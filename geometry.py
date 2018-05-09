@@ -168,7 +168,37 @@ class BeamMesh(object):
         
         for node in self.nodes:
             node.rotate(rotation, only_rotate_triads=False)
+    
+    
+    def wrap_cylinder(self):
+        """
+        Wrap the geometry around a cylinder.
+        The y-z plane morphs into the roation axis.
+        There should be NO points with negative x coordinates.
+        """
+        
+        # check the y coordiantes
+        for node in self.nodes:
+            if node.coordinates[0] < 0:
+                print('ERROR, there should be no points with negative x coordiantes')
+        
+        # transform the nodes
+        for node in self.nodes:
+            
+            # get the cylindercoordinates
+            r = np.dot([1,0,0], node.coordinates)
+            phi = node.coordinates[1] / r
 
+            # first apply the rotations
+            node.rotate(Rotation([0,0,1], phi), only_rotate_triads=True)
+            
+            # set the new coordinates
+            node.coordinates = [
+                r * np.cos(phi),
+                r * np.sin(phi),
+                node.coordinates[2]
+                ]
+            
 
 class BeamMeshLine(BeamMesh):
     """
@@ -229,7 +259,7 @@ class BeamMeshLine(BeamMesh):
                 self.start_point + (i+1)*direction/self.n
                 )
             
-            tmp_beam = Beam3rHerm2Lin3(1)
+            tmp_beam = self.beam_object(1)
             tmp_beam.create_beam(self.nodes, functions[0], functions[1])
             self.beams.append(tmp_beam)
         
@@ -286,9 +316,12 @@ class InputFile(object):
 
         
         
-a = BeamMeshLine(Beam3rHerm2Lin3, np.array([0,0,0]), 50*np.array([1,0,0]), 25)
-b = BeamMeshLine(Beam3rHerm2Lin3, np.array([0,0,0]), 50*np.array([1,0,0]), 25)
-b.rotate(Rotation([0,0,1], 0.5*np.pi))
+a = BeamMeshLine(Beam3rHerm2Lin3, np.array([0,0,0]), 50*np.array([1,0,0]), 5)
+b = BeamMeshLine(Beam3rHerm2Lin3, np.array([0,0,0]), 300*np.array([1,0,0]), 45)
+b.rotate(Rotation([0,0,1],np.pi/2))
+b.rotate(Rotation([1,0,0],np.pi/20))
+b.translate([20,0,0])
+b.wrap_cylinder()
 a.add_mesh(b)
 #print(len(a.beams))
 #print(len(a.nodes))
