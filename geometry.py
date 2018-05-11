@@ -27,7 +27,8 @@ class Node(object):
         """
         Rotate the node.
         Default values is that the nodes is rotated around the origin.
-        If only_rotate_triads is True, then only the triads are rotated, the position of the node stays the same.
+        If only_rotate_triads is True, then only the triads are rotated,
+        the position of the node stays the same.
         """
         
         # apply the roation to the triads
@@ -161,13 +162,22 @@ class BeamMesh(object):
             node.coordinates += vector
     
     
-    def rotate(self, rotation):
+    def rotate(self, rotation, origin=None):
         """
         Rotate the geometry about the origin.
         """
         
+        # move structure to rotation origin
+        if origin:
+            self.translate(-np.array(origin))
+        
+        # rotate structure
         for node in self.nodes:
             node.rotate(rotation, only_rotate_triads=False)
+        
+        # move origin back to initial place
+        if origin:
+            self.translate(np.array(origin))
     
     
     def wrap_cylinder(self):
@@ -263,11 +273,6 @@ class BeamMeshLine(BeamMesh):
             tmp_beam.create_beam(self.nodes, functions[0], functions[1])
             self.beams.append(tmp_beam)
         
-        
-
-
-
-
 
 class InputFile(object):
     """
@@ -314,22 +319,22 @@ class InputFile(object):
 
 
 
-        
-        
-a = BeamMeshLine(Beam3rHerm2Lin3, np.array([0,0,0]), 50*np.array([1,0,0]), 5)
-b = BeamMeshLine(Beam3rHerm2Lin3, np.array([0,0,0]), 300*np.array([1,0,0]), 45)
-b.rotate(Rotation([0,0,1],np.pi/2))
-b.rotate(Rotation([1,0,0],np.pi/20))
-b.translate([20,0,0])
-b.wrap_cylinder()
-a.add_mesh(b)
-#print(len(a.beams))
-#print(len(a.nodes))
+# create line
+cantilever = BeamMeshLine(Beam3rHerm2Lin3, np.array([0,0,0]), np.array([10,0,0]), 10)
+end_beam = BeamMeshLine(Beam3rHerm2Lin3, np.array([10,0,0]), np.array([15,0,0]), 5)
+end_beam.rotate(Rotation([0,0,1],np.pi/2), [10,0,0])
+
+cantilever.add_mesh(end_beam)
+
+
 
 input2 = InputFile()
-input2.geometry = a
+input2.geometry = cantilever
 input2.get_dat_lines()
 
+
+
+print('end')
 
 
 
