@@ -4,7 +4,12 @@ from rotation import Rotation
 
 
 
-
+class Coupling(object):
+    """
+    Represents a coupling between dof in BACI.
+    """
+    
+    pass
 
 
 class Node(object):
@@ -59,22 +64,73 @@ class Beam(object):
     TODO
     """
     
-    def __init__(self, material, nodes):
+    def __init__(self, material,
+                 nodes=None,
+                 element_name=None,
+                 node_create=None
+                 ):
         """
         TODO
         """
         
-        self.element_name = None
-        if nodes == None:
+        # name that will be displayed in the dat file
+        self.element_name = element_name
+        
+        # list with nodes from this element
+        if not nodes:
             self.nodes = []
         else:
             self.nodes = nodes
+        
+        # material of this beam
         self.material = material
+        
+        # default node creation rules
+        self.node_create = node_create
+        
+    
+    def create_beam(self, nodes, position_function, rotation_function, create_first=False):
+        """
+        Create the nodes and links for the beam element.
+        If the node list is empty or create_first is true, the first node is created.
+        Otherwise the last node of nodes is taken as the first node of this element.
+        
+        The functions position_function and rotation_function are called to give the
+        position and rotation along the beam in the local coordinates xi.
+        
+        Creation is based on the self.node_create parameter:
+            self.node_create = [
+                [ xi, local_index, create_rotation ], # fist node
+                ...
+                ] 
+        """
+        
+        # create local node list
+        self.nodes = [None for i in range(len(self.node_create))]
+        
+        # loop over nodes
+        for i, [xi, local_index, create_rotation] in enumerate(self.node_create):
+            # if there is no node in nodes the first one is created no matter what
+            # create_first is
+            if i > 0 or (len(nodes) == 0 or create_first):
+                if create_rotation:
+                    rotation = rotation_function(xi)
+                else:
+                    rotation = None
+                tmp_node = Node(position_function(xi), rotation=rotation)
+                
+                # add to global node list
+                nodes.append(tmp_node)
+                
+                # add to local node list
+                self.nodes[local_index] = tmp_node
+            else:
+                self.nodes[0] = nodes[-1]
 
 
 class Beam3rHerm2Lin3(Beam):
     """
-    TODO
+    Represents a BEAM3R HERM2LIN3 element.
     """
     
     def __init__(self, material, nodes=None):
@@ -82,8 +138,17 @@ class Beam3rHerm2Lin3(Beam):
         Set the data for this beam element
         """
         
-        Beam.__init__(self, material, nodes)
-        self.element_name = 'BEAM3R HERM2LIN3'
+        node_create = [
+            [-1, 0, True],
+            [0, 2, True],
+            [1, 1, True]
+            ]
+
+        Beam.__init__(self, material,
+                      nodes=nodes,
+                      element_name='BEAM3R HERM2LIN3',
+                      node_create=node_create
+                      )
     
     
     def get_dat_line(self, n_element):
@@ -92,8 +157,8 @@ class Beam3rHerm2Lin3(Beam):
         """
         
         string_nodes = ''
-        index = [0, 2, 1]
-        for node in [self.nodes[i] for i in index]:
+
+        for node in [self.nodes[i] for i in [create[1] for create in self.node_create]]:
             string_nodes += '{} '.format(node.n_global)
         
         string_triads = ''
@@ -107,24 +172,6 @@ class Beam3rHerm2Lin3(Beam):
             1,
             string_triads
             )
-        
-        
-    def create_beam(self, nodes, position_function, rotation_function, create_first=False):
-        """
-        Create the nodes and links for this beam element.
-        """
-        
-        # loop over nodes
-        for i, xi in enumerate(np.linspace(-1, 1, 3)):
-            # if there is no node in nodes the first one is created no matter what
-            # create_first is
-            if i > 0 or (len(nodes) == 0 or create_first):
-                tmp_node = Node(position_function(xi), rotation=rotation_function(xi))
-                nodes.append(tmp_node)
-                self.nodes.append(tmp_node)
-            else:
-                self.nodes.append(nodes[-1])
-
 
 
 class BeamMesh(object):
