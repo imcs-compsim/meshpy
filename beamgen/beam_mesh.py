@@ -10,12 +10,11 @@ class BeamMesh(object):
     Holds nodes, beams and couplings of beam_mesh geometry.
     """
     
-    def __init__(self, beam_object, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Set empty parameters
         """
-        
-        self.beam_object = beam_object
+
         self.nodes = []
         self.beams = []
         self.couplings = []
@@ -88,36 +87,14 @@ class BeamMesh(object):
                 ]
     
     
-    def add_mesh_line(self):
-            
-
-class BeamMeshLine(BeamMesh):
-    """
-    A straight line of beam_mesh elements.
-    """
-    
-    def __init__(self, beam_object, start_point, end_point, n, create_mesh = True, *args, **kwargs):
+    def add_mesh_line(self, beam_object, start_point, end_point, n):
         """
-        Line goes from start_point to end_point with n equidistant elements
-        """
-        
-        BeamMesh.__init__(self, beam_object, *args, **kwargs)
-        
-        self.start_point = start_point
-        self.end_point = end_point
-        self.n = n
-        
-        if create_mesh:
-            self._create_mesh()
-            
-    
-    def _create_mesh(self):
-        """
-        Create the mesh for this object.
+        A straight line of beam elements.
+            n: Number of elements along line
         """
         
         # direction vector of line
-        direction = self.end_point - self.start_point
+        direction = end_point - start_point
         
         # rotation for this line (is constant on the whole line)
         t1 = direction
@@ -143,13 +120,14 @@ class BeamMeshLine(BeamMesh):
                 )
         
         # create the beams
-        for i in range(self.n):
+        for i in range(n):
             
             functions = get_beam_function(
-                self.start_point + i*direction/self.n,
-                self.start_point + (i+1)*direction/self.n
+                start_point + i*direction/n,
+                start_point + (i+1)*direction/n
                 )
             
-            tmp_beam = self.beam_object(1)
+            tmp_beam = beam_object(1)
             tmp_beam.create_beam(self.nodes, functions[0], functions[1])
             self.beams.append(tmp_beam)
+            
