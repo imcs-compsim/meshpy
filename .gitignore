@@ -1,0 +1,7 @@
+*.pyc
+
+*input/*
+*old/*
+*.project
+*.pydevproject
+*.settings*

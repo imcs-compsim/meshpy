@@ -1,6 +1,10 @@
 import numpy as np
 from beamgen.rotation import Rotation
 
+
+
+
+
 class BeamMesh(object):
     """
     Holds nodes, beams and couplings of beam_mesh geometry.
@@ -82,6 +86,9 @@ class BeamMesh(object):
                 r * np.sin(phi),
                 node.coordinates[2]
                 ]
+    
+    
+    def add_mesh_line(self):
             
 
 class BeamMeshLine(BeamMesh):
