@@ -1,6 +1,8 @@
 import unittest
 import numpy as np
-from rotation import Rotation
+
+# import modules from beamgen
+from beamgen.rotation import Rotation
 
 
 
