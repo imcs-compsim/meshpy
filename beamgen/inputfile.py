@@ -34,7 +34,8 @@ class BaciOption(object):
                 string = string[:first_comment]
             
             # split up the remaining string into name and value
-            self._set_string_split(string.split())
+            if not self._set_string_split(string.split()) == 0:
+                self.option_comment = args[0]
                 
         else:
             # set from multiple parameters
@@ -48,20 +49,18 @@ class BaciOption(object):
         """
         Default method to convert a string split list into object parameters.
         Should be overwriten in special child classes.
+        
+        If the return value is not 0, option_name and option_value will be empty,
+        and the whole input string will be set to option_comment.
         """
 
         if len(string_split) == 2:
             self.option_name = string_split[0]
             self.option_value = string_split[1]
+            return 0
         else:
-            print('Error, input string does not match expected!')
-        
+            return 1
 
-
-
-BaciOption(1,2222, option_comment=1224)
-tmp = BaciOption('asd7_fas     h   //fasdf  asdf')
-print(tmp.option_name)
 
 
 class InputSection(object):
