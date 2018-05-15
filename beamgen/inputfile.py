@@ -1,12 +1,67 @@
 
-import textwrap
 import datetime
 
 # get version number of beamgen
 from beamgen import __VERSION__
 
 
+ 
+class BaciOption(object):
+    """
+    This class is a single option in a baci input file
+    """
+    
+    def __init__(self, *args, option_comment=None):
+        """
+        Set the option object.
+            - with a single string
+            - with two arguments: option_name, option_value 
+                and the optional keyword argument option_comment
+        """
+        
+        self.option_name = ''
+        self.option_value = ''
+        self.option_comment = ''
+        
+        if len(args) == 1:
+            # set from single string
+            string = args[0]
+            
+            # first check if the line has a comment
+            first_comment = string.find('//')
+            if not first_comment == -1:
+                self.option_comment = string[first_comment+2:]
+                string = string[:first_comment]
+            
+            # split up the remaining string into name and value
+            self._set_string_split(string.split())
+                
+        else:
+            # set from multiple parameters
+            self.option_name = args[0]
+            self.option_value = args[1]
+            if option_comment:
+                self.option_comment = option_comment
+        
+    
+    def _set_string_split(self, string_split):
+        """
+        Default method to convert a string split list into object parameters.
+        Should be overwriten in special child classes.
+        """
 
+        if len(string_split) == 2:
+            self.option_name = string_split[0]
+            self.option_value = string_split[1]
+        else:
+            print('Error, input string does not match expected!')
+        
+
+
+
+BaciOption(1,2222, option_comment=1224)
+tmp = BaciOption('asd7_fas     h   //fasdf  asdf')
+print(tmp.option_name)
 
 
 class InputSection(object):
