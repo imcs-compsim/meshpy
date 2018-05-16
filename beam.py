@@ -24,16 +24,25 @@ input2 = InputFile(maintainer='Ivo Steinbrecher', description='asd sakf ajsaf sl
 # input2.geometry = cantilever
 #input2.get_dat_lines()
 
-print(input2._get_header())
+# print(input2._get_header())
+# 
+# print('end')
+# 
+# 
+# test = InputSection('sdf',['1','2'])
+# tmp = test.get_dat_lines()
+# print(tmp)
 
-print('end')
 
+sec = InputSection("asdf", [1,2,3])
+sec2 = InputSection("asdf2", [1,2,3])
+input2.add_section(sec)
+input2.add_section(sec)
+input2.add_section(sec2)
 
-test = InputSection('sdf',['1','2'])
-tmp = test.get_dat_lines()
-print(tmp)
-
-
-
+print(input2.sections)
+lines = input2.get_dat_lines(header=False)
+for line in lines:
+    print(line)
 
 

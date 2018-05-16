@@ -81,6 +81,14 @@ class InputSection(object):
         self.data = data
     
     
+    def add_section(self, section):
+        """
+        Add section to this section.
+        """
+        
+        print('yet to implement')
+    
+    
     def get_dat_lines(self):
         """
         Return the dat lines for this section.
@@ -117,20 +125,99 @@ class InputFile(object):
         """
         
         # holdes the sections of the inputfile
-        #self.sections 
+        self.sections = []
         
-        # holds all the geometry data needed for beam_mesh elements
+        # holds the beam geometry
         self.geometry = None
         
+        # data for header
         self.maintainer = maintainer
         self.description = description
+        
     
-    
-    def get_dat_lines(self):
+    def _get_section_keys(self):
         """
-        Return a list with the lines of the input file
+        Returns a list of the names of the sections in this input file.
         """
         
+        return [section.name for section in self.sections]
+    
+    
+    def _get_section_index(self, key):
+        """
+        Return the index of a section in this item.
+        """
+        
+        if key in self._get_section_keys():
+            return self._get_section_keys().index(key)
+        else:
+            return None
+    
+    
+    def get_section(self, key):
+        """
+        Return section with name=key. Return false if section is not 
+        in this object.
+        """
+        
+        index = self._get_section_index(key)
+        if not index == None:
+            return self.sections[index]
+        else:
+            return None
+    
+    
+    def add_section(self,
+                    section,
+                    add_after=False        
+                    ):
+        """
+        Add a section to the object.
+        If the section name already exists, it is added to that section.
+        
+        Optional: add_after:
+            set to name of section that the item will be inserted after (if
+            section name does not exist already). Set empty to add ad beginning.
+        """
+        
+        # check if section already exists
+        section_base = self.get_section(section.name)
+        if section_base:
+            section_base.add_section(section)
+        else:
+            # add new section to item
+            if add_after:
+                if add_after == '':
+                    index = -1
+                else:
+                    index = self._get_section_index(add_after)
+            else:
+                index = None
+            
+            # add to list
+            if not index == None:
+                self.sections.insert(index+1, section)
+            else:
+                self.sections.append(section)
+ 
+    
+    def get_dat_lines(self, header=True):
+        """
+        Return the dat lines from all sections.
+        """
+        
+        lines = []
+        if header:
+            lines.append(self._get_header())
+        
+        for section in self.sections:
+            lines.extend(section.get_dat_lines())
+        
+        
+        
+        return lines
+    
+    
         lines_nodes = []
         lines_beams = []
         
