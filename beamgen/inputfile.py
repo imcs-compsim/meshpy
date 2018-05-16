@@ -234,6 +234,17 @@ class InputFile(object):
             
         for line in lines_beams:
             print(line)
+    
+    
+    def get_string(self, header=False):
+        """
+        Return the lines of the input file as string.
+        """
+        
+        string = ''
+        for line in self.get_dat_lines(header=header):
+            string += str(line) + '\n'
+        return string
 
     
     def _get_header(self):
@@ -248,9 +259,7 @@ class InputFile(object):
             string += '\n// Description: {}'.format(self.description)
         return string
 
-
-
-
+    
 
 
 
