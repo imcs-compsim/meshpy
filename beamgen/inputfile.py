@@ -3,10 +3,11 @@ import datetime
 
 # get version number of beamgen
 from beamgen import __VERSION__
+from cups import Option
 
 
  
-class BaciOption(object):
+class BaciInputLine(object):
     """
     This class is a single option in a baci input file
     """
@@ -23,6 +24,11 @@ class BaciOption(object):
         self.option_value = ''
         self.option_comment = ''
         
+        for arg in args:
+            # there should be no newline in the arguments
+            if not arg.find('\n') == -1:
+                print('Error, no newline in BaciInputLine')
+        
         if len(args) == 1:
             # set from single string
             string = args[0]
@@ -30,7 +36,7 @@ class BaciOption(object):
             # first check if the line has a comment
             first_comment = string.find('//')
             if not first_comment == -1:
-                self.option_comment = string[first_comment+2:]
+                self.option_comment = string[first_comment:]
                 string = string[:first_comment]
             
             # split up the remaining string into name and value
@@ -45,9 +51,20 @@ class BaciOption(object):
             self.option_name = args[0]
             self.option_value = args[1]
             if option_comment:
-                self.option_comment = option_comment
-        
+                self.option_comment = '// {}'.format(option_comment)
     
+    
+    def get_key(self):
+        """
+        Return a key that will be used in the dictionary storage for this item.
+        """
+        
+        if self.option_name == '':
+            return self.option_comment
+        else:
+            return self.option_name
+        
+
     def _set_string_split(self, string_split):
         """
         Default method to convert a string split list into object parameters.
@@ -68,7 +85,17 @@ class BaciOption(object):
             return 0
         else:
             return 1
-
+    
+    
+    def __str__(self, *args, **kwargs):
+        string = ''
+        if not self.option_name == '':
+            string += '{} {}'.format(self.option_name, self.option_value)
+        if not self.option_comment == '':
+            if not self.option_name == '':
+                string += ' '
+            string += '{}'.format(self.option_comment)
+        return string
 
 
 class InputSection(object):
@@ -76,9 +103,16 @@ class InputSection(object):
     Represent a single section in the input file
     """
     
-    def __init__(self, name, data):
+    def __init__(self, name, data=None, option_overwrite=False):
         self.name = name
-        self.data = data
+        
+        # each line in data will be converted to a baci line
+        self.data = {}
+        if data:
+            self.add_option(data, option_overwrite=option_overwrite)
+        
+        # a link to the input file object
+        self.input_file = None
     
     
     def add_section(self, section):
@@ -107,8 +141,62 @@ class InputSection(object):
         Per default return the data stored in this object.
         """
         
-        return self.data
+        return [str(line) for line in self.data.values()]
+    
+    
+    def _add_data(self, option, option_overwrite=False):
+        """
+        Add a BaciInputLine object to the item.
+        """
+        
+        if not (option.get_key() in self.data.keys()) or option_overwrite:
+            self.data[option.get_key()] = option
+        else:
+            print('Error, key {} already set!'.format(option.get_key()))
+    
+    def add_option(self, *args, option_comment=None, option_overwrite=False):
+        """
+        Add data to the section.
+        
+        data can be:
+            string: the string will be split up into lines and added as BaciLine
+            list: each element of the list will be added as BaciLine
+            option_name & option_value
+        """
+        
+        if len(args) == 1:
+            # check type of argument
+            if not type(args[0]) == list:
+                split = args[0].split('\n')
+            else:
+                split = args[0]
+            for item in split:
+                self._add_data(BaciInputLine(item, option_comment=option_comment), option_overwrite=option_overwrite)
+        else:
+            self._add_data(BaciInputLine(*args, option_comment=option_comment), option_overwrite=option_overwrite)
 
+
+class InputSectionNodes(InputSection):
+    """
+    Section that stores nodes of the mesh.
+    """
+    
+    def __init__(self):
+        InputSection.__init__(self, 'NODE COORDS')
+    
+    def _get_dat_lines(self):
+        """
+        Per default return the data stored in this object.
+        """
+        
+        index = 1
+        lines = []
+        
+        for node in self.input_file.geometry.nodes:
+            lines.append(node.get_dat_line(index))
+            index += 1
+        
+        return lines
 
 
 class InputFile(object):
@@ -185,6 +273,9 @@ class InputFile(object):
         if section_base:
             section_base.add_section(section)
         else:
+            # add link to section
+            section.input_file = self
+                                    
             # add new section to item
             if add_after:
                 if add_after == '':
@@ -212,8 +303,6 @@ class InputFile(object):
         
         for section in self.sections:
             lines.extend(section.get_dat_lines())
-        
-        
         
         return lines
     
