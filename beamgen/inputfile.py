@@ -4,6 +4,7 @@ import datetime
 # get version number of beamgen
 from beamgen import __VERSION__
 from cups import Option
+from _collections import OrderedDict
 
 
  
@@ -26,7 +27,7 @@ class BaciInputLine(object):
         
         for arg in args:
             # there should be no newline in the arguments
-            if not arg.find('\n') == -1:
+            if not str(arg).find('\n') == -1:
                 print('Error, no newline in BaciInputLine')
         
         if len(args) == 1:
@@ -40,12 +41,12 @@ class BaciInputLine(object):
                 string = string[:first_comment]
             
             # split up the remaining string into name and value
-            split = self._set_string_split(string.split()) 
+            split = self._set_string_split(string) 
             if split == 1:
                 self.option_comment = args[0]
             elif split == 2:
                 print('Error in set string split function!')
-                
+            
         else:
             # set from multiple parameters
             self.option_name = args[0]
@@ -65,7 +66,7 @@ class BaciInputLine(object):
             return self.option_name
         
 
-    def _set_string_split(self, string_split):
+    def _set_string_split(self, string):
         """
         Default method to convert a string split list into object parameters.
         Should be overwriten in special child classes.
@@ -78,19 +79,27 @@ class BaciInputLine(object):
         If the return value is 2 an error will be thrown. It is also possible
         to throw this error in this function.
         """
-
+        
+        # check if there is an equal sign in the string
+        insert_value = ''
+        if not string.find('=') == -1:
+            string_split = string.split('=')
+            string_split = [string.strip() for string in string_split]
+            insert_value = '= '
+        else:
+            string_split = string.split()
         if len(string_split) == 2:
             self.option_name = string_split[0]
-            self.option_value = string_split[1]
+            self.option_value = insert_value + string_split[1]
             return 0
         else:
             return 1
-    
+        
     
     def __str__(self, *args, **kwargs):
         string = ''
         if not self.option_name == '':
-            string += '{} {}'.format(self.option_name, self.option_value)
+            string += '{:<35} {}'.format(self.option_name, self.option_value)
         if not self.option_comment == '':
             if not self.option_name == '':
                 string += ' '
@@ -107,7 +116,7 @@ class InputSection(object):
         self.name = name
         
         # each line in data will be converted to a baci line
-        self.data = {}
+        self.data = OrderedDict()
         if data:
             self.add_option(data, option_overwrite=option_overwrite)
         
@@ -170,6 +179,14 @@ class InputSection(object):
                 split = args[0].split('\n')
             else:
                 split = args[0]
+            
+            # remove the first line if it is empty
+            if split[0].strip() == '':
+                del split[0]
+            # remove the last line if it is empty
+            if split[-1].strip() == '':
+                del split[-1]
+            
             for item in split:
                 self._add_data(BaciInputLine(item, option_comment=option_comment), option_overwrite=option_overwrite)
         else:

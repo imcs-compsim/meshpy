@@ -101,22 +101,122 @@ def line_test():
     print(tmp)
     print()
     
+    # if there is an equal sign the string is split there
+    tmp = BaciInputLine('var = val')
+    print(tmp)
+    print()
+    
 
 
 def test_section():
+    """
+    Create some test sections
+    """
+
     sec = InputSection("STRUCTURAL DYNAMIC","""INT_STRATEGY                    Standard
     test 2 //test
-    test 4    """)
-    print(sec.data)
-    print(sec.get_dat_lines())
+    test 4    """
+    )
+    for line in sec.get_dat_lines():
+        print(line)
+    print()
+
+    sec = InputSection("STRUCTURAL DYNAMIC","""INT_STRATEGY                    Standard
+    test 2 //test
+    test 4    """,option_overwrite=True)
+    sec.add_option('test', 100,option_overwrite=True)
+    for line in sec.get_dat_lines():
+        print(line)
+    print()
 
 
+def test_input():
+    """
+    Create a sample input file
+    """
 
-
-
-
-
-
+    input = InputFile(maintainer='Joe Doe', description='Simple input file')
+    sec = InputSection('PROBLEM SIZE', 'DIM 3')
+    input.add_section(sec)
+    
+    sec = InputSection('PROBLEM TYP')
+    sec.add_option('PROBLEMTYP', 'Structure')
+    sec.add_option('RESTART', '0')
+    input.add_section(sec)
+    
+    sec = InputSection('IO', '''OUTPUT_BIN                      Yes
+STRUCT_DISP                     Yes
+FILESTEPS                       1000''')
+    input.add_section(sec)
+    
+    sec = InputSection('IO/RUNTIME VTK OUTPUT', '''OUTPUT_DATA_FORMAT              binary
+INTERVAL_STEPS                  1
+EVERY_ITERATION                 No''')
+    input.add_section(sec)
+    
+    sec = InputSection('IO/RUNTIME VTK OUTPUT/BEAMS',
+'''
+OUTPUT_BEAMS                    Yes
+DISPLACEMENT                    Yes
+USE_ABSOLUTE_POSITIONS          Yes
+TRIAD_VISUALIZATIONPOINT        Yes
+STRAINS_GAUSSPOINT              Yes
+INTERNAL_ENERGY_ELEMENT         Yes
+''')
+    input.add_section(sec)
+    
+    sec = InputSection(
+        'STRUCTURAL DYNAMIC',
+        '''
+        INT_STRATEGY                    Standard
+        LINEAR_SOLVER                   1
+        DYNAMICTYP                      Statics
+        RESULTSEVRY                     1
+        RESEVRYERGY                     1
+        RESTARTEVRY                     100
+        NLNSOL                          fullnewton
+        TIMESTEP                        0.1
+        NUMSTEP                         10
+        MAXTIME                         1
+        PREDICT                         ConstDis
+        NORM_DISP                       Abs
+        NORM_RESF                       Abs
+        NORMCOMBI_RESFDISP              And
+        TOLDISP                         1.0E-10
+        TOLRES                          1.0E-06
+        MAXITER                         100
+        '''
+        )
+    input.add_section(sec)
+    
+    
+    sec = InputSection(
+        'STRUCT NOX/Printing',
+        '''
+        Outer Iteration                 = Yes
+        Inner Iteration                 = No
+        Outer Iteration StatusTest      = No
+        Linear Solver Details           = No
+        Test Details                    = No
+        Debug                           = NoSTRUCTURAL DYNAMIC
+        '''
+        )
+    input.add_section(sec)
+    
+    
+    sec = InputSection(
+        'SOLVER 1',
+        '''
+        NAME                            Structure_Solver
+        SOLVER                          UMFPACK
+        '''
+        )
+    input.add_section(sec)
+    
+    
+    
+    print(input.get_string())
+    
 
 
 
@@ -129,5 +229,6 @@ def test_section():
 
 
 # line_test()
-test_section()
+# test_section()
+test_input()
 
