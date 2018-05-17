@@ -3,7 +3,6 @@ import datetime
 
 # get version number of beamgen
 from beamgen import __VERSION__
-from cups import Option
 from _collections import OrderedDict
 
 
@@ -13,7 +12,7 @@ class BaciInputLine(object):
     This class is a single option in a baci input file
     """
     
-    def __init__(self, *args, option_comment=None):
+    def __init__(self, *args, option_comment=None, overwrite=False):
         """
         Set the option object.
             - with a single string
@@ -24,6 +23,8 @@ class BaciInputLine(object):
         self.option_name = ''
         self.option_value = ''
         self.option_comment = ''
+        self.option_value_pad= '  '
+        self.overwrite = overwrite
         
         for arg in args:
             # there should be no newline in the arguments
@@ -81,16 +82,15 @@ class BaciInputLine(object):
         """
         
         # check if there is an equal sign in the string
-        insert_value = ''
         if not string.find('=') == -1:
             string_split = string.split('=')
             string_split = [string.strip() for string in string_split]
-            insert_value = '= '
+            self.option_value_pad = '= '
         else:
             string_split = string.split()
         if len(string_split) == 2:
             self.option_name = string_split[0]
-            self.option_value = insert_value + string_split[1]
+            self.option_value = string_split[1]
             return 0
         else:
             return 1
@@ -99,7 +99,7 @@ class BaciInputLine(object):
     def __str__(self, *args, **kwargs):
         string = ''
         if not self.option_name == '':
-            string += '{:<35} {}'.format(self.option_name, self.option_value)
+            string += '{:<35} {}{}'.format(self.option_name, self.option_value_pad, self.option_value)
         if not self.option_comment == '':
             if not self.option_name == '':
                 string += ' '
@@ -129,7 +129,8 @@ class InputSection(object):
         Add section to this section.
         """
         
-        print('yet to implement')
+        for option in section.data.values():
+            self._add_data(option)
     
     
     def get_dat_lines(self):
@@ -153,15 +154,16 @@ class InputSection(object):
         return [str(line) for line in self.data.values()]
     
     
-    def _add_data(self, option, option_overwrite=False):
+    def _add_data(self, option):
         """
         Add a BaciInputLine object to the item.
         """
         
-        if not (option.get_key() in self.data.keys()) or option_overwrite:
+        if not (option.get_key() in self.data.keys()) or option.overwrite:
             self.data[option.get_key()] = option
         else:
             print('Error, key {} already set!'.format(option.get_key()))
+    
     
     def add_option(self, *args, option_comment=None, option_overwrite=False):
         """
@@ -188,9 +190,9 @@ class InputSection(object):
                 del split[-1]
             
             for item in split:
-                self._add_data(BaciInputLine(item, option_comment=option_comment), option_overwrite=option_overwrite)
+                self._add_data(BaciInputLine(item, option_comment=option_comment, overwrite=option_overwrite))
         else:
-            self._add_data(BaciInputLine(*args, option_comment=option_comment), option_overwrite=option_overwrite)
+            self._add_data(BaciInputLine(*args, option_comment=option_comment, overwrite=option_overwrite))
 
 
 class InputSectionNodes(InputSection):
@@ -307,7 +309,20 @@ class InputFile(object):
                 self.sections.insert(index+1, section)
             else:
                 self.sections.append(section)
- 
+    
+    
+    def delete_section(self, section_name):
+        """
+        Delete a section from the input file.
+        """
+        
+        index = self._get_section_index(section_name)
+        if not index == None:
+            # remove the section
+            del self.sections[index]
+        else:
+            print('Warning, section does not exist!')
+    
     
     def get_dat_lines(self, header=True):
         """

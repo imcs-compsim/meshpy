@@ -135,62 +135,32 @@ def test_input():
     Create a sample input file
     """
 
+    # create input file
     input = InputFile(maintainer='Joe Doe', description='Simple input file')
-    sec = InputSection('PROBLEM SIZE', 'DIM 3')
-    input.add_section(sec)
     
+    # add section with string
+    input.add_section(InputSection('PROBLEM SIZE', 'DIM 3'))
+    
+    # add section with long string
+    input.add_section(InputSection(
+        'IO/RUNTIME VTK OUTPUT/BEAMS',
+        '''
+        OUTPUT_BEAMS                    Yes
+        DISPLACEMENT                    Yes
+        USE_ABSOLUTE_POSITIONS          Yes
+        TRIAD_VISUALIZATIONPOINT        Yes
+        STRAINS_GAUSSPOINT              Yes
+        INTERNAL_ENERGY_ELEMENT         Yes
+        '''))
+    
+    # add section as object
     sec = InputSection('PROBLEM TYP')
     sec.add_option('PROBLEMTYP', 'Structure')
     sec.add_option('RESTART', '0')
     input.add_section(sec)
     
-    sec = InputSection('IO', '''OUTPUT_BIN                      Yes
-STRUCT_DISP                     Yes
-FILESTEPS                       1000''')
-    input.add_section(sec)
-    
-    sec = InputSection('IO/RUNTIME VTK OUTPUT', '''OUTPUT_DATA_FORMAT              binary
-INTERVAL_STEPS                  1
-EVERY_ITERATION                 No''')
-    input.add_section(sec)
-    
-    sec = InputSection('IO/RUNTIME VTK OUTPUT/BEAMS',
-'''
-OUTPUT_BEAMS                    Yes
-DISPLACEMENT                    Yes
-USE_ABSOLUTE_POSITIONS          Yes
-TRIAD_VISUALIZATIONPOINT        Yes
-STRAINS_GAUSSPOINT              Yes
-INTERNAL_ENERGY_ELEMENT         Yes
-''')
-    input.add_section(sec)
-    
-    sec = InputSection(
-        'STRUCTURAL DYNAMIC',
-        '''
-        INT_STRATEGY                    Standard
-        LINEAR_SOLVER                   1
-        DYNAMICTYP                      Statics
-        RESULTSEVRY                     1
-        RESEVRYERGY                     1
-        RESTARTEVRY                     100
-        NLNSOL                          fullnewton
-        TIMESTEP                        0.1
-        NUMSTEP                         10
-        MAXTIME                         1
-        PREDICT                         ConstDis
-        NORM_DISP                       Abs
-        NORM_RESF                       Abs
-        NORMCOMBI_RESFDISP              And
-        TOLDISP                         1.0E-10
-        TOLRES                          1.0E-06
-        MAXITER                         100
-        '''
-        )
-    input.add_section(sec)
-    
-    
-    sec = InputSection(
+    # add section with equal arguments    
+    input.add_section(InputSection(
         'STRUCT NOX/Printing',
         '''
         Outer Iteration                 = Yes
@@ -198,22 +168,21 @@ INTERNAL_ENERGY_ELEMENT         Yes
         Outer Iteration StatusTest      = No
         Linear Solver Details           = No
         Test Details                    = No
-        Debug                           = NoSTRUCTURAL DYNAMIC
+        Debug                           = No
         '''
-        )
-    input.add_section(sec)
+        ))
     
+    # delete section
+    input.delete_section('IO/RUNTIME VTK OUTPUT/BEAMS')
+    input.delete_section('IO/RUNTIME VTK OUTPUT/BEAMS')
     
-    sec = InputSection(
-        'SOLVER 1',
+    # add to section
+    input.add_section(InputSection(
+        'STRUCT NOX/Printing',
         '''
-        NAME                            Structure_Solver
-        SOLVER                          UMFPACK
-        '''
-        )
-    input.add_section(sec)
-    
-    
+        Outer Iteration StatusTest      = Yes // this value is overwriten
+        Test                            = Maybe // this value is added
+        ''', option_overwrite=True))
     
     print(input.get_string())
     
