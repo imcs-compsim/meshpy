@@ -107,6 +107,7 @@ class BaciInputLine(object):
         return string
 
 
+
 class InputSection(object):
     """
     Represent a single section in the input file
@@ -218,6 +219,144 @@ class InputSectionNodes(InputSection):
         return lines
 
 
+class MeshSection(object):
+    """
+    A base class to manage mesh items in the input file
+    """
+    
+    def __init__(self, input_file, *args):
+        """
+        Set the default values and call the set_data function witch is overwritten in the child classes.
+        """
+        
+        self.input_file = input_file
+        if len(args) == 0:
+            self.name = None
+        else:
+            self.name = args[0]
+        self.counter = 0
+        self.data = []
+
+
+    def get_dat_lines(self):
+        """
+        Return the default lines for this object 
+        """
+        
+        if self.name:
+            return [''.join(['-' for i in range(80-len(self.name))]) + self.name]
+        else:
+            return []
+    
+    
+    def apply_counter_to_geometry(self):
+        """
+        Overwrite in child classes
+        """
+        pass
+
+
+class MeshSectionNodes(MeshSection):
+    """
+    Manage nodes from solid and/or beam elements.
+    """
+    
+    def __init__(self, input_file):
+        MeshSection.__init__(self, input_file, 'NODE COORDS')
+    
+    
+    def add_data(self, data):
+        """
+        Add nodal data with lines containing all the nodal information
+        """
+        
+        # store the data in the object
+        self.data = data
+        
+        # set the number of nodes from the last line in data
+        self.counter = int(data[-1].split()[1])
+    
+    
+    def get_dat_lines(self):
+        """
+        Return the nodal data
+        """
+        
+        lines = MeshSection.get_dat_lines(self)
+        lines.extend(self.data)
+        for node in self.input_file.geometry.nodes:
+            lines.append(node.get_dat_line())
+        
+        return lines
+    
+    
+    def apply_counter_to_geometry(self):
+        """
+        Set the global number of nodes
+        """
+        
+        for i, node in enumerate(self.input_file.geometry.nodes):
+            node.n_global = self.counter + i + 1
+
+
+class MeshSectionElements(MeshSection):
+    """
+    Manage nodes from solid and/or beam elements.
+    """
+    
+    def __init__(self, input_file):
+        MeshSection.__init__(self, input_file, 'STRUCTURE ELEMENTS')
+    
+    
+    def add_data(self, data):
+        """
+        Add element data with lines containing all the nodal information
+        """
+        
+        # store the data in the object
+        self.data = data
+        
+        # set the elements of nodes from the last line in data
+        self.counter = int(data[-1].split()[0])
+    
+    
+    def get_dat_lines(self):
+        """
+        Return the nodal data
+        """
+        
+        lines = MeshSection.get_dat_lines(self)
+        lines.extend(self.data)
+        for element in self.input_file.geometry.beams:
+            lines.append(element.get_dat_line())
+        
+        return lines
+    
+    
+    def apply_counter_to_geometry(self):
+        """
+        Set the global number of nodes
+        """
+        
+        for i, element in enumerate(self.input_file.geometry.beams):
+            element.n_global = self.counter + i + 1
+
+
+
+class MeshSectionDesignDescription(MeshSection):
+    def __init__(self, input_file):
+        MeshSection.__init__(self, input_file, 'DESIGN DESCRIPTION')
+    
+    def get_dat_lines(self):    
+        lines = MeshSection.get_dat_lines(self)
+        lines.append('{:<20} 1'.format('NDPOINT'))
+        lines.append('{:<20} 1'.format('NDLINE'))
+        lines.append('{:<20} 1'.format('NDSURF'))
+        lines.append('{:<20} 1'.format('NDVOL'))
+        return lines
+        
+
+        
 class InputFile(object):
     """
     An object that holds all the information needed for a baci input file.
@@ -240,6 +379,16 @@ class InputFile(object):
         # data for header
         self.maintainer = maintainer
         self.description = description
+        
+        # dictionary to hold all the sections that are connected to a mesh
+        self.mesh_sections = OrderedDict()
+        self.mesh_sections['MATERIALS'] = MeshSection(self)
+        self.mesh_sections['DESIGN DESCRIPTION'] = MeshSectionDesignDescription(self)
+        self.mesh_sections['DESIGN POINT DIRICH CONDITIONS'] = MeshSection(self)
+        self.mesh_sections['DESIGN POINT NEUMANN CONDITIONS'] = MeshSection(self)
+        self.mesh_sections['DNODE-NODE TOPOLOGY'] = MeshSection(self)
+        self.mesh_sections['NODE COORDS'] = MeshSectionNodes(self)
+        self.mesh_sections['STRUCTURE ELEMENTS'] = MeshSectionElements(self)
         
     
     def _get_section_keys(self):
@@ -272,6 +421,17 @@ class InputFile(object):
             return self.sections[index]
         else:
             return None
+    
+    
+    def add_section_by_data(self, name, data=None, option_overwrite=True):
+        """
+        Return the correct InputSection class for the given name.
+        """
+        
+        if name in self.mesh_sections.keys():
+            self.mesh_sections[name].add_data(data)
+        else:
+            self.add_section(InputSection(name, data=data, option_overwrite=option_overwrite))
     
     
     def add_section(self,
@@ -329,6 +489,10 @@ class InputFile(object):
         Return the dat lines from all sections.
         """
         
+        # first set the global number of the elements and other items
+        for section in self.mesh_sections.values():
+            section.apply_counter_to_geometry()
+        
         lines = []
         if header:
             lines.append(self._get_header())
@@ -336,28 +500,13 @@ class InputFile(object):
         for section in self.sections:
             lines.extend(section.get_dat_lines())
         
+        for section in self.mesh_sections.values():
+            lines.extend(section.get_dat_lines())
+        
         return lines
     
     
-        lines_nodes = []
-        lines_beams = []
-        
-        for i, node in enumerate(self.geometry.nodes):
-            lines_nodes.append(node.get_dat_line(i+1))
-        
-        for i, beam in enumerate(self.geometry.beams):
-            lines_beams.append(beam.get_dat_line(i+1))
-        
-        for line in lines_nodes:
-            print(line)
-        
-        print('--------------------------------------------------------------STRUCTURE ELEMENTS')
-            
-        for line in lines_beams:
-            print(line)
-    
-    
-    def get_string(self, header=False):
+    def get_string(self, header=True):
         """
         Return the lines of the input file as string.
         """

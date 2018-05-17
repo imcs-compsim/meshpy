@@ -6,17 +6,20 @@ class Coupling(object):
     pass
 
 
-class NodeSet(object):
+class GeometrySet(object):
     """
     Represents a set of nodes, for points or lines
     """
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self, name, nodes=None):
         """
-        TODO
+        Define the type of the set
         """
         
+        self.name = [name]
         self.nodes = []
+        if nodes:
+            self.add_node(nodes)
     
     
     def add_node(self, add):
@@ -65,12 +68,10 @@ class Node(object):
             self.coordinates = rotation * self.coordinates
 
 
-    def get_dat_line(self, n_global):
+    def get_dat_line(self):
         """
         Return the line for the dat file for this element.
         """
-        
-        self.n_global = n_global
         
         return 'NODE {} COORD {} {} {}'.format(
             self.n_global,
@@ -108,6 +109,9 @@ class Beam(object):
         
         # default node creation rules
         self.node_create = node_create
+        
+        # global element number
+        self.n_global = None
         
     
     def create_beam(self, nodes, position_function, rotation_function, create_first=False):
@@ -172,7 +176,7 @@ class Beam3rHerm2Lin3(Beam):
                       )
     
     
-    def get_dat_line(self, n_element):
+    def get_dat_line(self):
         """
         return the line for the dat file for this element
         """
@@ -187,7 +191,7 @@ class Beam3rHerm2Lin3(Beam):
             string_triads += node.rotation.get_dat()
         
         return '{} {} {}MAT {} TRIADS{} FAD'.format(
-            n_element,
+            self.n_global,
             self.element_name,
             string_nodes,
             1,

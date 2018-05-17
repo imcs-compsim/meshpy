@@ -139,10 +139,10 @@ def test_input():
     input = InputFile(maintainer='Joe Doe', description='Simple input file')
     
     # add section with string
-    input.add_section(InputSection('PROBLEM SIZE', 'DIM 3'))
+    input.add_section_by_data('PROBLEM SIZE', 'DIM 3')
     
     # add section with long string
-    input.add_section(InputSection(
+    input.add_section_by_data(
         'IO/RUNTIME VTK OUTPUT/BEAMS',
         '''
         OUTPUT_BEAMS                    Yes
@@ -151,7 +151,7 @@ def test_input():
         TRIAD_VISUALIZATIONPOINT        Yes
         STRAINS_GAUSSPOINT              Yes
         INTERNAL_ENERGY_ELEMENT         Yes
-        '''))
+        ''')
     
     # add section as object
     sec = InputSection('PROBLEM TYP')
@@ -183,12 +183,41 @@ def test_input():
         Outer Iteration StatusTest      = Yes // this value is overwriten
         Test                            = Maybe // this value is added
         ''', option_overwrite=True))
+    input.add_section_by_data(
+        'STRUCT NOX/Printing',
+        '''
+        Outer Iteration StatusTest      = No // this value is overwriten again
+        Test                            = Sure // this value is added and overwritten
+        ''', option_overwrite=True)
+
+    # add node section
+    input.add_section_by_data('NODE COORDS', [
+        'NODE 394 COORD 2.00000000e+00 1.00000000e+00 -2.00000003e-01',
+        'NODE 395 COORD 2.00000000e+00 1.00000000e+00 -6.00000024e-01',
+        'NODE 396 COORD 2.00000000e+00 1.00000000e+00 -1.00000000e+00'])
+    
+    # add element section
+    input.add_section_by_data('STRUCTURE ELEMENTS', [
+'1 BEAM3R HERM2LIN3 1 3 2 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FAD',
+'2 BEAM3R HERM2LIN3 3 5 4 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FAD',
+'3 BEAM3R HERM2LIN3 5 7 6 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FAD',
+'4 BEAM3R HERM2LIN3 7 9 8 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FAD',
+'5 BEAM3R HERM2LIN3 9 11 10 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FAD',
+'6 BEAM3R HERM2LIN3 11 13 12 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FAD'])
+    
+    
+    # add mesh
+    cantilever = BeamMesh()
+    cantilever.add_mesh_line(Beam3rHerm2Lin3, np.array([0,0,0]), np.array([10,2,5]), 3)
+    input.geometry = cantilever
+
     
     print(input.get_string())
     
 
 
-
+def test_sets():
+    pass
 
 
 
@@ -199,5 +228,6 @@ def test_input():
 
 # line_test()
 # test_section()
-test_input()
+# test_input()
+test_sets()
 
