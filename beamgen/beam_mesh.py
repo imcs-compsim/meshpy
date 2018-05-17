@@ -1,5 +1,6 @@
 import numpy as np
 from beamgen.rotation import Rotation
+from beamgen.geometry import GeometrySet, Coupling
 
 
 
@@ -18,16 +19,25 @@ class BeamMesh(object):
         self.nodes = []
         self.beams = []
         self.couplings = []
-        self.sets = []
+        self.point_sets = []
+        self.line_sets = []
+        self.surf_sets = []
+        self.vol_sets = []
     
     
-    def add_mesh(self, beam_mesh):
+    def add_mesh(self, beam_mesh, add_sets=True):
         """
         Add other mesh to this one
         """
         
         self.nodes.extend(beam_mesh.nodes)
         self.beams.extend(beam_mesh.beams)
+        
+#         if add_sets:
+#             self.point_sets.extend(beam_mesh.point_sets)
+#             self.line_sets.extend(beam_mesh.line_sets)
+#             self.mesh_sets.extend(beam_mesh.mesh_sets)
+#             self.vol_sets.extend(beam_mesh.vol_sets)
     
     
     def translate(self, vector):
@@ -86,8 +96,15 @@ class BeamMesh(object):
                 node.coordinates[2]
                 ]
     
+    def add_coupling(self, nodes, tmp):
+        """
+        Add a coupling to the mesh
+        """
+        
+        self.couplings.append(Coupling(nodes, tmp))
     
-    def add_mesh_line(self, beam_object, start_point, end_point, n):
+    
+    def add_mesh_line(self, beam_object, start_point, end_point, n, add_sets=True, add_first_node=True):
         """
         A straight line of beam elements.
             n: Number of elements along line
@@ -119,6 +136,9 @@ class BeamMesh(object):
                 rotation_function
                 )
         
+        # save the old number of nodes
+        node_start = len(self.nodes)
+        
         # create the beams
         for i in range(n):
             
@@ -128,6 +148,28 @@ class BeamMesh(object):
                 )
             
             tmp_beam = beam_object(1)
-            tmp_beam.create_beam(self.nodes, functions[0], functions[1])
+            if add_first_node and i == 0:
+                tmp_beam.create_beam(self.nodes, functions[0], functions[1], create_first=True)
+            else:
+                tmp_beam.create_beam(self.nodes, functions[0], functions[1], create_first=False)
             self.beams.append(tmp_beam)
-            
+        
+        # add nodes to set
+        point_sets = [
+            GeometrySet('line_point_start', self.nodes[node_start]),
+            GeometrySet('line_point_end', self.nodes[-1])
+            ]
+        line_sets = [
+            GeometrySet('line_line', [self.nodes[i] for i in range(node_start,len(self.nodes))])
+            ]
+        if add_sets:
+            self.point_sets.extend(point_sets)
+            self.line_sets.extend(line_sets)
+        
+        return point_sets, line_sets, [], []            
+
+
+
+
+
+

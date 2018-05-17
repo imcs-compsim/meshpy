@@ -3,8 +3,30 @@ class Coupling(object):
     Represents a coupling between dof in BACI.
     """
     
-    pass
-
+    def __init__(self, nodes, coupling_string):
+        
+        # flatten out nodes
+        self.nodes = []
+        self._add_nodes(nodes)
+        self.coupling_string = coupling_string
+        self.node_set = None
+    
+    def _add_nodes(self, nodes):
+        # check type
+        if type(nodes) == list:
+            for node in nodes:
+                self._add_nodes(node)
+        elif type(nodes) == Node:
+            self.nodes.append(nodes)
+        elif type(nodes) == GeometrySet:
+            self.nodes.extend(nodes.nodes)
+        else:
+            print('Error! not node or list')
+    
+    def add_set_to_geometry(self, geometry):
+        # add set to global sets
+        self.node_set = GeometrySet('', self.nodes)
+        geometry.point_sets.append(self.node_set)
 
 class GeometrySet(object):
     """
@@ -16,7 +38,7 @@ class GeometrySet(object):
         Define the type of the set
         """
         
-        self.name = [name]
+        self.name = name
         self.nodes = []
         if nodes:
             self.add_node(nodes)
@@ -28,7 +50,8 @@ class GeometrySet(object):
         """
         
         if type(add) == Node:
-            self.nodes.append(add)
+            if not add in self.nodes:
+                self.nodes.append(add)
         elif type(add) == list:
             for item in add:
                 self.add_node(item)

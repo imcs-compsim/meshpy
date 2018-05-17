@@ -342,18 +342,102 @@ class MeshSectionElements(MeshSection):
             element.n_global = self.counter + i + 1
 
 
+class MeshSectionSets(MeshSection):
+    """
+    Manage sets.
+    """
+    
+    def add_data(self, data):
+        """
+        Add element data with lines containing all the nodal information
+        """
+        
+        # store the data in the object
+        self.data = data
+        
+        # set the elements of nodes from the last line in data
+        self.counter = int(data[-1].split()[0])
+    
+    
+    def get_dat_lines(self):
+        """
+        Return the nodal data
+        """
+        
+        # get the sets for this item
+        sets = self.get_sets()
+        
+        lines = MeshSection.get_dat_lines(self)
+        
+        # print the names of the sets
+        for i, set in enumerate(sets):
+            if not set.name == '':
+                lines.append('// Set {} {}'.format(i+1+self.counter, set.name))
+            
+        # print input data from solid
+        lines.extend(self.data)
+        
+        # get current sets
+        for i, set in enumerate(sets):
+            for node in set.nodes:
+                lines.append('NODE {} {} {}'.format(node.n_global, self.get_input_name(), i+1+self.counter))
+        return lines
+    
+    
+    def get_sets(self):
+        if self.name == 'DNODE-NODE TOPOLOGY':
+            return self.input_file.geometry.point_sets    
+        elif self.name == 'DLINE-NODE TOPOLOGY':
+            return self.input_file.geometry.line_sets
+        elif self.name == 'DSURF-NODE TOPOLOGY':
+            return self.input_file.geometry.surf_sets
+        elif self.name == 'DVOL-NODE TOPOLOGY':
+            return self.input_file.geometry.vol_sets
+    
+    def get_input_name(self):
+        if self.name == 'DNODE-NODE TOPOLOGY':
+            return 'DNODE'
+        elif self.name == 'DLINE-NODE TOPOLOGY':
+            return 'DLINE'
+        elif self.name == 'DSURF-NODE TOPOLOGY':
+            return 'DSURF'
+        elif self.name == 'DVOL-NODE TOPOLOGY':
+            return 'DVOL'
+    
+    def get_n_sets(self):
+        return self.counter + len(self.get_sets())
+    
+    def apply_counter_to_geometry(self):
+        """
+        Set the global number of nodes
+        """
+        
+        for i, element in enumerate(self.input_file.geometry.beams):
+            element.n_global = self.counter + i + 1
+
 
 class MeshSectionDesignDescription(MeshSection):
     def __init__(self, input_file):
         MeshSection.__init__(self, input_file, 'DESIGN DESCRIPTION')
-    
+        self.n_point_sets = 0
+        self.n_line_sets = 0
+        self.n_surf_sets = 0
+        self.n_vol_sets = 0
+        
+            
     def get_dat_lines(self):    
         lines = MeshSection.get_dat_lines(self)
-        lines.append('{:<20} 1'.format('NDPOINT'))
-        lines.append('{:<20} 1'.format('NDLINE'))
-        lines.append('{:<20} 1'.format('NDSURF'))
-        lines.append('{:<20} 1'.format('NDVOL'))
+        lines.append('{:<20} {}'.format('NDPOINT', self.n_point_sets))
+        lines.append('{:<20} {}'.format('NDLINE', self.n_line_sets))
+        lines.append('{:<20} {}'.format('NDSURF', self.n_surf_sets))
+        lines.append('{:<20} {}'.format('NDVOL', self.n_vol_sets))
         return lines
+    
+    def apply_counter_to_geometry(self):
+        self.n_point_sets = self.input_file.mesh_sections['DNODE-NODE TOPOLOGY'].get_n_sets()
+        self.n_line_sets = self.input_file.mesh_sections['DLINE-NODE TOPOLOGY'].get_n_sets()
+        self.n_surf_sets = self.input_file.mesh_sections['DSURF-NODE TOPOLOGY'].get_n_sets()
+        self.n_vol_sets = self.input_file.mesh_sections['DVOL-NODE TOPOLOGY'].get_n_sets()
         
 
         
@@ -386,7 +470,11 @@ class InputFile(object):
         self.mesh_sections['DESIGN DESCRIPTION'] = MeshSectionDesignDescription(self)
         self.mesh_sections['DESIGN POINT DIRICH CONDITIONS'] = MeshSection(self)
         self.mesh_sections['DESIGN POINT NEUMANN CONDITIONS'] = MeshSection(self)
-        self.mesh_sections['DNODE-NODE TOPOLOGY'] = MeshSection(self)
+        self.mesh_sections['DESIGN POINT COUPLING CONDITIONS'] = MeshSection(self)
+        self.mesh_sections['DNODE-NODE TOPOLOGY'] = MeshSectionSets(self, 'DNODE-NODE TOPOLOGY')
+        self.mesh_sections['DLINE-NODE TOPOLOGY'] = MeshSectionSets(self, 'DLINE-NODE TOPOLOGY')
+        self.mesh_sections['DSURF-NODE TOPOLOGY'] = MeshSectionSets(self, 'DSURF-NODE TOPOLOGY')
+        self.mesh_sections['DVOL-NODE TOPOLOGY'] = MeshSectionSets(self, 'DVOL-NODE TOPOLOGY')
         self.mesh_sections['NODE COORDS'] = MeshSectionNodes(self)
         self.mesh_sections['STRUCTURE ELEMENTS'] = MeshSectionElements(self)
         
@@ -490,6 +578,8 @@ class InputFile(object):
         """
         
         # first set the global number of the elements and other items
+        for coupling in self.geometry.couplings:
+            coupling.add_set_to_geometry(self.geometry)
         for section in self.mesh_sections.values():
             section.apply_counter_to_geometry()
         

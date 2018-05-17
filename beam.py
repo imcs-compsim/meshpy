@@ -208,7 +208,9 @@ def test_input():
     
     # add mesh
     cantilever = BeamMesh()
-    cantilever.add_mesh_line(Beam3rHerm2Lin3, np.array([0,0,0]), np.array([10,2,5]), 3)
+    nodes1, tmp, tmp, tmp = cantilever.add_mesh_line(Beam3rHerm2Lin3, np.array([0,0,0]), np.array([10,2,5]), 3)
+    nodes2, tmp, tmp, tmp = cantilever.add_mesh_line(Beam3rHerm2Lin3, np.array([0,0,0]), np.array([9,1,4]), 3)
+    cantilever.add_coupling([nodes1[0], nodes2[0]], 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0')
     input.geometry = cantilever
 
     
@@ -217,8 +219,11 @@ def test_input():
 
 
 def test_sets():
-    pass
-
+    cantilever = BeamMesh()
+    cantilever.add_mesh_line(Beam3rHerm2Lin3, np.array([0,0,0]), np.array([10,2,5]), 3, add_sets=False)
+    print(cantilever)
+    print(cantilever.point_sets)
+    print(cantilever.line_sets)
 
 
 
@@ -228,6 +233,6 @@ def test_sets():
 
 # line_test()
 # test_section()
-# test_input()
-test_sets()
+test_input()
+# test_sets()
 
