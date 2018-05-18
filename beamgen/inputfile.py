@@ -342,6 +342,47 @@ class MeshSectionElements(MeshSection):
             element.n_global = self.counter + i + 1
 
 
+class MeshSectionCouplings(MeshSection):
+    
+    def __init__(self, input_file):
+        MeshSection.__init__(self, input_file, 'DESIGN POINT COUPLING CONDITIONS')
+    
+    
+    def add_data(self, data):
+        
+        # get the counter from the previous items
+        self.counter = int(data[0].split()[1])
+        
+        # store the data in the object
+        self.data = data[1:]
+        
+    
+    def get_dat_lines(self):
+        """
+        Return the nodal data
+        """
+        
+        # get number of coupling conditions
+        n_couple = len(self.input_file.geometry.couplings)
+        
+        lines = MeshSection.get_dat_lines(self)
+        lines.append('DPOINT {}'.format(self.counter + n_couple))
+        lines.extend(self.data)
+        
+        for i, couple in enumerate(self.input_file.geometry.couplings):
+            lines.append(couple.get_dat_line())
+        return lines
+    
+    
+    def apply_counter_to_geometry(self):
+        """
+        Set the global number of nodes
+        """
+        
+        for i, element in enumerate(self.input_file.geometry.beams):
+            element.n_global = self.counter + i + 1
+
+
 class MeshSectionSets(MeshSection):
     """
     Manage sets.
@@ -413,7 +454,7 @@ class MeshSectionSets(MeshSection):
         """
         
         for i, element in enumerate(self.input_file.geometry.beams):
-            element.n_global = self.counter + i + 1
+            element.n_global = self.counter + i + 1        
 
 
 class MeshSectionDesignDescription(MeshSection):
@@ -470,7 +511,7 @@ class InputFile(object):
         self.mesh_sections['DESIGN DESCRIPTION'] = MeshSectionDesignDescription(self)
         self.mesh_sections['DESIGN POINT DIRICH CONDITIONS'] = MeshSection(self)
         self.mesh_sections['DESIGN POINT NEUMANN CONDITIONS'] = MeshSection(self)
-        self.mesh_sections['DESIGN POINT COUPLING CONDITIONS'] = MeshSection(self)
+        self.mesh_sections['DESIGN POINT COUPLING CONDITIONS'] = MeshSectionCouplings(self)
         self.mesh_sections['DNODE-NODE TOPOLOGY'] = MeshSectionSets(self, 'DNODE-NODE TOPOLOGY')
         self.mesh_sections['DLINE-NODE TOPOLOGY'] = MeshSectionSets(self, 'DLINE-NODE TOPOLOGY')
         self.mesh_sections['DSURF-NODE TOPOLOGY'] = MeshSectionSets(self, 'DSURF-NODE TOPOLOGY')

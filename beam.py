@@ -4,7 +4,7 @@ import numpy as np
 from beamgen.rotation import Rotation
 from beamgen.geometry import Beam3rHerm2Lin3
 from beamgen.beam_mesh import BeamMesh
-from beamgen.inputfile import InputFile, InputSection, InputSectionNodes, BaciInputLine
+from beamgen.inputfile import InputFile, InputSection, BaciInputLine
 
 
 # 
@@ -205,7 +205,15 @@ def test_input():
 '5 BEAM3R HERM2LIN3 9 11 10 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FAD',
 '6 BEAM3R HERM2LIN3 11 13 12 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FAD'])
     
-    
+    # add coupling section
+    input.add_section_by_data('DESIGN POINT COUPLING CONDITIONS', [
+'DPOINT 100',
+'E 5 - NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0',
+'E 6 - NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0',
+'E 7 - NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0',
+'E 8 - NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0'
+])
+
     # add mesh
     cantilever = BeamMesh()
     nodes1, tmp, tmp, tmp = cantilever.add_mesh_line(Beam3rHerm2Lin3, np.array([0,0,0]), np.array([10,2,5]), 3)

@@ -27,6 +27,9 @@ class Coupling(object):
         # add set to global sets
         self.node_set = GeometrySet('', self.nodes)
         geometry.point_sets.append(self.node_set)
+    
+    def get_dat_line(self):
+        return 'E {} - {}'.format(self.node_set.n_global, self.coupling_string)
 
 class GeometrySet(object):
     """
@@ -42,6 +45,7 @@ class GeometrySet(object):
         self.nodes = []
         if nodes:
             self.add_node(nodes)
+        self.n_global = None
     
     
     def add_node(self, add):
