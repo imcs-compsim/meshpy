@@ -522,6 +522,15 @@ class InputFile(object):
         else:
             # add new section
             self.sections[section.name] = section
+    
+    
+    def delete_section(self, section_name):
+        """ Delete a section from the dictionary self.sections. """
+        
+        if section_name in self.sections.keys():
+            del self.sections[section_name]
+        else:
+            print('Warning, section does not exist!')
 
     
     def get_dat_lines(self, header=True):

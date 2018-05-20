@@ -275,9 +275,13 @@ def beam_and_solid():
     # load solid mesh
     input_file.read_dat('input/block.dat')
     
+    # delete solver 2 section
+    #input_file.delete_section('SOLVER 2')
+    #input_file.delete_section('TITLE')
+    
     # add a cantilever beam
     cantilever = Mesh(name='cantilever')
-    cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, 1, [0,0,0], [1,2,3], 1)
+    cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, 1, [0,0,0], [1,2,3], 10)
     input_file.add_mesh(cantilever)
     
     # print input file
