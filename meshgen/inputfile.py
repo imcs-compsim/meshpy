@@ -99,7 +99,7 @@ class InputLine(object):
             return 1
         
     
-    def __str__(self, *args, **kwargs):
+    def __str__(self):
         string = ''
         if not self.option_name == '':
             string += '{:<35} {}{}'.format(self.option_name, self.option_value_pad, self.option_value)
@@ -108,276 +108,6 @@ class InputLine(object):
                 string += ' '
             string += '{}'.format(self.option_comment)
         return string
-
-
-
-
-# 
-# 
-# 
-# class MeshSection(object):
-#     """
-#     A base class to manage mesh items in the input file
-#     """
-#     
-#     def __init__(self, input_file, *args):
-#         """
-#         Set the default values and call the set_data function witch is overwritten in the child classes.
-#         """
-#         
-#         self.input_file = input_file
-#         if len(args) == 0:
-#             self.name = None
-#         else:
-#             self.name = args[0]
-#         self.counter = 0
-#         self.data = []
-# 
-# 
-#     def get_dat_lines(self):
-#         """
-#         Return the default lines for this object 
-#         """
-#         
-#         if self.name:
-#             return [''.join(['-' for i in range(80-len(self.name))]) + self.name]
-#         else:
-#             return []
-#     
-#     
-#     def apply_counter_to_geometry(self):
-#         """
-#         Overwrite in child classes
-#         """
-#         pass
-# 
-# 
-# class MeshSectionNodes(MeshSection):
-#     """
-#     Manage nodes from solid and/or beam elements.
-#     """
-#     
-#     def __init__(self, input_file):
-#         MeshSection.__init__(self, input_file, 'NODE COORDS')
-#     
-#     
-#     def add_data(self, data):
-#         """
-#         Add nodal data with lines containing all the nodal information
-#         """
-#         
-#         # store the data in the object
-#         self.data = data
-#         
-#         # set the number of nodes from the last line in data
-#         self.counter = int(data[-1].split()[1])
-#     
-#     
-#     def get_dat_lines(self):
-#         """
-#         Return the nodal data
-#         """
-#         
-#         lines = MeshSection.get_dat_lines(self)
-#         lines.extend(self.data)
-#         for node in self.input_file.geometry.nodes:
-#             lines.append(node.get_dat_line())
-#         
-#         return lines
-#     
-#     
-#     def apply_counter_to_geometry(self):
-#         """
-#         Set the global number of nodes
-#         """
-#         
-#         for i, node in enumerate(self.input_file.geometry.nodes):
-#             node.n_global = self.counter + i + 1
-# 
-# 
-# class MeshSectionElements(MeshSection):
-#     """
-#     Manage nodes from solid and/or beam elements.
-#     """
-#     
-#     def __init__(self, input_file):
-#         MeshSection.__init__(self, input_file, 'STRUCTURE ELEMENTS')
-#     
-#     
-#     def add_data(self, data):
-#         """
-#         Add element data with lines containing all the nodal information
-#         """
-#         
-#         # store the data in the object
-#         self.data = data
-#         
-#         # set the elements of nodes from the last line in data
-#         self.counter = int(data[-1].split()[0])
-#     
-#     
-#     def get_dat_lines(self):
-#         """
-#         Return the nodal data
-#         """
-#         
-#         lines = MeshSection.get_dat_lines(self)
-#         lines.extend(self.data)
-#         for element in self.input_file.geometry.beams:
-#             lines.append(element.get_dat_line())
-#         
-#         return lines
-#     
-#     
-#     def apply_counter_to_geometry(self):
-#         """
-#         Set the global number of nodes
-#         """
-#         
-#         for i, element in enumerate(self.input_file.geometry.beams):
-#             element.n_global = self.counter + i + 1
-# 
-# 
-# class MeshSectionCouplings(MeshSection):
-#     
-#     def __init__(self, input_file):
-#         MeshSection.__init__(self, input_file, 'DESIGN POINT COUPLING CONDITIONS')
-#     
-#     
-#     def add_data(self, data):
-#         
-#         # get the counter from the previous items
-#         self.counter = int(data[0].split()[1])
-#         
-#         # store the data in the object
-#         self.data = data[1:]
-#         
-#     
-#     def get_dat_lines(self):
-#         """
-#         Return the nodal data
-#         """
-#         
-#         # get number of coupling conditions
-#         n_couple = len(self.input_file.geometry.couplings)
-#         
-#         lines = MeshSection.get_dat_lines(self)
-#         lines.append('DPOINT {}'.format(self.counter + n_couple))
-#         lines.extend(self.data)
-#         
-#         for i, couple in enumerate(self.input_file.geometry.couplings):
-#             lines.append(couple.get_dat_line())
-#         return lines
-#     
-#     
-#     def apply_counter_to_geometry(self):
-#         """
-#         Set the global number of nodes
-#         """
-#         
-#         for i, element in enumerate(self.input_file.geometry.beams):
-#             element.n_global = self.counter + i + 1
-# 
-# 
-# class MeshSectionSets(MeshSection):
-#     """
-#     Manage sets.
-#     """
-#     
-#     def add_data(self, data):
-#         """
-#         Add element data with lines containing all the nodal information
-#         """
-#         
-#         # store the data in the object
-#         self.data = data
-#         
-#         # set the elements of nodes from the last line in data
-#         self.counter = int(data[-1].split()[0])
-#     
-#     
-#     def get_dat_lines(self):
-#         """
-#         Return the nodal data
-#         """
-#         
-#         # get the sets for this item
-#         sets = self.get_sets()
-#         
-#         lines = MeshSection.get_dat_lines(self)
-#         
-#         # print the names of the sets
-#         for i, set in enumerate(sets):
-#             if not set.name == '':
-#                 lines.append('// Set {} {}'.format(i+1+self.counter, set.name))
-#             
-#         # print input data from solid
-#         lines.extend(self.data)
-#         
-#         # get current sets
-#         for i, set in enumerate(sets):
-#             for node in set.nodes:
-#                 lines.append('NODE {} {} {}'.format(node.n_global, self.get_input_name(), i+1+self.counter))
-#         return lines
-#     
-#     
-#     def get_sets(self):
-#         if self.name == 'DNODE-NODE TOPOLOGY':
-#             return self.input_file.geometry.point_sets    
-#         elif self.name == 'DLINE-NODE TOPOLOGY':
-#             return self.input_file.geometry.line_sets
-#         elif self.name == 'DSURF-NODE TOPOLOGY':
-#             return self.input_file.geometry.surf_sets
-#         elif self.name == 'DVOL-NODE TOPOLOGY':
-#             return self.input_file.geometry.vol_sets
-#     
-#     def get_input_name(self):
-#         if self.name == 'DNODE-NODE TOPOLOGY':
-#             return 'DNODE'
-#         elif self.name == 'DLINE-NODE TOPOLOGY':
-#             return 'DLINE'
-#         elif self.name == 'DSURF-NODE TOPOLOGY':
-#             return 'DSURF'
-#         elif self.name == 'DVOL-NODE TOPOLOGY':
-#             return 'DVOL'
-#     
-#     def get_n_sets(self):
-#         return self.counter + len(self.get_sets())
-#     
-#     def apply_counter_to_geometry(self):
-#         """
-#         Set the global number of nodes
-#         """
-#         
-#         for i, element in enumerate(self.input_file.geometry.beams):
-#             element.n_global = self.counter + i + 1        
-# 
-# 
-# class MeshSectionDesignDescription(MeshSection):
-#     def __init__(self, input_file):
-#         MeshSection.__init__(self, input_file, 'DESIGN DESCRIPTION')
-#         self.n_point_sets = 0
-#         self.n_line_sets = 0
-#         self.n_surf_sets = 0
-#         self.n_vol_sets = 0
-#         
-#             
-#     def get_dat_lines(self):    
-#         lines = MeshSection.get_dat_lines(self)
-#         lines.append('{:<20} {}'.format('NDPOINT', self.n_point_sets))
-#         lines.append('{:<20} {}'.format('NDLINE', self.n_line_sets))
-#         lines.append('{:<20} {}'.format('NDSURF', self.n_surf_sets))
-#         lines.append('{:<20} {}'.format('NDVOL', self.n_vol_sets))
-#         return lines
-#     
-#     def apply_counter_to_geometry(self):
-#         self.n_point_sets = self.input_file.mesh_sections['DNODE-NODE TOPOLOGY'].get_n_sets()
-#         self.n_line_sets = self.input_file.mesh_sections['DLINE-NODE TOPOLOGY'].get_n_sets()
-#         self.n_surf_sets = self.input_file.mesh_sections['DSURF-NODE TOPOLOGY'].get_n_sets()
-#         self.n_vol_sets = self.input_file.mesh_sections['DVOL-NODE TOPOLOGY'].get_n_sets()
-#         
-
-        
 
 
 
@@ -533,7 +263,7 @@ class InputFile(object):
             print('Warning, section does not exist!')
 
     
-    def get_dat_lines(self, header=True):
+    def get_dat_lines(self, header=True, print_set_names=False):
         """ Return the dat lines from all sections. """
         
         # sections not to export in the dat file
@@ -559,7 +289,7 @@ class InputFile(object):
             if not section.name in skip_sections: 
                 lines.extend(section.get_dat_lines())
         
-        lines.extend(self.mesh.get_dat_lines())
+        lines.extend(self.mesh.get_dat_lines(print_set_names=print_set_names))
         
         # the last section is END
         lines.extend(InputSection('END').get_dat_lines())

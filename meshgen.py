@@ -3,8 +3,8 @@
 import numpy as np
 
 # meshgen imports
-from meshgen.inputfile import InputFile
-from meshgen.mesh import Mesh, Beam3rHerm2Lin3
+from meshgen.inputfile import InputFile, InputSection
+from meshgen.mesh import Mesh, Beam3rHerm2Lin3, Material, SetContainer
 
 
 
@@ -276,16 +276,28 @@ def beam_and_solid():
     input_file.read_dat('input/block.dat')
     
     # delete solver 2 section
-    #input_file.delete_section('SOLVER 2')
-    #input_file.delete_section('TITLE')
+    input_file.delete_section('TITLE')
+    
+    # add options for beam_output
+    input_file.add_section(InputSection(
+        'IO/RUNTIME VTK OUTPUT/BEAMS',
+        '''
+        OUTPUT_BEAMS                    Yes
+        DISPLACEMENT                    Yes
+        USE_ABSOLUTE_POSITIONS          Yes
+        TRIAD_VISUALIZATIONPOINT        Yes
+        STRAINS_GAUSSPOINT              Yes
+        '''))
     
     # add a cantilever beam
+    material = Material('MAT_BeamReissnerElastHyper YOUNG 1.0e+09 SHEARMOD 5.0e+08 DENS 0.001 CROSSAREA 3.1415926535897936e-04 SHEARCORR 0.75 MOMINPOL 1.5707963267948969e-08 MOMIN2 7.8539816339744844e-09 MOMIN3 7.8539816339744844e-09')
     cantilever = Mesh(name='cantilever')
-    cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, 1, [0,0,0], [1,2,3], 10)
+    cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [0,0,0], [1,2,3], 1)
+    cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [0,0,0], [1,2,3], 1)
     input_file.add_mesh(cantilever)
     
     # print input file
-    for line in input_file.get_dat_lines():
+    for line in input_file.get_dat_lines(print_set_names=True):
         print(line)
 
 
