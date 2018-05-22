@@ -4,7 +4,8 @@ import numpy as np
 
 # meshgen imports
 from meshgen.inputfile import InputFile, InputSection
-from meshgen.mesh import Mesh, Beam3rHerm2Lin3, Material, SetContainer
+from meshgen.mesh import Mesh, Beam3rHerm2Lin3, Material, ContainerGeom, BC,\
+    __POINT__, __LINE__, GeometrySet, Node
 
 
 
@@ -216,8 +217,8 @@ def test_input():
 
     # add mesh
     cantilever = Mesh()
-    nodes1, tmp, tmp, tmp = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, np.array([0, 0, 0]), np.array([10, 2, 5]), 3)
-    nodes2, tmp, tmp, tmp = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, np.array([0, 0, 0]), np.array([9, 1, 4]), 3)
+    nodes1, tmp, tmp, tmp = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, np.array([0, 0, 0]), np.array([10, 2, 5]), 3000)
+    nodes2, tmp, tmp, tmp = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, np.array([0, 0, 0]), np.array([9, 1, 4]), 3000)
     cantilever.add_coupling([nodes1[0], nodes2[0]], 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0')
     input.mesh = cantilever
     
@@ -226,7 +227,7 @@ def test_input():
 
 def test_sets():
     cantilever = Mesh()
-    cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, np.array([0, 0, 0]), np.array([10, 2, 5]), 3, add_sets=False)
+    cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, np.array([0, 0, 0]), np.array([10, 2, 5]), 3000, add_sets=False)
     print(cantilever)
     print(cantilever.point_sets)
     print(cantilever.line_sets)
@@ -292,12 +293,18 @@ def beam_and_solid():
     # add a cantilever beam
     material = Material('MAT_BeamReissnerElastHyper YOUNG 1.0e+09 SHEARMOD 5.0e+08 DENS 0.001 CROSSAREA 3.1415926535897936e-04 SHEARCORR 0.75 MOMINPOL 1.5707963267948969e-08 MOMIN2 7.8539816339744844e-09 MOMIN3 7.8539816339744844e-09')
     cantilever = Mesh(name='cantilever')
-    cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [0,0,0], [1,2,3], 1)
-    cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [0,0,0], [1,2,3], 1)
+    cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [0,0,0], [1,2,3], 3)
+    set_line2 = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [5,6,10], [1,2,3], 5)
+    cantilever.add_bc('dirich', BC(set_line2[__POINT__][0], 'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 {} {} 0 0 0', format_replacement=['6666',22]))
+    bc = BC(set_line2[__LINE__][0], 'asdfasdf')
+    cantilever.add_bc('dirich', bc)
+    cantilever.add_bc('dirich', BC(set_line2[__POINT__][1], 'asdfasdf'))
+    sets = GeometrySet('start', [Node([0,0,0])])
+    cantilever.add_bc('dirich', BC('asdfasdf', sets))
     input_file.add_mesh(cantilever)
     
     # print input file
-    for line in input_file.get_dat_lines(print_set_names=True):
+    for line in input_file.get_dat_lines(header=True, print_all_sets=True):
         print(line)
 
 

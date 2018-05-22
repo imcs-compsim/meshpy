@@ -10,6 +10,75 @@ from _collections import OrderedDict
 
 
 
+# constans for sets and BCs
+__POINT__ = 0
+__LINE__ = 1
+__SURF__ = 2
+__VOL__ = 3
+__DIRICH__ = 10
+__NEUMANN__ = 20
+
+
+def get_type_geometry(item_description, return_type):
+    """
+    Return the string for different cases of return_type.
+    """
+    
+    string_array = [
+        [__POINT__, 'DNODE-NODE TOPOLOGY', 'DNODE', 'DESIGN POINT DIRICH CONDITIONS', 'DESIGN POINT NEUMANN CONDITIONS', 'DPOINT'],
+        [__LINE__, 'DLINE-NODE TOPOLOGY', 'DLINE', 'DESIGN LINE DIRICH CONDITIONS', 'DESIGN LINE NEUMANN CONDITIONS', 'DLINE'],
+        [__SURF__, 'DSURF-NODE TOPOLOGY', 'DSURFACE', 'DESIGN SURF DIRICH CONDITIONS', 'DESIGN SURF NEUMANN CONDITIONS', 'DSURF'],
+        [__VOL__, 'DVOL-NODE TOPOLOGY', 'DVOLUME', 'DESIGN VOL DIRICH CONDITIONS', 'DESIGN VOL NEUMANN CONDITIONS', 'DVOL']
+        ]
+    
+    for i, line in enumerate(string_array):
+        if item_description in line:
+            item_index = i
+    
+    if return_type == 'enum':
+        return_index = 0
+    elif return_type == 'setsection':
+        return_index = 1
+    elif return_type == 'settopology':
+        return_index = 2
+    elif return_type == 'dirich':
+        return_index = 3
+    elif return_type == 'neumann':
+        return_index = 4
+    elif return_type == 'bccounter':
+        return_index = 5
+    
+    return string_array[item_index][return_index]
+
+
+def get_type_bc(item_description, return_type):
+    """
+    Return the string for different cases of return_type.
+    """
+    
+    string_array = [
+        [__DIRICH__, 'DESIGN POINT DIRICH CONDITIONS', 'DESIGN LINE DIRICH CONDITIONS', 'DESIGN SURF DIRICH CONDITIONS', 'DESIGN VOL DIRICH CONDITIONS'],
+        [__NEUMANN__, 'DESIGN POINT DIRICH NEUMANN', 'DESIGN LINE DIRICH NEUMANN', 'DESIGN SURF DIRICH NEUMANN', 'DESIGN VOL DIRICH NEUMANN']
+        ]
+    
+    for i, line in enumerate(string_array):
+        if item_description in line:
+            item_index = i
+    
+    if return_type == 'enum':
+        return_index = 0
+    elif return_type == __POINT__:
+        return_index = 1
+    elif return_type == __LINE__:
+        return_index = 2
+    elif return_type == __SURF__:
+        return_index = 3
+    elif return_type == __VOL__:
+        return_index = 4
+    
+    return string_array[item_index][return_index]
+    
+    
 
 # 
 # class Coupling(object):
@@ -46,61 +115,51 @@ from _collections import OrderedDict
 #         return 'E {} - {}'.format(self.node_set.n_global, self.coupling_string)
 
 
-class SetContainer(OrderedDict):
+
+class Container(OrderedDict):
     """
-    This object contains sets for a mesh or as the return value of a
-    mesh creation function.
+    A base class for a container that will store node sets and 
+    boundary conditions.
     """
     
-    def __init__(self):
-        """
-        Create empty list for different types of sets
-        """
+    def __init__(self, aliases):
+        """ Create a dictionary with the keys. """
         
-        self.aliases = [
-            # [key, [# list of aliases], 'string in dat-file' ]
-            ['DNODE-NODE TOPOLOGY', ['p', 'node', 'point'], 'DNODE'],
-            ['DLINE-NODE TOPOLOGY', ['l', 'line'], 'DLINE'],
-            ['DSURF-NODE TOPOLOGY', ['s', 'surf', 'surface'], 'DSURFACE'],
-            ['DVOL-NODE TOPOLOGY', ['v', 'vol', 'volume'], 'DVOLUME']
-            ]
+        self.aliases = aliases
         
         # set empty lists
         for line in self.aliases:
-            self[line[0]] = []
+            self[line[0]] = self.empty_item()
     
     
-    def _get_key(self, key, return_dat_string=False):
+    def empty_item(self):
+        """ What will be in the default items. """
+        return []
+
+    def _get_key(self, key):
         """ Return the key for the dictionary. Look in self.aliases. """
         for line in self.aliases:
             if key == line[0]:
-                if return_dat_string:
-                    return line[2]
-                else:
-                    return line[0]
+                return line[0]
             elif key in line[1]:
-                if return_dat_string:
-                    return line[2]
-                else:
-                    return line[0]
+                return line[0]
         print('Error, key {} not found!'.format(key))
     
     
-    def merge_sets(self, other_set):
+    def merge_containers(self, other_container):
         """ Merge the contents of this set with a other SetContainer. """
-        if type(other_set) == SetContainer:
-            for key in other_set.keys():
-                self[key].extend(other_set[key])
+        if type(other_container) == type(self):
+            for key in other_container.keys():
+                self[key].extend(other_container[key])
         else:
-            print('Error, expected type SetContainer, got {}!'.format(type(other_set)))
+            print('Error, expected type {}, got {}!'.format(type(self), type(other_container)))
     
     def set_global(self):
         """ Set the global values in each set element. """
         for key in self.keys():
-            dat_string = self._get_key(key, return_dat_string=True)
-            for i, node_set in enumerate(self[key]):
-                node_set.n_global = i + 1
-                node_set.set_type = dat_string
+            for i, item in enumerate(self[key]):
+                item.n_global = i + 1
+                item.is_referenced = False
             
     def __setitem__(self, key, value):
         """ Set items of the dictionary. """
@@ -112,6 +171,132 @@ class SetContainer(OrderedDict):
         """ Gets items of the dictionary. """
         dict_key = self._get_key(key)
         return OrderedDict.__getitem__(self, dict_key)
+    
+    
+    def append_item(self, key, data):
+        """ Add set(s) to object. Set the type of set in the item. """
+        data_type = self._get_key(key)
+        if type(data) == list:
+            self[key].extend(data)
+            for item in data:
+                item.item_type = data_type
+        else:
+            self[key].append(data)
+            data.item_type = data_type
+
+
+class ContainerGeom(Container):
+    """
+    This object contains sets for a mesh or as the return value of a
+    mesh creation function.
+    """
+    
+    def __init__(self):
+        """
+        Create empty list for different types of sets
+        """
+        
+        aliases = [
+            # [key, [# list of aliases], 'string in dat-file' ]
+            [__POINT__, ['p', 'node', 'point', 'DNODE-NODE TOPOLOGY']],
+            [__LINE__, ['l', 'line', 'DLINE-NODE TOPOLOGY']],
+            [__SURF__, ['s', 'surf', 'surface', 'DSURF-NODE TOPOLOGY']],
+            [__VOL__, ['v', 'vol', 'volume', 'DVOL-NODE TOPOLOGY']]
+            ]
+        Container.__init__(self, aliases)
+
+
+class ContainerBC(Container):
+    """ This object contains bc. """
+    
+    def __init__(self):
+        """
+        Create empty list for different types of bc
+        """
+        
+        aliases = [
+            # [key, [# list of aliases], 'string in dat-file' ]
+            [__DIRICH__, ['dbc', 'dirich']],
+            [__NEUMANN__, ['nbc', 'neumann']]
+            ]
+        Container.__init__(self, aliases)
+        
+    def empty_item(self):
+        """ What will be in the default items. """
+        return ContainerGeom()
+    
+    def merge_containers(self, other_container):
+        """ Merge the contents of this set with a other ContainerBC. """
+        if type(other_container) == type(self):
+            for key1 in other_container.keys():
+                for key2 in other_container[key1].keys():
+                    self[key1,key2].extend(other_container[key1,key2])
+        else:
+            print('Error, expected type {}, got {}!'.format(type(self), type(other_container)))
+            
+    def set_global(self):
+        """ Check if . """
+        for key1 in self.keys():
+            for key2 in self[key1].keys():
+                for i, item in enumerate(self[key1,key2]):
+                    item.n_global = i + 1
+                    if item.is_referenced:
+                        print('Error, each NodeSet should have a maximum of 1 BC!')
+                    item.is_referenced = True
+    
+    def __setitem__(self, key, value):
+        """
+        Set items of the dictionary.
+        This is done with a tuple containing the bc mode, and geom type
+        """
+        
+        if type(key) == tuple:
+            self[key[0]][key[1]] = value
+        else:
+            dict_key = self._get_key(key)
+            OrderedDict.__setitem__(self, dict_key, value)
+    
+    def __getitem__(self, key):
+        """
+        Gets items of the dictionary.
+        This is done with a tuple containing the bc mode, and geom type
+        """
+        
+        if type(key) == tuple:
+            return self[key[0]][key[1]]
+        else:
+            dict_key = self._get_key(key)
+            return OrderedDict.__getitem__(self, dict_key)
+
+
+class BC(object):
+    """ This object is one BC. """
+    
+    def __init__(self, set_item, bc_string, format_replacement=None):
+        """
+        Set the default values. Format_replacement will be called on string.
+        """
+        
+        self.bc_string = bc_string
+        self.format_replacement = format_replacement
+        self.set = set_item
+        
+        self.is_dat = True
+        self.n_global = None
+        self.is_referenced = False
+    
+    def get_dat_line(self):
+        """ Line in the input file for the BC. """
+        
+        if self.format_replacement:
+            dat_string = self.bc_string.format(*self.format_replacement)
+        else:
+            dat_string = self.bc_string
+             
+        return 'E {} - {}'.format(
+            self.set.n_global,
+            dat_string
+            )
 
 
 class GeometrySet(object):
@@ -137,7 +322,7 @@ class GeometrySet(object):
         
         self.n_global = None
         self.is_dat = False
-        self.set_type = None
+        self.item_type = None
      
      
     def add_node(self, add):
@@ -157,8 +342,9 @@ class GeometrySet(object):
     
     def get_dat_lines(self):
         """ Return the dat lines for this object. """
-        return ['NODE {} {} {}'.format(node.n_global, self.set_type, self.n_global) for node in self.nodes]
+        return ['NODE {} {} {}'.format(node.n_global, get_type_geometry(self.item_type, 'settopology'), self.n_global) for node in self.nodes]
 
+    
     def get_dat_name(self):
         """ Return a comment with the name of this set. """
         
@@ -172,10 +358,17 @@ class GeometrySet(object):
             else:
                 return [str(data)]
         return '// {} {} name in beamgen: {}'.format(
-            self.set_type,
+            get_type_geometry(self.item_type, 'settopology'),
             self.n_global,
             '_'.join(flatten(self.name))
             )
+        
+    def output_to_dat(self):
+        """
+        Check if the item is linked to any boundary conditions. If not,
+        the set will not appear in the dat file.
+        """
+        return True
         
 
 class Material(object):
@@ -213,6 +406,12 @@ class BaseMeshItem(object):
             print('ERROR, does not support arg with len > 1')
         self.is_dat = True
         self.n_global = None
+        self.is_referenced = False
+
+
+    def output_to_dat(self):
+        """ If the object will be shown in the dat file. """
+        return True
     
     
     def get_dat_line(self):
@@ -397,7 +596,8 @@ class Mesh(object):
         self.elements = []
         self.materials = []
         self.functions = []
-        self.sets = SetContainer()
+        self.sets = ContainerGeom()
+        self.bc = ContainerBC()
         
         # count the number of items created for numbering in the comments
         self.mesh_item_counter = {}
@@ -413,8 +613,26 @@ class Mesh(object):
         for material in mesh.materials:
             self.add_material(material)
         if add_sets:
-            self.sets.merge_sets(mesh.sets)
+            self.sets.merge_containers(mesh.sets)
+        self.bc.merge_containers(mesh.bc)
     
+    
+    def add_bc(self, bc_type, bc):
+        """ Add a boundary condition to this mesh. """
+        
+        for key in self.sets.keys():
+            if bc.set in self.sets[key]:
+                break
+        else:
+            print('Error, the set is not yet added to this mesh object. BC can not be added until the set is added!')
+            return
+        
+        if not bc in self.bc[bc_type, bc.set.item_type]:
+            self.bc[bc_type, bc.set.item_type].append(bc)
+        else:
+            print('Error, each BC can only be added once!')
+            
+        
     
     def add_material(self, material):
         """Add a material to this mesh. Every material can only be once in a mesh. """
@@ -496,7 +714,16 @@ class Mesh(object):
             return name
     
     
-    def add_beam_mesh_line(self, beam_object, material, start_point, end_point, n, name=None, add_sets=True, add_first_node=True):
+    def add_beam_mesh_line(self,
+                           beam_object,
+                           material,
+                           start_point,
+                           end_point,
+                           n,
+                           name=None,
+                           add_sets=True,
+                           add_first_node=True
+                           ):
         """
         A straight line of beam elements.
             n: Number of elements along line
@@ -531,6 +758,12 @@ class Mesh(object):
                 rotation_function
                 )
         
+        # saave the index of the first node
+        if add_first_node:
+            node_start = len(self.nodes)
+        else:
+            node_start = len(self.nodes) - 1
+        
         # create the beams
         for i in range(n):
             
@@ -541,20 +774,19 @@ class Mesh(object):
             
             tmp_beam = beam_object(material, mesh=self)
             if add_first_node and i == 0:
-                node_start = len(self.nodes)
                 tmp_beam.create_beam(self.nodes, functions[0], functions[1], create_first=True)
             else:
-                node_start = len(self.nodes) - 1
                 tmp_beam.create_beam(self.nodes, functions[0], functions[1], create_first=False)
             self.elements.append(tmp_beam)
         
         
         # add sets to mesh
-        node_set_line = SetContainer()
-        node_set_line['point'].append(GeometrySet([name, 'start'], self.nodes[node_start]))
-        node_set_line['point'].append(GeometrySet([name, 'end'], self.nodes[-1]))
-        node_set_line['line'].append(GeometrySet(name, self.nodes[node_start:]))
-        self.sets.merge_sets(node_set_line)
+        node_set_line = ContainerGeom()
+        node_set_line.append_item(__POINT__, GeometrySet([name, 'start'], self.nodes[node_start]))
+        node_set_line.append_item(__POINT__, GeometrySet([name, 'end'], self.nodes[-1]))
+        node_set_line.append_item(__LINE__, GeometrySet(name, self.nodes[node_start:]))
+        if add_sets:
+            self.sets.merge_containers(node_set_line)
         
         # return set container
         return node_set_line
@@ -571,37 +803,37 @@ class MeshInput(Mesh):
         basic input section.
         """
         
+        def add_bc(section_header):
+            """ Add boundary conditions to the object. """
+            
+            for i, item in enumerate(section_data):
+                # first line is number of BCs skip this one
+                if i > 0:
+                    self.bc[get_type_bc(section_header, 'enum'), get_type_geometry(section_header, 'enum')].append(BaseMeshItem(item))
+        
         def add_set(section_header):
             """ Add sets of points, lines, surfs or volumes to item. """
             
             if len(section_data) > 0:
                 # look for the individual sets 
                 last_index = 1
-                set_dat_list = []
+                dat_list = []
                 for line in section_data:
                     if last_index == int(line.split()[3]):
-                        set_dat_list.append(line)
+                        dat_list.append(line)
                     else:
                         last_index = int(line.split()[3])
-                        self.sets[section_header].append(BaseMeshItem(set_dat_list))
-                        set_dat_list = [line]
-                self.sets[section_header].append(BaseMeshItem(set_dat_list))
+                        self.sets[section_header].append(BaseMeshItem(dat_list))
+                        dat_list = [line]
+                self.sets[section_header].append(BaseMeshItem(dat_list))
         
         if section_name == 'MATERIALS':
             for line in section_data:
                 self.materials.append(BaseMeshItem(line))
-        elif section_name == 'DESIGN LINE DIRICH CONDITIONS':
-            pass
-        elif section_name == 'DESIGN SURF DIRICH CONDITIONS':
-            pass
-        elif section_name == 'DNODE-NODE TOPOLOGY':
-            add_set('point')
-        elif section_name == 'DLINE-NODE TOPOLOGY':
-            add_set('line')
-        elif section_name == 'DSURF-NODE TOPOLOGY':
-            add_set('surf')
-        elif section_name == 'DVOL-NODE TOPOLOGY':
-            add_set('vol')
+        elif section_name.endswith('CONDITIONS'):
+            add_bc(section_name)
+        elif section_name.endswith('TOPOLOGY'):
+            add_set(section_name)
         elif section_name == 'NODE COORDS':
             for line in section_data:
                 self.nodes.append(BaseMeshItem(line))
@@ -620,7 +852,7 @@ class MeshInput(Mesh):
         return 0
         
         
-    def get_dat_lines(self, print_set_names=False):
+    def get_dat_lines(self, print_all_sets=False):
         """
         Get the lines for the input file that contain the information for
         the mesh.
@@ -654,6 +886,7 @@ class MeshInput(Mesh):
         set_n_global(self.functions)
         set_n_global(self.materials)
         self.sets.set_global()
+        self.bc.set_global()
         
         lines = []
         
@@ -673,23 +906,27 @@ class MeshInput(Mesh):
         lines.append('NDVOL {}'.format(len(self.sets['vol'])))
         
         # add boundary conditions
-        # TODO
-        
+        for key1 in self.bc.keys():
+            for key2 in self.bc[key1].keys():
+                if len(self.bc[key1, key2]) > 0:
+                    lines.append(get_section_string(get_type_bc(key1, key2)))
+                    for bc in self.bc[key1, key2]:
+                        lines.append(bc.get_dat_line())
+
         # add the coupings
         # TODO
         
         # add the node sets
         for key in self.sets.keys():
             if len(self.sets[key]) > 0:
-                lines.append(get_section_string(key))
+                lines.append(get_section_string(get_type_geometry(key, 'setsection')))
                 # print the description for the sets
                 for mesh_set in self.sets[key]:
-                    if (not mesh_set.is_dat) and print_set_names:
+                    if (not mesh_set.is_dat) and print_all_sets:
                         lines.append(mesh_set.get_dat_name()) 
                 for mesh_set in self.sets[key]:
                     lines.extend(mesh_set.get_dat_lines())
                     
-        
         # add the nodal data
         get_section_dat('NODE COORDS', self.nodes)
 
