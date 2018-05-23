@@ -262,8 +262,14 @@ class InputFile(object):
         else:
             print('Warning, section does not exist!')
 
-    
-    def get_dat_lines(self, header=True, print_all_sets=False):
+    def write_input_file(self, file_path, **kwargs):
+        """ Write the input to a file. """
+        with open(file_path, 'w') as input_file:
+            for line in self.get_dat_lines(**kwargs):
+                input_file.write(line)
+                input_file.write('\n')
+        
+    def get_dat_lines(self, header=True, print_set_names=False, print_all_sets=False):
         """ Return the dat lines from all sections. """
         
         # sections not to export in the dat file
@@ -289,7 +295,7 @@ class InputFile(object):
             if not section.name in skip_sections: 
                 lines.extend(section.get_dat_lines())
         
-        lines.extend(self.mesh.get_dat_lines(print_all_sets=print_all_sets))
+        lines.extend(self.mesh.get_dat_lines(print_set_names=print_set_names, print_all_sets=print_all_sets))
         
         # the last section is END
         lines.extend(InputSection('END').get_dat_lines())

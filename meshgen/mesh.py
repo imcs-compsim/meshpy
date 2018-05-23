@@ -159,7 +159,6 @@ class Container(OrderedDict):
         for key in self.keys():
             for i, item in enumerate(self[key]):
                 item.n_global = i + 1
-                item.is_referenced = False
             
     def __setitem__(self, key, value):
         """ Set items of the dictionary. """
@@ -204,7 +203,32 @@ class ContainerGeom(Container):
             [__VOL__, ['v', 'vol', 'volume', 'DVOL-NODE TOPOLOGY']]
             ]
         Container.__init__(self, aliases)
-
+        
+    def set_global(self, all_sets=False):
+        """ Set the global values in each set element. With the flaf all_sets """
+        for key in self.keys():
+            for i, item in enumerate(self.get_sets(key, all_sets)):
+                item.n_global = i + 1
+    
+    def get_sets(self, key, all_sets=False):
+        """ If all_sets = False only the referenced sets are returned. """
+        if all_sets:
+            return self[key]
+        else:
+            return [item for item in self[key] if item.is_referenced]
+    
+    @property
+    def point(self):
+        return self[__POINT__]
+    @property
+    def line(self):
+        return self[__LINE__]
+    @property
+    def surf(self):
+        return self[__SURF__]
+    @property
+    def vol(self):
+        return self[__VOL__]
 
 class ContainerBC(Container):
     """ This object contains bc. """
@@ -240,9 +264,6 @@ class ContainerBC(Container):
             for key2 in self[key1].keys():
                 for i, item in enumerate(self[key1,key2]):
                     item.n_global = i + 1
-                    if item.is_referenced:
-                        print('Error, each NodeSet should have a maximum of 1 BC!')
-                    item.is_referenced = True
     
     def __setitem__(self, key, value):
         """
@@ -279,9 +300,14 @@ class BC(object):
         
         self.bc_string = bc_string
         self.format_replacement = format_replacement
-        self.set = set_item
         
-        self.is_dat = True
+        if set_item.is_referenced:
+            print('Error, each set can only have one BC!')        
+        self.set = set_item
+        self.set.is_referenced = True
+        
+        
+        self.is_dat = False
         self.n_global = None
         self.is_referenced = False
     
@@ -323,6 +349,7 @@ class GeometrySet(object):
         self.n_global = None
         self.is_dat = False
         self.item_type = None
+        self.is_referenced = False
      
      
     def add_node(self, add):
@@ -374,13 +401,60 @@ class GeometrySet(object):
 class Material(object):
     """ Holds material definition for beams and solids. """
     
-    def __init__(self, material_string):
+    def __init__(self, material_string, youngs_modulus, nu, density, diameter, shear_correction=0.75):
+        
         self.material_string = material_string
+        self.youngs_modulus = youngs_modulus
+        self.shear_modulus = self.youngs_modulus / (2*(1+nu))
+        self.density = density
+        self.diameter = diameter
+        self.area = diameter**2 * np.pi * 0.25
+        self.mom2 = (diameter*0.5)**4 * np.pi * 0.25
+        self.mom3 = self.mom2
+        self.polar = self.mom2 + self.mom3
+        self.shear_correction = shear_correction
+        
         self.n_global = None
+        
     
     def get_dat_line(self):
         """ Return the line for the dat file. """
-        return 'MAT {} {}'.format(self.n_global, self.material_string)
+        return 'MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}'.format(
+            self.n_global,
+            self.material_string,
+            self.youngs_modulus,
+            self.shear_modulus,
+            self.density,
+            self.area,
+            self.shear_correction,
+            self.polar,
+            self.mom2,
+            self.mom3
+            )
+
+
+class Function(object):
+    """ Holds information for a function. """
+    
+    def __init__(self, data):
+        if type(data) == list:
+            self.data = data
+        else:
+            self.data = [data]
+
+        self.n_global = None
+        self.is_dat = False
+    
+    def get_dat_lines(self):
+        """ Return the lines for the dat file. """
+        return self.data
+    
+    def __str__(self):
+        """ Check if the function has a global index. """
+        if self.n_global:
+            return str(self.n_global)
+        else:
+            print('Error function does not have a global index! It is probably not added to the mesh')
 
 
 class BaseMeshItem(object):
@@ -406,7 +480,7 @@ class BaseMeshItem(object):
             print('ERROR, does not support arg with len > 1')
         self.is_dat = True
         self.n_global = None
-        self.is_referenced = False
+        self.is_referenced = True
 
 
     def output_to_dat(self):
@@ -588,7 +662,7 @@ class Beam3rHerm2Lin3(Beam):
 class Mesh(object):
     """ Holds nodes, beams and couplings of beam_mesh geometry. """
     
-    def __init__(self, name=None):
+    def __init__(self, name='mesh'):
         """ Set empty variables """
         
         self.name = name
@@ -612,6 +686,8 @@ class Mesh(object):
         self.elements.extend(mesh.elements)
         for material in mesh.materials:
             self.add_material(material)
+        for function in mesh.functions:
+            self.add_function(function)
         if add_sets:
             self.sets.merge_containers(mesh.sets)
         self.bc.merge_containers(mesh.bc)
@@ -632,11 +708,13 @@ class Mesh(object):
         else:
             print('Error, each BC can only be added once!')
             
-        
+    def add_function(self, function):
+        """ Add a function to this mesh item. """
+        if not function in self.functions:
+            self.functions.append(function)
     
     def add_material(self, material):
-        """Add a material to this mesh. Every material can only be once in a mesh. """
-        
+        """Add a material to this mesh. Every material can only be once in a mesh. """       
         if not material in self.materials:
             self.materials.append(material)
     
@@ -852,7 +930,7 @@ class MeshInput(Mesh):
         return 0
         
         
-    def get_dat_lines(self, print_all_sets=False):
+    def get_dat_lines(self, print_set_names=False, print_all_sets=False):
         """
         Get the lines for the input file that contain the information for
         the mesh.
@@ -883,10 +961,12 @@ class MeshInput(Mesh):
         # first all nodes, elements, sets and couplings are assigned a global value
         set_n_global(self.nodes)
         set_n_global(self.elements)
-        set_n_global(self.functions)
         set_n_global(self.materials)
-        self.sets.set_global()
+        set_n_global(self.functions)
+        
+        # first set referenc counter of sets to False, then add bc and then renumber sets
         self.bc.set_global()
+        self.sets.set_global(all_sets=print_all_sets)
         
         lines = []
         
@@ -900,16 +980,17 @@ class MeshInput(Mesh):
         
         # add the design descriptions
         lines.append(get_section_string('DESIGN DESCRIPTION'))
-        lines.append('NDPOINT {}'.format(len(self.sets['point'])))
-        lines.append('NDLINE {}'.format(len(self.sets['line'])))
-        lines.append('NDSURF {}'.format(len(self.sets['surf'])))
-        lines.append('NDVOL {}'.format(len(self.sets['vol'])))
+        lines.append('NDPOINT {}'.format(len(self.sets.get_sets('point', all_sets=print_all_sets))))
+        lines.append('NDLINE {}'.format(len(self.sets.get_sets('line', all_sets=print_all_sets))))
+        lines.append('NDSURF {}'.format(len(self.sets.get_sets('surf', all_sets=print_all_sets))))
+        lines.append('NDVOL {}'.format(len(self.sets.get_sets('vol', all_sets=print_all_sets))))
         
         # add boundary conditions
         for key1 in self.bc.keys():
             for key2 in self.bc[key1].keys():
                 if len(self.bc[key1, key2]) > 0:
                     lines.append(get_section_string(get_type_bc(key1, key2)))
+                    lines.append('{} {}'.format(get_type_geometry(key2, 'bccounter'), len(self.bc[key1, key2])))
                     for bc in self.bc[key1, key2]:
                         lines.append(bc.get_dat_line())
 
@@ -921,10 +1002,10 @@ class MeshInput(Mesh):
             if len(self.sets[key]) > 0:
                 lines.append(get_section_string(get_type_geometry(key, 'setsection')))
                 # print the description for the sets
-                for mesh_set in self.sets[key]:
-                    if (not mesh_set.is_dat) and print_all_sets:
-                        lines.append(mesh_set.get_dat_name()) 
-                for mesh_set in self.sets[key]:
+                for mesh_set in self.sets.get_sets(key, all_sets=print_all_sets):
+                    if (not mesh_set.is_dat) and print_set_names:
+                        lines.append(mesh_set.get_dat_name())
+                for mesh_set in self.sets.get_sets(key, all_sets=print_all_sets):
                     lines.extend(mesh_set.get_dat_lines())
                     
         # add the nodal data

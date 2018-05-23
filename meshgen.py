@@ -5,7 +5,7 @@ import numpy as np
 # meshgen imports
 from meshgen.inputfile import InputFile, InputSection
 from meshgen.mesh import Mesh, Beam3rHerm2Lin3, Material, ContainerGeom, BC,\
-    __POINT__, __LINE__, GeometrySet, Node
+    GeometrySet, Node, Function
 
 
 
@@ -290,40 +290,61 @@ def beam_and_solid():
         STRAINS_GAUSSPOINT              Yes
         '''))
     
-    # add a cantilever beam
-    material = Material('MAT_BeamReissnerElastHyper YOUNG 1.0e+09 SHEARMOD 5.0e+08 DENS 0.001 CROSSAREA 3.1415926535897936e-04 SHEARCORR 0.75 MOMINPOL 1.5707963267948969e-08 MOMIN2 7.8539816339744844e-09 MOMIN3 7.8539816339744844e-09')
+    # add a straight line beam
+    material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.5)
     cantilever = Mesh(name='cantilever')
-    cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [0,0,0], [1,2,3], 3)
-    set_line2 = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [5,6,10], [1,2,3], 5)
-    cantilever.add_bc('dirich', BC(set_line2[__POINT__][0], 'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 {} {} 0 0 0', format_replacement=['6666',22]))
-    bc = BC(set_line2[__LINE__][0], 'asdfasdf')
-    cantilever.add_bc('dirich', bc)
-    cantilever.add_bc('dirich', BC(set_line2[__POINT__][1], 'asdfasdf'))
-    sets = GeometrySet('start', [Node([0,0,0])])
-    cantilever.add_bc('dirich', BC('asdfasdf', sets))
-    input_file.add_mesh(cantilever)
+    cantilever_set = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [2,0,-5], [2,0,5], 3)
     
-    # print input file
-    for line in input_file.get_dat_lines(header=True, print_all_sets=True):
-        print(line)
+    # add fix at start of the beam
+    cantilever.add_bc(
+        'dirich',
+        BC(
+            cantilever_set.point[0], # bc set
+            'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0' # bc string
+            )
+        )
+    
+    # add displacement controlled bc at end of the beam
+    sin = Function('COMPONENT 0 FUNCTION sin(t*2*pi)')
+    cos = Function('COMPONENT 0 FUNCTION 1-cos(t*2*pi)')
+    cantilever.add_function(sin)
+    cantilever.add_function(cos)
+    cantilever.add_bc(
+        'dirich',
+        BC(
+            cantilever_set.point[1], # bc set
+            'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 1 1 0 0 0 0 0 0 0 FUNCT {} {} 0 0 0 0 0 0 0', # bc string
+            format_replacement=[cos,sin]
+            )
+        )
+    
+    # add the beam mesh to the solid mesh
+    input_file.add_mesh(cantilever)
+       
+    
+#     # print input file
+#     for line in input_file.get_dat_lines(header=True, print_all_sets=False, print_set_names=True):
+#         print(line)
+#     
+
+    # write input file
+    input_file.write_input_file('/home/ivo/dev/inputgenerator-py/input/meshgen.dat')
 
 
 
 
+#     set_line2 = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [5,6,10], [1,2,3], 5)
+#     cantilever.add_bc('dirich', BC(set_line2[__POINT__][0], 'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 {} {} 0 0 0', format_replacement=[f2, '6666',22]))
+#     bc = BC(set_line2[__LINE__][0], 'asdfasdf')
+#     cantilever.add_bc('dirich', bc)
+# #     cantilever.add_bc('dirich', BC(set_line2[__POINT__][1], 'asdfasdf'))
+# #     sets = GeometrySet('start', [Node([0,0,0])])
+# #     cantilever.add_bc('dirich', BC('asdfasdf', sets))
 
+    
+    #cantilever.add_function(f2)
 
-
-
-
-
-
-
-
-
-
-
-
-
+    
 
 
 
