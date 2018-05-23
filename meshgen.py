@@ -5,7 +5,7 @@ import numpy as np
 # meshgen imports
 from meshgen.inputfile import InputFile, InputSection
 from meshgen.mesh import Mesh, Beam3rHerm2Lin3, Material, ContainerGeom, BC,\
-    GeometrySet, Node, Function
+    GeometrySet, Node, Function, Coupling
 
 
 
@@ -268,13 +268,13 @@ def test_sets():
 
 
 
-def beam_and_solid():
+def beam_and_solid_tube():
     
     # create input file
-    input_file = InputFile(maintainer='Joe Doe', description='Simple input file')
+    input_file = InputFile(maintainer='My Name', description='Simple input file')
     
     # load solid mesh
-    input_file.read_dat('input/block.dat')
+    input_file.read_dat('input/tube.dat')
     
     # delete solver 2 section
     input_file.delete_section('TITLE')
@@ -306,29 +306,164 @@ def beam_and_solid():
     
     # add displacement controlled bc at end of the beam
     sin = Function('COMPONENT 0 FUNCTION sin(t*2*pi)')
-    cos = Function('COMPONENT 0 FUNCTION 1-cos(t*2*pi)')
+    cos = Function('COMPONENT 0 FUNCTION cos(t*2*pi)')
     cantilever.add_function(sin)
     cantilever.add_function(cos)
     cantilever.add_bc(
         'dirich',
         BC(
             cantilever_set.point[1], # bc set
-            'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 1 1 0 0 0 0 0 0 0 FUNCT {} {} 0 0 0 0 0 0 0', # bc string
+            'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 3. 3. 0 0 0 0 0 0 0 FUNCT {} {} 0 0 0 0 0 0 0', # bc string
             format_replacement=[cos,sin]
             )
         )
     
     # add the beam mesh to the solid mesh
     input_file.add_mesh(cantilever)
-       
     
-#     # print input file
-#     for line in input_file.get_dat_lines(header=True, print_all_sets=False, print_set_names=True):
-#         print(line)
-#     
-
+    # add test case result description
+    input_file.add_section(InputSection(
+        'RESULT DESCRIPTION',
+        '''
+        STRUCTURE DIS structure NODE 35 QUANTITY dispx VALUE 1.50796091342925e+00 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 35 QUANTITY dispy VALUE 1.31453288915877e-08 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 35 QUANTITY dispz VALUE 0.0439008100184687e+00 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 69 QUANTITY dispx VALUE 0.921450108160878 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 69 QUANTITY dispy VALUE 1.41113401669104e-15 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 69 QUANTITY dispz VALUE 0.0178350143764099 TOLERANCE 1e-10
+        '''))
+        
     # write input file
     input_file.write_input_file('/home/ivo/dev/inputgenerator-py/input/meshgen.dat')
+
+
+
+
+
+
+
+def couplings_test():
+    
+    # create input file
+    input_file = InputFile(maintainer='My Name', description='Simple input file')
+    
+    input_file.add_section(InputSection('PROBLEM SIZE', 'DIM 3'))
+    input_file.add_section(InputSection(
+        'PROBLEM TYP',
+        '''
+        PROBLEMTYP                            Structure
+        RESTART                               0
+        '''))
+    input_file.add_section(InputSection(
+        'IO',
+        '''
+        OUTPUT_BIN                            No
+        STRUCT_DISP                           No
+        FILESTEPS                             1000
+        VERBOSITY                             Standard
+        '''))
+    input_file.add_section(InputSection(
+        'IO/RUNTIME VTK OUTPUT',
+        '''
+        OUTPUT_DATA_FORMAT                    binary
+        INTERVAL_STEPS                        1
+        EVERY_ITERATION                       No
+        '''))
+    input_file.add_section(InputSection(
+        'STRUCTURAL DYNAMIC',
+        '''
+        LINEAR_SOLVER                         1
+        INT_STRATEGY                          Standard
+        DYNAMICTYP                            Statics
+        RESULTSEVRY                           1
+        RESTARTEVRY                           5
+        NLNSOL                                fullnewton
+        PREDICT                               TangDis
+        TIMESTEP                              0.05
+        NUMSTEP                               20
+        MAXTIME                               1.0
+        TOLRES                                1.0E-5
+        TOLDISP                               1.0E-11
+        NORM_RESF                             Abs
+        NORM_DISP                             Abs
+        NORMCOMBI_RESFDISP                    And
+        MAXITER                               20
+        '''))
+    input_file.add_section(InputSection(
+        'SOLVER 1',
+        '''
+        NAME                                  Structure_Solver
+        SOLVER                                UMFPACK
+        '''))
+    input_file.add_section(InputSection(
+        'IO/RUNTIME VTK OUTPUT/BEAMS',
+        '''
+        OUTPUT_BEAMS                    Yes
+        DISPLACEMENT                    Yes
+        USE_ABSOLUTE_POSITIONS          Yes
+        TRIAD_VISUALIZATIONPOINT        Yes
+        STRAINS_GAUSSPOINT              Yes
+        '''))
+
+    input_file.add_section(InputSection(
+        'RESULT DESCRIPTION',
+        '''
+        STRUCTURE DIS structure NODE 7 QUANTITY dispx VALUE  1.93660652858398 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 7 QUANTITY dispy VALUE 2.96577245498969e-15 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 7 QUANTITY dispz VALUE  -0.377519670507509 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 18 QUANTITY dispx VALUE  1.93660652858398 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 18 QUANTITY dispy VALUE 2.96577245498969e-15 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 18 QUANTITY dispz VALUE  -0.377519670507508 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 30 QUANTITY dispx VALUE  2.24575771708225 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 30 QUANTITY dispy VALUE 3.43921508039788e-15 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 30 QUANTITY dispz VALUE  -0.528911069803332 TOLERANCE 1e-10
+        '''))
+    
+    material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.5)
+    cantilevers = Mesh(name='cantilever')
+    
+    # add three beams
+    cantilever_set = []
+    cantilever_set.append(cantilevers.add_beam_mesh_line(Beam3rHerm2Lin3, material, [0,0,-5], [0,0,5], 5))
+    cantilever_set.append(cantilevers.add_beam_mesh_line(Beam3rHerm2Lin3, material, [2,0,-5], [2,0,1], 3))
+    cantilever_set.append(cantilevers.add_beam_mesh_line(Beam3rHerm2Lin3, material, [2,0,1], [2,0,5], 2))
+    cantilever_set.append(cantilevers.add_beam_mesh_line(Beam3rHerm2Lin3, material, [4,0,-5], [4,0,1], 3))
+    cantilever_set.append(cantilevers.add_beam_mesh_line(Beam3rHerm2Lin3, material, [4,0,1], [4,0,5], 2))
+    
+    # function for boundary conditions
+    sin = Function('COMPONENT 0 FUNCTION sin(t*2*pi)')
+    cos = Function('COMPONENT 0 FUNCTION cos(t*2*pi)')
+    cantilevers.add_function(sin)
+    cantilevers.add_function(cos)
+    
+    # add boundary conditions
+    # fix on the start node
+    for index in [0,1,3]:
+        cantilevers.add_bc('dirich',
+            BC(cantilever_set[index].point[0],
+               'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0'
+            ))
+    # displacement on end node
+    for index in [0,2,4]:
+        cantilevers.add_bc('dirich',
+            BC(cantilever_set[index].point[1],
+               'NUMDOF 9 ONOFF 1 1 0 1 1 1 0 0 0 VAL 3. 3. 0 0 0 0 0 0 0 FUNCT {} {} 0 0 0 0 0 0 0',
+               format_replacement=[cos,sin]
+            ))
+
+    # add couplings
+    cantilevers.add_coupling(
+        Coupling([cantilever_set[1].point[1], cantilever_set[2].point[0]], 'fix')
+        )
+    cantilevers.add_coupling(
+        Coupling([cantilever_set[3].point[1], cantilever_set[4].point[0]], 'joint')
+        )
+    
+    # add the beam mesh to the solid mesh
+    input_file.add_mesh(cantilevers)
+        
+    # write input file
+    input_file.write_input_file('/home/ivo/dev/inputgenerator-py/input/meshgen2.dat')
 
 
 
@@ -357,4 +492,5 @@ def beam_and_solid():
 # test_section()
 # test_input()
 # test_sets()
-beam_and_solid()
+#beam_and_solid_tube()
+couplings_test()

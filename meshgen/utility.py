@@ -19,3 +19,14 @@ def get_git_sha(repo):
     
 # version number of beamgen
 __VERSION__ = get_git_sha(os.path.dirname(os.path.realpath(__file__)))
+
+
+# flatten out data
+def flatten(data):
+    flatten_list = []
+    if type(data) == list:
+        for item in data:
+            flatten_list.extend(flatten(item))
+        return flatten_list 
+    else:
+        return [data]

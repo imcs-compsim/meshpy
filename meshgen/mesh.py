@@ -4,9 +4,8 @@ import numpy as np
 
 # meshgen imports
 from meshgen.rotation import Rotation
-from meshgen.utility import get_section_string
+from meshgen.utility import get_section_string, flatten
 from _collections import OrderedDict
-
 
 
 
@@ -79,40 +78,40 @@ def get_type_bc(item_description, return_type):
     return string_array[item_index][return_index]
     
     
-
-# 
-# class Coupling(object):
-#     """
-#     Represents a coupling between dof in BACI.
-#     """
-#     
-#     def __init__(self, nodes, coupling_string):
-#         
-#         # flatten out nodes
-#         self.nodes = []
-#         self._add_nodes(nodes)
-#         self.coupling_string = coupling_string
-#         self.node_set = None
-#     
-#     def _add_nodes(self, nodes):
-#         # check type
-#         if type(nodes) == list:
-#             for node in nodes:
-#                 self._add_nodes(node)
-#         elif type(nodes) == Node:
-#             self.nodes.append(nodes)
-#         elif type(nodes) == GeometrySet:
-#             self.nodes.extend(nodes.nodes)
-#         else:
-#             print('Error! not node or list')
-#     
-#     def add_set_to_geometry(self, geometry):
-#         # add set to global sets
-#         self.node_set = GeometrySet('', self.nodes)
-#         geometry.point_sets.append(self.node_set)
-#     
-#     def get_dat_line(self):
-#         return 'E {} - {}'.format(self.node_set.n_global, self.coupling_string)
+  
+ 
+class Coupling(object):
+    """
+    Represents a coupling between dof in BACI.
+    """
+     
+    def __init__(self, nodes, coupling_type, name=None):
+         
+        # flatten out nodes
+        self.nodes = []
+        self._add_nodes(flatten(nodes))
+        self.name = name
+        self.coupling_type = coupling_type
+        self.node_set = None
+     
+    def _add_nodes(self, nodes):
+        # check type
+        if type(nodes) == list:
+            for node in nodes:
+                self._add_nodes(node)
+        elif type(nodes) == Node:
+            self.nodes.append(nodes)
+        elif type(nodes) == GeometrySet:
+            self.nodes.extend(nodes.nodes)
+        else:
+            print('Error! not node or list')
+     
+    def get_dat_line(self):
+        if self.coupling_type == 'joint':
+            string = 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0'
+        elif self.coupling_type == 'fix':
+            string = 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0' 
+        return 'E {} - {}'.format(self.node_set.n_global, string)
 
 
 
@@ -374,20 +373,10 @@ class GeometrySet(object):
     
     def get_dat_name(self):
         """ Return a comment with the name of this set. """
-        
-        # flatten name list
-        def flatten(data):
-            flatten_list = []
-            if type(data) == list:
-                for item in data:
-                    flatten_list.extend(flatten(item))
-                return flatten_list 
-            else:
-                return [str(data)]
         return '// {} {} name in beamgen: {}'.format(
             get_type_geometry(self.item_type, 'settopology'),
             self.n_global,
-            '_'.join(flatten(self.name))
+            '_'.join([str(item) for item in flatten(self.name)])
             )
         
     def output_to_dat(self):
@@ -672,11 +661,10 @@ class Mesh(object):
         self.functions = []
         self.sets = ContainerGeom()
         self.bc = ContainerBC()
+        self.couplings = []
         
         # count the number of items created for numbering in the comments
         self.mesh_item_counter = {}
-        
-        #self.couplings = []
         
     
     def add_mesh(self, mesh, add_sets=True):
@@ -691,7 +679,31 @@ class Mesh(object):
         if add_sets:
             self.sets.merge_containers(mesh.sets)
         self.bc.merge_containers(mesh.bc)
+        self.couplings.extend(mesh.couplings)
     
+    
+    def add_coupling(self, coupling):
+        """ Add a coupling to the mesh object. """
+        
+        # first perform checks
+        # check that all nodes have the same position and are in mesh
+        pos_set = False
+        for node in coupling.nodes:
+            if not node in self.nodes:
+                print('Error, node not in mesh!')
+            if not pos_set:
+                pos_set = True
+                pos = node.coordinates
+            if np.linalg.norm(pos - node.coordinates) > 1e-8:
+                print('Error, nodes of coupling do not have the same positions!')
+        
+        self.couplings.append(coupling)
+        
+        # add set with coupling conditions
+        node_set = GeometrySet([coupling.name, 'coupling'], coupling.nodes)
+        self.sets.append_item(__POINT__, node_set)
+        coupling.node_set = node_set
+        
     
     def add_bc(self, bc_type, bc):
         """ Add a boundary condition to this mesh. """
@@ -965,6 +977,14 @@ class MeshInput(Mesh):
         set_n_global(self.functions)
         
         # first set referenc counter of sets to False, then add bc and then renumber sets
+        for i, coupling in enumerate(self.couplings):
+            coupling.n_global = i + 1
+            if coupling.node_set.is_referenced:
+                print('Error this set can not be referenced by something else')
+                print(coupling.node_set.nodes[0].coordinates)
+                print(type(coupling.node_set))
+            else:
+                coupling.node_set.is_referenced = True
         self.bc.set_global()
         self.sets.set_global(all_sets=print_all_sets)
         
@@ -995,7 +1015,10 @@ class MeshInput(Mesh):
                         lines.append(bc.get_dat_line())
 
         # add the coupings
-        # TODO
+        lines.append(get_section_string('DESIGN POINT COUPLING CONDITIONS'))
+        lines.append('DPOINT {}'.format(len(self.couplings)))
+        for coupling in self.couplings:
+            lines.append(coupling.get_dat_line())
         
         # add the node sets
         for key in self.sets.keys():
