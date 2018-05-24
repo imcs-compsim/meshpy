@@ -6,6 +6,7 @@ import numpy as np
 from meshgen.rotation import Rotation
 from meshgen.utility import get_section_string, flatten
 from _collections import OrderedDict
+from numpy import dtype
 
 
 
@@ -503,6 +504,8 @@ class Node(object):
         self.is_dat = False
         self.connected_elements = []
         self.connected_couplings = []
+        # for the end nodes of a line
+        self.is_end_node = False
 
     
     def rotate(self, rotation, only_rotate_triads=False):
@@ -764,26 +767,68 @@ class Mesh(object):
         Search through nodes and connect all nodes with the same coordinates.
         """
         
-        # make a copy of the input list
-        node_list = list(input_list)
+        # make a copy of the input list, only consider nodes that are linked to one element
+        node_list = [node for node in input_list if node.is_end_node]
         
         close_node_list = []
+
+        # get array of nodal coordinates
+        coordinates = np.zeros([len(node_list),3])
         
-        # loop over all (remaining) nodes in list
-        print(len(node_list))
-        while len(node_list) > 1:
-            # check the first node with all others
-            current_node = node_list[0]
-            close_to_this_node = [current_node]
-            del node_list[0]
-            for i, node in enumerate(node_list):
-                if np.linalg.norm(current_node.coordinates-node.coordinates) < 1e-8:
-                    close_to_this_node.append(node)
-                    node_list[i] = None
-            node_list = [item for item in node_list if item is not None]
-            # if more than one node is close add to close_node_list
-            if len(close_to_this_node) > 1:
-                close_node_list.append(close_to_this_node)
+        # get max and min coorinates of nodes
+        x_max = y_max = z_max = -1000
+        x_min = y_min = z_min = 1000
+        for i, node in enumerate(node_list):
+            if node.coordinates[0] > x_max:
+                x_max = node.coordinates[0]
+            if node.coordinates[1] > y_max:
+                y_max = node.coordinates[1]
+            if node.coordinates[2] > z_max:
+                z_max = node.coordinates[2]
+            if node.coordinates[0] < x_min:
+                x_min = node.coordinates[0]
+            if node.coordinates[1] < y_min:
+                y_min = node.coordinates[1]
+            if node.coordinates[2] < z_min:
+                z_min = node.coordinates[2]
+            
+            coordinates[i, :] = node.coordinates
+
+        # split up domain into 20x20x20 cubes
+        n_seg = 20
+        x_seg = (x_max - x_min) / (n_seg-1)
+        y_seg = (y_max - y_min) / (n_seg-1)
+        z_seg = (z_max - z_min) / (n_seg-1)
+        segments = [[[[] for k in range(n_seg)] for j in range(n_seg)] for i in range(n_seg)]
+        #print(segments)
+        for i, coord in enumerate(coordinates):
+            ix = int((coord[0]-x_min+1e-5) // x_seg)
+            iy = int((coord[1]-y_min+1e-5) // y_seg)
+            iz = int((coord[2]-z_min+1e-5) // z_seg)
+            #print([ix,iy,iz])
+            #print(i)
+            #print(len(node_list))
+            segments[ix][iy][iz].append(node_list[i])  
+        
+        # loop over all segments
+        for ix in range(n_seg):
+            for iy in range(n_seg):
+                for iz in range(n_seg):
+                    node_list = segments[ix][iy][iz]
+                    # loop over all (remaining) nodes in list
+                    while len(node_list) > 1:
+                        # check the first node with all others
+                        current_node = node_list[0]
+                        close_to_this_node = [current_node]
+                        del node_list[0]
+                        for i, node in enumerate(node_list):
+                            if np.linalg.norm(current_node.coordinates-node.coordinates) < 1e-8:
+                                close_to_this_node.append(node)
+                                node_list[i] = None
+                        node_list = [item for item in node_list if item is not None]
+                        # if more than one node is close add to close_node_list
+                        if len(close_to_this_node) > 1:
+                            close_node_list.append(close_to_this_node)
         
         # add connections to mesh
         for nodes in close_node_list:
@@ -928,6 +973,8 @@ class Mesh(object):
         node_set_line = ContainerGeom()
         node_set_line.append_item(__POINT__, GeometrySet([name, 'start'], self.nodes[node_start]))
         node_set_line.append_item(__POINT__, GeometrySet([name, 'end'], self.nodes[-1]))
+        self.nodes[node_start].is_end_node = True
+        self.nodes[-1].is_end_node = True
         node_set_line.append_item(__LINE__, GeometrySet(name, self.nodes[node_start:]))
         if add_sets:
             self.sets.merge_containers(node_set_line)

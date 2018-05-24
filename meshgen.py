@@ -545,7 +545,7 @@ def honeycomb():
 #                                                                 )
     honeycomb_set = mesh_honeycomb.add_beam_mesh_honeycomb(Beam3rHerm2Lin3, material,
                            1,
-                           20,
+                           8,
                            41,
                            3)
     
