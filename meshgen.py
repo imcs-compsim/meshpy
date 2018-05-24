@@ -274,7 +274,7 @@ def beam_and_solid_tube():
     input_file = InputFile(maintainer='My Name', description='Simple input file')
     
     # load solid mesh
-    input_file.read_dat('input/tube.dat')
+    input_file.read_dat('solid-mesh/tube.dat')
     
     # delete solver 2 section
     input_file.delete_section('TITLE')
@@ -468,6 +468,110 @@ def couplings_test():
 
 
 
+
+
+
+def honeycomb():
+    
+    # create input file
+    input_file = InputFile(maintainer='My Name', description='Simple input file')
+    
+    input_file.add_section(InputSection('PROBLEM SIZE', 'DIM 3'))
+    input_file.add_section(InputSection(
+        'PROBLEM TYP',
+        '''
+        PROBLEMTYP                            Structure
+        RESTART                               0
+        '''))
+    input_file.add_section(InputSection(
+        'IO',
+        '''
+        OUTPUT_BIN                            No
+        STRUCT_DISP                           No
+        FILESTEPS                             1000
+        VERBOSITY                             Standard
+        '''))
+    input_file.add_section(InputSection(
+        'IO/RUNTIME VTK OUTPUT',
+        '''
+        OUTPUT_DATA_FORMAT                    binary
+        INTERVAL_STEPS                        1
+        EVERY_ITERATION                       No
+        '''))
+    input_file.add_section(InputSection(
+        'STRUCTURAL DYNAMIC',
+        '''
+        LINEAR_SOLVER                         1
+        INT_STRATEGY                          Standard
+        DYNAMICTYP                            Statics
+        RESULTSEVRY                           1
+        RESTARTEVRY                           5
+        NLNSOL                                fullnewton
+        PREDICT                               TangDis
+        TIMESTEP                              0.05
+        NUMSTEP                               20
+        MAXTIME                               1.0
+        TOLRES                                1.0E-5
+        TOLDISP                               1.0E-11
+        NORM_RESF                             Abs
+        NORM_DISP                             Abs
+        NORMCOMBI_RESFDISP                    And
+        MAXITER                               20
+        '''))
+    input_file.add_section(InputSection(
+        'SOLVER 1',
+        '''
+        NAME                                  Structure_Solver
+        SOLVER                                UMFPACK
+        '''))
+    input_file.add_section(InputSection(
+        'IO/RUNTIME VTK OUTPUT/BEAMS',
+        '''
+        OUTPUT_BEAMS                    Yes
+        DISPLACEMENT                    Yes
+        USE_ABSOLUTE_POSITIONS          Yes
+        TRIAD_VISUALIZATIONPOINT        Yes
+        STRAINS_GAUSSPOINT              Yes
+        '''))
+    
+    material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.1)
+    mesh = Mesh(name='mesh')
+    
+    # create two meshes with honeycomb structure
+    mesh_honeycomb = Mesh(name='honeycomb_' + str(1))
+    honeycomb_set = mesh_honeycomb.add_beam_mesh_honeycomb_flat(Beam3rHerm2Lin3, material, 1, 5, 9, 4,
+                                                                closed_width=False,
+                                                                closed_height=True
+                                                                )
+    
+    # BC
+    ft = Function('COMPONENT 0 FUNCTION t')
+    mesh_honeycomb.add_function(ft)
+
+    mesh_honeycomb.add_bc('dirich',
+            BC(honeycomb_set.point[0],
+               'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0'
+            ))
+    mesh_honeycomb.add_bc('dirich',
+            BC(honeycomb_set.point[2],
+               'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 -3. 0 0 0 0 0 0 0 FUNCT 0 {} 0 0 0 0 0 0 0',
+               format_replacement=[ft]
+            ))
+    
+    # add the honeycomb to mesh
+    mesh.add_mesh(mesh_honeycomb)
+            
+    # add the beam mesh to the solid mesh
+    input_file.add_mesh(mesh)
+        
+    # write input file
+    input_file.write_input_file('/home/ivo/dev/inputgenerator-py/input/honeycomb.dat', print_set_names=True, print_all_sets=True)
+
+
+
+
+
+
 #     set_line2 = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [5,6,10], [1,2,3], 5)
 #     cantilever.add_bc('dirich', BC(set_line2[__POINT__][0], 'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 {} {} 0 0 0', format_replacement=[f2, '6666',22]))
 #     bc = BC(set_line2[__LINE__][0], 'asdfasdf')
@@ -493,4 +597,5 @@ def couplings_test():
 # test_input()
 # test_sets()
 #beam_and_solid_tube()
-couplings_test()
+#couplings_test()
+honeycomb()

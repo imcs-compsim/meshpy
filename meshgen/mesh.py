@@ -756,6 +756,56 @@ class Mesh(object):
             self.translate(np.array(origin))
     
     
+    def add_connections(self, input_list, connection_type='fix'):
+        """
+        Search through nodes and connect all nodes with the same coordinates.
+        """
+        
+        # make a copy of the input list
+        node_list = list(input_list)
+        
+        close_node_list = []
+        
+        # loop over all (remaining) nodes in list
+        while len(node_list) > 1:
+            # check the first node with all others
+            current_node = node_list[0]
+            close_to_this_node = [current_node]
+            del node_list[0]
+            for i, node in enumerate(node_list):
+                if np.linalg.norm(current_node.coordinates-node.coordinates) < 1e-8:
+                    close_to_this_node.append(node)
+                    node_list[i] = None
+            node_list = [item for item in node_list if item is not None]
+            # if more than one node is close add to close_node_list
+            if len(close_to_this_node) > 1:
+                close_node_list.append(close_to_this_node)
+        
+        # add connections to mesh
+        for nodes in close_node_list:
+            # add sets to mesh
+            self.add_coupling(Coupling(nodes, connection_type))
+    
+    
+    def get_nodes_by_function(self, function, overlapping=True):
+        """
+        Return all nodes for which the function evaluates to true.
+        overlaping means that nodes with the same coordinates are also added.
+        """
+        
+        node_list = []
+        for node in self.nodes:
+            if function(node):
+                if overlapping:
+                    node_list.append(node)
+                else:
+                    for true_node in node_list:
+                        if np.linalg.norm(true_node.coordinates - node.coordinates) < 1e-8:
+                            break
+                    else:
+                        node_list.append(node)
+        return node_list
+    
     def wrap_around_cylinder(self):
         """
         Wrap the geometry around a cylinder.
@@ -880,6 +930,228 @@ class Mesh(object):
         
         # return set container
         return node_set_line
+    
+    
+    def add_beam_mesh_honeycomb_flat(self,
+                                     beam_object,
+                                     material,
+                                     width,
+                                     n_width,
+                                     n_height,
+                                     elements_per_line,
+                                     closed_width=True,
+                                     closed_height=True,
+                                     connection_type='fix',
+                                     name=None,
+                                     add_sets=True
+                                     ):
+        """
+        Add a flat honeycomb structure
+        """
+        
+        # check for consistency
+        if n_height % 2 == 0:
+            print('Error, only odd numbers can be used for the number of height rows!')
+            return
+        
+        def add_line(pointa, pointb):
+            """ Shortcut to add line. """
+            geom_set = self.add_beam_mesh_line(
+                beam_object,
+                material,
+                pointa,
+                pointb,
+                elements_per_line,
+                add_sets=False
+                )
+            return geom_set
+        
+        # get name for the mesh added
+        name = self._get_mesh_name(name, 'honeycomb_flat')
+        
+        # set that will be returned
+        return_node_set = ContainerGeom()
+        
+        # list for nodes -> used for connections
+        honeycomb_nodes = []
+        
+        # shortcuts
+        sin30 = np.sin(np.pi/6)
+        cos30 = np.sin(2*np.pi/6)
+        a = width * 0.5 / cos30
+        
+        nx = np.array([1.,0.,0.])
+        ny = np.array([0.,1.,0.])
+        
+        zig_zag_y = ny * a * sin30 * 0.5
+        
+        # create zig zag lines, first node is at [0,0,0]
+        origin = np.array([0,a*0.5*sin30,0])
+        
+        # loop to create elements
+        for i_height in range(n_height + 1):
+            
+            base_row = origin + ny * a * (1 + sin30 ) * i_height
+        
+            # if the first node is up or down of base_row
+            if i_height % 2 == 0:
+                direction = 1
+            else:
+                direction = -1    
+
+            for i_width in range(n_width + 1):
+            
+                base_zig_zag = base_row + direction * zig_zag_y + width * i_width * nx
+                
+                # do not add on last run
+                if i_width < n_width:
+                    tmp = add_line(
+                        base_zig_zag,
+                        base_zig_zag + nx * width * 0.5 - 2 * direction * zig_zag_y
+                        )
+                    # add the nodes to the node list for connections and sets
+                    honeycomb_nodes.extend([item.nodes[0] for item in tmp.point])
+                    tmp = add_line(
+                        base_zig_zag + nx * width * 0.5 - 2 * direction * zig_zag_y,
+                        base_zig_zag + nx * width
+                        )
+                    honeycomb_nodes.extend([item.nodes[0] for item in tmp.point])
+                    
+                
+                if i_height % 2 == 0:
+                    base_vert = base_zig_zag
+                else:
+                    base_vert = base_zig_zag + nx * width * 0.5 - 2 * direction * zig_zag_y
+                
+                # check if width is closed
+                if (i_width < n_width) or (direction==1 and closed_width):
+                    # check if height is closed
+                    if not (i_height == n_height) or (not closed_height): 
+                        tmp = add_line(
+                            base_vert,
+                            base_vert + ny * a
+                            )
+                        honeycomb_nodes.extend([item.nodes[0] for item in tmp.point])
+
+        # function to get nodes for boundaries
+        def node_in_box(x_range,y_range,z_range):
+            def funct(node):
+                coord = node.coordinates
+                eps = 1e-8
+                if -eps + x_range[0] < coord[0] < x_range[1] + eps:
+                    if -eps + y_range[0] < coord[1] < y_range[1] + eps:
+                        if -eps + z_range[0] < coord[2] < z_range[1] + eps:
+                            # also check if the node is in honeycomb_nodes -> we
+                            # only want nodes that are on the crossing points of the mesh
+                            if node in honeycomb_nodes:
+                                return True
+                return False
+            return funct
+        
+        x_max = y_max = 0
+        for node in honeycomb_nodes:
+            if node.coordinates[0] > x_max:
+                x_max = node.coordinates[0]
+            if node.coordinates[1] > y_max:
+                y_max = node.coordinates[1]
+                
+        node_set = ContainerGeom()
+        node_set.append_item(__POINT__, GeometrySet([name, 'north'],
+            self.get_nodes_by_function(node_in_box([0,x_max], [y_max,y_max], [-1,1]))
+            ))
+        node_set.append_item(__POINT__, GeometrySet([name, 'east'],
+            self.get_nodes_by_function(node_in_box([x_max,x_max], [0,y_max], [-1,1]))
+            ))
+        node_set.append_item(__POINT__, GeometrySet([name, 'south'],
+            self.get_nodes_by_function(node_in_box([0,x_max], [0,0], [-1,1]))
+            ))
+        node_set.append_item(__POINT__, GeometrySet([name, 'west'],
+            self.get_nodes_by_function(node_in_box([0,0], [0,y_max], [-1,1]))
+            ))
+        if add_sets:
+            self.sets.merge_containers(node_set)
+        
+        # add connection for nodes with same positions
+        self.add_connections(honeycomb_nodes)
+        
+        return node_set
+    
+#     def add_beam_mesh_honeycomb(self,
+#                            beam_object,
+#                            material,
+#                            diameter,
+#                            n_circumference,
+#                            n_height,
+#                            name=None,
+#                            add_sets=True
+#                            ):
+#         """
+#         A straight line of beam elements.
+#             n: Number of elements along line
+#         """
+#         
+#         # get name for the mesh added
+#         name = self._get_mesh_name(name, 'honeycomb')
+#         
+#         # first create the honeycombstructre as a flat 
+#         # direction vector of line
+#         direction = np.array(end_point) - np.array(start_point)
+#         
+#         # rotation for this line (is constant on the whole line)
+#         t1 = direction
+#         # check if the x or y axis are larger projected onto the direction
+#         if np.dot(t1,[1,0,0]) < np.dot(t1,[0,1,0]):
+#             t2 = [1,0,0]
+#         else:
+#             t2 = [0,1,0]
+#         rotation = Rotation.from_basis(t1, t2)
+#         
+#         # this function returns the position and the triads for each element
+#         def get_beam_function(point_a, point_b):
+#             
+#             def position_function(xi):
+#                 return 1/2*(1-xi)*point_a + 1/2*(1+xi)*point_b
+#             
+#             def rotation_function(xi):
+#                 return rotation
+#             
+#             return (
+#                 position_function,
+#                 rotation_function
+#                 )
+#         
+#         # saave the index of the first node
+#         if add_first_node:
+#             node_start = len(self.nodes)
+#         else:
+#             node_start = len(self.nodes) - 1
+#         
+#         # create the beams
+#         for i in range(n):
+#             
+#             functions = get_beam_function(
+#                 start_point + i*direction/n,
+#                 start_point + (i+1)*direction/n
+#                 )
+#             
+#             tmp_beam = beam_object(material, mesh=self)
+#             if add_first_node and i == 0:
+#                 tmp_beam.create_beam(self.nodes, functions[0], functions[1], create_first=True)
+#             else:
+#                 tmp_beam.create_beam(self.nodes, functions[0], functions[1], create_first=False)
+#             self.elements.append(tmp_beam)
+#         
+#         
+#         # add sets to mesh
+#         node_set_line = ContainerGeom()
+#         node_set_line.append_item(__POINT__, GeometrySet([name, 'start'], self.nodes[node_start]))
+#         node_set_line.append_item(__POINT__, GeometrySet([name, 'end'], self.nodes[-1]))
+#         node_set_line.append_item(__LINE__, GeometrySet(name, self.nodes[node_start:]))
+#         if add_sets:
+#             self.sets.merge_containers(node_set_line)
+#         
+#         # return set container
+#         return node_set_line
 
 
 class MeshInput(Mesh):
