@@ -497,11 +497,12 @@ class Node(object):
         The n_global value is set when the model is writen to a dat file.
         """
         
-        self.coordinates = coordinates
+        self.coordinates = 1.*np.array(coordinates)
         self.rotation = rotation
         self.n_global = None
         self.is_dat = False
         self.connected_elements = []
+        self.connected_couplings = []
 
     
     def rotate(self, rotation, only_rotate_triads=False):
@@ -513,7 +514,7 @@ class Node(object):
         """
         
         # do not do anything if the node does not have a rotation
-        if not self.rotation:
+        if self.rotation:
             # apply the roation to the triads
             self.rotation = rotation * self.rotation
             
@@ -703,6 +704,8 @@ class Mesh(object):
         node_set = GeometrySet([coupling.name, 'coupling'], coupling.nodes)
         self.sets.append_item(__POINT__, node_set)
         coupling.node_set = node_set
+        for node in coupling.nodes:
+            node.connected_couplings = coupling
         
     
     def add_bc(self, bc_type, bc):
@@ -767,6 +770,7 @@ class Mesh(object):
         close_node_list = []
         
         # loop over all (remaining) nodes in list
+        print(len(node_list))
         while len(node_list) > 1:
             # check the first node with all others
             current_node = node_list[0]
@@ -830,11 +834,11 @@ class Mesh(object):
                 node.rotate(Rotation([0,0,1], phi), only_rotate_triads=True)
                 
                 # set the new coordinates
-                node.coordinates = [
+                node.coordinates = np.array([
                     r * np.cos(phi),
                     r * np.sin(phi),
                     node.coordinates[2]
-                    ]
+                    ])
                 
     def _get_mesh_name(self, name, mesh_type):
         """
@@ -943,7 +947,8 @@ class Mesh(object):
                                      closed_height=True,
                                      connection_type='fix',
                                      name=None,
-                                     add_sets=True
+                                     add_sets=True,
+                                     create_couplings=True
                                      ):
         """
         Add a flat honeycomb structure
@@ -1072,86 +1077,95 @@ class Mesh(object):
             self.sets.merge_containers(node_set)
         
         # add connection for nodes with same positions
-        self.add_connections(honeycomb_nodes)
+        if create_couplings:
+            self.add_connections(honeycomb_nodes)
         
         return node_set
     
-#     def add_beam_mesh_honeycomb(self,
-#                            beam_object,
-#                            material,
-#                            diameter,
-#                            n_circumference,
-#                            n_height,
-#                            name=None,
-#                            add_sets=True
-#                            ):
-#         """
-#         A straight line of beam elements.
-#             n: Number of elements along line
-#         """
-#         
-#         # get name for the mesh added
-#         name = self._get_mesh_name(name, 'honeycomb')
-#         
-#         # first create the honeycombstructre as a flat 
-#         # direction vector of line
-#         direction = np.array(end_point) - np.array(start_point)
-#         
-#         # rotation for this line (is constant on the whole line)
-#         t1 = direction
-#         # check if the x or y axis are larger projected onto the direction
-#         if np.dot(t1,[1,0,0]) < np.dot(t1,[0,1,0]):
-#             t2 = [1,0,0]
-#         else:
-#             t2 = [0,1,0]
-#         rotation = Rotation.from_basis(t1, t2)
-#         
-#         # this function returns the position and the triads for each element
-#         def get_beam_function(point_a, point_b):
-#             
-#             def position_function(xi):
-#                 return 1/2*(1-xi)*point_a + 1/2*(1+xi)*point_b
-#             
-#             def rotation_function(xi):
-#                 return rotation
-#             
-#             return (
-#                 position_function,
-#                 rotation_function
-#                 )
-#         
-#         # saave the index of the first node
-#         if add_first_node:
-#             node_start = len(self.nodes)
-#         else:
-#             node_start = len(self.nodes) - 1
-#         
-#         # create the beams
-#         for i in range(n):
-#             
-#             functions = get_beam_function(
-#                 start_point + i*direction/n,
-#                 start_point + (i+1)*direction/n
-#                 )
-#             
-#             tmp_beam = beam_object(material, mesh=self)
-#             if add_first_node and i == 0:
-#                 tmp_beam.create_beam(self.nodes, functions[0], functions[1], create_first=True)
-#             else:
-#                 tmp_beam.create_beam(self.nodes, functions[0], functions[1], create_first=False)
-#             self.elements.append(tmp_beam)
-#         
-#         
-#         # add sets to mesh
-#         node_set_line = ContainerGeom()
-#         node_set_line.append_item(__POINT__, GeometrySet([name, 'start'], self.nodes[node_start]))
-#         node_set_line.append_item(__POINT__, GeometrySet([name, 'end'], self.nodes[-1]))
-#         node_set_line.append_item(__LINE__, GeometrySet(name, self.nodes[node_start:]))
-#         if add_sets:
-#             self.sets.merge_containers(node_set_line)
-#         
-#         # return set container
-#         return node_set_line
+    def add_beam_mesh_honeycomb(self,
+                           beam_object,
+                           material,
+                           diameter,
+                           n_circumference,
+                           n_height,
+                           n_element,
+                           name=None,
+                           add_sets=True
+                           ):
+        """
+        TODO
+        """
+        
+        # calculate stuff
+        width = diameter * np.pi / n_circumference
+        
+        # first create a mesh with the flat mesh
+        mesh_temp = Mesh(name='honeycomb_' + str(1))
+        mesh_temp.add_beam_mesh_honeycomb_flat(Beam3rHerm2Lin3, material, width, n_circumference, n_height, n_element,
+                                                                    closed_width=False,
+                                                                    closed_height=True,
+                                                                    create_couplings=False,
+                                                                    add_sets=False
+                                                                    )
+        
+        print('add flat honeycomb complete')
+        
+        # move the mesh to the correct position
+        mesh_temp.rotate(Rotation([1,0,0],np.pi/2))
+        mesh_temp.rotate(Rotation([0,0,1],np.pi/2))
+        
+        
+        
+        mesh_temp.translate([diameter/2, 0, 0])
+        mesh_temp.wrap_around_cylinder()
+        
+        print('wraping complete')
+        
+        mesh_temp.add_connections(mesh_temp.nodes)
+        
+        print('connections complete')
+        
+        
+        # function to get nodes for boundaries
+        def node_in_box(x_range,y_range,z_range):
+            def funct(node):
+                coord = node.coordinates
+                eps = 1e-8
+                if -eps + x_range[0] < coord[0] < x_range[1] + eps:
+                    if -eps + y_range[0] < coord[1] < y_range[1] + eps:
+                        if -eps + z_range[0] < coord[2] < z_range[1] + eps:
+                            # also check if the node is in honeycomb_nodes -> we
+                            # only want nodes that are on the crossing points of the mesh
+                            if node in mesh_temp.nodes:
+                                return True
+                return False
+            return funct
+        
+        x_max = y_max = z_max = 0
+        for node in mesh_temp.nodes:
+            if node.coordinates[0] > x_max:
+                x_max = node.coordinates[0]
+            if node.coordinates[1] > y_max:
+                y_max = node.coordinates[1]
+            if node.coordinates[2] > z_max:
+                z_max = node.coordinates[2]
+                
+        node_set = ContainerGeom()
+        node_set.append_item(__POINT__, GeometrySet([name, 'top'],
+            mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [z_max,z_max]))
+            ))
+        node_set.append_item(__POINT__, GeometrySet([name, 'bottom'],
+            mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [0,0]))
+            ))
+        
+        self.add_mesh(mesh_temp)
+        
+        if add_sets:
+            self.sets.merge_containers(node_set)
+        
+        
+        
+        return node_set
 
 
 class MeshInput(Mesh):

@@ -268,6 +268,7 @@ class InputFile(object):
             for line in self.get_dat_lines(**kwargs):
                 input_file.write(line)
                 input_file.write('\n')
+        print('Input File written!')
         
     def get_dat_lines(self, header=True, print_set_names=False, print_all_sets=False):
         """ Return the dat lines from all sections. """

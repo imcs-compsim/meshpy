@@ -511,7 +511,7 @@ def honeycomb():
         TIMESTEP                              0.05
         NUMSTEP                               20
         MAXTIME                               1.0
-        TOLRES                                1.0E-5
+        TOLRES                                1.0E-4
         TOLDISP                               1.0E-11
         NORM_RESF                             Abs
         NORM_DISP                             Abs
@@ -534,15 +534,20 @@ def honeycomb():
         STRAINS_GAUSSPOINT              Yes
         '''))
     
-    material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.1)
+    material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.025)
     mesh = Mesh(name='mesh')
     
     # create two meshes with honeycomb structure
     mesh_honeycomb = Mesh(name='honeycomb_' + str(1))
-    honeycomb_set = mesh_honeycomb.add_beam_mesh_honeycomb_flat(Beam3rHerm2Lin3, material, 1, 5, 9, 4,
-                                                                closed_width=False,
-                                                                closed_height=True
-                                                                )
+#     honeycomb_set = mesh_honeycomb.add_beam_mesh_honeycomb_flat(Beam3rHerm2Lin3, material, 1, 7, 41, 5,
+#                                                                 closed_width=True,
+#                                                                 closed_height=True
+#                                                                 )
+    honeycomb_set = mesh_honeycomb.add_beam_mesh_honeycomb(Beam3rHerm2Lin3, material,
+                           1,
+                           20,
+                           41,
+                           3)
     
     # BC
     ft = Function('COMPONENT 0 FUNCTION t')
@@ -553,8 +558,8 @@ def honeycomb():
                'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0'
             ))
     mesh_honeycomb.add_bc('dirich',
-            BC(honeycomb_set.point[2],
-               'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 -3. 0 0 0 0 0 0 0 FUNCT 0 {} 0 0 0 0 0 0 0',
+            BC(honeycomb_set.point[1],
+               'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 -5.0 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0',
                format_replacement=[ft]
             ))
     
@@ -566,7 +571,8 @@ def honeycomb():
         
     # write input file
     input_file.write_input_file('/home/ivo/dev/inputgenerator-py/input/honeycomb.dat', print_set_names=True, print_all_sets=True)
-
+    
+    
 
 
 
