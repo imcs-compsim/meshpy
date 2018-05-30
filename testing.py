@@ -10,7 +10,11 @@ from meshgen.mesh import Material, Mesh, Function, Beam3rHerm2Lin3, ContainerGeo
 
 # global variables
 __testing_path__ = '/home/ivo/dev/inputgenerator-py/tests'
-__baci_path__ = '/home/ivo/baci/work/release/baci-release'
+__testing_input__ = os.path.join(__testing_path__, 'input-solid-mesh')
+__testing_temp__ = os.path.join(__testing_path__, 'testing-tmp')
+__baci_path__ = '/home/ivo/baci/work/release'
+__baci_release__ = os.path.join(__baci_path__, 'baci-release')
+
 
 def roation_matrix(axis, alpha):
     """
@@ -134,17 +138,16 @@ class TestInputFile(unittest.TestCase):
         Run baci with a testinput and return the output.
         """
         
-        return_val = subprocess.call([
+        child = subprocess.Popen([
             'mpirun', '-np', str(n_proc),
-            __baci_path__,
+            __baci_release__,
             os.path.join(__testing_path__, input_file),
-            os.path.join(__testing_path__, 'testing-runs', 'xxx')
-            ], stdout=subprocess.DEVNULL)
-        
-        self.assertEqual(0, return_val, msg=input_file)
+            os.path.join(__testing_temp__, 'xxx')
+            ], cwd=__testing_temp__, stdout=subprocess.PIPE)
+        child.communicate()[0]
+        self.assertEqual(0, child.returncode, msg=input_file)
         
     
-        
     def test_honeycomb_as_input(self):
         """
         Create the same honeycomb mesh as defined in 
@@ -156,7 +159,7 @@ class TestInputFile(unittest.TestCase):
         
         # read input file with information on sphere
         input_file = InputFile(maintainer='Ivo Steinbrecher', description='honeycomb beam in contact with sphere')
-        input_file.read_dat('/home/ivo/dev/inputgenerator-py/tests/input-solid-mesh/honeycomb-sphere.dat')
+        input_file.read_dat(os.path.join(__testing_input__, 'honeycomb-sphere.dat'))
         
         # overwrite some entries in the input file
         input_file.add_section(InputSection(
@@ -220,6 +223,82 @@ class TestInputFile(unittest.TestCase):
         # write input file
         input_dat_file = os.path.join(__testing_path__, 'testing-input/honeycomb-sphere.dat')
         input_file.write_input_file(input_dat_file, print_set_names=False, print_all_sets=False)
+        
+        # test input
+        self.run_baci_test(input_dat_file)
+    
+    
+    def test_beam_and_solid_tube(self):
+        """
+        Create a solid mesh with cubit and insert some beams into the input file.
+        """
+    
+        # create input file
+        input_file = InputFile(maintainer='Ivo Steinbrecher', description='Solid tube with beam tube')
+        
+        # load solid mesh
+        input_file.read_dat(os.path.join(__testing_input__, 'tube.dat'))
+        
+        # delete solver 2 section
+        input_file.delete_section('TITLE')
+        
+        # add options for beam_output
+        input_file.add_section(InputSection(
+            'IO/RUNTIME VTK OUTPUT/BEAMS',
+            '''
+            OUTPUT_BEAMS                    Yes
+            DISPLACEMENT                    Yes
+            USE_ABSOLUTE_POSITIONS          Yes
+            TRIAD_VISUALIZATIONPOINT        Yes
+            STRAINS_GAUSSPOINT              Yes
+            '''))
+        
+        # add a straight line beam
+        material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.5)
+        cantilever = Mesh(name='cantilever')
+        cantilever_set = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [2,0,-5], [2,0,5], 3)
+        
+        # add fix at start of the beam
+        cantilever.add_bc(
+            'dirich',
+            BC(
+                cantilever_set.point[0], # bc set
+                'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0' # bc string
+                )
+            )
+        
+        # add displacement controlled bc at end of the beam
+        sin = Function('COMPONENT 0 FUNCTION sin(t*2*pi)')
+        cos = Function('COMPONENT 0 FUNCTION cos(t*2*pi)')
+        cantilever.add_function(sin)
+        cantilever.add_function(cos)
+        cantilever.add_bc(
+            'dirich',
+            BC(
+                cantilever_set.point[1], # bc set
+                'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 3. 3. 0 0 0 0 0 0 0 FUNCT {} {} 0 0 0 0 0 0 0', # bc string
+                format_replacement=[cos,sin]
+                )
+            )
+        
+        # add the beam mesh to the solid mesh
+        input_file.add_mesh(cantilever)
+        
+        # add test case result description
+        input_file.add_section(InputSection(
+            'RESULT DESCRIPTION',
+            '''
+            STRUCTURE DIS structure NODE 35 QUANTITY dispx VALUE 1.50796091342925e+00 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 35 QUANTITY dispy VALUE 1.31453288915877e-08 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 35 QUANTITY dispz VALUE 0.0439008100184687e+00 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 69 QUANTITY dispx VALUE 0.921450108160878 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 69 QUANTITY dispy VALUE 1.41113401669104e-15 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 69 QUANTITY dispz VALUE 0.0178350143764099 TOLERANCE 1e-10
+            '''))
+            
+        # write input file
+        input_dat_file = os.path.join(__testing_path__, 'testing-input/tube.dat')
+        input_file.write_input_file(input_dat_file)
         
         # test input
         self.run_baci_test(input_dat_file)

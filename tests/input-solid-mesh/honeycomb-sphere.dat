@@ -1,0 +1,103 @@
+// HEADER
+------------------------------------------------------PROBLEM SIZE
+DIM                3
+-------------------------------------------------------PROBLEM TYP
+PROBLEMTYP   Structure
+RESTART      0
+----------------------------------------------------DISCRETISATION
+NUMFLUIDDIS  0
+NUMSTRUCDIS  1
+NUMALEDIS    0
+NUMTHERMDIS  0
+----------------------------------------------------------------IO
+OUTPUT_BIN             Yes
+STRUCT_DISP            Yes
+FILESTEPS              1000
+VERBOSITY              standard
+---------------------------------------------------------IO/RUNTIME VTK OUTPUT
+OUTPUT_DATA_FORMAT              binary
+INTERVAL_STEPS                  1
+EVERY_ITERATION                 No
+----------------------------------------------------------IO/RUNTIME VTK OUTPUT/STRUCTURE
+OUTPUT_STRUCTURE                Yes
+DISPLACEMENT                    Yes
+----------------------------------------------------------IO/RUNTIME VTK OUTPUT/BEAMS
+OUTPUT_BEAMS                    Yes
+DISPLACEMENT                    Yes
+USE_ABSOLUTE_POSITIONS          Yes
+TRIAD_VISUALIZATIONPOINT        Yes
+STRAINS_GAUSSPOINT              Yes
+MATERIAL_FORCES_GAUSSPOINT      Yes
+------------------------------------------------STRUCTURAL DYNAMIC
+INT_STRATEGY                    Standard
+LINEAR_SOLVER                   1
+DYNAMICTYP                      Statics
+RESULTSEVRY                     1
+RESTARTEVRY                     20
+NLNSOL                          fullnewton
+TIMESTEP                        0.025
+NUMSTEP                         8
+MAXTIME                         1.0
+TOLRES                          1.0E-7
+TOLDISP                         1.0E-10
+NORM_RESF                       Abs
+NORM_DISP                       Abs
+NORMCOMBI_RESFDISP              And
+MAXITER                         15
+PREDICT                         TangDis
+----------------------------------------------------------------SOLVER 1
+NAME                            Structure_Solver
+SOLVER                          UMFPACK
+----------------------------------------------------------------BEAM INTERACTION
+REPARTITIONSTRATEGY             Everydt
+----------------------------------------------------------------BEAM INTERACTION/BEAM TO SPHERE CONTACT
+STRATEGY                        penalty
+----------------------------------------------------------------BEAM CONTACT
+MODELEVALUATOR                  Standard
+BEAMS_STRATEGY                  Penalty
+BEAMS_BTSPH_PENALTYPARAM        1e1
+
+// needed only for beam-to-beam contact
+BEAMS_BTBPENALTYPARAM           0.0
+BEAMS_BTBLINEPENALTYPARAM       0.0
+BEAMS_PENALTYLAW                LinPen
+BEAMS_SEGCON                    Yes
+BEAMS_PERPSHIFTANGLE1           10
+BEAMS_PERPSHIFTANGLE2           15
+BEAMS_PARSHIFTANGLE1            10
+BEAMS_PARSHIFTANGLE2            15
+BEAMS_SEGANGLE                  1.0
+BEAMS_NUMINTEGRATIONINTERVAL    20
+
+// needed only for old beam_contact_manager
+BEAMS_DEBUG                     No
+BEAMS_MAXDELTADISSCALEFAC       -1   //10000
+BEAMS_OCTREE                    none //octree_spherical
+BEAMS_ADDITEXT                  Yes
+BEAMS_EXTVAL                    0.01
+BEAMS_BTSPH                     Yes
+--------------------------------------------------------------------BINNING STRATEGY
+CUTOFF_RADIUS                   20
+BOUNDINGBOX                     -100 -100 -100 100 100 100
+------------------------------------------------STRUCT NOX/Printing
+Outer Iteration                 = Yes
+Inner Iteration                 = No
+Outer Iteration StatusTest      = No
+-------------------------------------------------DESIGN DESCRIPTION
+NDPOINT 1
+NDLINE  0
+NDSURF  0
+NDVOL   0
+------------------------------------DESIGN POINT DIRICH CONDITIONS
+DPOINT 1
+E 1 - NUMDOF 3 ONOFF 1 1 1 VAL 0.0 -10.0 0.0 FUNCT 0 1 0
+------------------------------------------------DNODE-NODE TOPOLOGY
+NODE     1 DNODE 1
+-------------------------------------------------------NODE COORDS
+NODE            1    COORD   0.0 37.0  35.0
+------------------------------------------------STRUCTURE ELEMENTS
+1 RIGIDSPHERE POINT1      1  RADIUS 10.0 DENSITY 1.0
+-------------------------------------------------------------FUNCT1
+COMPONENT 0 FUNCTION a
+VARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 3 TIMES 0.0 0.2 1.0 VALUES 0.0 0.0 1.0
+-------------------------------------------------------------------------END

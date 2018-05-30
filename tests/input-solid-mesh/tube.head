@@ -1,0 +1,46 @@
+-----------------------------------------------------------------PROBLEM TYP
+PROBLEMTYP                      Structure
+RESTART                         0
+--------------------------------------------------------------DISCRETISATION
+NUMFLUIDDIS                     0
+NUMSTRUCDIS                     1
+NUMALEDIS                       0
+NUMTHERMDIS                     0
+--------------------------------------------------------------------------IO
+OUTPUT_BIN                      Yes
+STRUCT_DISP                     Yes
+FILESTEPS                       1000
+VERBOSITY                       Standard
+----------------------------------------------------------IO/RUNTIME VTK OUTPUT
+OUTPUT_DATA_FORMAT              binary
+INTERVAL_STEPS                  1
+EVERY_ITERATION                 No
+----------------------------------------------------------IO/RUNTIME VTK OUTPUT/STRUCTURE
+OUTPUT_STRUCTURE                Yes
+DISPLACEMENT                    Yes
+----------------------------------------------------------STRUCTURAL DYNAMIC
+LINEAR_SOLVER                   1
+INT_STRATEGY                    Standard
+DYNAMICTYP                      Statics
+RESULTSEVRY                     1
+RESTARTEVRY                     5
+NLNSOL                          fullnewton
+PREDICT                         TangDis
+TIMESTEP                        0.05
+NUMSTEP                         20
+MAXTIME                         1.0
+TOLRES                          1.0E-5
+TOLDISP                         1.0E-11
+NORM_RESF                       Abs
+NORM_DISP                       Abs
+NORMCOMBI_RESFDISP              And
+MAXITER                         20
+--------------------------------------------------------------------SOLVER 1
+NAME                            Structure_Solver
+SOLVER                          UMFPACK
+-------------------------------------------------------------------MATERIALS
+MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0e+09 NUE 0.0 DENS 7.80E-6 THEXPANS 0.0
+----------------------------------------------------------------------FUNCT1
+COMPONENT 0 FUNCTION cos(2*pi*t)
+----------------------------------------------------------------------FUNCT2
+COMPONENT 0 FUNCTION sin(2*pi*t)
