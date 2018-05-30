@@ -395,7 +395,7 @@ class Material(object):
         
         self.material_string = material_string
         self.youngs_modulus = youngs_modulus
-        self.shear_modulus = self.youngs_modulus / (2*(1+nu))
+        self.nu = nu
         self.density = density
         self.diameter = diameter
         self.area = diameter**2 * np.pi * 0.25
@@ -409,11 +409,11 @@ class Material(object):
     
     def get_dat_line(self):
         """ Return the line for the dat file. """
-        return 'MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}'.format(
+        return 'MAT {} {} YOUNG {} POISSONRATIO {} DENS {} CROSSAREA {} SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}'.format(
             self.n_global,
             self.material_string,
             self.youngs_modulus,
-            self.shear_modulus,
+            self.nu,
             self.density,
             self.area,
             self.shear_correction,
@@ -498,7 +498,7 @@ class Node(object):
         The n_global value is set when the model is writen to a dat file.
         """
         
-        self.coordinates = 1.*np.array(coordinates)
+        self.coordinates = np.array(coordinates)
         self.rotation = rotation
         self.n_global = None
         self.is_dat = False
@@ -529,7 +529,7 @@ class Node(object):
     def get_dat_line(self):
         """ Return the line for the dat file for this element. """
         
-        return 'NODE {} COORD {} {} {}'.format(
+        return 'NODE {} COORD {:.10f} {:.10f} {:.10f}'.format(
             self.n_global,
             self.coordinates[0],
             self.coordinates[1],
@@ -926,9 +926,9 @@ class Mesh(object):
         
         # rotation for this line (is constant on the whole line)
         t1 = direction
-        # check if the x or y axis are larger projected onto the direction
-        if np.dot(t1,[1,0,0]) < np.dot(t1,[0,1,0]):
-            t2 = [1,0,0]
+        # check if the z or y axis are larger projected onto the direction
+        if np.dot(t1,[0,0,1]) < np.dot(t1,[0,1,0]):
+            t2 = [0,0,1]
         else:
             t2 = [0,1,0]
         rotation = Rotation.from_basis(t1, t2)
@@ -1001,11 +1001,6 @@ class Mesh(object):
         Add a flat honeycomb structure
         """
         
-        # check for consistency
-        if n_height % 2 == 0:
-            print('Error, only odd numbers can be used for the number of height rows!')
-            return
-        
         def add_line(pointa, pointb):
             """ Shortcut to add line. """
             geom_set = self.add_beam_mesh_line(
@@ -1020,9 +1015,6 @@ class Mesh(object):
         
         # get name for the mesh added
         name = self._get_mesh_name(name, 'honeycomb_flat')
-        
-        # set that will be returned
-        return_node_set = ContainerGeom()
         
         # list for nodes -> used for connections
         honeycomb_nodes = []
@@ -1150,7 +1142,7 @@ class Mesh(object):
         mesh_temp = Mesh(name='honeycomb_' + str(1))
         mesh_temp.add_beam_mesh_honeycomb_flat(Beam3rHerm2Lin3, material, width, n_circumference, n_height, n_element,
                                                                     closed_width=False,
-                                                                    closed_height=True,
+                                                                    closed_height=False,
                                                                     create_couplings=False,
                                                                     add_sets=False
                                                                     )
@@ -1198,11 +1190,11 @@ class Mesh(object):
                 z_max = node.coordinates[2]
                 
         node_set = ContainerGeom()
-        node_set.append_item(__POINT__, GeometrySet([name, 'top'],
-            mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [z_max,z_max]))
-            ))
         node_set.append_item(__POINT__, GeometrySet([name, 'bottom'],
             mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [0,0]))
+            ))
+        node_set.append_item(__POINT__, GeometrySet([name, 'top'],
+            mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [z_max,z_max]))
             ))
         
         self.add_mesh(mesh_temp)
@@ -1347,7 +1339,7 @@ class MeshInput(Mesh):
                     for bc in self.bc[key1, key2]:
                         lines.append(bc.get_dat_line())
 
-        # add the coupings
+        # add the couplings
         lines.append(get_section_string('DESIGN POINT COUPLING CONDITIONS'))
         lines.append('DPOINT {}'.format(len(self.couplings)))
         for coupling in self.couplings:

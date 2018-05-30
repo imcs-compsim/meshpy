@@ -146,6 +146,8 @@ class InputSection(object):
         
         if not (option.get_key() in self.data.keys()) or option.overwrite:
             self.data[option.get_key()] = option
+        elif option.get_key() == '':
+            print('TODO? what should happen here?')
         else:
             print('Error, key {} already set!'.format(option.get_key()))
     

@@ -1,8 +1,8 @@
 import unittest
 import numpy as np
 
-# import modules from beamgen
-from beamgen.rotation import Rotation
+# import modules from meshgen
+from meshgen.rotation import Rotation
 
 
 def roation_matrix(axis, alpha):
