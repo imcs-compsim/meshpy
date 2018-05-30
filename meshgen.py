@@ -606,7 +606,8 @@ def honeycomb_as_input():
     
     # create input file
     input_file = InputFile(maintainer='My Name', description='Simple input file')
-    input_file.read_dat('solid-mesh/honeycomb_no_sphere.dat')
+    #input_file.read_dat('solid-mesh/honeycomb.dat')
+    input_file.read_dat('solid-mesh/honeycomb.dat')
     
     input_file.add_section(InputSection(
         'STRUCTURAL DYNAMIC',
@@ -615,20 +616,20 @@ def honeycomb_as_input():
         ''',
         option_overwrite=True))
     
-#     input_file.add_section(InputSection(
-#         'RESULT DESCRIPTION',
-#         '''
-#         STRUCTURE DIS structure NODE 199 QUANTITY dispx VALUE  0.00000000000000000e+00 TOLERANCE 1e-10
-#         STRUCTURE DIS structure NODE 199 QUANTITY dispy VALUE -1.00941681590389045e+01 TOLERANCE 1e-10
-#         STRUCTURE DIS structure NODE 199 QUANTITY dispz VALUE  2.90922792397402263e+00 TOLERANCE 1e-10
-#         STRUCTURE DIS structure NODE 201 QUANTITY dispx VALUE  0.00000000000000000e+00 TOLERANCE 1e-10
-#         STRUCTURE DIS structure NODE 201 QUANTITY dispy VALUE -1.00941681590389045e+01 TOLERANCE 1e-10
-#         STRUCTURE DIS structure NODE 201 QUANTITY dispz VALUE  2.90922792397402263e+00 TOLERANCE 1e-10
-#         STRUCTURE DIS structure NODE 203 QUANTITY dispx VALUE  0.00000000000000000e+00 TOLERANCE 1e-10
-#         STRUCTURE DIS structure NODE 203 QUANTITY dispy VALUE -1.00941681590389045e+01 TOLERANCE 1e-10
-#         STRUCTURE DIS structure NODE 203 QUANTITY dispz VALUE  2.90922792397402263e+00 TOLERANCE 1e-10
-#         '''
-#         ))
+    input_file.add_section(InputSection(
+        'RESULT DESCRIPTION',
+        '''
+        STRUCTURE DIS structure NODE 268 QUANTITY dispx VALUE  0.00000000000000000e+00 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 268 QUANTITY dispy VALUE -8.09347205557697258e+00 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 268 QUANTITY dispz VALUE  2.89298034569662965e+00 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 188 QUANTITY dispx VALUE  0.00000000000000000e+00 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 188 QUANTITY dispy VALUE -8.09347205557697258e+00 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 188 QUANTITY dispz VALUE  2.89298034569662965e+00 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 182 QUANTITY dispx VALUE  0.00000000000000000e+00 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 182 QUANTITY dispy VALUE -8.09347205557697258e+00 TOLERANCE 1e-10
+        STRUCTURE DIS structure NODE 182 QUANTITY dispz VALUE  2.89298034569662965e+00 TOLERANCE 1e-10
+        '''
+        ))
     
     material = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0, 1e-3, 0.2, shear_correction=1.1)
     mesh = Mesh(name='mesh')
@@ -651,38 +652,38 @@ def honeycomb_as_input():
     bc_set.append_item(__LINE__, GeometrySet('line', nodes = honeycomb_set.point[0].nodes))
     bc_set.append_item(__LINE__, GeometrySet('line2', nodes = honeycomb_set.point[1].nodes))
     mesh_honeycomb.sets.merge_containers(bc_set)
-
-#     mesh_honeycomb.add_bc('dirich',
-#             BC(bc_set.line[0],
-#                'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0'
-#             ))
-#     mesh_honeycomb.add_bc('dirich',
-#             BC(bc_set.line[1],
-#                'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 5.0 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0',
-#                format_replacement=[ft]
-#             ))
-#     
+  
     mesh_honeycomb.add_bc('dirich',
-            BC(honeycomb_set.point[0],
+            BC(bc_set.line[0],
                'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0'
             ))
     mesh_honeycomb.add_bc('dirich',
-            BC(honeycomb_set.point[1],
+            BC(bc_set.line[1],
                'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 5.0 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0',
                format_replacement=[ft]
             ))
+#     
+#     mesh_honeycomb.add_bc('dirich',
+#             BC(honeycomb_set.point[0],
+#                'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0'
+#             ))
+#     mesh_honeycomb.add_bc('dirich',
+#             BC(honeycomb_set.point[1],
+#                'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 5.0 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0',
+#                format_replacement=[ft]
+#             ))
     
     # add the honeycomb to mesh
     mesh.add_mesh(mesh_honeycomb)
     
     # rotate the mesh so it is in the same direction as the input mesh
-    #mesh.rotate(Rotation([0,0,1], np.pi/2))
+    mesh.rotate(Rotation([0,0,1], np.pi/2))
     
     # add the beam mesh to the solid mesh
     input_file.add_mesh(mesh)
         
     # write input file
-    input_file.write_input_file('/home/ivo/dev/inputgenerator-py/input/honeycomb_as_input.dat', print_set_names=False, print_all_sets=False)
+    input_file.write_input_file('/home/ivo/dev/inputgenerator-py/input/honeycomb-var1.dat', print_set_names=False, print_all_sets=False)
 
 
 

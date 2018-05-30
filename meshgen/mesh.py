@@ -529,7 +529,7 @@ class Node(object):
     def get_dat_line(self):
         """ Return the line for the dat file for this element. """
         
-        return 'NODE {} COORD {:.10f} {:.10f} {:.10f}'.format(
+        return 'NODE {} COORD {} {} {}'.format(
             self.n_global,
             self.coordinates[0],
             self.coordinates[1],
@@ -643,7 +643,7 @@ class Beam3rHerm2Lin3(Beam):
         for node in self.nodes:
             string_triads += node.rotation.get_dat()
         
-        return '{} {} {}MAT {} TRIADS{} FAD'.format(
+        return '{} {} {}MAT {} TRIADS{}'.format(
             self.n_global,
             self.element_name,
             string_nodes,
@@ -925,9 +925,9 @@ class Mesh(object):
         direction = np.array(end_point) - np.array(start_point)
         
         # rotation for this line (is constant on the whole line)
-        t1 = direction
+        t1 = direction / np.linalg.norm(direction)
         # check if the z or y axis are larger projected onto the direction
-        if np.dot(t1,[0,0,1]) < np.dot(t1,[0,1,0]):
+        if abs(np.dot(t1,[0,0,1])) < abs(np.dot(t1,[0,1,0])):
             t2 = [0,0,1]
         else:
             t2 = [0,1,0]
