@@ -749,7 +749,8 @@ class Mesh(object):
         """ Rotate the geometry about the origin. """
         
         # move structure to rotation origin
-        if origin:
+        print(origin)
+        if not origin is None:
             self.translate(-np.array(origin))
         
         # rotate structure
@@ -758,7 +759,7 @@ class Mesh(object):
                 node.rotate(rotation, only_rotate_triads=False)
         
         # move origin back to initial place
-        if origin:
+        if not origin is None:
             self.translate(np.array(origin))
     
     
