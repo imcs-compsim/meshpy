@@ -748,18 +748,59 @@ class Mesh(object):
     def rotate(self, rotation, origin=None):
         """ Rotate the geometry about the origin. """
         
-        # move structure to rotation origin
-        if not origin is None:
-            self.translate(-np.array(origin))
-        
-        # rotate structure
-        for node in self.nodes:
+        # get numpy array with all quaternions for the nodes
+        quaternions = np.zeros([len(self.nodes),4])
+        rot_new = np.zeros([len(self.nodes),4])
+        for i, node in enumerate(self.nodes):
             if not node.is_dat:
-                node.rotate(rotation, only_rotate_triads=False)
+                tmp = node.rotation.get_quaternion()
+                quaternions[i,0] = tmp[0]
+                quaternions[i,1:] = tmp[1]
         
-        # move origin back to initial place
-        if not origin is None:
-            self.translate(np.array(origin))
+        # get quaternion of rotation
+        rot_quaternion = np.zeros(4)
+        tmp = rotation.get_quaternion()
+        rot_quaternion[0] = tmp[0]
+        rot_quaternion[1:] = tmp[1]
+        
+        # get the new quaternions of the nodes
+        rot_new[:,0] = quaternions[:,0] * rot_quaternion[0] - np.dot(quaternions[:,1:], rot_quaternion[1:])
+        rot_new[:,1:] = (
+            quaternions[:,1:] * rot_quaternion[0] + 
+            np.dot(np.transpose([quaternions[:,0]]),[rot_quaternion[1:]]) -
+            np.cross(quaternions[:,1:], rot_quaternion[1:])
+            )
+        # transform to rotation vector
+        cos = rot_new[:,0]
+        sin = np.linalg.norm(rot_new[:,1:],axis=1)
+        
+        phi = 2*np.arctan2(sin, cos)
+        n = rot_new[:,1:]
+        for i in range(len(n)):
+            if np.abs(sin[i] < 1e-10):
+                n[i,:] = [1,0,0]
+                phi[i] = 0
+            else:
+                n[i,:] = n[i,:] / sin[i]
+        
+        # rotate the position of the nodes
+        R = rotation.get_rotation_matrix()
+        
+        # set the new rotations and positions
+        for i, node in enumerate(self.nodes):
+            if not node.is_dat:
+                node.rotation.phi = phi[i]
+                node.rotation.n = n[i,:]
+        
+                # move coordinates to origin
+                if not origin is None:
+                    node.coordinates -= origin
+
+                node.coordinates = np.dot(R, node.coordinates)
+                
+                # move coordinates back from origin
+                if not origin is None:
+                    node.coordinates += origin
     
     
     def add_connections(self, input_list, connection_type='fix'):
