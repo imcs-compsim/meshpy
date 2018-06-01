@@ -518,12 +518,12 @@ class Node(object):
         
         # do not do anything if the node does not have a rotation
         if self.rotation:
-            # apply the roation to the triads
+            # apply the rotation to the triads
             self.rotation = rotation * self.rotation
-            
-            # rotate the positions
-            if not only_rotate_triads:
-                self.coordinates = rotation * self.coordinates
+        
+        # rotate the positions (around origin)
+        if not only_rotate_triads:
+            self.coordinates = rotation * self.coordinates
 
 
     def get_dat_line(self):
