@@ -749,7 +749,6 @@ class Mesh(object):
         """ Rotate the geometry about the origin. """
         
         # move structure to rotation origin
-        print(origin)
         if not origin is None:
             self.translate(-np.array(origin))
         
