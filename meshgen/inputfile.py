@@ -318,7 +318,7 @@ class InputFile(object):
     def _get_header(self):
         """ Return the header for the input file. """
         
-        string = '// Input file created with beamgen git sha: {}\n'.format(__VERSION__)
+        string = '// Input file created with meshgen git sha: {}\n'.format(__VERSION__)
         string += '// Maintainer: {}\n'.format(self.maintainer)
         string += '// Date: {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         if self.description:
