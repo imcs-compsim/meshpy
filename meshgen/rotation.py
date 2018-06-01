@@ -117,15 +117,15 @@ class Rotation(object):
     
     def __mul__(self, other):
         """
-        Add this roation to another, or apply it on a vector.
+        Add this rotation to another, or apply it on a vector.
         """
         
-        # check if the other object is also a roation
+        # check if the other object is also a rotation
         if isinstance(other, Rotation):
             # get quaternions of the two objects
             p = self.get_quaternion()
             q = other.get_quaternion()
-            # add the roations
+            # add the rotations
             return Rotation.from_quaternion((
                 p[0] * q[0] - np.dot(p[1],q[1]),
                 p[0] * q[1] + q[0] * p[1] + np.cross(p[1], q[1])
