@@ -1,0 +1,45 @@
+#!python
+import cubit
+
+cubit.cmd('reset')
+cubit.cmd('set geometry engine acis')
+
+b = 1
+h = 1
+t = 10
+
+nx = 1
+ny = 1
+nz = 3
+
+# create mesh
+cubit.cmd('brick x ' + str(b) + ' y ' + str(h) + ' z ' + str(t) )
+
+# set mesh size
+lines = [None, None, None]
+lines[0] = [nx, [2, 4, 6, 8]] # x
+lines[1] = [ny, [1, 3, 5, 7]] # y
+lines[2] = [nz, [9, 10, 11, 12]] # z
+
+for line in lines:
+    for index in line[1]:
+        cubit.cmd('curve ' + str(index) + ' interval ' + str(line[0]) )
+cubit.cmd('mesh volume all')
+
+# set blocks and sets
+cubit.cmd('reset block')
+cubit.cmd('block 1 volume 1')
+cubit.cmd('block 1 element type HEX8')
+
+for i in range(6):
+    cubit.cmd('nodeset ' + str(i+1) + ' surface ' + str(i+1))
+
+for i in range(12):
+    cubit.cmd('nodeset ' + str(6+i+1) + ' curve ' + str(i+1))
+
+cubit.cmd('nodeset 19 volume 1')
+
+# export mesh
+cubit.cmd('export mesh "/home/ivo/dev/inputgenerator-py/input/block.exo" overwrite')
+
+print("Last Python line")
