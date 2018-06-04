@@ -4,7 +4,7 @@ import numpy as np
 from _collections import OrderedDict
 
 # meshpy imports
-from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, Node, BaseMeshItem
+from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, Node, BaseMeshItem, Function
 
 
 # constans for sets and BCs
@@ -418,30 +418,6 @@ class Material(object):
             self.mom2,
             self.mom3
             )
-
-
-class Function(object):
-    """ Holds information for a function. """
-    
-    def __init__(self, data):
-        if type(data) == list:
-            self.data = data
-        else:
-            self.data = [data]
-
-        self.n_global = None
-        self.is_dat = False
-    
-    def get_dat_lines(self):
-        """ Return the lines for the dat file. """
-        return self.data
-    
-    def __str__(self):
-        """ Check if the function has a global index. """
-        if self.n_global:
-            return str(self.n_global)
-        else:
-            print('Error function does not have a global index! It is probably not added to the mesh')
 
 
 class Mesh(object):

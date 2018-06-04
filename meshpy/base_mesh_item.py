@@ -33,5 +33,7 @@ class BaseMeshItem(object):
         """ By default return the data list. """
         if isinstance(self.data, list):
             return self.data
+        elif isinstance(self.data, str):
+            return [self.data]
         else:
             raise TypeError('Expected list, got {}!'.format(type(self.data)))
