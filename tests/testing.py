@@ -171,19 +171,22 @@ class TestInputFile(unittest.TestCase):
         """
         
         # read input file with information on sphere
-        input_file = InputFile(maintainer='Ivo Steinbrecher', description='honeycomb beam in contact with sphere')
-        input_file.read_dat(os.path.join(__testing_input__, 'honeycomb-sphere.dat'))
+        input_file = InputFile(
+            maintainer='Ivo Steinbrecher',
+            description='honeycomb beam in contact with sphere',
+            dat_file=os.path.join(__testing_input__, 'honeycomb-sphere.dat')
+            )
         
         # overwrite some entries in the input file
-        input_file.add_section(InputSection(
+        input_file.add(InputSection(
             'STRUCTURAL DYNAMIC',
-            '''
-            NUMSTEP                         40
-            ''',
-            option_overwrite=True))
+            'NUMSTEP 40',
+            option_overwrite=True
+            ))
         
         # add results to the input file
-        input_file.add_section(InputSection(
+        input_file.delete_section('RESULT DESCRIPTION')
+        input_file.add(InputSection(
             'RESULT DESCRIPTION',
             '''
             STRUCTURE DIS structure NODE 268 QUANTITY dispx VALUE  0.00000000000000000e+00 TOLERANCE 1e-10
@@ -199,20 +202,34 @@ class TestInputFile(unittest.TestCase):
             ))
         
         # material for the beam
-        material = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0, 1e-3, 0.2, shear_correction=1.1)
+        material = Material(
+            'MAT_BeamReissnerElastHyper',
+            2.07e2, # E-Modul
+            0, # nu
+            1e-3, # rho
+            0.2, # diameter of beam
+            shear_correction=1.1
+            )
         
         # create the honeycomb mesh
         mesh_honeycomb = Mesh(name='honeycomb_' + str(1))
-        honeycomb_set = mesh_honeycomb.add_beam_mesh_honeycomb(Beam3rHerm2Lin3, material,
-                               50,
-                               10,
-                               4,
-                               1,
-                               closed_top=False)
+        honeycomb_set = mesh_honeycomb.add_beam_mesh_honeycomb(
+            Beam3rHerm2Lin3,
+            material,
+            50.0,
+            10,
+            4,
+            1,
+            closed_top=False
+            )
         mesh_honeycomb.rotate(Rotation([0,0,1], np.pi/2))
         
         # define functions for the bc
-        ft = Function('COMPONENT 0 FUNCTION a\nVARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 3 TIMES 0.0 0.2 1.0 VALUES 0.0 1.0 1.0')
+        ft = Function(
+            'COMPONENT 0 FUNCTION a\n' + \
+            'VARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 3 ' + \
+            'TIMES 0.0 0.2 1.0 VALUES 0.0 1.0 1.0'
+            )
         mesh_honeycomb.add_function(ft)
             
         # add bcs
@@ -232,7 +249,7 @@ class TestInputFile(unittest.TestCase):
                 ))
         
         # add the beam mesh to the solid mesh
-        input_file.add_mesh(mesh_honeycomb)
+        input_file.add(mesh_honeycomb)
             
         # write input file
         self.check_tmp_dir()
@@ -258,7 +275,7 @@ class TestInputFile(unittest.TestCase):
         input_file.delete_section('TITLE')
         
         # add options for beam_output
-        input_file.add_section(InputSection(
+        input_file.add(InputSection(
             'IO/RUNTIME VTK OUTPUT/BEAMS',
             '''
             OUTPUT_BEAMS                    Yes
@@ -297,10 +314,10 @@ class TestInputFile(unittest.TestCase):
             )
         
         # add the beam mesh to the solid mesh
-        input_file.add_mesh(cantilever)
+        input_file.add(cantilever)
         
         # add test case result description
-        input_file.add_section(InputSection(
+        input_file.add(InputSection(
             'RESULT DESCRIPTION',
             '''
             STRUCTURE DIS structure NODE 35 QUANTITY dispx VALUE 1.50796091342925e+00 TOLERANCE 1e-10
@@ -314,6 +331,132 @@ class TestInputFile(unittest.TestCase):
         # write input file
         self.check_tmp_dir()
         input_dat_file = os.path.join(__testing_temp__, 'tube.dat')
+        input_file.write_input_file(input_dat_file)
+        
+        # test input
+        self.run_baci_test(input_dat_file)
+        
+        
+    def test_honeycomb_variants(self):
+        """
+        Create a few different honeycomb structures.
+        """
+        
+        # create input file
+        input_file = InputFile(
+            maintainer='Ivo Steinbrecher', description='Varieties of honeycomb')
+        
+        input_file.add_section(InputSection('PROBLEM SIZE', 'DIM 3'))
+        input_file.add_section(InputSection(
+            'PROBLEM TYP',
+            '''
+            PROBLEMTYP                            Structure
+            RESTART                               0
+            '''))
+        input_file.add_section(InputSection(
+            'IO',
+            '''
+            OUTPUT_BIN                            No
+            STRUCT_DISP                           No
+            FILESTEPS                             1000
+            VERBOSITY                             Standard
+            '''))
+        input_file.add_section(InputSection(
+            'IO/RUNTIME VTK OUTPUT',
+            '''
+            OUTPUT_DATA_FORMAT                    binary
+            INTERVAL_STEPS                        1
+            EVERY_ITERATION                       No
+            '''))
+        input_file.add_section(InputSection(
+            'STRUCTURAL DYNAMIC',
+            '''
+            LINEAR_SOLVER                         1
+            INT_STRATEGY                          Standard
+            DYNAMICTYP                            Statics
+            RESULTSEVRY                           1
+            NLNSOL                                fullnewton
+            PREDICT                               TangDis
+            TIMESTEP                              1.
+            NUMSTEP                               10
+            MAXTIME                               1.0
+            TOLRES                                1.0E-4
+            TOLDISP                               1.0E-11
+            NORM_RESF                             Abs
+            NORM_DISP                             Abs
+            NORMCOMBI_RESFDISP                    And
+            MAXITER                               20
+            '''))
+        input_file.add_section(InputSection(
+            'SOLVER 1',
+            '''
+            NAME                                  Structure_Solver
+            SOLVER                                UMFPACK
+            '''))
+        input_file.add_section(InputSection(
+            'IO/RUNTIME VTK OUTPUT/BEAMS',
+            '''
+            OUTPUT_BEAMS                    Yes
+            DISPLACEMENT                    Yes
+            USE_ABSOLUTE_POSITIONS          Yes
+            TRIAD_VISUALIZATIONPOINT        Yes
+            STRAINS_GAUSSPOINT              Yes
+            '''))
+        
+        # create two meshes with honeycomb structure
+        mesh = Mesh(name='mesh')
+        material = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0, 1e-3, 0.2, shear_correction=1.1)
+        ft = Function('COMPONENT 0 FUNCTION t')
+        mesh.add_function(ft)
+    
+        for vertical in [False, True]:
+            for closed_top in [False, True]:
+                mesh.translate(17 * np.array([1,0,0]))
+                honeycomb_set = mesh.add_beam_mesh_honeycomb(
+                    Beam3rHerm2Lin3,
+                    material,
+                    10,
+                    6,
+                    3,
+                    n_el=2,
+                    vertical=vertical,
+                    closed_top=closed_top
+                    )
+                mesh.add_bc('dirich',
+                        BC(honeycomb_set.point[0],
+                           'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0'
+                        ))
+                mesh.add_bc('dirich',
+                        BC(honeycomb_set.point[1],
+                           'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 1. 1. 1. 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
+                           format_replacement=[ft]
+                        ))
+        
+        # add the beam mesh to the solid mesh
+        input_file.add_mesh(mesh)
+        
+        # add results
+        input_file.add(InputSection(
+            'RESULT DESCRIPTION',
+            '''
+            STRUCTURE DIS structure NODE 206 QUANTITY dispx VALUE 0.25164402121731655 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 206 QUANTITY dispy VALUE 0.77988990482787646 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 206 QUANTITY dispz VALUE 0.28881703074847209 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 531 QUANTITY dispx VALUE 0.26731807700633681 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 531 QUANTITY dispy VALUE 0.81334961503175585 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 531 QUANTITY dispz VALUE 0.29489958449574871 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 811 QUANTITY dispx VALUE 0.24316547992973625 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 811 QUANTITY dispy VALUE 0.80121852043307218 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 811 QUANTITY dispz VALUE 0.46918376976622778 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 1171 QUANTITY dispx VALUE 0.32535024034244314 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 1171 QUANTITY dispy VALUE 1.0426432941382124 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 1171 QUANTITY dispz VALUE 0.54691921102400531 TOLERANCE 1e-10
+            '''
+            ))
+        
+        # write input file
+        self.check_tmp_dir()
+        input_dat_file = os.path.join(__testing_temp__, 'honeycomb-variants.dat')
         input_file.write_input_file(input_dat_file)
         
         # test input

@@ -100,4 +100,8 @@ NODE            1    COORD   0.0 37.0  35.0
 -------------------------------------------------------------FUNCT1
 COMPONENT 0 FUNCTION a
 VARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 3 TIMES 0.0 0.2 1.0 VALUES 0.0 0.0 1.0
+--------------------------------------------------------------RESULT DESCRIPTION
+STRUCTURE DIS structure NODE 268 QUANTITY dispx VALUE 1. TOLERANCE 1e-10
+STRUCTURE DIS structure NODE 268 QUANTITY dispy VALUE 1. TOLERANCE 1e-10
+STRUCTURE DIS structure NODE 268 QUANTITY dispz VALUE 1. TOLERANCE 1e-10
 -------------------------------------------------------------------------END

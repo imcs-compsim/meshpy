@@ -49,7 +49,7 @@ class Beam(Element):
             self.nodes[0] = start_node
         
         # Loop over local nodes.
-        for i, [xi, create_rotation] in enumerate(self.node_create):
+        for i, [xi, create_rotation, middle_node] in enumerate(self.node_create):
             if i > 0 or start_node is None:
                 if create_rotation:
                     rotation = rotation_function(xi)
@@ -57,7 +57,8 @@ class Beam(Element):
                     rotation = None
                 self.nodes[i] = Node(
                     position_function(xi),
-                    rotation=rotation
+                    rotation=rotation,
+                    is_middle_node=middle_node
                     )
         
         if start_node is None:
@@ -73,9 +74,9 @@ class Beam3rHerm2Lin3(Beam):
     def __init__(self, material=None):
         
         nodes_create = [
-            [-1, True],
-            [0, True],
-            [1, True]
+            [-1, True, False],
+            [0, True, True],
+            [1, True, False]
             ]
         Beam.__init__(self, nodes_create=nodes_create, material=material)    
     

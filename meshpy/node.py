@@ -11,7 +11,7 @@ class Node(BaseMeshItem):
     and can be rotated moved and so on.
     """
     
-    def __init__(self, coordinates, rotation=None):
+    def __init__(self, coordinates, rotation=None, is_middle_node=False):
         BaseMeshItem.__init__(self, data=None, is_dat=False, is_referenced=False)
         
         # Coordinates and rotation of this node.
@@ -21,6 +21,7 @@ class Node(BaseMeshItem):
         # If this node is at the end of a line or curve created with multiple
         # elements.
         self.is_end_node = False
+        self.is_middle_node = is_middle_node
 
     
     def rotate(self, rotation, origin=None, only_rotate_triads=False):

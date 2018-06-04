@@ -610,7 +610,7 @@ class Mesh(object):
             self.add_coupling(Coupling(nodes, connection_type))
     
     
-    def get_nodes_by_function(self, function, overlapping=True):
+    def get_nodes_by_function(self, function, overlapping=True, middle_nodes=False):
         """
         Return all nodes for which the function evaluates to true.
         overlaping means that nodes with the same coordinates are also added.
@@ -618,6 +618,8 @@ class Mesh(object):
         
         node_list = []
         for node in self.nodes:
+            if node.is_middle_node:
+                continue
             if function(node):
                 if overlapping:
                     node_list.append(node)
@@ -787,7 +789,7 @@ class Mesh(object):
             width,
             n_width,
             n_height,
-            elements_per_line,
+            n_el=1,
             closed_width=True,
             closed_height=True,
             name=None,
@@ -805,7 +807,7 @@ class Mesh(object):
                 material,
                 pointa,
                 pointb,
-                n_el=elements_per_line#,
+                n_el=n_el#,
                 #add_sets=False
                 )
             return geom_set
@@ -925,7 +927,7 @@ class Mesh(object):
                            diameter,
                            n_circumference,
                            n_height,
-                           n_element,
+                           n_el=1,
                            name=None,
                            add_sets=True,
                            closed_top=True,
@@ -956,7 +958,7 @@ class Mesh(object):
         
         # first create a mesh with the flat mesh
         mesh_temp = Mesh(name='honeycomb_' + str(1))
-        mesh_temp.add_beam_mesh_honeycomb_flat(Beam3rHerm2Lin3, material, width, n_w, n_h, n_element,
+        mesh_temp.add_beam_mesh_honeycomb_flat(Beam3rHerm2Lin3, material, width, n_w, n_h, n_el,
                                                                     closed_width=closed_width,
                                                                     closed_height=closed_height,
                                                                     create_couplings=False,

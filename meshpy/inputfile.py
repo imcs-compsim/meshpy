@@ -5,7 +5,7 @@ import re
 from _collections import OrderedDict
 
 # meshgen imports
-from . import __git_sha__, MeshInput, get_section_string
+from . import __git_sha__, MeshInput, get_section_string, Mesh
 
  
 class InputLine(object):
@@ -184,7 +184,7 @@ class InputSection(object):
 class InputFile(object):
     """ A item that represents a single baci input file. """
     
-    def __init__(self, maintainer = '', description = None):
+    def __init__(self, maintainer = '', description = None, dat_file=None):
         """ Initialize the main variables. """
         
         # data for header
@@ -196,6 +196,9 @@ class InputFile(object):
         
         # set mesh object
         self.mesh = MeshInput()
+        
+        if not dat_file is None:
+            self.read_dat(dat_file)
         
     
     def read_dat(self, file_path):
@@ -239,6 +242,15 @@ class InputFile(object):
                 # add to section to the first section dictionary self
                 self.add_section(InputSection(section_name, data=section_data))
 
+    def add(self, item):
+        """
+        Add an item depending on what it is
+        """
+        
+        if isinstance(item, Mesh):
+            self.add_mesh(item)
+        elif isinstance(item, InputSection):
+            self.add_section(item)
     
     def add_section(self, section):
         """
