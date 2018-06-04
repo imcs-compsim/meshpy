@@ -4,7 +4,7 @@ import numpy as np
 from _collections import OrderedDict
 
 # meshpy imports
-from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, Node
+from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, Node, BaseMeshItem
 
 
 # constans for sets and BCs
@@ -442,49 +442,6 @@ class Function(object):
             return str(self.n_global)
         else:
             print('Error function does not have a global index! It is probably not added to the mesh')
-
-
-class BaseMeshItem(object):
-    """
-    A base class for nodes, elements, sets and so on that are given in dat files.
-    """
-    
-    def __init__(self, *args, dat_string=None, dat_list=None):
-        """ The defualt case is just set by a string from a dat file. """
-        
-        # if one argument is given check the type
-        if len(args) == 1:
-            if type(args[0]) == str:
-                self.dat_string = args[0]
-            elif type(args[0]) == list:
-                self.dat_list = args[0]
-            else:
-                print('ERROR, type of arg not expected!')
-        elif len(args) == 0:
-            self.dat_string = dat_string
-            self.dat_list = dat_list
-        else:
-            print('ERROR, does not support arg with len > 1')
-        self.is_dat = True
-        self.n_global = None
-        self.is_referenced = True
-
-
-    def output_to_dat(self):
-        """ If the object will be shown in the dat file. """
-        return True
-    
-    
-    def get_dat_line(self):
-        """ By default return the dat string. """
-        return self.dat_string
-    
-    
-    def get_dat_lines(self):
-        """ By default return the dat list. """
-        return self.dat_list
-
-
 
 
 class Mesh(object):

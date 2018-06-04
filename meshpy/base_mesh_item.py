@@ -5,7 +5,7 @@ class BaseMeshItem(object):
     Base class for all objects that are related to a mesh.
     """
     
-    def __init__(self, data=None, is_dat=True):
+    def __init__(self, data=None, is_dat=True, is_referenced=True):
         
         # Data for this object. Should be string or list of strings.
         self.data = data
@@ -18,7 +18,7 @@ class BaseMeshItem(object):
         self.n_global = None
         
         # If the item is referenced by another item. For example sets and BCs.
-        self.is_referenced = False
+        self.is_referenced = is_referenced
     
     
     def get_dat_line(self):
