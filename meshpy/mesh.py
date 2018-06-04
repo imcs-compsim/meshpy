@@ -3,8 +3,8 @@
 import numpy as np
 from _collections import OrderedDict
 
-# meshgen imports
-from . import Rotation, get_section_string, flatten
+# meshpy imports
+from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, Node
 
 
 # constans for sets and BCs
@@ -485,168 +485,6 @@ class BaseMeshItem(object):
         return self.dat_list
 
 
-class Node(object):
-    """ A class that represents one node of the mesh in the input file. """
-    
-    
-    def __init__(self, coordinates, rotation=None):
-        """
-        Each node has a position and an optional rotation object.
-        The n_global value is set when the model is writen to a dat file.
-        """
-        
-        self.coordinates = np.array(coordinates)
-        self.rotation = rotation
-        self.n_global = None
-        self.is_dat = False
-        self.connected_elements = []
-        self.connected_couplings = []
-        # for the end nodes of a line
-        self.is_end_node = False
-
-    
-    def rotate(self, rotation, only_rotate_triads=False):
-        """
-        Rotate the node.
-        Default values is that the nodes is rotated around the origin.
-        If only_rotate_triads is True, then only the triads are rotated,
-        the position of the node stays the same.
-        """
-        
-        # do not do anything if the node does not have a rotation
-        if self.rotation:
-            # apply the rotation to the triads
-            self.rotation = rotation * self.rotation
-        
-        # rotate the positions (around origin)
-        if not only_rotate_triads:
-            self.coordinates = rotation * self.coordinates
-
-
-    def get_dat_line(self):
-        """ Return the line for the dat file for this element. """
-        
-        return 'NODE {} COORD {} {} {}'.format(
-            self.n_global,
-            self.coordinates[0],
-            self.coordinates[1],
-            self.coordinates[2]
-            )
-
-
-class Beam(object):
-    """ A base class for a beam element. """
-    
-    def __init__(self, material, element_name=None, node_create=None, mesh=None):
-        """
-        Set the base values for a beam element.
-        node_create is described in self.create_beam
-        """
-        
-        # name that will be displayed in the dat file
-        self.element_name = element_name
-        
-        self.nodes = []
-        self.node_create = node_create
-        
-        self.material = material
-        if mesh:
-            mesh.add_material(material)
-        
-        self.n_global = None
-        self.is_dat = False
-        
-    
-    def create_beam(self, nodes, position_function, rotation_function, create_first=False):
-        """
-        Create the nodes and links for the beam element.
-        If the node list is empty or create_first is true, the first node is created.
-        Otherwise the last node of nodes is taken as the first node of this element.
-        
-        The functions position_function and rotation_function are called to give the
-        position and rotation along the beam in the local coordinates xi.
-        
-        Creation is based on the self.node_create parameter:
-            self.node_create = [
-                [ xi, local_index, create_rotation ], # fist node
-                ...
-                ] 
-        """
-        
-        # create local node list
-        self.nodes = [None for i in range(len(self.node_create))]
-        
-        # loop over nodes
-        for i, [xi, local_index, create_rotation] in enumerate(self.node_create):
-            # if there is no node in nodes the first one is created no matter what
-            # create_first is
-            if i > 0 or (len(nodes) == 0 or create_first):
-                if create_rotation:
-                    rotation = rotation_function(xi)
-                else:
-                    rotation = None
-                tmp_node = Node(position_function(xi), rotation=rotation)
-                
-                # add to global node list
-                nodes.append(tmp_node)
-                
-                # add to local node list
-                self._add_node(local_index, tmp_node)
-            else:
-                self._add_node(self.node_create[0][1], nodes[-1])
-    
-    
-    def _add_node(self, local_node_index, node):
-        """
-        Add the node to the element and place a link to the element in
-        the node object.
-        """
-        
-        if self.nodes[local_node_index] == None:
-            self.nodes[local_node_index] = node
-            node.connected_elements.append(self)
-        else:
-            print('ERROR, node list should not me filled')
-
-
-class Beam3rHerm2Lin3(Beam):
-    """ Represents a BEAM3R HERM2LIN3 element. """
-    
-    def __init__(self, material, mesh=None):
-        """ Set the data for this beam element. """
-        
-        node_create = [
-            [-1, 0, True],
-            [0, 2, True],
-            [1, 1, True]
-            ]
-
-        Beam.__init__(self, material,
-                      element_name='BEAM3R HERM2LIN3',
-                      node_create=node_create,
-                      mesh=mesh
-                      )
-    
-    
-    def get_dat_line(self):
-        """ Return the line for the dat file for this element. """
-        
-        string_nodes = ''
-
-        for node in self.nodes:
-            string_nodes += '{} '.format(node.n_global)
-        
-        string_triads = ''
-        for node in self.nodes:
-            string_triads += node.rotation.get_dat()
-        
-        return '{} {} {}MAT {} TRIADS{}'.format(
-            self.n_global,
-            self.element_name,
-            string_nodes,
-            self.material.n_global,
-            string_triads
-            )
 
 
 class Mesh(object):
@@ -946,32 +784,50 @@ class Mesh(object):
                            material,
                            start_point,
                            end_point,
-                           n,
-                           name=None,
-                           add_sets=True,
-                           add_first_node=True
+                           n_el=1,
+                           start_node=None
+                           #name=None,
+                           #add_sets=True,
+                           #add_first_node=True
                            ):
-        """
-        A straight line of beam elements.
-            n: Number of elements along line
+        
+        """Generate a straight line in this mesh.
+        
+        Args
+        ----
+        beam_object: Beam
+            Class of beam that will be used for this line
+        material: Material
+            Material for this line
+        start_point, end_point: np.array, list
+            3D-coordinates for the start and end point of the line
+        n_el: int
+            Number of equally spaces beam elements along the line
+        start_node: Node
+            Node to use as the first node for this line. Use this if the line
+            is connected to other lines (angles have to be the same, otherwise
+            connections should be used)
         """
         
-        # get name for the mesh added
-        name = self._get_mesh_name(name, 'line')
+        self.add_material(material)
         
-        # direction vector of line
+        ## get name for the mesh added
+        #name = self._get_mesh_name(name, 'line')
+        
+        # Direction vector of line
         direction = np.array(end_point) - np.array(start_point)
         
-        # rotation for this line (is constant on the whole line)
+        # Rotation for this line (is constant on the whole line)
         t1 = direction / np.linalg.norm(direction)
-        # check if the z or y axis are larger projected onto the direction
+        # Check if the z or y axis are larger projected onto the direction
         if abs(np.dot(t1,[0,0,1])) < abs(np.dot(t1,[0,1,0])):
             t2 = [0,0,1]
         else:
             t2 = [0,1,0]
         rotation = Rotation.from_basis(t1, t2)
         
-        # this function returns the position and the triads for each element
+        # This function returns the function for the position and triads along
+        # the beam element
         def get_beam_function(point_a, point_b):
             
             def position_function(xi):
@@ -985,37 +841,42 @@ class Mesh(object):
                 rotation_function
                 )
         
-        # saave the index of the first node
-        if add_first_node:
-            node_start = len(self.nodes)
+        # nodes in this line
+        if start_node is None:
+            nodes = []
         else:
-            node_start = len(self.nodes) - 1
+            nodes = [start_node]
         
         # create the beams
-        for i in range(n):
+        for i in range(n_el):
             
             functions = get_beam_function(
-                start_point + i*direction/n,
-                start_point + (i+1)*direction/n
+                start_point + i*direction/n_el,
+                start_point + (i+1)*direction/n_el
                 )
             
-            tmp_beam = beam_object(material, mesh=self)
-            if add_first_node and i == 0:
-                tmp_beam.create_beam(self.nodes, functions[0], functions[1], create_first=True)
+            tmp_beam = beam_object(material=material)
+            if (start_node is None) and i == 0:
+                tmp_start_node = None
             else:
-                tmp_beam.create_beam(self.nodes, functions[0], functions[1], create_first=False)
+                tmp_start_node = nodes[-1]
+            nodes.extend(tmp_beam.create_beam(functions[0], functions[1],
+                                 start_node=tmp_start_node))
             self.elements.append(tmp_beam)
         
+        # add nodes to mesh
+        self.nodes.extend(nodes)
         
         # add sets to mesh
         node_set_line = ContainerGeom()
-        node_set_line.append_item(__POINT__, GeometrySet([name, 'start'], self.nodes[node_start]))
-        node_set_line.append_item(__POINT__, GeometrySet([name, 'end'], self.nodes[-1]))
-        self.nodes[node_start].is_end_node = True
-        self.nodes[-1].is_end_node = True
-        node_set_line.append_item(__LINE__, GeometrySet(name, self.nodes[node_start:]))
-        if add_sets:
-            self.sets.merge_containers(node_set_line)
+        node_set_line.append_item(__POINT__, GeometrySet(['start'], nodes[0]))
+        node_set_line.append_item(__POINT__, GeometrySet(['end'], nodes[-1]))
+        nodes[0].is_end_node = True
+        nodes[-1].is_end_node = True
+        node_set_line.append_item(__LINE__, GeometrySet('line', nodes))
+        #if add_sets:
+        self.sets.merge_containers(node_set_line)
+        
         
         # return set container
         return node_set_line
@@ -1046,8 +907,8 @@ class Mesh(object):
                 material,
                 pointa,
                 pointb,
-                elements_per_line,
-                add_sets=False
+                n_el=elements_per_line#,
+                #add_sets=False
                 )
             return geom_set
         
