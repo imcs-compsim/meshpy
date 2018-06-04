@@ -207,7 +207,8 @@ class TestInputFile(unittest.TestCase):
                                50,
                                10,
                                4,
-                               1)
+                               1,
+                               closed_top=False)
         mesh_honeycomb.rotate(Rotation([0,0,1], np.pi/2))
         
         # define functions for the bc

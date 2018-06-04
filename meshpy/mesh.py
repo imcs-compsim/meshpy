@@ -677,17 +677,17 @@ class Mesh(object):
             return name
     
     
-    def add_beam_mesh_line(self,
-                           beam_object,
-                           material,
-                           start_point,
-                           end_point,
-                           n_el=1,
-                           start_node=None
+    def add_beam_mesh_line(
+            self,
+            beam_object,
+            material,
+            start_point,
+            end_point,
+            n_el=1,
+            start_node=None
                            #name=None,
-                           #add_sets=True,
-                           #add_first_node=True
-                           ):
+                           #add_sets=True
+            ):
         
         """Generate a straight line in this mesh.
         
@@ -780,20 +780,20 @@ class Mesh(object):
         return node_set_line
     
     
-    def add_beam_mesh_honeycomb_flat(self,
-                                     beam_object,
-                                     material,
-                                     width,
-                                     n_width,
-                                     n_height,
-                                     elements_per_line,
-                                     closed_width=True,
-                                     closed_height=True,
-                                     connection_type='fix',
-                                     name=None,
-                                     add_sets=True,
-                                     create_couplings=True
-                                     ):
+    def add_beam_mesh_honeycomb_flat(
+            self,
+            beam_object,
+            material,
+            width,
+            n_width,
+            n_height,
+            elements_per_line,
+            closed_width=True,
+            closed_height=True,
+            name=None,
+            add_sets=True,
+            create_couplings=True
+            ):
         """
         Add a flat honeycomb structure
         """
@@ -809,7 +809,7 @@ class Mesh(object):
                 #add_sets=False
                 )
             return geom_set
-        
+
         # get name for the mesh added
         name = self._get_mesh_name(name, 'honeycomb_flat')
         
@@ -918,6 +918,7 @@ class Mesh(object):
         
         return node_set
     
+    
     def add_beam_mesh_honeycomb(self,
                            beam_object,
                            material,
@@ -926,20 +927,38 @@ class Mesh(object):
                            n_height,
                            n_element,
                            name=None,
-                           add_sets=True
+                           add_sets=True,
+                           closed_top=True,
+                           vertical=True
                            ):
         """
         TODO
         """
         
-        # calculate stuff
-        width = diameter * np.pi / n_circumference
+        if vertical:
+            width = diameter * np.pi / n_circumference 
+            closed_width = False
+            closed_height = closed_top
+            rotation = Rotation([0,0,1],np.pi/2) * Rotation([1,0,0],np.pi/2)
+            n_h = n_height
+            n_w = n_circumference
+        else:
+            if not n_circumference % 2 == 0:
+                raise ValueError('There has to be an even number of elements along the diameter in horizontal mode. Given {}!'.format(n_circumference))
+            H = diameter * np.pi / n_circumference
+            r = H / (1+np.sin(np.pi/6))
+            width = 2*r*np.cos(np.pi/6)
+            closed_width = closed_top
+            closed_height = False
+            rotation = Rotation([0,1,0],-np.pi/2)
+            n_h = n_circumference
+            n_w = n_height
         
         # first create a mesh with the flat mesh
         mesh_temp = Mesh(name='honeycomb_' + str(1))
-        mesh_temp.add_beam_mesh_honeycomb_flat(Beam3rHerm2Lin3, material, width, n_circumference, n_height, n_element,
-                                                                    closed_width=False,
-                                                                    closed_height=False,
+        mesh_temp.add_beam_mesh_honeycomb_flat(Beam3rHerm2Lin3, material, width, n_w, n_h, n_element,
+                                                                    closed_width=closed_width,
+                                                                    closed_height=closed_height,
                                                                     create_couplings=False,
                                                                     add_sets=False
                                                                     )
@@ -947,11 +966,7 @@ class Mesh(object):
         print('add flat honeycomb complete')
         
         # move the mesh to the correct position
-        mesh_temp.rotate(Rotation([1,0,0],np.pi/2))
-        mesh_temp.rotate(Rotation([0,0,1],np.pi/2))
-        
-        
-        
+        mesh_temp.rotate(rotation)
         mesh_temp.translate([diameter/2, 0, 0])
         mesh_temp.wrap_around_cylinder()
         
