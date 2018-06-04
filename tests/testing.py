@@ -2,6 +2,7 @@ import unittest
 import numpy as np
 import os
 import subprocess
+import shutil
 
 # import modules from meshgen
 from meshpy import Rotation, InputFile, InputSection, Material, Mesh, \
@@ -132,6 +133,15 @@ class TestInputFile(unittest.TestCase):
     Test the input files created.
     """
     
+    def check_tmp_dir(self):
+        """
+        Check if the temp directory exists. If not create it.
+        """
+        
+        if not os.path.exists(__testing_temp__):
+            os.makedirs(__testing_temp__)
+    
+    
     def run_baci_test(self, input_file, n_proc=2):
         """
         Run baci with a testinput and return the output.
@@ -145,6 +155,10 @@ class TestInputFile(unittest.TestCase):
             ], cwd=__testing_temp__, stdout=subprocess.PIPE)
         child.communicate()[0]
         self.assertEqual(0, child.returncode, msg=input_file)
+        
+        # if successful delete tmp directory
+        if int(child.returncode) == 0:
+            shutil.rmtree(__testing_temp__)
         
     
     def test_honeycomb_as_input(self):
@@ -220,7 +234,8 @@ class TestInputFile(unittest.TestCase):
         input_file.add_mesh(mesh_honeycomb)
             
         # write input file
-        input_dat_file = os.path.join(__testing_path__, 'testing-input/honeycomb-sphere.dat')
+        self.check_tmp_dir()
+        input_dat_file = os.path.join(__testing_temp__, 'honeycomb-sphere.dat')
         input_file.write_input_file(input_dat_file, print_set_names=False, print_all_sets=False)
         
         # test input
@@ -296,7 +311,8 @@ class TestInputFile(unittest.TestCase):
             '''))
             
         # write input file
-        input_dat_file = os.path.join(__testing_path__, 'testing-input/tube.dat')
+        self.check_tmp_dir()
+        input_dat_file = os.path.join(__testing_temp__, 'tube.dat')
         input_file.write_input_file(input_dat_file)
         
         # test input
