@@ -1,46 +1,54 @@
-# import python modules
+# python modules
 import numpy as np
 
-class Node(object):
-    """ A class that represents one node of the mesh in the input file. """
-    
+# meshpy modules
+from . import BaseMeshItem
+
+
+class Node(BaseMeshItem):
+    """
+    This object represents one node in the mesh. The node can have a rotation
+    and can be rotated moved and so on.
+    """
     
     def __init__(self, coordinates, rotation=None):
-        """
-        Each node has a position and an optional rotation object.
-        The n_global value is set when the model is writen to a dat file.
-        """
+        BaseMeshItem.__init__(self, data=None, is_dat=False)
         
+        # Coordinates and rotation of this node.
         self.coordinates = np.array(coordinates)
         self.rotation = rotation
-        self.n_global = None
-        self.is_dat = False
-        self.connected_elements = []
-        self.connected_couplings = []
-        # for the end nodes of a line
+        
+        # If this node is at the end of a line or curve created with multiple
+        # elements.
         self.is_end_node = False
 
     
-    def rotate(self, rotation, only_rotate_triads=False):
+    def rotate(self, rotation, origin=None, only_rotate_triads=False):
         """
-        Rotate the node.
-        Default values is that the nodes is rotated around the origin.
-        If only_rotate_triads is True, then only the triads are rotated,
+        Rotate this node. By default the node is rotated around the origin
+        (0,0,0), if the keyword argument origin is given, it is rotated around
+        that point.
+        If only_rotate_triads is True, then only the rotation is affected,
         the position of the node stays the same.
         """
         
-        # do not do anything if the node does not have a rotation
+        # If the node has a rotation, rotate it.
         if self.rotation:
-            # apply the rotation to the triads
             self.rotation = rotation * self.rotation
         
-        # rotate the positions (around origin)
+        # Rotate the positions (around origin).
         if not only_rotate_triads:
+            if not origin is None:
+                self.coordinates -= origin
             self.coordinates = rotation * self.coordinates
+            if not origin is None:
+                self.coordinates += origin
 
 
     def get_dat_line(self):
-        """ Return the line for the dat file for this element. """
+        """
+        Return the line that represents this node in the input file.
+        """
         
         return 'NODE {} COORD {} {} {}'.format(
             self.n_global,
