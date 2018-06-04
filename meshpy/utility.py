@@ -17,9 +17,9 @@ def get_git_sha(repo):
     sha = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=repo).decode('ascii').strip()
     return sha
 
-    
-# version number of beamgen
-__VERSION__ = get_git_sha(os.path.dirname(os.path.realpath(__file__)))
+
+__version__ = '0.0.1'
+__git_sha__ = get_git_sha(os.path.dirname(os.path.realpath(__file__)))
 
 
 def flatten(data):
