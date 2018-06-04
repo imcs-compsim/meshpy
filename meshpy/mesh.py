@@ -4,7 +4,7 @@ import numpy as np
 from _collections import OrderedDict
 
 # meshpy imports
-from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, Node, BaseMeshItem, Function
+from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, Node, BaseMeshItem, Function, Material
 
 
 # constans for sets and BCs
@@ -383,41 +383,6 @@ class GeometrySet(object):
         the set will not appear in the dat file.
         """
         return True
-        
-
-class Material(object):
-    """ Holds material definition for beams and solids. """
-    
-    def __init__(self, material_string, youngs_modulus, nu, density, diameter, shear_correction=0.75):
-        
-        self.material_string = material_string
-        self.youngs_modulus = youngs_modulus
-        self.nu = nu
-        self.density = density
-        self.diameter = diameter
-        self.area = diameter**2 * np.pi * 0.25
-        self.mom2 = (diameter*0.5)**4 * np.pi * 0.25
-        self.mom3 = self.mom2
-        self.polar = self.mom2 + self.mom3
-        self.shear_correction = shear_correction
-        
-        self.n_global = None
-        
-    
-    def get_dat_line(self):
-        """ Return the line for the dat file. """
-        return 'MAT {} {} YOUNG {} POISSONRATIO {} DENS {} CROSSAREA {} SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}'.format(
-            self.n_global,
-            self.material_string,
-            self.youngs_modulus,
-            self.nu,
-            self.density,
-            self.area,
-            self.shear_correction,
-            self.polar,
-            self.mom2,
-            self.mom3
-            )
 
 
 class Mesh(object):
