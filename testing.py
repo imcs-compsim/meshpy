@@ -4,12 +4,11 @@ import os
 import subprocess
 
 # import modules from meshgen
-from meshgen.rotation import Rotation
-from meshgen.inputfile import InputFile, InputSection
-from meshgen.mesh import Material, Mesh, Function, Beam3rHerm2Lin3, ContainerGeom, __LINE__, GeometrySet, BC
+from meshpy import Rotation, InputFile, InputSection, Material, Mesh, \
+    Function, Beam3rHerm2Lin3, ContainerGeom, __LINE__, GeometrySet, BC
 
 # global variables
-__testing_path__ = '/home/ivo/dev/inputgenerator-py/tests'
+__testing_path__ = '/home/ivo/dev/meshpy/tests'
 __testing_input__ = os.path.join(__testing_path__, 'input-solid-mesh')
 __testing_temp__ = os.path.join(__testing_path__, 'testing-tmp')
 __baci_path__ = '/home/ivo/baci/work/release'

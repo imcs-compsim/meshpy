@@ -5,9 +5,7 @@ import re
 from _collections import OrderedDict
 
 # meshgen imports
-from meshgen.utility import __VERSION__ # version number of beamgen git
-from meshgen.mesh import MeshInput
-from meshgen.utility import get_section_string
+from . import __VERSION__, MeshInput, get_section_string
 
  
 class InputLine(object):

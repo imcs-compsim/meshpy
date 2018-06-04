@@ -1,13 +1,10 @@
 
 # python packages
 import numpy as np
+from _collections import OrderedDict
 
 # meshgen imports
-from meshgen.rotation import Rotation
-from meshgen.utility import get_section_string, flatten
-from _collections import OrderedDict
-from numpy import dtype
-
+from . import Rotation, get_section_string, flatten
 
 
 # constans for sets and BCs
