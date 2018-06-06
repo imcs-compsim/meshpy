@@ -290,12 +290,13 @@ class ContainerBC(Container):
 class BC(object):
     """ This object is one BC. """
     
-    def __init__(self, set_item, bc_string, format_replacement=None):
+    def __init__(self, set_item, bc_string, format_replacement=None, bc_type=None):
         """
         Set the default values. Format_replacement will be called on string.
         """
         
         self.bc_string = bc_string
+        self.type = bc_type
         self.format_replacement = format_replacement
         
         if set_item.is_referenced:
@@ -403,6 +404,21 @@ class Mesh(object):
         # count the number of items created for numbering in the comments
         self.mesh_item_counter = {}
         
+        
+    def add(self, item):
+        """
+        Add an item depending on what it is
+        """
+        
+        if isinstance(item, Mesh):
+            self.add_mesh(item)
+        elif isinstance(item, Function):
+            self.add_function(item)
+        elif isinstance(item, BC):
+            self.add_bc(item)
+        else:
+            raise TypeError('Did not expect {}!'.format(type(item)))
+        
     
     def add_mesh(self, mesh, add_sets=True):
         """ Add other mesh to this one. """
@@ -444,8 +460,10 @@ class Mesh(object):
             node.connected_couplings = coupling
         
     
-    def add_bc(self, bc_type, bc):
+    def add_bc(self, bc):
         """ Add a boundary condition to this mesh. """
+        
+        bc_type = bc.type
         
         for key in self.sets.keys():
             if bc.set in self.sets[key]:

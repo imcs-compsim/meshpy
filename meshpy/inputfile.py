@@ -251,6 +251,9 @@ class InputFile(object):
             self.add_mesh(item)
         elif isinstance(item, InputSection):
             self.add_section(item)
+        else:
+            raise TypeError('Did not expect {}!'.format(type(item)))
+        
     
     def add_section(self, section):
         """

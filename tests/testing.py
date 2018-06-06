@@ -230,7 +230,7 @@ class TestInputFile(unittest.TestCase):
             'VARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 3 ' + \
             'TIMES 0.0 0.2 1.0 VALUES 0.0 1.0 1.0'
             )
-        mesh_honeycomb.add_function(ft)
+        mesh_honeycomb.add(ft)
             
         # add bcs
         bc_set = ContainerGeom()
@@ -238,14 +238,16 @@ class TestInputFile(unittest.TestCase):
         bc_set.append_item(__LINE__, GeometrySet('line2', nodes = honeycomb_set.point[1].nodes))
         mesh_honeycomb.sets.merge_containers(bc_set)
       
-        mesh_honeycomb.add_bc('dirich',
+        mesh_honeycomb.add(
                 BC(bc_set.line[0],
-                   'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0'
+                   'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
+                   bc_type='dirich'
                 ))
-        mesh_honeycomb.add_bc('dirich',
+        mesh_honeycomb.add(
                 BC(bc_set.line[1],
                    'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 5.0 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0',
-                   format_replacement=[ft]
+                   format_replacement=[ft],
+                   bc_type='dirich'
                 ))
         
         # add the beam mesh to the solid mesh
@@ -291,25 +293,25 @@ class TestInputFile(unittest.TestCase):
         cantilever_set = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [2,0,-5], [2,0,5], 3)
         
         # add fix at start of the beam
-        cantilever.add_bc(
-            'dirich',
+        cantilever.add(
             BC(
                 cantilever_set.point[0], # bc set
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0' # bc string
+                ,bc_type='dirich'
                 )
             )
         
         # add displacement controlled bc at end of the beam
         sin = Function('COMPONENT 0 FUNCTION sin(t*2*pi)')
         cos = Function('COMPONENT 0 FUNCTION cos(t*2*pi)')
-        cantilever.add_function(sin)
-        cantilever.add_function(cos)
-        cantilever.add_bc(
-            'dirich',
+        cantilever.add(sin)
+        cantilever.add(cos)
+        cantilever.add(
             BC(
                 cantilever_set.point[1], # bc set
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 3. 3. 0 0 0 0 0 0 0 FUNCT {} {} 0 0 0 0 0 0 0', # bc string
-                format_replacement=[cos,sin]
+                format_replacement=[cos,sin],
+                bc_type = 'dirich'
                 )
             )
         
@@ -346,14 +348,14 @@ class TestInputFile(unittest.TestCase):
         input_file = InputFile(
             maintainer='Ivo Steinbrecher', description='Varieties of honeycomb')
         
-        input_file.add_section(InputSection('PROBLEM SIZE', 'DIM 3'))
-        input_file.add_section(InputSection(
+        input_file.add(InputSection('PROBLEM SIZE', 'DIM 3'))
+        input_file.add(InputSection(
             'PROBLEM TYP',
             '''
             PROBLEMTYP                            Structure
             RESTART                               0
             '''))
-        input_file.add_section(InputSection(
+        input_file.add(InputSection(
             'IO',
             '''
             OUTPUT_BIN                            No
@@ -361,14 +363,14 @@ class TestInputFile(unittest.TestCase):
             FILESTEPS                             1000
             VERBOSITY                             Standard
             '''))
-        input_file.add_section(InputSection(
+        input_file.add(InputSection(
             'IO/RUNTIME VTK OUTPUT',
             '''
             OUTPUT_DATA_FORMAT                    binary
             INTERVAL_STEPS                        1
             EVERY_ITERATION                       No
             '''))
-        input_file.add_section(InputSection(
+        input_file.add(InputSection(
             'STRUCTURAL DYNAMIC',
             '''
             LINEAR_SOLVER                         1
@@ -387,13 +389,13 @@ class TestInputFile(unittest.TestCase):
             NORMCOMBI_RESFDISP                    And
             MAXITER                               20
             '''))
-        input_file.add_section(InputSection(
+        input_file.add(InputSection(
             'SOLVER 1',
             '''
             NAME                                  Structure_Solver
             SOLVER                                UMFPACK
             '''))
-        input_file.add_section(InputSection(
+        input_file.add(InputSection(
             'IO/RUNTIME VTK OUTPUT/BEAMS',
             '''
             OUTPUT_BEAMS                    Yes
@@ -407,7 +409,7 @@ class TestInputFile(unittest.TestCase):
         mesh = Mesh(name='mesh')
         material = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0, 1e-3, 0.2, shear_correction=1.1)
         ft = Function('COMPONENT 0 FUNCTION t')
-        mesh.add_function(ft)
+        mesh.add(ft)
     
         for vertical in [False, True]:
             for closed_top in [False, True]:
@@ -422,18 +424,20 @@ class TestInputFile(unittest.TestCase):
                     vertical=vertical,
                     closed_top=closed_top
                     )
-                mesh.add_bc('dirich',
+                mesh.add(
                         BC(honeycomb_set.point[0],
-                           'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0'
+                           'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
+                           bc_type='dirich'
                         ))
-                mesh.add_bc('dirich',
+                mesh.add(
                         BC(honeycomb_set.point[1],
                            'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 1. 1. 1. 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
-                           format_replacement=[ft]
+                           format_replacement=[ft],
+                           bc_type='dirich'
                         ))
         
         # add the beam mesh to the solid mesh
-        input_file.add_mesh(mesh)
+        input_file.add(mesh)
         
         # add results
         input_file.add(InputSection(
