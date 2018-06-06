@@ -304,8 +304,7 @@ class TestInputFile(unittest.TestCase):
         # add displacement controlled bc at end of the beam
         sin = Function('COMPONENT 0 FUNCTION sin(t*2*pi)')
         cos = Function('COMPONENT 0 FUNCTION cos(t*2*pi)')
-        cantilever.add(sin)
-        cantilever.add(cos)
+        cantilever.add(sin, cos)
         cantilever.add(
             BC(
                 cantilever_set.point[1], # bc set
@@ -408,9 +407,14 @@ class TestInputFile(unittest.TestCase):
         # create two meshes with honeycomb structure
         mesh = Mesh(name='mesh')
         material = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0, 1e-3, 0.2, shear_correction=1.1)
-        ft = Function('COMPONENT 0 FUNCTION t')
+        ft = []
+        ft.append(Function('COMPONENT 0 FUNCTION t'))
+        ft.append(Function('COMPONENT 0 FUNCTION t'))
+        ft.append(Function('COMPONENT 0 FUNCTION t'))
+        ft.append(Function('COMPONENT 0 FUNCTION t'))
         mesh.add(ft)
-    
+        
+        counter = 0
         for vertical in [False, True]:
             for closed_top in [False, True]:
                 mesh.translate(17 * np.array([1,0,0]))
@@ -432,9 +436,10 @@ class TestInputFile(unittest.TestCase):
                 mesh.add(
                         BC(honeycomb_set.point[1],
                            'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 1. 1. 1. 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
-                           format_replacement=[ft],
+                           format_replacement=[ft[counter]],
                            bc_type='dirich'
                         ))
+                counter += 1
         
         # add the beam mesh to the solid mesh
         input_file.add(mesh)

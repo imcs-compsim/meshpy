@@ -405,19 +405,29 @@ class Mesh(object):
         self.mesh_item_counter = {}
         
         
-    def add(self, item):
+    def add(self, *args):
         """
         Add an item depending on what it is
         """
         
-        if isinstance(item, Mesh):
-            self.add_mesh(item)
-        elif isinstance(item, Function):
-            self.add_function(item)
-        elif isinstance(item, BC):
-            self.add_bc(item)
+        if len(args) == 0:
+            raise ValueError('At least one argument should be given!')
+        elif len(args) == 1:
+            add_item = args[0]
+            if isinstance(add_item, Mesh):
+                self.add_mesh(add_item)
+            elif isinstance(add_item, Function):
+                self.add_function(add_item)
+            elif isinstance(add_item, BC):
+                self.add_bc(add_item)
+            elif isinstance(add_item, list):
+                for item in add_item:
+                    self.add(item)
+            else:
+                raise TypeError('Did not expect {}!'.format(type(item)))
         else:
-            raise TypeError('Did not expect {}!'.format(type(item)))
+            for item in args:
+                self.add(item)
         
     
     def add_mesh(self, mesh, add_sets=True):
