@@ -5,7 +5,7 @@ import re
 from _collections import OrderedDict
 
 # meshgen imports
-from . import __git_sha__, MeshInput, get_section_string, Mesh
+from . import __git_sha__, get_section_string, Mesh, BaseMeshItem, get_section_string, get_type_bc, get_type_geometry
 
  
 class InputLine(object):
@@ -181,11 +181,12 @@ class InputSection(object):
 
 
 
-class InputFile(object):
+class InputFile(Mesh):
     """ A item that represents a single baci input file. """
     
     def __init__(self, maintainer = '', description = None, dat_file=None):
-        """ Initialize the main variables. """
+        
+        Mesh.__init__(self, name='root')
         
         # data for header
         self.maintainer = maintainer
@@ -193,9 +194,6 @@ class InputFile(object):
         
         # dictionary for all sections other than mesh sections
         self.sections = OrderedDict()
-        
-        # set mesh object
-        self.mesh = MeshInput()
         
         if not dat_file is None:
             self.read_dat(dat_file)
@@ -236,24 +234,72 @@ class InputFile(object):
             start = re.search(r'[^-]', name).start()
             section_name = name[start:]
             
-            # add to the mesh and check if it should be part of the mesh or before or after
-            section_return_value = self.mesh._add_dat_section(section_name, section_data) 
-            if section_return_value == 1:
-                # add to section to the first section dictionary self
+            """
+            Check if the section has to be added to the mesh of if it is just a
+            basic input section.
+            """
+            
+            def add_bc(section_header):
+                """ Add boundary conditions to the object. """
+                
+                for i, item in enumerate(section_data):
+                    # first line is number of BCs skip this one
+                    if i > 0:
+                        self.bc[get_type_bc(section_header, 'enum'), get_type_geometry(section_header, 'enum')].append(BaseMeshItem(item))
+            
+            def add_set(section_header):
+                """ Add sets of points, lines, surfs or volumes to item. """
+                
+                if len(section_data) > 0:
+                    # look for the individual sets 
+                    last_index = 1
+                    dat_list = []
+                    for line in section_data:
+                        if last_index == int(line.split()[3]):
+                            dat_list.append(line)
+                        else:
+                            last_index = int(line.split()[3])
+                            self.sets[section_header].append(BaseMeshItem(dat_list))
+                            dat_list = [line]
+                    self.sets[section_header].append(BaseMeshItem(dat_list))
+            
+            if section_name == 'MATERIALS':
+                for line in section_data:
+                    self.materials.append(BaseMeshItem(line))
+            elif section_name.endswith('CONDITIONS'):
+                add_bc(section_name)
+            elif section_name.endswith('TOPOLOGY'):
+                add_set(section_name)
+            elif section_name == 'NODE COORDS':
+                for line in section_data:
+                    self.nodes.append(BaseMeshItem(line))
+            elif section_name == 'STRUCTURE ELEMENTS':
+                for line in section_data:
+                    self.elements.append(BaseMeshItem(line))
+            elif section_name == 'DESIGN DESCRIPTION':
+                pass
+            elif section_name.startswith('FUNCT'):
+                self.functions.append(BaseMeshItem(section_data))
+            else:
+                # descion is not in mesh
                 self.add_section(InputSection(section_name, data=section_data))
+            
+        
+        
+        
+        
+        
 
-    def add(self, item):
+    def add(self, *args):
         """
         Add an item depending on what it is
         """
         
-        if isinstance(item, Mesh):
-            self.add_mesh(item)
-        elif isinstance(item, InputSection):
-            self.add_section(item)
+        if len(args) == 1 and isinstance(args[0], InputSection):
+            self.add_section(args[0])
         else:
-            raise TypeError('Did not expect {}!'.format(type(item)))
-        
+            Mesh.add(self, *args)
+    
     
     def add_section(self, section):
         """
@@ -311,7 +357,99 @@ class InputFile(object):
             if not section.name in skip_sections: 
                 lines.extend(section.get_dat_lines())
         
-        lines.extend(self.mesh.get_dat_lines(print_set_names=print_set_names, print_all_sets=print_all_sets))
+        """
+        Get the lines for the input file that contain the information for
+        the mesh.
+        """
+        
+        def set_n_global(data_list):
+            """ Set n_global in every item of list. """
+            for i, item in enumerate(data_list):
+                item.n_global = i + 1
+        
+        def get_section_dat(section_name, data_list, header_lines=None):
+            """
+            Output a section name and apply the get_dat_line for each list item.
+            """
+            
+            lines.append(get_section_string(section_name))
+            if header_lines:
+                if type(header_lines) == list:
+                    lines.extend(header_lines)
+                elif type(header_lines) == str:
+                    lines.append(header_lines)
+                else:
+                    print('ERROR, you can either add a list or a string')
+            for item in data_list:
+                lines.append(item.get_dat_line())
+        
+        
+        # first all nodes, elements, sets and couplings are assigned a global value
+        set_n_global(self.nodes)
+        set_n_global(self.elements)
+        set_n_global(self.materials)
+        set_n_global(self.functions)
+        
+        # first set referenc counter of sets to False, then add bc and then renumber sets
+        for i, coupling in enumerate(self.couplings):
+            coupling.n_global = i + 1
+            if coupling.node_set.is_referenced:
+                print('Error this set can not be referenced by something else')
+                print(coupling.node_set.nodes[0].coordinates)
+                print(type(coupling.node_set))
+            else:
+                coupling.node_set.is_referenced = True
+        self.bc.set_global()
+        self.sets.set_global(all_sets=print_all_sets)
+
+        
+        # add the material data
+        get_section_dat('MATERIALS', self.materials)
+        
+        # add the functions
+        for i, funct in enumerate(self.functions):
+            lines.append(get_section_string('FUNCT{}'.format(str(i+1))))
+            lines.extend(funct.get_dat_lines())
+        
+        # add the design descriptions
+        lines.append(get_section_string('DESIGN DESCRIPTION'))
+        lines.append('NDPOINT {}'.format(len(self.sets.get_sets('point', all_sets=print_all_sets))))
+        lines.append('NDLINE {}'.format(len(self.sets.get_sets('line', all_sets=print_all_sets))))
+        lines.append('NDSURF {}'.format(len(self.sets.get_sets('surf', all_sets=print_all_sets))))
+        lines.append('NDVOL {}'.format(len(self.sets.get_sets('vol', all_sets=print_all_sets))))
+        
+        # add boundary conditions
+        for key1 in self.bc.keys():
+            for key2 in self.bc[key1].keys():
+                if len(self.bc[key1, key2]) > 0:
+                    lines.append(get_section_string(get_type_bc(key1, key2)))
+                    lines.append('{} {}'.format(get_type_geometry(key2, 'bccounter'), len(self.bc[key1, key2])))
+                    for bc in self.bc[key1, key2]:
+                        lines.append(bc.get_dat_line())
+
+        # add the couplings
+        lines.append(get_section_string('DESIGN POINT COUPLING CONDITIONS'))
+        lines.append('DPOINT {}'.format(len(self.couplings)))
+        for coupling in self.couplings:
+            lines.append(coupling.get_dat_line())
+        
+        # add the node sets
+        for key in self.sets.keys():
+            if len(self.sets[key]) > 0:
+                lines.append(get_section_string(get_type_geometry(key, 'setsection')))
+                # print the description for the sets
+                for mesh_set in self.sets.get_sets(key, all_sets=print_all_sets):
+                    if (not mesh_set.is_dat) and print_set_names:
+                        lines.append(mesh_set.get_dat_name())
+                for mesh_set in self.sets.get_sets(key, all_sets=print_all_sets):
+                    lines.extend(mesh_set.get_dat_lines())
+                    
+        # add the nodal data
+        get_section_dat('NODE COORDS', self.nodes)
+
+        # add the element data
+        get_section_dat('STRUCTURE ELEMENTS', self.elements)
+        
         
         # the last section is END
         lines.extend(InputSection('END').get_dat_lines())
@@ -337,15 +475,5 @@ class InputFile(object):
         if self.description:
             string += '\n// Description: {}'.format(self.description)
         return string
-
-    
-    def add_mesh(self, mesh, *args, **kwargs):
-        """ Merge the mesh item of the input file with another mesh. """
-        
-        self.mesh.add_mesh(mesh, *args, **kwargs)
-
-
-
-
 
 

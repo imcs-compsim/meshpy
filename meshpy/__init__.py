@@ -10,6 +10,6 @@ from .node import Node
 from .element import Element
 from .element_beam import Beam, Beam3rHerm2Lin3
 
-from .mesh import MeshInput, Mesh, Function, \
-    ContainerGeom, __LINE__, GeometrySet, BC
+from .mesh import Mesh, Function, \
+    ContainerGeom, __LINE__, GeometrySet, BC, get_type_geometry, get_type_bc
 from .inputfile import InputFile, InputSection
