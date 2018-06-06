@@ -424,7 +424,7 @@ class Mesh(object):
                 for item in add_item:
                     self.add(item, **kwargs)
             else:
-                raise TypeError('Did not expect {}!'.format(type(item)))
+                raise TypeError('Did not expect {}!'.format(type(add_item)))
         else:
             for item in args:
                 self.add(item, **kwargs)

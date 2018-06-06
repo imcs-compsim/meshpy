@@ -348,20 +348,16 @@ class TestInputFile(unittest.TestCase):
             maintainer='Ivo Steinbrecher', description='Varieties of honeycomb')
         
         input_file.add(InputSection('PROBLEM SIZE', 'DIM 3'))
-        input_file.add(InputSection(
-            'PROBLEM TYP',
-            '''
-            PROBLEMTYP                            Structure
-            RESTART                               0
-            '''))
-        input_file.add(InputSection(
-            'IO',
-            '''
-            OUTPUT_BIN                            No
-            STRUCT_DISP                           No
-            FILESTEPS                             1000
-            VERBOSITY                             Standard
-            '''))
+        input_file.add('''
+        ------------------------------------PROBLEM TYP
+        PROBLEMTYP                            Structure
+        RESTART                               0
+        --------------------------------------IO
+        OUTPUT_BIN                            No
+        STRUCT_DISP                           No
+        FILESTEPS                             1000
+        VERBOSITY                             Standard
+        ''')
         input_file.add(InputSection(
             'IO/RUNTIME VTK OUTPUT',
             '''

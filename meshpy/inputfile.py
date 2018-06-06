@@ -202,19 +202,36 @@ class InputFile(Mesh):
     def read_dat(self, file_path):
         """ Read a .dat input file and add the content to this object. """
         
+        with open(file_path) as dat_file:
+            lines = []
+            for line in dat_file:
+                lines.append(line)
+        self._add_dat_lines(lines)
+    
+    
+    def _add_dat_lines(self, data):
+        
+        # check input
+        if isinstance(data, list):
+            lines = data
+        elif isinstance(data, str):
+            lines = data.split('\n')
+        else:
+            raise TypeError('Expected list or string but got {}'.format(type(data)))
+            
+        
         # empty temp variables
         section_line = None
         section_data = []
-                
-        with open(file_path) as dat_file:
-            for line in dat_file:
-                line = line.rstrip()
-                if line.startswith('----------'):
-                    self._add_dat_section(section_line, section_data)
-                    section_line = line
-                    section_data = []
-                else:
-                    section_data.append(line)
+
+        for line in lines:
+            line = line.strip()
+            if line.startswith('----------'):
+                self._add_dat_section(section_line, section_data)
+                section_line = line
+                section_data = []
+            else:
+                section_data.append(line)
         self._add_dat_section(section_line, section_data)
     
     
@@ -297,6 +314,8 @@ class InputFile(Mesh):
         
         if len(args) == 1 and isinstance(args[0], InputSection):
             self.add_section(args[0], **kwargs)
+        elif len(args) == 1 and isinstance(args[0], str):
+            self._add_dat_lines(args[0])
         else:
             Mesh.add(self, *args, **kwargs)
     
