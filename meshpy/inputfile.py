@@ -290,15 +290,15 @@ class InputFile(Mesh):
         
         
 
-    def add(self, *args):
+    def add(self, *args, **kwargs):
         """
         Add an item depending on what it is
         """
         
         if len(args) == 1 and isinstance(args[0], InputSection):
-            self.add_section(args[0])
+            self.add_section(args[0], **kwargs)
         else:
-            Mesh.add(self, *args)
+            Mesh.add(self, *args, **kwargs)
     
     
     def add_section(self, section):

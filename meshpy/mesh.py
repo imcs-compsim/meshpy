@@ -405,7 +405,7 @@ class Mesh(object):
         self.mesh_item_counter = {}
         
         
-    def add(self, *args):
+    def add(self, *args, **kwargs):
         """
         Add an item depending on what it is
         """
@@ -415,19 +415,19 @@ class Mesh(object):
         elif len(args) == 1:
             add_item = args[0]
             if isinstance(add_item, Mesh):
-                self.add_mesh(add_item)
+                self.add_mesh(add_item, **kwargs)
             elif isinstance(add_item, Function):
-                self.add_function(add_item)
+                self.add_function(add_item, **kwargs)
             elif isinstance(add_item, BC):
-                self.add_bc(add_item)
+                self.add_bc(add_item, **kwargs)
             elif isinstance(add_item, list):
                 for item in add_item:
-                    self.add(item)
+                    self.add(item, **kwargs)
             else:
                 raise TypeError('Did not expect {}!'.format(type(item)))
         else:
             for item in args:
-                self.add(item)
+                self.add(item, **kwargs)
         
     
     def add_mesh(self, mesh, add_sets=True):
