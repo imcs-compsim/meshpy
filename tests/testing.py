@@ -77,7 +77,7 @@ class TestRotation(unittest.TestCase):
             angle = theta
             
             rotation = Rotation(axis, angle)
-            quaternion = Rotation.from_quaternion(rotation.get_quaternion())
+            quaternion = Rotation(rotation.get_quaternion())
             rotation_matrix = Rotation.from_rotation_matrix(quaternion.get_rotation_matrix())
             
             self.assertAlmostEqual(np.linalg.norm(rot3D - rotation_matrix.get_rotation_matrix()), 0.)
@@ -120,7 +120,7 @@ class TestRotation(unittest.TestCase):
         self.assertAlmostEqual(quaternion_diff_norm(quaternion, rotation_euler.get_quaternion()), 0.)
         self.assertAlmostEqual(quaternion_diff_norm(
             quaternion,
-            Rotation.from_quaternion(rotation_euler.get_quaternion()).get_quaternion()
+            Rotation(rotation_euler.get_quaternion()).get_quaternion()
             ), 0.)
         self.assertAlmostEqual(quaternion_diff_norm(
             quaternion,
