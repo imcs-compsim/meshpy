@@ -33,7 +33,7 @@ class Rotation(object):
             if norm < self.eps:
                 raise ValueError('The rotation axis can not be a zero vector!')
             self.q = np.zeros(4);
-            if phi < self.eps:
+            if np.abs(phi) < self.eps:
                 self.q[0] = 1
             else:
                 self.q[0] = np.cos(0.5*phi)
