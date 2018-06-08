@@ -420,6 +420,8 @@ class Mesh(object):
                 self.add_function(add_item, **kwargs)
             elif isinstance(add_item, BC):
                 self.add_bc(add_item, **kwargs)
+            elif isinstance(add_item, Material):
+                self.add_material(add_item, **kwargs)
             elif isinstance(add_item, list):
                 for item in add_item:
                     self.add(item, **kwargs)

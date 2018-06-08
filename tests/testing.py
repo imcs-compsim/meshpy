@@ -147,14 +147,17 @@ class TestInputFile(unittest.TestCase):
         Run baci with a testinput and return the output.
         """
         
+        test_name = os.path.splitext(os.path.basename(input_file))[0]
         child = subprocess.Popen([
             'mpirun', '-np', str(n_proc),
             __baci_release__,
             os.path.join(__testing_path__, input_file),
-            os.path.join(__testing_temp__, 'xxx')
+            os.path.join(__testing_temp__, 'xxx_' + test_name)
             ], cwd=__testing_temp__, stdout=subprocess.PIPE)
         child.communicate()[0]
-        self.assertEqual(0, child.returncode, msg=input_file)
+        self.assertEqual(0, child.returncode,
+            msg='Test {} failed!'.format(test_name)
+            )
         
         # if successful delete tmp directory
         if int(child.returncode) == 0:
