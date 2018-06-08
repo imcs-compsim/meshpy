@@ -153,7 +153,8 @@ class Rotation(object):
         """
         
         if isinstance(other, Rotation):
-            if np.linalg.norm(self.q - other.q) < self.eps:
+            if (np.linalg.norm(self.q - other.q) < self.eps) or \
+                (np.linalg.norm(self.q + other.q) < self.eps):
                 return True
             else:
                 return False
