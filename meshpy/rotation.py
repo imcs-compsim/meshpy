@@ -146,6 +146,20 @@ class Rotation(object):
         else:
             print("Error, not implemented, does not make sense anyway!")
     
+    
+    def __eq__(self, other):
+        """
+        Check if the other rotation is equal to this one
+        """
+        
+        if isinstance(other, Rotation):
+            if np.linalg.norm(self.q - other.q) < self.eps:
+                return True
+            else:
+                return False
+        else:
+            return object.__eq__(self, other)
+    
         
     def get_dat(self):
         """
