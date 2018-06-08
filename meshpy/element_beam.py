@@ -46,6 +46,15 @@ class Beam(Element):
         self.nodes = [None for i in range(len(self.node_create))]
         
         if not start_node is None:
+            
+            # check if start node has the same position and rotation as the
+            # given functions
+            if np.linalg.norm(position_function(-1)-start_node.coordinates) > 1e-10:
+                print(position_function(-1))
+                print(start_node.coordinates)
+                raise ValueError('Coordinates of function and start nodes do not match!')
+            
+            # TODO: check rotation
             self.nodes[0] = start_node
         
         # Loop over local nodes.
