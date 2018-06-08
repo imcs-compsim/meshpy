@@ -516,15 +516,10 @@ class Mesh(object):
         rot_new = np.zeros([len(self.nodes),4])
         for i, node in enumerate(self.nodes):
             if not node.is_dat:
-                tmp = node.rotation.get_quaternion()
-                quaternions[i,0] = tmp[0]
-                quaternions[i,1:] = tmp[1]
+                quaternions[i,:] = node.rotation.get_quaternion()
         
         # get quaternion of rotation
-        rot_quaternion = np.zeros(4)
-        tmp = rotation.get_quaternion()
-        rot_quaternion[0] = tmp[0]
-        rot_quaternion[1:] = tmp[1]
+        rot_quaternion = rotation.get_quaternion()
         
         # get the new quaternions of the nodes
         rot_new[:,0] = quaternions[:,0] * rot_quaternion[0] - np.dot(quaternions[:,1:], rot_quaternion[1:])
@@ -533,18 +528,6 @@ class Mesh(object):
             np.dot(np.transpose([quaternions[:,0]]),[rot_quaternion[1:]]) -
             np.cross(quaternions[:,1:], rot_quaternion[1:])
             )
-        # transform to rotation vector
-        cos = rot_new[:,0]
-        sin = np.linalg.norm(rot_new[:,1:],axis=1)
-        
-        phi = 2*np.arctan2(sin, cos)
-        n = rot_new[:,1:]
-        for i in range(len(n)):
-            if np.abs(sin[i] < 1e-10):
-                n[i,:] = [1,0,0]
-                phi[i] = 0
-            else:
-                n[i,:] = n[i,:] / sin[i]
         
         # rotate the position of the nodes
         R = rotation.get_rotation_matrix()
@@ -552,8 +535,7 @@ class Mesh(object):
         # set the new rotations and positions
         for i, node in enumerate(self.nodes):
             if not node.is_dat:
-                node.rotation.phi = phi[i]
-                node.rotation.n = n[i,:]
+                node.rotation.q = rot_new[i,:] 
         
                 # move coordinates to origin
                 if not origin is None:

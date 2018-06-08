@@ -34,26 +34,6 @@ def roation_matrix(axis, alpha):
     rot3D[np.ix_(index,index)] = rot2D
     return rot3D
 
-
-def quaternion_diff_norm(quaternion1, quaternion2):
-    """
-    Simple norm of the difference of two quaternions.
-    """
-    
-    if not len(quaternion1) == 4:
-        tmp1 = np.zeros(4)
-        tmp1[0] = quaternion1[0]
-        tmp1[1:] = quaternion1[1]
-    else:
-        tmp1 = np.array(quaternion1)
-    if not len(quaternion2) == 4:
-        tmp2 = np.zeros(4)
-        tmp2[0] = quaternion2[0]
-        tmp2[1:] = quaternion2[1]
-    else:
-        tmp2 = np.array(quaternion2)
-    return np.linalg.norm(tmp1 - tmp2)
-
         
 class TestRotation(unittest.TestCase):
     """
@@ -77,7 +57,7 @@ class TestRotation(unittest.TestCase):
             angle = theta
             
             rotation = Rotation(axis, angle)
-            quaternion = Rotation.from_quaternion(rotation.get_quaternion())
+            quaternion = Rotation(rotation.get_quaternion())
             rotation_matrix = Rotation.from_rotation_matrix(quaternion.get_rotation_matrix())
             
             self.assertAlmostEqual(np.linalg.norm(rot3D - rotation_matrix.get_rotation_matrix()), 0.)
@@ -117,16 +97,27 @@ class TestRotation(unittest.TestCase):
         quaternion[1] = cy * sr * cp - sy * cr * sp
         quaternion[2] = cy * cr * sp + sy * sr * cp
         quaternion[3] = sy * cr * cp - cy * sr * sp
-        self.assertAlmostEqual(quaternion_diff_norm(quaternion, rotation_euler.get_quaternion()), 0.)
-        self.assertAlmostEqual(quaternion_diff_norm(
-            quaternion,
-            Rotation.from_quaternion(rotation_euler.get_quaternion()).get_quaternion()
-            ), 0.)
-        self.assertAlmostEqual(quaternion_diff_norm(
-            quaternion,
-            Rotation.from_rotation_matrix(R_euler).get_quaternion()
-            ), 0.)
+        self.assertTrue(Rotation(quaternion) == rotation_euler)
+        self.assertTrue(Rotation(quaternion) == Rotation(rotation_euler.get_quaternion()))
+        self.assertTrue(Rotation(quaternion) == Rotation.from_rotation_matrix(R_euler))
+    
+    
+    def test_negative_angles(self):
+        """
+        Check if a rotation is created correctly if a negative angle or a large
+        angle is given.
+        """
 
+        vector = np.array([-1.234243,-2.334343,-1.123123])
+        phi = -12.152101868665
+        rot = Rotation(vector, phi)
+        for i in range(2):
+            self.assertTrue(rot == Rotation(vector, phi + 2*i*np.pi))
+        
+        q = np.array([0.97862427,-0.0884585,-0.16730294,-0.0804945])
+        self.assertTrue(Rotation(q)==Rotation(-q))
+            
+        
 
 class TestInputFile(unittest.TestCase):
     """
