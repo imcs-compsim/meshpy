@@ -189,7 +189,7 @@ class TestMeshpy(unittest.TestCase):
         mesh_2.write_input_file(file2, header=False)
         self.assertTrue(
             self.compare_files(file1, file2),
-            'Compare roation node-wise and mesh-wise'
+            'Compare rotation node-wise and mesh-wise'
             )
         
 
