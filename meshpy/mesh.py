@@ -525,41 +525,55 @@ class Mesh(object):
     def rotate(self, rotation, origin=None):
         """ Rotate the geometry about the origin. """
         
-        # get numpy array with all quaternions for the nodes
-        quaternions = np.zeros([len(self.nodes),4])
-        rot_new = np.zeros([len(self.nodes),4])
+        # get numpy array with all quaternions and positions for the nodes
+        rot1 = np.zeros([len(self.nodes),4],dtype=np.longdouble)
+        pos = np.zeros([len(self.nodes),3],dtype=np.longdouble)
         for i, node in enumerate(self.nodes):
             if not node.is_dat:
-                quaternions[i,:] = node.rotation.get_quaternion()
+                rot1[i,:] = node.rotation.get_quaternion()
+                pos[i,:] = node.coordinates
         
-        # get quaternion of rotation
-        rot_quaternion = rotation.get_quaternion()
+        # check if origin has to be added
+        if not origin is None:
+            pos -= origin
         
-        # get the new quaternions of the nodes
-        rot_new[:,0] = quaternions[:,0] * rot_quaternion[0] - np.dot(quaternions[:,1:], rot_quaternion[1:])
-        rot_new[:,1:] = (
-            quaternions[:,1:] * rot_quaternion[0] + 
-            np.dot(np.transpose([quaternions[:,0]]),[rot_quaternion[1:]]) -
-            np.cross(quaternions[:,1:], rot_quaternion[1:])
-            )
+        # new arrays
+        rotnew = np.zeros_like(rot1)
+        posnew = np.zeros_like(pos)
         
-        # rotate the position of the nodes
-        R = rotation.get_rotation_matrix()
+        # additional rotation
+        rot2 = rotation.get_quaternion()
         
-        # set the new rotations and positions
-        for i, node in enumerate(self.nodes):
-            if not node.is_dat:
-                node.rotation.q = rot_new[i,:] 
+        # temp array for AceGen variables
+        temp_val=[None for i in range(11)]
         
-                # move coordinates to origin
-                if not origin is None:
-                    node.coordinates -= origin
-
-                node.coordinates = np.dot(R, node.coordinates)
+        # code generated with AceGen (rotation.nb)
+        temp_val[0]=2*10**0*rot2[1]*rot2[2]
+        temp_val[1]=2*10**0*rot2[0]*rot2[3]
+        temp_val[2]=2*10**0*rot2[0]*rot2[2]
+        temp_val[3]=2*10**0*rot2[1]*rot2[3]
+        temp_val[4]=rot2[0]**2
+        temp_val[5]=rot2[1]**2
+        temp_val[6]=rot2[2]**2
+        temp_val[10]=temp_val[4]-temp_val[6]
+        temp_val[7]=rot2[3]**2
+        temp_val[8]=2*10**0*rot2[0]*rot2[1]
+        temp_val[9]=2*10**0*rot2[2]*rot2[3]
+        posnew[:,0]=pos[:,1]*(temp_val[0]-temp_val[1])+pos[:,2]*(temp_val[2]+temp_val[3])+pos[:,0]*(temp_val[5]-temp_val[7]+temp_val[10])
+        posnew[:,1]=pos[:,0]*(temp_val[0]+temp_val[1])+pos[:,1]*(temp_val[4]-temp_val[5]+temp_val[6]-temp_val[7])+pos[:,2]*(-temp_val[8] +temp_val[9])
+        posnew[:,2]=pos[:,0]*(-temp_val[2]+temp_val[3])+pos[:,1]*(temp_val[8]+temp_val[9])+pos[:,2]*(-temp_val[5]+temp_val[7]+temp_val[10])
+        rotnew[:,0]=rot1[:,0]*rot2[0]-rot1[:,1]*rot2[1]-rot1[:,2]*rot2[2]-rot1[:,3]*rot2[3]
+        rotnew[:,1]=rot1[:,1]*rot2[0]+rot1[:,0]*rot2[1]+rot1[:,3]*rot2[2]-rot1[:,2]*rot2[3]
+        rotnew[:,2]=rot1[:,2]*rot2[0]-rot1[:,3]*rot2[1]+rot1[:,0]*rot2[2]+rot1[:,1]*rot2[3]
+        rotnew[:,3]=rot1[:,3]*rot2[0]+rot1[:,2]*rot2[1]-rot1[:,1]*rot2[2]+rot1[:,0]*rot2[3]
                 
-                # move coordinates back from origin
-                if not origin is None:
-                    node.coordinates += origin
+        if not origin is None:
+            posnew += origin
+            
+        for i, node in enumerate(self.nodes):
+            if not node.is_dat:
+                node.rotation.q = rotnew[i,:]
+                node.coordinates = posnew[i,:]
     
     
     def add_connections(self, input_list, connection_type='fix'):
@@ -681,12 +695,10 @@ class Mesh(object):
                 node.rotate(Rotation([0,0,1], phi), only_rotate_triads=True)
                 
                 # set the new coordinates
-                node.coordinates = np.array([
-                    r * np.cos(phi),
-                    r * np.sin(phi),
-                    node.coordinates[2]
-                    ])
-                
+                node.coordinates[0] = r * np.cos(phi)
+                node.coordinates[1] = r * np.sin(phi)
+    
+    
     def _get_mesh_name(self, name, mesh_type):
         """
         Return the name for the mesh item. This name will be the prefix for
@@ -741,7 +753,8 @@ class Mesh(object):
         #name = self._get_mesh_name(name, 'line')
         
         # Direction vector of line
-        direction = np.array(end_point) - np.array(start_point)
+        direction = np.array(end_point,dtype=np.longdouble) - \
+            np.array(start_point,dtype=np.longdouble)
         
         # Rotation for this line (is constant on the whole line)
         t1 = direction / np.linalg.norm(direction)
