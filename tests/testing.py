@@ -3,10 +3,11 @@ import numpy as np
 import os
 import subprocess
 import shutil
+import filecmp
 
 # import modules from meshgen
 from meshpy import Rotation, InputFile, InputSection, Material, Mesh, \
-    Function, Beam3rHerm2Lin3, ContainerGeom, __LINE__, GeometrySet, BC
+    Function, Beam3rHerm2Lin3, ContainerGeom, __LINE__, GeometrySet, BC, Node
 
 # global variables
 __testing_path__ = '/home/ivo/dev/meshpy/tests'
@@ -14,6 +15,15 @@ __testing_input__ = os.path.join(__testing_path__, 'input-solid-mesh')
 __testing_temp__ = os.path.join(__testing_path__, 'testing-tmp')
 __baci_path__ = '/home/ivo/baci/work/release'
 __baci_release__ = os.path.join(__baci_path__, 'baci-release')
+
+
+def check_tmp_dir():
+    """
+    Check if the temp directory exists. If not create it.
+    """
+    
+    if not os.path.exists(__testing_temp__):
+        os.makedirs(__testing_temp__)
 
 
 def roation_matrix(axis, alpha):
@@ -117,21 +127,76 @@ class TestRotation(unittest.TestCase):
         q = np.array([0.97862427,-0.0884585,-0.16730294,-0.0804945])
         self.assertTrue(Rotation(q)==Rotation(-q))
             
+
+
+def create_test_mesh(mesh):
+    """
+    Fill the mesh with a couple of test nodes
+    """
+    
+    mesh.add(Node([1.2323342333,2.2314234,4.12313123123], rotation=Rotation([1,2,3],np.pi)))
+    mesh.add(Node([123.23342333,22.34234,0.4512313123123], rotation=Rotation([-1,4,-3],3.54545*np.pi)))
+    mesh.add(Node([1, 2, 3], rotation=Rotation([1,1,1],2*np.pi)))
+    mat = Material('tmp', 1, 0.3, 0.1, 0.2, shear_correction=1.1)    
+    tmp_beam = Beam3rHerm2Lin3(material=mat, nodes=mesh.nodes)
+    mesh.add(tmp_beam)
+    mesh.add(mat)
+
+
+ 
+class TestMeshpy(unittest.TestCase):
+    """
+    Test various stuff from the meshpy module.
+    """
+    
+    def compare_files(self, file1, file2):
+        """
+        Compare two files. If they are not identical open kompare and show
+        differences.
+        """
+        
+        compare = filecmp.cmp(file1, file2, shallow=False)
+        if not compare:
+            child = subprocess.Popen(['kompare', file1, file2], stderr=subprocess.PIPE)
+            child.communicate()
+        return compare
+    
+    
+    def test_mesh_rotations(self):
+        """
+        Check if the Mesh function rotation gives the same results as rotating
+        each node it self. 
+        """
+         
+        mesh_ref = InputFile()
+        create_test_mesh(mesh_ref)
+        
+        mesh_2 = InputFile()
+        create_test_mesh(mesh_2)
+        
+        rot = Rotation([1.1213,-12.2323,-0.123123],1.123123)
+        origin = [.1221, -112.11212, 12.12112]
+        
+        for node in mesh_ref.nodes:
+            node.rotate(rot, origin=origin)
+        
+        mesh_2.rotate(rot, origin=origin)
+        
+        check_tmp_dir()
+        file1 = os.path.join(__testing_temp__, 'mesh_ref.dat')
+        file2 = os.path.join(__testing_temp__, 'mesh_2.dat')
+        mesh_ref.write_input_file(file1, header=False)
+        mesh_2.write_input_file(file2, header=False)
+        self.assertTrue(
+            self.compare_files(file1, file2),
+            'Compare roation node-wise and mesh-wise'
+            )
         
 
-class TestInputFile(unittest.TestCase):
+class TestFullBaci(unittest.TestCase):
     """
-    Test the input files created.
+    Test the input files created with baci.
     """
-    
-    def check_tmp_dir(self):
-        """
-        Check if the temp directory exists. If not create it.
-        """
-        
-        if not os.path.exists(__testing_temp__):
-            os.makedirs(__testing_temp__)
-    
     
     def run_baci_test(self, input_file, n_proc=2):
         """
@@ -248,7 +313,7 @@ class TestInputFile(unittest.TestCase):
         input_file.add(mesh_honeycomb)
             
         # write input file
-        self.check_tmp_dir()
+        check_tmp_dir()
         input_dat_file = os.path.join(__testing_temp__, 'honeycomb-sphere.dat')
         input_file.write_input_file(input_dat_file, print_set_names=False, print_all_sets=False)
         
@@ -324,7 +389,7 @@ class TestInputFile(unittest.TestCase):
             '''))
             
         # write input file
-        self.check_tmp_dir()
+        check_tmp_dir()
         input_dat_file = os.path.join(__testing_temp__, 'tube.dat')
         input_file.write_input_file(input_dat_file)
         
@@ -454,7 +519,7 @@ class TestInputFile(unittest.TestCase):
             ))
         
         # write input file
-        self.check_tmp_dir()
+        check_tmp_dir()
         input_dat_file = os.path.join(__testing_temp__, 'honeycomb-variants.dat')
         input_file.write_input_file(input_dat_file)
         
@@ -464,3 +529,4 @@ class TestInputFile(unittest.TestCase):
 
 if __name__ == '__main__':
     unittest.main()
+    pass

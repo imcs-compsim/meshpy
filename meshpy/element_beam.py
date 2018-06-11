@@ -12,8 +12,8 @@ class Beam(Element):
     A base class for a beam element. Derived from the base element.
     """
     
-    def __init__(self, nodes_create=None, material=None):
-        Element.__init__(self, nodes=None, material=material)
+    def __init__(self, nodes_create=None, material=None, nodes=None):
+        Element.__init__(self, nodes=nodes, material=material)
         
         # A array that defines the creation of the nodes for this beam along a
         # line. Details are in the docstring for create_beam.
@@ -80,14 +80,19 @@ class Beam(Element):
 class Beam3rHerm2Lin3(Beam):
     """ Represents a BEAM3R HERM2LIN3 element. """
     
-    def __init__(self, material=None):
+    def __init__(self, material=None, nodes=None):
         
         nodes_create = [
             [-1, True, False],
             [0, True, True],
             [1, True, False]
             ]
-        Beam.__init__(self, nodes_create=nodes_create, material=material)    
+        Beam.__init__(
+            self,
+            nodes=nodes,
+            nodes_create=nodes_create,
+            material=material
+            )    
     
     
     def get_dat_line(self):

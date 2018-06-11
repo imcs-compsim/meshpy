@@ -15,7 +15,7 @@ class Node(BaseMeshItem):
         BaseMeshItem.__init__(self, data=None, is_dat=False, is_referenced=False)
         
         # Coordinates and rotation of this node.
-        self.coordinates = np.array(coordinates)
+        self.coordinates = np.array(coordinates, dtype=np.float)
         self.rotation = rotation
         
         # If this node is at the end of a line or curve created with multiple
