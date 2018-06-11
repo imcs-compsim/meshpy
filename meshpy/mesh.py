@@ -4,7 +4,7 @@ import numpy as np
 from _collections import OrderedDict
 
 # meshpy imports
-from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, Node, BaseMeshItem, Function, Material
+from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, Node, BaseMeshItem, Function, Material, Element
 
 
 # constans for sets and BCs
@@ -422,6 +422,10 @@ class Mesh(object):
                 self.add_bc(add_item, **kwargs)
             elif isinstance(add_item, Material):
                 self.add_material(add_item, **kwargs)
+            elif isinstance(add_item, Node):
+                self.add_node(add_item, **kwargs)
+            elif isinstance(add_item, Element):
+                self.add_element(add_item, **kwargs)
             elif isinstance(add_item, list):
                 for item in add_item:
                     self.add(item, **kwargs)
@@ -435,8 +439,10 @@ class Mesh(object):
     def add_mesh(self, mesh, add_sets=True):
         """ Add other mesh to this one. """
         
-        self.nodes.extend(mesh.nodes)
-        self.elements.extend(mesh.elements)
+        for node in mesh.nodes:
+            self.add_node(node)
+        for element in mesh.elements:
+            self.add_element(element)
         for material in mesh.materials:
             self.add_material(material)
         for function in mesh.functions:
@@ -498,6 +504,14 @@ class Mesh(object):
         """Add a material to this mesh. Every material can only be once in a mesh. """       
         if not material in self.materials:
             self.materials.append(material)
+    
+    def add_node(self, node):
+        """ Add a node to this mesh."""
+        self.nodes.append(node)
+        
+    def add_element(self, element):
+        """ Add a element to this mesh."""
+        self.elements.append(element)
     
     
     def translate(self, vector):
