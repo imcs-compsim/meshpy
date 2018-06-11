@@ -1,6 +1,7 @@
 # import python modules
 import numpy as np
 import math
+from numpy import longdouble
 
 
 class Rotation(object):
@@ -17,14 +18,14 @@ class Rotation(object):
         The default constructor is from an rotation vector n and an angle phi.
         """
         
-        self.q = np.zeros(4);
+        self.q = np.zeros(4,dtype=np.longdouble)
         
         if len(args) == 0:
             # identity element
             self.q[0] = 1
         elif len(args) == 1 and len(args[0]) == 4:
             # set from quaternion
-            self.q[:] = args[0]
+            self.q[:] = np.array(args[0],dtype=np.longdouble)
         elif len(args) == 2:
             # set from vector and rotation angle
             vector = args[0]
@@ -32,13 +33,12 @@ class Rotation(object):
             norm = np.linalg.norm(vector)
             if norm < self.eps:
                 raise ValueError('The rotation axis can not be a zero vector!')
-            self.q = np.zeros(4);
             if np.abs(phi) < self.eps:
                 self.q[0] = 1
             else:
                 self.q[0] = np.cos(0.5*phi)
                 self.q[1:] = np.sin(0.5*phi) * \
-                    np.array(vector,dtype=np.float) / norm
+                    np.array(vector,dtype=np.longdouble) / norm
         else:
             raise ValueError('The given arguments {} are invalid!'.format(args))
     
@@ -49,7 +49,7 @@ class Rotation(object):
         Create the object from a rotation matrix.
         """
         
-        q = np.zeros(4)
+        q = np.zeros(4,dtype=np.longdouble);
         q[0] = np.sqrt( max( 0, 1 + R[0,0] + R[1,1] + R[2,2] ) ) / 2
         q[1] = np.sqrt( max( 0, 1 + R[0,0] - R[1,1] - R[2,2] ) ) / 2
         q[2] = np.sqrt( max( 0, 1 - R[0,0] + R[1,1] - R[2,2] ) ) / 2
@@ -94,7 +94,7 @@ class Rotation(object):
         Return the matrix \skew{n} for this rotation.
         """
         
-        N = np.zeros([3,3])
+        N = np.zeros([3,3],dtype=np.longdouble)
         N[0,1] = -self.q[3]
         N[0,2] =  self.q[2]
         N[1,0] =  self.q[3]
@@ -135,7 +135,7 @@ class Rotation(object):
             p = self.q
             q = other.q
             # add the rotations
-            added_rotation = np.zeros(4)
+            added_rotation = np.zeros_like(self.q)
             added_rotation[0] = p[0] * q[0] - np.dot(p[1:],q[1:]) 
             added_rotation[1:] = p[0] * q[1:] + q[0] * p[1:] + \
                 np.cross(p[1:], q[1:])
@@ -168,7 +168,7 @@ class Rotation(object):
         """
         
         rotation_vector = self.get_roation_vector()
-        return ' {} {} {}'.format(
+        return ' {:.15g} {:.15g} {:.15g}'.format(
             rotation_vector[0],
             rotation_vector[1],
             rotation_vector[2]

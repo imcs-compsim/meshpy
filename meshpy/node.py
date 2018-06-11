@@ -15,7 +15,7 @@ class Node(BaseMeshItem):
         BaseMeshItem.__init__(self, data=None, is_dat=False, is_referenced=False)
         
         # Coordinates and rotation of this node.
-        self.coordinates = np.array(coordinates, dtype=np.float)
+        self.coordinates = np.array(coordinates, dtype=np.longdouble)
         self.rotation = rotation
         
         # If this node is at the end of a line or curve created with multiple
@@ -51,7 +51,7 @@ class Node(BaseMeshItem):
         Return the line that represents this node in the input file.
         """
         
-        return 'NODE {} COORD {} {} {}'.format(
+        return 'NODE {} COORD {:.15g} {:.15g} {:.15g}'.format(
             self.n_global,
             self.coordinates[0],
             self.coordinates[1],
