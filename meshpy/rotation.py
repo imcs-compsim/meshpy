@@ -1,7 +1,5 @@
 # import python modules
 import numpy as np
-import math
-from numpy import longdouble
 from . import mpy
 
 
@@ -55,9 +53,9 @@ class Rotation(object):
         q[1] = np.sqrt( max( 0, 1 + R[0,0] - R[1,1] - R[2,2] ) ) / 2
         q[2] = np.sqrt( max( 0, 1 - R[0,0] + R[1,1] - R[2,2] ) ) / 2
         q[3] = np.sqrt( max( 0, 1 - R[0,0] - R[1,1] + R[2,2] ) ) / 2
-        q[1] = math.copysign( q[1] , R[2,1] - R[1,2] )
-        q[2] = math.copysign( q[2] , R[0,2] - R[2,0] )
-        q[3] = math.copysign( q[3] , R[1,0] - R[0,1] )
+        q[1] = np.copysign( q[1] , R[2,1] - R[1,2] )
+        q[2] = np.copysign( q[2] , R[0,2] - R[2,0] )
+        q[3] = np.copysign( q[3] , R[1,0] - R[0,1] )
         return cls(q)
     
     

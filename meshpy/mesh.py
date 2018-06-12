@@ -1,11 +1,9 @@
 
 # python packages
 import numpy as np
-from _collections import OrderedDict
 
 # meshpy imports
-from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, \
-    Node, BaseMeshItem, Function, Material, Element, mpy, ContainerBC, ContainerGeom, NodeSetContainer, NodeSet, \
+from . import Rotation, Node, Function, Material, Element, mpy, NodeSetContainer, NodeSet, \
     BC, Coupling
 
 
@@ -617,7 +615,7 @@ class Mesh(object):
         
         # first create a mesh with the flat mesh
         mesh_temp = Mesh(name='honeycomb_' + str(1))
-        mesh_temp.add_beam_mesh_honeycomb_flat(Beam3rHerm2Lin3, material, width, n_w, n_h, n_el,
+        mesh_temp.add_beam_mesh_honeycomb_flat(beam_object, material, width, n_w, n_h, n_el,
                                                                     closed_width=closed_width,
                                                                     closed_height=closed_height,
                                                                     create_couplings=False,
