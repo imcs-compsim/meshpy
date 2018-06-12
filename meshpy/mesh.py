@@ -5,78 +5,10 @@ from _collections import OrderedDict
 
 # meshpy imports
 from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, \
-    Node, BaseMeshItem, Function, Material, Element, mpy
+    Node, BaseMeshItem, Function, Material, Element, mpy, ContainerBC, ContainerGeom, NodeSetContainer, NodeSet
 
 
-# constans for sets and BCs
-__POINT__ = 0
-__LINE__ = 1
-__SURF__ = 2
-__VOL__ = 3
-__DIRICH__ = 10
-__NEUMANN__ = 20
-
-
-def get_type_geometry(item_description, return_type):
-    """
-    Return the string for different cases of return_type.
-    """
-    
-    string_array = [
-        [__POINT__, 'DNODE-NODE TOPOLOGY', 'DNODE', 'DESIGN POINT DIRICH CONDITIONS', 'DESIGN POINT NEUMANN CONDITIONS', 'DPOINT'],
-        [__LINE__, 'DLINE-NODE TOPOLOGY', 'DLINE', 'DESIGN LINE DIRICH CONDITIONS', 'DESIGN LINE NEUMANN CONDITIONS', 'DLINE'],
-        [__SURF__, 'DSURF-NODE TOPOLOGY', 'DSURFACE', 'DESIGN SURF DIRICH CONDITIONS', 'DESIGN SURF NEUMANN CONDITIONS', 'DSURF'],
-        [__VOL__, 'DVOL-NODE TOPOLOGY', 'DVOLUME', 'DESIGN VOL DIRICH CONDITIONS', 'DESIGN VOL NEUMANN CONDITIONS', 'DVOL']
-        ]
-    
-    for i, line in enumerate(string_array):
-        if item_description in line:
-            item_index = i
-    
-    if return_type == 'enum':
-        return_index = 0
-    elif return_type == 'setsection':
-        return_index = 1
-    elif return_type == 'settopology':
-        return_index = 2
-    elif return_type == 'dirich':
-        return_index = 3
-    elif return_type == 'neumann':
-        return_index = 4
-    elif return_type == 'bccounter':
-        return_index = 5
-    
-    return string_array[item_index][return_index]
-
-
-def get_type_bc(item_description, return_type):
-    """
-    Return the string for different cases of return_type.
-    """
-    
-    string_array = [
-        [__DIRICH__, 'DESIGN POINT DIRICH CONDITIONS', 'DESIGN LINE DIRICH CONDITIONS', 'DESIGN SURF DIRICH CONDITIONS', 'DESIGN VOL DIRICH CONDITIONS'],
-        [__NEUMANN__, 'DESIGN POINT NEUMANN CONDITIONS', 'DESIGN LINE DIRICH NEUMANN', 'DESIGN SURF DIRICH NEUMANN', 'DESIGN VOL DIRICH NEUMANN']
-        ]
-    
-    for i, line in enumerate(string_array):
-        if item_description in line:
-            item_index = i
-    
-    if return_type == 'enum':
-        return_index = 0
-    elif return_type == __POINT__:
-        return_index = 1
-    elif return_type == __LINE__:
-        return_index = 2
-    elif return_type == __SURF__:
-        return_index = 3
-    elif return_type == __VOL__:
-        return_index = 4
-    
-    return string_array[item_index][return_index]
-    
-    
+   
   
  
 class Coupling(object):
@@ -114,179 +46,6 @@ class Coupling(object):
 
 
 
-class Container(OrderedDict):
-    """
-    A base class for a container that will store node sets and 
-    boundary conditions.
-    """
-    
-    def __init__(self, aliases):
-        """ Create a dictionary with the keys. """
-        
-        self.aliases = aliases
-        
-        # set empty lists
-        for line in self.aliases:
-            self[line[0]] = self.empty_item()
-    
-    
-    def empty_item(self):
-        """ What will be in the default items. """
-        return []
-
-    def _get_key(self, key):
-        """ Return the key for the dictionary. Look in self.aliases. """
-        for line in self.aliases:
-            if key == line[0]:
-                return line[0]
-            elif key in line[1]:
-                return line[0]
-        print('Error, key {} not found!'.format(key))
-    
-    
-    def merge_containers(self, other_container):
-        """ Merge the contents of this set with a other SetContainer. """
-        if type(other_container) == type(self):
-            for key in other_container.keys():
-                self[key].extend(other_container[key])
-        else:
-            print('Error, expected type {}, got {}!'.format(type(self), type(other_container)))
-    
-    def set_global(self):
-        """ Set the global values in each set element. """
-        for key in self.keys():
-            for i, item in enumerate(self[key]):
-                item.n_global = i + 1
-            
-    def __setitem__(self, key, value):
-        """ Set items of the dictionary. """
-        dict_key = self._get_key(key)
-        OrderedDict.__setitem__(self, dict_key, value)
-        
-    
-    def __getitem__(self, key):
-        """ Gets items of the dictionary. """
-        dict_key = self._get_key(key)
-        return OrderedDict.__getitem__(self, dict_key)
-    
-    
-    def append_item(self, key, data):
-        """ Add set(s) to object. Set the type of set in the item. """
-        data_type = self._get_key(key)
-        if type(data) == list:
-            self[key].extend(data)
-            for item in data:
-                item.item_type = data_type
-        else:
-            self[key].append(data)
-            data.item_type = data_type
-
-
-class ContainerGeom(Container):
-    """
-    This object contains sets for a mesh or as the return value of a
-    mesh creation function.
-    """
-    
-    def __init__(self):
-        """
-        Create empty list for different types of sets
-        """
-        
-        aliases = [
-            # [key, [# list of aliases], 'string in dat-file' ]
-            [__POINT__, ['p', 'node', 'point', 'DNODE-NODE TOPOLOGY']],
-            [__LINE__, ['l', 'line', 'DLINE-NODE TOPOLOGY']],
-            [__SURF__, ['s', 'surf', 'surface', 'DSURF-NODE TOPOLOGY']],
-            [__VOL__, ['v', 'vol', 'volume', 'DVOL-NODE TOPOLOGY']]
-            ]
-        Container.__init__(self, aliases)
-        
-    def set_global(self, all_sets=False):
-        """ Set the global values in each set element. With the flaf all_sets """
-        for key in self.keys():
-            for i, item in enumerate(self.get_sets(key, all_sets)):
-                item.n_global = i + 1
-    
-    def get_sets(self, key, all_sets=False):
-        """ If all_sets = False only the referenced sets are returned. """
-        if all_sets:
-            return self[key]
-        else:
-            return [item for item in self[key] if item.is_referenced]
-    
-    @property
-    def point(self):
-        return self[__POINT__]
-    @property
-    def line(self):
-        return self[__LINE__]
-    @property
-    def surf(self):
-        return self[__SURF__]
-    @property
-    def vol(self):
-        return self[__VOL__]
-
-class ContainerBC(Container):
-    """ This object contains bc. """
-    
-    def __init__(self):
-        """
-        Create empty list for different types of bc
-        """
-        
-        aliases = [
-            # [key, [# list of aliases], 'string in dat-file' ]
-            [__DIRICH__, ['dbc', 'dirich']],
-            [__NEUMANN__, ['nbc', 'neumann']]
-            ]
-        Container.__init__(self, aliases)
-        
-    def empty_item(self):
-        """ What will be in the default items. """
-        return ContainerGeom()
-    
-    def merge_containers(self, other_container):
-        """ Merge the contents of this set with a other ContainerBC. """
-        if type(other_container) == type(self):
-            for key1 in other_container.keys():
-                for key2 in other_container[key1].keys():
-                    self[key1,key2].extend(other_container[key1,key2])
-        else:
-            print('Error, expected type {}, got {}!'.format(type(self), type(other_container)))
-            
-    def set_global(self):
-        """ Check if . """
-        for key1 in self.keys():
-            for key2 in self[key1].keys():
-                for i, item in enumerate(self[key1,key2]):
-                    item.n_global = i + 1
-    
-    def __setitem__(self, key, value):
-        """
-        Set items of the dictionary.
-        This is done with a tuple containing the bc mode, and geom type
-        """
-        
-        if type(key) == tuple:
-            self[key[0]][key[1]] = value
-        else:
-            dict_key = self._get_key(key)
-            OrderedDict.__setitem__(self, dict_key, value)
-    
-    def __getitem__(self, key):
-        """
-        Gets items of the dictionary.
-        This is done with a tuple containing the bc mode, and geom type
-        """
-        
-        if type(key) == tuple:
-            return self[key[0]][key[1]]
-        else:
-            dict_key = self._get_key(key)
-            return OrderedDict.__getitem__(self, dict_key)
-
 
 class BC(object):
     """ This object is one BC. """
@@ -317,7 +76,7 @@ class BC(object):
             dat_string = self.bc_string.format(*self.format_replacement)
         else:
             dat_string = self.bc_string
-             
+        
         return 'E {} - {}'.format(
             self.set.n_global,
             dat_string
@@ -392,14 +151,13 @@ class Mesh(object):
     
     def __init__(self, name='mesh'):
         """ Set empty variables """
-        
-        self.name = name
+
         self.nodes = []
         self.elements = []
         self.materials = []
         self.functions = []
-        self.sets = ContainerGeom()
-        self.bc = ContainerBC()
+        self.sets = []
+        self.bc = []
         self.couplings = []
         
         # count the number of items created for numbering in the comments
@@ -427,6 +185,8 @@ class Mesh(object):
                 self.add_node(add_item, **kwargs)
             elif isinstance(add_item, Element):
                 self.add_element(add_item, **kwargs)
+            elif isinstance(add_item, NodeSet):
+                self.add_set(add_item)
             elif isinstance(add_item, list):
                 for item in add_item:
                     self.add(item, **kwargs)
@@ -437,7 +197,7 @@ class Mesh(object):
                 self.add(item, **kwargs)
         
     
-    def add_mesh(self, mesh, add_sets=True):
+    def add_mesh(self, mesh):
         """ Add other mesh to this one. """
         
         for node in mesh.nodes:
@@ -448,9 +208,8 @@ class Mesh(object):
             self.add_material(material)
         for function in mesh.functions:
             self.add_function(function)
-        if add_sets:
-            self.sets.merge_containers(mesh.sets)
-        self.bc.merge_containers(mesh.bc)
+        self.bc.extend(mesh.bc)
+        self.sets.extend(mesh.sets)
         self.couplings.extend(mesh.couplings)
     
     
@@ -472,8 +231,8 @@ class Mesh(object):
         self.couplings.append(coupling)
         
         # add set with coupling conditions
-        node_set = GeometrySet([coupling.name, 'coupling'], coupling.nodes)
-        self.sets.append_item(__POINT__, node_set)
+        node_set = NodeSet(mpy.geo_point, coupling.nodes)
+        self.add(node_set)
         coupling.node_set = node_set
         for node in coupling.nodes:
             node.connected_couplings = coupling
@@ -481,20 +240,8 @@ class Mesh(object):
     
     def add_bc(self, bc):
         """ Add a boundary condition to this mesh. """
-        
-        bc_type = bc.type
-        
-        for key in self.sets.keys():
-            if bc.set in self.sets[key]:
-                break
-        else:
-            print('Error, the set is not yet added to this mesh object. BC can not be added until the set is added!')
-            return
-        
-        if not bc in self.bc[bc_type, bc.set.item_type]:
-            self.bc[bc_type, bc.set.item_type].append(bc)
-        else:
-            print('Error, each BC can only be added once!')
+        self.bc.append(bc)
+        self.sets.append(bc.set)
             
     def add_function(self, function):
         """ Add a function to this mesh item. """
@@ -514,6 +261,27 @@ class Mesh(object):
         """ Add a element to this mesh."""
         self.elements.append(element)
     
+    def add_set(self, node_set):
+        """ Add a node set to the mesh. """
+        self.sets.append(node_set)    
+    
+    def get_bc_ordered(self):
+        """ Return an array with the bc ordered in type and geometry. """
+        array = [[[] for geom in mpy.geo] for bc in mpy.bc]
+        
+        for bc in self.bc:
+            if not bc.is_dat:
+                array[bc.type][bc.set.geo_type].append(bc)
+        return array
+
+    def get_set_ordered(self):
+        """ Return an array with the sets ordered in geometry. """
+        set_list = [[] for set in mpy.geo]
+        
+        for set in self.sets:
+            if not set.is_dat:
+                set_list[set.geo_type].append(set)
+        return set_list
     
     def translate(self, vector):
         """ Move all nodes of this mesh by the vector. """
@@ -803,23 +571,21 @@ class Mesh(object):
             nodes.extend(tmp_beam.create_beam(functions[0], functions[1],
                                  start_node=tmp_start_node))
             self.elements.append(tmp_beam)
+
+        # set the nodes that are at the beginning and end of line (for search of
+        # overlapping points)
+        nodes[0].is_end_node = True
+        nodes[-1].is_end_node = True
         
         # add nodes to mesh
         self.nodes.extend(nodes)
         
         # add sets to mesh
-        node_set_line = ContainerGeom()
-        node_set_line.append_item(__POINT__, GeometrySet(['start'], nodes[0]))
-        node_set_line.append_item(__POINT__, GeometrySet(['end'], nodes[-1]))
-        nodes[0].is_end_node = True
-        nodes[-1].is_end_node = True
-        node_set_line.append_item(__LINE__, GeometrySet('line', nodes))
-        #if add_sets:
-        self.sets.merge_containers(node_set_line)
-        
-        
-        # return set container
-        return node_set_line
+        return_set = NodeSetContainer()
+        return_set['start'] = NodeSet(mpy.geo_point, nodes=nodes[0])
+        return_set['end'] = NodeSet(mpy.geo_point, nodes=nodes[-1])
+        return_set['line'] = NodeSet(mpy.geo_line, nodes=nodes)
+        return return_set
     
     
     def add_beam_mesh_honeycomb_flat(
@@ -855,9 +621,6 @@ class Mesh(object):
         # get name for the mesh added
         name = self._get_mesh_name(name, 'honeycomb_flat')
         
-        # list for nodes -> used for connections
-        honeycomb_nodes = []
-        
         # shortcuts
         sin30 = np.sin(np.pi/6)
         cos30 = np.sin(2*np.pi/6)
@@ -870,6 +633,9 @@ class Mesh(object):
         
         # create zig zag lines, first node is at [0,0,0]
         origin = np.array([0,a*0.5*sin30,0])
+        
+        # node index from the already existing nodes
+        i_node_start = len(self.nodes)
         
         # loop to create elements
         for i_height in range(n_height + 1):
@@ -888,18 +654,14 @@ class Mesh(object):
                 
                 # do not add on last run
                 if i_width < n_width:
-                    tmp = add_line(
+                    add_line(
                         base_zig_zag,
                         base_zig_zag + nx * width * 0.5 - 2 * direction * zig_zag_y
                         )
-                    # add the nodes to the node list for connections and sets
-                    honeycomb_nodes.extend([item.nodes[0] for item in tmp.point])
-                    tmp = add_line(
+                    add_line(
                         base_zig_zag + nx * width * 0.5 - 2 * direction * zig_zag_y,
                         base_zig_zag + nx * width
                         )
-                    honeycomb_nodes.extend([item.nodes[0] for item in tmp.point])
-                    
                 
                 if i_height % 2 == 0:
                     base_vert = base_zig_zag
@@ -910,12 +672,14 @@ class Mesh(object):
                 if (i_width < n_width) or (direction==1 and closed_width):
                     # check if height is closed
                     if not (i_height == n_height) or (not closed_height): 
-                        tmp = add_line(
+                        add_line(
                             base_vert,
                             base_vert + ny * a
                             )
-                        honeycomb_nodes.extend([item.nodes[0] for item in tmp.point])
-
+        
+        # list of nodes from the honeycomb that are candidates for connections
+        honeycomb_nodes = [self.nodes(i) for i in range(i_node_start) if self.nodes(i).is_end_node]
+        
         # function to get nodes for boundaries
         def node_in_box(x_range,y_range,z_range):
             def funct(node):
@@ -937,28 +701,17 @@ class Mesh(object):
                 x_max = node.coordinates[0]
             if node.coordinates[1] > y_max:
                 y_max = node.coordinates[1]
-                
-        node_set = ContainerGeom()
-        node_set.append_item(__POINT__, GeometrySet([name, 'north'],
-            self.get_nodes_by_function(node_in_box([0,x_max], [y_max,y_max], [-1,1]))
-            ))
-        node_set.append_item(__POINT__, GeometrySet([name, 'east'],
-            self.get_nodes_by_function(node_in_box([x_max,x_max], [0,y_max], [-1,1]))
-            ))
-        node_set.append_item(__POINT__, GeometrySet([name, 'south'],
-            self.get_nodes_by_function(node_in_box([0,x_max], [0,0], [-1,1]))
-            ))
-        node_set.append_item(__POINT__, GeometrySet([name, 'west'],
-            self.get_nodes_by_function(node_in_box([0,0], [0,y_max], [-1,1]))
-            ))
-        if add_sets:
-            self.sets.merge_containers(node_set)
         
         # add connection for nodes with same positions
         if create_couplings:
             self.add_connections(honeycomb_nodes)
-        
-        return node_set
+            
+        return_set = NodeSetContainer()
+        return_set['north'] = NodeSet(mpy.geo_point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [y_max,y_max], [-1,1])))
+        return_set['east'] = NodeSet(mpy.geo_point, nodes=self.get_nodes_by_function(node_in_box([x_max,x_max], [0,y_max], [-1,1])))
+        return_set['south'] = NodeSet(mpy.geo_point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [0,0], [-1,1])))
+        return_set['west'] = NodeSet(mpy.geo_point, nodes=self.get_nodes_by_function(node_in_box([0,0], [0,y_max], [-1,1])))
+        return return_set
     
     
     def add_beam_mesh_honeycomb(self,
@@ -1043,22 +796,13 @@ class Mesh(object):
             if node.coordinates[2] > z_max:
                 z_max = node.coordinates[2]
                 
-        node_set = ContainerGeom()
-        node_set.append_item(__POINT__, GeometrySet([name, 'bottom'],
-            mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [0,0]))
-            ))
-        node_set.append_item(__POINT__, GeometrySet([name, 'top'],
-            mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [z_max,z_max]))
-            ))
-        
+        return_set = NodeSetContainer()
+        return_set['bottom'] = NodeSet(mpy.geo_point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [0,0])))
+        return_set['top'] = NodeSet(mpy.geo_point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [z_max,z_max])))
+
         self.add_mesh(mesh_temp)
         
-        if add_sets:
-            self.sets.merge_containers(node_set)
-        
-        
-        
-        return node_set
+        return return_set
 
         
         

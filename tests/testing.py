@@ -7,7 +7,8 @@ import filecmp
 
 # import modules from meshgen
 from meshpy import Rotation, InputFile, InputSection, Material, Mesh, \
-    Function, Beam3rHerm2Lin3, ContainerGeom, __LINE__, GeometrySet, BC, Node
+    Function, Beam3rHerm2Lin3, ContainerGeom, GeometrySet, BC, Node, mpy
+from meshpy.geometry_set import NodeSetContainer
 
 # global variables
 __testing_path__ = '/home/ivo/dev/meshpy/tests'
@@ -197,12 +198,12 @@ class TestFullBaci(unittest.TestCase):
     """
     Test the input files created with baci.
     """
-    
+     
     def run_baci_test(self, input_file, n_proc=2):
         """
         Run baci with a testinput and return the output.
         """
-        
+         
         test_name = os.path.splitext(os.path.basename(input_file))[0]
         child = subprocess.Popen([
             'mpirun', '-np', str(n_proc),
@@ -214,12 +215,12 @@ class TestFullBaci(unittest.TestCase):
         self.assertEqual(0, child.returncode,
             msg='Test {} failed!'.format(test_name)
             )
-        
+         
         # if successful delete tmp directory
         if int(child.returncode) == 0:
             shutil.rmtree(__testing_temp__)
-        
-    
+         
+     
     def test_honeycomb_as_input(self):
         """
         Create the same honeycomb mesh as defined in 
@@ -228,21 +229,21 @@ class TestFullBaci(unittest.TestCase):
         to the original test file, since there are some problems with the contact convergence.
         The sphere is imported as an existing mesh. 
         """
-        
+          
         # read input file with information on sphere
         input_file = InputFile(
             maintainer='Ivo Steinbrecher',
             description='honeycomb beam in contact with sphere',
             dat_file=os.path.join(__testing_input__, 'honeycomb-sphere.dat')
             )
-        
+          
         # overwrite some entries in the input file
         input_file.add(InputSection(
             'STRUCTURAL DYNAMIC',
             'NUMSTEP 40',
             option_overwrite=True
             ))
-        
+          
         # add results to the input file
         input_file.delete_section('RESULT DESCRIPTION')
         input_file.add(InputSection(
@@ -259,7 +260,7 @@ class TestFullBaci(unittest.TestCase):
             STRUCTURE DIS structure NODE 182 QUANTITY dispz VALUE  2.89298034569662965e+00 TOLERANCE 1e-10
             '''
             ))
-        
+          
         # material for the beam
         material = Material(
             'MAT_BeamReissnerElastHyper',
@@ -269,7 +270,7 @@ class TestFullBaci(unittest.TestCase):
             0.2, # diameter of beam
             shear_correction=1.1
             )
-        
+          
         # create the honeycomb mesh
         mesh_honeycomb = Mesh(name='honeycomb_' + str(1))
         honeycomb_set = mesh_honeycomb.add_beam_mesh_honeycomb(
@@ -282,7 +283,7 @@ class TestFullBaci(unittest.TestCase):
             closed_top=False
             )
         mesh_honeycomb.rotate(Rotation([0,0,1], np.pi/2))
-        
+          
         # define functions for the bc
         ft = Function(
             'COMPONENT 0 FUNCTION a\n' + \
@@ -290,51 +291,48 @@ class TestFullBaci(unittest.TestCase):
             'TIMES 0.0 0.2 1.0 VALUES 0.0 1.0 1.0'
             )
         mesh_honeycomb.add(ft)
-            
-        # add bcs
-        bc_set = ContainerGeom()
-        bc_set.append_item(__LINE__, GeometrySet('line', nodes = honeycomb_set.point[0].nodes))
-        bc_set.append_item(__LINE__, GeometrySet('line2', nodes = honeycomb_set.point[1].nodes))
-        mesh_honeycomb.sets.merge_containers(bc_set)
-      
+        
+        # change the sets to lines, only for purpose of matching the test file
+        honeycomb_set['bottom'].geo_type = mpy.geo_line
+        honeycomb_set['top'].geo_type = mpy.geo_line
         mesh_honeycomb.add(
-                BC(bc_set.line[0],
+                BC(honeycomb_set['bottom'],
                    'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
-                   bc_type='dirich'
+                   bc_type=mpy.bc_diri
                 ))
         mesh_honeycomb.add(
-                BC(bc_set.line[1],
+                BC(honeycomb_set['top'],
                    'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 5.0 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0',
                    format_replacement=[ft],
-                   bc_type='dirich'
+                   bc_type=mpy.bc_diri
                 ))
-        
+          
         # add the beam mesh to the solid mesh
         input_file.add(mesh_honeycomb)
-            
+              
         # write input file
         check_tmp_dir()
         input_dat_file = os.path.join(__testing_temp__, 'honeycomb-sphere.dat')
         input_file.write_input_file(input_dat_file, print_set_names=False, print_all_sets=False)
-        
+          
         # test input
         self.run_baci_test(input_dat_file)
-    
-    
+      
+      
     def test_beam_and_solid_tube(self):
         """
         Create a solid mesh with cubit and insert some beams into the input file.
         """
-    
+      
         # create input file
         input_file = InputFile(maintainer='Ivo Steinbrecher', description='Solid tube with beam tube')
-        
+          
         # load solid mesh
         input_file.read_dat(os.path.join(__testing_input__, 'tube.dat'))
-        
+          
         # delete solver 2 section
         input_file.delete_section('TITLE')
-        
+          
         # add options for beam_output
         input_file.add(InputSection(
             'IO/RUNTIME VTK OUTPUT/BEAMS',
@@ -345,12 +343,12 @@ class TestFullBaci(unittest.TestCase):
             TRIAD_VISUALIZATIONPOINT        Yes
             STRAINS_GAUSSPOINT              Yes
             '''))
-        
+          
         # add a straight line beam
         material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.5)
         cantilever = Mesh(name='cantilever')
         cantilever_set = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [2,0,-5], [2,0,5], 3)
-        
+          
         # add fix at start of the beam
         cantilever.add(
             BC(
@@ -359,7 +357,7 @@ class TestFullBaci(unittest.TestCase):
                 ,bc_type='dirich'
                 )
             )
-        
+          
         # add displacement controlled bc at end of the beam
         sin = Function('COMPONENT 0 FUNCTION sin(t*2*pi)')
         cos = Function('COMPONENT 0 FUNCTION cos(t*2*pi)')
@@ -372,10 +370,10 @@ class TestFullBaci(unittest.TestCase):
                 bc_type = 'dirich'
                 )
             )
-        
+          
         # add the beam mesh to the solid mesh
         input_file.add(cantilever)
-        
+          
         # add test case result description
         input_file.add(InputSection(
             'RESULT DESCRIPTION',
@@ -387,25 +385,25 @@ class TestFullBaci(unittest.TestCase):
             STRUCTURE DIS structure NODE 69 QUANTITY dispy VALUE 1.41113401669104e-15 TOLERANCE 1e-10
             STRUCTURE DIS structure NODE 69 QUANTITY dispz VALUE 0.0178350143764099 TOLERANCE 1e-10
             '''))
-            
+              
         # write input file
         check_tmp_dir()
         input_dat_file = os.path.join(__testing_temp__, 'tube.dat')
         input_file.write_input_file(input_dat_file)
-        
+          
         # test input
         self.run_baci_test(input_dat_file)
-        
-        
+         
+         
     def test_honeycomb_variants(self):
         """
         Create a few different honeycomb structures.
         """
-        
+         
         # create input file
         input_file = InputFile(
             maintainer='Ivo Steinbrecher', description='Varieties of honeycomb')
-        
+         
         input_file.add(InputSection('PROBLEM SIZE', 'DIM 3'))
         input_file.add('''
         ------------------------------------PROBLEM TYP
@@ -458,7 +456,7 @@ class TestFullBaci(unittest.TestCase):
             TRIAD_VISUALIZATIONPOINT        Yes
             STRAINS_GAUSSPOINT              Yes
             '''))
-        
+         
         # create two meshes with honeycomb structure
         mesh = Mesh(name='mesh')
         material = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0, 1e-3, 0.2, shear_correction=1.1)
@@ -468,7 +466,7 @@ class TestFullBaci(unittest.TestCase):
         ft.append(Function('COMPONENT 0 FUNCTION t'))
         ft.append(Function('COMPONENT 0 FUNCTION t'))
         mesh.add(ft)
-        
+         
         counter = 0
         for vertical in [False, True]:
             for closed_top in [False, True]:
@@ -484,21 +482,21 @@ class TestFullBaci(unittest.TestCase):
                     closed_top=closed_top
                     )
                 mesh.add(
-                        BC(honeycomb_set.point[0],
+                        BC(honeycomb_set['bottom'],
                            'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
-                           bc_type='dirich'
+                           bc_type=mpy.bc_diri
                         ))
                 mesh.add(
-                        BC(honeycomb_set.point[1],
+                        BC(honeycomb_set['top'],
                            'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 1. 1. 1. 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
                            format_replacement=[ft[counter]],
-                           bc_type='dirich'
+                           bc_type=mpy.bc_diri
                         ))
                 counter += 1
-        
+         
         # add the beam mesh to the solid mesh
         input_file.add(mesh)
-        
+         
         # add results
         input_file.add(InputSection(
             'RESULT DESCRIPTION',
@@ -517,12 +515,12 @@ class TestFullBaci(unittest.TestCase):
             STRUCTURE DIS structure NODE 1171 QUANTITY dispz VALUE 0.54691921102400531 TOLERANCE 1e-10
             '''
             ))
-        
+         
         # write input file
         check_tmp_dir()
         input_dat_file = os.path.join(__testing_temp__, 'honeycomb-variants.dat')
         input_file.write_input_file(input_dat_file)
-        
+         
         # test input
         self.run_baci_test(input_dat_file)
 
