@@ -260,7 +260,7 @@ class InputFile(Mesh):
     
     def __init__(self, maintainer = '', description = None, dat_file=None):
         
-        Mesh.__init__(self, name='root')
+        Mesh.__init__(self)
         
         # data for header
         self.maintainer = maintainer

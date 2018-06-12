@@ -1,27 +1,22 @@
 
 
+from . import BaseMeshItem
 
-class BC(object):
+
+class BC(BaseMeshItem):
     """ This object is one BC. """
     
-    def __init__(self, set_item, bc_string, format_replacement=None, bc_type=None):
+    def __init__(self, geometry_set, bc_string, format_replacement=None, bc_type=None):
         """
         Set the default values. Format_replacement will be called on string.
         """
         
+        BaseMeshItem.__init__(self, is_dat=False, is_referenced=False)
         self.bc_string = bc_string
-        self.type = bc_type
-        self.format_replacement = format_replacement
-        
-        if set_item.is_referenced:
-            print('Error, each set can only have one BC!')        
-        self.set = set_item
-        self.set.is_referenced = True
-        
-        
-        self.is_dat = False
-        self.n_global = None
-        self.is_referenced = False
+        self.bc_type = bc_type
+        self.format_replacement = format_replacement  
+        self.geometry_set = geometry_set
+            
     
     def get_dat_line(self):
         """ Line in the input file for the BC. """
@@ -32,6 +27,6 @@ class BC(object):
             dat_string = self.bc_string
         
         return 'E {} - {}'.format(
-            self.set.n_global,
+            self.geometry_set.n_global,
             dat_string
             )

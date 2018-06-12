@@ -215,10 +215,10 @@ class TestFullBaci(unittest.TestCase):
         self.assertEqual(0, child.returncode,
             msg='Test {} failed!'.format(test_name)
             )
-         
-        # if successful delete tmp directory
-        if int(child.returncode) == 0:
-            shutil.rmtree(__testing_temp__)
+#          
+#         # if successful delete tmp directory
+#         if int(child.returncode) == 0:
+#             shutil.rmtree(__testing_temp__)
          
      
     def test_honeycomb_as_input(self):
@@ -272,7 +272,7 @@ class TestFullBaci(unittest.TestCase):
             )
           
         # create the honeycomb mesh
-        mesh_honeycomb = Mesh(name='honeycomb_' + str(1))
+        mesh_honeycomb = Mesh()
         honeycomb_set = mesh_honeycomb.add_beam_mesh_honeycomb(
             Beam3rHerm2Lin3,
             material,
@@ -346,7 +346,7 @@ class TestFullBaci(unittest.TestCase):
           
         # add a straight line beam
         material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.5)
-        cantilever = Mesh(name='cantilever')
+        cantilever = Mesh()
         cantilever_set = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [2,0,-5], [2,0,5], 3)
           
         # add fix at start of the beam
@@ -458,7 +458,7 @@ class TestFullBaci(unittest.TestCase):
             '''))
          
         # create two meshes with honeycomb structure
-        mesh = Mesh(name='mesh')
+        mesh = Mesh()
         material = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0, 1e-3, 0.2, shear_correction=1.1)
         ft = []
         ft.append(Function('COMPONENT 0 FUNCTION t'))

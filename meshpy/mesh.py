@@ -15,11 +15,13 @@ from . import Rotation, Node, Function, Material, Element, mpy, NodeSetContainer
 
 
 class Mesh(object):
-    """ Holds nodes, beams and couplings of beam_mesh geometry. """
+    r"""
+    A class that contains a full mesh, i.e. Nodes, Elements, Boundary
+    Conditions, Sets, Couplings, Materials and Functions.
+    """
     
-    def __init__(self, name='mesh'):
-        """ Set empty variables """
-
+    def __init__(self):
+        
         self.nodes = []
         self.elements = []
         self.materials = []
@@ -35,17 +37,15 @@ class Mesh(object):
             for key2 in mpy.geometry:
                 self.bc[key1][key2] = []
         
-        # count the number of items created for numbering in the comments
-        self.mesh_item_counter = {}
-        
-        
     def add(self, *args, **kwargs):
-        """
-        Add an item depending on what it is
+        r"""
+        Add an item to this mesh, depending on its type. If an list is given
+        each list element is added with this function. Keyword arguments are
+        passed through to the adding function.
         """
         
         if len(args) == 0:
-            raise ValueError('At least one argument should be given!')
+            raise ValueError('At least one argument is required!')
         elif len(args) == 1:
             add_item = args[0]
             if isinstance(add_item, Mesh):
@@ -61,34 +61,42 @@ class Mesh(object):
             elif isinstance(add_item, Element):
                 self.add_element(add_item, **kwargs)
             elif isinstance(add_item, NodeSet):
-                self.add_set(add_item)
+                self.add_set(add_item, **kwargs)
+            elif isinstance(add_item, Coupling):
+                self.add_coupling(add_item, **kwargs)
             elif isinstance(add_item, list):
                 for item in add_item:
                     self.add(item, **kwargs)
             else:
-                raise TypeError('Did not expect {}!'.format(type(add_item)))
+                raise(TypeError(
+                    'No Mesh.add case implemented for type: ' + \
+                    '{}!'.format(type(add_item))
+                    ))
         else:
             for item in args:
                 self.add(item, **kwargs)
         
     
     def add_mesh(self, mesh):
-        """ Add other mesh to this one. """
+        r"""
+        Add the content of another mesh to this mesh.
+        """
         
-        for node in mesh.nodes:
-            self.add_node(node)
-        for element in mesh.elements:
-            self.add_element(element)
-        for material in mesh.materials:
-            self.add_material(material)
-        for function in mesh.functions:
-            self.add_function(function)
+        # Extend the lists in this mesh
+        self.add(mesh.nodes)
+        self.add(mesh.elements)
+        self.add(mesh.materials)
+        self.add(mesh.functions)
+        self.add(mesh.couplings)
+        
+        # First add sets to the new mesh, so when the bc is added, no additional
+        # set is created
+        for key in self.sets.keys():
+            self.sets[key].extend(mesh.sets[key])
         for key1 in self.bc.keys():
             for key2 in self.bc[key1].keys():
                 self.bc[key1][key2].extend(mesh.bc[key1][key2])
-        for key in self.sets.keys():
-                self.sets[key].extend(mesh.sets[key])
-        self.couplings.extend(mesh.couplings)
+        
     
     
     def add_coupling(self, coupling):
@@ -97,7 +105,7 @@ class Mesh(object):
         # first perform checks
         # check that all nodes have the same position and are in mesh
         pos_set = False
-        for node in coupling.nodes:
+        for node in coupling.node_set.nodes:
             if not node in self.nodes:
                 print('Error, node not in mesh!')
             if not pos_set:
@@ -106,23 +114,18 @@ class Mesh(object):
             if np.linalg.norm(pos - node.coordinates) > 1e-8:
                 print('Error, nodes of coupling do not have the same positions!')
         
+        self.add(coupling.node_set)
         self.couplings.append(coupling)
-        
-        # add set with coupling conditions
-        node_set = NodeSet(mpy.point, coupling.nodes)
-        self.add(node_set)
-        coupling.node_set = node_set
-        for node in coupling.nodes:
-            node.connected_couplings = coupling
         
     
     def add_bc(self, bc):
         """ Add a boundary condition to this mesh. """
-        bc_key = bc.type
-        geom_key = bc.set.geo_type
         
+        bc_key = bc.bc_type
+        geom_key = bc.geometry_set.geo_type
+        
+        self.add(bc.geometry_set)
         self.bc[bc_key][geom_key].append(bc)
-        self.sets[geom_key].append(bc.set)
             
     def add_function(self, function):
         """ Add a function to this mesh item. """
@@ -144,7 +147,8 @@ class Mesh(object):
     
     def add_set(self, node_set):
         """ Add a node set to the mesh. """
-        self.sets[node_set.geo_type].append(node_set)
+        if not node_set in self.sets[node_set.geo_type]:
+            self.sets[node_set.geo_type].append(node_set)
     
     
     def translate(self, vector):
@@ -330,25 +334,7 @@ class Mesh(object):
                 # set the new coordinates
                 node.coordinates[0] = r * np.cos(phi)
                 node.coordinates[1] = r * np.sin(phi)
-    
-    
-    def _get_mesh_name(self, name, mesh_type):
-        """
-        Return the name for the mesh item. This name will be the prefix for
-        all set names created by the mesh create function.
-        """
-        
-        if not name:
-            # name was not given, is None
-            if not mesh_type in self.mesh_item_counter.keys():
-                # mesh_type does not exist in counter -> this is first mesh_type
-                self.mesh_item_counter[mesh_type] = 0
-            # add one to the counter
-            self.mesh_item_counter[mesh_type] += 1
-            return [mesh_type, self.mesh_item_counter[mesh_type]]
-        else:
-            return name
-    
+
     
     def add_beam_mesh_line(
             self,
@@ -358,8 +344,6 @@ class Mesh(object):
             end_point,
             n_el=1,
             start_node=None
-                           #name=None,
-                           #add_sets=True
             ):
         
         """Generate a straight line in this mesh.
@@ -481,9 +465,6 @@ class Mesh(object):
                 #add_sets=False
                 )
             return geom_set
-
-        # get name for the mesh added
-        name = self._get_mesh_name(name, 'honeycomb_flat')
         
         # shortcuts
         sin30 = np.sin(np.pi/6)
@@ -614,7 +595,7 @@ class Mesh(object):
             n_w = n_height
         
         # first create a mesh with the flat mesh
-        mesh_temp = Mesh(name='honeycomb_' + str(1))
+        mesh_temp = Mesh()
         mesh_temp.add_beam_mesh_honeycomb_flat(beam_object, material, width, n_w, n_h, n_el,
                                                                     closed_width=closed_width,
                                                                     closed_height=closed_height,
