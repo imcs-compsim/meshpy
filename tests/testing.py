@@ -215,10 +215,10 @@ class TestFullBaci(unittest.TestCase):
         self.assertEqual(0, child.returncode,
             msg='Test {} failed!'.format(test_name)
             )
-#          
-#         # if successful delete tmp directory
-#         if int(child.returncode) == 0:
-#             shutil.rmtree(__testing_temp__)
+          
+        # if successful delete tmp directory
+        if int(child.returncode) == 0:
+            shutil.rmtree(__testing_temp__)
          
      
     def test_honeycomb_as_input(self):

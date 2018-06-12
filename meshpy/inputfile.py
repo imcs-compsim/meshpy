@@ -339,7 +339,7 @@ class InputFile(Mesh):
                     if i > 0:
                         bc_key = get_type_bc(section_header, 'enum')
                         geom_key = get_type_geometry(section_header, 'enum')
-                        self.bc[bc_key][geom_key].append(BaseMeshItem(item))
+                        self.bc[bc_key,geom_key].append(BaseMeshItem(item))
             
             def add_set(section_header):
                 """ Add sets of points, lines, surfs or volumes to item. """
@@ -501,11 +501,20 @@ class InputFile(Mesh):
                 coupling.node_set.is_referenced = True
         
         # get ordered list of sets and bcs
-        for key1 in self.bc.keys():
-            for key2 in self.bc[key1].keys():
-                set_n_global(self.bc[key1][key2])
-        for key in self.sets.keys():
-            set_n_global(self.sets[key])
+        for key in self.bc.keys():
+            set_n_global(self.bc[key])
+        
+        # get dictionary with sets in this mesh
+        mesh_sets = self.sets.copy()
+        for coupling in self.couplings:
+            mesh_sets[coupling.node_set.geo_type].append(coupling.node_set)
+        for key in self.bc.keys():
+            for bc in self.bc[key]:
+                if not bc.is_dat:
+                    mesh_sets[bc.geometry_set.geo_type].append(bc.geometry_set)
+        
+        for key in mesh_sets.keys():
+            set_n_global(mesh_sets[key])
 
         # add the material data
         get_section_dat('MATERIALS', self.materials)
@@ -517,19 +526,18 @@ class InputFile(Mesh):
         
         # add the design descriptions
         lines.append(get_section_string('DESIGN DESCRIPTION'))
-        lines.append('NDPOINT {}'.format(len(self.sets[mpy.point])))
-        lines.append('NDLINE {}'.format(len(self.sets[mpy.line])))
-        lines.append('NDSURF {}'.format(len(self.sets[mpy.surface])))
-        lines.append('NDVOL {}'.format(len(self.sets[mpy.volume])))
+        lines.append('NDPOINT {}'.format(len(mesh_sets[mpy.point])))
+        lines.append('NDLINE {}'.format(len(mesh_sets[mpy.line])))
+        lines.append('NDSURF {}'.format(len(mesh_sets[mpy.surface])))
+        lines.append('NDVOL {}'.format(len(mesh_sets[mpy.volume])))
         
         # add boundary conditions
-        for key1 in self.bc.keys():
-            for key2 in self.bc[key1].keys():
-                for i, bc in enumerate(self.bc[key1][key2]):
-                    if i == 0:
-                        lines.append(get_section_string(get_type_bc(key1,key2)))
-                        lines.append('{} {}'.format(get_type_geometry(key2,'bccounter'), len(self.bc[key1][key2])))
-                    lines.append(bc.get_dat_line())
+        for (bc_key, geom_key) in self.bc.keys():
+            for i, bc in enumerate(self.bc[bc_key, geom_key]):
+                if i == 0:
+                    lines.append(get_section_string(get_type_bc(bc_key, geom_key)))
+                    lines.append('{} {}'.format(get_type_geometry(geom_key,'bccounter'), len(self.bc[bc_key, geom_key])))
+                lines.append(bc.get_dat_line())
 
         # add the couplings
         lines.append(get_section_string('DESIGN POINT COUPLING CONDITIONS'))
@@ -538,8 +546,8 @@ class InputFile(Mesh):
             lines.append(coupling.get_dat_line())
         
         # add the node sets
-        for key in self.sets.keys():
-            for i, node_set in enumerate(self.sets[key]):
+        for key in mesh_sets.keys():
+            for i, node_set in enumerate(mesh_sets[key]):
                 if i == 0:
                     lines.append(get_section_string(get_type_geometry(key,'setsection')))
                 lines.extend(node_set.get_dat_lines())

@@ -71,3 +71,22 @@ class NodeSetContainer(dict):
         else:
             raise ValueError('Not expected {}'.format(type(value)))
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

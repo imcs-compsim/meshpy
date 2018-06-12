@@ -5,6 +5,7 @@ import numpy as np
 # meshpy imports
 from . import Rotation, Node, Function, Material, Element, mpy, NodeSetContainer, NodeSet, \
     BC, Coupling
+from _collections import OrderedDict
 
 
    
@@ -28,14 +29,13 @@ class Mesh(object):
         self.functions = []
         self.couplings = []
         
-        self.sets = {}
+        self.sets = OrderedDict()
         for key in mpy.geometry:
             self.sets[key] = []
-        self.bc = {}
+        self.bc = OrderedDict()
         for key1 in mpy.boundary_condition:
-            self.bc[key1] = {}
             for key2 in mpy.geometry:
-                self.bc[key1][key2] = []
+                self.bc[(key1,key2)] = []
         
     def add(self, *args, **kwargs):
         r"""
@@ -87,34 +87,19 @@ class Mesh(object):
         self.add(mesh.elements)
         self.add(mesh.materials)
         self.add(mesh.functions)
-        self.add(mesh.couplings)
         
         # First add sets to the new mesh, so when the bc is added, no additional
         # set is created
         for key in self.sets.keys():
             self.sets[key].extend(mesh.sets[key])
-        for key1 in self.bc.keys():
-            for key2 in self.bc[key1].keys():
-                self.bc[key1][key2].extend(mesh.bc[key1][key2])
-        
+        for key in self.bc:
+            self.bc[key].extend(mesh.bc[key])
+        self.add(mesh.couplings)
     
     
     def add_coupling(self, coupling):
         """ Add a coupling to the mesh object. """
         
-        # first perform checks
-        # check that all nodes have the same position and are in mesh
-        pos_set = False
-        for node in coupling.node_set.nodes:
-            if not node in self.nodes:
-                print('Error, node not in mesh!')
-            if not pos_set:
-                pos_set = True
-                pos = node.coordinates
-            if np.linalg.norm(pos - node.coordinates) > 1e-8:
-                print('Error, nodes of coupling do not have the same positions!')
-        
-        self.add(coupling.node_set)
         self.couplings.append(coupling)
         
     
@@ -123,9 +108,7 @@ class Mesh(object):
         
         bc_key = bc.bc_type
         geom_key = bc.geometry_set.geo_type
-        
-        self.add(bc.geometry_set)
-        self.bc[bc_key][geom_key].append(bc)
+        self.bc[bc_key,geom_key].append(bc)
             
     def add_function(self, function):
         """ Add a function to this mesh item. """
@@ -284,7 +267,7 @@ class Mesh(object):
         # add connections to mesh
         for nodes in close_node_list:
             # add sets to mesh
-            self.add_coupling(Coupling(nodes, connection_type))
+            self.add(Coupling(nodes, connection_type))
     
     
     def get_nodes_by_function(self, function, overlapping=True, middle_nodes=False):
