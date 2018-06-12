@@ -1,6 +1,7 @@
 #
 
 # meshgen imports
+from .conf import mpy
 from .utility import get_section_string, flatten, __version__, __git_sha__
 from .rotation import Rotation
 from .base_mesh_item import BaseMeshItem

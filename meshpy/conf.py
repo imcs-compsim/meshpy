@@ -1,6 +1,6 @@
 
 
-
+import numpy as np
 
 
 class MeshPy(object):
@@ -10,6 +10,10 @@ class MeshPy(object):
     
     def __init__(self, *args, **kwargs):
         print(1)
+        
+        
+        # parameters for float conversion
+        self.dtype = np.longdouble
 
 
-meshpy_conf = MeshPy()
+mpy = MeshPy()

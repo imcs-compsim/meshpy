@@ -2,6 +2,7 @@
 import numpy as np
 import math
 from numpy import longdouble
+from . import mpy
 
 
 class Rotation(object):
@@ -18,14 +19,14 @@ class Rotation(object):
         The default constructor is from an rotation vector n and an angle phi.
         """
         
-        self.q = np.zeros(4,dtype=np.longdouble)
+        self.q = np.zeros(4,dtype=mpy.dtype)
         
         if len(args) == 0:
             # identity element
             self.q[0] = 1
         elif len(args) == 1 and len(args[0]) == 4:
             # set from quaternion
-            self.q[:] = np.array(args[0],dtype=np.longdouble)
+            self.q[:] = np.array(args[0],dtype=mpy.dtype)
         elif len(args) == 2:
             # set from vector and rotation angle
             vector = args[0]
@@ -38,7 +39,7 @@ class Rotation(object):
             else:
                 self.q[0] = np.cos(0.5*phi)
                 self.q[1:] = np.sin(0.5*phi) * \
-                    np.array(vector,dtype=np.longdouble) / norm
+                    np.array(vector,dtype=mpy.dtype) / norm
         else:
             raise ValueError('The given arguments {} are invalid!'.format(args))
     
@@ -49,7 +50,7 @@ class Rotation(object):
         Create the object from a rotation matrix.
         """
         
-        q = np.zeros(4,dtype=np.longdouble);
+        q = np.zeros(4,dtype=mpy.dtype);
         q[0] = np.sqrt( max( 0, 1 + R[0,0] + R[1,1] + R[2,2] ) ) / 2
         q[1] = np.sqrt( max( 0, 1 + R[0,0] - R[1,1] - R[2,2] ) ) / 2
         q[2] = np.sqrt( max( 0, 1 - R[0,0] + R[1,1] - R[2,2] ) ) / 2
@@ -94,7 +95,7 @@ class Rotation(object):
         Return the matrix \skew{n} for this rotation.
         """
         
-        N = np.zeros([3,3],dtype=np.longdouble)
+        N = np.zeros([3,3],dtype=mpy.dtype)
         N[0,1] = -self.q[3]
         N[0,2] =  self.q[2]
         N[1,0] =  self.q[3]

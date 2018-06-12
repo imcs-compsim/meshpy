@@ -2,7 +2,7 @@
 import numpy as np
 
 # meshpy modules
-from . import BaseMeshItem
+from . import BaseMeshItem, mpy
 
 
 class Node(BaseMeshItem):
@@ -15,7 +15,7 @@ class Node(BaseMeshItem):
         BaseMeshItem.__init__(self, data=None, is_dat=False, is_referenced=False)
         
         # Coordinates and rotation of this node.
-        self.coordinates = np.array(coordinates, dtype=np.longdouble)
+        self.coordinates = np.array(coordinates, dtype=mpy.dtype)
         self.rotation = rotation
         
         # If this node is at the end of a line or curve created with multiple
