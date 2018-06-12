@@ -190,10 +190,10 @@ def get_type_geometry(item_description, return_type):
     """
     
     string_array = [
-        [mpy.geo_point, 'DNODE-NODE TOPOLOGY', 'DNODE', 'DESIGN POINT DIRICH CONDITIONS', 'DESIGN POINT NEUMANN CONDITIONS', 'DPOINT'],
-        [mpy.geo_line, 'DLINE-NODE TOPOLOGY', 'DLINE', 'DESIGN LINE DIRICH CONDITIONS', 'DESIGN LINE NEUMANN CONDITIONS', 'DLINE'],
-        [mpy.geo_surf, 'DSURF-NODE TOPOLOGY', 'DSURFACE', 'DESIGN SURF DIRICH CONDITIONS', 'DESIGN SURF NEUMANN CONDITIONS', 'DSURF'],
-        [mpy.geo_vol, 'DVOL-NODE TOPOLOGY', 'DVOLUME', 'DESIGN VOL DIRICH CONDITIONS', 'DESIGN VOL NEUMANN CONDITIONS', 'DVOL']
+        [mpy.point, 'DNODE-NODE TOPOLOGY', 'DNODE', 'DESIGN POINT DIRICH CONDITIONS', 'DESIGN POINT NEUMANN CONDITIONS', 'DPOINT'],
+        [mpy.line, 'DLINE-NODE TOPOLOGY', 'DLINE', 'DESIGN LINE DIRICH CONDITIONS', 'DESIGN LINE NEUMANN CONDITIONS', 'DLINE'],
+        [mpy.surface, 'DSURF-NODE TOPOLOGY', 'DSURFACE', 'DESIGN SURF DIRICH CONDITIONS', 'DESIGN SURF NEUMANN CONDITIONS', 'DSURF'],
+        [mpy.volume, 'DVOL-NODE TOPOLOGY', 'DVOLUME', 'DESIGN VOL DIRICH CONDITIONS', 'DESIGN VOL NEUMANN CONDITIONS', 'DVOL']
         ]
     
     for i, line in enumerate(string_array):
@@ -222,8 +222,8 @@ def get_type_bc(item_description, return_type):
     """
     
     string_array = [
-        [mpy.bc_diri, 'DESIGN POINT DIRICH CONDITIONS', 'DESIGN LINE DIRICH CONDITIONS', 'DESIGN SURF DIRICH CONDITIONS', 'DESIGN VOL DIRICH CONDITIONS'],
-        [mpy.bc_neum, 'DESIGN POINT NEUMANN CONDITIONS', 'DESIGN LINE DIRICH NEUMANN', 'DESIGN SURF DIRICH NEUMANN', 'DESIGN VOL DIRICH NEUMANN']
+        [mpy.dirichlet, 'DESIGN POINT DIRICH CONDITIONS', 'DESIGN LINE DIRICH CONDITIONS', 'DESIGN SURF DIRICH CONDITIONS', 'DESIGN VOL DIRICH CONDITIONS'],
+        [mpy.neumann, 'DESIGN POINT NEUMANN CONDITIONS', 'DESIGN LINE DIRICH NEUMANN', 'DESIGN SURF DIRICH NEUMANN', 'DESIGN VOL DIRICH NEUMANN']
         ]
     
     for i, line in enumerate(string_array):
@@ -232,13 +232,13 @@ def get_type_bc(item_description, return_type):
     
     if return_type == 'enum':
         return_index = 0
-    elif return_type == mpy.geo_point:
+    elif return_type == mpy.point:
         return_index = 1
-    elif return_type == mpy.geo_line:
+    elif return_type == mpy.line:
         return_index = 2
-    elif return_type == mpy.geo_surf:
+    elif return_type == mpy.surface:
         return_index = 3
-    elif return_type == mpy.geo_vol:
+    elif return_type == mpy.volume:
         return_index = 4
     
     return string_array[item_index][return_index]
@@ -309,6 +309,7 @@ class InputFile(Mesh):
         self._add_dat_section(section_line, section_data)
     
     
+    
     def _add_dat_section(self, section_line, section_data):
         """
         The values are first added to the mesh object, if the return code is 1, the
@@ -336,8 +337,9 @@ class InputFile(Mesh):
                 for i, item in enumerate(section_data):
                     # first line is number of BCs skip this one
                     if i > 0:
-                        #[get_type_bc(section_header, 'enum'), get_type_geometry(section_header, 'enum')]
-                        self.bc.append(BaseMeshItem(item))
+                        bc_key = get_type_bc(section_header, 'enum')
+                        geom_key = get_type_geometry(section_header, 'enum')
+                        self.bc[bc_key][geom_key].append(BaseMeshItem(item))
             
             def add_set(section_header):
                 """ Add sets of points, lines, surfs or volumes to item. """
@@ -351,11 +353,11 @@ class InputFile(Mesh):
                             dat_list.append(line)
                         else:
                             last_index = int(line.split()[3])
-                            #[section_header]
-                            self.sets.append(BaseMeshItem(dat_list))
+                            geom_key = get_type_geometry(section_header, 'enum')
+                            self.sets[geom_key].append(BaseMeshItem(dat_list))
                             dat_list = [line]
-                    #[section_header]
-                    self.sets.append(BaseMeshItem(dat_list))
+                    geom_key = get_type_geometry(section_header, 'enum')
+                    self.sets[geom_key].append(BaseMeshItem(dat_list))
             
             if section_name == 'MATERIALS':
                 for line in section_data:
@@ -499,15 +501,11 @@ class InputFile(Mesh):
                 coupling.node_set.is_referenced = True
         
         # get ordered list of sets and bcs
-        ordered_set = self.get_set_ordered()
-        ordered_bc = self.get_bc_ordered()
-        for geom_list in ordered_set:
-            for i, node_set in enumerate(geom_list):
-                node_set.n_global = i + 1
-        for bc_list in ordered_bc:
-            for geom_bc in bc_list:
-                for i, bc in enumerate(geom_bc):
-                    bc.n_global = i + 1
+        for key1 in self.bc.keys():
+            for key2 in self.bc[key1].keys():
+                set_n_global(self.bc[key1][key2])
+        for key in self.sets.keys():
+            set_n_global(self.sets[key])
 
         # add the material data
         get_section_dat('MATERIALS', self.materials)
@@ -519,27 +517,19 @@ class InputFile(Mesh):
         
         # add the design descriptions
         lines.append(get_section_string('DESIGN DESCRIPTION'))
-        lines.append('NDPOINT {}'.format(len(ordered_set[mpy.geo_point])))
-        lines.append('NDLINE {}'.format(len(ordered_set[mpy.geo_line])))
-        lines.append('NDSURF {}'.format(len(ordered_set[mpy.geo_surf])))
-        lines.append('NDVOL {}'.format(len(ordered_set[mpy.geo_vol])))
+        lines.append('NDPOINT {}'.format(len(self.sets[mpy.point])))
+        lines.append('NDLINE {}'.format(len(self.sets[mpy.line])))
+        lines.append('NDSURF {}'.format(len(self.sets[mpy.surface])))
+        lines.append('NDVOL {}'.format(len(self.sets[mpy.volume])))
         
         # add boundary conditions
-        for bc_type in mpy.bc:
-            for bc_geom in mpy.geo:
-                for i, bc in enumerate(ordered_bc[bc_type][bc_geom]):
+        for key1 in self.bc.keys():
+            for key2 in self.bc[key1].keys():
+                for i, bc in enumerate(self.bc[key1][key2]):
                     if i == 0:
-                        lines.append(get_section_string(mpy.bc_dat_name[bc_type][bc_geom]))
-                        lines.append('{} {}'.format(mpy.bc_name[bc_geom], len(ordered_bc[bc_type][bc_geom])))
+                        lines.append(get_section_string(get_type_bc(key1,key2)))
+                        lines.append('{} {}'.format(get_type_geometry(key2,'bccounter'), len(self.bc[key1][key2])))
                     lines.append(bc.get_dat_line())
-#                 
-#                 
-#             for bc_geom in self.bc[bc_type].keys():
-#                 if len(self.bc[bc_type][bc_geom]) > 0:
-#                     lines.append(get_section_string(get_type_bc(bc_type, bc_geom)))
-#                     lines.append('{} {}'.format(get_type_geometry(key2, 'bccounter'), len(self.bc[key1, key2])))
-#                     for bc in self.bc[bc_type][bc_geom]:
-#                         lines.append(bc.get_dat_line())
 
         # add the couplings
         lines.append(get_section_string('DESIGN POINT COUPLING CONDITIONS'))
@@ -547,23 +537,13 @@ class InputFile(Mesh):
         for coupling in self.couplings:
             lines.append(coupling.get_dat_line())
         
-        
         # add the node sets
-        for set_geom in mpy.geo:
-            for i, node_set in enumerate(ordered_set[set_geom]):
+        for key in self.sets.keys():
+            for i, node_set in enumerate(self.sets[key]):
                 if i == 0:
-                    lines.append(get_section_string(mpy.geo_dat_names[set_geom]))
+                    lines.append(get_section_string(get_type_geometry(key,'setsection')))
                 lines.extend(node_set.get_dat_lines())
-#         for key in self.sets.keys():
-#             if len(self.sets[key]) > 0:
-#                 lines.append(get_section_string(get_type_geometry(key, 'setsection')))
-#                 # print the description for the sets
-#                 for mesh_set in self.sets.get_sets(key, all_sets=print_all_sets):
-#                     if (not mesh_set.is_dat) and print_set_names:
-#                         lines.append(mesh_set.get_dat_name())
-#                 for mesh_set in self.sets.get_sets(key, all_sets=print_all_sets):
-#                     lines.extend(mesh_set.get_dat_lines())
-#                     
+
         # add the nodal data
         get_section_dat('NODE COORDS', self.nodes)
 

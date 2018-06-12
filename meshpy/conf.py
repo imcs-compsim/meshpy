@@ -14,18 +14,16 @@ class MeshPy(object):
         self.dtype = np.longdouble
         
         # geometry types
-        self.geo_n = 4
-        self.geo_point = 0
-        self.geo_line = 1
-        self.geo_surf = 2
-        self.geo_vol = 3
-        self.geo = [self.geo_point, self.geo_line, self.geo_surf, self.geo_vol]
+        self.point = 'geometry_point'
+        self.line = 'geometry_line'
+        self.surface = 'geometry_surface'
+        self.volume = 'geometry_volume'
+        self.geometry = [self.point, self.line, self.surface, self.volume]
         
         # boundary conditions types
-        self.bc_n = 2
-        self.bc_diri = 0
-        self.bc_neum = 1
-        self.bc = [self.bc_diri, self.bc_neum]
+        self.dirichlet = 'boundary_condition_dirichlet'
+        self.neumann = 'boundary_condition_neumann'
+        self.boundary_condition = [self.dirichlet, self.neumann]
         
         
         # node set names

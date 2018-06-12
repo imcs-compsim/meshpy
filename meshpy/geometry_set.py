@@ -19,8 +19,15 @@ class NodeSet(BaseMeshItem):
         
         if not nodes is None:
             self.add(nodes)
-    
-    
+        
+        # node set names
+        self.geo_set_names = {
+            mpy.point: 'DNODE',
+            mpy.line: 'DLINE',
+            mpy.surface: 'DSURFACE',
+            mpy.volume: 'DVOLUME'
+            }
+        
     def add(self, value):
         """ Add Nodes. """
         
@@ -43,7 +50,7 @@ class NodeSet(BaseMeshItem):
     
     def get_dat_lines(self):
         """ Print the data stuff. """
-        return ['NODE {} {} {}'.format(node.n_global, mpy.geo_set_names[self.geo_type], self.n_global) for node in self.nodes]
+        return ['NODE {} {} {}'.format(node.n_global, self.geo_set_names[self.geo_type], self.n_global) for node in self.nodes]
 
 
 

@@ -156,9 +156,16 @@ class Mesh(object):
         self.elements = []
         self.materials = []
         self.functions = []
-        self.sets = []
-        self.bc = []
         self.couplings = []
+        
+        self.sets = {}
+        for key in mpy.geometry:
+            self.sets[key] = []
+        self.bc = {}
+        for key1 in mpy.boundary_condition:
+            self.bc[key1] = {}
+            for key2 in mpy.geometry:
+                self.bc[key1][key2] = []
         
         # count the number of items created for numbering in the comments
         self.mesh_item_counter = {}
@@ -208,8 +215,11 @@ class Mesh(object):
             self.add_material(material)
         for function in mesh.functions:
             self.add_function(function)
-        self.bc.extend(mesh.bc)
-        self.sets.extend(mesh.sets)
+        for key1 in self.bc.keys():
+            for key2 in self.bc[key1].keys():
+                self.bc[key1][key2].extend(mesh.bc[key1][key2])
+        for key in self.sets.keys():
+                self.sets[key].extend(mesh.sets[key])
         self.couplings.extend(mesh.couplings)
     
     
@@ -231,7 +241,7 @@ class Mesh(object):
         self.couplings.append(coupling)
         
         # add set with coupling conditions
-        node_set = NodeSet(mpy.geo_point, coupling.nodes)
+        node_set = NodeSet(mpy.point, coupling.nodes)
         self.add(node_set)
         coupling.node_set = node_set
         for node in coupling.nodes:
@@ -240,8 +250,11 @@ class Mesh(object):
     
     def add_bc(self, bc):
         """ Add a boundary condition to this mesh. """
-        self.bc.append(bc)
-        self.sets.append(bc.set)
+        bc_key = bc.type
+        geom_key = bc.set.geo_type
+        
+        self.bc[bc_key][geom_key].append(bc)
+        self.sets[geom_key].append(bc.set)
             
     def add_function(self, function):
         """ Add a function to this mesh item. """
@@ -263,25 +276,8 @@ class Mesh(object):
     
     def add_set(self, node_set):
         """ Add a node set to the mesh. """
-        self.sets.append(node_set)    
+        self.sets[node_set.geo_type].append(node_set)
     
-    def get_bc_ordered(self):
-        """ Return an array with the bc ordered in type and geometry. """
-        array = [[[] for geom in mpy.geo] for bc in mpy.bc]
-        
-        for bc in self.bc:
-            if not bc.is_dat:
-                array[bc.type][bc.set.geo_type].append(bc)
-        return array
-
-    def get_set_ordered(self):
-        """ Return an array with the sets ordered in geometry. """
-        set_list = [[] for set in mpy.geo]
-        
-        for set in self.sets:
-            if not set.is_dat:
-                set_list[set.geo_type].append(set)
-        return set_list
     
     def translate(self, vector):
         """ Move all nodes of this mesh by the vector. """
@@ -582,9 +578,9 @@ class Mesh(object):
         
         # add sets to mesh
         return_set = NodeSetContainer()
-        return_set['start'] = NodeSet(mpy.geo_point, nodes=nodes[0])
-        return_set['end'] = NodeSet(mpy.geo_point, nodes=nodes[-1])
-        return_set['line'] = NodeSet(mpy.geo_line, nodes=nodes)
+        return_set['start'] = NodeSet(mpy.point, nodes=nodes[0])
+        return_set['end'] = NodeSet(mpy.point, nodes=nodes[-1])
+        return_set['line'] = NodeSet(mpy.point, nodes=nodes)
         return return_set
     
     
@@ -707,10 +703,10 @@ class Mesh(object):
             self.add_connections(honeycomb_nodes)
             
         return_set = NodeSetContainer()
-        return_set['north'] = NodeSet(mpy.geo_point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [y_max,y_max], [-1,1])))
-        return_set['east'] = NodeSet(mpy.geo_point, nodes=self.get_nodes_by_function(node_in_box([x_max,x_max], [0,y_max], [-1,1])))
-        return_set['south'] = NodeSet(mpy.geo_point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [0,0], [-1,1])))
-        return_set['west'] = NodeSet(mpy.geo_point, nodes=self.get_nodes_by_function(node_in_box([0,0], [0,y_max], [-1,1])))
+        return_set['north'] = NodeSet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [y_max,y_max], [-1,1])))
+        return_set['east'] = NodeSet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([x_max,x_max], [0,y_max], [-1,1])))
+        return_set['south'] = NodeSet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [0,0], [-1,1])))
+        return_set['west'] = NodeSet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,0], [0,y_max], [-1,1])))
         return return_set
     
     
@@ -797,8 +793,8 @@ class Mesh(object):
                 z_max = node.coordinates[2]
                 
         return_set = NodeSetContainer()
-        return_set['bottom'] = NodeSet(mpy.geo_point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [0,0])))
-        return_set['top'] = NodeSet(mpy.geo_point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [z_max,z_max])))
+        return_set['bottom'] = NodeSet(mpy.point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [0,0])))
+        return_set['top'] = NodeSet(mpy.point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [z_max,z_max])))
 
         self.add_mesh(mesh_temp)
         

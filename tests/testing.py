@@ -293,18 +293,18 @@ class TestFullBaci(unittest.TestCase):
         mesh_honeycomb.add(ft)
         
         # change the sets to lines, only for purpose of matching the test file
-        honeycomb_set['bottom'].geo_type = mpy.geo_line
-        honeycomb_set['top'].geo_type = mpy.geo_line
+        honeycomb_set['bottom'].geo_type = mpy.line
+        honeycomb_set['top'].geo_type = mpy.line
         mesh_honeycomb.add(
                 BC(honeycomb_set['bottom'],
                    'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
-                   bc_type=mpy.bc_diri
+                   bc_type=mpy.dirichlet
                 ))
         mesh_honeycomb.add(
                 BC(honeycomb_set['top'],
                    'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 5.0 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0',
                    format_replacement=[ft],
-                   bc_type=mpy.bc_diri
+                   bc_type=mpy.dirichlet
                 ))
           
         # add the beam mesh to the solid mesh
@@ -352,9 +352,9 @@ class TestFullBaci(unittest.TestCase):
         # add fix at start of the beam
         cantilever.add(
             BC(
-                cantilever_set.point[0], # bc set
+                cantilever_set['start'], # bc set
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0' # bc string
-                ,bc_type='dirich'
+                ,bc_type=mpy.dirichlet
                 )
             )
           
@@ -364,10 +364,10 @@ class TestFullBaci(unittest.TestCase):
         cantilever.add(sin, cos)
         cantilever.add(
             BC(
-                cantilever_set.point[1], # bc set
+                cantilever_set['end'], # bc set
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 3. 3. 0 0 0 0 0 0 0 FUNCT {} {} 0 0 0 0 0 0 0', # bc string
                 format_replacement=[cos,sin],
-                bc_type = 'dirich'
+                bc_type = mpy.dirichlet
                 )
             )
           
@@ -484,13 +484,13 @@ class TestFullBaci(unittest.TestCase):
                 mesh.add(
                         BC(honeycomb_set['bottom'],
                            'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
-                           bc_type=mpy.bc_diri
+                           bc_type=mpy.dirichlet
                         ))
                 mesh.add(
                         BC(honeycomb_set['top'],
                            'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 1. 1. 1. 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
                            format_replacement=[ft[counter]],
-                           bc_type=mpy.bc_diri
+                           bc_type=mpy.dirichlet
                         ))
                 counter += 1
          
