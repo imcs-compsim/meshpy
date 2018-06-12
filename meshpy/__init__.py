@@ -12,7 +12,7 @@ from .node import Node
 from .geometry_set import NodeSet, NodeSetContainer
 from .element import Element
 from .element_beam import Beam, Beam3rHerm2Lin3
-
-from .mesh import Mesh, Function, \
-    ContainerGeom, GeometrySet, BC
+from .boundary_condition import BC
+from .coupling import Coupling
+from .mesh import Mesh, BC
 from .inputfile import InputFile, InputSection

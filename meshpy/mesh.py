@@ -5,145 +5,15 @@ from _collections import OrderedDict
 
 # meshpy imports
 from . import Rotation, get_section_string, flatten, Beam, Beam3rHerm2Lin3, \
-    Node, BaseMeshItem, Function, Material, Element, mpy, ContainerBC, ContainerGeom, NodeSetContainer, NodeSet
+    Node, BaseMeshItem, Function, Material, Element, mpy, ContainerBC, ContainerGeom, NodeSetContainer, NodeSet, \
+    BC, Coupling
 
 
    
   
- 
-class Coupling(object):
-    """
-    Represents a coupling between dof in BACI.
-    """
-     
-    def __init__(self, nodes, coupling_type, name=None):
-         
-        # flatten out nodes
-        self.nodes = []
-        self._add_nodes(flatten(nodes))
-        self.name = name
-        self.coupling_type = coupling_type
-        self.node_set = None
-     
-    def _add_nodes(self, nodes):
-        # check type
-        if type(nodes) == list:
-            for node in nodes:
-                self._add_nodes(node)
-        elif type(nodes) == Node:
-            self.nodes.append(nodes)
-        elif type(nodes) == GeometrySet:
-            self.nodes.extend(nodes.nodes)
-        else:
-            print('Error! not node or list')
-     
-    def get_dat_line(self):
-        if self.coupling_type == 'joint':
-            string = 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0'
-        elif self.coupling_type == 'fix':
-            string = 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0' 
-        return 'E {} - {}'.format(self.node_set.n_global, string)
 
 
 
-
-class BC(object):
-    """ This object is one BC. """
-    
-    def __init__(self, set_item, bc_string, format_replacement=None, bc_type=None):
-        """
-        Set the default values. Format_replacement will be called on string.
-        """
-        
-        self.bc_string = bc_string
-        self.type = bc_type
-        self.format_replacement = format_replacement
-        
-        if set_item.is_referenced:
-            print('Error, each set can only have one BC!')        
-        self.set = set_item
-        self.set.is_referenced = True
-        
-        
-        self.is_dat = False
-        self.n_global = None
-        self.is_referenced = False
-    
-    def get_dat_line(self):
-        """ Line in the input file for the BC. """
-        
-        if self.format_replacement:
-            dat_string = self.bc_string.format(*self.format_replacement)
-        else:
-            dat_string = self.bc_string
-        
-        return 'E {} - {}'.format(
-            self.set.n_global,
-            dat_string
-            )
-
-
-class GeometrySet(object):
-    """
-    Represents a set of nodes, for points, lines, surfaces or volumes.
-    """
-     
-    def __init__(self, name, nodes=None):
-        """
-        Define the type of the set
-        """
-        
-        # the name will be a list of names, as the parent meshes will also
-        # be in the name
-        if type(name) == list:
-            self.name = name
-        else:
-            self.name = [name]
-        
-        self.nodes = []
-        if nodes:
-            self.add_node(nodes)
-        
-        self.n_global = None
-        self.is_dat = False
-        self.item_type = None
-        self.is_referenced = False
-     
-     
-    def add_node(self, add):
-        """
-        Check if the object or list of objects given is a node and add it to self.
-        """
-         
-        if type(add) == Node:
-            if not add in self.nodes:
-                self.nodes.append(add)
-        elif type(add) == list:
-            for item in add:
-                self.add_node(item)
-        else:
-            print('ERROR only Nodes and list of Nodes can be added to this object.')
-    
-    
-    def get_dat_lines(self):
-        """ Return the dat lines for this object. """
-        return ['NODE {} {} {}'.format(node.n_global, get_type_geometry(self.item_type, 'settopology'), self.n_global) for node in self.nodes]
-
-    
-    def get_dat_name(self):
-        """ Return a comment with the name of this set. """
-        return '// {} {} name in beamgen: {}'.format(
-            get_type_geometry(self.item_type, 'settopology'),
-            self.n_global,
-            '_'.join([str(item) for item in flatten(self.name)])
-            )
-        
-    def output_to_dat(self):
-        """
-        Check if the item is linked to any boundary conditions. If not,
-        the set will not appear in the dat file.
-        """
-        return True
 
 
 class Mesh(object):

@@ -7,7 +7,7 @@ import filecmp
 
 # import modules from meshgen
 from meshpy import Rotation, InputFile, InputSection, Material, Mesh, \
-    Function, Beam3rHerm2Lin3, ContainerGeom, GeometrySet, BC, Node, mpy
+    Function, Beam3rHerm2Lin3, BC, Node, mpy
 from meshpy.geometry_set import NodeSetContainer
 
 # global variables
