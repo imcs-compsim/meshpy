@@ -4,7 +4,7 @@ import numpy as np
 
 # meshpy imports
 from . import Rotation, Node, Function, Material, Element, mpy, GeometryName, GeometrySet, \
-    BC, Coupling
+    BoundaryCondition, Coupling
 from _collections import OrderedDict
 
 
@@ -52,7 +52,7 @@ class Mesh(object):
                 self.add_mesh(add_item, **kwargs)
             elif isinstance(add_item, Function):
                 self.add_function(add_item, **kwargs)
-            elif isinstance(add_item, BC):
+            elif isinstance(add_item, BoundaryCondition):
                 self.add_bc(add_item, **kwargs)
             elif isinstance(add_item, Material):
                 self.add_material(add_item, **kwargs)

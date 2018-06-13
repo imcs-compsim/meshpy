@@ -7,7 +7,7 @@ import filecmp
 
 # import modules from meshgen
 from meshpy import Rotation, InputFile, InputSection, Material, Mesh, \
-    Function, Beam3rHerm2Lin3, BC, Node, mpy, GeometryName, GeometrySet
+    Function, Beam3rHerm2Lin3, BoundaryCondition, Node, mpy, GeometryName, GeometrySet
 
 # global variables
 __testing_path__ = '/home/ivo/dev/meshpy/tests'
@@ -295,12 +295,12 @@ class TestFullBaci(unittest.TestCase):
         honeycomb_set['bottom'].geo_type = mpy.line
         honeycomb_set['top'].geo_type = mpy.line
         mesh_honeycomb.add(
-                BC(honeycomb_set['bottom'],
+                BoundaryCondition(honeycomb_set['bottom'],
                    'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
                    bc_type=mpy.dirichlet
                 ))
         mesh_honeycomb.add(
-                BC(honeycomb_set['top'],
+                BoundaryCondition(honeycomb_set['top'],
                    'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 5.0 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0',
                    format_replacement=[ft],
                    bc_type=mpy.dirichlet
@@ -350,7 +350,7 @@ class TestFullBaci(unittest.TestCase):
           
         # add fix at start of the beam
         cantilever.add(
-            BC(
+            BoundaryCondition(
                 cantilever_set['start'], # bc set
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0' # bc string
                 ,bc_type=mpy.dirichlet
@@ -362,7 +362,7 @@ class TestFullBaci(unittest.TestCase):
         cos = Function('COMPONENT 0 FUNCTION cos(t*2*pi)')
         cantilever.add(sin, cos)
         cantilever.add(
-            BC(
+            BoundaryCondition(
                 cantilever_set['end'], # bc set
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 3. 3. 0 0 0 0 0 0 0 FUNCT {} {} 0 0 0 0 0 0 0', # bc string
                 format_replacement=[cos,sin],
@@ -481,12 +481,12 @@ class TestFullBaci(unittest.TestCase):
                     closed_top=closed_top
                     )
                 mesh.add(
-                        BC(honeycomb_set['bottom'],
+                        BoundaryCondition(honeycomb_set['bottom'],
                            'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
                            bc_type=mpy.dirichlet
                         ))
                 mesh.add(
-                        BC(honeycomb_set['top'],
+                        BoundaryCondition(honeycomb_set['top'],
                            'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 1. 1. 1. 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
                            format_replacement=[ft[counter]],
                            bc_type=mpy.dirichlet

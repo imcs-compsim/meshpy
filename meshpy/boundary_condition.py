@@ -1,14 +1,31 @@
+# -*- coding: utf-8 -*-
+"""
+This module implements a class to handle boundary conditions in the input file.
+"""
 
-
+# meshyp modules 
 from . import BaseMeshItem
 
 
-class BC(BaseMeshItem):
-    """ This object is one BC. """
+class BoundaryCondition(BaseMeshItem):
+    """This object represents one boundary condition in the input file."""
     
-    def __init__(self, geometry_set, bc_string, format_replacement=None, bc_type=None):
+    def __init__(self, geometry_set, bc_string, format_replacement=None,
+            bc_type=None):
         """
-        Set the default values. Format_replacement will be called on string.
+        Initialize the object.
+        
+        Args
+        ----
+        geometry_set: GeometrySet
+            Geometry that this boundary condition acts on.
+        bc_string: str
+            Text that will be displayed in the input file for this boundary
+            condition.
+        format_replacement: str, list
+            Replacement with the str.format() function for bc_string.
+        bc_type: mpy.boundary
+            Type of the boundary condition (dirichlet or neumann).
         """
         
         BaseMeshItem.__init__(self, is_dat=False)
@@ -16,8 +33,7 @@ class BC(BaseMeshItem):
         self.bc_type = bc_type
         self.format_replacement = format_replacement  
         self.geometry_set = geometry_set
-            
-    
+
     def _get_dat(self, **kwargs):
         """
         Add the content of this object to the list of lines.

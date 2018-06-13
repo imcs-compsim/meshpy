@@ -14,12 +14,10 @@ from .node import Node
 from .element import Element
 from .element_beam import Beam, Beam3rHerm2Lin3
 from .geometry_set import GeometrySet
+from .boundary_condition import BoundaryCondition
+from .container import GeometryName, BoundaryConditionContainer, \
+    GeometrySetContainer
 
-from .container import GeometryName, BoundaryConditionContainer
-#from .container import ContainerBC, ContainerGeom
-
-
-from .boundary_condition import BC
 from .coupling import Coupling
-from .mesh import Mesh, BC
+from .mesh import Mesh
 from .inputfile import InputFile, InputSection
