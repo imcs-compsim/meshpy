@@ -14,8 +14,7 @@ from .node import Node
 from .element import Element
 from .element_beam import Beam, Beam3rHerm2Lin3
 
-
-from .container import ContainerBC, ContainerGeom
+#from .container import ContainerBC, ContainerGeom
 
 from .geometry_set import NodeSet, NodeSetContainer
 from .boundary_condition import BC

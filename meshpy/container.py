@@ -1,14 +1,19 @@
+# -*- coding: utf-8 -*-
+"""
+This module implements containers to manage boundary conditions and node sets in
+one object.
+"""
+
+# python modules
 from _collections import OrderedDict
 
-
+# meshpy modules
 from . import mpy
-
 
 
 class Container(OrderedDict):
     """
-    A base class for a container that will store node sets and 
-    boundary conditions.
+    A base class for a container that will store node sets and   boundary conditions.
     """
     
     def __init__(self, fields, empty_type):
