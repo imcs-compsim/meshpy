@@ -5,7 +5,7 @@ import re
 from _collections import OrderedDict
 
 # meshgen imports
-from . import __git_sha__, Mesh, BaseMeshItem, mpy, get_section_string
+from . import mpy, Mesh, BaseMeshItem, mpy, get_section_string
 
 
  
@@ -577,7 +577,7 @@ class InputFile(Mesh):
     def _get_header(self):
         """ Return the header for the input file. """
         
-        string = '// Input file created with meshgen git sha: {}\n'.format(__git_sha__)
+        string = '// Input file created with meshgen git sha: {}\n'.format(mpy.git_sha)
         string += '// Maintainer: {}\n'.format(self.maintainer)
         string += '// Date: {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
         if self.description:

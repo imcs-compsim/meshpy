@@ -10,8 +10,15 @@ class MeshPy(object):
     
     def __init__(self, *args, **kwargs):
 
+        # Version information
+        self.version = '0.0.1'
+        self.git_sha = None
+
         # Value for epsilon when checking if two results are equal.
         self.eps_vec = 1e-10
+        
+        # Values for the formating of the input file
+        self.dat_len_section = 80
         
         # Geometry types
         self.point = 'geometry_point'
