@@ -172,6 +172,11 @@ class Rotation(object):
             rotation_vector[1],
             rotation_vector[2]
             )
+    
+    
+    def copy(self):
+        """Return a deep copy of this object."""
+        return Rotation(self.q)
 
     
     def __str__(self):

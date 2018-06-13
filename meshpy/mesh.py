@@ -132,7 +132,7 @@ class Mesh(object):
                 node.coordinates += vector
     
     
-    def rotate(self, rotation, origin=None):
+    def rotate(self, rotation, origin=None, only_rotate_triads=False):
         """
         Rotate the geometry about origin. Parts of code generated with AceGen.
         """
@@ -154,7 +154,10 @@ class Mesh(object):
         posnew = np.zeros_like(pos)
         
         # additional rotation
-        rot2 = rotation.get_quaternion()
+        if isinstance(rotation, Rotation):
+            rot2 = rotation.get_quaternion()
+        else:
+            rot2 = rotation.transpose()
         
         # temp list for AceGen variables
         temp_val=[None for i in range(11)]
@@ -185,7 +188,8 @@ class Mesh(object):
         for i, node in enumerate(self.nodes):
             if not node.is_dat:
                 node.rotation.q = rotnew[i,:]
-                node.coordinates = posnew[i,:]
+                if not only_rotate_triads:
+                    node.coordinates = posnew[i,:]
 
     def add_connections(self, input_list, connection_type='fix'):
         """
@@ -289,25 +293,31 @@ class Mesh(object):
         There should be NO points with negative x coordinates.
         """
         
-        # check the y coordiantes
-        for node in self.nodes:
+        quaternions = np.zeros([len(self.nodes),4])
+        pos = np.zeros([len(self.nodes),3])
+        for i, node in enumerate(self.nodes):
             if not node.is_dat:
-                if node.coordinates[0] < 0:
-                    print('ERROR, there should be no points with negative x coordiantes')
+                pos[i,:] = node.coordinates
         
-        # transform the nodes
-        for node in self.nodes:
+        # The x coordinate is the radius, the y coordinate the arc length.
+        radius = pos[:,0].copy()
+        phi = pos[:,1] / radius
+        
+        # The rotation is about the z-axis.
+        quaternions[:,0] = np.cos(0.5*phi)
+        quaternions[:,3] = np.sin(0.5*phi)
+        
+        # Set the new positions in the global array.
+        pos[:,0] = radius * np.cos(phi)
+        pos[:,1] = radius * np.sin(phi)
+        
+        # Rotate the mesh
+        self.rotate(quaternions, only_rotate_triads=True)
+        
+        # Set the new position for the nodes.
+        for i, node in enumerate(self.nodes):
             if not node.is_dat:
-                # get the cylindercoordinates
-                r = np.dot([1,0,0], node.coordinates)
-                phi = node.coordinates[1] / r
-    
-                # first apply the rotations
-                node.rotate(Rotation([0,0,1], phi), only_rotate_triads=True)
-                
-                # set the new coordinates
-                node.coordinates[0] = r * np.cos(phi)
-                node.coordinates[1] = r * np.sin(phi)
+                node.coordinates = pos[i,:]
 
     
     def add_beam_mesh_line(

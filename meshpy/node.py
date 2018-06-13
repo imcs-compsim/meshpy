@@ -21,7 +21,7 @@ class Node(BaseMeshItem):
         
         # Coordinates and rotation of this node.
         self.coordinates = np.array(coordinates)
-        self.rotation = rotation
+        self.rotation = rotation.copy()
         
         # If this node is at the end of a line or curve (by default only those
         # nodes are checked for overlapping nodes).

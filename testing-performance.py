@@ -35,8 +35,15 @@ def test_rotation():
     Test the performance of rotating nodes
     """
     
+    start = time.time()
     mesh = Mesh()
-    create_nodes_array(mesh, 40, 200, 10)
+    create_nodes_array(mesh, 100, 50, 10)
+    #create_nodes_array(mesh, 40, 20, 10)
+    #create_nodes_array(mesh, 4, 2, 10)
+    end = time.time()
+    print('time for creation: {:7.4f} sec'.format(end - start))
+    
+    
     
     print('number of nodes: {}'.format(len(mesh.nodes)))
     
@@ -45,6 +52,11 @@ def test_rotation():
     mesh.rotate(rot, origin=np.array([1,0,1]))
     end = time.time()
     print('time for rotation: {:7.4f} sec'.format(end - start))
+    
+    start = time.time()
+    mesh.wrap_around_cylinder()
+    end = time.time()
+    print('time for wraping: {:7.4f} sec'.format(end - start))
     
     print('finished')
 
