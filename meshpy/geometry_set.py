@@ -1,35 +1,41 @@
+# -*- coding: utf-8 -*-
+"""
+This module implements a basic class to manage geometry in the input file.
+"""
 
 # import meshpy modules
-from . import BaseMeshItem, Node, mpy
+from . import mpy, BaseMeshItem, Node
 
 
-class NodeSet(BaseMeshItem):
-    """
-    To group nodes together. The variable referenced_type holds a boolean value
-    if the item is referenced to a certain geometry.
-    """
+class GeometrySet(BaseMeshItem):
+    """This object represents a geometry set. The set is defined by nodes."""
     
-    def __init__(self, geo_type, nodes=None):
-        """
-        Initialize object. It is possible to give nodes at this point.
-        """
+    # Node set names for the input file file.
+    geo_set_names = {
+        mpy.point: 'DNODE',
+        mpy.line: 'DLINE',
+        mpy.surface: 'DSURFACE',
+        mpy.volume: 'DVOLUME'
+        }
+    
+    def __init__(self, geometry_type, nodes=None):
         BaseMeshItem.__init__(self, is_dat=None)
-        self.geo_type = geo_type
+        
+        self.geometry_type = geometry_type
         self.nodes = []
         
         if not nodes is None:
             self.add(nodes)
-        
-        # node set names
-        self.geo_set_names = {
-            mpy.point: 'DNODE',
-            mpy.line: 'DLINE',
-            mpy.surface: 'DSURFACE',
-            mpy.volume: 'DVOLUME'
-            }
-        
+    
     def add(self, value):
-        """ Add Nodes. """
+        """
+        Add nodes to this object.
+        
+        Args
+        ----
+        value: Node, list(Nodes)
+            Node(s) to be added to this geometry
+        """
         
         if isinstance(value, list):
             for item in value:
@@ -49,44 +55,8 @@ class NodeSet(BaseMeshItem):
             yield node
     
     def _get_dat(self):
-        """ Print the data stuff. """
-        return ['NODE {} {} {}'.format(node.n_global, self.geo_set_names[self.geo_type], self.n_global) for node in self.nodes]
-
-
-
-class NodeSetContainer(dict):
-    """ Group node sets together. Mainly for export from mesh functions. """
-    
-    def __setitem__(self, key, value):
-        """ Set nodes to item. """
-        
-        if not isinstance(key, str):
-            raise TypeError('Expected string, got {}!'.format(type(key)))
-        elif isinstance(value, NodeSet):
-            dict.__setitem__(self, key, value)
-        elif isinstance(value, list):
-            dict.__setitem__(self, key, NodeSet(nodes=value))
-        elif isinstance(value, Node):
-            dict.__setitem__(self, key, NodeSet(nodes=[value]))
-        else:
-            raise ValueError('Not expected {}'.format(type(value)))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        """Get the lines for the input file."""
+        return ['NODE {} {} {}'.format(
+            node.n_global,
+            self.geo_set_names[self.geometry_type], self.n_global
+            ) for node in self.nodes ]

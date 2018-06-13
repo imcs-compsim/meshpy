@@ -1,5 +1,5 @@
 
-from . import Node, NodeSet, mpy, BaseMeshItem
+from . import Node, GeometrySet, mpy, BaseMeshItem
  
 class Coupling(BaseMeshItem):
     """
@@ -8,7 +8,7 @@ class Coupling(BaseMeshItem):
      
     def __init__(self, nodes, coupling_type):
         BaseMeshItem.__init__(self, is_dat=False)
-        self.node_set = NodeSet(mpy.point, nodes=nodes) 
+        self.node_set = GeometrySet(mpy.point, nodes=nodes) 
         self.coupling_type = coupling_type
 
     

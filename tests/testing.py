@@ -7,8 +7,7 @@ import filecmp
 
 # import modules from meshgen
 from meshpy import Rotation, InputFile, InputSection, Material, Mesh, \
-    Function, Beam3rHerm2Lin3, BC, Node, mpy
-from meshpy.geometry_set import NodeSetContainer
+    Function, Beam3rHerm2Lin3, BC, Node, mpy, GeometryName, GeometrySet
 
 # global variables
 __testing_path__ = '/home/ivo/dev/meshpy/tests'

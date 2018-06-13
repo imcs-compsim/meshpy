@@ -1,47 +1,106 @@
 # -*- coding: utf-8 -*-
 """
-This module implements containers to manage boundary conditions and node sets in
-one object.
+This module implements containers to manage boundary conditions and geometry
+sets in one object.
 """
 
 # python modules
 from _collections import OrderedDict
 
 # meshpy modules
-from . import mpy
+from . import mpy, GeometrySet
 
 
-class Container(OrderedDict):
+
+class GeometryName(dict):
     """
-    A base class for a container that will store node sets and   boundary conditions.
+    Group node geometry sets together. This is mainly used for export from mesh
+    functions. The sets can be accessed by a unique name. There is no
+    distinction between different types of geometry, every name can only be used
+    once -> use meaningful names.
     """
     
-    def __init__(self, fields, empty_type):
-        """ Create a dictionary with the keys. """
+    def __setitem__(self, key, value):
+        """Set an geometry set in this container."""
         
-        self._fields = fields
+        if not isinstance(key, str):
+            raise TypeError('Expected string, got {}!'.format(type(key)))
+        elif isinstance(value, GeometrySet):
+            dict.__setitem__(self, key, value)
+        else:
+            dict.__setitem__(self, key, GeometrySet(nodes=value))
+
+
+class BoundaryConditionContainer(OrderedDict):
+    """
+    A class to group boundary conditions together. The key of the dicitonary
+    are (bc_type, geometry_type).
+    """ 
+    def __init__(self, *args, **kwargs):
+        OrderedDict.__init__(self, *args, **kwargs)
         
-        # set empty dictionary
-        for field in self._fields:
-            self[field[0]] = empty_type()
-    
-    
-    def __getattr__(self, name):
-        """ Check if attribute is in self._fields. """
-        for field in OrderedDict.__getattribute__(self, '_fields'):
-            if name in field:
-                return self[field[0]]
-        raise AttributeError('Attribute {} does not exist!'.format(name))
-    
-    
-    def __setattr__(self, *args, **kwargs):
-        return OrderedDict.__setattr__(self, *args, **kwargs)
-    
-    
-    def __iter__(self):
-        """ Return the items in fields. """
-        for key in self.keys():
-            yield self[key]    
+        for bc_key in mpy.boundary_condition:
+            for geometry_key in mpy.geometry:
+                self[(bc_key, geometry_key)] = []
+
+
+class GeometrySetContainer(OrderedDict):
+    """
+    A class to group geometry sets together with the key being the geometry
+    type.
+    """
+    def __init__(self, *args, **kwargs):
+        OrderedDict.__init__(self, *args, **kwargs)
+
+        for geometry_key in mpy.geometry:
+            self[geometry_key] = []
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 
+# 
+# 
+# class Container(OrderedDict):
+#     """
+#     A base class for a container that will store node sets and   boundary conditions.
+#     """
+#     
+#     def __init__(self, fields, empty_type):
+#         """ Create a dictionary with the keys. """
+#         
+#         self._fields = fields
+#         
+#         # set empty dictionary
+#         for field in self._fields:
+#             self[field[0]] = empty_type()
+#     
+#     
+#     def __getattr__(self, name):
+#         """ Check if attribute is in self._fields. """
+#         for field in OrderedDict.__getattribute__(self, '_fields'):
+#             if name in field:
+#                 return self[field[0]]
+#         raise AttributeError('Attribute {} does not exist!'.format(name))
+#     
+#     
+#     def __setattr__(self, *args, **kwargs):
+#         return OrderedDict.__setattr__(self, *args, **kwargs)
+#     
+#     
+#     def __iter__(self):
+#         """ Return the items in fields. """
+#         for key in self.keys():
+#             yield self[key]    
 
 
 
@@ -115,17 +174,17 @@ class Container(OrderedDict):
 
 
 
-
-
-
-class ContainerGeom(Container):
-    def __init__(self):
-        Container.__init__(self, mpy.geo, list)
-class ContainerBC(Container):
-    def __init__(self):
-        Container.__init__(self, mpy.bc, ContainerGeom)
-
-
+# 
+# 
+# 
+# class ContainerGeom(Container):
+#     def __init__(self):
+#         Container.__init__(self, mpy.geo, list)
+# class ContainerBC(Container):
+#     def __init__(self):
+#         Container.__init__(self, mpy.bc, ContainerGeom)
+# 
+# 
 
 
 

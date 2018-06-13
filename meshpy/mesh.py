@@ -3,7 +3,7 @@
 import numpy as np
 
 # meshpy imports
-from . import Rotation, Node, Function, Material, Element, mpy, NodeSetContainer, NodeSet, \
+from . import Rotation, Node, Function, Material, Element, mpy, GeometryName, GeometrySet, \
     BC, Coupling
 from _collections import OrderedDict
 
@@ -60,7 +60,7 @@ class Mesh(object):
                 self.add_node(add_item, **kwargs)
             elif isinstance(add_item, Element):
                 self.add_element(add_item, **kwargs)
-            elif isinstance(add_item, NodeSet):
+            elif isinstance(add_item, GeometrySet):
                 self.add_set(add_item, **kwargs)
             elif isinstance(add_item, Coupling):
                 self.add_coupling(add_item, **kwargs)
@@ -107,7 +107,7 @@ class Mesh(object):
         """ Add a boundary condition to this mesh. """
         
         bc_key = bc.bc_type
-        geom_key = bc.geometry_set.geo_type
+        geom_key = bc.geometry_set.geometry_type
         self.bc[bc_key,geom_key].append(bc)
             
     def add_function(self, function):
@@ -411,10 +411,10 @@ class Mesh(object):
         self.nodes.extend(nodes)
         
         # add sets to mesh
-        return_set = NodeSetContainer()
-        return_set['start'] = NodeSet(mpy.point, nodes=nodes[0])
-        return_set['end'] = NodeSet(mpy.point, nodes=nodes[-1])
-        return_set['line'] = NodeSet(mpy.point, nodes=nodes)
+        return_set = GeometryName()
+        return_set['start'] = GeometrySet(mpy.point, nodes=nodes[0])
+        return_set['end'] = GeometrySet(mpy.point, nodes=nodes[-1])
+        return_set['line'] = GeometrySet(mpy.point, nodes=nodes)
         return return_set
     
     
@@ -533,11 +533,11 @@ class Mesh(object):
         if create_couplings:
             self.add_connections(honeycomb_nodes)
             
-        return_set = NodeSetContainer()
-        return_set['north'] = NodeSet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [y_max,y_max], [-1,1])))
-        return_set['east'] = NodeSet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([x_max,x_max], [0,y_max], [-1,1])))
-        return_set['south'] = NodeSet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [0,0], [-1,1])))
-        return_set['west'] = NodeSet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,0], [0,y_max], [-1,1])))
+        return_set = GeometryName()
+        return_set['north'] = GeometrySet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [y_max,y_max], [-1,1])))
+        return_set['east'] = GeometrySet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([x_max,x_max], [0,y_max], [-1,1])))
+        return_set['south'] = GeometrySet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [0,0], [-1,1])))
+        return_set['west'] = GeometrySet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,0], [0,y_max], [-1,1])))
         return return_set
     
     
@@ -623,9 +623,9 @@ class Mesh(object):
             if node.coordinates[2] > z_max:
                 z_max = node.coordinates[2]
                 
-        return_set = NodeSetContainer()
-        return_set['bottom'] = NodeSet(mpy.point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [0,0])))
-        return_set['top'] = NodeSet(mpy.point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [z_max,z_max])))
+        return_set = GeometryName()
+        return_set['bottom'] = GeometrySet(mpy.point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [0,0])))
+        return_set['top'] = GeometrySet(mpy.point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [z_max,z_max])))
 
         self.add_mesh(mesh_temp)
         

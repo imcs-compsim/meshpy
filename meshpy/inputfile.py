@@ -507,11 +507,11 @@ class InputFile(Mesh):
         # get dictionary with sets in this mesh
         mesh_sets = self.sets.copy()
         for coupling in self.couplings:
-            mesh_sets[coupling.node_set.geo_type].append(coupling.node_set)
+            mesh_sets[coupling.node_set.geometry_type].append(coupling.node_set)
         for key in self.bc.keys():
             for bc in self.bc[key]:
                 if not bc.is_dat:
-                    mesh_sets[bc.geometry_set.geo_type].append(bc.geometry_set)
+                    mesh_sets[bc.geometry_set.geometry_type].append(bc.geometry_set)
         
         for key in mesh_sets.keys():
             set_n_global(mesh_sets[key])

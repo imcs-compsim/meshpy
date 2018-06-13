@@ -13,10 +13,12 @@ from .material import Material
 from .node import Node
 from .element import Element
 from .element_beam import Beam, Beam3rHerm2Lin3
+from .geometry_set import GeometrySet
 
+from .container import GeometryName, BoundaryConditionContainer
 #from .container import ContainerBC, ContainerGeom
 
-from .geometry_set import NodeSet, NodeSetContainer
+
 from .boundary_condition import BC
 from .coupling import Coupling
 from .mesh import Mesh, BC
