@@ -1,47 +1,42 @@
+# -*- coding: utf-8 -*-
+"""
+This module defines the Mesh class, which holds the content (nodes, elements,
+sets, ...) for a meshed geometry.
+"""
 
 # python packages
 import numpy as np
 
 # meshpy imports
-from . import Rotation, Node, Function, Material, Element, mpy, GeometryName, GeometrySet, \
-    BoundaryCondition, Coupling
-from _collections import OrderedDict
-
-
-   
-  
-
-
-
+from . import mpy, Rotation, Function, Material, Node, Element, GeometryName, \
+    GeometrySet, GeometrySetContainer, BoundaryCondition, Coupling, \
+    BoundaryConditionContainer
 
 
 class Mesh(object):
-    r"""
+    """
     A class that contains a full mesh, i.e. Nodes, Elements, Boundary
     Conditions, Sets, Couplings, Materials and Functions.
     """
     
     def __init__(self):
+        """ Initialize all empty containers."""
         
         self.nodes = []
         self.elements = []
         self.materials = []
         self.functions = []
         self.couplings = []
-        
-        self.sets = OrderedDict()
-        for key in mpy.geometry:
-            self.sets[key] = []
-        self.bc = OrderedDict()
-        for key1 in mpy.boundary_condition:
-            for key2 in mpy.geometry:
-                self.bc[(key1,key2)] = []
-        
+        self.geometry_sets = GeometrySetContainer()
+        self.boundary_conditions = BoundaryConditionContainer()
+
+
     def add(self, *args, **kwargs):
-        r"""
+        """
         Add an item to this mesh, depending on its type. If an list is given
-        each list element is added with this function. Keyword arguments are
-        passed through to the adding function.
+        each list element is added with this function. If multiple arguments
+        are given, each one is individually added with this funciton.Keyword
+        arguments are passed through to the adding function.
         """
         
         if len(args) == 0:
@@ -61,7 +56,7 @@ class Mesh(object):
             elif isinstance(add_item, Element):
                 self.add_element(add_item, **kwargs)
             elif isinstance(add_item, GeometrySet):
-                self.add_set(add_item, **kwargs)
+                self.add_geometry_set(add_item, **kwargs)
             elif isinstance(add_item, Coupling):
                 self.add_coupling(add_item, **kwargs)
             elif isinstance(add_item, list):
@@ -75,77 +70,74 @@ class Mesh(object):
         else:
             for item in args:
                 self.add(item, **kwargs)
-        
-    
+
+
     def add_mesh(self, mesh):
-        r"""
-        Add the content of another mesh to this mesh.
-        """
+        """Add the content of another mesh to this mesh."""
         
-        # Extend the lists in this mesh
+        # Add each item from mesh to self. 
         self.add(mesh.nodes)
         self.add(mesh.elements)
         self.add(mesh.materials)
         self.add(mesh.functions)
-        
-        # First add sets to the new mesh, so when the bc is added, no additional
-        # set is created
-        for key in self.sets.keys():
-            self.sets[key].extend(mesh.sets[key])
-        for key in self.bc:
-            self.bc[key].extend(mesh.bc[key])
         self.add(mesh.couplings)
-    
+        for key in self.geometry_sets.keys():
+            self.add(mesh.geometry_sets[key])
+        for key in self.boundary_conditions.keys():
+            self.add(mesh.boundary_conditions[key])
     
     def add_coupling(self, coupling):
-        """ Add a coupling to the mesh object. """
-        
+        """Add a coupling to the mesh object."""
         self.couplings.append(coupling)
-        
-    
+
     def add_bc(self, bc):
-        """ Add a boundary condition to this mesh. """
-        
+        """Add a boundary condition to this mesh."""
         bc_key = bc.bc_type
         geom_key = bc.geometry_set.geometry_type
-        self.bc[bc_key,geom_key].append(bc)
-            
+        self.boundary_conditions[bc_key,geom_key].append(bc)
+
     def add_function(self, function):
-        """ Add a function to this mesh item. """
+        """
+        Add a function to this mesh item. Check that the function is only added
+        once.
+        """
         if not function in self.functions:
             self.functions.append(function)
     
     def add_material(self, material):
-        """Add a material to this mesh. Every material can only be once in a mesh. """       
+        """
+        Add a material to this mesh item. Check that the material is only added
+        once.
+        """
         if not material in self.materials:
             self.materials.append(material)
     
     def add_node(self, node):
-        """ Add a node to this mesh."""
+        """Add a node to this mesh."""
         self.nodes.append(node)
         
     def add_element(self, element):
-        """ Add a element to this mesh."""
+        """Add an element to this mesh."""
         self.elements.append(element)
     
-    def add_set(self, node_set):
-        """ Add a node set to the mesh. """
-        if not node_set in self.sets[node_set.geo_type]:
-            self.sets[node_set.geo_type].append(node_set)
-    
-    
+    def add_set(self, geometry_set):
+        """Add a geometry set to this mesh."""
+        if not geometry_set in self.sets[geometry_set.geometry_type]:
+            self.sets[geometry_set.geometry_type].append(geometry_set)
+
     def translate(self, vector):
-        """ Move all nodes of this mesh by the vector. """
-        
+        """Move all nodes of this mesh by vector."""
         for node in self.nodes:
             if not node.is_dat:
                 node.coordinates += vector
     
     
     def rotate(self, rotation, origin=None):
-        """ Rotate the geometry about the origin. """
+        """
+        Rotate the geometry about origin. Parts of code generated with AceGen.
+        """
         
-        # get numpy array with all quaternions and positions for the nodes
+        # get array with all quaternions and positions for the nodes
         rot1 = np.zeros([len(self.nodes),4])
         pos = np.zeros([len(self.nodes),3])
         for i, node in enumerate(self.nodes):
@@ -164,7 +156,7 @@ class Mesh(object):
         # additional rotation
         rot2 = rotation.get_quaternion()
         
-        # temp array for AceGen variables
+        # temp list for AceGen variables
         temp_val=[None for i in range(11)]
         
         # code generated with AceGen (rotation.nb)
@@ -194,8 +186,7 @@ class Mesh(object):
             if not node.is_dat:
                 node.rotation.q = rotnew[i,:]
                 node.coordinates = posnew[i,:]
-    
-    
+
     def add_connections(self, input_list, connection_type='fix'):
         """
         Search through nodes and connect all nodes with the same coordinates.

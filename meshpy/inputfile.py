@@ -339,7 +339,7 @@ class InputFile(Mesh):
                     if i > 0:
                         bc_key = get_type_bc(section_header, 'enum')
                         geom_key = get_type_geometry(section_header, 'enum')
-                        self.bc[bc_key,geom_key].append(BaseMeshItem(item))
+                        self.boundary_conditions[bc_key,geom_key].append(BaseMeshItem(item))
             
             def add_set(section_header):
                 """ Add sets of points, lines, surfs or volumes to item. """
@@ -354,10 +354,10 @@ class InputFile(Mesh):
                         else:
                             last_index = int(line.split()[3])
                             geom_key = get_type_geometry(section_header, 'enum')
-                            self.sets[geom_key].append(BaseMeshItem(dat_list))
+                            self.geometry_sets[geom_key].append(BaseMeshItem(dat_list))
                             dat_list = [line]
                     geom_key = get_type_geometry(section_header, 'enum')
-                    self.sets[geom_key].append(BaseMeshItem(dat_list))
+                    self.geometry_sets[geom_key].append(BaseMeshItem(dat_list))
             
             if section_name == 'MATERIALS':
                 for line in section_data:
@@ -501,15 +501,15 @@ class InputFile(Mesh):
 #                 coupling.node_set.is_referenced = True
         
         # get ordered list of sets and bcs
-        for key in self.bc.keys():
-            set_n_global(self.bc[key])
+        for key in self.boundary_conditions.keys():
+            set_n_global(self.boundary_conditions[key])
         
         # get dictionary with sets in this mesh
-        mesh_sets = self.sets.copy()
+        mesh_sets = self.geometry_sets.copy()
         for coupling in self.couplings:
             mesh_sets[coupling.node_set.geometry_type].append(coupling.node_set)
-        for key in self.bc.keys():
-            for bc in self.bc[key]:
+        for key in self.boundary_conditions.keys():
+            for bc in self.boundary_conditions[key]:
                 if not bc.is_dat:
                     mesh_sets[bc.geometry_set.geometry_type].append(bc.geometry_set)
         
@@ -532,11 +532,11 @@ class InputFile(Mesh):
         lines.append('NDVOL {}'.format(len(mesh_sets[mpy.volume])))
         
         # add boundary conditions
-        for (bc_key, geom_key) in self.bc.keys():
-            for i, bc in enumerate(self.bc[bc_key, geom_key]):
+        for (bc_key, geom_key) in self.boundary_conditions.keys():
+            for i, bc in enumerate(self.boundary_conditions[bc_key, geom_key]):
                 if i == 0:
                     lines.append(get_section_string(get_type_bc(bc_key, geom_key)))
-                    lines.append('{} {}'.format(get_type_geometry(geom_key,'bccounter'), len(self.bc[bc_key, geom_key])))
+                    lines.append('{} {}'.format(get_type_geometry(geom_key,'bccounter'), len(self.boundary_conditions[bc_key, geom_key])))
                 lines.extend(bc.get_dat_lines())
 
         # add the couplings
