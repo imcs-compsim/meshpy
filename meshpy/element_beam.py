@@ -95,7 +95,7 @@ class Beam3rHerm2Lin3(Beam):
             )    
     
     
-    def get_dat_line(self):
+    def _get_dat(self):
         """ Return the line for the input file. """
         
         string_nodes = ''

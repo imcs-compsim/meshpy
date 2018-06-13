@@ -18,8 +18,15 @@ class BC(BaseMeshItem):
         self.geometry_set = geometry_set
             
     
-    def get_dat_line(self):
-        """ Line in the input file for the BC. """
+    def _get_dat(self, **kwargs):
+        """
+        Add the content of this object to the list of lines.
+        
+        Args:
+        ----
+        lines: list(str)
+            The contents of this object will be added to the end of lines.
+        """
         
         if self.format_replacement:
             dat_string = self.bc_string.format(*self.format_replacement)

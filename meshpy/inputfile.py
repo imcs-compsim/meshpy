@@ -452,7 +452,7 @@ class InputFile(Mesh):
         
         for section in self.sections.values():
             # only export sections that are not in skip_section
-            if not section.name in skip_sections: 
+            if not section.name in skip_sections:
                 lines.extend(section.get_dat_lines())
         
         """
@@ -472,14 +472,14 @@ class InputFile(Mesh):
             
             lines.append(get_section_string(section_name))
             if header_lines:
-                if type(header_lines) == list:
+                if isinstance(header_lines, list):
                     lines.extend(header_lines)
-                elif type(header_lines) == str:
+                elif isinstance(header_lines, str):
                     lines.append(header_lines)
                 else:
                     print('ERROR, you can either add a list or a string')
             for item in data_list:
-                lines.append(item.get_dat_line())
+                lines.extend(item.get_dat_lines())
         
         
         # first all nodes, elements, sets and couplings are assigned a global value
@@ -537,13 +537,13 @@ class InputFile(Mesh):
                 if i == 0:
                     lines.append(get_section_string(get_type_bc(bc_key, geom_key)))
                     lines.append('{} {}'.format(get_type_geometry(geom_key,'bccounter'), len(self.bc[bc_key, geom_key])))
-                lines.append(bc.get_dat_line())
+                lines.extend(bc.get_dat_lines())
 
         # add the couplings
         lines.append(get_section_string('DESIGN POINT COUPLING CONDITIONS'))
         lines.append('DPOINT {}'.format(len(self.couplings)))
         for coupling in self.couplings:
-            lines.append(coupling.get_dat_line())
+            lines.extend(coupling.get_dat_lines())
         
         # add the node sets
         for key in mesh_sets.keys():

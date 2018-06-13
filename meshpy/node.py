@@ -46,7 +46,7 @@ class Node(BaseMeshItem):
                 self.coordinates += origin
 
 
-    def get_dat_line(self):
+    def _get_dat(self):
         """
         Return the line that represents this node in the input file.
         """

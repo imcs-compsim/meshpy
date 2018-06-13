@@ -1,17 +1,18 @@
 
-from . import Node, NodeSet, mpy
+from . import Node, NodeSet, mpy, BaseMeshItem
  
-class Coupling(object):
+class Coupling(BaseMeshItem):
     """
     Represents a coupling between dof in BACI.
     """
      
     def __init__(self, nodes, coupling_type):
+        BaseMeshItem.__init__(self, is_dat=False)
         self.node_set = NodeSet(mpy.point, nodes=nodes) 
         self.coupling_type = coupling_type
 
-     
-    def get_dat_line(self):
+    
+    def _get_dat(self):
         if self.coupling_type == 'joint':
             string = 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0'
         elif self.coupling_type == 'fix':

@@ -32,7 +32,7 @@ class Material(BaseMeshItem):
         self.shear_correction = shear_correction
         
     
-    def get_dat_line(self):
+    def _get_dat(self):
         """ Return the line for the .dat file. """
         string = 'MAT {} {} YOUNG {} POISSONRATIO {} DENS {} CROSSAREA {} '
         string += 'SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}'

@@ -25,37 +25,15 @@ class BaseMeshItem(object):
         # Overall index of this item in the mesh. 
         self.n_global = None
     
-    def add_to_dat_lines(self, lines, **kwargs):
-        """
-        Add the content of this object to the list of lines.
+    def get_dat_lines(self, **kwargs):
+        """Return the content of this object as a list."""
         
-        Args:
-        ----
-        lines: list(str)
-            The contents of this object will be added to the end of lines.
-        """
-        
-        if isinstance(self.data, str):
-            lines.append(self.data)
-        elif isinstance(self.data, list):
-            lines.extend(self.data)
+        data = self._get_dat(**kwargs)
+        if isinstance(data, str):
+            return [data]
         else:
-            raise TypeError('self.data is neither str nor list. '
-                + 'Got {}!'.format(type(self.data)))
+            return data
 
-    def get_dat_line(self):
-        """ By default return the data string. """
-        if isinstance(self.data, str):
-            return self.data
-        else:
-            raise TypeError('Expected string, got {}!'.format(type(self.data)))
-    
-    
-    def get_dat_lines(self):
-        """ By default return the data list. """
-        if isinstance(self.data, list):
-            return self.data
-        elif isinstance(self.data, str):
-            return [self.data]
-        else:
-            raise TypeError('Expected list, got {}!'.format(type(self.data)))
+    def _get_dat(self, **kwargs):
+        """Return the content of this object as either a list or a str."""
+        return self.data

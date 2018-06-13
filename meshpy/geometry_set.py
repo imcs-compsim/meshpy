@@ -48,7 +48,7 @@ class NodeSet(BaseMeshItem):
         for node in self.nodes:
             yield node
     
-    def get_dat_lines(self):
+    def _get_dat(self):
         """ Print the data stuff. """
         return ['NODE {} {} {}'.format(node.n_global, self.geo_set_names[self.geo_type], self.n_global) for node in self.nodes]
 
