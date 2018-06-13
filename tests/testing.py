@@ -345,7 +345,7 @@ class TestFullBaci(unittest.TestCase):
             '''))
           
         # add a straight line beam
-        material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.5)
+        material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.5, shear_correction=0.75)
         cantilever = Mesh()
         cantilever_set = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [2,0,-5], [2,0,5], 3)
           
