@@ -146,8 +146,8 @@ class Mesh(object):
         """ Rotate the geometry about the origin. """
         
         # get numpy array with all quaternions and positions for the nodes
-        rot1 = np.zeros([len(self.nodes),4],dtype=mpy.dtype)
-        pos = np.zeros([len(self.nodes),3],dtype=mpy.dtype)
+        rot1 = np.zeros([len(self.nodes),4])
+        pos = np.zeros([len(self.nodes),3])
         for i, node in enumerate(self.nodes):
             if not node.is_dat:
                 rot1[i,:] = node.rotation.get_quaternion()
@@ -353,8 +353,7 @@ class Mesh(object):
         #name = self._get_mesh_name(name, 'line')
         
         # Direction vector of line
-        direction = np.array(end_point,dtype=mpy.dtype) - \
-            np.array(start_point,dtype=mpy.dtype)
+        direction = np.array(end_point) - np.array(start_point)
         
         # Rotation for this line (is constant on the whole line)
         t1 = direction / np.linalg.norm(direction)

@@ -1,15 +1,7 @@
-import unittest
+
 import numpy as np
-import os
-import subprocess
 
-# import modules from meshgen
-from meshgen.rotation import Rotation
-from meshgen.inputfile import InputFile, InputSection
-from meshgen.mesh import Material, Mesh, Function, Beam3rHerm2Lin3, ContainerGeom, __LINE__, GeometrySet, BC, Node
-
-
-from meshgen.utility import get_close_coordinates
+from meshpy import Node, Mesh, Rotation
 
 
 import time
@@ -44,7 +36,7 @@ def test_rotation():
     """
     
     mesh = Mesh()
-    create_nodes_array(mesh, 40, 20, 10)
+    create_nodes_array(mesh, 40, 200, 10)
     
     print('number of nodes: {}'.format(len(mesh.nodes)))
     

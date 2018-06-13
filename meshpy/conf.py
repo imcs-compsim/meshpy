@@ -11,7 +11,7 @@ class MeshPy(object):
     def __init__(self, *args, **kwargs):
 
         # parameters for float conversion
-        self.dtype = np.longdouble
+        #self.dtype = np.longdouble
         
         # geometry types
         self.point = 'geometry_point'

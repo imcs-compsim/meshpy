@@ -17,14 +17,14 @@ class Rotation(object):
         The default constructor is from an rotation vector n and an angle phi.
         """
         
-        self.q = np.zeros(4,dtype=mpy.dtype)
+        self.q = np.zeros(4)
         
         if len(args) == 0:
             # identity element
             self.q[0] = 1
         elif len(args) == 1 and len(args[0]) == 4:
             # set from quaternion
-            self.q[:] = np.array(args[0],dtype=mpy.dtype)
+            self.q[:] = np.array(args[0])
         elif len(args) == 2:
             # set from vector and rotation angle
             vector = args[0]
@@ -37,7 +37,7 @@ class Rotation(object):
             else:
                 self.q[0] = np.cos(0.5*phi)
                 self.q[1:] = np.sin(0.5*phi) * \
-                    np.array(vector,dtype=mpy.dtype) / norm
+                    np.array(vector) / norm
         else:
             raise ValueError('The given arguments {} are invalid!'.format(args))
     
@@ -48,15 +48,15 @@ class Rotation(object):
         Create the object from a rotation matrix.
         """
         
-        q = np.zeros(4,dtype=mpy.dtype);
-        q[0] = np.sqrt( max( 0, 1 + R[0,0] + R[1,1] + R[2,2] ) ) / 2
-        q[1] = np.sqrt( max( 0, 1 + R[0,0] - R[1,1] - R[2,2] ) ) / 2
-        q[2] = np.sqrt( max( 0, 1 - R[0,0] + R[1,1] - R[2,2] ) ) / 2
-        q[3] = np.sqrt( max( 0, 1 - R[0,0] - R[1,1] + R[2,2] ) ) / 2
-        q[1] = np.copysign( q[1] , R[2,1] - R[1,2] )
-        q[2] = np.copysign( q[2] , R[0,2] - R[2,0] )
-        q[3] = np.copysign( q[3] , R[1,0] - R[0,1] )
-        return cls(q)
+        rot = Rotation()        
+        rot.q[0] = np.sqrt( max( 0, 1 + R[0,0] + R[1,1] + R[2,2] ) ) / 2
+        rot.q[1] = np.sqrt( max( 0, 1 + R[0,0] - R[1,1] - R[2,2] ) ) / 2
+        rot.q[2] = np.sqrt( max( 0, 1 - R[0,0] + R[1,1] - R[2,2] ) ) / 2
+        rot.q[3] = np.sqrt( max( 0, 1 - R[0,0] - R[1,1] + R[2,2] ) ) / 2
+        rot.q[1] = np.copysign( rot.q[1] , R[2,1] - R[1,2] )
+        rot.q[2] = np.copysign( rot.q[2] , R[0,2] - R[2,0] )
+        rot.q[3] = np.copysign( rot.q[3] , R[1,0] - R[0,1] )
+        return rot
     
     
     @classmethod
@@ -93,7 +93,7 @@ class Rotation(object):
         Return the matrix \skew{n} for this rotation.
         """
         
-        N = np.zeros([3,3],dtype=mpy.dtype)
+        N = np.zeros([3,3])
         N[0,1] = -self.q[3]
         N[0,2] =  self.q[2]
         N[1,0] =  self.q[3]

@@ -15,7 +15,7 @@ class Node(BaseMeshItem):
         BaseMeshItem.__init__(self, data=None, is_dat=False)
         
         # Coordinates and rotation of this node.
-        self.coordinates = np.array(coordinates, dtype=mpy.dtype)
+        self.coordinates = np.array(coordinates)
         self.rotation = rotation
         
         # If this node is at the end of a line or curve created with multiple
@@ -40,10 +40,10 @@ class Node(BaseMeshItem):
         # Rotate the positions (around origin).
         if not only_rotate_triads:
             if not origin is None:
-                self.coordinates -= origin
+                self.coordinates = self.coordinates - origin
             self.coordinates = rotation * self.coordinates
             if not origin is None:
-                self.coordinates += origin
+                self.coordinates = self.coordinates + origin
 
 
     def _get_dat(self):
