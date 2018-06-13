@@ -120,13 +120,20 @@ class Mesh(object):
         """Add an element to this mesh."""
         self.elements.append(element)
     
-    def add_set(self, geometry_set):
+    def add_geometry_set(self, geometry_set):
         """Add a geometry set to this mesh."""
         if not geometry_set in self.sets[geometry_set.geometry_type]:
             self.sets[geometry_set.geometry_type].append(geometry_set)
 
     def translate(self, vector):
-        """Move all nodes of this mesh by vector."""
+        """
+        Translate all nodes of this mesh.
+        
+        Args
+        ----
+        vector: np.array, list
+            3D vector that will be added to all nodes.
+        """
         for node in self.nodes:
             if not node.is_dat:
                 node.coordinates += vector
@@ -134,7 +141,18 @@ class Mesh(object):
     
     def rotate(self, rotation, origin=None, only_rotate_triads=False):
         """
-        Rotate the geometry about origin. Parts of code generated with AceGen.
+        Rotate all nodes of the mesh with rotation.
+        
+        Args
+        ----
+        rotation: Rotation, list(quaternions) (nx4)
+            The rotation that will be applies to the nodes. Can also be an array
+            with a quaternion for each node.
+        origin: 3D vector
+            If this is given, the mesh is rotated about this point. Default is
+            (0,0,0)
+        only_rotate_triads: bool
+            If true the nodal positions are not changed.
         """
         
         # get array with all quaternions and positions for the nodes
@@ -159,29 +177,29 @@ class Mesh(object):
         else:
             rot2 = rotation.transpose()
         
-        # temp list for AceGen variables
-        temp_val=[None for i in range(11)]
+        # Temporary AceGen variables.
+        tmp = [None for i in range(11)]
         
         # code generated with AceGen (rotation.nb)
-        temp_val[0]=2*10**0*rot2[1]*rot2[2]
-        temp_val[1]=2*10**0*rot2[0]*rot2[3]
-        temp_val[2]=2*10**0*rot2[0]*rot2[2]
-        temp_val[3]=2*10**0*rot2[1]*rot2[3]
-        temp_val[4]=rot2[0]**2
-        temp_val[5]=rot2[1]**2
-        temp_val[6]=rot2[2]**2
-        temp_val[10]=temp_val[4]-temp_val[6]
-        temp_val[7]=rot2[3]**2
-        temp_val[8]=2*10**0*rot2[0]*rot2[1]
-        temp_val[9]=2*10**0*rot2[2]*rot2[3]
-        posnew[:,0]=pos[:,1]*(temp_val[0]-temp_val[1])+pos[:,2]*(temp_val[2]+temp_val[3])+pos[:,0]*(temp_val[5]-temp_val[7]+temp_val[10])
-        posnew[:,1]=pos[:,0]*(temp_val[0]+temp_val[1])+pos[:,1]*(temp_val[4]-temp_val[5]+temp_val[6]-temp_val[7])+pos[:,2]*(-temp_val[8] +temp_val[9])
-        posnew[:,2]=pos[:,0]*(-temp_val[2]+temp_val[3])+pos[:,1]*(temp_val[8]+temp_val[9])+pos[:,2]*(-temp_val[5]+temp_val[7]+temp_val[10])
+        tmp[0]=2*10**0*rot2[1]*rot2[2]
+        tmp[1]=2*10**0*rot2[0]*rot2[3]
+        tmp[2]=2*10**0*rot2[0]*rot2[2]
+        tmp[3]=2*10**0*rot2[1]*rot2[3]
+        tmp[4]=rot2[0]**2
+        tmp[5]=rot2[1]**2
+        tmp[6]=rot2[2]**2
+        tmp[10]=tmp[4]-tmp[6]
+        tmp[7]=rot2[3]**2
+        tmp[8]=2*10**0*rot2[0]*rot2[1]
+        tmp[9]=2*10**0*rot2[2]*rot2[3]
+        posnew[:,0]=(tmp[5]-tmp[7]+tmp[10])*pos[:,0]+(tmp[0]-tmp[1])*pos[:,1]+(tmp[2]+tmp[3])*pos[:,2]
+        posnew[:,1]=(tmp[0]+tmp[1])*pos[:,0]+(tmp[4]-tmp[5]+tmp[6]-tmp[7])*pos[:,1]+(-tmp[8]+tmp[9])*pos[:,2]
+        posnew[:,2]=(-tmp[2]+tmp[3])*pos[:,0]+(tmp[8]+tmp[9])*pos[:,1]+(-tmp[5]+tmp[7]+tmp[10])*pos[:,2]
         rotnew[:,0]=rot1[:,0]*rot2[0]-rot1[:,1]*rot2[1]-rot1[:,2]*rot2[2]-rot1[:,3]*rot2[3]
         rotnew[:,1]=rot1[:,1]*rot2[0]+rot1[:,0]*rot2[1]+rot1[:,3]*rot2[2]-rot1[:,2]*rot2[3]
         rotnew[:,2]=rot1[:,2]*rot2[0]-rot1[:,3]*rot2[1]+rot1[:,0]*rot2[2]+rot1[:,1]*rot2[3]
         rotnew[:,3]=rot1[:,3]*rot2[0]+rot1[:,2]*rot2[1]-rot1[:,1]*rot2[2]+rot1[:,0]*rot2[3]
-                
+        
         if not origin is None:
             posnew += origin
             
@@ -190,6 +208,40 @@ class Mesh(object):
                 node.rotation.q = rotnew[i,:]
                 if not only_rotate_triads:
                     node.coordinates = posnew[i,:]
+
+
+    def wrap_around_cylinder(self):
+        """
+        Wrap the geometry around a cylinder. The y-z plane gets morphed into the
+        axis of symmetry.
+        """
+        
+        quaternions = np.zeros([len(self.nodes),4])
+        pos = np.zeros([len(self.nodes),3])
+        for i, node in enumerate(self.nodes):
+            if not node.is_dat:
+                pos[i,:] = node.coordinates
+        
+        # The x coordinate is the radius, the y coordinate the arc length.
+        radius = pos[:,0].copy()
+        phi = pos[:,1] / radius
+        
+        # The rotation is about the z-axis.
+        quaternions[:,0] = np.cos(0.5*phi)
+        quaternions[:,3] = np.sin(0.5*phi)
+        
+        # Set the new positions in the global array.
+        pos[:,0] = radius * np.cos(phi)
+        pos[:,1] = radius * np.sin(phi)
+        
+        # Rotate the mesh
+        self.rotate(quaternions, only_rotate_triads=True)
+        
+        # Set the new position for the nodes.
+        for i, node in enumerate(self.nodes):
+            if not node.is_dat:
+                node.coordinates = pos[i,:]
+
 
     def add_connections(self, input_list, connection_type='fix'):
         """
@@ -286,107 +338,58 @@ class Mesh(object):
                         node_list.append(node)
         return node_list
     
-    def wrap_around_cylinder(self):
-        """
-        Wrap the geometry around a cylinder.
-        The y-z plane morphs into the roation axis.
-        There should be NO points with negative x coordinates.
-        """
-        
-        quaternions = np.zeros([len(self.nodes),4])
-        pos = np.zeros([len(self.nodes),3])
-        for i, node in enumerate(self.nodes):
-            if not node.is_dat:
-                pos[i,:] = node.coordinates
-        
-        # The x coordinate is the radius, the y coordinate the arc length.
-        radius = pos[:,0].copy()
-        phi = pos[:,1] / radius
-        
-        # The rotation is about the z-axis.
-        quaternions[:,0] = np.cos(0.5*phi)
-        quaternions[:,3] = np.sin(0.5*phi)
-        
-        # Set the new positions in the global array.
-        pos[:,0] = radius * np.cos(phi)
-        pos[:,1] = radius * np.sin(phi)
-        
-        # Rotate the mesh
-        self.rotate(quaternions, only_rotate_triads=True)
-        
-        # Set the new position for the nodes.
-        for i, node in enumerate(self.nodes):
-            if not node.is_dat:
-                node.coordinates = pos[i,:]
 
-    
-    def add_beam_mesh_line(
-            self,
-            beam_object,
-            material,
-            start_point,
-            end_point,
-            n_el=1,
-            start_node=None
-            ):
-        
-        """Generate a straight line in this mesh.
+    def create_beam_mesh_line(self, beam_object, material, start_point,
+            end_point, n_el=1, start_node=None ):
+        """
+        Generate a straight line of beam elements.
         
         Args
         ----
         beam_object: Beam
-            Class of beam that will be used for this line
+            Class of beam that will be used for this line.
         material: Material
-            Material for this line
+            Material for this line.
         start_point, end_point: np.array, list
-            3D-coordinates for the start and end point of the line
+            3D-coordinates for the start and end point of the line.
         n_el: int
-            Number of equally spaces beam elements along the line
+            Number of equally spaces beam elements along the line.
         start_node: Node
             Node to use as the first node for this line. Use this if the line
             is connected to other lines (angles have to be the same, otherwise
-            connections should be used)
+            connections should be used).
         """
         
         self.add_material(material)
         
-        ## get name for the mesh added
-        #name = self._get_mesh_name(name, 'line')
-        
-        # Direction vector of line
+        # Get geometrical values for this line.
         direction = np.array(end_point) - np.array(start_point)
-        
-        # Rotation for this line (is constant on the whole line)
         t1 = direction / np.linalg.norm(direction)
-        # Check if the z or y axis are larger projected onto the direction
+        
+        # Check if the z or y axis are larger projected onto the direction.
         if abs(np.dot(t1,[0,0,1])) < abs(np.dot(t1,[0,1,0])):
             t2 = [0,0,1]
         else:
             t2 = [0,1,0]
         rotation = Rotation.from_basis(t1, t2)
         
-        # This function returns the function for the position and triads along
-        # the beam element
         def get_beam_function(point_a, point_b):
-            
+            """
+            Return a function for the position and rotation along the beam axis.
+            """
             def position_function(xi):
                 return 1/2*(1-xi)*point_a + 1/2*(1+xi)*point_b
-            
             def rotation_function(xi):
                 return rotation
-            
-            return (
-                position_function,
-                rotation_function
-                )
+            return (position_function, rotation_function)
         
-        # nodes in this line
-        if start_node is None:
-            nodes = []
-        else:
+        # List with nodes and elements of this line.
+        elements = []
+        nodes = []
+        if not start_node is None:
             nodes = [start_node]
         
-        # create the beams
+        # Create the beams.
         for i in range(n_el):
             
             functions = get_beam_function(
@@ -394,24 +397,24 @@ class Mesh(object):
                 start_point + (i+1)*direction/n_el
                 )
             
-            tmp_beam = beam_object(material=material)
             if (start_node is None) and i == 0:
-                tmp_start_node = None
+                first_node = None
             else:
-                tmp_start_node = nodes[-1]
-            nodes.extend(tmp_beam.create_beam(functions[0], functions[1],
-                                 start_node=tmp_start_node))
-            self.elements.append(tmp_beam)
-
-        # set the nodes that are at the beginning and end of line (for search of
+                first_node = nodes[-1]
+            elements.append(beam_object(material=material))
+            nodes.extend(elements[-1].create_beam(
+                functions[0], functions[1], start_node=first_node))
+        
+        # Set the nodes that are at the beginning and end of line (for search of
         # overlapping points)
         nodes[0].is_end_node = True
         nodes[-1].is_end_node = True
         
-        # add nodes to mesh
+        # Add items to the mesh
+        self.elements.extend(elements)
         self.nodes.extend(nodes)
         
-        # add sets to mesh
+        # Create geometry sets that will be returned.
         return_set = GeometryName()
         return_set['start'] = GeometrySet(mpy.point, nodes=nodes[0])
         return_set['end'] = GeometrySet(mpy.point, nodes=nodes[-1])
@@ -419,7 +422,7 @@ class Mesh(object):
         return return_set
     
     
-    def add_beam_mesh_honeycomb_flat(
+    def create_beam_mesh_honeycomb_flat(
             self,
             beam_object,
             material,
@@ -439,7 +442,7 @@ class Mesh(object):
         
         def add_line(pointa, pointb):
             """ Shortcut to add line. """
-            geom_set = self.add_beam_mesh_line(
+            geom_set = self.create_beam_mesh_line(
                 beam_object,
                 material,
                 pointa,
@@ -542,7 +545,7 @@ class Mesh(object):
         return return_set
     
     
-    def add_beam_mesh_honeycomb(self,
+    def create_beam_mesh_honeycomb(self,
                            beam_object,
                            material,
                            diameter,
@@ -579,7 +582,7 @@ class Mesh(object):
         
         # first create a mesh with the flat mesh
         mesh_temp = Mesh()
-        mesh_temp.add_beam_mesh_honeycomb_flat(beam_object, material, width, n_w, n_h, n_el,
+        mesh_temp.create_beam_mesh_honeycomb_flat(beam_object, material, width, n_w, n_h, n_el,
                                                                     closed_width=closed_width,
                                                                     closed_height=closed_height,
                                                                     create_couplings=False,

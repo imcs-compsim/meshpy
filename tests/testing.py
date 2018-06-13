@@ -272,7 +272,7 @@ class TestFullBaci(unittest.TestCase):
           
         # create the honeycomb mesh
         mesh_honeycomb = Mesh()
-        honeycomb_set = mesh_honeycomb.add_beam_mesh_honeycomb(
+        honeycomb_set = mesh_honeycomb.create_beam_mesh_honeycomb(
             Beam3rHerm2Lin3,
             material,
             50.0,
@@ -346,7 +346,7 @@ class TestFullBaci(unittest.TestCase):
         # add a straight line beam
         material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.5, shear_correction=0.75)
         cantilever = Mesh()
-        cantilever_set = cantilever.add_beam_mesh_line(Beam3rHerm2Lin3, material, [2,0,-5], [2,0,5], 3)
+        cantilever_set = cantilever.create_beam_mesh_line(Beam3rHerm2Lin3, material, [2,0,-5], [2,0,5], 3)
           
         # add fix at start of the beam
         cantilever.add(
@@ -470,7 +470,7 @@ class TestFullBaci(unittest.TestCase):
         for vertical in [False, True]:
             for closed_top in [False, True]:
                 mesh.translate(17 * np.array([1,0,0]))
-                honeycomb_set = mesh.add_beam_mesh_honeycomb(
+                honeycomb_set = mesh.create_beam_mesh_honeycomb(
                     Beam3rHerm2Lin3,
                     material,
                     10,
