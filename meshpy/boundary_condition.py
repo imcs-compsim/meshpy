@@ -11,7 +11,7 @@ class BC(BaseMeshItem):
         Set the default values. Format_replacement will be called on string.
         """
         
-        BaseMeshItem.__init__(self, is_dat=False, is_referenced=False)
+        BaseMeshItem.__init__(self, is_dat=False)
         self.bc_string = bc_string
         self.bc_type = bc_type
         self.format_replacement = format_replacement  

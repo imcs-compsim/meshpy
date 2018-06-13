@@ -493,12 +493,12 @@ class InputFile(Mesh):
         # first set referenc counter of sets to False, then add bc and then renumber sets
         for i, coupling in enumerate(self.couplings):
             coupling.n_global = i + 1
-            if coupling.node_set.is_referenced:
-                print('Error this set can not be referenced by something else')
-                print(coupling.node_set.nodes[0].coordinates)
-                print(type(coupling.node_set))
-            else:
-                coupling.node_set.is_referenced = True
+#             if coupling.node_set.is_referenced:
+#                 print('Error this set can not be referenced by something else')
+#                 print(coupling.node_set.nodes[0].coordinates)
+#                 print(type(coupling.node_set))
+#             else:
+#                 coupling.node_set.is_referenced = True
         
         # get ordered list of sets and bcs
         for key in self.bc.keys():

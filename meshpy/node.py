@@ -12,7 +12,7 @@ class Node(BaseMeshItem):
     """
     
     def __init__(self, coordinates, rotation=None, is_middle_node=False):
-        BaseMeshItem.__init__(self, data=None, is_dat=False, is_referenced=False)
+        BaseMeshItem.__init__(self, data=None, is_dat=False)
         
         # Coordinates and rotation of this node.
         self.coordinates = np.array(coordinates, dtype=mpy.dtype)

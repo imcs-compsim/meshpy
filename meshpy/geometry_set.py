@@ -13,7 +13,7 @@ class NodeSet(BaseMeshItem):
         """
         Initialize object. It is possible to give nodes at this point.
         """
-        BaseMeshItem.__init__(self, is_dat=None, is_referenced=False)
+        BaseMeshItem.__init__(self, is_dat=None)
         self.geo_type = geo_type
         self.nodes = []
         
