@@ -1,9 +1,14 @@
+# -*- coding: utf-8 -*-
+"""
+This module implements the class that represents one element in the Mesh.
+"""
+
+# meshpy modules
 from . import BaseMeshItem
 
+
 class Element(BaseMeshItem):
-    """
-    A base class for an FEM element in the mesh.
-    """
+    """A base class for an FEM element in the mesh."""
     
     def __init__(self, nodes=None, material=None):
         BaseMeshItem.__init__(self, data=None, is_dat=False)

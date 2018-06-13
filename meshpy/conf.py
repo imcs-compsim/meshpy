@@ -10,17 +10,17 @@ class MeshPy(object):
     
     def __init__(self, *args, **kwargs):
 
-        # parameters for float conversion
-        #self.dtype = np.longdouble
+        # Value for epsilon when checking if two results are equal.
+        self.eps_vec = 1e-10
         
-        # geometry types
+        # Geometry types
         self.point = 'geometry_point'
         self.line = 'geometry_line'
         self.surface = 'geometry_surface'
         self.volume = 'geometry_volume'
         self.geometry = [self.point, self.line, self.surface, self.volume]
         
-        # boundary conditions types
+        # Boundary conditions types
         self.dirichlet = 'boundary_condition_dirichlet'
         self.neumann = 'boundary_condition_neumann'
         self.boundary_condition = [self.dirichlet, self.neumann]
