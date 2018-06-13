@@ -1,8 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+This module implements the class that represents one node in the Mesh.
+"""
+
 # python modules
 import numpy as np
 
 # meshpy modules
-from . import BaseMeshItem, mpy
+from . import BaseMeshItem
 
 
 class Node(BaseMeshItem):
@@ -18,9 +23,11 @@ class Node(BaseMeshItem):
         self.coordinates = np.array(coordinates)
         self.rotation = rotation
         
-        # If this node is at the end of a line or curve created with multiple
-        # elements.
+        # If this node is at the end of a line or curve (by default only those
+        # nodes are checked for overlapping nodes).
         self.is_end_node = False
+        
+        # If the node is in the middle of a beam element.
         self.is_middle_node = is_middle_node
 
     
@@ -34,16 +41,16 @@ class Node(BaseMeshItem):
         """
         
         # If the node has a rotation, rotate it.
-        if self.rotation:
+        if not self.rotation is None:
             self.rotation = rotation * self.rotation
-        
-        # Rotate the positions (around origin).
-        if not only_rotate_triads:
-            if not origin is None:
-                self.coordinates = self.coordinates - origin
-            self.coordinates = rotation * self.coordinates
-            if not origin is None:
-                self.coordinates = self.coordinates + origin
+            
+            # Rotate the positions (around origin).
+            if not only_rotate_triads:
+                if not origin is None:
+                    self.coordinates = self.coordinates - origin
+                self.coordinates = rotation * self.coordinates
+                if not origin is None:
+                    self.coordinates = self.coordinates + origin
 
 
     def _get_dat(self):
