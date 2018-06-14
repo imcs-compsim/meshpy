@@ -312,7 +312,7 @@ class TestFullBaci(unittest.TestCase):
         # write input file
         check_tmp_dir()
         input_dat_file = os.path.join(__testing_temp__, 'honeycomb-sphere.dat')
-        input_file.write_input_file(input_dat_file, print_set_names=False, print_all_sets=False)
+        input_file.write_input_file(input_dat_file)
           
         # test input
         self.run_baci_test(input_dat_file)

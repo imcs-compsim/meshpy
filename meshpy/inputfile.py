@@ -8,7 +8,7 @@ import datetime
 import re
 from _collections import OrderedDict
 
-# meshgen imports
+# meshpy imports
 from . import mpy, get_section_string,  Mesh, BaseMeshItem
 
 
@@ -213,12 +213,27 @@ class InputFile(Mesh):
         (mpy.neumann,   mpy.surface): 'DESIGN SURF DIRICH NEUMANN',
         (mpy.neumann,   mpy.volume ): 'DESIGN VOL DIRICH NEUMANN'
     }
-    boundary_condition_counter = {
+    geometry_counter = {
         mpy.point:   'DPOINT',
         mpy.line:    'DLINE',
         mpy.surface: 'DSURF',
         mpy.volume:  'DVOL'
     }
+    
+    # Sections that won't be exported to input file.
+    skip_sections = [
+        'FLUID ELEMENTS',
+        'ALE ELEMENTS',
+        'LUBRICATION ELEMENTS',
+        'TRANSPORT ELEMENTS',
+        'TRANSPORT2 ELEMENTS',
+        'THERMO ELEMENTS',
+        'ACOUSTIC ELEMENTS',
+        'CELL ELEMENTS',
+        'CELLSCATRA ELEMENTS',
+        'END'
+    ]
+
 
     def __init__(self, maintainer = '', description = None, dat_file=None):
         """
@@ -239,6 +254,7 @@ class InputFile(Mesh):
         
         self.maintainer = maintainer
         self.description = description
+        self.dat_header = []
         
         # Dictionary for all sections other than mesh sections.
         self.sections = OrderedDict()
@@ -293,14 +309,21 @@ class InputFile(Mesh):
     
     def _add_dat_section(self, section_line, section_data):
         """
-        The values are first added to the mesh object, if the return code is 1, the
-        section does not belong to mesh and is added to the self.sections dictionary.
+        Add a section to the object.
+        
+        Args
+        ----
+        section_line: string
+            A string containing the line with the section header. If this is
+            None, the data will be added to self.dat_header
+        section_data: list(str)
+            A list with strings containing the data for this section.
         """
         
         # The text until the first section will have no section line.
         if section_line == None:
-            # TODO
-            pass
+            if not (len(section_data) == 1 and section_data[0] == ''):
+                self.dat_header.extend(section_data)
         else:
             # Extract the name of the section.
             name = section_line.strip()
@@ -350,7 +373,6 @@ class InputFile(Mesh):
                             dat_list = [line]
                     # Add the last set.
                     add_to_set(section_header, dat_list)
-                    
             
             # Check if the section contains mesh data that has to be added to
             # specific lists.       
@@ -376,16 +398,13 @@ class InputFile(Mesh):
             else:
                 # Section is not in mesh, i.e. simulation parameters.
                 self.add_section(InputSection(section_name, data=section_data))
-            
-        
-        
-        
-        
+
         
 
     def add(self, *args, **kwargs):
         """
-        Add an item depending on what it is
+        Add to this object. If the type is not recognized, the child add method
+        is called.
         """
         
         if len(args) == 1 and isinstance(args[0], InputSection):
@@ -401,72 +420,83 @@ class InputFile(Mesh):
         Add a section to the object.
         If the section name already exists, it is added to that section.
         """
-         
         if section.name in self.sections.keys():
-            # section already exists, is merged with existing one
             self.sections[section.name].merge_section(section)
         else:
-            # add new section
             self.sections[section.name] = section
     
     
     def delete_section(self, section_name):
-        """ Delete a section from the dictionary self.sections. """
-        
+        """Delete a section from the dictionary self.sections."""
         if section_name in self.sections.keys():
             del self.sections[section_name]
         else:
-            print('Warning, section does not exist!')
+            raise Warning('Section {} does not exist!'.format(section_name))
 
     def write_input_file(self, file_path, **kwargs):
-        """ Write the input to a file. """
+        """Write the input to a file."""
         with open(file_path, 'w') as input_file:
             for line in self.get_dat_lines(**kwargs):
                 input_file.write(line)
                 input_file.write('\n')
-        print('Input File written!')
+
+    
+    def get_dat_lines(self, header=True, dat_header=True):
+        """
+        Return the lines for the input file for the whole object.
         
-    def get_dat_lines(self, header=True, print_set_names=False, print_all_sets=False):
-        """ Return the dat lines from all sections. """
+        Args
+        ----
+        header: bool
+            If the header should be exported to the input file files.
+        dat_header: bool
+            If header lines from the imported dat file should be exported.
+        """
         
-        # sections not to export in the dat file
-        skip_sections = [
-            'FLUID ELEMENTS',
-            'ALE ELEMENTS',
-            'LUBRICATION ELEMENTS',
-            'TRANSPORT ELEMENTS',
-            'TRANSPORT2 ELEMENTS',
-            'THERMO ELEMENTS',
-            'ACOUSTIC ELEMENTS',
-            'CELL ELEMENTS',
-            'CELLSCATRA ELEMENTS',
-            'END'
-            ]
-        
+        # List that will contain all input lines.
         lines = []
+        
+        # Add header to the input file.
         if header:
             lines.append(self._get_header())
+        if dat_header:
+            lines.extend(self.dat_header)
         
+        # Export the basic sections in the input file.
         for section in self.sections.values():
-            # only export sections that are not in skip_section
-            if not section.name in skip_sections:
+            if not section.name in self.skip_sections:
                 lines.extend(section.get_dat_lines())
         
-        """
-        Get the lines for the input file that contain the information for
-        the mesh.
-        """
-        
         def set_n_global(data_list):
-            """ Set n_global in every item of list. """
+            """Set n_global in every item of data_list."""
             for i, item in enumerate(data_list):
                 item.n_global = i + 1
         
+        # Assign global indices to all entries.
+        set_n_global(self.nodes)
+        set_n_global(self.elements)
+        set_n_global(self.materials)
+        set_n_global(self.functions)
+        set_n_global(self.couplings)
+        for key in self.boundary_conditions.keys():
+            set_n_global(self.boundary_conditions[key])
+        
+        # Add sets from couplings and boundary conditions to a temp container. 
+        mesh_sets = self.geometry_sets.copy()
+        for coupling in self.couplings:
+            mesh_sets[coupling.node_set.geometry_type].append(coupling.node_set)
+        for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
+            for bc in bc_list:
+                if not bc.is_dat:
+                    mesh_sets[geom_key].append(bc.geometry_set)
+        for item in mesh_sets.values():
+            set_n_global(item)
+
+
         def get_section_dat(section_name, data_list, header_lines=None):
             """
             Output a section name and apply the get_dat_line for each list item.
             """
-            
             lines.append(get_section_string(section_name))
             if header_lines:
                 if isinstance(header_lines, list):
@@ -474,109 +504,78 @@ class InputFile(Mesh):
                 elif isinstance(header_lines, str):
                     lines.append(header_lines)
                 else:
-                    print('ERROR, you can either add a list or a string')
+                    raise TypeError('Expected string or list, got {}'.format(
+                        type(header_lines)))
             for item in data_list:
                 lines.extend(item.get_dat_lines())
-        
-        
-        # first all nodes, elements, sets and couplings are assigned a global value
-        set_n_global(self.nodes)
-        set_n_global(self.elements)
-        set_n_global(self.materials)
-        set_n_global(self.functions)
-        
 
-        
-        # first set referenc counter of sets to False, then add bc and then renumber sets
-        for i, coupling in enumerate(self.couplings):
-            coupling.n_global = i + 1
-#             if coupling.node_set.is_referenced:
-#                 print('Error this set can not be referenced by something else')
-#                 print(coupling.node_set.nodes[0].coordinates)
-#                 print(type(coupling.node_set))
-#             else:
-#                 coupling.node_set.is_referenced = True
-        
-        # get ordered list of sets and bcs
-        for key in self.boundary_conditions.keys():
-            set_n_global(self.boundary_conditions[key])
-        
-        # get dictionary with sets in this mesh
-        mesh_sets = self.geometry_sets.copy()
-        for coupling in self.couplings:
-            mesh_sets[coupling.node_set.geometry_type].append(coupling.node_set)
-        for key in self.boundary_conditions.keys():
-            for bc in self.boundary_conditions[key]:
-                if not bc.is_dat:
-                    mesh_sets[bc.geometry_set.geometry_type].append(bc.geometry_set)
-        
-        for key in mesh_sets.keys():
-            set_n_global(mesh_sets[key])
-
-        # add the material data
+        # Add material data to the input file.
         get_section_dat('MATERIALS', self.materials)
         
-        # add the functions
+        # Add the functions.
         for i, funct in enumerate(self.functions):
-            lines.append(get_section_string('FUNCT{}'.format(str(i+1))))
+            lines.append(get_section_string('FUNCT{}'.format(i+1)))
             lines.extend(funct.get_dat_lines())
         
-        # add the design descriptions
+        # Add the design description.
         lines.append(get_section_string('DESIGN DESCRIPTION'))
         lines.append('NDPOINT {}'.format(len(mesh_sets[mpy.point])))
         lines.append('NDLINE {}'.format(len(mesh_sets[mpy.line])))
         lines.append('NDSURF {}'.format(len(mesh_sets[mpy.surface])))
         lines.append('NDVOL {}'.format(len(mesh_sets[mpy.volume])))
-        
-        # add boundary conditions
-        for (bc_key, geom_key) in self.boundary_conditions.keys():
-            for i, bc in enumerate(self.boundary_conditions[bc_key, geom_key]):
-                if i == 0:
-                    lines.append(get_section_string(self.boundary_condition_names[bc_key, geom_key]))
-                    lines.append('{} {}'.format(self.boundary_condition_counter[geom_key], len(self.boundary_conditions[bc_key, geom_key])))
-                lines.extend(bc.get_dat_lines())
+                
+        # Add the boundary conditions.
+        for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
+            if len(bc_list) > 0:
+                get_section_dat(
+                    self.boundary_condition_names[bc_key, geom_key],
+                    bc_list,
+                    header_lines='{} {}'.format(
+                        self.geometry_counter[geom_key],
+                        len(self.boundary_conditions[bc_key, geom_key])
+                        )
+                    )
 
-        # add the couplings
-        lines.append(get_section_string('DESIGN POINT COUPLING CONDITIONS'))
-        lines.append('DPOINT {}'.format(len(self.couplings)))
-        for coupling in self.couplings:
-            lines.extend(coupling.get_dat_lines())
+        # Add the couplings.
+        get_section_dat(
+            get_section_string('DESIGN POINT COUPLING CONDITIONS'),
+            self.couplings,
+            header_lines='DPOINT {}'.format(len(self.couplings))
+            )
         
-        # add the node sets
-        for key in mesh_sets.keys():
-            for i, node_set in enumerate(mesh_sets[key]):
-                if i == 0:
-                    lines.append(get_section_string(self.geometry_set_names[key]))
-                lines.extend(node_set.get_dat_lines())
+        # Add the geometry sets.
+        for geom_key, item in mesh_sets.items():
+            if len(item) > 0:
+                get_section_dat(
+                    self.geometry_set_names[geom_key],
+                    item
+                    )
 
-        # add the nodal data
+        # Add the nodes and elements.
         get_section_dat('NODE COORDS', self.nodes)
-
-        # add the element data
         get_section_dat('STRUCTURE ELEMENTS', self.elements)
         
-        
-        # the last section is END
+        # The last section is END
         lines.extend(InputSection('END').get_dat_lines())
         
         return lines
     
     
-    def get_string(self, header=True):
-        """ Return the lines of the input file as string. """
-        
-        string = ''
-        for line in self.get_dat_lines(header=header):
-            string += str(line) + '\n'
-        return string
-
+    def get_string(self, **kwargs):
+        """Return the lines of the input file as string."""
+        return '\n'.join(self.get_dat_lines(**kwargs))
     
     def _get_header(self):
-        """ Return the header for the input file. """
+        """Return the header for the input file."""
         
-        string = '// Input file created with meshgen git sha: {}\n'.format(mpy.git_sha)
-        string += '// Maintainer: {}\n'.format(self.maintainer)
-        string += '// Date: {}'.format(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+        string = ('// Input file created with meshgen git sha: {}\n'
+                + '// Maintainer: {}\n'
+                + '// Date: {}'
+                ).format(
+                    mpy.git_sha,
+                    self.maintainer,
+                    datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                    )
         if self.description:
             string += '\n// Description: {}'.format(self.description)
         return string
