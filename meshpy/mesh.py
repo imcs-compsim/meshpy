@@ -364,6 +364,12 @@ class Mesh(object):
     def get_min_max_nodes(self, nodes=None):
         """
         Return a geometry set with the max and min nodes in all directions.
+        
+        Args
+        ----
+        nodes: list(Nodes)
+            If this one is given return an array with the coordinates of the
+            nodes in list, otherwise of all nodes in the mesh.
         """
         
         geometry = GeometryName()

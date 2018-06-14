@@ -11,7 +11,7 @@ class GeometrySet(BaseMeshItem):
     """This object represents a geometry set. The set is defined by nodes."""
     
     # Node set names for the input file file.
-    geo_set_names = {
+    geometry_set_names = {
         mpy.point: 'DNODE',
         mpy.line: 'DLINE',
         mpy.surface: 'DSURFACE',
@@ -58,5 +58,5 @@ class GeometrySet(BaseMeshItem):
         """Get the lines for the input file."""
         return ['NODE {} {} {}'.format(
             node.n_global,
-            self.geo_set_names[self.geometry_type], self.n_global
+            self.geometry_set_names[self.geometry_type], self.n_global
             ) for node in self.nodes ]

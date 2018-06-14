@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+"""
+This module defines the classes that are used to create an input file for Baci.
+"""
 
 # python packages
 import datetime
@@ -5,14 +9,12 @@ import re
 from _collections import OrderedDict
 
 # meshgen imports
-from . import mpy, Mesh, BaseMeshItem, mpy, get_section_string
+from . import mpy, get_section_string,  Mesh, BaseMeshItem
 
 
  
 class InputLine(object):
-    """
-    This class is a single option in a baci input file
-    """
+    """This class is a single option in a Baci input file."""
     
     def __init__(self, *args, option_comment=None, overwrite=False):
         """
@@ -184,70 +186,6 @@ class InputSection(object):
 
 
 
-def get_type_geometry(item_description, return_type):
-    """
-    Return the string for different cases of return_type.
-    """
-    
-    string_array = [
-        [mpy.point, 'DNODE-NODE TOPOLOGY', 'DNODE', 'DESIGN POINT DIRICH CONDITIONS', 'DESIGN POINT NEUMANN CONDITIONS', 'DPOINT'],
-        [mpy.line, 'DLINE-NODE TOPOLOGY', 'DLINE', 'DESIGN LINE DIRICH CONDITIONS', 'DESIGN LINE NEUMANN CONDITIONS', 'DLINE'],
-        [mpy.surface, 'DSURF-NODE TOPOLOGY', 'DSURFACE', 'DESIGN SURF DIRICH CONDITIONS', 'DESIGN SURF NEUMANN CONDITIONS', 'DSURF'],
-        [mpy.volume, 'DVOL-NODE TOPOLOGY', 'DVOLUME', 'DESIGN VOL DIRICH CONDITIONS', 'DESIGN VOL NEUMANN CONDITIONS', 'DVOL']
-        ]
-    
-    for i, line in enumerate(string_array):
-        if item_description in line:
-            item_index = i
-    
-    if return_type == 'enum':
-        return_index = 0
-    elif return_type == 'setsection':
-        return_index = 1
-    elif return_type == 'settopology':
-        return_index = 2
-    elif return_type == 'dirich':
-        return_index = 3
-    elif return_type == 'neumann':
-        return_index = 4
-    elif return_type == 'bccounter':
-        return_index = 5
-    
-    return string_array[item_index][return_index]
-
-
-def get_type_bc(item_description, return_type):
-    """
-    Return the string for different cases of return_type.
-    """
-    
-    string_array = [
-        [mpy.dirichlet, 'DESIGN POINT DIRICH CONDITIONS', 'DESIGN LINE DIRICH CONDITIONS', 'DESIGN SURF DIRICH CONDITIONS', 'DESIGN VOL DIRICH CONDITIONS'],
-        [mpy.neumann, 'DESIGN POINT NEUMANN CONDITIONS', 'DESIGN LINE DIRICH NEUMANN', 'DESIGN SURF DIRICH NEUMANN', 'DESIGN VOL DIRICH NEUMANN']
-        ]
-    
-    for i, line in enumerate(string_array):
-        if item_description in line:
-            item_index = i
-    
-    if return_type == 'enum':
-        return_index = 0
-    elif return_type == mpy.point:
-        return_index = 1
-    elif return_type == mpy.line:
-        return_index = 2
-    elif return_type == mpy.surface:
-        return_index = 3
-    elif return_type == mpy.volume:
-        return_index = 4
-    
-    return string_array[item_index][return_index]
-    
-
-
-
-
-
 
 
 
@@ -256,17 +194,53 @@ def get_type_bc(item_description, return_type):
 
 
 class InputFile(Mesh):
-    """ A item that represents a single baci input file. """
+    """A item that represents a complete Baci input file."""
     
+    # Define the names of sections and boundary conditions in the input file.
+    geometry_set_names = {
+        mpy.point:   'DNODE-NODE TOPOLOGY',
+        mpy.line:    'DLINE-NODE TOPOLOGY',
+        mpy.surface: 'DSURF-NODE TOPOLOGY',
+        mpy.volume:  'DVOL-NODE TOPOLOGY'
+    }
+    boundary_condition_names = {
+        (mpy.dirichlet, mpy.point  ): 'DESIGN POINT DIRICH CONDITIONS',
+        (mpy.dirichlet, mpy.line   ): 'DESIGN LINE DIRICH CONDITIONS',
+        (mpy.dirichlet, mpy.surface): 'DESIGN SURF DIRICH CONDITIONS',
+        (mpy.dirichlet, mpy.volume ): 'DESIGN VOL DIRICH CONDITIONS',
+        (mpy.neumann,   mpy.point  ): 'DESIGN POINT DIRICH NEUMANN',
+        (mpy.neumann,   mpy.line   ): 'DESIGN LINE DIRICH NEUMANN',
+        (mpy.neumann,   mpy.surface): 'DESIGN SURF DIRICH NEUMANN',
+        (mpy.neumann,   mpy.volume ): 'DESIGN VOL DIRICH NEUMANN'
+    }
+    boundary_condition_counter = {
+        mpy.point:   'DPOINT',
+        mpy.line:    'DLINE',
+        mpy.surface: 'DSURF',
+        mpy.volume:  'DVOL'
+    }
+
     def __init__(self, maintainer = '', description = None, dat_file=None):
+        """
+        Initialize the input file.
+        
+        Args
+        ----
+        maintainer: str
+            Name of person to maintain this input file.
+        description: srt
+            Will be shown in the input file as description of the system.
+        dat_file: str
+            A file path to an existing input file that will be read into this
+            object.
+        """
         
         Mesh.__init__(self)
         
-        # data for header
         self.maintainer = maintainer
         self.description = description
         
-        # dictionary for all sections other than mesh sections
+        # Dictionary for all sections other than mesh sections.
         self.sections = OrderedDict()
         
         if not dat_file is None:
@@ -274,7 +248,15 @@ class InputFile(Mesh):
         
     
     def read_dat(self, file_path):
-        """ Read a .dat input file and add the content to this object. """
+        """
+        Read an existing input file into this object.
+        
+        Args
+        ----
+        file_path: str
+            A file path to an existing input file that will be read into this
+            object.
+        """
         
         with open(file_path) as dat_file:
             lines = []
@@ -284,20 +266,20 @@ class InputFile(Mesh):
     
     
     def _add_dat_lines(self, data):
+        """Read lines of string into this object.
+        """
         
-        # check input
         if isinstance(data, list):
             lines = data
         elif isinstance(data, str):
             lines = data.split('\n')
         else:
-            raise TypeError('Expected list or string but got {}'.format(type(data)))
-            
+            raise TypeError('Expected list or string but got ' + \
+                '{}'.format(type(data)))
         
-        # empty temp variables
+        # Loop over lines and add individual sections separately.
         section_line = None
         section_data = []
-
         for line in lines:
             line = line.strip()
             if line.startswith('----------'):
@@ -309,43 +291,54 @@ class InputFile(Mesh):
         self._add_dat_section(section_line, section_data)
     
     
-    
     def _add_dat_section(self, section_line, section_data):
         """
         The values are first added to the mesh object, if the return code is 1, the
         section does not belong to mesh and is added to the self.sections dictionary.
         """
         
-        # first text will have no section_line
+        # The text until the first section will have no section line.
         if section_line == None:
             # TODO
             pass
         else:
-            # extract the name of the section
+            # Extract the name of the section.
             name = section_line.strip()
             start = re.search(r'[^-]', name).start()
             section_name = name[start:]
             
-            """
-            Check if the section has to be added to the mesh of if it is just a
-            basic input section.
-            """
             
-            def add_bc(section_header):
-                """ Add boundary conditions to the object. """
-                
+            def add_bc(section_header, section_data):
+                """Add boundary conditions to the object."""
                 for i, item in enumerate(section_data):
-                    # first line is number of BCs skip this one
+                    # The first line is the number of BCs and will be skipped.
                     if i > 0:
-                        bc_key = get_type_bc(section_header, 'enum')
-                        geom_key = get_type_geometry(section_header, 'enum')
-                        self.boundary_conditions[bc_key,geom_key].append(BaseMeshItem(item))
+                        for key, value in self.boundary_condition_names.items():
+                            if value == section_header:
+                                (bc_key, geometry_key) = key
+                                break
+                        self.boundary_conditions[bc_key,geometry_key].append(
+                            BaseMeshItem(item)
+                            )
             
-            def add_set(section_header):
-                """ Add sets of points, lines, surfs or volumes to item. """
+            def add_set(section_header, section_data):
+                """
+                Add sets of points, lines, surfaces or volumes to the object.
+                """
+                
+                def add_to_set(section_header, dat_list):
+                    """Add the data_list to the sets of this object."""
+                    for key, value in self.geometry_set_names.items():
+                        if value == section_header:
+                            geometry_key = key
+                            break
+                    self.geometry_sets[geometry_key].append(
+                        BaseMeshItem(dat_list)
+                        )
                 
                 if len(section_data) > 0:
-                    # look for the individual sets 
+                    # Add the individual sets to the object. For that loop until
+                    # a new set index is reached.
                     last_index = 1
                     dat_list = []
                     for line in section_data:
@@ -353,31 +346,35 @@ class InputFile(Mesh):
                             dat_list.append(line)
                         else:
                             last_index = int(line.split()[3])
-                            geom_key = get_type_geometry(section_header, 'enum')
-                            self.geometry_sets[geom_key].append(BaseMeshItem(dat_list))
+                            add_to_set(section_header, dat_list)
                             dat_list = [line]
-                    geom_key = get_type_geometry(section_header, 'enum')
-                    self.geometry_sets[geom_key].append(BaseMeshItem(dat_list))
+                    # Add the last set.
+                    add_to_set(section_header, dat_list)
+                    
             
+            # Check if the section contains mesh data that has to be added to
+            # specific lists.       
             if section_name == 'MATERIALS':
                 for line in section_data:
                     self.materials.append(BaseMeshItem(line))
-            elif section_name.endswith('CONDITIONS'):
-                add_bc(section_name)
-            elif section_name.endswith('TOPOLOGY'):
-                add_set(section_name)
             elif section_name == 'NODE COORDS':
                 for line in section_data:
                     self.nodes.append(BaseMeshItem(line))
             elif section_name == 'STRUCTURE ELEMENTS':
                 for line in section_data:
                     self.elements.append(BaseMeshItem(line))
-            elif section_name == 'DESIGN DESCRIPTION':
-                pass
             elif section_name.startswith('FUNCT'):
                 self.functions.append(BaseMeshItem(section_data))
+            elif section_name.endswith('CONDITIONS'):
+                add_bc(section_name, section_data)
+            elif section_name.endswith('TOPOLOGY'):
+                add_set(section_name, section_data)
+            elif section_name == 'DESIGN DESCRIPTION' or \
+                    section_name == 'END':
+                # Skip those sections as they won't be used!
+                pass
             else:
-                # descion is not in mesh
+                # Section is not in mesh, i.e. simulation parameters.
                 self.add_section(InputSection(section_name, data=section_data))
             
         
@@ -535,8 +532,8 @@ class InputFile(Mesh):
         for (bc_key, geom_key) in self.boundary_conditions.keys():
             for i, bc in enumerate(self.boundary_conditions[bc_key, geom_key]):
                 if i == 0:
-                    lines.append(get_section_string(get_type_bc(bc_key, geom_key)))
-                    lines.append('{} {}'.format(get_type_geometry(geom_key,'bccounter'), len(self.boundary_conditions[bc_key, geom_key])))
+                    lines.append(get_section_string(self.boundary_condition_names[bc_key, geom_key]))
+                    lines.append('{} {}'.format(self.boundary_condition_counter[geom_key], len(self.boundary_conditions[bc_key, geom_key])))
                 lines.extend(bc.get_dat_lines())
 
         # add the couplings
@@ -549,7 +546,7 @@ class InputFile(Mesh):
         for key in mesh_sets.keys():
             for i, node_set in enumerate(mesh_sets[key]):
                 if i == 0:
-                    lines.append(get_section_string(get_type_geometry(key,'setsection')))
+                    lines.append(get_section_string(self.geometry_set_names[key]))
                 lines.extend(node_set.get_dat_lines())
 
         # add the nodal data
