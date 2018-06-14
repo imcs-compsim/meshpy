@@ -28,6 +28,7 @@ class GeometryName(dict):
         elif isinstance(value, GeometrySet):
             dict.__setitem__(self, key, value)
         else:
+            raise ValueError('TODO')
             dict.__setitem__(self, key, GeometrySet(nodes=value))
 
 

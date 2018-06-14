@@ -125,10 +125,22 @@ class Mesh(object):
         if not geometry_set in self.sets[geometry_set.geometry_type]:
             self.sets[geometry_set.geometry_type].append(geometry_set)
     
-    def get_global_coordinates(self):
-        """Return an array with the coordinates of all nodes."""
-        pos = np.zeros([len(self.nodes),3])
-        for i, node in enumerate(self.nodes):
+    def get_global_coordinates(self, nodes=None):
+        """
+        Return an array with the coordinates of all nodes.
+        
+        Args
+        ----
+        nodes: list(Nodes)
+            If this one is given return an array with the coordinates of the
+            nodes in list, otherwise of all nodes in the mesh.
+        """
+        if nodes is None:
+            node_list = self.nodes
+        else:
+            node_list = nodes
+        pos = np.zeros([len(node_list),3])
+        for i, node in enumerate(node_list):
             if not node.is_dat:
                 pos[i,:] = node.coordinates
         return pos
@@ -349,7 +361,36 @@ class Mesh(object):
         return node_list
     
     
-    
+    def get_min_max_nodes(self, nodes=None):
+        """
+        Return a geometry set with the max and min nodes in all directions.
+        """
+        
+        geometry = GeometryName()
+        
+        if nodes is None:
+            node_list = self.nodes
+        else:
+            node_list = nodes
+        pos = self.get_global_coordinates(nodes = node_list)
+        for i, direction in enumerate(['x', 'y', 'z']):
+            # Check if there is more than one value in dimension.
+            min_max = [ np.min(pos[:,i]), np.max(pos[:,i]) ]
+            if np.abs(min_max[1] - min_max[0]) >= mpy.eps_vec:
+                for j, text in enumerate(['min', 'max']):
+                    # get all nodes with the min / max coordinate
+                    min_max_nodes = []
+                    for index, value in enumerate(
+                            np.abs(pos[:,i] - min_max[j]) < mpy.eps_vec
+                            ):
+                        if value:
+                            min_max_nodes.append(node_list[index])
+                    geometry['{}_{}'.format(direction, text)] = GeometrySet(
+                        mpy.point,
+                        min_max_nodes
+                        )
+        return geometry
+
 
     def create_beam_mesh_line(self, beam_object, material, start_point,
             end_point, n_el=1, start_node=None ):
@@ -506,43 +547,25 @@ class Mesh(object):
                             base_vert + ny * a
                             )
         
-        # list of nodes from the honeycomb that are candidates for connections
+        # List of nodes from the honeycomb that are candidates for connections.
         honeycomb_nodes = [
-            self.nodes(i) for i in range(i_node_start)
-            if self.nodes(i).is_end_node
+            self.nodes[i] for i in range(i_node_start, len(self.nodes))
+            if self.nodes[i].is_end_node
             ]
-        
-        # function to get nodes for boundaries
-        def node_in_box(x_range,y_range,z_range):
-            def funct(node):
-                coord = node.coordinates
-                eps = 1e-8
-                if -eps + x_range[0] < coord[0] < x_range[1] + eps:
-                    if -eps + y_range[0] < coord[1] < y_range[1] + eps:
-                        if -eps + z_range[0] < coord[2] < z_range[1] + eps:
-                            # also check if the node is in honeycomb_nodes -> we
-                            # only want nodes that are on the crossing points of the mesh
-                            if node in honeycomb_nodes:
-                                return True
-                return False
-            return funct
-        
-        x_max = y_max = 0
-        for node in honeycomb_nodes:
-            if node.coordinates[0] > x_max:
-                x_max = node.coordinates[0]
-            if node.coordinates[1] > y_max:
-                y_max = node.coordinates[1]
-        
-        # add connection for nodes with same positions
+
+        # Add connections for the nodes with same positions.
         if create_couplings:
             self.add_connections(honeycomb_nodes)
-            
+        
+        # Get min and max nodes of the honeycomb.
+        min_max_nodes = self.get_min_max_nodes(nodes=honeycomb_nodes)
+        
+        # Return the geometry set.
         return_set = GeometryName()
-        return_set['north'] = GeometrySet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [y_max,y_max], [-1,1])))
-        return_set['east'] = GeometrySet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([x_max,x_max], [0,y_max], [-1,1])))
-        return_set['south'] = GeometrySet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,x_max], [0,0], [-1,1])))
-        return_set['west'] = GeometrySet(mpy.point, nodes=self.get_nodes_by_function(node_in_box([0,0], [0,y_max], [-1,1])))
+        return_set['north'] = min_max_nodes['y_max'] 
+        return_set['east'] = min_max_nodes['x_max']
+        return_set['south'] = min_max_nodes['y_min']
+        return_set['west'] = min_max_nodes['x_min']
         return return_set
     
     
