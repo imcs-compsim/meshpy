@@ -124,6 +124,24 @@ class Mesh(object):
         """Add a geometry set to this mesh."""
         if not geometry_set in self.sets[geometry_set.geometry_type]:
             self.sets[geometry_set.geometry_type].append(geometry_set)
+    
+    def get_global_coordinates(self):
+        """Return an array with the coordinates of all nodes."""
+        pos = np.zeros([len(self.nodes),3])
+        for i, node in enumerate(self.nodes):
+            if not node.is_dat:
+                pos[i,:] = node.coordinates
+        return pos
+    
+    def get_global_quaternions(self):
+        """Return an array with the quaternions of all nodes."""
+        rot = np.zeros([len(self.nodes),4])
+        for i, node in enumerate(self.nodes):
+            if (not node.is_dat) and (not node.rotation is None):
+                rot[i,:] = node.rotation.get_quaternion()
+            else:
+                rot[i,0] = 1
+        return rot
 
     def translate(self, vector):
         """
@@ -156,12 +174,8 @@ class Mesh(object):
         """
         
         # get array with all quaternions and positions for the nodes
-        rot1 = np.zeros([len(self.nodes),4])
-        pos = np.zeros([len(self.nodes),3])
-        for i, node in enumerate(self.nodes):
-            if not node.is_dat:
-                rot1[i,:] = node.rotation.get_quaternion()
-                pos[i,:] = node.coordinates
+        pos = self.get_global_coordinates()
+        rot1 = self.get_global_quaternions()
         
         # check if origin has to be added
         if not origin is None:
@@ -205,7 +219,8 @@ class Mesh(object):
             
         for i, node in enumerate(self.nodes):
             if not node.is_dat:
-                node.rotation.q = rotnew[i,:]
+                if not node.rotation is None:
+                    node.rotation.q = rotnew[i,:]
                 if not only_rotate_triads:
                     node.coordinates = posnew[i,:]
 
@@ -216,11 +231,8 @@ class Mesh(object):
         axis of symmetry.
         """
         
+        pos = self.get_global_coordinates()
         quaternions = np.zeros([len(self.nodes),4])
-        pos = np.zeros([len(self.nodes),3])
-        for i, node in enumerate(self.nodes):
-            if not node.is_dat:
-                pos[i,:] = node.coordinates
         
         # The x coordinate is the radius, the y coordinate the arc length.
         radius = pos[:,0].copy()
@@ -317,26 +329,26 @@ class Mesh(object):
             self.add(Coupling(nodes, connection_type))
     
     
-    def get_nodes_by_function(self, function, overlapping=True, middle_nodes=False):
+    def get_nodes_by_function(self, function, middle_nodes=False):
         """
         Return all nodes for which the function evaluates to true.
-        overlaping means that nodes with the same coordinates are also added.
+        
+        Args
+        ----
+        function: function(node)
+            Nodes for which this function is true are returned.
+        middle_nodes: bool
+            If this is true, middle nodes of a beam are also returned.
         """
         
         node_list = []
         for node in self.nodes:
-            if node.is_middle_node:
-                continue
-            if function(node):
-                if overlapping:
+            if middle_nodes or (not node.is_middle_node):
+                if function(node):
                     node_list.append(node)
-                else:
-                    for true_node in node_list:
-                        if np.linalg.norm(true_node.coordinates - node.coordinates) < 1e-8:
-                            break
-                    else:
-                        node_list.append(node)
         return node_list
+    
+    
     
 
     def create_beam_mesh_line(self, beam_object, material, start_point,
@@ -422,86 +434,72 @@ class Mesh(object):
         return return_set
     
     
-    def create_beam_mesh_honeycomb_flat(
-            self,
-            beam_object,
-            material,
-            width,
-            n_width,
-            n_height,
-            n_el=1,
-            closed_width=True,
-            closed_height=True,
-            name=None,
-            add_sets=True,
-            create_couplings=True
-            ):
+    def create_beam_mesh_honeycomb_flat(self, beam_object, material, width,
+            n_width, n_height, n_el=1, closed_width=True, closed_height=True,
+            create_couplings=True):
         """
         Add a flat honeycomb structure
         """
         
         def add_line(pointa, pointb):
-            """ Shortcut to add line. """
-            geom_set = self.create_beam_mesh_line(
+            """Shortcut to add line."""
+            return self.create_beam_mesh_line(
                 beam_object,
                 material,
                 pointa,
                 pointb,
-                n_el=n_el#,
-                #add_sets=False
+                n_el=n_el
                 )
-            return geom_set
         
-        # shortcuts
+        # Geometrical shortcuts.
         sin30 = np.sin(np.pi/6)
         cos30 = np.sin(2*np.pi/6)
         a = width * 0.5 / cos30
-        
         nx = np.array([1.,0.,0.])
         ny = np.array([0.,1.,0.])
-        
+        zig_zag_x = nx * width * 0.5
         zig_zag_y = ny * a * sin30 * 0.5
         
-        # create zig zag lines, first node is at [0,0,0]
+        # Create the honeycomb structure
         origin = np.array([0,a*0.5*sin30,0])
-        
-        # node index from the already existing nodes
         i_node_start = len(self.nodes)
-        
-        # loop to create elements
         for i_height in range(n_height + 1):
             
-            base_row = origin + ny * a * (1 + sin30 ) * i_height
-        
-            # if the first node is up or down of base_row
+            # Start point for this zig-zag line.
+            base_row = origin + ( 2 * zig_zag_y + a * ny ) * i_height
+            
+            # If the first node is up or down of base_row.
             if i_height % 2 == 0:
                 direction = 1
             else:
                 direction = -1    
 
             for i_width in range(n_width + 1):
-            
-                base_zig_zag = base_row + direction * zig_zag_y + width * i_width * nx
+                base_zig_zag = ( base_row + direction * zig_zag_y
+                    + width * i_width * nx )
                 
-                # do not add on last run
+                # Do not add a zig-zag line on the last run (that one is only for
+                # the remaining vertical lines).
                 if i_width < n_width:
                     add_line(
                         base_zig_zag,
-                        base_zig_zag + nx * width * 0.5 - 2 * direction * zig_zag_y
+                        base_zig_zag + zig_zag_x - 2 * direction * zig_zag_y
                         )
                     add_line(
-                        base_zig_zag + nx * width * 0.5 - 2 * direction * zig_zag_y,
-                        base_zig_zag + nx * width
+                        base_zig_zag + zig_zag_x - 2 * direction * zig_zag_y,
+                        base_zig_zag + nx*width
                         )
                 
+                # Check where the vertical lines start.
                 if i_height % 2 == 0:
                     base_vert = base_zig_zag
                 else:
-                    base_vert = base_zig_zag + nx * width * 0.5 - 2 * direction * zig_zag_y
+                    base_vert = base_zig_zag + zig_zag_x - \
+                        2 * direction * zig_zag_y
                 
-                # check if width is closed
+                # Only add vertical lines at the end if closed_width.
                 if (i_width < n_width) or (direction==1 and closed_width):
-                    # check if height is closed
+                    # Check if the vertical lines at the top should be added.
                     if not (i_height == n_height) or (not closed_height): 
                         add_line(
                             base_vert,
@@ -509,7 +507,10 @@ class Mesh(object):
                             )
         
         # list of nodes from the honeycomb that are candidates for connections
-        honeycomb_nodes = [self.nodes(i) for i in range(i_node_start) if self.nodes(i).is_end_node]
+        honeycomb_nodes = [
+            self.nodes(i) for i in range(i_node_start)
+            if self.nodes(i).is_end_node
+            ]
         
         # function to get nodes for boundaries
         def node_in_box(x_range,y_range,z_range):
@@ -585,8 +586,7 @@ class Mesh(object):
         mesh_temp.create_beam_mesh_honeycomb_flat(beam_object, material, width, n_w, n_h, n_el,
                                                                     closed_width=closed_width,
                                                                     closed_height=closed_height,
-                                                                    create_couplings=False,
-                                                                    add_sets=False
+                                                                    create_couplings=False
                                                                     )
         
         print('add flat honeycomb complete')
