@@ -479,7 +479,35 @@ class Mesh(object):
             n_width, n_height, n_el=1, closed_width=True, closed_height=True,
             create_couplings=True):
         """
-        Add a flat honeycomb structure
+        Add a flat honeycomb structure. The structure will be created in the
+        x-y plane.
+        
+        Args
+        ----
+        beam_object: Beam
+            Object that will be used to create the beam elements.
+        material: Material
+            Material for the beam.
+        width: float
+            Width of one honeycomb.
+        n_width: int
+            Number of honeycombs in x-direction.
+        n_height: int
+            Number of honeycombs in y-direction.
+        n_el: int
+            Number of elements per beam line.
+        closed_width: bool
+            If the last honeycombs in x-direction will be closed.
+        closed_height: bool
+            If the last vertical lines in y-direction will be created.
+        create_couplings: bool
+            If the nodes will be connected in this function.
+        
+        Return
+        ----
+        return_set: GeometryName
+            Set with nodes on the north, south, east and west boundaries. This
+            set only contains end nodes of lines.
         """
         
         def add_line(pointa, pointb):
@@ -569,101 +597,88 @@ class Mesh(object):
         return return_set
     
     
-    def create_beam_mesh_honeycomb(self,
-                           beam_object,
-                           material,
-                           diameter,
-                           n_circumference,
-                           n_height,
-                           n_el=1,
-                           name=None,
-                           add_sets=True,
-                           closed_top=True,
-                           vertical=True
-                           ):
+    def create_beam_mesh_honeycomb(self, beam_object, material, diameter,
+        n_circumference, n_axis, n_el=1, closed_top=True, vertical=True):
         """
-        TODO
+        Add a honeycomb structure around a cylinder. The cylinder axis will be
+        the z-axis.
+        
+        Args
+        ----
+        beam_object: Beam
+            Object that will be used to create the beam elements.
+        material: Material
+            Material for the beam.
+        diameter: float
+            Diameter of the cylinder.
+        n_circumference: int
+            Number of honeycombs around the diameter. If vertical is False this
+            has to be an odd number.
+        n_axis: int
+            Number of honeycombs in axial-direction.
+        n_el: int
+            Number of elements per beam line.
+        closed_top: bool
+            If the last honeycombs in axial-direction will be closed.
+        vertical: bool
+            If there are vertical lines in the honeycomb or horizontal.
+        
+        Return
+        ----
+        return_set: GeometryName
+            Set with nodes top and bottom nodes. This will only contains end
+            nodes of lines.
         """
         
+        # Calculate the input values for the flat honeycomb mesh.
         if vertical:
-            width = diameter * np.pi / n_circumference 
+            width = diameter * np.pi / n_circumference
             closed_width = False
             closed_height = closed_top
             rotation = Rotation([0,0,1],np.pi/2) * Rotation([1,0,0],np.pi/2)
-            n_h = n_height
-            n_w = n_circumference
+            n_height = n_axis
+            n_width = n_circumference
         else:
             if not n_circumference % 2 == 0:
-                raise ValueError('There has to be an even number of elements along the diameter in horizontal mode. Given {}!'.format(n_circumference))
+                raise ValueError('There has to be an even number of ' + \
+                    'elements along the diameter in horizontal mode.' + \
+                    ' Given {}!'.format(n_circumference))
             H = diameter * np.pi / n_circumference
             r = H / (1+np.sin(np.pi/6))
             width = 2*r*np.cos(np.pi/6)
             closed_width = closed_top
             closed_height = False
             rotation = Rotation([0,1,0],-np.pi/2)
-            n_h = n_circumference
-            n_w = n_height
+            n_height = n_circumference
+            n_width = n_axis
         
-        # first create a mesh with the flat mesh
+        # Create the flat mesh, do not create couplings, as they will be added
+        # later in this function, where also the diameter nodes will be
+        # connected.
         mesh_temp = Mesh()
-        mesh_temp.create_beam_mesh_honeycomb_flat(beam_object, material, width, n_w, n_h, n_el,
-                                                                    closed_width=closed_width,
-                                                                    closed_height=closed_height,
-                                                                    create_couplings=False
-                                                                    )
+        honeycomb_sets = mesh_temp.create_beam_mesh_honeycomb_flat(beam_object,
+            material, width, n_width, n_height, n_el=n_el,
+            closed_width=closed_width, closed_height=closed_height,
+            create_couplings=False)
         
-        print('add flat honeycomb complete')
-        
-        # move the mesh to the correct position
+        # Move the mesh to the correct position.
         mesh_temp.rotate(rotation)
         mesh_temp.translate([diameter/2, 0, 0])
         mesh_temp.wrap_around_cylinder()
         
-        print('wraping complete')
-        
+        # Add connections to the mesh.
         mesh_temp.add_connections(mesh_temp.nodes)
         
-        print('connections complete')
-        
-        
-        # function to get nodes for boundaries
-        def node_in_box(x_range,y_range,z_range):
-            def funct(node):
-                coord = node.coordinates
-                eps = 1e-8
-                if -eps + x_range[0] < coord[0] < x_range[1] + eps:
-                    if -eps + y_range[0] < coord[1] < y_range[1] + eps:
-                        if -eps + z_range[0] < coord[2] < z_range[1] + eps:
-                            # also check if the node is in honeycomb_nodes -> we
-                            # only want nodes that are on the crossing points of the mesh
-                            if node in mesh_temp.nodes:
-                                return True
-                return False
-            return funct
-        
-        x_max = y_max = z_max = 0
-        for node in mesh_temp.nodes:
-            if node.coordinates[0] > x_max:
-                x_max = node.coordinates[0]
-            if node.coordinates[1] > y_max:
-                y_max = node.coordinates[1]
-            if node.coordinates[2] > z_max:
-                z_max = node.coordinates[2]
-                
+        # Return the geometry set'
         return_set = GeometryName()
-        return_set['bottom'] = GeometrySet(mpy.point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [0,0])))
-        return_set['top'] = GeometrySet(mpy.point, nodes=mesh_temp.get_nodes_by_function(node_in_box([-2*x_max,2*x_max], [-2*y_max,2*y_max], [z_max,z_max])))
-
+        if vertical:
+            return_set['top'] = honeycomb_sets['north'] 
+            return_set['bottom'] = honeycomb_sets['south']
+        else:
+            return_set['top'] = honeycomb_sets['east'] 
+            return_set['bottom'] = honeycomb_sets['west']
+        
+        # Add to this mesh
         self.add_mesh(mesh_temp)
         
         return return_set
-
-        
-        
-        
-        
-        
-        
-        
-        
-        
