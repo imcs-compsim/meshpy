@@ -7,7 +7,7 @@ This module implements the class that represents one node in the Mesh.
 import numpy as np
 
 # Meshpy modules.
-from . import BaseMeshItem
+from . import mpy, BaseMeshItem
 
 
 class Node(BaseMeshItem):
@@ -57,8 +57,9 @@ class Node(BaseMeshItem):
         """
         Return the line that represents this node in the input file.
         """
-        
-        return 'NODE {} COORD {:.15g} {:.15g} {:.15g}'.format(
+        node_string = 'NODE {} COORD ' + ' '.join(
+            [mpy.dat_precision for i in range(3)])
+        return node_string.format(
             self.n_global,
             self.coordinates[0],
             self.coordinates[1],
