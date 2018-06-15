@@ -16,7 +16,7 @@ from . import mpy, get_section_string,  Mesh, BaseMeshItem
 class InputLine(object):
     """This class is a single option in a Baci input file."""
     
-    def __init__(self, *args, option_comment=None, overwrite=False):
+    def __init__(self, *args, option_comment=None, option_overwrite=False):
         """
         Set the option object.
             - with a single string
@@ -28,7 +28,7 @@ class InputLine(object):
         self.option_value = ''
         self.option_comment = ''
         self.option_value_pad= '  '
-        self.overwrite = overwrite
+        self.overwrite = option_overwrite
         
         for arg in args:
             # there should be no newline in the arguments
@@ -113,47 +113,21 @@ class InputLine(object):
 
 
 class InputSection(object):
-    """ Represent a single section in the input file. """
+    """Represent a single section in the input file."""
     
-    
-    def __init__(self, name, data=None, option_overwrite=False):
+    def __init__(self, name, data=None, **kwargs):
         """ Initiate section. """
         
+        # Section title.
         self.name = name
         
-        # each line in data will be converted to a baci line
+        # Each input line will be one entry in this dictionary.
         self.data = OrderedDict()
         if data:
-            self.add_option(data, option_overwrite=option_overwrite)
+            self.add_option(data, **kwargs)
+
     
-    
-    def merge_section(self, section):
-        """ Merge this section with another. This one is the master. """
-        
-        for option in section.data.values():
-            self._add_data(option)
-    
-    
-    def get_dat_lines(self):
-        """ Return the dat lines for this section. """
-    
-        lines = [get_section_string(self.name)]
-        lines.extend([str(line) for line in self.data.values()])
-        return lines
-    
-    
-    def _add_data(self, option):
-        """ Add a InputLine object to the item. """
-        
-        if not (option.get_key() in self.data.keys()) or option.overwrite:
-            self.data[option.get_key()] = option
-        elif option.get_key() == '':
-            print('TODO? what should happen here?')
-        else:
-            print('Error, key {} already set!'.format(option.get_key()))
-    
-    
-    def add_option(self, *args, option_comment=None, option_overwrite=False):
+    def add_option(self, *args, **kwargs):
         """
         Add data to the section.
         
@@ -178,15 +152,38 @@ class InputSection(object):
                 del split[-1]
             
             for item in split:
-                self._add_data(InputLine(item, option_comment=option_comment, overwrite=option_overwrite))
+                self._add_data(InputLine(item, **kwargs))
         else:
-            self._add_data(InputLine(*args, option_comment=option_comment, overwrite=option_overwrite))
+            self._add_data(InputLine(*args, **kwargs))
 
+    def _add_data(self, option):
+        """ Add a InputLine object to the item. """
+        
+        if not (option.get_key() in self.data.keys()) or option.overwrite:
+            self.data[option.get_key()] = option
+        elif option.get_key() == '':
+            print('TODO? what should happen here?')
+        else:
+            print('Error, key {} already set!'.format(option.get_key()))
+    
+    def merge_section(self, section):
+        """ Merge this section with another. This one is the master. """
+        
+        for option in section.data.values():
+            self._add_data(option)
+    
+    
+    def get_dat_lines(self):
+        """ Return the dat lines for this section. """
+    
+        lines = [get_section_string(self.name)]
+        lines.extend([str(line) for line in self.data.values()])
+        return lines
+    
+    
 
-
-
-
-
+    
+    
 
 
 
