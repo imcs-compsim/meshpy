@@ -281,63 +281,70 @@ class TestFullBaci(unittest.TestCase):
     return 0.
     """
            
-    def run_baci_test(self, input_file, n_proc=2):
+    def run_baci_test(self, name, mesh, n_proc=2):
         """
         Run Baci with a input file and check the output. If the test passes,
         the created files are deleted.
         
         Args
         ----
-        input_file: str
-            Path to the input file.
+        name: str
+            Name of the test case.
+        mesh: InputFile
+            The InputFile object that contains the simulation.
         n_proc: int
             Number of processors to run Baci on.
         """
         
-        test_name = os.path.splitext(os.path.basename(input_file))[0]
+        # Check if temp directory exists. 
+        check_tmp_dir()
+        
+        # Create input file.
+        input_file = os.path.join(testing_temp, name + '.dat')
+        mesh.write_input_file(input_file)
+        
+        # Run Baci with the input file.
         child = subprocess.Popen([
             'mpirun', '-np', str(n_proc),
             baci_release,
             os.path.join(testing_path, input_file),
-            os.path.join(testing_temp, 'xxx_' + test_name)
+            os.path.join(testing_temp, 'xxx_' + name)
             ], cwd=testing_temp, stdout=subprocess.PIPE)
         child.communicate()[0]
         self.assertEqual(0, child.returncode,
-            msg='Test {} failed!'.format(test_name)
+            msg='Test {} failed!'.format(name)
             )
             
         # If successful delete created files directory.
         if int(child.returncode) == 0:
             os.remove(input_file)
-            items = glob.glob(testing_temp+'/xxx_' + test_name + '*')
+            items = glob.glob(testing_temp+'/xxx_' + name + '*')
             for item in items:
                 if os.path.isdir(item):
                     shutil.rmtree(item)
                 else:
                     os.remove(item)
-                
 
-
-
-           
        
     def test_honeycomb_as_input(self):
         """
         Create the same honeycomb mesh as defined in 
-        /Input/beam3r_herm2lin3_static_point_coupling_BTSPH_contact_stent_honeycomb_stretch_r01_circ10.dat
-        The honeycomb beam is in contact with a rigid sphere, the sphere is moved compared
-        to the original test file, since there are some problems with the contact convergence.
-        The sphere is imported as an existing mesh. 
+        /Input/beam3r_herm2lin3_static_point_coupling_BTSPH_contact_stent_\
+        honeycomb_stretch_r01_circ10.dat
+        The honeycomb beam is in contact with a rigid sphere, the sphere is
+        moved compared to the original test file, since there are some problems
+        with the contact convergence. The sphere is imported as an existing
+        mesh. 
         """
             
-        # read input file with information on sphere
+        # Read input file with information of the sphere and simulation.
         input_file = InputFile(
             maintainer='Ivo Steinbrecher',
             description='honeycomb beam in contact with sphere',
             dat_file=os.path.join(testing_input, 'honeycomb-sphere.dat')
             )
-            
-        # overwrite some entries in the input file
+        
+        # Modify the time step options.
         input_file.add(InputSection(
             'STRUCTURAL DYNAMIC',
             'NUMSTEP 5',
@@ -345,7 +352,8 @@ class TestFullBaci(unittest.TestCase):
             option_overwrite=True
             ))
             
-        # add results to the input file
+        # First delete the results given in the input file and then add the
+        # correct results to the file.
         input_file.delete_section('RESULT DESCRIPTION')
         input_file.add(InputSection(
             'RESULT DESCRIPTION',
@@ -362,7 +370,7 @@ class TestFullBaci(unittest.TestCase):
             '''
             ))
             
-        # material for the beam
+        # Material for the beam.
         material = Material(
             'MAT_BeamReissnerElastHyper',
             2.07e2, # E-Modul
@@ -372,52 +380,42 @@ class TestFullBaci(unittest.TestCase):
             shear_correction=1.1
             )
             
-        # create the honeycomb mesh
+        # Create the honeycomb mesh.
         mesh_honeycomb = Mesh()
         honeycomb_set = mesh_honeycomb.create_beam_mesh_honeycomb(
-            Beam3rHerm2Lin3,
-            material,
-            50.0,
-            10,
-            4,
-            1,
-            closed_top=False
-            )
+            Beam3rHerm2Lin3, material, 50.0, 10, 4, 1, closed_top=False)
         mesh_honeycomb.rotate(Rotation([0,0,1], np.pi/2))
             
-        # define functions for the bc
+        # Functions for the boundary conditions
         ft = Function(
             'COMPONENT 0 FUNCTION a\n' + \
             'VARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 3 ' + \
             'TIMES 0.0 0.2 1.0 VALUES 0.0 1.0 1.0'
             )
         mesh_honeycomb.add(ft)
-          
-        # change the sets to lines, only for purpose of matching the test file
+        
+        # Change the sets to lines, only for purpose of matching the test file
         honeycomb_set['bottom'].geo_type = mpy.line
         honeycomb_set['top'].geo_type = mpy.line
         mesh_honeycomb.add(
-                BoundaryCondition(honeycomb_set['bottom'],
-                   'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
-                   bc_type=mpy.dirichlet
-                ))
+            BoundaryCondition(honeycomb_set['bottom'],
+                'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 ' + \
+                'FUNCT 0 0 0 0 0 0 0 0 0',
+                bc_type=mpy.dirichlet
+            ))
         mesh_honeycomb.add(
-                BoundaryCondition(honeycomb_set['top'],
-                   'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 5.0 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0',
-                   format_replacement=[ft],
-                   bc_type=mpy.dirichlet
-                ))
+            BoundaryCondition(honeycomb_set['top'],
+                'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 5.0 0 0 0 0 0 0 ' + \
+                'FUNCT 0 0 {} 0 0 0 0 0 0',
+                format_replacement=[ft],
+                bc_type=mpy.dirichlet
+            ))
             
-        # add the beam mesh to the solid mesh
+        # Add the mesh to the imported solid mesh.
         input_file.add(mesh_honeycomb)
-                
-        # write input file
-        check_tmp_dir()
-        input_dat_file = os.path.join(testing_temp, 'honeycomb-sphere.dat')
-        input_file.write_input_file(input_dat_file)
-            
-        # test input
-        self.run_baci_test(input_dat_file)
+        
+        # Run the input file in Baci.
+        self.run_baci_test('honeycomb-sphere', input_file)
         
         
     def test_beam_and_solid_tube(self):
@@ -486,14 +484,9 @@ class TestFullBaci(unittest.TestCase):
             STRUCTURE DIS structure NODE 69 QUANTITY dispy VALUE 1.41113401669104e-15 TOLERANCE 1e-10
             STRUCTURE DIS structure NODE 69 QUANTITY dispz VALUE 0.0178350143764099 TOLERANCE 1e-10
             '''))
-                
-        # write input file
-        check_tmp_dir()
-        input_dat_file = os.path.join(testing_temp, 'tube.dat')
-        input_file.write_input_file(input_dat_file)
-            
-        # test input
-        self.run_baci_test(input_dat_file)
+        
+        # Run the input file in Baci.
+        self.run_baci_test('tube', input_file)
            
            
     def test_honeycomb_variants(self):
@@ -617,14 +610,8 @@ class TestFullBaci(unittest.TestCase):
             '''
             ))
            
-        # write input file
-        check_tmp_dir()
-        input_dat_file = os.path.join(testing_temp, 'honeycomb-variants.dat')
-        input_file.write_input_file(input_dat_file)
-         
-        # test input
-        self.run_baci_test(input_dat_file)
-
+        # Run the input file in Baci.
+        self.run_baci_test('honeycomb-variants', input_file)
 
 if __name__ == '__main__':
     unittest.main()
