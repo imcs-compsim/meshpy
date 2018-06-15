@@ -120,15 +120,16 @@ class InputLine(object):
 class InputSection(object):
     """Represent a single section in the input file."""
     
-    def __init__(self, name, data=None, **kwargs):
+    def __init__(self, name, *args, **kwargs):
         
         # Section title.
         self.name = name
         
         # Each input line will be one entry in this dictionary.
         self.data = OrderedDict()
-        if data:
-            self.add(data, **kwargs)
+
+        for arg in args:
+            self.add(arg, **kwargs)
 
     
     def add(self, data, **kwargs):
@@ -145,6 +146,9 @@ class InputSection(object):
         if isinstance(data, str):
             data_lines = data.split('\n')
         else:
+            # Check if data has entries
+            if len(data) == 0:
+                return
             data_lines = data
         
         # Remove the first and or last line if it is empty.
@@ -384,7 +388,7 @@ class InputFile(Mesh):
                 pass
             else:
                 # Section is not in mesh, i.e. simulation parameters.
-                self.add_section(InputSection(section_name, data=section_data))
+                self.add_section(InputSection(section_name, section_data))
 
         
 
