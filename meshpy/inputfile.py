@@ -18,10 +18,26 @@ class InputLine(object):
     
     def __init__(self, *args, option_comment=None, option_overwrite=False):
         """
-        Set the option object.
-            - with a single string
-            - with two arguments: option_name, option_value 
-                and the optional keyword argument option_comment
+        Set a line of the baci input file.
+        
+        Args
+        ----
+        args: str
+            First the string is checked for a comment at the end of it. Then
+            the remaining string will be searched for an equal sign and if found
+            split up at that sign. Otherwise it will be checked how many parts
+            separated by spaces there are in the string. If there are exactly
+            two parts, the first one will be the option_name the second one the
+            option_value.
+        args: (str, str)
+            The first one will be the option_name the second one the
+            option_value.
+        option_comment: str
+            This will be added as a comment to this line.
+        option_overwrite: bool
+            If this object is added to a section which already contains an
+            option with the same name, this flag decides weather the option
+            will be overwritten.
         """
         
         self.option_name = ''
@@ -30,80 +46,69 @@ class InputLine(object):
         self.option_value_pad= '  '
         self.overwrite = option_overwrite
         
-        for arg in args:
-            # there should be no newline in the arguments
-            if not str(arg).find('\n') == -1:
-                print('Error, no newline in InputLine')
-        
         if len(args) == 1:
-            # set from single string
+            # Set from single a string.
             string = args[0]
             
-            # first check if the line has a comment
+            # First check if the line has a comment.
             first_comment = string.find('//')
             if not first_comment == -1:
                 self.option_comment = string[first_comment:]
                 string = string[:first_comment]
             
-            # split up the remaining string into name and value
-            split = self._set_string_split(string) 
-            if split == 1:
-                self.option_comment = args[0]
-            elif split == 2:
-                print('Error in set string split function!')
-            
+            # Check if there is an equal sign in the string.
+            if not string.find('=') == -1:
+                string_split = [text.strip() for text in string.split('=')]
+                self.option_value_pad = '= '
+            elif len(string.split()) == 2:
+                string_split = [text.strip() for text in string.split()]
+            else:
+                string_split = ['', '']
+                self.option_comment = args[0].strip()
         else:
-            # set from multiple parameters
-            self.option_name = args[0]
-            self.option_value = args[1]
-            if option_comment:
-                self.option_comment = '// {}'.format(option_comment)
-    
-    
-    def get_key(self):
-        """
-        Return a key that will be used in the dictionary storage for this item.
-        """
-        
-        if self.option_name == '':
-            return self.option_comment
-        else:
-            return self.option_name
-        
+            string_split = [str(arg).strip() for arg in args]
 
-    def _set_string_split(self, string):
-        """
-        Default method to convert a string split list into object parameters.
-        Should be overwriten in special child classes.
-        
-        If everything is ok the return value is 0.
-        
-        If the return value is 1, option_name and option_value will be empty,
-        and the whole input string will be set to option_comment.
-        
-        If the return value is 2 an error will be thrown. It is also possible
-        to throw this error in this function.
-        """
-        
-        # check if there is an equal sign in the string
-        if not string.find('=') == -1:
-            string_split = string.split('=')
-            string_split = [string.strip() for string in string_split]
-            self.option_value_pad = '= '
-        else:
-            string_split = string.split()
+        if not option_comment is None:
+            if self.option_comment == '':
+                self.option_comment = '// {}'.format(option_comment)
+            else:
+                self.option_comment += ' // {}'.format(option_comment)
+
+        # Check if the string_split array has a suitable size.
         if len(string_split) == 2:
             self.option_name = string_split[0]
             self.option_value = string_split[1]
-            return 0
         else:
-            return 1
+            raise ValueError('Could not process the input parameters:'
+                + '\nargs:\n    {}\noption_comment:\n    {}'.format(
+                    args, option_comment
+                    ))
+
+
+    def get_key(self):
+        """
+        Return a key that will be used in the dictionary storage for this item.
+        If the option_comment is empty the identifier of this object will be
+        returned, so than more than one empty lines can be in one section. 
+        """
         
-    
+        if self.option_name == '':
+            if self.option_comment == '':
+                return str(id(self))
+            else:
+                return self.option_comment
+        else:
+            return self.option_name
+
+
+
     def __str__(self):
+        """Return the string for this line of the input file."""
         string = ''
         if not self.option_name == '':
-            string += '{:<35} {}{}'.format(self.option_name, self.option_value_pad, self.option_value)
+            string += '{:<35} {}{}'.format(
+                self.option_name, self.option_value_pad, self.option_value
+                )
         if not self.option_comment == '':
             if not self.option_name == '':
                 string += ' '
@@ -116,7 +121,6 @@ class InputSection(object):
     """Represent a single section in the input file."""
     
     def __init__(self, name, data=None, **kwargs):
-        """ Initiate section. """
         
         # Section title.
         self.name = name
