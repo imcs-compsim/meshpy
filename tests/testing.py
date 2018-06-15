@@ -419,20 +419,15 @@ class TestFullBaci(unittest.TestCase):
         
         
     def test_beam_and_solid_tube(self):
-        """
-        Create a solid mesh with cubit and insert some beams into the input file.
-        """
+        """Merge a solid tube with a beam tube and simulate them together."""
         
-        # create input file
-        input_file = InputFile(maintainer='Ivo Steinbrecher', description='Solid tube with beam tube')
-            
-        # load solid mesh
+        # Create the input file and read solid mesh data.
+        input_file = InputFile(
+            maintainer='Ivo Steinbrecher',
+            description='Solid tube with beam tube')
         input_file.read_dat(os.path.join(testing_input, 'tube.dat'))
-            
-        # delete solver 2 section
-        input_file.delete_section('TITLE')
-            
-        # add options for beam_output
+        
+        # Add options for beam_output.
         input_file.add(InputSection(
             'IO/RUNTIME VTK OUTPUT/BEAMS',
             '''
@@ -442,38 +437,39 @@ class TestFullBaci(unittest.TestCase):
             TRIAD_VISUALIZATIONPOINT        Yes
             STRAINS_GAUSSPOINT              Yes
             '''))
-            
-        # add a straight line beam
-        material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.5, shear_correction=0.75)
-        cantilever = Mesh()
-        cantilever_set = cantilever.create_beam_mesh_line(Beam3rHerm2Lin3, material, [2,0,-5], [2,0,5], 3)
-            
-        # add fix at start of the beam
-        cantilever.add(
-            BoundaryCondition(
-                cantilever_set['start'], # bc set
-                'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0' # bc string
-                ,bc_type=mpy.dirichlet
-                )
-            )
-            
-        # add displacement controlled bc at end of the beam
+        
+        # Add functions for boundary conditions and material.
         sin = Function('COMPONENT 0 FUNCTION sin(t*2*pi)')
         cos = Function('COMPONENT 0 FUNCTION cos(t*2*pi)')
-        cantilever.add(sin, cos)
-        cantilever.add(
+        material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.5,
+            shear_correction=0.75)
+        input_file.add(sin, cos, material)
+        
+        # Add a straight beam.
+        input_file.add(material)
+        cantilever_set = input_file.create_beam_mesh_line(Beam3rHerm2Lin3, 
+            material, [2,0,-5], [2,0,5], 3)
+            
+        # Add boundary conditions.
+        input_file.add(
+            BoundaryCondition(
+                cantilever_set['start'], # bc set
+                'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 ' + \
+                'FUNCT 0 0 0 0 0 0 0 0 0', # bc string
+                bc_type=mpy.dirichlet
+                )
+            )
+        input_file.add(
             BoundaryCondition(
                 cantilever_set['end'], # bc set
-                'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 3. 3. 0 0 0 0 0 0 0 FUNCT {} {} 0 0 0 0 0 0 0', # bc string
+                'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 3. 3. 0 0 0 0 0 0 0 ' + \
+                'FUNCT {} {} 0 0 0 0 0 0 0', # bc string
                 format_replacement=[cos,sin],
                 bc_type = mpy.dirichlet
                 )
             )
             
-        # add the beam mesh to the solid mesh
-        input_file.add(cantilever)
-            
-        # add test case result description
+        # Add results for the simulation.
         input_file.add(InputSection(
             'RESULT DESCRIPTION',
             '''
