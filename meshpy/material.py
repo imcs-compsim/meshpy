@@ -3,10 +3,10 @@
 This module implements a basic class to manage materials in the baci input file.
 """
 
-# import python modules
+# Python modules.
 import numpy as np
 
-# import meshpy modules
+# Meshpy modules.
 from . import BaseMeshItem
 
 

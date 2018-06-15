@@ -3,7 +3,7 @@
 This module implements a basic class to manage functions in the baci input file.
 """
 
-# import meshpy modules
+# Meshpy modules.
 from . import BaseMeshItem
 
 

@@ -3,10 +3,10 @@
 This module implements beam elements for the mesh.
 """
 
-# python modules
+# Python modules.
 import numpy as np
 
-# meshpy modules
+# Meshpy modules.
 from . import mpy, Element, Node
 
 

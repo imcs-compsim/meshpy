@@ -3,7 +3,7 @@
 This module implements a class to handle boundary conditions in the input file.
 """
 
-# meshyp modules 
+# Meshpy modules.
 from . import BaseMeshItem
 
 

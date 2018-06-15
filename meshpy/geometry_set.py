@@ -3,7 +3,7 @@
 This module implements a basic class to manage geometry in the input file.
 """
 
-# import meshpy modules
+# Meshpy modules.
 from . import mpy, BaseMeshItem, Node
 
 

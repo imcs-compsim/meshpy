@@ -1,4 +1,9 @@
-# import python modules
+# -*- coding: utf-8 -*-
+"""
+This module defines a class that represents a rotation in 3D.
+"""
+
+# Python modules.
 import numpy as np
 from . import mpy
 

@@ -3,10 +3,10 @@
 This module implements the class that represents one node in the Mesh.
 """
 
-# python modules
+# Python modules.
 import numpy as np
 
-# meshpy modules
+# Meshpy modules.
 from . import BaseMeshItem
 
 

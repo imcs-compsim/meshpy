@@ -3,8 +3,6 @@
 This module defines classes and functions to create and edit a Baci input file.
 """
 
-# meshpy imports
-
 # Global configuration object.
 from .conf import mpy
 
@@ -43,7 +41,4 @@ __all__ = [
     # Mesh items
     'Beam3rHerm2Lin3', 'Mesh', 'InputFile', 'InputSection'
     ]
-
-
-
 

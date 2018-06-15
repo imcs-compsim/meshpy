@@ -1,5 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+This module defines a global object that manages all kind of stuff regarding
+meshpy.
+"""
 
-
+# Python modules.
 import numpy as np
 
 

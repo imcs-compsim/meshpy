@@ -4,11 +4,11 @@ This module implements some basic functions that are used in the meshpy
 application.
 """
 
-# python packages
+# Python modules.
 import subprocess
 import os
 
-# meshpy modules
+# Meshpy modules.
 from . import mpy
 
 

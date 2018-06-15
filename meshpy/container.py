@@ -4,10 +4,10 @@ This module implements containers to manage boundary conditions and geometry
 sets in one object.
 """
 
-# python modules
+# Python modules.
 from _collections import OrderedDict
 
-# meshpy modules
+# Meshpy modules.
 from . import mpy, GeometrySet
 
 

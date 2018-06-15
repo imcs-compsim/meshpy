@@ -3,8 +3,10 @@
 This module implements a class to couple geometry together.
 """
 
+# Meshpy modules.
 from . import mpy, GeometrySet, BaseMeshItem
- 
+
+
 class Coupling(BaseMeshItem):
     """Represents a coupling between geometry in BACI."""
 

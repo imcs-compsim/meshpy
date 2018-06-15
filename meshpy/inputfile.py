@@ -3,12 +3,12 @@
 This module defines the classes that are used to create an input file for Baci.
 """
 
-# python packages
+# Python modules.
 import datetime
 import re
 from _collections import OrderedDict
 
-# meshpy imports
+# Meshpy modules.
 from . import mpy, get_section_string,  Mesh, BaseMeshItem
 
 

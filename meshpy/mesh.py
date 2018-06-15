@@ -4,10 +4,10 @@ This module defines the Mesh class, which holds the content (nodes, elements,
 sets, ...) for a meshed geometry.
 """
 
-# python packages
+# Python modules.
 import numpy as np
 
-# meshpy imports
+# Meshpy modules.
 from . import mpy, Rotation, Function, Material, Node, Element, GeometryName, \
     GeometrySet, GeometrySetContainer, BoundaryCondition, Coupling, \
     BoundaryConditionContainer

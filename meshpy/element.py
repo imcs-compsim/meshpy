@@ -3,7 +3,7 @@
 This module implements the class that represents one element in the Mesh.
 """
 
-# meshpy modules
+# Meshpy modules.
 from . import BaseMeshItem
 
 
