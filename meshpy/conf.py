@@ -18,6 +18,9 @@ class MeshPy(object):
         # Version information
         self.version = '0.0.1'
         self.git_sha = None
+        
+        # Precision for floats in output
+        self.dat_precision = '{:.15g}'
 
         # Value for epsilon when checking if two results are equal.
         self.eps_vec = 1e-10
