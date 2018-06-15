@@ -340,7 +340,8 @@ class TestFullBaci(unittest.TestCase):
         # overwrite some entries in the input file
         input_file.add(InputSection(
             'STRUCTURAL DYNAMIC',
-            'NUMSTEP 40',
+            'NUMSTEP 5',
+            'TIMESTEP 0.2',
             option_overwrite=True
             ))
             
