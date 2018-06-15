@@ -128,70 +128,56 @@ class InputSection(object):
         # Each input line will be one entry in this dictionary.
         self.data = OrderedDict()
         if data:
-            self.add_option(data, **kwargs)
+            self.add(data, **kwargs)
 
     
-    def add_option(self, *args, **kwargs):
+    def add(self, data, **kwargs):
         """
-        Add data to the section.
+        Add data to this section in the form of an InputLine object.
         
-        data can be:
-            string: the string will be split up into lines and added as BaciLine
-            list: each element of the list will be added as BaciLine
-            option_name & option_value
+        Args
+        ----
+        data: str, list(str)
+            If data is a string, it will be split up into lines.
+            Each line will be added as an InputLine object.
         """
         
-        if len(args) == 1:
-            # check type of argument
-            if not type(args[0]) == list:
-                split = args[0].split('\n')
-            else:
-                split = args[0]
-            
-            # remove the first line if it is empty
-            if split[0].strip() == '':
-                del split[0]
-            # remove the last line if it is empty
-            if split[-1].strip() == '':
-                del split[-1]
-            
-            for item in split:
-                self._add_data(InputLine(item, **kwargs))
+        if isinstance(data, str):
+            data_lines = data.split('\n')
         else:
-            self._add_data(InputLine(*args, **kwargs))
+            data_lines = data
+        
+        # Remove the first and or last line if it is empty.
+        for index in [0,-1]:
+            if data_lines[index].strip() == '':
+                del(data_lines[index])
+
+        # Add the data lines.
+        for item in data_lines:
+            self._add_data(InputLine(item, **kwargs))
+
 
     def _add_data(self, option):
-        """ Add a InputLine object to the item. """
+        """Add a InputLine object to the item."""
         
-        if not (option.get_key() in self.data.keys()) or option.overwrite:
+        if (not option.get_key() in self.data.keys()) or option.overwrite:
             self.data[option.get_key()] = option
-        elif option.get_key() == '':
-            print('TODO? what should happen here?')
         else:
-            print('Error, key {} already set!'.format(option.get_key()))
+            raise KeyError('Key {} is already set!'.format(option.get_key()))
     
     def merge_section(self, section):
-        """ Merge this section with another. This one is the master. """
+        """Merge this section with another. This one is the master."""
         
         for option in section.data.values():
             self._add_data(option)
     
     
     def get_dat_lines(self):
-        """ Return the dat lines for this section. """
+        """Return the lines for this section in the input file."""
     
         lines = [get_section_string(self.name)]
         lines.extend([str(line) for line in self.data.values()])
         return lines
-    
-    
-
-    
-    
-
-
-
-
 
 
 class InputFile(Mesh):
@@ -569,7 +555,7 @@ class InputFile(Mesh):
     def _get_header(self):
         """Return the header for the input file."""
         
-        string = ('// Input file created with meshgen git sha: {}\n'
+        string = ('// Input file created with meshpy git sha: {}\n'
                 + '// Maintainer: {}\n'
                 + '// Date: {}'
                 ).format(
