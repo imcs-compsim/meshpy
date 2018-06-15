@@ -34,3 +34,16 @@ from .coupling import Coupling
 # The mesh class itself and the input file classes.
 from .mesh import Mesh
 from .inputfile import InputFile, InputSection, InputLine
+
+# Define the itCouplingems that will be exported by default.
+__all__ = [
+    # Basic stuff.
+    'Rotation', 'Function', 'Material', 'GeometrySet', 'BoundaryCondition',
+    'Coupling',
+    # Mesh items
+    'Beam3rHerm2Lin3', 'Mesh', 'InputFile', 'InputSection'
+    ]
+
+
+
+
