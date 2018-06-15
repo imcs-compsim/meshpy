@@ -382,12 +382,12 @@ class Mesh(object):
         for i, direction in enumerate(['x', 'y', 'z']):
             # Check if there is more than one value in dimension.
             min_max = [ np.min(pos[:,i]), np.max(pos[:,i]) ]
-            if np.abs(min_max[1] - min_max[0]) >= mpy.eps_vec:
+            if np.abs(min_max[1] - min_max[0]) >= mpy.eps_pos:
                 for j, text in enumerate(['min', 'max']):
                     # get all nodes with the min / max coordinate
                     min_max_nodes = []
                     for index, value in enumerate(
-                            np.abs(pos[:,i] - min_max[j]) < mpy.eps_vec
+                            np.abs(pos[:,i] - min_max[j]) < mpy.eps_pos
                             ):
                         if value:
                             min_max_nodes.append(node_list[index])

@@ -14,9 +14,6 @@ class Rotation(object):
     The internal parameters are the unit vector n and the rotation angle phi.
     """
     
-    # tolerance for zero check
-    eps = 1e-10
-    
     def __init__(self, *args):
         """
         The default constructor is from an rotation vector n and an angle phi.
@@ -35,9 +32,9 @@ class Rotation(object):
             vector = args[0]
             phi = args[1]
             norm = np.linalg.norm(vector)
-            if norm < self.eps:
+            if norm < mpy.eps_quaternion:
                 raise ValueError('The rotation axis can not be a zero vector!')
-            if np.abs(phi) < self.eps:
+            if np.abs(phi) < mpy.eps_quaternion:
                 self.q[0] = 1
             else:
                 self.q[0] = np.cos(0.5*phi)
@@ -157,8 +154,8 @@ class Rotation(object):
         """
         
         if isinstance(other, Rotation):
-            if (np.linalg.norm(self.q - other.q) < self.eps) or \
-                (np.linalg.norm(self.q + other.q) < self.eps):
+            if (np.linalg.norm(self.q - other.q) < mpy.eps_quaternion) or \
+                (np.linalg.norm(self.q + other.q) < mpy.eps_quaternion):
                 return True
             else:
                 return False
