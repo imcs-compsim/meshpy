@@ -44,7 +44,7 @@ class Beam(Element):
         
         if not start_node is None:
             if np.linalg.norm(position_function(-1)
-                    - start_node.coordinates) > mpy.eps_vec:
+                    - start_node.coordinates) > mpy.eps_pos:
                 raise ValueError('Start node does not match with function!')
             if not start_node.rotation == rotation_function(-1):
                 raise ValueError('Start rotation does not match with function!')

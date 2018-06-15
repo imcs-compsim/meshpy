@@ -13,14 +13,15 @@ class MeshPy(object):
     A global object that stores options for the whole meshpy application.
     """
     
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
 
         # Version information
         self.version = '0.0.1'
         self.git_sha = None
 
-        # Value for epsilon when checking if two results are equal.
-        self.eps_vec = 1e-10
+        # Set the epsilons for comparison of different types of values.
+        self.eps_quaternion = 1e-10
+        self.eps_pos = 1e-10
         
         # Values for the formating of the input file
         self.dat_len_section = 80
