@@ -4,9 +4,6 @@ This module defines a global object that manages all kind of stuff regarding
 meshpy.
 """
 
-# Python modules.
-import numpy as np
-
 
 class MeshPy(object):
     """
@@ -20,7 +17,7 @@ class MeshPy(object):
         self.git_sha = None
         
         # Precision for floats in output
-        self.dat_precision = '{:.15g}'
+        self.dat_precision = '{:.12g}'
 
         # Value for epsilon when checking if two results are equal.
         self.eps_vec = 1e-10
