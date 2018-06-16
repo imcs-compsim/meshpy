@@ -88,7 +88,7 @@ class Beam3rHerm2Lin3(Beam):
         for i in [0,2,1]:
             node = self.nodes[i]
             string_nodes += '{} '.format(node.n_global)
-            string_triads += node.rotation.get_dat()
+            string_triads += ' ' + node.rotation.get_dat()
         
         return '{} BEAM3R HERM2LIN3 {}MAT {} TRIADS{}'.format(
             self.n_global,

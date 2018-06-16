@@ -18,6 +18,9 @@ class MeshPy(object):
         # Version information
         self.version = '0.0.1'
         self.git_sha = None
+        
+        # Precision for floats in output
+        self.dat_precision = '{:.15g}'
 
         # Set the epsilons for comparison of different types of values.
         self.eps_quaternion = 1e-10
