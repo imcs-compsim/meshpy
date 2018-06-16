@@ -559,16 +559,20 @@ class InputFile(Mesh):
     def _get_header(self):
         """Return the header for the input file."""
         
-        string = ('// Input file created with meshpy git sha: {}\n'
+        string = ('// Input file created with meshpy {}\n'
+                + '// git sha: {}\n'
                 + '// Maintainer: {}\n'
                 + '// Date: {}'
                 ).format(
+                    mpy.version,
                     mpy.git_sha,
                     self.maintainer,
                     datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     )
+        string_line = '// ' + ''.join(
+            ['-' for i in range(mpy.dat_len_section - 3)])
         if self.description:
             string += '\n// Description: {}'.format(self.description)
-        return string
+        return string_line + '\n' + string + '\n' + string_line
 
 

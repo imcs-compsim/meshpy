@@ -490,10 +490,13 @@ class TestFullBaci(unittest.TestCase):
         Create a few different honeycomb structures.
         """
            
-        # create input file
+        # Create input file.
         input_file = InputFile(
-            maintainer='Ivo Steinbrecher', description='Varieties of honeycomb')
-           
+            maintainer='Ivo Steinbrecher',
+            description='Varieties of honeycomb'
+            )
+        
+        # Set options with different syntaxes.
         input_file.add(InputSection('PROBLEM SIZE', 'DIM 3'))
         input_file.add('''
         ------------------------------------PROBLEM TYP
@@ -512,9 +515,8 @@ class TestFullBaci(unittest.TestCase):
             INTERVAL_STEPS                        1
             EVERY_ITERATION                       No
             '''))
-        input_file.add(InputSection(
-            'STRUCTURAL DYNAMIC',
-            '''
+        input_file.add('''
+            ------------------------------------STRUCTURAL DYNAMIC
             LINEAR_SOLVER                         1
             INT_STRATEGY                          Standard
             DYNAMICTYP                            Statics
@@ -522,7 +524,7 @@ class TestFullBaci(unittest.TestCase):
             NLNSOL                                fullnewton
             PREDICT                               TangDis
             TIMESTEP                              1.
-            NUMSTEP                               10
+            NUMSTEP                               666
             MAXTIME                               1.0
             TOLRES                                1.0E-4
             TOLDISP                               1.0E-11
@@ -530,7 +532,9 @@ class TestFullBaci(unittest.TestCase):
             NORM_DISP                             Abs
             NORMCOMBI_RESFDISP                    And
             MAXITER                               20
-            '''))
+            ''')
+        input_file.add(InputSection('STRUCTURAL DYNAMIC', 'NUMSTEP 10',
+            option_overwrite=True))
         input_file.add(InputSection(
             'SOLVER 1',
             '''
@@ -547,47 +551,41 @@ class TestFullBaci(unittest.TestCase):
             STRAINS_GAUSSPOINT              Yes
             '''))
            
-        # create two meshes with honeycomb structure
+        # Create four meshes with different types of honeycomb structure.
         mesh = Mesh()
-        material = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0, 1e-3, 0.2, shear_correction=1.1)
+        material = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0, 1e-3, 0.2,
+            shear_correction=1.1)
         ft = []
         ft.append(Function('COMPONENT 0 FUNCTION t'))
         ft.append(Function('COMPONENT 0 FUNCTION t'))
         ft.append(Function('COMPONENT 0 FUNCTION t'))
         ft.append(Function('COMPONENT 0 FUNCTION t'))
         mesh.add(ft)
-           
+
         counter = 0
         for vertical in [False, True]:
             for closed_top in [False, True]:
                 mesh.translate(17 * np.array([1,0,0]))
                 honeycomb_set = mesh.create_beam_mesh_honeycomb(
-                    Beam3rHerm2Lin3,
-                    material,
-                    10,
-                    6,
-                    3,
-                    n_el=2,
-                    vertical=vertical,
-                    closed_top=closed_top
-                    )
+                    Beam3rHerm2Lin3, material, 10, 6, 3, n_el=2,
+                    vertical=vertical, closed_top=closed_top)
                 mesh.add(
                         BoundaryCondition(honeycomb_set['bottom'],
-                           'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
+                           'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL ' + \
+                           '0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
                            bc_type=mpy.dirichlet
                         ))
                 mesh.add(
                         BoundaryCondition(honeycomb_set['top'],
-                           'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 1. 1. 1. 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
+                           'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL ' + \
+                           '1. 1. 1. 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
                            format_replacement=[ft[counter]],
                            bc_type=mpy.dirichlet
                         ))
                 counter += 1
-           
-        # add the beam mesh to the solid mesh
+        
+        # Add to input file and set testing results.
         input_file.add(mesh)
-           
-        # add results
         input_file.add(InputSection(
             'RESULT DESCRIPTION',
             '''
