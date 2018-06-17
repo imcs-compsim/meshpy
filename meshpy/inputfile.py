@@ -199,10 +199,10 @@ class InputFile(Mesh):
         (mpy.dirichlet, mpy.line   ): 'DESIGN LINE DIRICH CONDITIONS',
         (mpy.dirichlet, mpy.surface): 'DESIGN SURF DIRICH CONDITIONS',
         (mpy.dirichlet, mpy.volume ): 'DESIGN VOL DIRICH CONDITIONS',
-        (mpy.neumann,   mpy.point  ): 'DESIGN POINT DIRICH NEUMANN',
-        (mpy.neumann,   mpy.line   ): 'DESIGN LINE DIRICH NEUMANN',
-        (mpy.neumann,   mpy.surface): 'DESIGN SURF DIRICH NEUMANN',
-        (mpy.neumann,   mpy.volume ): 'DESIGN VOL DIRICH NEUMANN'
+        (mpy.neumann,   mpy.point  ): 'DESIGN POINT NEUMANN CONDITIONS',
+        (mpy.neumann,   mpy.line   ): 'DESIGN LINE NEUMANN CONDITIONS',
+        (mpy.neumann,   mpy.surface): 'DESIGN SURF NEUMANN CONDITIONS',
+        (mpy.neumann,   mpy.volume ): 'DESIGN VOL NEUMANN CONDITIONS'
     }
     geometry_counter = {
         mpy.point:   'DPOINT',
