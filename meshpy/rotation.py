@@ -119,10 +119,13 @@ class Rotation(object):
         """
         
         norm = np.linalg.norm(self.q[1:])
-        n = self.q[1:] / norm
         phi = 2 * np.arctan2(norm, self.q[0])
         
-        return phi*n
+        # Check if phi is 0
+        if phi < mpy.eps_quaternion:
+            return np.zeros(3)
+        else:
+            return phi * self.q[1:] / norm
         
     
     def __mul__(self, other):

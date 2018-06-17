@@ -35,6 +35,8 @@ from .inputfile import InputFile, InputSection, InputLine
 
 # Define the itCouplingems that will be exported by default.
 __all__ = [
+    # Option object.
+    'mpy',
     # Basic stuff.
     'Rotation', 'Function', 'Material', 'GeometrySet', 'BoundaryCondition',
     'Coupling',
