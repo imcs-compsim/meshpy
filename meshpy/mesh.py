@@ -301,15 +301,16 @@ class Mesh(object):
 
         # split up domain into 20x20x20 cubes
         n_seg = 20
-        x_seg = (x_max - x_min) / (n_seg-1)
-        y_seg = (y_max - y_min) / (n_seg-1)
-        z_seg = (z_max - z_min) / (n_seg-1)
+        x_seg = np.max([(x_max - x_min) / (n_seg-1), mpy.eps_pos])
+        y_seg = np.max([(y_max - y_min) / (n_seg-1), mpy.eps_pos])
+        z_seg = np.max([(z_max - z_min) / (n_seg-1), mpy.eps_pos])
+
         segments = [[[[] for k in range(n_seg)] for j in range(n_seg)] for i in range(n_seg)]
         #print(segments)
         for i, coord in enumerate(coordinates):
-            ix = int((coord[0]-x_min+1e-5) // x_seg)
-            iy = int((coord[1]-y_min+1e-5) // y_seg)
-            iz = int((coord[2]-z_min+1e-5) // z_seg)
+            ix = np.min([int((coord[0]-x_min+1e-5) // x_seg), n_seg-1])
+            iy = np.min([int((coord[1]-y_min+1e-5) // y_seg), n_seg-1])
+            iz = np.min([int((coord[2]-z_min+1e-5) // z_seg), n_seg-1])
             #print([ix,iy,iz])
             #print(i)
             #print(len(node_list))
