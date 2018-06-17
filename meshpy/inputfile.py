@@ -528,11 +528,12 @@ class InputFile(Mesh):
                     )
 
         # Add the couplings.
-        get_section_dat(
-            get_section_string('DESIGN POINT COUPLING CONDITIONS'),
-            self.couplings,
-            header_lines='DPOINT {}'.format(len(self.couplings))
-            )
+        if len(self.couplings) > 0:
+            get_section_dat(
+                get_section_string('DESIGN POINT COUPLING CONDITIONS'),
+                self.couplings,
+                header_lines='DPOINT {}'.format(len(self.couplings))
+                )
         
         # Add the geometry sets.
         for geom_key, item in mesh_sets.items():
