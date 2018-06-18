@@ -38,4 +38,8 @@ class MeshPy(object):
         self.neumann = 'boundary_condition_neumann'
         self.boundary_condition = [self.dirichlet, self.neumann]
         
+        # Coupling types
+        self.coupling_fix = 'coupling_fix'
+        self.coupling_joint = 'coupling_joint'
+        
 mpy = MeshPy()

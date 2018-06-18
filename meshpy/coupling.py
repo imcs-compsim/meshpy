@@ -16,8 +16,12 @@ class Coupling(BaseMeshItem):
         self.coupling_type = coupling_type
 
     def _get_dat(self):
-        if self.coupling_type == 'joint':
+        if self.coupling_type == mpy.coupling_joint:
             string = 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0'
-        elif self.coupling_type == 'fix':
-            string = 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0' 
+        elif self.coupling_type == mpy.coupling_fix:
+            string = 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0'
+        else:
+            raise ValueError('coupling_type "{}" is not implemented!'.format(
+                self.coupling_type
+                )) 
         return 'E {} - {}'.format(self.node_set.n_global, string)
