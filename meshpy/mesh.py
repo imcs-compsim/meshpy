@@ -485,7 +485,10 @@ class Mesh(object):
         
         # Add items to the mesh
         self.elements.extend(elements)
-        self.nodes.extend(nodes)
+        if start_node is None:
+            self.nodes.extend(nodes)
+        else:
+            self.nodes.extend(nodes[1:])
         
         # Create geometry sets that will be returned.
         return_set = GeometryName()
