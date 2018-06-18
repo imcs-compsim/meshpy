@@ -414,10 +414,11 @@ class Mesh(object):
             3D-coordinates for the start and end point of the line.
         n_el: int
             Number of equally spaces beam elements along the line.
-        start_node: Node
+        start_node: Node, GeometrySet
             Node to use as the first node for this line. Use this if the line
             is connected to other lines (angles have to be the same, otherwise
-            connections should be used).
+            connections should be used). If a geometry set is given, it can
+            contain one, and one node only.
         """
         
         self.add_material(material)
@@ -447,7 +448,19 @@ class Mesh(object):
         elements = []
         nodes = []
         if not start_node is None:
-            nodes = [start_node]
+            # Check type of start node.
+            if isinstance(start_node, Node):
+                nodes = [start_node]
+            elif isinstance(start_node, GeometrySet):
+                # Check if there is only one node in the set
+                if len(start_node.nodes) == 1:
+                    nodes = [start_node.nodes[0]]
+                else:
+                    raise ValueError('GeometrySet does not have one node!')
+            else:
+                raise TypeError('start_node can be node or GeometrySet '
+                    + 'got "{}"!'.format(type(start_node))
+                    )
         
         # Create the beams.
         for i in range(n_el):
