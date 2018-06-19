@@ -1,7 +1,24 @@
+# general filetypes to ignorer
+*.txt
 *.pyc
 
-*input/*
-*old/*
+# eclipse stuff
 *.project
 *.pydevproject
 *.settings*
+
+# testing folder
+*/testing-tmp
+
+# Python stuff
+*/__pycache__
+
+# ignore build folders for cython
+*/build
+meshpy/meshpy
+*/find_close_nodes.c
+*/find_close_nodes.html
+
+# AceGen stuff
+*/rotation_matrix.cpp
+*/AceShare

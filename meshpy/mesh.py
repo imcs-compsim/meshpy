@@ -10,7 +10,7 @@ import numpy as np
 # Meshpy modules.
 from . import mpy, Rotation, Function, Material, Node, Element, GeometryName, \
     GeometrySet, GeometrySetContainer, BoundaryCondition, Coupling, \
-    BoundaryConditionContainer
+    BoundaryConditionContainer, find_close_nodes
 
 
 class Mesh(object):
@@ -267,13 +267,16 @@ class Mesh(object):
                 node.coordinates = pos[i,:]
 
 
-    def add_connections(self, input_list, connection_type=mpy.coupling_fix):
+    def add_connections(self, input_list=None, connection_type=mpy.coupling_fix):
         """
         Search through nodes and connect all nodes with the same coordinates.
         """
         
-        # make a copy of the input list, only consider nodes that are linked to one element
-        node_list = [node for node in input_list if node.is_end_node]
+        if input_list is None:
+            node_list = self.nodes
+        else:
+            # make a copy of the input list, only consider nodes that are linked to one element
+            node_list = [node for node in input_list if node.is_end_node]
         
         close_node_list = []
 
@@ -397,7 +400,18 @@ class Mesh(object):
                         min_max_nodes
                         )
         return geometry
-
+    
+    
+    def find_close_nodes(self, input_list=None):
+        
+        # Get array of coordinates.
+        coords = self.get_global_coordinates()
+        
+        # Get list of closest pairs
+        find_close_nodes(coords, eps=mpy.eps_pos)
+        
+        #print(a)
+        #print(b)
 
     def create_beam_mesh_line(self, beam_object, material, start_point,
             end_point, n_el=1, start_node=None ):

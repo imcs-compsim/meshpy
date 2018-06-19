@@ -4,9 +4,13 @@ import numpy as np
 from meshpy import *
 from meshpy import Node
 
+
+from cython_modules.find_close_nodes import find_close_nodes, find_close_nodes_segment
+
 import time
 
-
+from distutils.core import setup
+from Cython.Build import cythonize
 
 
 def create_nodes_array(mesh, n_sec,n_per_sec,l):
@@ -92,9 +96,22 @@ def test_rotation():
     print('time for wraping: {:7.4f} sec'.format(end - start))
 
     start = time.time()
-    mesh.add_connections()
+    #mesh.add_connections()
     end = time.time()
     print('time for connections: {:7.4f} sec'.format(end - start))
+    
+    pos = mesh.get_global_coordinates()
+    start = time.time()
+    find_close_nodes(pos)
+    #print(find_close_nodes(pos, mpy.eps_pos))
+    end = time.time()
+    print('time for connections cython: {:7.4f} sec'.format(end - start))
+    
+    
+    start = time.time()
+    mesh.find_close_nodes()
+    end = time.time()
+    print('time for mesh.connections: {:7.4f} sec'.format(end - start)) 
     
     print('finished')
 

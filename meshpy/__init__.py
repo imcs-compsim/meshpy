@@ -10,6 +10,9 @@ from .conf import mpy
 from .utility import get_section_string
 from .base_mesh_item import BaseMeshItem
 
+# Find close node function.
+from .meshpy.find_close_nodes import find_close_nodes
+
 # 3D rotations for nodes.
 from .rotation import Rotation
 
