@@ -13,7 +13,7 @@ class MeshPy(object):
     def __init__(self):
 
         # Version information
-        self.version = '0.0.1'
+        self.version = '0.0.2'
         self.git_sha = None
         
         # Precision for floats in output
