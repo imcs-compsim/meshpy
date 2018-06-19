@@ -14,7 +14,6 @@ cimport cython
 cimport numpy as np
 
 
-
 # Define float type
 FLOAT = np.float64
 ctypedef np.float64_t FLOAT_t
@@ -22,74 +21,6 @@ ctypedef np.float64_t FLOAT_t
 # Define integer type
 INT = np.int
 ctypedef np.int_t INT_t
-
-
-
-
-# 
-# @cython.boundscheck(False)  # Deactivate bounds checking.
-# @cython.wraparound(False)   # Deactivate negative indexing.
-# def find_close_nodes_segment(np.ndarray[FLOAT_t, ndim=2] coords, sections=20,FLOAT_t eps=1e-10):
-#     
-#     # Define types of variables for this function.
-#     cdef int n_nodes, i, j
-#     cdef int[3] n_sections, segment_index
-#     cdef double[3][2] min_max_coord
-#     cdef double[3] length
-#     cdef double grid_offset
-#     
-#     # Offset for grid, so that even numbers wont be hit as much.
-#     grid_offset = 89 * eps
-#     
-#     # Number of nodes.
-#     n_nodes = len(coords) 
-#     
-#     # Set sections from input.
-#     if isinstance(sections, int):
-#         for i in range(3):
-#             n_sections[i] = sections
-#     elif len(sections) == 3:
-#         for i in range(3):
-#             n_sections[i] = sections[i]
-#     else:
-#         raise ValueError('Sections is wrong!')
-#     
-#     # Get min and max values of coordinates.
-#     for i in range(n_nodes):
-#         for j in range(3):
-#             # First set the values to the first node
-#             if i == 0:
-#                 min_max_coord[j][0] = coords[i,j]
-#                 min_max_coord[j][1] = coords[i,j]
-#             else:
-#                 if min_max_coord[j][0] > coords[i,j]:
-#                     min_max_coord[j][0] = coords[i,j]
-#                 elif min_max_coord[j][1] < coords[i,j]:
-#                     min_max_coord[j][1] = coords[i,j]
-#     
-#     # Check if number of sections should be changed and define lengths
-#     for i in range(3):
-#         if abs(min_max_coord[i][1] - min_max_coord[i][0]) < 10*eps:
-#             n_sections[i] = 1
-#         length[i] = (min_max_coord[i][1] - min_max_coord[i][0]) / n_sections[i]
-#     
-#     # Create array and fill up with coordinates.
-#     cdef np.ndarray[INT_t, ndim=3] segment_number_of_nodes = np.zeros(
-#         [n_sections[0], n_sections[1], n_sections[2]], dtype=INT)
-#     for i in range(n_nodes):
-#         for j in range(3):
-#             segment_index[j] = min(
-#                 int(floor(coords[i,j] - min_max_coord[j][0] + 10*eps)),
-#                 n_sections[j] - 1
-#                 )
-#             segment_nodes[i] += n_sections[j] * segment_index[j]
-#         #print(segment_nodes)
-#         #segment_number_of_nodes[segment_index[0], segment_index[1],
-#             #segment_index[2]] += 1
-#     print(segment_nodes)
-#     
-
-
 
 
 @cython.boundscheck(False)  # Deactivate bounds checking.
@@ -146,55 +77,3 @@ def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps=1e-10):
                 partner += 1
 
     return has_partner, partner
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# 
-# def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps=1e-10,
-#         INT_t n_sections=10):
-#     
-#     # Get min and max coordinate values
-#     cdef np.ndarray[INT_t, n_dim=2] min_max = [ np.min(coords[:,i]), np.max(coords[:,i]) ]
-#     
-#     print(min_max)
-#     print(eps)
-#     # Number of nodes.
-#     cdef int n_nodes, i, j
-#     cdef FLOAT_t value
-#     n_nodes = len(coords)
-#     value = 0.
-#     for i in range(n_nodes):
-#         for j in range(i, n_nodes):
-#             value = coords[j, 0] + coords[j, 2] + coords[j, 2]
-#     
-#     # Cython access to input array.
-#     #cdef double [:, :] narr_view = coords
-#     
-#     
-#     #narr_view[1,1] = 2.
-#     
-#     print(value)
-#     print(n_nodes)
-#     
-#     
-# 
-
-

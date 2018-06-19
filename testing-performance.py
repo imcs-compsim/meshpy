@@ -70,7 +70,7 @@ def test_rotation():
     mesh = Mesh()
     #create_nodes_array(mesh, 100, 50, 10)
     #create_nodes_array(mesh, 40, 20, 10)
-    #create_nodes_array(mesh, 20, 20, 10)
+    create_nodes_array(mesh, 20, 20, 10)
     #create_nodes_array(mesh, 4, 2, 10)
     #create_elements_array(mesh, 100, 50, 10)
     #create_elements_array(mesh, 40, 20, 10)
@@ -107,7 +107,7 @@ def test_rotation():
     
     
     start = time.time()
-    mesh.find_close_nodes()
+    mesh.get_close_nodes()
     end = time.time()
     print('time for mesh.connections: {:7.4f} sec'.format(end - start)) 
     
