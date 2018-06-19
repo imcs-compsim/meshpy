@@ -267,82 +267,17 @@ class Mesh(object):
                 node.coordinates = pos[i,:]
 
 
-    def add_connections(self, input_list=None, connection_type=mpy.coupling_fix):
+    def couple_nodes(self, nodes=None, connection_type=mpy.coupling_fix):
         """
         Search through nodes and connect all nodes with the same coordinates.
         """
         
-        if input_list is None:
-            node_list = self.nodes
-        else:
-            # make a copy of the input list, only consider nodes that are linked to one element
-            node_list = [node for node in input_list if node.is_end_node]
+        # Get list of partner nodes
+        partner_nodes = self.get_close_nodes(nodes=nodes)
         
-        close_node_list = []
-
-        # get array of nodal coordinates
-        coordinates = np.zeros([len(node_list),3])
-        
-        # get max and min coorinates of nodes
-        x_max = y_max = z_max = -1000
-        x_min = y_min = z_min = 1000
-        for i, node in enumerate(node_list):
-            if node.coordinates[0] > x_max:
-                x_max = node.coordinates[0]
-            if node.coordinates[1] > y_max:
-                y_max = node.coordinates[1]
-            if node.coordinates[2] > z_max:
-                z_max = node.coordinates[2]
-            if node.coordinates[0] < x_min:
-                x_min = node.coordinates[0]
-            if node.coordinates[1] < y_min:
-                y_min = node.coordinates[1]
-            if node.coordinates[2] < z_min:
-                z_min = node.coordinates[2]
-            
-            coordinates[i, :] = node.coordinates
-
-        # split up domain into 20x20x20 cubes
-        n_seg = 20
-        x_seg = np.max([(x_max - x_min) / (n_seg-1), mpy.eps_pos])
-        y_seg = np.max([(y_max - y_min) / (n_seg-1), mpy.eps_pos])
-        z_seg = np.max([(z_max - z_min) / (n_seg-1), mpy.eps_pos])
-
-        segments = [[[[] for k in range(n_seg)] for j in range(n_seg)] for i in range(n_seg)]
-        #print(segments)
-        for i, coord in enumerate(coordinates):
-            ix = np.min([int((coord[0]-x_min+1e-5) // x_seg), n_seg-1])
-            iy = np.min([int((coord[1]-y_min+1e-5) // y_seg), n_seg-1])
-            iz = np.min([int((coord[2]-z_min+1e-5) // z_seg), n_seg-1])
-            #print([ix,iy,iz])
-            #print(i)
-            #print(len(node_list))
-            segments[ix][iy][iz].append(node_list[i])  
-        
-        # loop over all segments
-        for ix in range(n_seg):
-            for iy in range(n_seg):
-                for iz in range(n_seg):
-                    node_list = segments[ix][iy][iz]
-                    # loop over all (remaining) nodes in list
-                    while len(node_list) > 1:
-                        # check the first node with all others
-                        current_node = node_list[0]
-                        close_to_this_node = [current_node]
-                        del node_list[0]
-                        for i, node in enumerate(node_list):
-                            if np.linalg.norm(current_node.coordinates-node.coordinates) < 1e-8:
-                                close_to_this_node.append(node)
-                                node_list[i] = None
-                        node_list = [item for item in node_list if item is not None]
-                        # if more than one node is close add to close_node_list
-                        if len(close_to_this_node) > 1:
-                            close_node_list.append(close_to_this_node)
-        
-        # add connections to mesh
-        for nodes in close_node_list:
-            # add sets to mesh
-            self.add(Coupling(nodes, connection_type))
+        # Connect close nodes with a coupling.
+        for node_list in partner_nodes:
+            self.add(Coupling(node_list, connection_type))
     
     
     def get_nodes_by_function(self, function, middle_nodes=False):
@@ -402,16 +337,45 @@ class Mesh(object):
         return geometry
     
     
-    def find_close_nodes(self, input_list=None):
+    def get_close_nodes(self, nodes=None, eps=mpy.eps_pos):
+        """
+        Find nodes that are close to each other.
+        
+        Args
+        ----
+        nodes: list(Node)
+            If this argument is given, the closest nodes within this list are
+            returned, otherwise all nodes in the mesh are checked.
+        eps: double
+            Spherical value that the nodes have to be within, to be identified
+            as overlapping.
+        
+        Return
+        ----
+        partner_nodes: list(list(Node))
+            A list of lists with partner nodes.
+        """
+        
+        # Check if input argument was given
+        if nodes is None:
+            node_list = [node for node in self.nodes if not node.is_dat]
+        else:
+            node_list = nodes
         
         # Get array of coordinates.
-        coords = self.get_global_coordinates()
+        coords = self.get_global_coordinates(nodes=node_list)
         
-        # Get list of closest pairs
-        find_close_nodes(coords, eps=mpy.eps_pos)
+        # Get list of closest pairs.
+        has_partner, n_partner = find_close_nodes(coords, eps=eps)
         
-        #print(a)
-        #print(b)
+        # Create list with nodes.
+        partner_nodes = [[] for i in range(n_partner)]
+        for i, node in enumerate(node_list):
+            if not has_partner[i] == -1:
+                partner_nodes[has_partner[i]].append(node)
+        
+        return partner_nodes
+
 
     def create_beam_mesh_line(self, beam_object, material, start_point,
             end_point, n_el=1, start_node=None ):
@@ -620,7 +584,7 @@ class Mesh(object):
 
         # Add connections for the nodes with same positions.
         if create_couplings:
-            self.add_connections(honeycomb_nodes)
+            self.couple_nodes(nodes=honeycomb_nodes)
         
         # Get min and max nodes of the honeycomb.
         min_max_nodes = self.get_min_max_nodes(nodes=honeycomb_nodes)
@@ -686,7 +650,7 @@ class Mesh(object):
             closed_width = closed_top
             closed_height = False
             rotation = Rotation([0,1,0],-np.pi/2)
-            n_height = n_circumference
+            n_height = n_circumference - 1
             n_width = n_axis
         
         # Create the flat mesh, do not create couplings, as they will be added
@@ -704,7 +668,7 @@ class Mesh(object):
         mesh_temp.wrap_around_cylinder()
         
         # Add connections to the mesh.
-        mesh_temp.add_connections(mesh_temp.nodes)
+        mesh_temp.couple_nodes()
         
         # Return the geometry set'
         return_set = GeometryName()

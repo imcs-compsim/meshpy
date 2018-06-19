@@ -5,8 +5,6 @@ from meshpy import *
 from meshpy import Node
 
 
-from cython_modules.find_close_nodes import find_close_nodes, find_close_nodes_segment
-
 import time
 
 from distutils.core import setup
@@ -72,7 +70,7 @@ def test_rotation():
     mesh = Mesh()
     #create_nodes_array(mesh, 100, 50, 10)
     #create_nodes_array(mesh, 40, 20, 10)
-    create_nodes_array(mesh, 20, 20, 10)
+    #create_nodes_array(mesh, 20, 20, 10)
     #create_nodes_array(mesh, 4, 2, 10)
     #create_elements_array(mesh, 100, 50, 10)
     #create_elements_array(mesh, 40, 20, 10)
@@ -102,7 +100,7 @@ def test_rotation():
     
     pos = mesh.get_global_coordinates()
     start = time.time()
-    find_close_nodes(pos)
+    #find_close_nodes(pos)
     #print(find_close_nodes(pos, mpy.eps_pos))
     end = time.time()
     print('time for connections cython: {:7.4f} sec'.format(end - start))
