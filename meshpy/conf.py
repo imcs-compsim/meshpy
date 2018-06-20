@@ -42,4 +42,9 @@ class MeshPy(object):
         self.coupling_fix = 'coupling_fix'
         self.coupling_joint = 'coupling_joint'
         
+        # Handling of multiple nodes in neuman bcs.
+        self.double_nodes_remove = 'double_nodes_remove'
+        self.double_nodes_keep = 'double_nodes_keep'
+
+
 mpy = MeshPy()

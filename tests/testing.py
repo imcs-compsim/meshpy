@@ -525,7 +525,7 @@ class TestFullBaci(unittest.TestCase):
             PREDICT                               TangDis
             TIMESTEP                              1.
             NUMSTEP                               666
-            MAXTIME                               1.0
+            MAXTIME                               10.0
             TOLRES                                1.0E-4
             TOLDISP                               1.0E-11
             NORM_RESF                             Abs
@@ -533,7 +533,7 @@ class TestFullBaci(unittest.TestCase):
             NORMCOMBI_RESFDISP                    And
             MAXITER                               20
             ''')
-        input_file.add(InputSection('STRUCTURAL DYNAMIC', 'NUMSTEP 10',
+        input_file.add(InputSection('STRUCTURAL DYNAMIC', 'NUMSTEP 1',
             option_overwrite=True))
         input_file.add(InputSection(
             'SOLVER 1',
@@ -578,9 +578,10 @@ class TestFullBaci(unittest.TestCase):
                 mesh.add(
                         BoundaryCondition(honeycomb_set['top'],
                            'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL ' + \
-                           '1. 1. 1. 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
-                           format_replacement=[ft[counter]],
-                           bc_type=mpy.dirichlet
+                           '{1} {1} {1} 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
+                           format_replacement=[ft[counter], 0.0001],
+                           bc_type=mpy.neumann,
+                           double_nodes=mpy.double_nodes_remove
                         ))
                 counter += 1
         
@@ -589,18 +590,18 @@ class TestFullBaci(unittest.TestCase):
         input_file.add(InputSection(
             'RESULT DESCRIPTION',
             '''
-            STRUCTURE DIS structure NODE 190 QUANTITY dispx VALUE 2.22755241743985061e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 190 QUANTITY dispy VALUE 7.50563273570252321e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 190 QUANTITY dispz VALUE 2.98689476623922590e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 470 QUANTITY dispx VALUE 2.38369093851331260e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 470 QUANTITY dispy VALUE 7.77848541056979759e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 470 QUANTITY dispz VALUE 3.02586157057907812e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 711 QUANTITY dispx VALUE 0.24316547992973625 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 711 QUANTITY dispy VALUE 0.80121852043307218 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 711 QUANTITY dispz VALUE 0.46918376976622778 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 1071 QUANTITY dispx VALUE 0.32535024034244314 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 1071 QUANTITY dispy VALUE 1.0426432941382124 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 1071 QUANTITY dispz VALUE 0.54691921102400531 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 190 QUANTITY dispx VALUE 1.31917493321867280e-01 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 190 QUANTITY dispy VALUE 1.99335191674617163e-01 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 190 QUANTITY dispz VALUE 6.92208840492946759e-02 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 470 QUANTITY dispx VALUE 1.32983000589799755e-01 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 470 QUANTITY dispy VALUE 2.00555448758363231e-01 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 470 QUANTITY dispz VALUE 6.97002973386536134e-02 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 711 QUANTITY dispx VALUE 7.69274537804140734e-02 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 711 QUANTITY dispy VALUE 1.24993807967913248e-01 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 711 QUANTITY dispz VALUE 5.86799642123171789e-02 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 1071 QUANTITY dispx VALUE 6.98802967009408832e-02 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 1071 QUANTITY dispy VALUE 1.09892595703934184e-01 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 1071 QUANTITY dispz VALUE 4.83525916448545312e-02 TOLERANCE 1e-10
             '''
             ))
            
