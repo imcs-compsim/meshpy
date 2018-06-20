@@ -7,9 +7,10 @@ application.
 # Python modules.
 import subprocess
 import os
+import numpy as np
 
 # Meshpy modules.
-from . import mpy
+from . import mpy, find_close_nodes
 
 
 def get_section_string(section_name):
@@ -28,6 +29,47 @@ def get_git_sha(repo):
 
 # Set the git version in the global configuration object.
 mpy.git_sha = get_git_sha(os.path.dirname(os.path.realpath(__file__)))
+
+
+
+def get_close_nodes(nodes, eps=mpy.eps_pos):
+    """
+    Find nodes that are close to each other.
+    
+    Args
+    ----
+    nodes: list(Node)
+        Nodes that are checked for partners.
+    eps: double
+        Spherical value that the nodes have to be within, to be identified
+        as overlapping.
+    
+    Return
+    ----
+    partner_nodes: list(list(Node))
+        A list of lists with partner nodes.
+    """
+    
+    # Remove dat nodes from list
+    node_list = [node for node in nodes if not node.is_dat]
+    
+    # Get array of coordinates.
+    coords = np.zeros([len(node_list),3])
+    for i, node in enumerate(node_list):
+        if not node.is_dat:
+            coords[i,:] = node.coordinates
+    
+    # Get list of closest pairs.
+    has_partner, n_partner = find_close_nodes(coords, eps=eps)
+    
+    # Create list with nodes.
+    partner_nodes = [[] for i in range(n_partner)]
+    for i, node in enumerate(node_list):
+        if not has_partner[i] == -1:
+            partner_nodes[has_partner[i]].append(node)
+    
+    return partner_nodes
+
 
 
 

@@ -10,7 +10,7 @@ import numpy as np
 # Meshpy modules.
 from . import mpy, Rotation, Function, Material, Node, Element, GeometryName, \
     GeometrySet, GeometrySetContainer, BoundaryCondition, Coupling, \
-    BoundaryConditionContainer, find_close_nodes
+    BoundaryConditionContainer, get_close_nodes
 
 
 class Mesh(object):
@@ -362,19 +362,7 @@ class Mesh(object):
         else:
             node_list = nodes
         
-        # Get array of coordinates.
-        coords = self.get_global_coordinates(nodes=node_list)
-        
-        # Get list of closest pairs.
-        has_partner, n_partner = find_close_nodes(coords, eps=eps)
-        
-        # Create list with nodes.
-        partner_nodes = [[] for i in range(n_partner)]
-        for i, node in enumerate(node_list):
-            if not has_partner[i] == -1:
-                partner_nodes[has_partner[i]].append(node)
-        
-        return partner_nodes
+        return get_close_nodes(node_list)
 
 
     def create_beam_mesh_line(self, beam_object, material, start_point,

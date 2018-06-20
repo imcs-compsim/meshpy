@@ -6,12 +6,12 @@ This module defines classes and functions to create and edit a Baci input file.
 # Global configuration object.
 from .conf import mpy
 
-# Utility functions and base classes.
-from .utility import get_section_string
-from .base_mesh_item import BaseMeshItem
-
-# Find close node function.
+# Find close node Cython function.
 from .meshpy.find_close_nodes import find_close_nodes
+
+# Utility functions and base classes.
+from .utility import get_section_string, get_close_nodes
+from .base_mesh_item import BaseMeshItem
 
 # 3D rotations for nodes.
 from .rotation import Rotation
