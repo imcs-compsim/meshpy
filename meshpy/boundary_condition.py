@@ -3,6 +3,9 @@
 This module implements a class to handle boundary conditions in the input file.
 """
 
+# Python modules.
+import warnings
+
 # Meshpy modules.
 from . import mpy, BaseMeshItem, get_close_nodes
 
@@ -82,7 +85,7 @@ class BoundaryCondition(BaseMeshItem):
                 self.geometry_set.nodes = [node for node in
                     self.geometry_set.nodes if (not node in double_node_list)]
             elif len(double_node_list) > 0:
-                raise Warning('There are overlapping nodes in this point ' + \
+                warnings.warn('There are overlapping nodes in this point ' + \
                     'Neumann boundary, and it is not specified on how to ' + \
                     'handle them!')
                 
