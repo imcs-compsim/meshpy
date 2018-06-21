@@ -272,9 +272,8 @@ class InputFile(Mesh):
         self._add_dat_lines(lines)
     
     
-    def _add_dat_lines(self, data):
-        """Read lines of string into this object.
-        """
+    def _add_dat_lines(self, data, **kwargs):
+        """Read lines of string into this object."""
         
         if isinstance(data, list):
             lines = data
@@ -290,15 +289,15 @@ class InputFile(Mesh):
         for line in lines:
             line = line.strip()
             if line.startswith('----------'):
-                self._add_dat_section(section_line, section_data)
+                self._add_dat_section(section_line, section_data, **kwargs)
                 section_line = line
                 section_data = []
             else:
                 section_data.append(line)
-        self._add_dat_section(section_line, section_data)
+        self._add_dat_section(section_line, section_data, **kwargs)
     
     
-    def _add_dat_section(self, section_line, section_data):
+    def _add_dat_section(self, section_line, section_data, **kwargs):
         """
         Add a section to the object.
         
@@ -388,7 +387,9 @@ class InputFile(Mesh):
                 pass
             else:
                 # Section is not in mesh, i.e. simulation parameters.
-                self.add_section(InputSection(section_name, section_data))
+                self.add_section(
+                    InputSection(section_name, section_data, **kwargs)
+                    )
 
         
 
@@ -401,7 +402,7 @@ class InputFile(Mesh):
         if len(args) == 1 and isinstance(args[0], InputSection):
             self.add_section(args[0], **kwargs)
         elif len(args) == 1 and isinstance(args[0], str):
-            self._add_dat_lines(args[0])
+            self._add_dat_lines(args[0], **kwargs)
         else:
             Mesh.add(self, *args, **kwargs)
     
@@ -556,6 +557,9 @@ class InputFile(Mesh):
     def get_string(self, **kwargs):
         """Return the lines of the input file as string."""
         return '\n'.join(self.get_dat_lines(**kwargs))
+    
+    def __str__(self, **kwargs):
+        return self.get_string(**kwargs)
     
     def _get_header(self):
         """Return the header for the input file."""
