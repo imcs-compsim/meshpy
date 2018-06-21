@@ -561,9 +561,9 @@ class InputFile(Mesh):
         """Return the header for the input file."""
         
         string = ('// Input file created with meshpy {}\n'
-                + '// git sha: {}\n'
+                + '// git sha:    {}\n'
                 + '// Maintainer: {}\n'
-                + '// Date: {}'
+                + '// Date:       {}'
                 ).format(
                     mpy.version,
                     mpy.git_sha,

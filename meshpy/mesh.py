@@ -280,7 +280,7 @@ class Mesh(object):
             self.add(Coupling(node_list, coupling_type))
     
     
-    def get_nodes_by_function(self, function, middle_nodes=False):
+    def get_nodes_by_function(self, function, *args, middle_nodes=False):
         """
         Return all nodes for which the function evaluates to true.
         
@@ -295,7 +295,7 @@ class Mesh(object):
         node_list = []
         for node in self.nodes:
             if middle_nodes or (not node.is_middle_node):
-                if function(node):
+                if function(node, *args):
                     node_list.append(node)
         return node_list
     
