@@ -267,7 +267,7 @@ class Mesh(object):
                 node.coordinates = pos[i,:]
 
 
-    def couple_nodes(self, nodes=None, connection_type=mpy.coupling_fix):
+    def couple_nodes(self, nodes=None, coupling_type=mpy.coupling_fix):
         """
         Search through nodes and connect all nodes with the same coordinates.
         """
@@ -277,7 +277,7 @@ class Mesh(object):
         
         # Connect close nodes with a coupling.
         for node_list in partner_nodes:
-            self.add(Coupling(node_list, connection_type))
+            self.add(Coupling(node_list, coupling_type))
     
     
     def get_nodes_by_function(self, function, middle_nodes=False):

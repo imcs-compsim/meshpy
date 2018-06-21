@@ -20,6 +20,8 @@ class Coupling(BaseMeshItem):
             string = 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0'
         elif self.coupling_type == mpy.coupling_fix:
             string = 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0'
+        elif isinstance(self.coupling_type, str):
+            string = self.coupling_type
         else:
             raise ValueError('coupling_type "{}" is not implemented!'.format(
                 self.coupling_type
