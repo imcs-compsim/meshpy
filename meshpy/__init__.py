@@ -10,7 +10,7 @@ from .conf import mpy
 from .meshpy.find_close_nodes import find_close_nodes
 
 # Utility functions and base classes.
-from .utility import get_section_string, get_close_nodes
+from .utility import get_section_string, get_close_nodes, flatten
 from .base_mesh_item import BaseMeshItem
 
 # 3D rotations for nodes.
@@ -40,6 +40,8 @@ from .inputfile import InputFile, InputSection, InputLine
 __all__ = [
     # Option object.
     'mpy',
+    # Utility functions.
+    'flatten',
     # Basic stuff.
     'Rotation', 'Function', 'Material', 'GeometrySet', 'BoundaryCondition',
     'Coupling',

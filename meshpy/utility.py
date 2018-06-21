@@ -31,6 +31,16 @@ def get_git_sha(repo):
 mpy.git_sha = get_git_sha(os.path.dirname(os.path.realpath(__file__)))
 
 
+def flatten(data):
+    """Flatten out all list items in data."""
+    flatten_list = []
+    if type(data) == list:
+        for item in data:
+            flatten_list.extend(flatten(item))
+        return flatten_list 
+    else:
+        return [data]
+
 
 def get_close_nodes(nodes, eps=mpy.eps_pos):
     """
@@ -73,19 +83,6 @@ def get_close_nodes(nodes, eps=mpy.eps_pos):
 
 
 
-
-
-
-# 
-# def flatten(data):
-#     """ Flatten out all list items in data. """
-#     flatten_list = []
-#     if type(data) == list:
-#         for item in data:
-#             flatten_list.extend(flatten(item))
-#         return flatten_list 
-#     else:
-#         return [data]
 # 
 # 
 # def _get_close_coordinates(coordinate_list, eps=1e-8):
