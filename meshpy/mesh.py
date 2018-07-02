@@ -367,62 +367,117 @@ class Mesh(object):
         return get_close_nodes(node_list)
     
     
-#     def create_beam_curve_2d(self, beam_object, material, function, intervall,
-#             n_el=1):
-#         
-#         # Packages for AD and numerical integration.
-#         from autograd import jacobian
-#         import autograd.numpy as npauto
-#         import scipy.integrate as integrate
-#         import scipy.optimize as optimize
-#         
-#         # Get first and second derivative of function.
-#         rp = jacobian(function)
-#         rpp = jacobian(rp)
-#         
-#         # Get length of whole segment.
-#         def ds(t):
-#             return npauto.linalg.norm(rp(t))
-#         def S(t):
-#             length, err = integrate.quad(ds, intervall[0], t)
-#             return length
-#         length = S(intervall[1])
-#         
-#         # Get arc length points where element boundaries are.
-#         def root(val):
-#             def funct(t):
-#                 return S(t) - val
-#             return funct
-#         def get_t_length(length, start):
-#             return optimize.newton(root(length), start, fprime=ds) 
-#         
-#         # Get rotation angle along the curve.
-#         def get_phi(t):
-#             rprime = rp(t)
-#             return np.arctan2(rprime[0],rprime[1])
-#         
-#         def get_beam_function(point_a, point_b):
-#             """
-#             Return a function for the position and rotation along the beam axis.
-#             """
-#             def position_function(xi):
-#                 return 1/2*(1-xi)*point_a + 1/2*(1+xi)*point_b
-#             def rotation_function(xi):
-#                 return rotation
-#             return (position_function, rotation_function)
-#         
-#         
-#         
-#         
-#         
-#         
-#         
-#         t_root = get_t_length(1, 0.03)
-# 
-#         print(length)
-#         print(t_root)
-#         #
+    def create_beam_curve_2d(self, beam_object, material, function, intervall,
+            n_el=1):
+        """
+        Generate a beam from a 2d parametric curve.
         
+        Args
+        ----
+        beam_object: Beam
+            Class of beam that will be used for this line.
+        material: Material
+            Material for this line.
+        function: np.array (len=2)
+            3D-parametric curve that represents the beam axis.
+        intervall: [start end]
+            Start and end values for the parameter of the curve.
+        n_el: int
+            Number of equally spaces beam elements along the line.
+        """
+         
+        # Packages for AD and numerical integration.
+        from autograd import jacobian
+        import autograd.numpy as npauto
+        import scipy.integrate as integrate
+        import scipy.optimize as optimize
+         
+        # Get first and second derivative of function.
+        rp = jacobian(function)
+        #rpp = jacobian(rp)
+         
+        # Get length of whole segment.
+        def ds(t):
+            """ Incremental length along the beam axis. """
+            return npauto.linalg.norm(rp(t))
+        def S(t):
+            """ Length along the beam axis. """
+            length, err = integrate.quad(ds, intervall[0], t)
+            return length
+        length = S(intervall[1])
+         
+        # Get arc length points where element boundaries are.
+        def root(val):
+            """ Return a function that is zero for a length. """
+            def funct(t):
+                return S(t) - val
+            return funct
+        last_point = [0]
+        def get_t_length(length):
+            """ Return the parameter for a certain length along the beam. """
+            root_point = optimize.newton(root(length), last_point[0], fprime=ds)
+            last_point[0] = root_point
+            return root_point 
+         
+        # Get rotation angle along the curve.
+        def get_phi(t):
+            """ Return the rotation angle of the beam axis. """
+            rprime = rp(t)
+            return np.arctan2(rprime[1],rprime[0])
+        
+        # Function to create beam elements.
+        def get_beam_geometry(length_a, length_b):
+            """
+            Return a function for the position and rotation along the beam axis.
+            """
+
+            L = length_b - length_a
+            def beam_function(xi):
+                t = get_t_length(length_a + 0.5*(xi+1)*L)
+                pos = function(t)
+                return (
+                    np.array([pos[0], pos[1], 0.]),
+                    Rotation([0,0,1],get_phi(t))
+                    )
+            return beam_function
+        
+        # Add the beam elements
+        self.add_material(material)
+        
+        # List with nodes and elements of this line.
+        elements = []
+        nodes = []
+        
+        # Create the beams.
+        for i in range(n_el):
+            print(i)       
+            function_pos_rot = get_beam_geometry(
+                length*i/n_el,
+                length*(i+1)/n_el
+                )
+            if i == 0:
+                first_node = None
+            else:
+                first_node = nodes[-1]
+            elements.append(beam_object(material=material))
+            nodes.extend(elements[-1].create_beam(function_pos_rot,
+                start_node=first_node))
+        
+        # Set the nodes that are at the beginning and end of line (for search of
+        # overlapping points)
+        nodes[0].is_end_node = True
+        nodes[-1].is_end_node = True
+        
+        # Add items to the mesh
+        self.elements.extend(elements)
+        self.nodes.extend(nodes)
+        
+        # Create geometry sets that will be returned.
+        return_set = GeometryName()
+        return_set['start'] = GeometrySet(mpy.point, nodes=nodes[0])
+        return_set['end'] = GeometrySet(mpy.point, nodes=nodes[-1])
+        return_set['line'] = GeometrySet(mpy.point, nodes=nodes)
+        return return_set
     
 
     def create_beam_mesh_line(self, beam_object, material, start_point,
