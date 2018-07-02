@@ -367,7 +367,7 @@ class Mesh(object):
         return get_close_nodes(node_list)
     
     
-    def create_beam_curve_2d(self, beam_object, material, function, intervall,
+    def create_beam_mesh_curve_2d(self, beam_object, material, function, intervall,
             n_el=1):
         """
         Generate a beam from a 2d parametric curve.
@@ -450,7 +450,6 @@ class Mesh(object):
         
         # Create the beams.
         for i in range(n_el):
-            print(i)       
             function_pos_rot = get_beam_geometry(
                 length*i/n_el,
                 length*(i+1)/n_el
