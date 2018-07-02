@@ -143,6 +143,8 @@ class Mesh(object):
         for i, node in enumerate(node_list):
             if not node.is_dat:
                 pos[i,:] = node.coordinates
+            else:
+                pos[i,:] = [1,0,0]
         return pos
     
     def get_global_quaternions(self):
