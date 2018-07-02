@@ -365,7 +365,65 @@ class Mesh(object):
             node_list = nodes
         
         return get_close_nodes(node_list)
-
+    
+    
+#     def create_beam_curve_2d(self, beam_object, material, function, intervall,
+#             n_el=1):
+#         
+#         # Packages for AD and numerical integration.
+#         from autograd import jacobian
+#         import autograd.numpy as npauto
+#         import scipy.integrate as integrate
+#         import scipy.optimize as optimize
+#         
+#         # Get first and second derivative of function.
+#         rp = jacobian(function)
+#         rpp = jacobian(rp)
+#         
+#         # Get length of whole segment.
+#         def ds(t):
+#             return npauto.linalg.norm(rp(t))
+#         def S(t):
+#             length, err = integrate.quad(ds, intervall[0], t)
+#             return length
+#         length = S(intervall[1])
+#         
+#         # Get arc length points where element boundaries are.
+#         def root(val):
+#             def funct(t):
+#                 return S(t) - val
+#             return funct
+#         def get_t_length(length, start):
+#             return optimize.newton(root(length), start, fprime=ds) 
+#         
+#         # Get rotation angle along the curve.
+#         def get_phi(t):
+#             rprime = rp(t)
+#             return np.arctan2(rprime[0],rprime[1])
+#         
+#         def get_beam_function(point_a, point_b):
+#             """
+#             Return a function for the position and rotation along the beam axis.
+#             """
+#             def position_function(xi):
+#                 return 1/2*(1-xi)*point_a + 1/2*(1+xi)*point_b
+#             def rotation_function(xi):
+#                 return rotation
+#             return (position_function, rotation_function)
+#         
+#         
+#         
+#         
+#         
+#         
+#         
+#         t_root = get_t_length(1, 0.03)
+# 
+#         print(length)
+#         print(t_root)
+#         #
+        
+    
 
     def create_beam_mesh_line(self, beam_object, material, start_point,
             end_point, n_el=1, start_node=None ):
