@@ -460,15 +460,16 @@ class Mesh(object):
             t2 = [0,1,0]
         rotation = Rotation.from_basis(t1, t2)
         
-        def get_beam_function(point_a, point_b):
+        def get_beam_geometry(point_a, point_b):
             """
             Return a function for the position and rotation along the beam axis.
             """
-            def position_function(xi):
-                return 1/2*(1-xi)*point_a + 1/2*(1+xi)*point_b
-            def rotation_function(xi):
-                return rotation
-            return (position_function, rotation_function)
+            def beam_function(xi):
+                return (
+                    1/2*(1-xi)*point_a + 1/2*(1+xi)*point_b,
+                    rotation
+                    )
+            return beam_function
         
         # List with nodes and elements of this line.
         elements = []
@@ -491,7 +492,7 @@ class Mesh(object):
         # Create the beams.
         for i in range(n_el):
             
-            functions = get_beam_function(
+            function = get_beam_geometry(
                 start_point + i*direction/n_el,
                 start_point + (i+1)*direction/n_el
                 )
@@ -501,8 +502,8 @@ class Mesh(object):
             else:
                 first_node = nodes[-1]
             elements.append(beam_object(material=material))
-            nodes.extend(elements[-1].create_beam(
-                functions[0], functions[1], start_node=first_node))
+            nodes.extend(elements[-1].create_beam(function,
+                start_node=first_node))
         
         # Set the nodes that are at the beginning and end of line (for search of
         # overlapping points)
