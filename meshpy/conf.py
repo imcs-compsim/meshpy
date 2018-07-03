@@ -15,6 +15,7 @@ class MeshPy(object):
         # Version information
         self.version = '0.0.2'
         self.git_sha = None
+        self.git_date = None
         
         # Precision for floats in output
         self.dat_precision = '{:.12g}'

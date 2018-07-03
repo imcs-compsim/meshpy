@@ -566,11 +566,13 @@ class InputFile(Mesh):
         
         string = ('// Input file created with meshpy {}\n'
                 + '// git sha:    {}\n'
+                + '// git date:   {}\n'
                 + '// Maintainer: {}\n'
                 + '// Date:       {}'
                 ).format(
                     mpy.version,
                     mpy.git_sha,
+                    mpy.git_date,
                     self.maintainer,
                     datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     )

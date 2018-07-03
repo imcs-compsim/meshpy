@@ -20,15 +20,19 @@ def get_section_string(section_name):
         ) + section_name
 
 
-def get_git_sha(repo):
-    """Return the hash of the current git commit."""
+def get_git_data(repo):
+    """Return the hash and date of the current git commit."""
     sha = subprocess.check_output(
         ['git', 'rev-parse', 'HEAD'], cwd=repo
         ).decode('ascii').strip()
-    return sha
+    date = subprocess.check_output(
+        ['git', 'show', '-s','--format=%ci'], cwd=repo
+        ).decode('ascii').strip()
+    return sha, date
 
 # Set the git version in the global configuration object.
-mpy.git_sha = get_git_sha(os.path.dirname(os.path.realpath(__file__)))
+mpy.git_sha, mpy.git_date = get_git_data(
+    os.path.dirname(os.path.realpath(__file__)))
 
 
 def flatten(data):
