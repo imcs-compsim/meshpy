@@ -22,17 +22,16 @@ def get_section_string(section_name):
 
 def get_git_data(repo):
     """Return the hash and date of the current git commit."""
-    try:
-        sha = subprocess.check_output(
-            ['git', 'rev-parse', 'HEAD'], cwd=repo
-            ).decode('ascii').strip()
-        date = subprocess.check_output(
-            ['git', 'show', '-s','--format=%ci'], cwd=repo
-            ).decode('ascii').strip()
-    except subprocess.CalledProcessError as e:
-        sha = None
-        date = None
-    return sha, date
+    out_sha = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=repo,
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    out_date = subprocess.run(['git', 'show', '-s','--format=%ci'], cwd=repo,
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    if not out_sha.returncode + out_date.returncode == 0:
+        return None,None
+    else:
+        sha = out_sha.stdout.decode('ascii').strip()
+        date = out_date.stdout.decode('ascii').strip()
+        return sha, date
 
 # Set the git version in the global configuration object.
 mpy.git_sha, mpy.git_date = get_git_data(
