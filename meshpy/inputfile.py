@@ -320,10 +320,30 @@ class InputFile(Mesh):
             start = re.search(r'[^-]', name).start()
             section_name = name[start:]
             
+            def group_input_comments(section_data):
+                """
+                Group the section data in relevant input data and comment /
+                empty lines. The comments at the end of the section are lost, as
+                it is not clear where they belong to.
+                """
+                
+                group_list = []
+                temp_header_list = []
+                for line in section_data:
+                    # Check if the line is relevant input data or not.
+                    if line.strip() == '' or line.strip().startswith('//'):
+                        temp_header_list.append(line)
+                    else:
+                        group_list.append([
+                            line,
+                            temp_header_list
+                            ])
+                        temp_header_list = []
+                return group_list
             
-            def add_bc(section_header, section_data):
+            def add_bc(section_header, section_data_comment):
                 """Add boundary conditions to the object."""
-                for i, item in enumerate(section_data):
+                for i, [item, comments] in enumerate(section_data_comment):
                     # The first line is the number of BCs and will be skipped.
                     if i > 0:
                         for key, value in self.boundary_condition_names.items():
@@ -331,56 +351,64 @@ class InputFile(Mesh):
                                 (bc_key, geometry_key) = key
                                 break
                         self.boundary_conditions[bc_key,geometry_key].append(
-                            BaseMeshItem(item)
+                            BaseMeshItem(item, comments=comments)
                             )
             
-            def add_set(section_header, section_data):
+            def add_set(section_header, section_data_comment):
                 """
                 Add sets of points, lines, surfaces or volumes to the object.
                 """
                 
-                def add_to_set(section_header, dat_list):
+                def add_to_set(section_header, dat_list, comments):
                     """Add the data_list to the sets of this object."""
                     for key, value in self.geometry_set_names.items():
                         if value == section_header:
                             geometry_key = key
                             break
                     self.geometry_sets[geometry_key].append(
-                        BaseMeshItem(dat_list)
+                        BaseMeshItem(dat_list, comments=comments)
                         )
                 
-                if len(section_data) > 0:
+                if len(section_data_comment) > 0:
                     # Add the individual sets to the object. For that loop until
                     # a new set index is reached.
                     last_index = 1
                     dat_list = []
-                    for line in section_data:
+                    current_comments = []
+                    for line, comments in section_data_comment:
                         if last_index == int(line.split()[3]):
                             dat_list.append(line)
                         else:
                             last_index = int(line.split()[3])
-                            add_to_set(section_header, dat_list)
+                            add_to_set(section_header, dat_list,
+                                current_comments)
                             dat_list = [line]
+                            current_comments = comments
                     # Add the last set.
-                    add_to_set(section_header, dat_list)
+                    add_to_set(section_header, dat_list, current_comments)
+            
+            def add_line(self_list, line):
+                """Add the line to self_list, and handle comments."""
+                self_list.append(BaseMeshItem(line[0], comments=line[1]))
             
             # Check if the section contains mesh data that has to be added to
-            # specific lists.       
+            # specific lists.
+            section_data_comment = group_input_comments(section_data)     
             if section_name == 'MATERIALS':
-                for line in section_data:
-                    self.materials.append(BaseMeshItem(line))
+                for line in section_data_comment:
+                    add_line(self.materials, line)
             elif section_name == 'NODE COORDS':
-                for line in section_data:
-                    self.nodes.append(BaseMeshItem(line))
+                for line in section_data_comment:
+                    add_line(self.nodes, line)
             elif section_name == 'STRUCTURE ELEMENTS':
-                for line in section_data:
-                    self.elements.append(BaseMeshItem(line))
+                for line in section_data_comment:
+                    add_line(self.elements, line)
             elif section_name.startswith('FUNCT'):
                 self.functions.append(BaseMeshItem(section_data))
             elif section_name.endswith('CONDITIONS'):
-                add_bc(section_name, section_data)
+                add_bc(section_name, section_data_comment)
             elif section_name.endswith('TOPOLOGY'):
-                add_set(section_name, section_data)
+                add_set(section_name, section_data_comment)
             elif section_name == 'DESIGN DESCRIPTION' or \
                     section_name == 'END':
                 # Skip those sections as they won't be used!

@@ -7,7 +7,7 @@ that are in a mesh.
 class BaseMeshItem(object):
     """Base class for all objects that are related to a mesh."""
 
-    def __init__(self, data=None, is_dat=True):
+    def __init__(self, data=None, is_dat=True, comments=None):
         """
         Create the object
         
@@ -24,15 +24,34 @@ class BaseMeshItem(object):
 
         # Overall index of this item in the mesh. 
         self.n_global = None
+        
+        # Comments regarding this Mesh Item.
+        if comments is None:
+            self.comments = []
+        else:
+            self.comments = comments
 
     def get_dat_lines(self, **kwargs):
-        """Return the content of this object as a list."""
+        """
+        Return the content of this object as a list. If comments exist, also add
+        those.
+        """
 
+        # Get data of object.
         data = self._get_dat(**kwargs)
         if isinstance(data, str):
-            return [data]
+            data = [data]
         else:
-            return data
+            data = data
+        
+        # Get comments if given.
+        return_list = []
+        if not len(self.comments) == 0:
+            return_list.extend(self.comments)
+        
+        # Return final list.
+        return_list.extend(data)
+        return return_list
 
     def _get_dat(self, **kwargs):
         """Return the content of this object as either a list or a str."""

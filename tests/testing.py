@@ -14,7 +14,7 @@ import glob
 
 # Meshpy imports.
 from meshpy import mpy, Rotation, InputFile, InputSection, Material, Mesh, \
-    Function, Beam3rHerm2Lin3, BoundaryCondition, Node
+    Function, Beam3rHerm2Lin3, BoundaryCondition, Node, BaseMeshItem
 
 
 # Define the testing paths.
@@ -216,7 +216,7 @@ class TestMeshpy(unittest.TestCase):
         
         mesh_1 = InputFile()
         create_test_mesh(mesh_1)
-         
+        
         mesh_2 = InputFile()
         create_test_mesh(mesh_2)
     
@@ -230,10 +230,9 @@ class TestMeshpy(unittest.TestCase):
 
         for node in mesh_1.nodes:
             node.rotate(rot, origin=origin)
-         
+        
         mesh_2.rotate(rot, origin=origin)
-         
-        check_tmp_dir()
+        
         string1 = mesh_1.get_string(header=False)
         string2 = mesh_2.get_string(header=False)
         self.compare_strings('Rotate_mesh', string1, string2)
@@ -267,14 +266,35 @@ class TestMeshpy(unittest.TestCase):
 
         mesh_2.rotate(rotations, origin=origin)
          
-        check_tmp_dir()
+        
         string1 = mesh_1.get_string(header=False)
         string2 = mesh_2.get_string(header=False)
         self.compare_strings('Rotate_mesh_individual', string1, string2)
 
- 
-          
-  
+    
+    def test_comments_in_solid(self):
+        """
+        Check if comments in the solid file are handled correctly if they are
+        inside a mesh section.
+        """
+        
+        ref_file = os.path.join(testing_input, 'comments_in_input_file_ref.dat')
+        solid_file = os.path.join(testing_input, 'comments_in_input_file.dat')
+        mesh = InputFile(dat_file=solid_file)
+        
+        # Add one element with BCs.
+        mat = BaseMeshItem('material')
+        sets = mesh.create_beam_mesh_line(Beam3rHerm2Lin3, mat, [0,0,0], [1,2,3])
+        mesh.add(BoundaryCondition(sets['start'], 'test', bc_type=mpy.dirichlet))
+        mesh.add(BoundaryCondition(sets['end'], 'test', bc_type=mpy.neumann))
+        
+        string1 = mesh.get_string(header=False).strip()
+        
+        with open(ref_file, 'r') as r_file:
+            string2 = r_file.read().strip()
+        self.compare_strings('test_comments_in_solid', string1, string2)
+
+
 class TestFullBaci(unittest.TestCase):
     """
     Create and run input files in Baci. They are test files and Baci should
