@@ -367,10 +367,11 @@ class Mesh(object):
         return get_close_nodes(node_list)
     
     
-    def create_beam_mesh_curve_2d(self, beam_object, material, function, intervall,
-            n_el=1):
+    def create_beam_mesh_curve(self, beam_object, material, function, interval,
+            n_el=1, function_rotation=None):
         """
-        Generate a beam from a 2d parametric curve.
+        Generate a beam from a parametric curve. Integration along the beam is
+        performed with scipy, and the gradient is calculated with autograd.
         
         Args
         ----
@@ -378,68 +379,129 @@ class Mesh(object):
             Class of beam that will be used for this line.
         material: Material
             Material for this line.
-        function: np.array (len=2)
-            3D-parametric curve that represents the beam axis.
-        intervall: [start end]
+        function: function
+            3D-parametric curve that represents the beam axis. If only a 2D
+            point is returned, the triad creation is simplified. If mathematical
+            functions are used, they have to come from the wrapper
+            autograd.numpy.
+        interval: [start end]
             Start and end values for the parameter of the curve.
         n_el: int
             Number of equally spaces beam elements along the line.
+        function_rotation: function
+            If this argument is given, the triads are computed with this
+            function, on the same interval as the position function. Must return
+            a Rotation object.
         """
-         
+        
         # Packages for AD and numerical integration.
         from autograd import jacobian
-        import autograd.numpy as npauto
+        import autograd.numpy as npAD
         import scipy.integrate as integrate
         import scipy.optimize as optimize
-         
-        # Get first and second derivative of function.
-        rp = jacobian(function)
-        #rpp = jacobian(rp)
-         
-        # Get length of whole segment.
-        def ds(t):
-            """ Incremental length along the beam axis. """
-            return npauto.linalg.norm(rp(t))
-        def S(t):
-            """ Length along the beam axis. """
-            length, err = integrate.quad(ds, intervall[0], t)
-            return length
-        length = S(intervall[1])
-         
-        # Get arc length points where element boundaries are.
-        def root(val):
-            """ Return a function that is zero for a length. """
-            def funct(t):
-                return S(t) - val
-            return funct
-        last_point = [0]
-        def get_t_length(length):
-            """ Return the parameter for a certain length along the beam. """
-            root_point = optimize.newton(root(length), last_point[0], fprime=ds)
-            last_point[0] = root_point
-            return root_point 
-         
-        # Get rotation angle along the curve.
-        def get_phi(t):
-            """ Return the rotation angle of the beam axis. """
-            rprime = rp(t)
-            return np.arctan2(rprime[1],rprime[0])
         
-        # Function to create beam elements.
-        def get_beam_geometry(length_a, length_b):
+        # Check size of position function
+        if len(function(interval[0])) == 2:
+            is_3d_curve = False
+        elif len(function(interval[0])) == 3:
+            is_3d_curve = True
+        else:
+            raise ValueError('Function must return either 2d or 3d curve!')
+        
+        # Check rotation function.
+        if function_rotation is None:
+            is_rot_funct = False
+        else:
+            is_rot_funct = True
+        
+        # Check that the position is an np.array
+        if not isinstance(function(float(interval[0])), np.ndarray):
+            raise TypeError(
+                'Function must be of type np.ndarray, got {}!'.format(
+                    type(function(float(interval[0])))
+                    ))
+        
+        # Get the derivative of the position function and the increment along
+        # the curve.
+        rp = jacobian(function)
+        ds = lambda t: npAD.linalg.norm(rp(t))
+        
+        def S(t, start_t=None, start_S=None):
+            """
+            Function that integrates the length until a parameter value.
+            A speedup can be achieved by giving start_t and start_S, the
+            parameter and Length at a known point.
+            """
+            if start_t is None and start_S is None:
+                st = interval[0]
+                sS = 0
+            elif not start_t is None and not start_S is None:
+                st = start_t
+                sS = start_S
+            else:
+                raise ValueError('Input parameters are wrong!')
+            return integrate.quad(ds, st, t)[0] + sS
+        
+        def get_t_along_curve(arc_length, t0, **kwargs):
+            """
+            Calculate the parameter t where the length along the curve is
+            arc_length. t0 is the start point for the newton iteration.
+            """
+            t_root = optimize.newton(lambda t: S(t, **kwargs)-arc_length, t0,
+                fprime=ds)
+            return t_root 
+        
+        def get_beam_functions(length_a, length_b):
             """
             Return a function for the position and rotation along the beam axis.
             """
-
+            
+            # Length of the beam element in physical space.
             L = length_b - length_a
+            
             def beam_function(xi):
-                t = get_t_length(length_a + 0.5*(xi+1)*L)
-                pos = function(t)
-                return (
-                    np.array([pos[0], pos[1], 0.]),
-                    Rotation([0,0,1],get_phi(t))
-                    )
+                """
+                Return position and rotation along the beam in the parameter
+                coordinate xi.
+                """
+                
+                # Global values for the start of the element.
+                global t_temp, t_start_element, t2_temp
+                
+                # Parameter for xi.
+                t = get_t_along_curve(
+                    length_a + 0.5*(xi+1)*L,
+                    t_start_element, start_t=t_start_element, start_S=length_a)
+                t_temp = t
+                
+                # Position at xi.
+                if is_3d_curve:
+                    pos = function(t)
+                else:
+                    pos = np.zeros(3)
+                    pos[:2] = function(t)
+                
+                # Rotation at xi.
+                if is_rot_funct:
+                    rot = function_rotation(t)
+                else:
+                    if is_3d_curve:
+                        rot = Rotation.from_basis(rp(t), t2_temp)
+                    else:
+                        # The rotation simplifies in the 2d case.
+                        rprime = rp(t)
+                        rot = Rotation([0,0,1], np.arctan2(rprime[1],rprime[0]))
+                
+                # Return the needed values for beam creation.
+                return (pos, rot)
+            
             return beam_function
+
+
+        # Now create the beam.
+        
+        # Get the length of the whole segment.
+        length = S(interval[1])
         
         # Add the beam elements
         self.add_material(material)
@@ -449,8 +511,21 @@ class Mesh(object):
         nodes = []
         
         # Create the beams.
+        global t_temp, t_start_element, t2_temp
+        t_temp = interval[0]
+        t_start_element = interval[0]
+        
+        # The first t2 basis is the one with the larger projection on rp.
+        if is_3d_curve:
+            rprime = rp(float(interval[0]))
+            if abs(np.dot(rprime, [0,0,1])) < \
+                    abs(np.dot(rprime,[0,1,0])):
+                t2_temp = [0,0,1]
+            else:
+                t2_temp = [0,1,0]
+        
         for i in range(n_el):
-            function_pos_rot = get_beam_geometry(
+            function_pos_rot = get_beam_functions(
                 length*i/n_el,
                 length*(i+1)/n_el
                 )
@@ -461,6 +536,10 @@ class Mesh(object):
             elements.append(beam_object(material=material))
             nodes.extend(elements[-1].create_beam(function_pos_rot,
                 start_node=first_node))
+            
+            # Reset the start value of t and t2.
+            t_start_element = t_temp
+            t2_temp = nodes[-1].rotation.get_rotation_matrix()[:,1]
         
         # Set the nodes that are at the beginning and end of line (for search of
         # overlapping points)

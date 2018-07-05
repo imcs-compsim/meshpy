@@ -74,23 +74,23 @@ def curve_2d():
     
     # Define parametric functions to add to beam.
     def circle(t):
-        return np.array([np.cos(t), np.sin(t)])
+        return np.array([np.cos(t), np.sin(t), t])
     def sin(t):
         return np.array([np.sin(t), t])
     def exp_2(t):
         return np.array([t, np.exp(t)])
     
     # Add the curves to the beam.
-    n_el = 5    
+    n_el = 50
     sets = []
-    sets.append(input_file.create_beam_mesh_curve_2d(Beam3rHerm2Lin3, mat, circle,
+    sets.append(input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat, circle,
         [0,1.9*np.pi], n_el=n_el))
-    input_file.translate([2,0,0])
-    sets.append(input_file.create_beam_mesh_curve_2d(Beam3rHerm2Lin3, mat, sin,
-        [0,2*np.pi], n_el=n_el))
-    input_file.translate([2,0,0])
-    sets.append(input_file.create_beam_mesh_curve_2d(Beam3rHerm2Lin3, mat, exp_2,
-        [-1,1], n_el=n_el))
+    #input_file.translate([2,0,0])
+    #sets.append(input_file.create_beam_mesh_curve_2d(Beam3rHerm2Lin3, mat, sin,
+    #    [0,2*np.pi], n_el=n_el))
+    #input_file.translate([2,0,0])
+    #sets.append(input_file.create_beam_mesh_curve_2d(Beam3rHerm2Lin3, mat, exp_2,
+    #    [-1,1], n_el=n_el))
     
     for node_set in sets:
         input_file.add(BoundaryCondition(
@@ -101,7 +101,7 @@ def curve_2d():
         input_file.add(BoundaryCondition(
             node_set['end'],
             'NUMDOF 9 ONOFF 0 1 0 0 0 0 0 0 0 VAL 0 {} 0 0 0 0 0 0 0 FUNCT 0 {} 0 0 0 0 0 0 0',
-            format_replacement=[0.1, ft],
+            format_replacement=[0.0001, ft],
             bc_type=mpy.neumann
             ))
     
