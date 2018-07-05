@@ -2,8 +2,12 @@
 *.txt
 *.pyc
 
+# test file in root folder
+/test.py
+
 # eclipse stuff
 *.project
+*.directory
 *.pydevproject
 *.settings*
 

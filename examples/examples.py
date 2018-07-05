@@ -5,6 +5,7 @@ Create a couple of test examples with a straight beam.
 
 # Python modules
 import numpy as np
+import autograd.numpy as npAD
 
 # Meshpy modules.
 from meshpy import *
@@ -306,10 +307,137 @@ def shear_test():
         
     # Write input file.
     input_file.write_input_file('/home/ivo/temp/shear-test.dat')
+
+
+def curve_3d_helix():
+    """
+    Create a helix by two different methods:
+        1. By wrapping a line in space around a cylinder.
+        2. With a parametric curve in space.
+    """
     
+    input_file = InputFile(maintainer='Ivo Steinbrecher')
+    input_file.add(default_parameters)
+    input_file.add('''
+        ------------------------STRUCTURAL DYNAMIC
+        TIMESTEP                              0.1
+        NUMSTEP                               10
+        MAXTIME                               1.0
+        ''')
     
+    # Add material and functions.
+    mat = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0.3, 1e-3, 0.5,
+        shear_correction=0.75
+        )
+    ft = Function('COMPONENT 0 FUNCTION t')
+    input_file.add(mat, ft)
     
+    # Set parameters for the helix.
+    R = 2.
+    tz = 1. # incline
+    n = 2 # number of turns
+    n_el = 8
+    
+    # Sets to apply boundary conditions on.
+    sets = []
+    
+    # Create a line and wrap it around a cylinder.
+    sets.append(input_file.create_beam_mesh_line(Beam3rHerm2Lin3, mat,
+        [R, 0, 0], [R, 2*np.pi*n*R, n*tz], n_el=n_el))
+    input_file.wrap_around_cylinder()
+    
+    # Create a helix with a parametric curve.
+    offset_x = 2.2 * R
+    def helix(t):
+        return npAD.array([
+            offset_x + R*npAD.cos(t),
+            R*npAD.sin(t),
+            t*tz/(2*np.pi)
+            ])
+    sets.append(input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat, helix,
+        [0,2*np.pi*n], n_el=n_el))
+    
+    # Apply boundary conditions.
+    for node_set in sets:
+        input_file.add(BoundaryCondition(
+            node_set['start'],
+            'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
+            bc_type=mpy.dirichlet
+            ))
+        input_file.add(BoundaryCondition(
+            node_set['end'],
+            'NUMDOF 9 ONOFF 0 1 0 0 0 0 0 0 0 VAL 0 {} 0 0 0 0 0 0 0 FUNCT 0 {} 0 0 0 0 0 0 0',
+            format_replacement=[0.01, ft],
+            bc_type=mpy.neumann
+            ))
+    
+    # Write input file.
+    input_file.write_input_file('/home/ivo/temp/curve_3d_helix.dat')
+
+
+def curve_3d_line_rotation():
+    """
+    Create two lines, one with  trivial triad positions, the other one with
+    rotating triads.
+    """
+    
+    input_file = InputFile(maintainer='Ivo Steinbrecher')
+    input_file.add(default_parameters)
+    input_file.add('''
+        ------------------------STRUCTURAL DYNAMIC
+        TIMESTEP                              0.1
+        NUMSTEP                               10
+        MAXTIME                               1.0
+        ''')
+    
+    # Add material and functions.
+    mat = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0.3, 1e-3, 0.5,
+        shear_correction=0.75
+        )
+    ft = Function('COMPONENT 0 FUNCTION t')
+    input_file.add(mat, ft)
+    
+    # Set parameters for the lines.
+    L = 10.
+    n_el = 10
+    phi_end = 2*np.pi
+    
+    # Sets to apply boundary conditions on.
+    sets = []
+    
+    # Create a line.
+    sets.append(input_file.create_beam_mesh_line(Beam3rHerm2Lin3, mat,
+        [L, 0, 0], [0, 0, 0], n_el=n_el))
+    
+    # Create a line with a parametric curve.
+    offset = 0.5*L
+    def line(t):
+        return npAD.array([L - t*L, offset, 0.])
+    def rotation(t):
+        return Rotation([1,0,0], phi_end * t) * Rotation([0,0,1], np.pi) 
+    sets.append(input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat, line,
+        [0,1], n_el=n_el, function_rotation=rotation))
+    
+    # Apply boundary conditions.
+    for node_set in sets:
+        input_file.add(BoundaryCondition(
+            node_set['end'],
+            'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
+            bc_type=mpy.dirichlet
+            ))
+        input_file.add(BoundaryCondition(
+            node_set['start'],
+            'NUMDOF 9 ONOFF 0 1 0 1 0 0 0 0 0 VAL {0} {2} {0} {0} {0} {0} {0} {0} {0} FUNCT {1} {1} {1} {1} {1} {1} {1} {1} {1}',
+            format_replacement=[0.25, ft, 0.025],
+            bc_type=mpy.neumann
+            ))
+    
+    # Write input file.
+    input_file.write_input_file('/home/ivo/temp/curve_3d_line_rotation.dat')
+
 
 if __name__ == '__main__':
     shear_test()
     cantilever_with_end_load()
+    curve_3d_helix()
+    curve_3d_line_rotation()
