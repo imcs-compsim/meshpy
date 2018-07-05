@@ -6,11 +6,13 @@ This script is used to test the functionality of the meshpy module.
 # Python imports.
 import unittest
 import numpy as np
+import autograd.numpy as npAD
 import os
 import subprocess
 import random
 import shutil
 import glob
+import warnings
 
 # Meshpy imports.
 from meshpy import mpy, Rotation, InputFile, InputSection, Material, Mesh, \
@@ -288,11 +290,129 @@ class TestMeshpy(unittest.TestCase):
         mesh.add(BoundaryCondition(sets['start'], 'test', bc_type=mpy.dirichlet))
         mesh.add(BoundaryCondition(sets['end'], 'test', bc_type=mpy.neumann))
         
-        string1 = mesh.get_string(header=False).strip()
+        string2 = mesh.get_string(header=False).strip()
         
         with open(ref_file, 'r') as r_file:
-            string2 = r_file.read().strip()
+            string1 = r_file.read().strip()
         self.compare_strings('test_comments_in_solid', string1, string2)
+
+
+    def test_curve_3d_helix(self):
+        """Create a helix from a parametric curve."""
+        
+        # Ignore some strange warnings.
+        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+        
+        # Create input file.
+        input_file = InputFile(maintainer='Ivo Steinbrecher')
+        
+        # Add material and functions.
+        mat = BaseMeshItem('material')
+        
+        # Set parameters for the helix.
+        R = 2.
+        tz = 1. # incline
+        n = 2 # number of turns
+        n_el = 8
+        
+        # Create a helix with a parametric curve.
+        def helix(t):
+            return npAD.array([R*npAD.cos(t), R*npAD.sin(t), t*tz/(2*np.pi)])
+        helix_set = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat,
+            helix, [0.,2.*np.pi*n], n_el=n_el)
+         
+        # Apply boundary conditions.
+        input_file.add(BoundaryCondition(helix_set['start'], 'BC1',
+            bc_type=mpy.dirichlet))
+        input_file.add(BoundaryCondition(helix_set['end'], 'BC2',
+            bc_type=mpy.neumann))
+         
+        # Check the output.
+        ref_file = os.path.join(testing_input, 'curve_3d_helix_ref.dat')
+        string2 = input_file.get_string(header=False).strip()
+        with open(ref_file, 'r') as r_file:
+            string1 = r_file.read().strip()
+        self.compare_strings('test_curve_3d_helix', string1, string2)
+
+
+    def test_curve_2d_sin(self):
+        """Create a sin from a parametric curve."""
+        
+        # Ignore some strange warnings.
+        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+        
+        # Create input file.
+        input_file = InputFile(maintainer='Ivo Steinbrecher')
+        
+        # Add material and functions.
+        mat = BaseMeshItem('material')
+        
+        # Set parameters for the sin.
+        n_el = 8
+        
+        # Create a helix with a parametric curve.
+        def sin(t):
+            return npAD.array([t, npAD.sin(t)])
+        sin_set = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat,
+            sin, [0.,2.*np.pi], n_el=n_el)
+         
+        # Apply boundary conditions.
+        input_file.add(BoundaryCondition(sin_set['start'], 'BC1',
+            bc_type=mpy.dirichlet))
+        input_file.add(BoundaryCondition(sin_set['end'], 'BC2',
+            bc_type=mpy.neumann))
+         
+        # Check the output.
+        ref_file = os.path.join(testing_input, 'curve_2d_sin_ref.dat')
+        string2 = input_file.get_string(header=False).strip()
+        with open(ref_file, 'r') as r_file:
+            string1 = r_file.read().strip()
+        self.compare_strings('test_curve_2d_sin', string1, string2)
+
+
+    def test_curve_3d_curve_rotation(self):
+        """Create a line from a parametric curve and prescribe the rotation."""
+        
+        # AD.
+        from autograd import jacobian
+        
+        # Ignore some strange warnings.
+        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+        
+        # Create input file.
+        input_file = InputFile(maintainer='Ivo Steinbrecher')
+        
+        # Add material and functions.
+        mat = BaseMeshItem('material')
+        
+        # Set parameters for the line.
+        L = 1.1
+        n_el = 4
+        
+        # Create a helix with a parametric curve.
+        def curve(t):
+            return npAD.array([L*t, t*t*L*L, 0.])
+        def rotation(t):
+            rp2 = jacobian(curve)(t)
+            rp = [rp2[0], rp2[1], 0]
+            R1 = Rotation([1,0,0], t*2*np.pi)
+            R2 = Rotation.from_basis(rp, [0,0,1])
+            return R2*R1
+        sin_set = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat,
+            curve, [0.,1.], n_el=n_el, function_rotation=rotation)
+         
+        # Apply boundary conditions.
+        input_file.add(BoundaryCondition(sin_set['start'], 'BC1',
+            bc_type=mpy.dirichlet))
+        input_file.add(BoundaryCondition(sin_set['end'], 'BC2',
+            bc_type=mpy.neumann))
+         
+        # Check the output.
+        ref_file = os.path.join(testing_input, 'curve_3d_line_rotation_ref.dat')
+        string2 = input_file.get_string(header=False).strip()
+        with open(ref_file, 'r') as r_file:
+            string1 = r_file.read().strip()
+        self.compare_strings('test_curve_3d_line_rotation', string1, string2)
 
 
 class TestFullBaci(unittest.TestCase):
