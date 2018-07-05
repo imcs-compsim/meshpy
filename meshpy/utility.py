@@ -14,21 +14,28 @@ from . import mpy, find_close_nodes
 
 
 def get_section_string(section_name):
-    """ Return the string for a section in the dat file. """
+    """Return the string for a section in the dat file."""
     return ''.join(
         ['-' for i in range(mpy.dat_len_section-len(section_name))]
         ) + section_name
 
 
-def get_git_sha(repo):
-    """Return the hash of the current git commit."""
-    sha = subprocess.check_output(
-        ['git', 'rev-parse', 'HEAD'], cwd=repo
-        ).decode('ascii').strip()
-    return sha
+def get_git_data(repo):
+    """Return the hash and date of the current git commit."""
+    out_sha = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=repo,
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    out_date = subprocess.run(['git', 'show', '-s','--format=%ci'], cwd=repo,
+        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    if not out_sha.returncode + out_date.returncode == 0:
+        return None,None
+    else:
+        sha = out_sha.stdout.decode('ascii').strip()
+        date = out_date.stdout.decode('ascii').strip()
+        return sha, date
 
 # Set the git version in the global configuration object.
-mpy.git_sha = get_git_sha(os.path.dirname(os.path.realpath(__file__)))
+mpy.git_sha, mpy.git_date = get_git_data(
+    os.path.dirname(os.path.realpath(__file__)))
 
 
 def flatten(data):
