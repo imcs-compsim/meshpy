@@ -72,6 +72,12 @@ class Beam(Element):
         else:
             return self.nodes[1:]
     
+    
+    def preview_python(self, ax):
+        """Plot the beam in matplotlib, by connecting the nodes."""
+        
+        coordinates = np.array([node.coordinates for node in self.nodes])
+        ax.plot(coordinates[:,0], coordinates[:,1], coordinates[:,2], '-x')
 
 
 class Beam3rHerm2Lin3(Beam):

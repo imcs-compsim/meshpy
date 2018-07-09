@@ -6,6 +6,8 @@ sets, ...) for a meshed geometry.
 
 # Python modules.
 import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 # Meshpy modules.
 from . import mpy, Rotation, Function, Material, Node, Element, GeometryName, \
@@ -367,6 +369,26 @@ class Mesh(object):
         return get_close_nodes(node_list)
     
     
+    def preview_python(self):
+        """Display the elements in this mesh in matplotlib."""
+        
+        # Create figure.
+        fig = plt.figure()
+        ax = fig.gca(projection='3d')
+        
+        # Loop over elements.
+        for element in self.elements:
+            if not element.is_dat:
+                element.preview_python(ax)
+        
+        # Finish plot.
+        ax.set_aspect('equal')
+        ax.set_xlabel('X')
+        ax.set_ylabel('Y')
+        ax.set_zlabel('Z')
+        plt.show()
+
+
     def create_beam_mesh_curve(self, beam_object, material, function, interval,
             n_el=1, function_rotation=None):
         """
