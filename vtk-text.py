@@ -339,31 +339,59 @@ cellArray3.InsertNextCell(poly)
 
 
 
-poly = vtk.vtkPolyLine()
-poly.GetPointIds().SetNumberOfIds(4)
-poly.GetPointIds().SetId(0, 3)
-poly.GetPointIds().SetId(1, 0)
-poly.GetPointIds().SetId(2, 5)
-poly.GetPointIds().SetId(3, 6)
+poly2 = vtk.vtkPolyLine()
+poly2.GetPointIds().SetNumberOfIds(4)
+poly2.GetPointIds().SetId(0, 3)
+poly2.GetPointIds().SetId(1, 0)
+poly2.GetPointIds().SetId(2, 5)
+poly2.GetPointIds().SetId(3, 6)
 
-cellArray3.InsertNextCell(poly)
+cellArray3.InsertNextCell(poly2)
 
 
 unstructuredGrid3.SetCells(vtk.VTK_POLY_LINE, cellArray3)
+
+
+#unstructuredGrid3.InsertNextCell(poly.GetCellType(),poly.GetPointIds())
+#unstructuredGrid3.InsertNextCell(poly2.GetCellType(),poly2.GetPointIds())
+
+
+
  
+Colors1 = vtk.vtkUnsignedCharArray();
+Colors1.SetNumberOfComponents(3);
+Colors1.SetName("Colors1");
+Colors1.InsertNextTuple3(255,50,0);
+Colors1.InsertNextTuple3(255,50,0);
+
+Colors2 = vtk.vtkUnsignedCharArray();
+Colors2.SetNumberOfComponents(4);
+Colors2.SetName("Colors2");
+Colors2.InsertNextTuple4(255,50,0,3);
+Colors2.InsertNextTuple4(255,50,0,0.34444444);
+
+Colors3 = vtk.vtkUnsignedCharArray();
+Colors3.SetNumberOfComponents(3);
+Colors3.SetName("Colors3");
+Colors3.InsertNextTuple3(255,50,0);
+Colors3.InsertNextTuple3(255,50,0);
+Colors3.InsertNextTuple3(255,50,0);
+Colors3.InsertNextTuple3(255,50,0);
+Colors3.InsertNextTuple3(255,50,0);
+Colors3.InsertNextTuple3(255,50,0);
+Colors3.InsertNextTuple3(255,50,0);
 
 
 
+print_arg(Colors2)
 
 
+unstructuredGrid3.GetCellData().SetVectors(Colors1)
+unstructuredGrid3.GetCellData().SetScalars(Colors2)
+#unstructuredGrid3.GetCellData().SetTensors(Colors3)
 
 
-
-
-
-
-
-
+unstructuredGrid3.GetPointData().SetVectors(Colors3)
 
 
 
@@ -395,14 +423,7 @@ writer.Write()
 
 
  
- 
-list = (
-    [method_name for method_name in dir(vtk)
- if callable(getattr(vtk, method_name))]
-    )
- 
-for item in list:
-    print(item)
+
   
 #  
 #  
