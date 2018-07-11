@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 This script is used to compile the cyton code.
-python3 setup.py build_ext --inplace
+python3 find_close_nodes_setup.py build_ext --inplace
 """
 
 from distutils.core import setup
