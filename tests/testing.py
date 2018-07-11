@@ -469,7 +469,8 @@ class TestMeshpy(unittest.TestCase):
         if compare_xml(ref_file, vtk_file):
             self.assertTrue(True, '')
         else:
-            # Compare files
+            # If the trivial compare CML function fails, compare the full
+            # strings to see the differences.
             with open(ref_file, 'r') as r_file:
                 string1 = r_file.read().strip()
             with open(vtk_file, 'r') as r_file:
