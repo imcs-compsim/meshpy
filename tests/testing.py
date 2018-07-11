@@ -13,10 +13,12 @@ import random
 import shutil
 import glob
 import warnings
+import vtk
 
 # Meshpy imports.
 from meshpy import mpy, Rotation, InputFile, InputSection, Material, Mesh, \
-    Function, Beam3rHerm2Lin3, BoundaryCondition, Node, BaseMeshItem
+    Function, Beam3rHerm2Lin3, BoundaryCondition, Node, BaseMeshItem, \
+    VTKWriter, compare_xml
 
 
 # Define the testing paths.
@@ -403,6 +405,76 @@ class TestMeshpy(unittest.TestCase):
         with open(ref_file, 'r') as r_file:
             string1 = r_file.read().strip()
         self.compare_strings('test_curve_3d_line_rotation', string1, string2)
+
+    def test_vtk_writer(self):
+        """Test the output created by the VTK writer."""
+
+        # Initialize writer.
+        writer = VTKWriter()
+
+        # Add poly line.
+        writer.add_poly_line([
+            [0, 0, -2],
+            [1, 1, -2],
+            [2, 2, -1]
+            ])
+
+        # Add quadratic quad.
+        cell_data = {}
+        cell_data['cell_data_1'] = 3
+        cell_data['cell_data_2'] = [66, 0, 1]
+        point_data = {}
+        point_data['point_data_1'] = [1, 2, 3, 4, 5, -2, -3, 0]
+        point_data['point_data_2'] = [
+                [0.25, 0, -0.25],
+                [1, 0.25, 0],
+                [2, 0, 0],
+                [2.25, 1.25, 0.5],
+                [2, 2.25, 0],
+                [1, 2, 0.5],
+                [0, 2.25, 0],
+                [0, 1, 0.5]
+            ]
+        writer._add_cell(vtk.vtkQuadraticQuad,
+            [
+                [0.25, 0, -0.25],
+                [1, 0.25, 0],
+                [2, 0, 0],
+                [2.25, 1.25, 0.5],
+                [2, 2.25, 0],
+                [1, 2, 0.5],
+                [0, 2.25, 0],
+                [0, 1, 0.5]
+            ], [0, 2, 4, 6, 1, 3, 5, 7], cell_data=cell_data, point_data=point_data)
+
+        # Add tetraeder.
+        cell_data = {}
+        cell_data['cell_data_2'] = [5, 0, 10]
+        point_data = {}
+        point_data['point_data_1'] = [1, 2, 3, 4]
+        writer._add_cell(vtk.vtkTetra,
+            [
+                [3, 3, 3],
+                [4, 4, 3],
+                [4, 3, 3],
+                [4, 4, 4]
+            ], [0, 2, 1, 3], cell_data=cell_data, point_data=point_data)
+
+        # Write to file.
+        ref_file = os.path.join(testing_input, 'vtk_writer_test_ref.vtu')
+        vtk_file = os.path.join(testing_temp, 'vtk_writer_test.vtu')
+        writer.write_vtk(vtk_file, ascii=True)
+
+        # Compare.
+        if compare_xml(ref_file, vtk_file):
+            self.assertTrue(True, '')
+        else:
+            # Compare files
+            with open(ref_file, 'r') as r_file:
+                string1 = r_file.read().strip()
+            with open(vtk_file, 'r') as r_file:
+                string2 = r_file.read().strip()
+            self.compare_strings('test_vtk_writer', string1, string2)
 
 
 class TestFullBaci(unittest.TestCase):
