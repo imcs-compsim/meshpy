@@ -89,8 +89,6 @@ def get_close_nodes(nodes, eps=mpy.eps_pos):
     return partner_nodes
 
 
-
-
 #
 #
 # def _get_close_coordinates(coordinate_list, eps=1e-8):

@@ -577,8 +577,7 @@ class InputFile(Mesh):
                 + '// git sha:    {}\n'
                 + '// git date:   {}\n'
                 + '// Maintainer: {}\n'
-                + '// Date:       {}'
-                ).format(
+                + '// Date:       {}').format(
                     mpy.version,
                     mpy.git_sha,
                     mpy.git_date,

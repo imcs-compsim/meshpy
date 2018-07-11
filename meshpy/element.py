@@ -17,7 +17,7 @@ class Element(BaseMeshItem):
         if nodes is None:
             self.nodes = []
         else:
-            self.nodes = nodes 
+            self.nodes = nodes
 
         # Material of this element.
         self.material = material

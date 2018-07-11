@@ -87,7 +87,7 @@ class Rotation(object):
         return R
 
     def get_q_skew(self):
-        """
+        r"""
         Return the matrix \skew{n} for this rotation.
         """
 
