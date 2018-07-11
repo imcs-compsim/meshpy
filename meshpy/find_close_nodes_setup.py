@@ -8,5 +8,5 @@ from distutils.core import setup
 from Cython.Build import cythonize
 
 setup(
-    ext_modules = cythonize('find_close_nodes.pyx', annotate=True)
-)
+    ext_modules=cythonize('find_close_nodes.pyx', annotate=True)
+    )

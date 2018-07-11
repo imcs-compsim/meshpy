@@ -30,8 +30,7 @@ class VTKWriter(object):
         self.data = {}
         for key1 in mpy.vtk_geom_types:
             for key2 in mpy.vtk_data_types:
-                self.data[key1,key2] = {}
-
+                self.data[key1, key2] = {}
 
     def add_poly_line(self, coordinates, **kwargs):
         """Add a poly line. The line will connect the points in coordinates."""
@@ -41,7 +40,6 @@ class VTKWriter(object):
 
         # Add cell.
         self._add_cell(vtk.vtkPolyLine, coordinates, topology, **kwargs)
-
 
     def _add_cell(self, cell_type, coordinates, topology, cell_data=None,
             point_data=None):
@@ -57,11 +55,11 @@ class VTKWriter(object):
         topology: [int]
             The connectivity between the cell and the coordinates.
         cell_data, point_data: dic
-            A dictionary containing data that will be added to this cell, either
-            as cell data, or point data for each point of the cell. There are
-            some checks in place, but the length of the data should be chosen
-            carefully. If some cells do not have a filed, that field will be
-            set to 0 for this cell / points.
+            A dictionary containing data that will be added to this cell,
+            either as cell data, or point data for each point of the cell.
+            There are some checks in place, but the length of the data should
+            be chosen carefully. If some cells do not have a filed, that field
+            will be set to 0 for this cell / points.
         """
 
         # Consistency checks.
@@ -83,7 +81,7 @@ class VTKWriter(object):
                             n_points,
                             key,
                             len(value)
-                            )) 
+                            ))
 
         # Check if data container already exists. If not, add it and also add
         # previous entries.
@@ -95,19 +93,19 @@ class VTKWriter(object):
             # Loop through output fields.
             for key, value in data_container.items():
 
-                # Data type. 
+                # Data type.
                 if vtk_geom_type == mpy.vtk_cell:
                     vtk_data_type = self._get_vtk_data_type(value)
                 else:
-                    for item in value: 
+                    for item in value:
                         vtk_data_type = self._get_vtk_data_type(item)
 
                 # Check if key already exists.
-                if not key in self.data[vtk_geom_type, vtk_data_type].keys():
+                if key not in self.data[vtk_geom_type, vtk_data_type].keys():
 
                     # Set up the VTK data array.
-                    data = vtk.vtkDoubleArray();
-                    data.SetName(key);
+                    data = vtk.vtkDoubleArray()
+                    data.SetName(key)
                     if vtk_data_type == mpy.vtk_scalar:
                         data.SetNumberOfComponents(1)
                     else:
@@ -175,7 +173,6 @@ class VTKWriter(object):
                         for item in data_container[key]:
                             self._add_data(value, key_data)
 
-
     def _get_vtk_data_type(self, data):
         """Return the type of data. Check if data matches an expected case."""
 
@@ -191,7 +188,6 @@ class VTKWriter(object):
         raise ValueError('Data {} did not match any expected case!'.format(
             data))
 
-
     def _add_data(self, data, vtk_data_type, non_zero_data=None):
         """Add data to a VTK data array."""
         if vtk_data_type == mpy.vtk_scalar:
@@ -206,11 +202,10 @@ class VTKWriter(object):
                 data.InsertNextTuple3(non_zero_data[0], non_zero_data[1],
                     non_zero_data[2])
 
-
     def write_vtk(self, filepath, ascii=False):
         """
         Write the VTK geometry and data to a file.
-        
+
         Args
         ----
         filepath: str
@@ -228,7 +223,7 @@ class VTKWriter(object):
                     self.grid.GetPointData().AddArray(vtk_data)
 
         # Initialize VTK writer.
-        writer = vtk.vtkXMLUnstructuredGridWriter();
+        writer = vtk.vtkXMLUnstructuredGridWriter()
 
         # Set the ascii flag.
         if ascii:
@@ -241,6 +236,6 @@ class VTKWriter(object):
                 file_extension))
 
         # Write geometry and data to file.
-        writer.SetFileName(filepath);
+        writer.SetFileName(filepath)
         writer.SetInputData(self.grid)
         writer.Write()

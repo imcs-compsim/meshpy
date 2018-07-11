@@ -24,11 +24,10 @@ class Material(BaseMeshItem):
         self.density = density
         self.diameter = diameter
         self.area = diameter**2 * np.pi * 0.25
-        self.mom2 = (diameter*0.5)**4 * np.pi * 0.25
+        self.mom2 = (diameter * 0.5)**4 * np.pi * 0.25
         self.mom3 = self.mom2
         self.polar = self.mom2 + self.mom3
         self.shear_correction = shear_correction
-
 
     def _get_dat(self):
         """Return the line for this material."""

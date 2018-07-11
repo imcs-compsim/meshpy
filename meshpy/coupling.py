@@ -12,7 +12,7 @@ class Coupling(BaseMeshItem):
 
     def __init__(self, nodes, coupling_type):
         BaseMeshItem.__init__(self, is_dat=False)
-        self.node_set = GeometrySet(mpy.point, nodes=nodes) 
+        self.node_set = GeometrySet(mpy.point, nodes=nodes)
         self.coupling_type = coupling_type
 
     def _get_dat(self):
@@ -25,5 +25,5 @@ class Coupling(BaseMeshItem):
         else:
             raise ValueError('coupling_type "{}" is not implemented!'.format(
                 self.coupling_type
-                )) 
+                ))
         return 'E {} - {}'.format(self.node_set.n_global, string)

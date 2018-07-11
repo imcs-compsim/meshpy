@@ -9,7 +9,7 @@ from . import BaseMeshItem
 
 class Element(BaseMeshItem):
     """A base class for an FEM element in the mesh."""
-    
+
     def __init__(self, nodes=None, material=None):
         BaseMeshItem.__init__(self, data=None, is_dat=False)
 
@@ -18,6 +18,6 @@ class Element(BaseMeshItem):
             self.nodes = []
         else:
             self.nodes = nodes 
-        
+
         # Material of this element.
         self.material = material

@@ -28,14 +28,14 @@ ctypedef np.int_t INT_t
 def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps=1e-10):
     """
     Finds coordinates that are within an tolerance of each other.
-    
+
     Args
     ----
     coords: numpy array
         Array with the coordinates of the nodes.
     eps: float
         Tolerance to look for neighbors.
-    
+
     Return
     ----
     partners: numpy array
@@ -48,7 +48,7 @@ def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps=1e-10):
     cdef double distance
 
     # Number of nodes.
-    n_nodes = len(coords)  
+    n_nodes = len(coords)
 
     # This vector is 0 if a node does not belong to a pair, otherwise it is the
     # number of the pair.
@@ -60,11 +60,11 @@ def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps=1e-10):
     for i in range(n_nodes):
         this_is_partner = 0
         if has_partner[i] == -1:
-            for j in range(i+1, n_nodes):
+            for j in range(i + 1, n_nodes):
                 # Calculate the distance between the two nodes.
                 distance = 0.
                 for k in range(3):
-                    distance += (coords[i,k] - coords[j,k])**2
+                    distance += (coords[i, k] - coords[j, k])**2
                 distance = sqrt(distance)
                 # Check if the distance is smaller than the threshold, and add
                 # to has_partner list.

@@ -15,22 +15,21 @@ class Node(BaseMeshItem):
     This object represents one node in the mesh. The node can have a rotation
     and can be rotated moved and so on.
     """
-    
+
     def __init__(self, coordinates, rotation=None, is_middle_node=False):
         BaseMeshItem.__init__(self, data=None, is_dat=False)
-        
+
         # Coordinates and rotation of this node.
         self.coordinates = np.array(coordinates)
         self.rotation = rotation.copy()
-        
+
         # If this node is at the end of a line or curve (by default only those
         # nodes are checked for overlapping nodes).
         self.is_end_node = False
-        
+
         # If the node is in the middle of a beam element.
         self.is_middle_node = is_middle_node
 
-    
     def rotate(self, rotation, origin=None, only_rotate_triads=False):
         """
         Rotate this node. By default the node is rotated around the origin
@@ -39,19 +38,18 @@ class Node(BaseMeshItem):
         If only_rotate_triads is True, then only the rotation is affected,
         the position of the node stays the same.
         """
-        
+
         # If the node has a rotation, rotate it.
-        if not self.rotation is None:
+        if self.rotation is not None:
             self.rotation = rotation * self.rotation
-            
+
             # Rotate the positions (around origin).
             if not only_rotate_triads:
-                if not origin is None:
+                if origin is not None:
                     self.coordinates = self.coordinates - origin
                 self.coordinates = rotation * self.coordinates
-                if not origin is None:
+                if origin is not None:
                     self.coordinates = self.coordinates + origin
-
 
     def _get_dat(self):
         """

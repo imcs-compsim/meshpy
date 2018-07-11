@@ -51,4 +51,3 @@ __all__ = [
     # Mesh items
     'Beam3rHerm2Lin3', 'Mesh', 'InputFile', 'InputSection'
     ]
-
