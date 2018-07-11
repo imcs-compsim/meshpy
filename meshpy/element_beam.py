@@ -78,6 +78,35 @@ class Beam(Element):
         
         coordinates = np.array([node.coordinates for node in self.nodes])
         ax.plot(coordinates[:,0], coordinates[:,1], coordinates[:,2], '-x')
+    
+    def get_vtk(self, vtk_writer):
+        """
+        Add the representation of this element to the VTK writer as a poly line.
+        """
+        
+        # Dictionary with cell data.
+        cell_data = {}
+        cell_data['cross_section_radius'] = self.material.diameter / 2
+        
+        # Dictionary with point data.
+        point_data = {}
+        point_data['node_value'] = []
+        
+        # Array with nodal coordinates.
+        coordinates = np.zeros([len(self.nodes), 3])
+        for i, node in enumerate(self.nodes):
+            xi = self.nodes_create[i][0]
+            coordinates[i, :] = node.coordinates
+            if xi == -1 or xi == 1:
+                point_data['node_value'].append(1.)
+            elif xi == 0:
+                point_data['node_value'].append(0.5)
+            else:
+                point_data['node_value'].append(0)
+                
+        # Add poly line to writer.
+        vtk_writer.add_poly_line(coordinates, cell_data=cell_data,
+            point_data=point_data)
 
 
 class Beam3rHerm2Lin3(Beam):

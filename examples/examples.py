@@ -436,8 +436,26 @@ def curve_3d_line_rotation():
     input_file.write_input_file('/home/ivo/temp/curve_3d_line_rotation.dat')
 
 
+
+def create_vtk():
+    """Create a mesh and output it to VTK."""
+    
+    mesh = Mesh()
+    mat = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0.3, 1e-3, 0.05,
+        shear_correction=0.75
+        )
+    mesh.create_beam_mesh_line(Beam3rHerm2Lin3, mat, [1, 0, 0], [1, 2, 3],
+        n_el=5)
+    
+    
+    mesh.wrap_around_cylinder()
+    mesh.write_vtk('test.vtu', ascii=True)
+
+
+
 if __name__ == '__main__':
-    shear_test()
-    cantilever_with_end_load()
-    curve_3d_helix()
-    curve_3d_line_rotation()
+    #shear_test()
+    #cantilever_with_end_load()
+    #curve_3d_helix()
+    #curve_3d_line_rotation()
+    create_vtk()

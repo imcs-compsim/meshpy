@@ -30,6 +30,10 @@ class BaseMeshItem(object):
             self.comments = []
         else:
             self.comments = comments
+    
+    def get_vtk(self, vtk_writer):
+        """Add representation of this object to a vtk_writer."""
+        pass
 
     def get_dat_lines(self, **kwargs):
         """

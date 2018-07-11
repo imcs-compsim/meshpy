@@ -7,12 +7,11 @@ sets, ...) for a meshed geometry.
 # Python modules.
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 
 # Meshpy modules.
 from . import mpy, Rotation, Function, Material, Node, Element, GeometryName, \
     GeometrySet, GeometrySetContainer, BoundaryCondition, Coupling, \
-    BoundaryConditionContainer, get_close_nodes
+    BoundaryConditionContainer, get_close_nodes, VTKWriter
 
 
 class Mesh(object):
@@ -387,6 +386,21 @@ class Mesh(object):
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
         plt.show()
+
+
+    def write_vtk(self, filepath, **kwargs):
+        """ TODO """
+        
+        # Object to store VKT data and write it to file.
+        vtkwriter = VTKWriter()
+        
+        # Get representation of elements.
+        for element in self.elements:
+            element.get_vtk(vtkwriter)
+        
+        # Write to file
+        vtkwriter.write_vtk(filepath, **kwargs)
+
 
 
     def create_beam_mesh_curve(self, beam_object, material, function, interval,

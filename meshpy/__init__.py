@@ -16,6 +16,9 @@ from .base_mesh_item import BaseMeshItem
 # 3D rotations for nodes.
 from .rotation import Rotation
 
+# VTK writer.
+from .vtk_writer import VTKWriter
+
 # Mesh items.
 from .function import Function
 from .material import Material

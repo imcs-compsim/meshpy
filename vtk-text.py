@@ -11,6 +11,7 @@ from meshpy import BaseMeshItem
 
 import numpy as np
 import autograd.numpy as npAD
+from meshpy.vtk_writer import VTKWriter
 
 def test_curve():
     """Create a helix from a parametric curve."""
@@ -255,55 +256,6 @@ import vtk
 
 
 
- 
-points = vtk.vtkPoints()
-points.InsertNextPoint(0.2, 0, 0)
-points.InsertNextPoint(1, 0, 0)
-points.InsertNextPoint(1, 1, 0)
-points.InsertNextPoint(0, 1, 1)
-points.InsertNextPoint(5, 5, 5)
-points.InsertNextPoint(6, 5, 5)
-points.InsertNextPoint(6, 6, 5)
-points.InsertNextPoint(5, 6, 6)
- 
-# The first tetrahedron
-unstructuredGrid1 = vtk.vtkUnstructuredGrid()
-unstructuredGrid1.SetPoints(points)
- 
-tetra = vtk.vtkTetra()
- 
-tetra.GetPointIds().SetId(0, 0)
-tetra.GetPointIds().SetId(1, 1)
-tetra.GetPointIds().SetId(2, 2)
-tetra.GetPointIds().SetId(3, 3)
- 
-cellArray = vtk.vtkCellArray()
-cellArray.InsertNextCell(tetra)
-
-
-tetra2 = vtk.vtkTetra()
- 
-tetra2.GetPointIds().SetId(0, 4)
-tetra2.GetPointIds().SetId(1, 5)
-tetra2.GetPointIds().SetId(2, 6)
-tetra2.GetPointIds().SetId(3, 7)
-
-
-unstructuredGrid1.SetCells(vtk.VTK_TETRA, cellArray)
-
-cellArray.InsertNextCell(tetra2)
-
-unstructuredGrid1.SetCells(vtk.VTK_TETRA, cellArray)
- 
- 
-
-
-
-
-
-
-
-
 
 
 
@@ -312,6 +264,11 @@ unstructuredGrid1.SetCells(vtk.VTK_TETRA, cellArray)
 
 
 points3 = vtk.vtkPoints()
+
+unstructuredGrid3 = vtk.vtkUnstructuredGrid()
+unstructuredGrid3.SetPoints(points3)
+
+
 points3.InsertNextPoint(0.2, 0, 0)
 points3.InsertNextPoint(1, 0, 2)
 points3.InsertNextPoint(1, 1, 0)
@@ -319,10 +276,9 @@ points3.InsertNextPoint(1, 1, 0)
 points3.InsertNextPoint(5, 5, 5)
 points3.InsertNextPoint(6, 5, 5)
 points3.InsertNextPoint(6, 6, 5)
-points3.InsertNextPoint(5, 6, 6)
+points3.InsertNextPoint(5, 6, 1)
+points3.InsertNextPoint(5, 6, 1)
 
-unstructuredGrid3 = vtk.vtkUnstructuredGrid()
-unstructuredGrid3.SetPoints(points3)
 
 cellArray3 = vtk.vtkCellArray()
 
@@ -383,8 +339,8 @@ Colors3.InsertNextTuple3(255,50,0);
 
 
 
-print_arg(Colors2)
-
+print_arg(vtk)
+print(vtk)
 
 unstructuredGrid3.GetCellData().SetVectors(Colors1)
 unstructuredGrid3.GetCellData().SetScalars(Colors2)
@@ -468,3 +424,44 @@ writer.Write()
 # 
 
 
+
+
+
+
+
+
+
+
+
+
+
+vtkwriter = VTKWriter()
+
+
+coord = [[np.cos(x/10), np.sin(x/10), x/50] for x in range(100)]
+
+vtkwriter.add_poly_line(coord)
+
+
+coord = [[np.cos(x/10), np.sin(x/10), x/50+2] for x in range(100)]
+
+vtkwriter.add_poly_line(coord)
+
+
+vtkwriter.write_vtu('Tria999.vtu')
+
+
+
+
+
+mesh = Mesh()
+mesh.create_beam_mesh_line(Beam3rHerm2Lin3, 1, [1,0,0], [2,5,3], n_el=10 )
+mesh.write_vtk('Tria999.vtu', ascii=True)
+
+
+
+
+
+
+
+print('\n\nend')
