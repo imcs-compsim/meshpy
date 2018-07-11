@@ -339,15 +339,15 @@ Colors3.InsertNextTuple3(255,50,0);
 
 
 
-print_arg(vtk)
-print(vtk)
+print_arg(unstructuredGrid3.GetCellData())
+print()
 
-unstructuredGrid3.GetCellData().SetVectors(Colors1)
-unstructuredGrid3.GetCellData().SetScalars(Colors2)
+unstructuredGrid3.GetCellData().AddArray(Colors1)
+unstructuredGrid3.GetCellData().AddArray(Colors2)
 #unstructuredGrid3.GetCellData().SetTensors(Colors3)
 
 
-unstructuredGrid3.GetPointData().SetVectors(Colors3)
+#unstructuredGrid3.GetPointData().SetVectors(Colors3)
 
 
 

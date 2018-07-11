@@ -222,10 +222,10 @@ class VTKWriter(object):
         # Add data to grid.
         for (key_geom, key_data), value in self.data.items():
             for vtk_data in value.values():
-                if key_data == mpy.vtk_scalar:
-                    self.grid.GetCellData().SetScalars(vtk_data)
+                if key_geom == mpy.vtk_cell:
+                    self.grid.GetCellData().AddArray(vtk_data)
                 else:
-                    self.grid.GetCellData().SetVectors(vtk_data)
+                    self.grid.GetPointData().AddArray(vtk_data)
 
         # Initialize VTK writer.
         writer = vtk.vtkXMLUnstructuredGridWriter();
