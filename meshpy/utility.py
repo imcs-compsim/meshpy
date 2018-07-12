@@ -8,6 +8,7 @@ application.
 import subprocess
 import os
 import numpy as np
+import xml.etree.ElementTree as ET
 
 # Meshpy modules.
 from . import mpy, find_close_nodes
@@ -87,6 +88,74 @@ def get_close_nodes(nodes, eps=mpy.eps_pos):
             partner_nodes[has_partner[i]].append(node)
 
     return partner_nodes
+
+
+def xml_to_dict(xml):
+    """Convert a XML to a nested dictionary."""
+
+    # Get and sort keys.
+    keys = xml.keys()
+    keys.sort()
+
+    # Get string for this XML element.
+    string = xml.tag
+    for key in keys:
+        string += ' '
+        string += key
+        string += '="'
+        string += xml.get(key)
+        string += '"'
+
+    # Add data.
+    if not xml.text.strip() == '':
+        string += '\n'
+        string += xml.text.strip()
+
+    # Get data for this item.
+    xml_dict = {}
+    n_childs = len(xml.getchildren())
+    if not n_childs == 0:
+        for child in xml.getchildren():
+            key, value = xml_to_dict(child)
+            xml_dict[key] = value
+
+    # Return key for this item and all child items.
+    return string, xml_dict
+
+
+def xml_dict_to_string(xml_dict):
+    """The nested XML dictionary to a string."""
+
+    # Sort the keys
+    keys = list(xml_dict.keys())
+    keys.sort()
+
+    # Add content.
+    string = ''
+    for key in keys:
+        string += key
+        string += '\n'
+        string += xml_dict_to_string(xml_dict[key])
+        string += '\n'
+
+    # Return the value
+    return string
+
+
+def compare_xml(path1, path2):
+    """Compare the xml files at path1 and path2."""
+
+    tree1 = ET.parse(path1)
+    tree2 = ET.parse(path2)
+
+    key, value = xml_to_dict(tree1.getroot())
+    hash1 = hash((xml_dict_to_string({key: value})))
+
+    key, value = xml_to_dict(tree2.getroot())
+    hash2 = hash((xml_dict_to_string({key: value})))
+
+    return hash1 == hash2
+
 
 
 #

@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="15" NumberOfCells="3">
+      <PointData>
+        <DataArray type="Float64" Name="point_data_2" NumberOfComponents="3" format="ascii" RangeMin="0" RangeMax="3.0103986447">
+          0 0 0 0 0 0
+          0 0 0 0.25 0 -0.25
+          1 0.25 0 2 0 0
+          2.25 1.25 0.5 2 2.25 0
+          1 2 0.5 0 2.25 0
+          0 1 0.5 0 0 0
+          0 0 0 0 0 0
+          0 0 0
+        </DataArray>
+        <DataArray type="Float64" Name="point_data_1" format="ascii" RangeMin="-3" RangeMax="5">
+          0 0 0 1 2 3
+          4 5 -2 -3 0 1
+          2 3 4
+        </DataArray>
+      </PointData>
+      <CellData>
+        <DataArray type="Float64" Name="cell_data_1" format="ascii" RangeMin="0" RangeMax="3">
+          0 3 0
+        </DataArray>
+        <DataArray type="Float64" Name="cell_data_2" NumberOfComponents="3" format="ascii" RangeMin="0" RangeMax="66.007575323">
+          0 0 0 66 0 1
+          5 0 10
+        </DataArray>
+      </CellData>
+      <Points>
+        <DataArray type="Float32" Name="Points" NumberOfComponents="3" format="ascii" RangeMin="0.35355339059" RangeMax="6.9282032303">
+          0 0 -2 1 1 -2
+          2 2 -1 0.25 0 -0.25
+          1 0.25 0 2 0 0
+          2.25 1.25 0.5 2 2.25 0
+          1 2 0.5 0 2.25 0
+          0 1 0.5 3 3 3
+          4 4 3 4 3 3
+          4 4 4
+        </DataArray>
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="ascii" RangeMin="0" RangeMax="14">
+          0 1 2 3 5 7
+          9 4 6 8 10 11
+          13 12 14
+        </DataArray>
+        <DataArray type="Int64" Name="offsets" format="ascii" RangeMin="3" RangeMax="15">
+          3 11 15
+        </DataArray>
+        <DataArray type="UInt8" Name="types" format="ascii" RangeMin="4" RangeMax="23">
+          4 23 10
+        </DataArray>
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+</VTKFile>

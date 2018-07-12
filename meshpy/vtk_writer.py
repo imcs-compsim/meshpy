@@ -117,7 +117,7 @@ class VTKWriter(object):
                     else:
                         n_items = self.grid.GetNumberOfPoints()
                     for i in range(n_items):
-                        self._add_empty_data(data, vtk_data_type)
+                        self._add_data(data, vtk_data_type)
                     self.data[vtk_geom_type, vtk_data_type][key] = data
 
         # Create the cell.
@@ -125,6 +125,7 @@ class VTKWriter(object):
         geometry_item.GetPointIds().SetNumberOfIds(n_points)
 
         # Create the connection between the coordinates.
+        n_grid_points = self.points.GetNumberOfPoints()
         for i, coord in enumerate(coordinates):
 
             # Add the coordinate to the global list of coordinates.
@@ -133,7 +134,7 @@ class VTKWriter(object):
             # Set the local connectivity.
             geometry_item.GetPointIds().SetId(
                 i,
-                self.points.GetNumberOfPoints() - 1
+                n_grid_points + topology[i]
                 )
 
         # Add to global cells.
@@ -152,7 +153,7 @@ class VTKWriter(object):
             else:
                 data_container = point_data
             if data_container is None:
-                continue
+                data_container = {}
 
             for key, value in data.items():
 
@@ -170,7 +171,7 @@ class VTKWriter(object):
                     if key_geom == mpy.vtk_cell:
                         self._add_data(value, key_data)
                     else:
-                        for item in data_container[key]:
+                        for item in range(n_points):
                             self._add_data(value, key_data)
 
     def _get_vtk_data_type(self, data):
