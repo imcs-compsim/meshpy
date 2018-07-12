@@ -7,6 +7,7 @@ sets, ...) for a meshed geometry.
 # Python modules.
 import numpy as np
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
 
 # Meshpy modules.
 from . import mpy, Rotation, Function, Material, Node, Element, GeometryName, \
