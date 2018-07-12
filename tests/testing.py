@@ -4,6 +4,8 @@ This script is used to test the functionality of the meshpy module.
 """
 
 # Python imports.
+import os
+import sys
 import unittest
 import numpy as np
 import autograd.numpy as npAD
@@ -15,6 +17,10 @@ import glob
 import warnings
 import vtk
 
+# Set path to find meshpy.
+sys.path.insert(0, os.path.abspath(os.path.join(
+    os.path.dirname(__file__), '..')))
+
 # Meshpy imports.
 from meshpy import mpy, Rotation, InputFile, InputSection, Material, Mesh, \
     Function, Beam3rHerm2Lin3, BoundaryCondition, Node, BaseMeshItem, \
@@ -22,7 +28,7 @@ from meshpy import mpy, Rotation, InputFile, InputSection, Material, Mesh, \
 
 
 # Define the testing paths.
-testing_path = '/home/ivo/dev/meshpy/tests'
+testing_path = os.path.abspath(os.path.dirname(__file__))
 testing_input = os.path.join(testing_path, 'input-solid-mesh')
 testing_temp = os.path.join(testing_path, 'testing-tmp')
 baci_path = '/home/ivo/baci/work/release'
