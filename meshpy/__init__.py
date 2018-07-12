@@ -10,7 +10,7 @@ from .conf import mpy
 from .meshpy.find_close_nodes import find_close_nodes
 
 # Utility functions and base classes.
-from .utility import get_section_string, get_close_nodes, flatten, compare_xml
+from .utility import get_close_nodes, flatten, compare_xml
 from .base_mesh_item import BaseMeshItem
 
 # 3D rotations for nodes.

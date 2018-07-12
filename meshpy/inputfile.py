@@ -9,7 +9,14 @@ import re
 from _collections import OrderedDict
 
 # Meshpy modules.
-from . import mpy, get_section_string, Mesh, BaseMeshItem
+from . import mpy, Mesh, BaseMeshItem
+
+
+def get_section_string(section_name):
+    """Return the string for a section in the dat file."""
+    return ''.join(
+        ['-' for i in range(mpy.dat_len_section - len(section_name))]
+        ) + section_name
 
 
 class InputLine(object):
