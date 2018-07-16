@@ -32,10 +32,10 @@ class Rotation(object):
             vector = args[0]
             phi = args[1]
             norm = np.linalg.norm(vector)
-            if norm < mpy.eps_quaternion:
-                raise ValueError('The rotation axis can not be a zero vector!')
             if np.abs(phi) < mpy.eps_quaternion:
                 self.q[0] = 1
+            elif norm < mpy.eps_quaternion:
+                raise ValueError('The rotation axis can not be a zero vector!')
             else:
                 self.q[0] = np.cos(0.5 * phi)
                 self.q[1:] = np.sin(0.5 * phi) * \
@@ -115,11 +115,20 @@ class Rotation(object):
         norm = np.linalg.norm(self.q[1:])
         phi = 2 * np.arctan2(norm, self.q[0])
 
-        # Check if phi is 0
-        if phi < mpy.eps_quaternion:
+        # Check if effective rotation angle is 0
+        if np.abs(np.sin(phi / 2)) < mpy.eps_quaternion:
             return np.zeros(3)
         else:
             return phi * self.q[1:] / norm
+
+    def inv(self):
+        """
+        Return the inverse of this rotation.
+        """
+
+        tmp_quaternion = self.q.copy()
+        tmp_quaternion[0] *= -1.
+        return Rotation(tmp_quaternion)
 
     def __mul__(self, other):
         """
@@ -183,3 +192,8 @@ class Rotation(object):
             str(self.q[0]),
             str(self.q[1:])
             )
+
+
+def get_relative_rotation(rotation1, rotation2):
+    """Return the rotation from rotation1 to rotation2."""
+    return rotation2 * rotation1.inv()

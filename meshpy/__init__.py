@@ -14,7 +14,7 @@ from .utility import get_close_nodes, flatten, compare_xml
 from .base_mesh_item import BaseMeshItem
 
 # 3D rotations for nodes.
-from .rotation import Rotation
+from .rotation import Rotation, get_relative_rotation
 
 # VTK writer.
 from .vtk_writer import VTKWriter
@@ -46,8 +46,8 @@ __all__ = [
     # Utility functions.
     'flatten',
     # Basic stuff.
-    'Rotation', 'Function', 'Material', 'GeometrySet', 'BoundaryCondition',
-    'Coupling',
+    'Rotation', 'get_relative_rotation', 'Function', 'Material', 'GeometrySet',
+    'BoundaryCondition', 'Coupling',
     # Mesh items
     'Beam3rHerm2Lin3', 'Mesh', 'InputFile', 'InputSection'
     ]

@@ -22,9 +22,9 @@ sys.path.insert(0, os.path.abspath(os.path.join(
     os.path.dirname(__file__), '..')))
 
 # Meshpy imports.
-from meshpy import mpy, Rotation, InputFile, InputSection, Material, Mesh, \
-    Function, Beam3rHerm2Lin3, BoundaryCondition, Node, BaseMeshItem, \
-    VTKWriter, compare_xml
+from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
+    InputSection, Material, Mesh, Function, Beam3rHerm2Lin3, \
+    BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml
 
 
 # Define the testing paths.
@@ -150,6 +150,30 @@ class TestRotation(unittest.TestCase):
 
         q = np.array([0.97862427, -0.0884585, -0.16730294, -0.0804945])
         self.assertTrue(Rotation(q) == Rotation(-q))
+
+    def test_inverse_rotation(self):
+        """Test the inv() function for rotations."""
+
+        rot = Rotation([1, 2, 3], 2)
+
+        # Check if inverse rotation gets identity rotation. Use two different
+        # constructors for identity rotation.
+        self.assertTrue(Rotation([0, 0, 0], 0) == rot * rot.inv())
+        self.assertTrue(Rotation() == rot * rot.inv())
+
+        # Check that there is no warning or error when getting the vector for
+        # an identity rotation.
+        (rot * rot.inv()).get_roation_vector()
+
+    def test_relative_roation(self):
+        """Test the relative rotation between two rotations."""
+
+        rot1 = Rotation([1, 2, 3], 2)
+        rot2 = Rotation([0.1, -0.2, 2], np.pi / 5)
+
+        rot21 = get_relative_rotation(rot1, rot2)
+
+        self.assertTrue(rot2 == rot21 * rot1)
 
 
 def create_test_mesh(mesh):
