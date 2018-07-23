@@ -23,8 +23,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(
 
 # Meshpy imports.
 from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
-    InputSection, Material, Mesh, Function, Beam3rHerm2Lin3, \
-    BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml
+    InputSection, MaterialReissner, MaterialBeam, Function, Beam3rHerm2Lin3, \
+    BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh
 
 
 # Define the testing paths.
@@ -183,7 +183,7 @@ def create_test_mesh(mesh):
     random.seed(0)
 
     # Add material to mesh.
-    material = Material('material', 0.1, 0.1, 0.1, 0.1, shear_correction=1.1)
+    material = MaterialReissner()
     mesh.add(material)
 
     # Add three test nodes and add them to a beam element
@@ -517,7 +517,7 @@ class TestMeshpy(unittest.TestCase):
         mesh = Mesh()
 
         # Add content to the mesh.
-        mat = Material('Material', 1., 1., 1., 0.1)
+        mat = MaterialBeam(radius=0.05)
         mesh.create_beam_mesh_honeycomb(Beam3rHerm2Lin3, mat, 2., 5, 3, 2)
 
         # Write VTK output."""
@@ -632,14 +632,10 @@ class TestFullBaci(unittest.TestCase):
             ))
 
         # Material for the beam.
-        material = Material(
-            'MAT_BeamReissnerElastHyper',
-            2.07e2,  # E-Modul
-            0,  # nu
-            1e-3,  # rho
-            0.2,  # diameter of beam
-            shear_correction=1.1
-            )
+        material = MaterialReissner(
+            youngs_modulus=2.07e2,
+            radius=0.1,
+            shear_correction=1.1)
 
         # Create the honeycomb mesh.
         mesh_honeycomb = Mesh()
@@ -699,7 +695,9 @@ class TestFullBaci(unittest.TestCase):
         # Add functions for boundary conditions and material.
         sin = Function('COMPONENT 0 FUNCTION sin(t*2*pi)')
         cos = Function('COMPONENT 0 FUNCTION cos(t*2*pi)')
-        material = Material('MAT_BeamReissnerElastHyper', 1e9, 0, 1e-3, 0.5,
+        material = MaterialReissner(
+            youngs_modulus=1e9,
+            radius=0.25,
             shear_correction=0.75)
         input_file.add(sin, cos, material)
 
@@ -810,7 +808,9 @@ class TestFullBaci(unittest.TestCase):
 
         # Create four meshes with different types of honeycomb structure.
         mesh = Mesh()
-        material = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0, 1e-3, 0.2,
+        material = MaterialReissner(
+            youngs_modulus=2.07e2,
+            radius=0.1,
             shear_correction=1.1)
         ft = []
         ft.append(Function('COMPONENT 0 FUNCTION t'))

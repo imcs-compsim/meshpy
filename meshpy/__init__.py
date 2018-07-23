@@ -21,7 +21,7 @@ from .vtk_writer import VTKWriter
 
 # Mesh items.
 from .function import Function
-from .material import Material
+from .material import Material, MaterialBeam, MaterialReissner
 from .node import Node
 from .element import Element
 from .element_beam import Beam, Beam3rHerm2Lin3
@@ -46,8 +46,8 @@ __all__ = [
     # Utility functions.
     'flatten',
     # Basic stuff.
-    'Rotation', 'get_relative_rotation', 'Function', 'Material', 'GeometrySet',
-    'BoundaryCondition', 'Coupling',
+    'Rotation', 'get_relative_rotation', 'Function', 'MaterialReissner',
+    'MaterialBeam', 'GeometrySet', 'BoundaryCondition', 'Coupling',
     # Mesh items
     'Beam3rHerm2Lin3', 'Mesh', 'InputFile', 'InputSection'
     ]

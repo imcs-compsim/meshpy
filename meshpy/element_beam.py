@@ -87,7 +87,7 @@ class Beam(Element):
 
         # Dictionary with cell data.
         cell_data = {}
-        cell_data['cross_section_radius'] = self.material.diameter / 2
+        cell_data['cross_section_radius'] = self.material.radius
 
         # Dictionary with point data.
         point_data = {}

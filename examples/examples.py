@@ -74,8 +74,11 @@ def cantilever_with_end_load():
         ''')
 
     # Add material and functions.
-    mat = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0.3, 1e-3, 0.5,
-        shear_correction=0.75)
+    mat = MaterialReissner(
+        youngs_modulus=2.07e2,
+        radius=0.25,
+        shear_correction=0.75
+        )
     ft = Function('COMPONENT 0 FUNCTION t')
     input_file.add(mat, ft)
 
@@ -177,8 +180,11 @@ def shear_test():
     diameter = 0.25
 
     # Add material and functions.
-    mat = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0.3, 1e-3, diameter,
-        shear_correction=0.75)
+    mat = MaterialReissner(
+        youngs_modulus=2.07e2,
+        radius=diameter / 2,
+        shear_correction=0.75
+        )
     ft = Function('COMPONENT 0 FUNCTION t')
     input_file.add(mat, ft)
 
@@ -324,8 +330,11 @@ def curve_3d_helix():
         ''')
 
     # Add material and functions.
-    mat = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0.3, 1e-3, 0.5,
-        shear_correction=0.75)
+    mat = MaterialReissner(
+        youngs_modulus=2.07e2,
+        radius=0.25,
+        shear_correction=0.75
+        )
     ft = Function('COMPONENT 0 FUNCTION t')
     input_file.add(mat, ft)
 
@@ -389,8 +398,11 @@ def curve_3d_line_rotation():
         ''')
 
     # Add material and functions.
-    mat = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0.3, 1e-3, 0.5,
-        shear_correction=0.75)
+    mat = MaterialReissner(
+        youngs_modulus=2.07e2,
+        radius=0.25,
+        shear_correction=0.75
+        )
     ft = Function('COMPONENT 0 FUNCTION t')
     input_file.add(mat, ft)
 
@@ -440,8 +452,11 @@ def create_vtk():
     """Create a mesh and output it to VTK."""
 
     mesh = Mesh()
-    mat = Material('MAT_BeamReissnerElastHyper', 2.07e2, 0.3, 1e-3, 0.05,
-        shear_correction=0.75)
+    mat = MaterialReissner(
+        youngs_modulus=2.07e2,
+        radius=0.025,
+        shear_correction=0.75
+        )
     mesh.create_beam_mesh_line(Beam3rHerm2Lin3, mat, [1, 0, 0], [1, 2, 3],
         n_el=5)
 

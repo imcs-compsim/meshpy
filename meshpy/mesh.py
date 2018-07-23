@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 # Meshpy modules.
-from . import mpy, Rotation, Function, Material, Node, Element, GeometryName, \
-    GeometrySet, GeometrySetContainer, BoundaryCondition, Coupling, \
-    BoundaryConditionContainer, get_close_nodes, VTKWriter
+from . import mpy, Rotation, Function, Material, Node, Element, \
+    GeometryName, GeometrySet, GeometrySetContainer, BoundaryCondition, \
+    Coupling, BoundaryConditionContainer, get_close_nodes, VTKWriter
 
 
 class Mesh(object):
