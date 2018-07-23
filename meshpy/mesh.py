@@ -380,7 +380,7 @@ class Mesh(object):
         plt.show()
 
     def write_vtk(self, filepath, **kwargs):
-        """ TODO """
+        """Write the contents of this mesh to a VTK file."""
 
         # Object to store VKT data and write it to file.
         vtkwriter = VTKWriter()
