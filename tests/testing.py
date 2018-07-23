@@ -507,6 +507,33 @@ class TestMeshpy(unittest.TestCase):
                 string2 = r_file.read().strip()
             self.compare_strings('test_vtk_writer', string1, string2)
 
+    def test_vtk_writer_beam(self):
+        """Create a sample mesh and check the VTK output."""
+
+        # Create the mesh.
+        mesh = Mesh()
+
+        # Add content to the mesh.
+        mat = Material('Material', 1., 1., 1., 0.1)
+        mesh.create_beam_mesh_honeycomb(Beam3rHerm2Lin3, mat, 2., 5, 3, 2)
+
+        # Write VTK output."""
+        ref_file = os.path.join(testing_input, 'vtk_writer_beam_test_ref.vtu')
+        vtk_file = os.path.join(testing_temp, 'vtk_writer_beam_test.vtu')
+        mesh.write_vtk(os.path.join(testing_temp, vtk_file), ascii=True)
+
+        # Compare.
+        if compare_xml(ref_file, vtk_file):
+            self.assertTrue(True, '')
+        else:
+            # If the trivial compare CML function fails, compare the full
+            # strings to see the differences.
+            with open(ref_file, 'r') as r_file:
+                string1 = r_file.read().strip()
+            with open(vtk_file, 'r') as r_file:
+                string2 = r_file.read().strip()
+            self.compare_strings('test_vtk_writer_beam', string1, string2)
+
 
 class TestFullBaci(unittest.TestCase):
     """
