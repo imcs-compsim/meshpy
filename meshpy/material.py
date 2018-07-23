@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-This module implements a basic class to manage materials in the baci input file.
+This module implements a basic class to manage materials in the baci input
+file.
 """
 
 # Python modules.

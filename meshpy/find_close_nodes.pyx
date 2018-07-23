@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-This script contains functions that calculate points that are close together. It
-uses cython to gain performance.
+This script contains functions that calculate points that are close together.
+It uses cython to gain performance.
 """
 
 

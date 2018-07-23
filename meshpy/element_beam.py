@@ -25,8 +25,8 @@ class Beam(Element):
 
     def create_beam(self, beam_function, start_node=None):
         """
-        Create the nodes for this beam element. The function returns a list with
-        the created nodes.
+        Create the nodes for this beam element. The function returns a list
+        with the created nodes.
 
         Args
         ----
@@ -46,7 +46,8 @@ class Beam(Element):
                     - start_node.coordinates) > mpy.eps_pos:
                 raise ValueError('Start node does not match with function!')
             if not start_node.rotation == rot:
-                raise ValueError('Start rotation does not match with function!')
+                raise ValueError('Start rotation does not match with '
+                    + 'function!')
             self.nodes = [start_node]
 
         # Loop over local nodes.
@@ -80,7 +81,8 @@ class Beam(Element):
 
     def get_vtk(self, vtk_writer):
         """
-        Add the representation of this element to the VTK writer as a poly line.
+        Add the representation of this element to the VTK writer as a poly
+        line.
         """
 
         # Dictionary with cell data.

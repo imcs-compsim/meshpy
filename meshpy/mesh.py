@@ -177,8 +177,8 @@ class Mesh(object):
         Args
         ----
         rotation: Rotation, list(quaternions) (nx4)
-            The rotation that will be applies to the nodes. Can also be an array
-            with a quaternion for each node.
+            The rotation that will be applies to the nodes. Can also be an
+            array with a quaternion for each node.
         origin: 3D vector
             If this is given, the mesh is rotated about this point. Default is
             (0,0,0)
@@ -219,13 +219,20 @@ class Mesh(object):
         tmp[7]=rot2[3]**2
         tmp[8]=2*10**0*rot2[0]*rot2[1]
         tmp[9]=2*10**0*rot2[2]*rot2[3]
-        posnew[:,0]=(tmp[5]-tmp[7]+tmp[10])*pos[:,0]+(tmp[0]-tmp[1])*pos[:,1]+(tmp[2]+tmp[3])*pos[:,2]
-        posnew[:,1]=(tmp[0]+tmp[1])*pos[:,0]+(tmp[4]-tmp[5]+tmp[6]-tmp[7])*pos[:,1]+(-tmp[8]+tmp[9])*pos[:,2]
-        posnew[:,2]=(-tmp[2]+tmp[3])*pos[:,0]+(tmp[8]+tmp[9])*pos[:,1]+(-tmp[5]+tmp[7]+tmp[10])*pos[:,2]
-        rotnew[:,0]=rot1[:,0]*rot2[0]-rot1[:,1]*rot2[1]-rot1[:,2]*rot2[2]-rot1[:,3]*rot2[3]
-        rotnew[:,1]=rot1[:,1]*rot2[0]+rot1[:,0]*rot2[1]+rot1[:,3]*rot2[2]-rot1[:,2]*rot2[3]
-        rotnew[:,2]=rot1[:,2]*rot2[0]-rot1[:,3]*rot2[1]+rot1[:,0]*rot2[2]+rot1[:,1]*rot2[3]
-        rotnew[:,3]=rot1[:,3]*rot2[0]+rot1[:,2]*rot2[1]-rot1[:,1]*rot2[2]+rot1[:,0]*rot2[3]
+        posnew[:,0]=(tmp[5]-tmp[7]+tmp[10])*pos[:,0]+(tmp[0]-tmp[1])*pos[:,1]+(
+            tmp[2]+tmp[3])*pos[:,2]
+        posnew[:,1]=(tmp[0]+tmp[1])*pos[:,0]+(tmp[4]-tmp[5]+tmp[6]-tmp[7])* \
+            pos[:,1]+(-tmp[8]+tmp[9])*pos[:,2]
+        posnew[:,2]=(-tmp[2]+tmp[3])*pos[:,0]+(tmp[8]+tmp[9])*pos[:,1]+(
+            -tmp[5]+tmp[7]+tmp[10])*pos[:,2]
+        rotnew[:,0]=rot1[:,0]*rot2[0]-rot1[:,1]*rot2[1]-rot1[:,2]* \
+            rot2[2]-rot1[:,3]*rot2[3]
+        rotnew[:,1]=rot1[:,1]*rot2[0]+rot1[:,0]*rot2[1]+rot1[:,3]* \
+            rot2[2]-rot1[:,2]*rot2[3]
+        rotnew[:,2]=rot1[:,2]*rot2[0]-rot1[:,3]*rot2[1]+rot1[:,0]* \
+            rot2[2]+rot1[:,1]*rot2[3]
+        rotnew[:,3]=rot1[:,3]*rot2[0]+rot1[:,2]*rot2[1]-rot1[:,1]* \
+            rot2[2]+rot1[:,0]*rot2[3]
 
         if origin is not None:
             posnew += origin
@@ -239,8 +246,8 @@ class Mesh(object):
 
     def wrap_around_cylinder(self):
         """
-        Wrap the geometry around a cylinder. The y-z plane gets morphed into the
-        axis of symmetry.
+        Wrap the geometry around a cylinder. The y-z plane gets morphed into
+        the axis of symmetry.
         """
 
         pos = self.get_global_coordinates()
@@ -406,8 +413,8 @@ class Mesh(object):
             Material for this line.
         function: function
             3D-parametric curve that represents the beam axis. If only a 2D
-            point is returned, the triad creation is simplified. If mathematical
-            functions are used, they have to come from the wrapper
+            point is returned, the triad creation is simplified. If
+            mathematical functions are used, they have to come from the wrapper
             autograd.numpy.
         interval: [start end]
             Start and end values for the parameter of the curve.
@@ -415,8 +422,8 @@ class Mesh(object):
             Number of equally spaces beam elements along the line.
         function_rotation: function
             If this argument is given, the triads are computed with this
-            function, on the same interval as the position function. Must return
-            a Rotation object.
+            function, on the same interval as the position function. Must
+            return a Rotation object.
         """
 
         # Packages for AD and numerical integration.
@@ -481,7 +488,8 @@ class Mesh(object):
 
         def get_beam_functions(length_a, length_b):
             """
-            Return a function for the position and rotation along the beam axis.
+            Return a function for the position and rotation along the beam
+            axis.
             """
 
             # Length of the beam element in physical space.
@@ -570,8 +578,8 @@ class Mesh(object):
             t_start_element = t_temp
             t2_temp = nodes[-1].rotation.get_rotation_matrix()[:, 1]
 
-        # Set the nodes that are at the beginning and end of line (for search of
-        # overlapping points)
+        # Set the nodes that are at the beginning and end of line (for search
+        # of overlapping points)
         nodes[0].is_end_node = True
         nodes[-1].is_end_node = True
 
@@ -623,7 +631,8 @@ class Mesh(object):
 
         def get_beam_geometry(point_a, point_b):
             """
-            Return a function for the position and rotation along the beam axis.
+            Return a function for the position and rotation along the beam
+            axis.
             """
             def beam_function(xi):
                 return (
@@ -665,8 +674,8 @@ class Mesh(object):
             nodes.extend(elements[-1].create_beam(function,
                 start_node=first_node))
 
-        # Set the nodes that are at the beginning and end of line (for search of
-        # overlapping points)
+        # Set the nodes that are at the beginning and end of line (for search
+        # of overlapping points)
         nodes[0].is_end_node = True
         nodes[-1].is_end_node = True
 
@@ -756,8 +765,8 @@ class Mesh(object):
                 base_zig_zag = (base_row + direction * zig_zag_y
                     + width * i_width * nx)
 
-                # Do not add a zig-zag line on the last run (that one is only for
-                # the remaining vertical lines).
+                # Do not add a zig-zag line on the last run (that one is only
+                # for the remaining vertical lines).
                 if i_width < n_width:
                     add_line(
                         base_zig_zag,

@@ -298,7 +298,8 @@ class TestMeshpy(unittest.TestCase):
         inside a mesh section.
         """
 
-        ref_file = os.path.join(testing_input, 'comments_in_input_file_ref.dat')
+        ref_file = os.path.join(
+            testing_input, 'comments_in_input_file_ref.dat')
         solid_file = os.path.join(testing_input, 'comments_in_input_file.dat')
         mesh = InputFile(dat_file=solid_file)
 
@@ -430,7 +431,8 @@ class TestMeshpy(unittest.TestCase):
             bc_type=mpy.neumann))
 
         # Check the output.
-        ref_file = os.path.join(testing_input, 'curve_3d_line_rotation_ref.dat')
+        ref_file = os.path.join(
+            testing_input, 'curve_3d_line_rotation_ref.dat')
         string2 = input_file.get_string(header=False).strip()
         with open(ref_file, 'r') as r_file:
             string1 = r_file.read().strip()
@@ -475,7 +477,8 @@ class TestMeshpy(unittest.TestCase):
                 [1, 2, 0.5],
                 [0, 2.25, 0],
                 [0, 1, 0.5]
-            ], [0, 2, 4, 6, 1, 3, 5, 7], cell_data=cell_data, point_data=point_data)
+            ], [0, 2, 4, 6, 1, 3, 5, 7],
+            cell_data=cell_data, point_data=point_data)
 
         # Add tetraeder.
         cell_data = {}
@@ -830,8 +833,8 @@ class TestFullBaci(unittest.TestCase):
                         bc_type=mpy.dirichlet))
                 mesh.add(
                     BoundaryCondition(honeycomb_set['top'],
-                        'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL '
-                        + '{1} {1} {1} 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
+                        'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL {1} {1} {1} '
+                        + '0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
                         format_replacement=[ft[counter], 0.0001],
                         bc_type=mpy.neumann,
                         double_nodes=mpy.double_nodes_remove))

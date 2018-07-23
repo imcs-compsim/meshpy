@@ -41,7 +41,8 @@ class Rotation(object):
                 self.q[1:] = np.sin(0.5 * phi) * \
                     np.array(vector) / norm
         else:
-            raise ValueError('The given arguments {} are invalid!'.format(args))
+            raise ValueError(
+                'The given arguments {} are invalid!'.format(args))
 
     @classmethod
     def from_rotation_matrix(cls, R):
@@ -63,7 +64,8 @@ class Rotation(object):
     def from_basis(cls, t1, t2):
         """
         Create the object from two basis vectors t1, t2.
-        t2 will be orthogonalized on t1, and t3 will be calculated with the cross product.
+        t2 will be orthogonalized on t1, and t3 will be calculated with the
+        cross product.
         """
 
         t1_normal = t1 / np.linalg.norm(t1)

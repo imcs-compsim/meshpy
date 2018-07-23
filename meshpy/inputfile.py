@@ -30,11 +30,11 @@ class InputLine(object):
         ----
         args: str
             First the string is checked for a comment at the end of it. Then
-            the remaining string will be searched for an equal sign and if found
-            split up at that sign. Otherwise it will be checked how many parts
-            separated by spaces there are in the string. If there are exactly
-            two parts, the first one will be the option_name the second one the
-            option_value.
+            the remaining string will be searched for an equal sign and if
+            found split up at that sign. Otherwise it will be checked how many
+            parts separated by spaces there are in the string. If there are
+            exactly two parts, the first one will be the option_name the second
+            one the option_value.
         args: (str, str)
             The first one will be the option_name the second one the
             option_value.
@@ -318,8 +318,8 @@ class InputFile(Mesh):
             def group_input_comments(section_data):
                 """
                 Group the section data in relevant input data and comment /
-                empty lines. The comments at the end of the section are lost, as
-                it is not clear where they belong to.
+                empty lines. The comments at the end of the section are lost,
+                as it is not clear where they belong to.
                 """
 
                 group_list = []
@@ -341,7 +341,8 @@ class InputFile(Mesh):
                 for i, [item, comments] in enumerate(section_data_comment):
                     # The first line is the number of BCs and will be skipped.
                     if i > 0:
-                        for key, value in self.boundary_condition_names.items():
+                        for key, value in \
+                                self.boundary_condition_names.items():
                             if value == section_header:
                                 (bc_key, geometry_key) = key
                                 break
@@ -365,8 +366,8 @@ class InputFile(Mesh):
                         )
 
                 if len(section_data_comment) > 0:
-                    # Add the individual sets to the object. For that loop until
-                    # a new set index is reached.
+                    # Add the individual sets to the object. For that loop
+                    # until a new set index is reached.
                     last_index = 1
                     dat_list = []
                     current_comments = []
@@ -494,7 +495,8 @@ class InputFile(Mesh):
         # Add sets from couplings and boundary conditions to a temp container.
         mesh_sets = self.geometry_sets.copy()
         for coupling in self.couplings:
-            mesh_sets[coupling.node_set.geometry_type].append(coupling.node_set)
+            mesh_sets[coupling.node_set.geometry_type].append(
+                coupling.node_set)
         for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
             for bc in bc_list:
                 if not bc.is_dat:
@@ -504,7 +506,8 @@ class InputFile(Mesh):
 
         def get_section_dat(section_name, data_list, header_lines=None):
             """
-            Output a section name and apply the get_dat_line for each list item.
+            Output a section name and apply the get_dat_line for each list
+            item.
             """
             lines.append(get_section_string(section_name))
             if header_lines:

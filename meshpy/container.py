@@ -15,8 +15,8 @@ class GeometryName(dict):
     """
     Group node geometry sets together. This is mainly used for export from mesh
     functions. The sets can be accessed by a unique name. There is no
-    distinction between different types of geometry, every name can only be used
-    once -> use meaningful names.
+    distinction between different types of geometry, every name can only be
+    used once -> use meaningful names.
     """
 
     def __setitem__(self, key, value):

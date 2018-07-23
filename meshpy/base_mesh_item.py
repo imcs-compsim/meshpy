@@ -38,8 +38,8 @@ class BaseMeshItem(object):
 
     def get_dat_lines(self, **kwargs):
         """
-        Return the content of this object as a list. If comments exist, also add
-        those.
+        Return the content of this object as a list. If comments exist, also
+        add those.
         """
 
         # Get data of object.
