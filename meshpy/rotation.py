@@ -50,7 +50,7 @@ class Rotation(object):
         Create the object from a rotation matrix.
         """
 
-        rot = Rotation()
+        rot = cls()
         rot.q[0] = np.sqrt(max(0, 1 + R[0, 0] + R[1, 1] + R[2, 2])) / 2
         rot.q[1] = np.sqrt(max(0, 1 + R[0, 0] - R[1, 1] - R[2, 2])) / 2
         rot.q[2] = np.sqrt(max(0, 1 - R[0, 0] + R[1, 1] - R[2, 2])) / 2

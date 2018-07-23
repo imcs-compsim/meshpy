@@ -27,6 +27,9 @@ class MeshPy(object):
         # Values for the formating of the input file.
         self.dat_len_section = 80
 
+        # Import meshes as pure dat or import the geometry.
+        self.import_mesh_full = False
+
         # Geometry types.
         self.point = 'geometry_point'
         self.line = 'geometry_line'

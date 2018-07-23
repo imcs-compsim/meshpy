@@ -9,7 +9,7 @@ import re
 from _collections import OrderedDict
 
 # Meshpy modules.
-from . import mpy, Mesh, BaseMeshItem
+from . import mpy, Mesh, BaseMeshItem, Node, Element
 
 
 def get_section_string(section_name):
@@ -395,10 +395,16 @@ class InputFile(Mesh):
                     add_line(self.materials, line)
             elif section_name == 'NODE COORDS':
                 for line in section_data_comment:
-                    add_line(self.nodes, line)
+                    if mpy.import_mesh_full:
+                        self.nodes.append(Node.from_dat(line))
+                    else:
+                        add_line(self.nodes, line)
             elif section_name == 'STRUCTURE ELEMENTS':
                 for line in section_data_comment:
-                    add_line(self.elements, line)
+                    if mpy.import_mesh_full:
+                        self.elements.append(Element.from_dat(line, self))
+                    else:
+                        add_line(self.elements, line)
             elif section_name.startswith('FUNCT'):
                 self.functions.append(BaseMeshItem(section_data))
             elif section_name.endswith('CONDITIONS'):

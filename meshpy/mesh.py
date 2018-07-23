@@ -8,6 +8,7 @@ sets, ...) for a meshed geometry.
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+import os
 from _collections import OrderedDict
 
 # Meshpy modules.
@@ -429,21 +430,33 @@ class Mesh(object):
         ax.set_zlabel('Z')
         plt.show()
 
-    def write_vtk(self, filepath, **kwargs):
+    def write_vtk(self, output_directory, output_name, **kwargs):
         """Write the contents of this mesh to a VTK file."""
 
         # Object to store VKT data and write it to file.
-        vtkwriter = VTKWriter()
+        vtkwriter_beam = VTKWriter()
+        vtkwriter_solid = VTKWriter()
 
         # Get the set numbers of the mesh
         self.get_unique_geometry_sets(link_nodes=True)
 
         # Get representation of elements.
         for element in self.elements:
-            element.get_vtk(vtkwriter)
+            element.get_vtk(vtkwriter_beam, vtkwriter_solid)
 
-        # Write to file
-        vtkwriter.write_vtk(filepath, **kwargs)
+        # Write to file, only if there is at least one point in the writer.
+        if (vtkwriter_beam.points.GetNumberOfPoints() > 0):
+            filepath = os.path.join(
+                output_directory,
+                output_name + '_beam.vtu'
+                )
+            vtkwriter_beam.write_vtk(filepath, **kwargs)
+        if (vtkwriter_solid.points.GetNumberOfPoints() > 0):
+            filepath = os.path.join(
+                output_directory,
+                output_name + '_solid.vtu'
+                )
+            vtkwriter_solid.write_vtk(filepath, **kwargs)
 
     def create_beam_mesh_curve(self, beam_object, material, function, interval,
             n_el=1, function_rotation=None, add_sets=False):

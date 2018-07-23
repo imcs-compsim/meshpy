@@ -16,12 +16,16 @@ class Node(BaseMeshItem):
     and can be rotated moved and so on.
     """
 
-    def __init__(self, coordinates, rotation=None, is_middle_node=False):
-        BaseMeshItem.__init__(self, data=None, is_dat=False)
+    def __init__(self, coordinates, rotation=None, is_middle_node=False,
+                is_dat=False):
+        BaseMeshItem.__init__(self, data=None, is_dat=is_dat)
 
         # Coordinates and rotation of this node.
         self.coordinates = np.array(coordinates)
-        self.rotation = rotation.copy()
+        if rotation is None:
+            self.rotation = None
+        else:
+            self.rotation = rotation.copy()
 
         # If this node is at the end of a line or curve (by default only those
         # nodes are checked for overlapping nodes).
@@ -32,6 +36,16 @@ class Node(BaseMeshItem):
 
         # Lists with the node sets that are connected to this node.
         self.node_sets_link = []
+
+    @classmethod
+    def from_dat(cls, input_line):
+        """TODO"""
+
+        # Split up the input line.
+        line_split = input_line[0].split()
+
+        # Convert the node coordinates into a Node object.
+        return cls([float(line_split[i]) for i in range(3, 6)], is_dat=True)
 
     def rotate(self, rotation, origin=None, only_rotate_triads=False):
         """

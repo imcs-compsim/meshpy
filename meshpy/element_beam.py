@@ -79,7 +79,7 @@ class Beam(Element):
         coordinates = np.array([node.coordinates for node in self.nodes])
         ax.plot(coordinates[:, 0], coordinates[:, 1], coordinates[:, 2], '-x')
 
-    def get_vtk(self, vtk_writer):
+    def get_vtk(self, vtkwriter_beam, vtkwriter_solid):
         """
         Add the representation of this element to the VTK writer as a poly
         line.
@@ -114,7 +114,7 @@ class Beam(Element):
         vtk_writer.add_point_data_node_sets(point_data, self.nodes)
 
         # Add poly line to writer.
-        vtk_writer.add_poly_line(coordinates, cell_data=cell_data,
+        vtkwriter_beam.add_poly_line(coordinates, cell_data=cell_data,
             point_data=point_data)
 
 

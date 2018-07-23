@@ -68,6 +68,15 @@ class VTKWriter(object):
         # Add cell.
         self._add_cell(vtk.vtkPolyLine, coordinates, topology, **kwargs)
 
+    def add_hex8(self, coordinates, **kwargs):
+        """Add a hex8 cell."""
+
+        # Connectivity of points in cell.
+        topology = list(range(len(coordinates)))
+
+        # Add cell.
+        self._add_cell(vtk.vtkHexahedron, coordinates, topology, **kwargs)
+
     def _add_cell(self, cell_type, coordinates, topology, cell_data=None,
             point_data=None):
         """

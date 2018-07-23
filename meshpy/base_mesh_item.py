@@ -32,7 +32,7 @@ class BaseMeshItem(object):
         else:
             self.comments = comments
 
-    def get_vtk(self, vtk_writer):
+    def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
         """Add representation of this object to a vtk_writer."""
         pass
 
