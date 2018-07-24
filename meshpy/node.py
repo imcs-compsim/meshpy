@@ -39,7 +39,7 @@ class Node(BaseMeshItem):
 
     @classmethod
     def from_dat(cls, input_line):
-        """TODO"""
+        """Create the Node object from a line in the input file."""
 
         # Split up the input line.
         line_split = input_line[0].split()
