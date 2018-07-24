@@ -27,7 +27,8 @@ class GeometryName(dict):
         elif isinstance(value, GeometrySet):
             dict.__setitem__(self, key, value)
         else:
-            raise ValueError('TODO')
+            raise NotImplementedError('TODO: This case needs to be '
+                + 'implemented')
             dict.__setitem__(self, key, GeometrySet(nodes=value))
 
 

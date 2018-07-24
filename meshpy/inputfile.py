@@ -493,16 +493,7 @@ class InputFile(Mesh):
             set_n_global(self.boundary_conditions[key])
 
         # Add sets from couplings and boundary conditions to a temp container.
-        mesh_sets = self.geometry_sets.copy()
-        for coupling in self.couplings:
-            mesh_sets[coupling.node_set.geometry_type].append(
-                coupling.node_set)
-        for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
-            for bc in bc_list:
-                if not bc.is_dat:
-                    mesh_sets[geom_key].append(bc.geometry_set)
-        for item in mesh_sets.values():
-            set_n_global(item)
+        mesh_sets = self.get_unique_geometry_sets()
 
         def get_section_dat(section_name, data_list, header_lines=None):
             """

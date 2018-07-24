@@ -640,7 +640,8 @@ class TestFullBaci(unittest.TestCase):
         # Create the honeycomb mesh.
         mesh_honeycomb = Mesh()
         honeycomb_set = mesh_honeycomb.create_beam_mesh_honeycomb(
-            Beam3rHerm2Lin3, material, 50.0, 10, 4, 1, closed_top=False)
+            Beam3rHerm2Lin3, material, 50.0, 10, 4, 1, closed_top=False,
+            add_sets=True)
         mesh_honeycomb.rotate(Rotation([0, 0, 1], 0.5 * np.pi))
 
         # Functions for the boundary conditions

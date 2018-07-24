@@ -8,6 +8,7 @@ sets, ...) for a meshed geometry.
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
+from _collections import OrderedDict
 
 # Meshpy modules.
 from . import mpy, Rotation, Function, Material, Node, Element, \
@@ -58,6 +59,8 @@ class Mesh(object):
                 self.add_element(add_item, **kwargs)
             elif isinstance(add_item, GeometrySet):
                 self.add_geometry_set(add_item, **kwargs)
+            elif isinstance(add_item, GeometryName):
+                self.add_geometry_name(add_item, **kwargs)
             elif isinstance(add_item, Coupling):
                 self.add_coupling(add_item, **kwargs)
             elif isinstance(add_item, list):
@@ -122,8 +125,48 @@ class Mesh(object):
 
     def add_geometry_set(self, geometry_set):
         """Add a geometry set to this mesh."""
-        if geometry_set not in self.sets[geometry_set.geometry_type]:
-            self.sets[geometry_set.geometry_type].append(geometry_set)
+        if geometry_set not in self.geometry_sets[geometry_set.geometry_type]:
+            self.geometry_sets[geometry_set.geometry_type].append(geometry_set)
+
+    def add_geometry_name(self, geometry_name):
+        """Add a set of geometry sets to this mesh."""
+        for key, value in geometry_name.items():
+            self.add(value)
+
+    def get_unique_geometry_sets(self, link_nodes=False):
+        """TODO"""
+
+        if link_nodes:
+            # First clear all links in existing nodes.
+            for node in self.nodes:
+                node.node_sets_link = []
+
+        # If all sets are wanted, make a copy of the sets in this mesh,
+        # otherwise start with a new container.
+        mesh_sets = self.geometry_sets.copy()
+
+        # Add sets from couplings and boundary conditions.
+        for coupling in self.couplings:
+            mesh_sets[coupling.node_set.geometry_type].append(
+                coupling.node_set)
+        for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
+            for bc in bc_list:
+                if not bc.is_dat:
+                    mesh_sets[geom_key].append(bc.geometry_set)
+
+        for key in mesh_sets.keys():
+            # Remove double node sets in the container.
+            mesh_sets[key] = list(OrderedDict.fromkeys(mesh_sets[key]))
+
+            for i, geometry_set in enumerate(mesh_sets[key]):
+                # Add global indices to the geometry set.
+                geometry_set.n_global = i + 1
+
+                if link_nodes and not geometry_set.is_dat:
+                    for node in geometry_set:
+                        node.node_sets_link.append(geometry_set)
+
+        return mesh_sets
 
     def get_global_coordinates(self, nodes=None):
         """
@@ -400,7 +443,7 @@ class Mesh(object):
         vtkwriter.write_vtk(filepath, **kwargs)
 
     def create_beam_mesh_curve(self, beam_object, material, function, interval,
-            n_el=1, function_rotation=None):
+            n_el=1, function_rotation=None, add_sets=False):
         """
         Generate a beam from a parametric curve. Integration along the beam is
         performed with scipy, and the gradient is calculated with autograd.
@@ -424,6 +467,16 @@ class Mesh(object):
             If this argument is given, the triads are computed with this
             function, on the same interval as the position function. Must
             return a Rotation object.
+        add_sets: bool
+            If this is true the sets are added to the mesh and then displayed
+            in eventual VTK output, even if they are not used for a boundary
+            condition or coupling.
+
+        Return
+        ----
+        return_set: GeometryName
+            Set with the 'start' and 'end' node of the curve. Also a 'line' set
+            with all nodes of the curve.
         """
 
         # Packages for AD and numerical integration.
@@ -591,11 +644,13 @@ class Mesh(object):
         return_set = GeometryName()
         return_set['start'] = GeometrySet(mpy.point, nodes=nodes[0])
         return_set['end'] = GeometrySet(mpy.point, nodes=nodes[-1])
-        return_set['line'] = GeometrySet(mpy.point, nodes=nodes)
+        return_set['line'] = GeometrySet(mpy.line, nodes=nodes)
+        if add_sets:
+            self.add(return_set)
         return return_set
 
     def create_beam_mesh_line(self, beam_object, material, start_point,
-            end_point, n_el=1, start_node=None):
+            end_point, n_el=1, start_node=None, add_sets=False):
         """
         Generate a straight line of beam elements.
 
@@ -614,6 +669,16 @@ class Mesh(object):
             is connected to other lines (angles have to be the same, otherwise
             connections should be used). If a geometry set is given, it can
             contain one, and one node only.
+        add_sets: bool
+            If this is true the sets are added to the mesh and then displayed
+            in eventual VTK output, even if they are not used for a boundary
+            condition or coupling.
+
+        Return
+        ----
+        return_set: GeometryName
+            Set with the 'start' and 'end' node of the line. Also a 'line' set
+            with all nodes of the line.
         """
 
         self.add_material(material)
@@ -690,12 +755,14 @@ class Mesh(object):
         return_set = GeometryName()
         return_set['start'] = GeometrySet(mpy.point, nodes=nodes[0])
         return_set['end'] = GeometrySet(mpy.point, nodes=nodes[-1])
-        return_set['line'] = GeometrySet(mpy.point, nodes=nodes)
+        return_set['line'] = GeometrySet(mpy.line, nodes=nodes)
+        if add_sets:
+            self.add(return_set)
         return return_set
 
     def create_beam_mesh_honeycomb_flat(self, beam_object, material, width,
             n_width, n_height, n_el=1, closed_width=True, closed_height=True,
-            create_couplings=True):
+            create_couplings=True, add_sets=False):
         """
         Add a flat honeycomb structure. The structure will be created in the
         x-y plane.
@@ -720,12 +787,17 @@ class Mesh(object):
             If the last vertical lines in y-direction will be created.
         create_couplings: bool
             If the nodes will be connected in this function.
+        add_sets: bool
+            If this is true the sets are added to the mesh and then displayed
+            in eventual VTK output, even if they are not used for a boundary
+            condition or coupling.
 
         Return
         ----
         return_set: GeometryName
-            Set with nodes on the north, south, east and west boundaries. This
-            set only contains end nodes of lines.
+            Set with nodes on the north, south, east and west boundaries. Those
+            sets only contains end nodes of lines, not the middle ones. The set
+            'all' contains all nodes.
         """
 
         def add_line(pointa, pointb):
@@ -794,9 +866,11 @@ class Mesh(object):
                             )
 
         # List of nodes from the honeycomb that are candidates for connections.
-        honeycomb_nodes = [
+        honeycomb_nodes_all = [
             self.nodes[i] for i in range(i_node_start, len(self.nodes))
-            if self.nodes[i].is_end_node
+            ]
+        honeycomb_nodes = [
+            node for node in honeycomb_nodes_all if node.is_end_node
             ]
 
         # Add connections for the nodes with same positions.
@@ -812,10 +886,14 @@ class Mesh(object):
         return_set['east'] = min_max_nodes['x_max']
         return_set['south'] = min_max_nodes['y_min']
         return_set['west'] = min_max_nodes['x_min']
+        return_set['all'] = GeometrySet(mpy.line, honeycomb_nodes_all)
+        if add_sets:
+            self.add(return_set)
         return return_set
 
     def create_beam_mesh_honeycomb(self, beam_object, material, diameter,
-            n_circumference, n_axis, n_el=1, closed_top=True, vertical=True):
+            n_circumference, n_axis, n_el=1, closed_top=True, vertical=True,
+            add_sets=False):
         """
         Add a honeycomb structure around a cylinder. The cylinder axis will be
         the z-axis.
@@ -839,12 +917,17 @@ class Mesh(object):
             If the last honeycombs in axial-direction will be closed.
         vertical: bool
             If there are vertical lines in the honeycomb or horizontal.
+        add_sets: bool
+            If this is true the sets are added to the mesh and then displayed
+            in eventual VTK output, even if they are not used for a boundary
+            condition or coupling.
 
         Return
         ----
         return_set: GeometryName
-            Set with nodes top and bottom nodes. This will only contains end
-            nodes of lines.
+            Set with nodes on the north, south, east and west boundaries. Those
+            sets only contains end nodes of lines, not the middle ones. The set
+            'all' contains all nodes.
         """
 
         # Calculate the input values for the flat honeycomb mesh.
@@ -884,17 +967,23 @@ class Mesh(object):
         mesh_temp.translate([diameter / 2, 0, 0])
         mesh_temp.wrap_around_cylinder()
 
-        # Add connections to the mesh.
-        mesh_temp.couple_nodes()
+        # Add connections for the nodes with same positions.
+        honeycomb_nodes = [
+            node for node in mesh_temp.nodes if node.is_end_node
+            ]
+        mesh_temp.couple_nodes(nodes=honeycomb_nodes)
 
         # Return the geometry set'
         return_set = GeometryName()
+        return_set['all'] = honeycomb_sets['all']
         if vertical:
             return_set['top'] = honeycomb_sets['north']
             return_set['bottom'] = honeycomb_sets['south']
         else:
             return_set['top'] = honeycomb_sets['east']
             return_set['bottom'] = honeycomb_sets['west']
+        if add_sets:
+            self.add(return_set)
 
         # Add to this mesh
         self.add_mesh(mesh_temp)

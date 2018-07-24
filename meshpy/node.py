@@ -30,6 +30,9 @@ class Node(BaseMeshItem):
         # If the node is in the middle of a beam element.
         self.is_middle_node = is_middle_node
 
+        # Lists with the node sets that are connected to this node.
+        self.node_sets_link = []
+
     def rotate(self, rotation, origin=None, only_rotate_triads=False):
         """
         Rotate this node. By default the node is rotated around the origin
