@@ -10,8 +10,8 @@ from . import BaseMeshItem
 class Element(BaseMeshItem):
     """A base class for an FEM element in the mesh."""
 
-    def __init__(self, nodes=None, material=None, is_dat=False):
-        BaseMeshItem.__init__(self, data=None, is_dat=is_dat)
+    def __init__(self, nodes=None, material=None, is_dat=False, **kwargs):
+        BaseMeshItem.__init__(self, data=None, is_dat=is_dat, **kwargs)
 
         # List of nodes that are connected to the element.
         if nodes is None:
@@ -50,7 +50,7 @@ class Element(BaseMeshItem):
         # Depending on the number of nodes chose which solid element to return.
         if len(element_nodes) == 8:
             return SolidHEX8(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes)
+                dat_post_nodes=dat_post_nodes, comments=input_line[1])
         elif len(element_nodes) == 1:
             return SolidRigidSphere(nodes=element_nodes,
                 dat_pre_nodes=dat_pre_nodes, dat_post_nodes=dat_post_nodes)

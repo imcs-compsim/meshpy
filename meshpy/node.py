@@ -17,8 +17,8 @@ class Node(BaseMeshItem):
     """
 
     def __init__(self, coordinates, rotation=None, is_middle_node=False,
-                is_dat=False):
-        BaseMeshItem.__init__(self, data=None, is_dat=is_dat)
+                is_dat=False, **kwargs):
+        BaseMeshItem.__init__(self, data=None, is_dat=is_dat, **kwargs)
 
         # Coordinates and rotation of this node.
         self.coordinates = np.array(coordinates)
@@ -45,7 +45,8 @@ class Node(BaseMeshItem):
         line_split = input_line[0].split()
 
         # Convert the node coordinates into a Node object.
-        return cls([float(line_split[i]) for i in range(3, 6)], is_dat=True)
+        return cls([float(line_split[i]) for i in range(3, 6)], is_dat=True,
+            comments=input_line[1])
 
     def rotate(self, rotation, origin=None, only_rotate_triads=False):
         """

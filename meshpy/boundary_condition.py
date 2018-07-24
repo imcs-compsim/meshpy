@@ -14,7 +14,7 @@ class BoundaryCondition(BaseMeshItem):
     """This object represents one boundary condition in the input file."""
 
     def __init__(self, geometry_set, bc_string, format_replacement=None,
-            bc_type=None, **kwargs):
+            bc_type=None, comments=None, **kwargs):
         """
         Initialize the object.
 
@@ -31,7 +31,7 @@ class BoundaryCondition(BaseMeshItem):
             Type of the boundary condition (dirichlet or neumann).
         """
 
-        BaseMeshItem.__init__(self, is_dat=False)
+        BaseMeshItem.__init__(self, is_dat=False, comments=comments)
         self.bc_string = bc_string
         self.bc_type = bc_type
         self.format_replacement = format_replacement
@@ -41,14 +41,15 @@ class BoundaryCondition(BaseMeshItem):
         self._check_multiple_nodes(**kwargs)
 
     @classmethod
-    def from_dat(cls, bc_key, line, comments=None):
+    def from_dat(cls, bc_key, line, **kwargs):
         """TODO, maybe add comments"""
 
         # Split up the input line.
         split = line.split()
 
         # Set up class with values for solid mesh import
-        return cls(int(split[1]) - 1, ' '.join(split[3:]), bc_type=bc_key)
+        return cls(int(split[1]) - 1, ' '.join(split[3:]), bc_type=bc_key,
+            **kwargs)
 
     def _get_dat(self, **kwargs):
         """

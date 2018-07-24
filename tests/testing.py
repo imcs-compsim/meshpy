@@ -354,6 +354,18 @@ class TestMeshpy(unittest.TestCase):
             mesh_2.get_string(header=False))
 
     def test_comments_in_solid(self):
+        """Test case with full classical import."""
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_comments_in_input_file_reference.dat')
+        self.create_comments_in_solid(ref_file, False)
+
+    def test_comments_in_solid_full(self):
+        """Test case with full solid import."""
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_comments_in_input_file_full_reference.dat')
+        self.create_comments_in_solid(ref_file, True)
+
+    def create_comments_in_solid(self, ref_file, full_import):
         """
         Check if comments in the solid file are handled correctly if they are
         inside a mesh section.
@@ -361,10 +373,8 @@ class TestMeshpy(unittest.TestCase):
 
         # Set default values for global parameters.
         mpy.set_default_values()
-        mpy.import_mesh_full = False
+        mpy.import_mesh_full = full_import
 
-        ref_file = os.path.join(testing_input,
-            'test_meshpy_comments_in_input_file_reference.dat')
         solid_file = os.path.join(testing_input,
             'test_meshpy_comments_in_input_file.dat')
         mesh = InputFile(dat_file=solid_file)
@@ -378,8 +388,12 @@ class TestMeshpy(unittest.TestCase):
         mesh.add(BoundaryCondition(sets['end'], 'test', bc_type=mpy.neumann))
 
         # Compare the output of the mesh.
+        if full_import:
+            full_name = 'create_comments_in_solid_full'
+        else:
+            full_name = 'create_comments_in_solid'
         self.compare_strings(
-            'test_meshpy_comments_in_input_file',
+            full_name,
             ref_file,
             mesh.get_string(header=False).strip())
 

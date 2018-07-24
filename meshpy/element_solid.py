@@ -13,8 +13,10 @@ from . import mpy, Element, Node
 class SolidElement(Element):
     """A base class for a solid element."""
 
-    def __init__(self, nodes=None, dat_pre_nodes='', dat_post_nodes=''):
-        Element.__init__(self, nodes=nodes, material=None, is_dat=True)
+    def __init__(self, nodes=None, dat_pre_nodes='', dat_post_nodes='',
+            **kwargs):
+        Element.__init__(self, nodes=nodes, material=None, is_dat=True,
+            **kwargs)
         self.dat_pre_nodes = dat_pre_nodes
         self.dat_post_nodes = dat_post_nodes
 

@@ -18,8 +18,8 @@ class GeometrySet(BaseMeshItem):
         mpy.volume: 'DVOLUME'
         }
 
-    def __init__(self, geometry_type, nodes=None):
-        BaseMeshItem.__init__(self, is_dat=None)
+    def __init__(self, geometry_type, nodes=None, **kwargs):
+        BaseMeshItem.__init__(self, is_dat=None, **kwargs)
 
         self.geometry_type = geometry_type
         self.nodes = []
@@ -37,7 +37,7 @@ class GeometrySet(BaseMeshItem):
             nodes.append(int(line.split()[1]) - 1)
 
         # Set up class with values for solid mesh import
-        return cls(geometry_key, nodes=nodes)
+        return cls(geometry_key, nodes=nodes, comments=comments)
 
     def add(self, value):
         """
