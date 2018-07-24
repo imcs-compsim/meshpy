@@ -34,12 +34,6 @@ baci_path = '/home/ivo/baci/work/release'
 baci_release = os.path.join(baci_path, 'baci-release')
 
 
-def check_tmp_dir():
-    """Check if the temp directory exists, if not create it."""
-    if not os.path.exists(testing_temp):
-        os.makedirs(testing_temp)
-
-
 class TestRotation(unittest.TestCase):
     """This class tests the implementation of the Rotation class."""
 
@@ -642,7 +636,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file and read solid mesh data.
         input_file = InputFile()
-        input_file.read_dat(os.path.join(testing_input, 'tube.dat'))
+        input_file.read_dat(os.path.join(testing_input, 'baci_input_tube.dat'))
 
         # Write VTK output."""
         ref_file = os.path.join(testing_input,
@@ -683,7 +677,7 @@ class TestFullBaci(unittest.TestCase):
         """
 
         # Check if temp directory exists.
-        check_tmp_dir()
+        os.makedirs(testing_temp, exist_ok=True)
 
         # Create input file.
         input_file = os.path.join(testing_temp, name + '.dat')
@@ -737,8 +731,8 @@ class TestFullBaci(unittest.TestCase):
         input_file = InputFile(
             maintainer='Ivo Steinbrecher',
             description='honeycomb beam in contact with sphere',
-            dat_file=os.path.join(testing_input, 'honeycomb-sphere.dat')
-            )
+            dat_file=os.path.join(testing_input,
+                'baci_input_honeycomb_sphere.dat'))
 
         # Modify the time step options.
         input_file.add(InputSection(
@@ -827,7 +821,7 @@ class TestFullBaci(unittest.TestCase):
         input_file = InputFile(
             maintainer='Ivo Steinbrecher',
             description='Solid tube with beam tube')
-        input_file.read_dat(os.path.join(testing_input, 'tube.dat'))
+        input_file.read_dat(os.path.join(testing_input, 'baci_input_tube.dat'))
 
         # Add options for beam_output.
         input_file.add(InputSection(
