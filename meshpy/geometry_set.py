@@ -27,6 +27,18 @@ class GeometrySet(BaseMeshItem):
         if nodes is not None:
             self.add(nodes)
 
+    @classmethod
+    def from_dat(cls, geometry_key, lines, comments=None):
+        """TODO, maybe add comments"""
+
+        # Split up the input line.
+        nodes = []
+        for line in lines:
+            nodes.append(int(line.split()[1]) - 1)
+
+        # Set up class with values for solid mesh import
+        return cls(geometry_key, nodes=nodes)
+
     def add(self, value):
         """
         Add nodes to this object.
@@ -40,7 +52,7 @@ class GeometrySet(BaseMeshItem):
         if isinstance(value, list):
             for item in value:
                 self.add(item)
-        elif isinstance(value, Node):
+        elif isinstance(value, Node) or isinstance(value, int):
             if value not in self.nodes:
                 self.nodes.append(value)
             else:

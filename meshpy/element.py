@@ -23,7 +23,7 @@ class Element(BaseMeshItem):
         self.material = material
 
     @classmethod
-    def from_dat(cls, input_line, mesh):
+    def from_dat(cls, input_line):
         """Check the string to decide which element to use."""
 
         # Import solid element classes for creation of the element.
@@ -37,7 +37,7 @@ class Element(BaseMeshItem):
         element_nodes = []
         for i, item in enumerate(line_split[3:]):
             if item.isdigit():
-                element_nodes.append(mesh.nodes[int(item) - 1])
+                element_nodes.append(int(item) - 1)
             else:
                 break
         else:

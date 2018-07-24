@@ -3,6 +3,64 @@
   <UnstructuredGrid>
     <Piece NumberOfPoints="160" NumberOfCells="20">
       <PointData>
+        <DataArray type="Float64" Name="geometry_surface_set_1" format="ascii" RangeMin="0" RangeMax="1">
+          0 0 0 0 1 1
+          1 1 0 0 0 0
+          1 1 1 1 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0
+        </DataArray>
+        <DataArray type="Float64" Name="geometry_surface_set_2" format="ascii" RangeMin="0" RangeMax="1">
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          0 0 0 0 0 0
+          1 1 1 1 0 0
+          0 0 1 1 1 1
+          0 0 0 0
+        </DataArray>
       </PointData>
       <CellData>
       </CellData>
@@ -136,3 +194,4 @@
     </Piece>
   </UnstructuredGrid>
 </VTKFile>
+

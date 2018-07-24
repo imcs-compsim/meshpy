@@ -40,6 +40,16 @@ class BoundaryCondition(BaseMeshItem):
         # Check the parameters for this object.
         self._check_multiple_nodes(**kwargs)
 
+    @classmethod
+    def from_dat(cls, bc_key, line, comments=None):
+        """TODO, maybe add comments"""
+
+        # Split up the input line.
+        split = line.split()
+
+        # Set up class with values for solid mesh import
+        return cls(int(split[1]) - 1, ' '.join(split[3:]), bc_type=bc_key)
+
     def _get_dat(self, **kwargs):
         """
         Add the content of this object to the list of lines.
@@ -65,6 +75,10 @@ class BoundaryCondition(BaseMeshItem):
         Check for point Neumann boundaries that there is not a double
         Node in the set
         """
+
+        if isinstance(self.geometry_set, int):
+            # In the case of solid imports this is a integer at initialization.
+            return
 
         if double_nodes is mpy.double_nodes_keep:
             return

@@ -9,7 +9,8 @@ import re
 from _collections import OrderedDict
 
 # Meshpy modules.
-from . import mpy, Mesh, BaseMeshItem, Node, Element
+from . import mpy, Mesh, BaseMeshItem, Node, Element, BoundaryCondition, \
+    GeometrySet
 
 
 def get_section_string(section_name):
@@ -248,6 +249,9 @@ class InputFile(Mesh):
         # Dictionary for all sections other than mesh sections.
         self.sections = OrderedDict()
 
+        # Flag if dat file was loaded.
+        self._dat_file_loaded = False
+
         if dat_file is not None:
             self.read_dat(dat_file)
 
@@ -262,11 +266,40 @@ class InputFile(Mesh):
             object.
         """
 
+        if len(self.nodes) + len(self.elements) > 0:
+            raise RuntimeError('A dat file can only be loaded for an '
+                + 'empty mesh!')
+        if self._dat_file_loaded:
+            raise RuntimeError('It is not possible to import two dat files!')
+
         with open(file_path) as dat_file:
             lines = []
             for line in dat_file:
                 lines.append(line)
         self._add_dat_lines(lines)
+
+        if mpy.import_mesh_full:
+            # If the solid mesh is imported as objects, link the relevant data
+            # after the import.
+
+            # First link the nodes to the elements and sets.
+            for element in self.elements:
+                for i in range(len(element.nodes)):
+                    element.nodes[i] = self.nodes[element.nodes[i]]
+            for geometry_type_list in self.geometry_sets.values():
+                for geometry_set in geometry_type_list:
+                    for i in range(len(geometry_set.nodes)):
+                        geometry_set.nodes[i] = self.nodes[
+                            geometry_set.nodes[i]]
+
+            # Link the boundary conditions.
+            for bc_key, bc_list in self.boundary_conditions.items():
+                for boundary_condition in bc_list:
+                    geom_list = self.geometry_sets[bc_key[1]]
+                    geom_index = boundary_condition.geometry_set
+                    boundary_condition.geometry_set = geom_list[geom_index]
+
+        self._dat_file_loaded = True
 
     def _add_dat_lines(self, data, **kwargs):
         """Read lines of string into this object."""
@@ -341,14 +374,22 @@ class InputFile(Mesh):
                 for i, [item, comments] in enumerate(section_data_comment):
                     # The first line is the number of BCs and will be skipped.
                     if i > 0:
+
+                        # TODO: move this outside the loop.
                         for key, value in \
                                 self.boundary_condition_names.items():
                             if value == section_header:
                                 (bc_key, geometry_key) = key
                                 break
+
+                        if mpy.import_mesh_full:
+                            bc = BoundaryCondition.from_dat(bc_key, item,
+                                comments=comments)
+                        else:
+                            bc = BaseMeshItem(item, comments=comments)
+
                         self.boundary_conditions[bc_key, geometry_key].append(
-                            BaseMeshItem(item, comments=comments)
-                            )
+                            bc)
 
             def add_set(section_header, section_data_comment):
                 """
@@ -361,9 +402,14 @@ class InputFile(Mesh):
                         if value == section_header:
                             geometry_key = key
                             break
-                    self.geometry_sets[geometry_key].append(
-                        BaseMeshItem(dat_list, comments=comments)
-                        )
+
+                    if mpy.import_mesh_full:
+                        geometry_set = GeometrySet.from_dat(geometry_key,
+                            dat_list, comments=comments)
+                    else:
+                        geometry_set = BaseMeshItem(dat_list,
+                            comments=comments)
+                    self.geometry_sets[geometry_key].append(geometry_set)
 
                 if len(section_data_comment) > 0:
                     # Add the individual sets to the object. For that loop
@@ -402,7 +448,7 @@ class InputFile(Mesh):
             elif section_name == 'STRUCTURE ELEMENTS':
                 for line in section_data_comment:
                     if mpy.import_mesh_full:
-                        self.elements.append(Element.from_dat(line, self))
+                        self.elements.append(Element.from_dat(line))
                     else:
                         add_line(self.elements, line)
             elif section_name.startswith('FUNCT'):
