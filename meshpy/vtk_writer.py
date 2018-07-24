@@ -32,6 +32,33 @@ class VTKWriter(object):
             for key2 in mpy.vtk_data_types:
                 self.data[key1, key2] = {}
 
+    def add_point_data_node_sets(self, point_data, nodes):
+        """ TODO """
+
+        # Get list with node set indices of the given nodes
+        geometry_set_list = []
+        for node in nodes:
+            geometry_set_list.extend(node.node_sets_link)
+
+        # Remove double entries of list.
+        geometry_set_list = list(set(geometry_set_list))
+
+        # Loop over the geometry sets.
+        for geometry_set in geometry_set_list:
+
+            # Check which nodes are connected to a geometry set.
+            data_vector = np.zeros(len(nodes))
+            for i, node in enumerate(nodes):
+                if geometry_set in node.node_sets_link:
+                    data_vector[i] = 1.
+                else:
+                    data_vector[i] = 0.
+
+            # Add the data vector.
+            set_name = '{}_set_{}'.format(geometry_set.geometry_type,
+                geometry_set.n_global)
+            point_data[set_name] = data_vector
+
     def add_poly_line(self, coordinates, **kwargs):
         """Add a poly line. The line will connect the points in coordinates."""
 

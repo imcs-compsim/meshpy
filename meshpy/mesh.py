@@ -435,6 +435,9 @@ class Mesh(object):
         # Object to store VKT data and write it to file.
         vtkwriter = VTKWriter()
 
+        # Get the set numbers of the mesh
+        self.get_unique_geometry_sets(link_nodes=True)
+
         # Get representation of elements.
         for element in self.elements:
             element.get_vtk(vtkwriter)

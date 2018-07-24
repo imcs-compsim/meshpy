@@ -518,7 +518,8 @@ class TestMeshpy(unittest.TestCase):
 
         # Add content to the mesh.
         mat = MaterialBeam(radius=0.05)
-        mesh.create_beam_mesh_honeycomb(Beam3rHerm2Lin3, mat, 2., 5, 3, 2)
+        mesh.create_beam_mesh_honeycomb(Beam3rHerm2Lin3, mat, 2., 2, 3, 2,
+            add_sets=True)
 
         # Write VTK output."""
         ref_file = os.path.join(testing_input, 'vtk_writer_beam_test_ref.vtu')
@@ -737,6 +738,10 @@ class TestFullBaci(unittest.TestCase):
             STRUCTURE DIS structure NODE 69 QUANTITY dispy VALUE 1.41113401669104e-15 TOLERANCE 1e-10
             STRUCTURE DIS structure NODE 69 QUANTITY dispz VALUE 0.0178350143764099 TOLERANCE 1e-10
             '''))
+
+        # Call get_unique_geometry_sets to check that this does not affect the
+        # mesh creation.
+        input_file.get_unique_geometry_sets(link_nodes=True)
 
         # Run the input file in Baci.
         self.run_baci_test('tube', input_file)

@@ -99,19 +99,19 @@ class Beam(Element):
         # Array with nodal coordinates.
         coordinates = np.zeros([len(self.nodes), 3])
         for i, node in enumerate(self.nodes):
-            xi = self.nodes_create[i][0]
             coordinates[i, :] = node.coordinates
-            if xi == -1 or xi == 1:
-                point_data['node_value'].append(1.)
-            elif xi == 0:
+            if node.is_middle_node:
                 point_data['node_value'].append(0.5)
             else:
-                point_data['node_value'].append(0)
+                point_data['node_value'].append(1.)
 
             R = node.rotation.get_rotation_matrix()
             point_data['base_vector_1'].append(R[:, 0])
             point_data['base_vector_2'].append(R[:, 1])
             point_data['base_vector_3'].append(R[:, 2])
+
+        # Add the node sets connected to this element.
+        vtk_writer.add_point_data_node_sets(point_data, self.nodes)
 
         # Add poly line to writer.
         vtk_writer.add_poly_line(coordinates, cell_data=cell_data,
