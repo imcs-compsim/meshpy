@@ -111,7 +111,7 @@ class Beam(Element):
             point_data['base_vector_3'].append(R[:, 2])
 
         # Add the node sets connected to this element.
-        vtk_writer.add_point_data_node_sets(point_data, self.nodes)
+        vtkwriter_beam.add_point_data_node_sets(point_data, self.nodes)
 
         # Add poly line to writer.
         vtkwriter_beam.add_poly_line(coordinates, cell_data=cell_data,
