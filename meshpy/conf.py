@@ -11,6 +11,9 @@ class MeshPy(object):
     """
 
     def __init__(self):
+        self.set_default_values()
+
+    def set_default_values(self):
 
         # Version information.
         self.version = '0.0.3'

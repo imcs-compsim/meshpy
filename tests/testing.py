@@ -9,7 +9,6 @@ import sys
 import unittest
 import numpy as np
 import autograd.numpy as npAD
-import os
 import subprocess
 import random
 import shutil
@@ -207,29 +206,62 @@ def create_test_mesh(mesh):
 class TestMeshpy(unittest.TestCase):
     """Test various stuff from the meshpy module."""
 
-    def compare_strings(self, name, string_ref, string_compare):
+    def compare_strings(self, name, reference, compare):
         """
         Compare two stings. If they are not identical open kompare and show
         differences.
         """
 
-        # Check if the strings are equal, if not fail the test and show the
-        # differences in the strings.
-        compare = string_ref == string_compare
-        if not compare:
-            check_tmp_dir()
-            strings = [string_ref, string_compare]
-            files = []
-            files.append(os.path.join(testing_temp, '{}_ref.dat'.format(name)))
-            files.append(
-                os.path.join(testing_temp, '{}_compare.dat'.format(name)))
-            for i, file in enumerate(files):
-                with open(file, 'w') as input_file:
-                    input_file.write(strings[i])
+        # Check if the input data is a file that exists.
+        reference_is_file = os.path.isfile(reference)
+        compare_is_file = os.path.isfile(compare)
+
+        # Get the correct data
+        if reference_is_file:
+            with open(reference, 'r') as myfile:
+                reference_string = myfile.read()
+        else:
+            reference_string = reference
+
+        if compare_is_file:
+            with open(compare, 'r') as myfile:
+                compare_string = myfile.read()
+        else:
+            compare_string = compare
+
+        # Check if the strings are equal, if not compare the differences and
+        # fail the test.
+        is_equal = reference_string.strip() == compare_string.strip()
+        if not is_equal:
+
+            # Check if temp directory exists, and creates it if necessary.
+            os.makedirs(testing_temp, exist_ok=True)
+
+            # Get the paths of the files to compare. If a string was given
+            # create a file with the string in it.
+            if reference_is_file:
+                reference_file = reference
+            else:
+                reference_file = os.path.join(testing_temp,
+                    '{}_reference.dat'.format(name))
+                with open(reference_file, 'w') as input_file:
+                    input_file.write(reference_string)
+
+            if compare_is_file:
+                compare_file = reference
+            else:
+                compare_file = os.path.join(testing_temp,
+                    '{}_compare.dat'.format(name))
+                with open(compare_file, 'w') as input_file:
+                    input_file.write(compare_string)
+
             child = subprocess.Popen(
-                ['kompare', files[0], files[1]], stderr=subprocess.PIPE)
+                ['kompare', reference_file, compare_file],
+                stderr=subprocess.PIPE)
             child.communicate()
-        self.assertTrue(compare, name)
+
+        # Pass or fail the test.
+        self.assertTrue(is_equal, name)
 
     def test_mesh_rotations(self):
         """
@@ -256,9 +288,11 @@ class TestMeshpy(unittest.TestCase):
 
         mesh_2.rotate(rot, origin=origin)
 
-        string1 = mesh_1.get_string(header=False)
-        string2 = mesh_2.get_string(header=False)
-        self.compare_strings('Rotate_mesh', string1, string2)
+        # Compare the output for the two meshes.
+        self.compare_strings(
+            'test_meshpy_rotate_mesh',
+            mesh_1.get_string(header=False),
+            mesh_2.get_string(header=False))
 
     def test_mesh_rotations_individual(self):
         """
@@ -288,9 +322,11 @@ class TestMeshpy(unittest.TestCase):
 
         mesh_2.rotate(rotations, origin=origin)
 
-        string1 = mesh_1.get_string(header=False)
-        string2 = mesh_2.get_string(header=False)
-        self.compare_strings('Rotate_mesh_individual', string1, string2)
+        # Compare the output for the two meshes.
+        self.compare_strings(
+            'test_meshpy_rotate_mesh_individually',
+            mesh_1.get_string(header=False),
+            mesh_2.get_string(header=False))
 
     def test_comments_in_solid(self):
         """
@@ -298,9 +334,10 @@ class TestMeshpy(unittest.TestCase):
         inside a mesh section.
         """
 
-        ref_file = os.path.join(
-            testing_input, 'comments_in_input_file_ref.dat')
-        solid_file = os.path.join(testing_input, 'comments_in_input_file.dat')
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_comments_in_input_file_reference.dat')
+        solid_file = os.path.join(testing_input,
+            'test_meshpy_comments_in_input_file.dat')
         mesh = InputFile(dat_file=solid_file)
 
         # Add one element with BCs.
@@ -311,11 +348,11 @@ class TestMeshpy(unittest.TestCase):
             bc_type=mpy.dirichlet))
         mesh.add(BoundaryCondition(sets['end'], 'test', bc_type=mpy.neumann))
 
-        string2 = mesh.get_string(header=False).strip()
-
-        with open(ref_file, 'r') as r_file:
-            string1 = r_file.read().strip()
-        self.compare_strings('test_comments_in_solid', string1, string2)
+        # Compare the output of the mesh.
+        self.compare_strings(
+            'test_meshpy_comments_in_input_file',
+            ref_file,
+            mesh.get_string(header=False).strip())
 
     def test_curve_3d_helix(self):
         """Create a helix from a parametric curve."""
@@ -352,11 +389,12 @@ class TestMeshpy(unittest.TestCase):
             bc_type=mpy.neumann))
 
         # Check the output.
-        ref_file = os.path.join(testing_input, 'curve_3d_helix_ref.dat')
-        string2 = input_file.get_string(header=False).strip()
-        with open(ref_file, 'r') as r_file:
-            string1 = r_file.read().strip()
-        self.compare_strings('test_curve_3d_helix', string1, string2)
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_curve_3d_helix_reference.dat')
+        self.compare_strings(
+            'test_meshpy_curve_3d_helix',
+            ref_file,
+            input_file.get_string(header=False))
 
     def test_curve_2d_sin(self):
         """Create a sin from a parametric curve."""
@@ -386,11 +424,12 @@ class TestMeshpy(unittest.TestCase):
             bc_type=mpy.neumann))
 
         # Check the output.
-        ref_file = os.path.join(testing_input, 'curve_2d_sin_ref.dat')
-        string2 = input_file.get_string(header=False).strip()
-        with open(ref_file, 'r') as r_file:
-            string1 = r_file.read().strip()
-        self.compare_strings('test_curve_2d_sin', string1, string2)
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_curve_2d_sin_reference.dat')
+        self.compare_strings(
+            'test_meshpy_curve_2d_sin',
+            ref_file,
+            input_file.get_string(header=False))
 
     def test_curve_3d_curve_rotation(self):
         """Create a line from a parametric curve and prescribe the rotation."""
@@ -431,12 +470,12 @@ class TestMeshpy(unittest.TestCase):
             bc_type=mpy.neumann))
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, 'curve_3d_line_rotation_ref.dat')
-        string2 = input_file.get_string(header=False).strip()
-        with open(ref_file, 'r') as r_file:
-            string1 = r_file.read().strip()
-        self.compare_strings('test_curve_3d_line_rotation', string1, string2)
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_curve_3d_line_rotation_reference.dat')
+        self.compare_strings(
+            'test_meshpy_curve_3d_line_rotation',
+            ref_file,
+            input_file.get_string(header=False))
 
     def test_vtk_writer(self):
         """Test the output created by the VTK writer."""
@@ -494,8 +533,10 @@ class TestMeshpy(unittest.TestCase):
             ], [0, 2, 1, 3], cell_data=cell_data, point_data=point_data)
 
         # Write to file.
-        ref_file = os.path.join(testing_input, 'vtk_writer_test_ref.vtu')
-        vtk_file = os.path.join(testing_temp, 'vtk_writer_test.vtu')
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_vtk_writer_reference.vtu')
+        vtk_file = os.path.join(testing_temp,
+            'test_meshpy_vtk_writer.vtu')
         writer.write_vtk(vtk_file, ascii=True)
 
         # Compare.
@@ -504,11 +545,8 @@ class TestMeshpy(unittest.TestCase):
         else:
             # If the trivial compare CML function fails, compare the full
             # strings to see the differences.
-            with open(ref_file, 'r') as r_file:
-                string1 = r_file.read().strip()
-            with open(vtk_file, 'r') as r_file:
-                string2 = r_file.read().strip()
-            self.compare_strings('test_vtk_writer', string1, string2)
+            self.compare_strings('test_meshpy_vtk_writer', ref_file,
+                vtk_file)
 
     def test_vtk_writer_beam(self):
         """Create a sample mesh and check the VTK output."""
@@ -522,9 +560,10 @@ class TestMeshpy(unittest.TestCase):
             add_sets=True)
 
         # Write VTK output."""
-        ref_file = os.path.join(testing_input, 'vtk_writer_beam_test_ref.vtu')
-        vtk_file = os.path.join(testing_temp, 'vtk_writer_test_beam.vtu')
-        mesh.write_vtk(testing_temp, 'vtk_writer_test', ascii=True)
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_vtk_beam_reference.vtu')
+        vtk_file = os.path.join(testing_temp, 'test_meshpy_vtk_beam.vtu')
+        mesh.write_vtk(testing_temp, 'test_meshpy_vtk', ascii=True)
 
         # Compare.
         if compare_xml(ref_file, vtk_file):
@@ -532,11 +571,7 @@ class TestMeshpy(unittest.TestCase):
         else:
             # If the trivial compare CML function fails, compare the full
             # strings to see the differences.
-            with open(ref_file, 'r') as r_file:
-                string1 = r_file.read().strip()
-            with open(vtk_file, 'r') as r_file:
-                string2 = r_file.read().strip()
-            self.compare_strings('test_vtk_writer_beam', string1, string2)
+            self.compare_strings('test_vtk_writer_beam', ref_file, vtk_file)
 
     def test_vtk_writer_solid(self):
         """Import a solid mesh and check the VTK output."""
@@ -549,9 +584,10 @@ class TestMeshpy(unittest.TestCase):
         input_file.read_dat(os.path.join(testing_input, 'tube.dat'))
 
         # Write VTK output."""
-        ref_file = os.path.join(testing_input, 'vtk_writer_solid_test_ref.vtu')
-        vtk_file = os.path.join(testing_temp, 'vtk_writer_test_solid.vtu')
-        input_file.write_vtk(testing_temp, 'vtk_writer_test', ascii=True)
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_vtk_solid_reference.vtu')
+        vtk_file = os.path.join(testing_temp, 'test_meshpy_vtk_solid.vtu')
+        input_file.write_vtk(testing_temp, 'test_meshpy_vtk', ascii=True)
 
         # Compare.
         if compare_xml(ref_file, vtk_file):
@@ -559,11 +595,7 @@ class TestMeshpy(unittest.TestCase):
         else:
             # If the trivial compare CML function fails, compare the full
             # strings to see the differences.
-            with open(ref_file, 'r') as r_file:
-                string1 = r_file.read().strip()
-            with open(vtk_file, 'r') as r_file:
-                string2 = r_file.read().strip()
-            self.compare_strings('test_vtk_writer_solid', string1, string2)
+            self.compare_strings('test_meshpy_vtk_solid', ref_file, vtk_file)
 
 
 class TestFullBaci(unittest.TestCase):
