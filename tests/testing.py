@@ -73,6 +73,9 @@ class TestRotation(unittest.TestCase):
         matrix.
         """
 
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
         theta = 1.
         # Loop per directions.
         for i in range(3):
@@ -94,6 +97,9 @@ class TestRotation(unittest.TestCase):
 
     def test_euler_angles(self):
         """Create a rotation with euler angles and compare to known results."""
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
 
         # Euler angles.
         alpha = 1.1
@@ -141,6 +147,9 @@ class TestRotation(unittest.TestCase):
         angle is given.
         """
 
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
         vector = 10 * np.array([-1.234243, -2.334343, -1.123123])
         phi = -12.152101868665
         rot = Rotation(vector, phi)
@@ -153,6 +162,10 @@ class TestRotation(unittest.TestCase):
     def test_inverse_rotation(self):
         """Test the inv() function for rotations."""
 
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Define test rotation.
         rot = Rotation([1, 2, 3], 2)
 
         # Check if inverse rotation gets identity rotation. Use two different
@@ -166,6 +179,9 @@ class TestRotation(unittest.TestCase):
 
     def test_relative_roation(self):
         """Test the relative rotation between two rotations."""
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
 
         rot1 = Rotation([1, 2, 3], 2)
         rot2 = Rotation([0.1, -0.2, 2], np.pi / 5)
@@ -211,6 +227,9 @@ class TestMeshpy(unittest.TestCase):
         Compare two stings. If they are not identical open kompare and show
         differences.
         """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
 
         # Check if the input data is a file that exists.
         reference_is_file = os.path.isfile(reference)
@@ -269,6 +288,9 @@ class TestMeshpy(unittest.TestCase):
         each node it self.
         """
 
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
         mesh_1 = InputFile()
         create_test_mesh(mesh_1)
 
@@ -299,6 +321,9 @@ class TestMeshpy(unittest.TestCase):
         Check if the Mesh function rotation gives the same results as rotating
         each node it self, when an array is passed with different rotations.
         """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
 
         mesh_1 = InputFile()
         create_test_mesh(mesh_1)
@@ -334,6 +359,10 @@ class TestMeshpy(unittest.TestCase):
         inside a mesh section.
         """
 
+        # Set default values for global parameters.
+        mpy.set_default_values()
+        mpy.import_mesh_full = False
+
         ref_file = os.path.join(testing_input,
             'test_meshpy_comments_in_input_file_reference.dat')
         solid_file = os.path.join(testing_input,
@@ -356,6 +385,9 @@ class TestMeshpy(unittest.TestCase):
 
     def test_curve_3d_helix(self):
         """Create a helix from a parametric curve."""
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
 
         # Ignore some strange warnings.
         warnings.filterwarnings("ignore", message="numpy.dtype size changed")
@@ -399,6 +431,9 @@ class TestMeshpy(unittest.TestCase):
     def test_curve_2d_sin(self):
         """Create a sin from a parametric curve."""
 
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
         # Ignore some strange warnings.
         warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
@@ -433,6 +468,9 @@ class TestMeshpy(unittest.TestCase):
 
     def test_curve_3d_curve_rotation(self):
         """Create a line from a parametric curve and prescribe the rotation."""
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
 
         # AD.
         from autograd import jacobian
@@ -479,6 +517,9 @@ class TestMeshpy(unittest.TestCase):
 
     def test_vtk_writer(self):
         """Test the output created by the VTK writer."""
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
 
         # Initialize writer.
         writer = VTKWriter()
@@ -551,6 +592,9 @@ class TestMeshpy(unittest.TestCase):
     def test_vtk_writer_beam(self):
         """Create a sample mesh and check the VTK output."""
 
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
         # Create the mesh.
         mesh = Mesh()
 
@@ -576,7 +620,10 @@ class TestMeshpy(unittest.TestCase):
     def test_vtk_writer_solid(self):
         """Import a solid mesh and check the VTK output."""
 
-        # Set the flag for importing solids.
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Without this parameter no solid VTK file would be written.
         mpy.import_mesh_full = True
 
         # Create the input file and read solid mesh data.
@@ -587,6 +634,8 @@ class TestMeshpy(unittest.TestCase):
         ref_file = os.path.join(testing_input,
             'test_meshpy_vtk_solid_reference.vtu')
         vtk_file = os.path.join(testing_temp, 'test_meshpy_vtk_solid.vtu')
+        if os.path.isfile(vtk_file):
+            os.remove(vtk_file)
         input_file.write_vtk(testing_temp, 'test_meshpy_vtk', ascii=True)
 
         # Compare.
@@ -647,7 +696,19 @@ class TestFullBaci(unittest.TestCase):
                 else:
                     os.remove(item)
 
-    def test_honeycomb_as_input(self):
+    def test_honeycomb_sphere_as_input(self):
+        """
+        Test the honeycomb sphere model with different types of mesh import.
+        """
+
+        mpy.set_default_values()
+        self.create_honeycomb_sphere_as_input('honeycomb_sphere')
+
+        mpy.set_default_values()
+        mpy.import_mesh_full = True
+        self.create_honeycomb_sphere_as_input('honeycomb_sphere_full_input')
+
+    def create_honeycomb_sphere_as_input(self, name):
         """
         Create the same honeycomb mesh as defined in
         /Input/beam3r_herm2lin3_static_point_coupling_BTSPH_contact_stent_\
@@ -731,9 +792,21 @@ class TestFullBaci(unittest.TestCase):
         input_file.add(mesh_honeycomb)
 
         # Run the input file in Baci.
-        self.run_baci_test('honeycomb-sphere', input_file)
+        self.run_baci_test(name, input_file)
 
     def test_beam_and_solid_tube(self):
+        """
+        Test the honeycomb sphere model with different types of mesh import.
+        """
+
+        mpy.set_default_values()
+        self.create_beam_and_solid_tube('beam_and_solid_tube')
+
+        mpy.set_default_values()
+        mpy.import_mesh_full = True
+        self.create_beam_and_solid_tube('beam_and_solid_tube')
+
+    def create_beam_and_solid_tube(self, name):
         """Merge a solid tube with a beam tube and simulate them together."""
 
         # Create the input file and read solid mesh data.
@@ -803,12 +876,15 @@ class TestFullBaci(unittest.TestCase):
         input_file.get_unique_geometry_sets(link_nodes=True)
 
         # Run the input file in Baci.
-        self.run_baci_test('tube', input_file)
+        self.run_baci_test(name, input_file)
 
     def test_honeycomb_variants(self):
         """
         Create a few different honeycomb structures.
         """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
 
         # Create input file.
         input_file = InputFile(
@@ -926,9 +1002,8 @@ class TestFullBaci(unittest.TestCase):
             ))
 
         # Run the input file in Baci.
-        self.run_baci_test('honeycomb-variants', input_file)
+        self.run_baci_test('honeycomb_variants', input_file)
 
 
 if __name__ == '__main__':
     unittest.main()
-    pass
