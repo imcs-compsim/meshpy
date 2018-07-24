@@ -59,6 +59,9 @@ class MeshPy(object):
         self.vtk_scalar = 'vtk_scalar'
         self.vtk_vector = 'vtk_vector'
         self.vtk_data_types = [self.vtk_scalar, self.vtk_vector]
+        # Number of digits for node set output (this will be set in the
+        # Mesh.get_unique_geometry_sets() method.
+        self.vtk_node_set_format = '{:05}'
 
 
 mpy = MeshPy()

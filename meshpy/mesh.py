@@ -142,8 +142,7 @@ class Mesh(object):
             for node in self.nodes:
                 node.node_sets_link = []
 
-        # If all sets are wanted, make a copy of the sets in this mesh,
-        # otherwise start with a new container.
+        # Make a copy of the sets in this mesh.
         mesh_sets = self.geometry_sets.copy()
 
         # Add sets from couplings and boundary conditions.
@@ -166,6 +165,18 @@ class Mesh(object):
                 if link_nodes and not geometry_set.is_dat:
                     for node in geometry_set:
                         node.node_sets_link.append(geometry_set)
+
+        # Set the global value for digits in the VTK output.
+        if link_nodes:
+
+            # Get highest number of node_sets.
+            max_sets = max([
+                len(geometry_list) for geometry_list in mesh_sets.values()
+                ])
+
+            # Set the mpy value.
+            digits = len(str(max_sets))
+            mpy.vtk_node_set_format = '{:0' + str(digits) + '}'
 
         return mesh_sets
 

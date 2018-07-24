@@ -54,6 +54,9 @@ class SolidHEX8(SolidElement):
         for i, node in enumerate(self.nodes):
             coordinates[i, :] = node.coordinates
 
+        # Add the node sets connected to this element.
+        vtkwriter_solid.add_point_data_node_sets(point_data, self.nodes)
+
         # Add poly line to writer.
         vtkwriter_solid.add_hex8(coordinates, cell_data=cell_data,
             point_data=point_data)

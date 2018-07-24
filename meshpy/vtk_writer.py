@@ -55,8 +55,10 @@ class VTKWriter(object):
                     data_vector[i] = 0.
 
             # Add the data vector.
-            set_name = '{}_set_{}'.format(geometry_set.geometry_type,
-                geometry_set.n_global)
+            set_name = '{}_set_{}'.format(
+                geometry_set.geometry_type,
+                mpy.vtk_node_set_format.format(geometry_set.n_global)
+                )
             point_data[set_name] = data_vector
 
     def add_poly_line(self, coordinates, **kwargs):
