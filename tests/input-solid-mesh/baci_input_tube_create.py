@@ -11,7 +11,7 @@ import os
 from cubitpy import cupy, CubitPy, get_methods
 
 
-# Iniialize cubit
+# Initialize cubit
 cubit = CubitPy()
 
 # Set header.
