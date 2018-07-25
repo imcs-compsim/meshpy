@@ -392,7 +392,11 @@ class TestMeshpy(unittest.TestCase):
             mesh.get_string(header=False).strip())
 
     def test_curve_3d_helix(self):
-        """Create a helix from a parametric curve."""
+        """
+        Create a helix from a parametric curve where the parameter is
+        transformed so the arc length along the beam is not proportional to
+        the parameter.
+        """
 
         # Set default values for global parameters.
         mpy.set_default_values()
@@ -408,19 +412,32 @@ class TestMeshpy(unittest.TestCase):
 
         # Set parameters for the helix.
         R = 2.
-        tz = 1.  # incline
-        n = 2  # number of turns
-        n_el = 8
+        tz = 4.  # incline
+        n = 1  # number of turns
+        n_el = 5
 
         # Create a helix with a parametric curve.
         def helix(t):
+            factor = 2
+            t_trans = (npAD.exp(factor * t / (2. * np.pi * n)) * t
+                / npAD.exp(factor))
             return npAD.array([
-                R * npAD.cos(t),
-                R * npAD.sin(t),
-                t * tz / (2 * np.pi)
+                R * npAD.cos(t_trans),
+                R * npAD.sin(t_trans),
+                t_trans * tz / (2 * np.pi)
                 ])
         helix_set = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat,
             helix, [0., 2. * np.pi * n], n_el=n_el)
+
+        # Compare the coordinates with the ones from mathematica.
+        coordinates_mathematica = np.loadtxt(os.path.join(testing_input,
+                'test_meshpy_curve_3d_helix_mathematica.csv'), delimiter=',')
+        self.assertLess(
+            np.linalg.norm(
+                coordinates_mathematica - input_file.get_global_coordinates()),
+            mpy.eps_pos,
+            'test_meshpy_curve_3d_helix'
+            )
 
         # Apply boundary conditions.
         input_file.add(BoundaryCondition(helix_set['start'], 'BC1',
@@ -459,6 +476,16 @@ class TestMeshpy(unittest.TestCase):
             return npAD.array([t, npAD.sin(t)])
         sin_set = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat,
             sin, [0., 2. * np.pi], n_el=n_el)
+
+        # Compare the coordinates with the ones from mathematica.
+        coordinates_mathematica = np.loadtxt(os.path.join(testing_input,
+                'test_meshpy_curve_2d_sin_mathematica.csv'), delimiter=',')
+        self.assertLess(
+            np.linalg.norm(
+                coordinates_mathematica - input_file.get_global_coordinates()),
+            mpy.eps_pos,
+            'test_meshpy_curve_2d_sin'
+            )
 
         # Apply boundary conditions.
         input_file.add(BoundaryCondition(sin_set['start'], 'BC1',
