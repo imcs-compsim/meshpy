@@ -42,7 +42,11 @@ class BoundaryCondition(BaseMeshItem):
 
     @classmethod
     def from_dat(cls, bc_key, line, **kwargs):
-        """TODO, maybe add comments"""
+        """
+        Get a boundary condition from an input line in a dat file. The geometry
+        set is passed as integer (0 based index) and will be connected after
+        the whole input file is parsed.
+        """
 
         # Split up the input line.
         split = line.split()

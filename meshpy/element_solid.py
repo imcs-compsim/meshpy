@@ -7,7 +7,7 @@ This module implements solid elements for the mesh.
 import numpy as np
 
 # Meshpy modules.
-from . import mpy, Element, Node
+from . import mpy, Element, Node, add_point_data_node_sets
 
 
 class SolidElement(Element):
@@ -57,7 +57,7 @@ class SolidHEX8(SolidElement):
             coordinates[i, :] = node.coordinates
 
         # Add the node sets connected to this element.
-        vtkwriter_solid.add_point_data_node_sets(point_data, self.nodes)
+        add_point_data_node_sets(point_data, self.nodes)
 
         # Add poly line to writer.
         vtkwriter_solid.add_hex8(coordinates, cell_data=cell_data,

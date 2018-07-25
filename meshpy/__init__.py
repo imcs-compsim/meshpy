@@ -17,7 +17,7 @@ from .base_mesh_item import BaseMeshItem
 from .rotation import Rotation, get_relative_rotation
 
 # VTK writer.
-from .vtk_writer import VTKWriter
+from .vtk_writer import add_point_data_node_sets, VTKWriter
 
 # Mesh items.
 from .function import Function

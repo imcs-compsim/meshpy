@@ -135,7 +135,13 @@ class Mesh(object):
             self.add(value)
 
     def get_unique_geometry_sets(self, link_nodes=False):
-        """TODO"""
+        """
+        Return a geometry set container that contains all geometry sets
+        explicitly added to the mesh, as well as all sets from boundary
+        conditions and couplings.
+        After all the sets are gathered, each sets tells its nodes that they
+        are part of the set (mainly for vtk output).
+        """
 
         if link_nodes:
             # First clear all links in existing nodes.
@@ -145,14 +151,14 @@ class Mesh(object):
         # Make a copy of the sets in this mesh.
         mesh_sets = self.geometry_sets.copy()
 
-        # Add sets from couplings and boundary conditions.
-        for coupling in self.couplings:
-            mesh_sets[coupling.node_set.geometry_type].append(
-                coupling.node_set)
+        # Add sets from boundary conditions and couplings.
         for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
             for bc in bc_list:
                 if not bc.is_dat:
                     mesh_sets[geom_key].append(bc.geometry_set)
+        for coupling in self.couplings:
+            mesh_sets[coupling.node_set.geometry_type].append(
+                coupling.node_set)
 
         for key in mesh_sets.keys():
             # Remove double node sets in the container.

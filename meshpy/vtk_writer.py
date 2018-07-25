@@ -14,6 +14,39 @@ import warnings
 from . import mpy
 
 
+def add_point_data_node_sets(point_data, nodes):
+    """
+    Add the information if a node is part of a set to the point_data vector
+    for all nodes in the list 'nodes'.
+    """
+
+    # Get list with node set indices of the given nodes
+    geometry_set_list = []
+    for node in nodes:
+        geometry_set_list.extend(node.node_sets_link)
+
+    # Remove double entries of list.
+    geometry_set_list = list(set(geometry_set_list))
+
+    # Loop over the geometry sets.
+    for geometry_set in geometry_set_list:
+
+        # Check which nodes are connected to a geometry set.
+        data_vector = np.zeros(len(nodes))
+        for i, node in enumerate(nodes):
+            if geometry_set in node.node_sets_link:
+                data_vector[i] = 1.
+            else:
+                data_vector[i] = 0.
+
+        # Add the data vector.
+        set_name = '{}_set_{}'.format(
+            geometry_set.geometry_type,
+            mpy.vtk_node_set_format.format(geometry_set.n_global)
+            )
+        point_data[set_name] = data_vector
+
+
 class VTKWriter(object):
     """A class that manages VTK cells and data and can also create them."""
 
@@ -31,35 +64,6 @@ class VTKWriter(object):
         for key1 in mpy.vtk_geom_types:
             for key2 in mpy.vtk_data_types:
                 self.data[key1, key2] = {}
-
-    def add_point_data_node_sets(self, point_data, nodes):
-        """ TODO """
-
-        # Get list with node set indices of the given nodes
-        geometry_set_list = []
-        for node in nodes:
-            geometry_set_list.extend(node.node_sets_link)
-
-        # Remove double entries of list.
-        geometry_set_list = list(set(geometry_set_list))
-
-        # Loop over the geometry sets.
-        for geometry_set in geometry_set_list:
-
-            # Check which nodes are connected to a geometry set.
-            data_vector = np.zeros(len(nodes))
-            for i, node in enumerate(nodes):
-                if geometry_set in node.node_sets_link:
-                    data_vector[i] = 1.
-                else:
-                    data_vector[i] = 0.
-
-            # Add the data vector.
-            set_name = '{}_set_{}'.format(
-                geometry_set.geometry_type,
-                mpy.vtk_node_set_format.format(geometry_set.n_global)
-                )
-            point_data[set_name] = data_vector
 
     def add_poly_line(self, coordinates, **kwargs):
         """Add a poly line. The line will connect the points in coordinates."""

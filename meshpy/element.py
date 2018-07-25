@@ -24,7 +24,11 @@ class Element(BaseMeshItem):
 
     @classmethod
     def from_dat(cls, input_line):
-        """Check the string to decide which element to use."""
+        """
+        Check the string to decide which element to use. Nodes are linked with
+        the 0 based index and will be connected to the Node objects after the
+        whole input file is parsed.
+        """
 
         # Import solid element classes for creation of the element.
         from . import SolidHEX8, SolidRigidSphere
