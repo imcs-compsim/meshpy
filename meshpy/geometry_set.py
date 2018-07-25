@@ -54,8 +54,15 @@ class GeometrySet(BaseMeshItem):
         """
 
         if isinstance(value, list):
+            # Loop over items and check if they are either Nodes or integers.
+            # This improves the performance considerably when large list of Nodes
+            # are added.
             for item in value:
-                self.add(item)
+                if ((not isinstance(item, Node))
+                        and (not isinstance(item, int))):
+                    raise TypeError('Expected Node or integer, '
+                        + 'got: {}!'.format(type(item)))
+            self.nodes.extend(value)
         elif isinstance(value, Node) or isinstance(value, int):
             if value not in self.nodes:
                 self.nodes.append(value)
