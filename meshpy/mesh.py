@@ -1016,7 +1016,7 @@ class Mesh(object):
             return_set['top'] = honeycomb_sets['east']
             return_set['bottom'] = honeycomb_sets['west']
         if add_sets:
-            self.add(return_set)
+            mesh_temp.add(return_set)
 
         # Add to this mesh
         self.add_mesh(mesh_temp)

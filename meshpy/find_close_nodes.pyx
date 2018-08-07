@@ -50,8 +50,8 @@ def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps=1e-10):
     # Number of nodes.
     n_nodes = len(coords)
 
-    # This vector is 0 if a node does not belong to a pair, otherwise it is the
-    # number of the pair.
+    # This vector is -1 if a node does not belong to a pair, otherwise it is
+    # the number of the pair.
     cdef np.ndarray[INT_t, ndim=1] has_partner = (
         np.zeros(n_nodes, dtype=INT) - 1)
 
