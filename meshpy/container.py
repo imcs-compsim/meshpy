@@ -28,11 +28,11 @@ class GeometryName(OrderedDict):
         if not isinstance(key, str):
             raise TypeError('Expected string, got {}!'.format(type(key)))
         elif isinstance(value, GeometrySet):
-            dict.__setitem__(self, key, value)
+            OrderedDict.__setitem__(self, key, value)
         else:
             raise NotImplementedError('TODO: This case needs to be '
                 + 'implemented')
-            dict.__setitem__(self, key, GeometrySet(nodes=value))
+            OrderedDict.__setitem__(self, key, GeometrySet(nodes=value))
 
 
 class BoundaryConditionContainer(OrderedDict):
