@@ -61,3 +61,11 @@ class Element(BaseMeshItem):
         else:
             raise TypeError('Could not find a element type for {}'.format(
                 dat_pre_nodes))
+
+    def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
+        """
+        Add representation of this element to the vtk_writers for solid and
+        beam.
+        """
+        raise NotImplementedError(
+            'VTK output has to e implemented in the class!')

@@ -59,15 +59,11 @@ class SolidHEX8(SolidElement):
         # Add the node sets connected to this element.
         add_point_data_node_sets(point_data, self.nodes)
 
-        # Add poly line to writer.
+        # Add hex8 line to writer.
         vtkwriter_solid.add_hex8(coordinates, cell_data=cell_data,
             point_data=point_data)
 
 
 class SolidRigidSphere(SolidElement):
     """A rigid sphere solid element."""
-
-    def get_vtk(self, vtkwriter_beam, vtkwriter_solid):
-        """This function is not implemented for solid spheres!"""
-        raise NotImplementedError(
-            'No VTK output implemented for solid sphere!')
+    pass

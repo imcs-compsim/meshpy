@@ -68,22 +68,16 @@ class VTKWriter(object):
     def add_poly_line(self, coordinates, **kwargs):
         """Add a poly line. The line will connect the points in coordinates."""
 
-        # Connectivity of points in cell.
-        topology = list(range(len(coordinates)))
-
         # Add cell.
-        self._add_cell(vtk.vtkPolyLine, coordinates, topology, **kwargs)
+        self.add_cell(vtk.vtkPolyLine, coordinates, **kwargs)
 
     def add_hex8(self, coordinates, **kwargs):
         """Add a hex8 cell."""
 
-        # Connectivity of points in cell.
-        topology = list(range(len(coordinates)))
-
         # Add cell.
-        self._add_cell(vtk.vtkHexahedron, coordinates, topology, **kwargs)
+        self.add_cell(vtk.vtkHexahedron, coordinates, **kwargs)
 
-    def _add_cell(self, cell_type, coordinates, topology, cell_data=None,
+    def add_cell(self, cell_type, coordinates, topology=None, cell_data=None,
             point_data=None):
         """
         Create a cell and add it to the global array.
@@ -95,7 +89,9 @@ class VTKWriter(object):
         coordinates: [3d vector]
             Coordinated of points for this cell.
         topology: [int]
-            The connectivity between the cell and the coordinates.
+            The connectivity between the cell and the coordinates. If nothing
+            is given, it is assumed that the coordinates are in the right order
+            for the cell.
         cell_data, point_data: dic
             A dictionary containing data that will be added to this cell,
             either as cell data, or point data for each point of the cell.
@@ -107,12 +103,15 @@ class VTKWriter(object):
         # Consistency checks.
         # Size of coordinates and topology.
         n_points = len(coordinates)
-        if not n_points == len(topology):
-            raise ValueError(('Coordinates is of size {}, '
-                + 'while topology is of size {}!').format(
-                    n_points,
-                    len(topology)
-                    ))
+        if topology is None:
+            topology = list(range(n_points))
+        else:
+            if not n_points == len(topology):
+                raise ValueError(('Coordinates is of size {}, '
+                        + 'while topology is of size {}!').format(
+                        n_points,
+                        len(topology)
+                        ))
 
         # Check if point data containers are of the correct size.
         if point_data is not None:

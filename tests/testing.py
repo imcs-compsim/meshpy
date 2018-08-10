@@ -579,7 +579,7 @@ class TestMeshpy(unittest.TestCase):
                 [0, 2.25, 0],
                 [0, 1, 0.5]
             ]
-        writer._add_cell(vtk.vtkQuadraticQuad,
+        writer.add_cell(vtk.vtkQuadraticQuad,
             [
                 [0.25, 0, -0.25],
                 [1, 0.25, 0],
@@ -597,7 +597,7 @@ class TestMeshpy(unittest.TestCase):
         cell_data['cell_data_2'] = [5, 0, 10]
         point_data = {}
         point_data['point_data_1'] = [1, 2, 3, 4]
-        writer._add_cell(vtk.vtkTetra,
+        writer.add_cell(vtk.vtkTetra,
             [
                 [3, 3, 3],
                 [4, 4, 3],
