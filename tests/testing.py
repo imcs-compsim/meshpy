@@ -28,7 +28,7 @@ from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
 
 # Define the testing paths.
 testing_path = os.path.abspath(os.path.dirname(__file__))
-testing_input = os.path.join(testing_path, 'input-solid-mesh')
+testing_input = os.path.join(testing_path, 'reference-files')
 testing_temp = os.path.join(testing_path, 'testing-tmp')
 baci_path = '/home/ivo/baci/work/release'
 baci_release = os.path.join(baci_path, 'baci-release')
