@@ -52,15 +52,16 @@ class Element(BaseMeshItem):
         dat_post_nodes = ' '.join(line_split[3 + i:])
 
         # Depending on the number of nodes chose which solid element to return.
-        if len(element_nodes) == 8:
+        n_nodes = len(element_nodes)
+        if n_nodes == 8:
             return SolidHEX8(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
                 dat_post_nodes=dat_post_nodes, comments=input_line[1])
         elif len(element_nodes) == 1:
             return SolidRigidSphere(nodes=element_nodes,
                 dat_pre_nodes=dat_pre_nodes, dat_post_nodes=dat_post_nodes)
         else:
-            raise TypeError('Could not find a element type for {}'.format(
-                dat_pre_nodes))
+            raise TypeError('Could not find a element type for '
+                + '{}, with {} nodes'.format(dat_pre_nodes, n_nodes))
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
         """
@@ -68,4 +69,4 @@ class Element(BaseMeshItem):
         beam.
         """
         raise NotImplementedError(
-            'VTK output has to e implemented in the class!')
+            'VTK output has to be implemented in the class!')

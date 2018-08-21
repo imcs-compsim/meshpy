@@ -718,7 +718,8 @@ class TestMeshpy(unittest.TestCase):
         ref_file = os.path.join(testing_input,
             'test_meshpy_vtk_beam_reference.vtu')
         vtk_file = os.path.join(testing_temp, 'test_meshpy_vtk_beam.vtu')
-        mesh.write_vtk(testing_temp, 'test_meshpy_vtk', ascii=True)
+        mesh.write_vtk(output_name='test_meshpy_vtk',
+            output_directory=testing_temp, ascii=True)
 
         # Compare.
         if compare_xml(ref_file, vtk_file):
@@ -747,7 +748,8 @@ class TestMeshpy(unittest.TestCase):
         vtk_file = os.path.join(testing_temp, 'test_meshpy_vtk_solid.vtu')
         if os.path.isfile(vtk_file):
             os.remove(vtk_file)
-        input_file.write_vtk(testing_temp, 'test_meshpy_vtk', ascii=True)
+        input_file.write_vtk(output_name='test_meshpy_vtk',
+            output_directory=testing_temp, ascii=True)
 
         # Compare.
         if compare_xml(ref_file, vtk_file):
@@ -816,7 +818,7 @@ class TestFullBaci(unittest.TestCase):
         self.create_honeycomb_sphere_as_input('honeycomb_sphere')
 
         mpy.set_default_values()
-        mpy.import_mesh_full = True
+        mpy.import_mesh_full = not mpy.import_mesh_full
         self.create_honeycomb_sphere_as_input('honeycomb_sphere_full_input')
 
     def create_honeycomb_sphere_as_input(self, name):
@@ -914,7 +916,7 @@ class TestFullBaci(unittest.TestCase):
         self.create_beam_and_solid_tube('beam_and_solid_tube')
 
         mpy.set_default_values()
-        mpy.import_mesh_full = True
+        mpy.import_mesh_full = not mpy.import_mesh_full
         self.create_beam_and_solid_tube('beam_and_solid_tube')
 
     def create_beam_and_solid_tube(self, name):
@@ -1117,4 +1119,17 @@ class TestFullBaci(unittest.TestCase):
 
 
 if __name__ == '__main__':
+
+    # Delete all files in the testing directory.
+    for the_file in os.listdir(testing_temp):
+        file_path = os.path.join(testing_temp, the_file)
+        try:
+            if os.path.isfile(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print(e)
+
+    # Perform tests.
     unittest.main()
