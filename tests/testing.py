@@ -508,7 +508,7 @@ class TestMeshpy(unittest.TestCase):
         from autograd import jacobian
 
         # Ignore some strange warnings.
-        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+        warnings.filterwarnings('ignore', message='numpy.dtype size changed')
 
         # Create input file.
         input_file = InputFile(maintainer='Ivo Steinbrecher')
