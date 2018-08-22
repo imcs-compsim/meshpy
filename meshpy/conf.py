@@ -29,7 +29,7 @@ class MeshPy(object):
 
         # Binning options.
         self.binning = True
-        self.binning_max_nodes_brute_force = 50000
+        self.binning_max_nodes_brute_force = 1000
         self.binning_n_bin = 10
 
         # Values for the formating of the input file.

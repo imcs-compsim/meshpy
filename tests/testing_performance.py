@@ -225,5 +225,5 @@ if __name__ == '__main__':
         'meshpy_write_vtk',
         Mesh.write_vtk,
         args=[mesh],
-        kwargs={'output_name': 'beam2', 'output_directory': testing_temp}
+        kwargs={'output_name': 'performance_testing_beam', 'output_directory': testing_temp}
         )
