@@ -23,7 +23,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(
 # Meshpy imports.
 from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
     InputSection, MaterialReissner, MaterialBeam, Function, Beam3rHerm2Lin3, \
-    BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh
+    BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh, \
+    find_close_nodes, find_close_nodes_binning
 
 
 # Define the testing paths.
@@ -387,6 +388,62 @@ class TestMeshpy(unittest.TestCase):
             full_name,
             ref_file,
             mesh.get_string(header=False).strip())
+
+    def test_find_close_nodes_binning(self):
+        """
+        Test if the find_close nodes_binnign and find_close nodes functions
+        return the same results.
+        """
+
+        # Set the seed for the pseudo random numbers.
+        random.seed(0)
+
+        # Add random nodes to a cube with width 2. Randomly add nodes close to existing
+        # nodes.
+        eps_medium = 1e-5
+        n_nodes = 1000
+        coords = np.zeros([n_nodes, 3])
+        for i in range(n_nodes):
+            # Check if this one should be close to another one.
+            if random.randint(0, 4) == 0 and i > 0:
+                close_node = random.randint(0, i - 1)
+                for j in range(3):
+                    coords[i, j] = (coords[close_node, j]
+                        + eps_medium * random.uniform(-1, 1))
+            else:
+                for j in range(3):
+                    coords[i, j] = random.uniform(-1, 1)
+
+        # Add nodes between the bins.
+        coords[-1, :] = [0., 0., 0.]
+        coords[-2, :] = [0., 0., 0.]
+        coords[-3, :] = [0., 0., 0.5]
+        coords[-4, :] = [0., 0., 0.5]
+        coords[-5, :] = [0., 0.5, 0.]
+        coords[-6, :] = [0., 0.5, 0.]
+        coords[-7, :] = [0.5, 0., 0.]
+        coords[-8, :] = [0.5, 0., 0.]
+        coords[-9, :] = [0. + eps_medium, 0., 0.]
+        coords[-10, :] = [0., 0. + eps_medium, 0.]
+        coords[-11, :] = [0., 0., 0. + eps_medium]
+        coords[-12, :] = [0. - eps_medium, 0., 0.]
+        coords[-13, :] = [0., 0. - eps_medium, 0.]
+        coords[-14, :] = [0., 0., 0. - eps_medium]
+
+        has_partner, partner = find_close_nodes_binning(coords, 4, 4, 4,
+            100 * eps_medium)
+        has_partner_brute, partner = find_close_nodes(coords, 100 * eps_medium)
+        self.assertTrue(np.array_equal(has_partner, has_partner_brute))
+
+        has_partner, partner = find_close_nodes_binning(coords, 4, 4, 4,
+            eps_medium)
+        has_partner_brute, partner = find_close_nodes(coords, eps_medium)
+        self.assertTrue(np.array_equal(has_partner, has_partner_brute))
+
+        has_partner, partner = find_close_nodes_binning(coords, 4, 4, 4,
+            0.01 * eps_medium)
+        has_partner_brute, partner = find_close_nodes(coords, 0.01 * eps_medium)
+        self.assertTrue(np.array_equal(has_partner, has_partner_brute))
 
     def test_curve_3d_helix(self):
         """
