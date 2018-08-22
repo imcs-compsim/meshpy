@@ -258,7 +258,7 @@ class TestMeshpy(unittest.TestCase):
                     input_file.write(reference_string)
 
             if compare_is_file:
-                compare_file = reference
+                compare_file = compare
             else:
                 compare_file = os.path.join(testing_temp,
                     '{}_compare.dat'.format(name))

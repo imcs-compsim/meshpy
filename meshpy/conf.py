@@ -27,6 +27,11 @@ class MeshPy(object):
         self.eps_quaternion = 1e-10
         self.eps_pos = 1e-10
 
+        # Binning options.
+        self.binning = True
+        self.binning_max_nodes_brute_force = 50000
+        self.binning_n_bin = 10
+
         # Values for the formating of the input file.
         self.dat_len_section = 80
 

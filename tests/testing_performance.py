@@ -169,7 +169,7 @@ if __name__ == '__main__':
         'meshpy_rotate': 0.6,
         'meshpy_translate': 0.6,
         'meshpy_wrap_around_cylinder': 0.9,
-        'meshpy_get_close_nodes': 117,
+        'meshpy_get_close_nodes': 0.75,
         'meshpy_write_vtk': 19,
         }
 

@@ -7,7 +7,7 @@ This module defines classes and functions to create and edit a Baci input file.
 from .conf import mpy
 
 # Find close node Cython function.
-from .meshpy.find_close_nodes import find_close_nodes
+from .meshpy.find_close_nodes import find_close_nodes, find_close_nodes_binning
 
 # Utility functions and base classes.
 from .utility import get_close_nodes, flatten, compare_xml

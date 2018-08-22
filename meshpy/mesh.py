@@ -401,7 +401,7 @@ class Mesh(object):
                         )
         return geometry
 
-    def get_close_nodes(self, nodes=None, eps=mpy.eps_pos):
+    def get_close_nodes(self, nodes=None, **kwargs):
         """
         Find nodes that are close to each other.
 
@@ -410,9 +410,8 @@ class Mesh(object):
         nodes: list(Node)
             If this argument is given, the closest nodes within this list are
             returned, otherwise all nodes in the mesh are checked.
-        eps: double
-            Spherical value that the nodes have to be within, to be identified
-            as overlapping.
+        kwargs:
+            Keyword arguments for get_close_nodes.
 
         Return
         ----
@@ -426,7 +425,7 @@ class Mesh(object):
         else:
             node_list = nodes
 
-        return get_close_nodes(node_list)
+        return get_close_nodes(node_list, **kwargs)
 
     def preview_python(self):
         """Display the elements in this mesh in matplotlib."""
