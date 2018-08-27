@@ -398,8 +398,8 @@ class TestMeshpy(unittest.TestCase):
         # Set the seed for the pseudo random numbers.
         random.seed(0)
 
-        # Add random nodes to a cube with width 2. Randomly add nodes close to existing
-        # nodes.
+        # Add random nodes to a cube with width 2. Randomly add nodes close to
+        # existing nodes.
         eps_medium = 1e-5
         n_nodes = 1000
         coords = np.zeros([n_nodes, 3])
@@ -442,7 +442,8 @@ class TestMeshpy(unittest.TestCase):
 
         has_partner, partner = find_close_nodes_binning(coords, 4, 4, 4,
             0.01 * eps_medium)
-        has_partner_brute, partner = find_close_nodes(coords, 0.01 * eps_medium)
+        has_partner_brute, partner = find_close_nodes(coords,
+            0.01 * eps_medium)
         self.assertTrue(np.array_equal(has_partner, has_partner_brute))
 
     def test_curve_3d_helix(self):
