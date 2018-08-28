@@ -16,7 +16,7 @@ class MeshPy(object):
     def set_default_values(self):
 
         # Version information.
-        self.version = '0.0.3'
+        self.version = '0.0.4'
         self.git_sha = None
         self.git_date = None
 
