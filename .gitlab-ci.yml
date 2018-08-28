@@ -1,0 +1,14 @@
+# Test cubitpy.
+test:
+    script:
+        - "pwd"
+        - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+        # Copy baci.
+        - "cd meshpy"
+        - "python3 find_close_nodes_setup.py"
+        - "cd .."
+        - "rsync -a --delete --exclude 'xxx*' ../../../../fe5bc0dd/0/baci/baci-build/ ../../../baci/"
+        - "cd tests"
+        - "python3 testing.py"
+    tags:
+        - "imcs-all"

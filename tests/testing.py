@@ -27,12 +27,33 @@ from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
     find_close_nodes, find_close_nodes_binning
 
 
+def get_default_paths(name, throw_error=True):
+    """Look for and return a path to cubit or pre_exodus."""
+
+    if name == 'baci-release':
+        default_paths = [
+            ['/home/ivo/baci/work/release/baci-release', os.path.isfile],
+            ['/hdd/gitlab-runner/cc603775/baci/baci-release', os.path.isfile]
+            ]
+    else:
+        raise ValueError('Type {} not implemented!'.format(name))
+
+    # Check which path exists.
+    for [path, function] in default_paths:
+        if function(path):
+            return path
+    else:
+        if throw_error:
+            raise ValueError('Path for {} not found!'.format(name))
+        else:
+            return None
+
+
 # Define the testing paths.
 testing_path = os.path.abspath(os.path.dirname(__file__))
 testing_input = os.path.join(testing_path, 'reference-files')
 testing_temp = os.path.join(testing_path, 'testing-tmp')
-baci_path = '/home/ivo/baci/work/release'
-baci_release = os.path.join(baci_path, 'baci-release')
+baci_release = get_default_paths('baci-release')
 
 
 class TestRotation(unittest.TestCase):
