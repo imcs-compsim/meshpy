@@ -31,7 +31,8 @@ class Element(BaseMeshItem):
         """
 
         # Import solid element classes for creation of the element.
-        from . import SolidHEX8, SolidRigidSphere
+        from . import SolidHEX8, SolidRigidSphere, SolidHEX27, SolidHEX20, \
+            SolidTET10, SolidTET4
 
         # Split up input line and get pre node string.
         line_split = input_line[0].split()
@@ -56,9 +57,22 @@ class Element(BaseMeshItem):
         if n_nodes == 8:
             return SolidHEX8(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
                 dat_post_nodes=dat_post_nodes, comments=input_line[1])
+        elif len(element_nodes) == 4:
+            return SolidTET4(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+        elif len(element_nodes) == 10:
+            return SolidTET10(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+        elif len(element_nodes) == 20:
+            return SolidHEX20(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+        elif len(element_nodes) == 27:
+            return SolidHEX27(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes, comments=input_line[1])
         elif len(element_nodes) == 1:
             return SolidRigidSphere(nodes=element_nodes,
-                dat_pre_nodes=dat_pre_nodes, dat_post_nodes=dat_post_nodes)
+                dat_pre_nodes=dat_pre_nodes, dat_post_nodes=dat_post_nodes,
+                comments=input_line[1])
         else:
             raise TypeError('Could not find a element type for '
                 + '{}, with {} nodes'.format(dat_pre_nodes, n_nodes))
