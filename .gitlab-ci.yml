@@ -1,13 +1,13 @@
-# Test cubitpy.
-test:
+# Test meshpy.
+meshpy-testing:
     script:
         - "pwd"
         - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-        # Copy baci.
+        # Compile cython code.
         - "cd meshpy"
         - "python3 find_close_nodes_setup.py"
         - "cd .."
-        - "rsync -a --delete --exclude 'xxx*' ../../../../fe5bc0dd/0/baci/baci-build/ ../../../baci/"
+        # Run tests.
         - "cd tests"
         - "python3 testing.py"
     tags:
