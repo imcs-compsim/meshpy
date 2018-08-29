@@ -33,7 +33,7 @@ def get_default_paths(name, throw_error=True):
     if name == 'baci-release':
         default_paths = [
             ['/home/ivo/baci/work/release/baci-release', os.path.isfile],
-            ['/hdd/gitlab-runner/cc603775/baci/baci-release', os.path.isfile]
+            ['/hdd/gitlab-runner/lib/baci-release/baci-release', os.path.isfile]
             ]
     else:
         raise ValueError('Type {} not implemented!'.format(name))
