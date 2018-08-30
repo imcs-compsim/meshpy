@@ -65,18 +65,6 @@ class VTKWriter(object):
             for key2 in mpy.vtk_data_types:
                 self.data[key1, key2] = {}
 
-    def add_poly_line(self, coordinates, **kwargs):
-        """Add a poly line. The line will connect the points in coordinates."""
-
-        # Add cell.
-        self.add_cell(vtk.vtkPolyLine, coordinates, **kwargs)
-
-    def add_hex8(self, coordinates, **kwargs):
-        """Add a hex8 cell."""
-
-        # Add cell.
-        self.add_cell(vtk.vtkHexahedron, coordinates, **kwargs)
-
     def add_cell(self, cell_type, coordinates, topology=None, cell_data=None,
             point_data=None):
         """

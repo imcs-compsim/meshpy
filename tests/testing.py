@@ -636,7 +636,7 @@ class TestMeshpy(unittest.TestCase):
         writer = VTKWriter()
 
         # Add poly line.
-        writer.add_poly_line([
+        writer.add_cell(vtk.vtkPolyLine, [
             [0, 0, -2],
             [1, 1, -2],
             [2, 2, -1]

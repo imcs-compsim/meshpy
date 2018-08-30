@@ -5,6 +5,7 @@ This module implements beam elements for the mesh.
 
 # Python modules.
 import numpy as np
+import vtk
 
 # Meshpy modules.
 from . import mpy, Element, Node, add_point_data_node_sets
@@ -114,8 +115,8 @@ class Beam(Element):
         add_point_data_node_sets(point_data, self.nodes)
 
         # Add poly line to writer.
-        vtkwriter_beam.add_poly_line(coordinates, cell_data=cell_data,
-            point_data=point_data)
+        vtkwriter_beam.add_cell(vtk.vtkPolyLine, coordinates,
+            cell_data=cell_data, point_data=point_data)
 
 
 class Beam3rHerm2Lin3(Beam):
