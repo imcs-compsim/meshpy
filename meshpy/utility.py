@@ -149,6 +149,10 @@ def xml_dict_to_string(xml_dict):
 def compare_xml(path1, path2):
     """Compare the xml files at path1 and path2."""
 
+    # Check that both arguments are paths and exist.
+    if not (os.path.isfile(path1) and os.path.isfile(path2)):
+        raise ValueError('The paths given are not ok!')
+
     tree1 = ET.parse(path1)
     tree2 = ET.parse(path2)
 
