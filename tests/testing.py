@@ -1120,16 +1120,17 @@ class TestFullBaci(unittest.TestCase):
 
 if __name__ == '__main__':
 
-    # Delete all files in the testing directory.
-    for the_file in os.listdir(testing_temp):
-        file_path = os.path.join(testing_temp, the_file)
-        try:
-            if os.path.isfile(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print(e)
+    # Delete all files in the testing directory, if it exists.
+    if os.path.isdir(testing_temp):
+        for the_file in os.listdir(testing_temp):
+            file_path = os.path.join(testing_temp, the_file)
+            try:
+                if os.path.isfile(file_path):
+                    os.unlink(file_path)
+                elif os.path.isdir(file_path):
+                    shutil.rmtree(file_path)
+            except Exception as e:
+                print(e)
 
     # Perform tests.
     unittest.main()
