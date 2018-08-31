@@ -16,7 +16,7 @@ from . import mpy, Mesh, BaseMeshItem, Node, Element, BoundaryCondition, \
 def get_section_string(section_name):
     """Return the string for a section in the dat file."""
     return ''.join(
-        ['-' for i in range(mpy.dat_len_section - len(section_name))]
+        ['-' for _i in range(mpy.dat_len_section - len(section_name))]
         ) + section_name
 
 
@@ -638,7 +638,7 @@ class InputFile(Mesh):
                     datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                     )
         string_line = '// ' + ''.join(
-            ['-' for i in range(mpy.dat_len_section - 3)])
+            ['-' for _i in range(mpy.dat_len_section - 3)])
         if self.description:
             string += '\n// Description: {}'.format(self.description)
         return string_line + '\n' + string + '\n' + string_line

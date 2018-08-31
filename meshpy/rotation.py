@@ -174,7 +174,7 @@ class Rotation(object):
         """
 
         rotation_vector = self.get_roation_vector()
-        rotation_string = ' '.join([mpy.dat_precision for i in range(3)])
+        rotation_string = ' '.join([mpy.dat_precision for _i in range(3)])
         return rotation_string.format(
             rotation_vector[0],
             rotation_vector[1],

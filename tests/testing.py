@@ -32,8 +32,10 @@ def get_default_paths(name, throw_error=True):
 
     if name == 'baci-release':
         default_paths = [
-            ['/home/ivo/baci/work/release/baci-release', os.path.isfile],
-            ['/hdd/gitlab-runner/lib/baci-release/baci-release', os.path.isfile]
+            ['/home/ivo/workspace/baci/release/baci-release', os.path.isfile],
+            #['/home/ivo/baci/work/release/baci-release', os.path.isfile],
+            ['/hdd/gitlab-runner/lib/baci-release/baci-release',
+                os.path.isfile]
             ]
     else:
         raise ValueError('Type {} not implemented!'.format(name))
@@ -218,11 +220,11 @@ def create_test_mesh(mesh):
     mesh.add(material)
 
     # Add three test nodes and add them to a beam element
-    for j in range(3):
+    for _j in range(3):
         mesh.add(Node(
-            [100 * random.uniform(-1, 1) for i in range(3)],
+            [100 * random.uniform(-1, 1) for _i in range(3)],
             rotation=Rotation(
-                [100 * random.uniform(-1, 1) for i in range(3)],
+                [100 * random.uniform(-1, 1) for _i in range(3)],
                 100 * random.uniform(-1, 1)
                 )))
     beam = Beam3rHerm2Lin3(material=material, nodes=mesh.nodes)
@@ -230,8 +232,8 @@ def create_test_mesh(mesh):
 
     # Add a beam line with three elements
     mesh.create_beam_mesh_line(Beam3rHerm2Lin3, material,
-        [100 * random.uniform(-1, 1) for i in range(3)],
-        [100 * random.uniform(-1, 1) for i in range(3)],
+        [100 * random.uniform(-1, 1) for _i in range(3)],
+        [100 * random.uniform(-1, 1) for _i in range(3)],
         n_el=3)
 
 
@@ -313,10 +315,10 @@ class TestMeshpy(unittest.TestCase):
         # Set the seed for the pseudo random numbers
         random.seed(0)
         rot = Rotation(
-            [100 * random.uniform(-1, 1) for i in range(3)],
+            [100 * random.uniform(-1, 1) for _i in range(3)],
             100 * random.uniform(-1, 1)
             )
-        origin = [100 * random.uniform(-1, 1) for i in range(3)]
+        origin = [100 * random.uniform(-1, 1) for _i in range(3)]
 
         for node in mesh_1.nodes:
             node.rotate(rot, origin=origin)
@@ -349,10 +351,10 @@ class TestMeshpy(unittest.TestCase):
 
         # Rotate each node with a different rotation
         rotations = np.zeros([len(mesh_1.nodes), 4])
-        origin = [100 * random.uniform(-1, 1) for i in range(3)]
+        origin = [100 * random.uniform(-1, 1) for _i in range(3)]
         for j, node in enumerate(mesh_1.nodes):
             rot = Rotation(
-                [100 * random.uniform(-1, 1) for i in range(3)],
+                [100 * random.uniform(-1, 1) for _i in range(3)],
                 100 * random.uniform(-1, 1)
                 )
             rotations[j, :] = rot.get_quaternion()
@@ -451,19 +453,20 @@ class TestMeshpy(unittest.TestCase):
         coords[-13, :] = [0., 0. - eps_medium, 0.]
         coords[-14, :] = [0., 0., 0. - eps_medium]
 
-        has_partner, partner = find_close_nodes_binning(coords, 4, 4, 4,
+        has_partner, _partner = find_close_nodes_binning(coords, 4, 4, 4,
             100 * eps_medium)
-        has_partner_brute, partner = find_close_nodes(coords, 100 * eps_medium)
+        has_partner_brute, _partner = find_close_nodes(
+            coords, 100 * eps_medium)
         self.assertTrue(np.array_equal(has_partner, has_partner_brute))
 
-        has_partner, partner = find_close_nodes_binning(coords, 4, 4, 4,
+        has_partner, _partner = find_close_nodes_binning(coords, 4, 4, 4,
             eps_medium)
-        has_partner_brute, partner = find_close_nodes(coords, eps_medium)
+        has_partner_brute, _partner = find_close_nodes(coords, eps_medium)
         self.assertTrue(np.array_equal(has_partner, has_partner_brute))
 
-        has_partner, partner = find_close_nodes_binning(coords, 4, 4, 4,
+        has_partner, _partner = find_close_nodes_binning(coords, 4, 4, 4,
             0.01 * eps_medium)
-        has_partner_brute, partner = find_close_nodes(coords,
+        has_partner_brute, _partner = find_close_nodes(coords,
             0.01 * eps_medium)
         self.assertTrue(np.array_equal(has_partner, has_partner_brute))
 

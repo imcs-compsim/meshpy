@@ -7,7 +7,7 @@ This module implements solid elements for the mesh.
 import numpy as np
 
 # Meshpy modules.
-from . import mpy, Element, Node, add_point_data_node_sets
+from . import Element, add_point_data_node_sets
 
 
 class SolidElement(Element):

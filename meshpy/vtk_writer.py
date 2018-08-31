@@ -257,7 +257,7 @@ class VTKWriter(object):
         """
 
         # Add data to grid.
-        for (key_geom, key_data), value in self.data.items():
+        for (key_geom, _key_data), value in self.data.items():
             for vtk_data in value.values():
                 if key_geom == mpy.vtk_cell:
                     self.grid.GetCellData().AddArray(vtk_data)
@@ -272,7 +272,7 @@ class VTKWriter(object):
             writer.SetDataModeToAscii()
 
         # Check the file extension.
-        filename, file_extension = os.path.splitext(filepath)
+        _filename, file_extension = os.path.splitext(filepath)
         if not file_extension.lower() == '.vtu':
             warnings.warn('The extension should be "vtu", got {}!'.format(
                 file_extension))

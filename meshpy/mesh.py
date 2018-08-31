@@ -131,7 +131,7 @@ class Mesh(object):
 
     def add_geometry_name(self, geometry_name):
         """Add a set of geometry sets to this mesh."""
-        for key, value in geometry_name.items():
+        for _key, value in geometry_name.items():
             self.add(value)
 
     def get_unique_geometry_sets(self, link_nodes=False):
@@ -152,7 +152,7 @@ class Mesh(object):
         mesh_sets = self.geometry_sets.copy()
 
         # Add sets from boundary conditions and couplings.
-        for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
+        for (_bc_key, geom_key), bc_list in self.boundary_conditions.items():
             for bc in bc_list:
                 if not bc.is_dat:
                     mesh_sets[geom_key].append(bc.geometry_set)
