@@ -31,7 +31,8 @@ class Element(BaseMeshItem):
         """
 
         # Import solid element classes for creation of the element.
-        from . import SolidHEX8, SolidRigidSphere
+        from . import SolidHEX8, SolidRigidSphere, SolidHEX27, SolidHEX20, \
+            SolidTET10, SolidTET4
 
         # Split up input line and get pre node string.
         line_split = input_line[0].split()
@@ -52,15 +53,29 @@ class Element(BaseMeshItem):
         dat_post_nodes = ' '.join(line_split[3 + i:])
 
         # Depending on the number of nodes chose which solid element to return.
-        if len(element_nodes) == 8:
+        n_nodes = len(element_nodes)
+        if n_nodes == 8:
             return SolidHEX8(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+        elif len(element_nodes) == 4:
+            return SolidTET4(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+        elif len(element_nodes) == 10:
+            return SolidTET10(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+        elif len(element_nodes) == 20:
+            return SolidHEX20(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+        elif len(element_nodes) == 27:
+            return SolidHEX27(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
                 dat_post_nodes=dat_post_nodes, comments=input_line[1])
         elif len(element_nodes) == 1:
             return SolidRigidSphere(nodes=element_nodes,
-                dat_pre_nodes=dat_pre_nodes, dat_post_nodes=dat_post_nodes)
+                dat_pre_nodes=dat_pre_nodes, dat_post_nodes=dat_post_nodes,
+                comments=input_line[1])
         else:
-            raise TypeError('Could not find a element type for {}'.format(
-                dat_pre_nodes))
+            raise TypeError('Could not find a element type for '
+                + '{}, with {} nodes'.format(dat_pre_nodes, n_nodes))
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
         """
@@ -68,4 +83,4 @@ class Element(BaseMeshItem):
         beam.
         """
         raise NotImplementedError(
-            'VTK output has to e implemented in the class!')
+            'VTK output has to be implemented in the class!')

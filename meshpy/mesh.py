@@ -446,7 +446,7 @@ class Mesh(object):
         ax.set_zlabel('Z')
         plt.show()
 
-    def write_vtk(self, output_directory, output_name, **kwargs):
+    def write_vtk(self, output_name='meshpy', output_directory='', **kwargs):
         """Write the contents of this mesh to a VTK file."""
 
         # Object to store VKT data and write it to file.

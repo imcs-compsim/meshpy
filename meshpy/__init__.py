@@ -24,7 +24,8 @@ from .function import Function
 from .material import Material, MaterialBeam, MaterialReissner
 from .node import Node
 from .element import Element
-from .element_solid import SolidElement, SolidHEX8, SolidRigidSphere
+from .element_solid import SolidElement, SolidHEX8, SolidHEX20, SolidHEX27, \
+    SolidTET4, SolidTET10, SolidRigidSphere
 from .element_beam import Beam, Beam3rHerm2Lin3
 from .geometry_set import GeometrySet
 
