@@ -22,13 +22,13 @@ class Rotation(object):
         self.q = np.zeros(4)
 
         if len(args) == 0:
-            # identity element
+            # Identity element.
             self.q[0] = 1
         elif len(args) == 1 and len(args[0]) == 4:
-            # set from quaternion
+            # Set from quaternion.
             self.q[:] = np.array(args[0])
         elif len(args) == 2:
-            # set from vector and rotation angle
+            # Set from vector and rotation angle.
             vector = args[0]
             phi = args[1]
             norm = np.linalg.norm(vector)
@@ -79,7 +79,7 @@ class Rotation(object):
     def get_rotation_matrix(self):
         """
         Return the rotation matrix for this rotation.
-        (Krenk (3.53))
+        (Krenk (3.50))
         """
 
         R = (self.q[0]**2 - np.dot(self.q[1:], self.q[1:])) * np.eye(3) + \
@@ -117,7 +117,7 @@ class Rotation(object):
         norm = np.linalg.norm(self.q[1:])
         phi = 2 * np.arctan2(norm, self.q[0])
 
-        # Check if effective rotation angle is 0
+        # Check if effective rotation angle is 0.
         if np.abs(np.sin(phi / 2)) < mpy.eps_quaternion:
             return np.zeros(3)
         else:
@@ -137,19 +137,19 @@ class Rotation(object):
         Add this rotation to another, or apply it on a vector.
         """
 
-        # check if the other object is also a rotation
+        # Check if the other object is also a rotation.
         if isinstance(other, Rotation):
-            # get quaternions of the two objects
+            # Get quaternions of the two objects.
             p = self.q
             q = other.q
-            # add the rotations
+            # Add the rotations.
             added_rotation = np.zeros_like(self.q)
             added_rotation[0] = p[0] * q[0] - np.dot(p[1:], q[1:])
             added_rotation[1:] = p[0] * q[1:] + q[0] * p[1:] + \
                 np.cross(p[1:], q[1:])
             return Rotation(added_rotation)
         elif isinstance(other, np.ndarray):
-            # apply rotation to vector
+            # Apply rotation to vector.
             return np.dot(self.get_rotation_matrix(), other)
         else:
             print("Error, not implemented, does not make sense anyway!")
