@@ -742,7 +742,7 @@ class TestMeshpy(unittest.TestCase):
         input_file = InputFile()
         input_file.read_dat(os.path.join(testing_input, 'baci_input_tube.dat'))
 
-        # Write VTK output."""
+        # Write VTK output.
         ref_file = os.path.join(testing_input,
             'test_meshpy_vtk_solid_reference.vtu')
         vtk_file = os.path.join(testing_temp, 'test_meshpy_vtk_solid.vtu')
@@ -758,6 +758,38 @@ class TestMeshpy(unittest.TestCase):
             # If the trivial compare CML function fails, compare the full
             # strings to see the differences.
             self.compare_strings('test_meshpy_vtk_solid', ref_file, vtk_file)
+
+    def test_vtk_writer_solid_elements(self):
+        """
+        Import a solid mesh with all solid types and check the VTK output.
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Without this parameter no solid VTK file would be written.
+        mpy.import_mesh_full = True
+
+        # Create the input file and read solid mesh data.
+        input_file = InputFile()
+        input_file.read_dat(os.path.join(testing_input, 'baci_input_solid_elements.dat'))
+
+        # Write VTK output.
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_vtk_solid_elements_reference.vtu')
+        vtk_file = os.path.join(testing_temp, 'test_meshpy_vtk_elements_solid.vtu')
+        if os.path.isfile(vtk_file):
+            os.remove(vtk_file)
+        input_file.write_vtk(output_name='test_meshpy_vtk_elements',
+            output_directory=testing_temp, ascii=True)
+
+        # Compare.
+        if compare_xml(ref_file, vtk_file):
+            self.assertTrue(True, '')
+        else:
+            # If the trivial compare CML function fails, compare the full
+            # strings to see the differences.
+            self.compare_strings('test_meshpy_vtk_elements_solid', ref_file, vtk_file)
 
 
 class TestFullBaci(unittest.TestCase):
