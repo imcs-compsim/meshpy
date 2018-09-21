@@ -31,7 +31,7 @@ if ('TESTING_GITLAB' in os.environ.keys()
         and os.environ['TESTING_GITLAB'] == '1'):
     TESTING_GITLAB = True
 else:
-    TESTING_GITLAB = True
+    TESTING_GITLAB = False
 
 
 def get_default_paths(name):
@@ -778,6 +778,40 @@ class TestMeshpy(unittest.TestCase):
             'test_meshpy_curve_3d_line_reference.dat')
         self.compare_strings(
             'test_meshpy_curve_3d_line',
+            ref_file,
+            input_file.get_string(header=False))
+
+    def test_segment(self):
+        """ Create a circular segment and compare it with the reference file."""
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Create input file.
+        input_file = InputFile(maintainer='Ivo Steinbrecher')
+
+        # Add material and function.
+        mat = MaterialReissner(
+            youngs_modulus=2.07e2,
+            radius=0.1,
+            shear_correction=1.1)
+
+        # Create mesh.
+        mesh = input_file.create_beam_mesh_segment(Beam3rHerm2Lin3, mat,
+            [3, 6, 9.2], Rotation([4.5, 7, 10], np.pi / 5), 10, np.pi / 2.3,
+            n_el=5)
+
+        # Add boundary conditions.
+        input_file.add(BoundaryCondition(mesh['start'],
+            'rb', bc_type=mpy.dirichlet))
+        input_file.add(BoundaryCondition(mesh['end'],
+            'rb', bc_type=mpy.neumann))
+
+        # Check the output.
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_segment_reference.dat')
+        self.compare_strings(
+            'test_meshpy_segment',
             ref_file,
             input_file.get_string(header=False))
 

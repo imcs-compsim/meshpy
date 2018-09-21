@@ -212,7 +212,8 @@ class Rotation(object):
             # If multiplied with none, nothing happens.
             return self
         else:
-            print("Error, not implemented, does not make sense anyway!")
+            raise NotImplementedError('Error, not implemented, does not ' +
+                'make sense anyway!')
 
     def __eq__(self, other):
         """
