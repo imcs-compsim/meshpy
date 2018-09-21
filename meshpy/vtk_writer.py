@@ -244,6 +244,12 @@ class VTKWriter(object):
             If the data should be compressed or written in human readable text.
         """
 
+        # Check if directory for file exits.
+        if not os.path.isdir(os.path.dirname(filepath)):
+            raise ValueError('Directory {} does not exist!'.format(
+                os.path.dirname(filepath)
+                ))
+
         # Add data to grid.
         for (key_geom, _key_data), value in self.data.items():
             for vtk_data in value.values():
