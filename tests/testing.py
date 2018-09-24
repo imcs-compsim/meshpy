@@ -174,7 +174,9 @@ class TestRotation(unittest.TestCase):
         for i in range(2):
             self.assertTrue(rot == Rotation(vector, phi + 2 * i * np.pi))
 
-        q = np.array([0.97862427, -0.0884585, -0.16730294, -0.0804945])
+        rot = Rotation.from_rotation_vector(vector)
+        q = rot.q
+        self.assertTrue(rot == Rotation(-q))
         self.assertTrue(Rotation(q) == Rotation(-q))
 
     def test_inverse_rotation(self):
@@ -193,7 +195,7 @@ class TestRotation(unittest.TestCase):
 
         # Check that there is no warning or error when getting the vector for
         # an identity rotation.
-        (rot * rot.inv()).get_roation_vector()
+        (rot * rot.inv()).get_rotation_vector()
 
     def test_relative_roation(self):
         """Test the relative rotation between two rotations."""
@@ -207,6 +209,56 @@ class TestRotation(unittest.TestCase):
         rot21 = get_relative_rotation(rot1, rot2)
 
         self.assertTrue(rot2 == rot21 * rot1)
+
+    def test_rotation_vector(self):
+        """Test if the rotation vector functions give a correct result."""
+
+        # Calculate rotation vector and quaternion.
+        axis = np.array([1.36568, -2.96784, 3.23346878])
+        angle = 0.7189467
+        rotation_vector = angle * axis / np.linalg.norm(axis)
+        q = np.zeros(4)
+        q[0] = np.cos(angle / 2)
+        q[1:] = np.sin(angle / 2) * axis / np.linalg.norm(axis)
+
+        # Check that the rotation object from the quaternion and rotation
+        # vector are equal.
+        rotation_from_vec = Rotation.from_rotation_vector(rotation_vector)
+        self.assertTrue(Rotation(q) == rotation_from_vec)
+        self.assertTrue(Rotation(axis, angle) == rotation_from_vec)
+
+        # Check that the same rotation vector is returned after being converted
+        # to a quaternion.
+        self.assertLess(
+            np.linalg.norm(
+                rotation_vector - rotation_from_vec.get_rotation_vector()),
+            mpy.eps_quaternion,
+            'test_rotation_vector'
+            )
+
+    def test_rotation_operator_overload(self):
+        """Test if the operator overloading gives a correct result."""
+
+        # Calculate rotation and vector.
+        axis = np.array([1.36568, -2.96784, 3.23346878])
+        angle = 0.7189467
+        rot = Rotation(axis, angle)
+        vector = [2.234234, -4.213234, 6.345234]
+
+        # Check the result of the operator overloading.
+        result_vector = np.dot(rot.get_rotation_matrix(), vector)
+        self.assertLess(
+            np.linalg.norm(
+                result_vector - rot * vector),
+            mpy.eps_quaternion,
+            'test_rotation_vector'
+            )
+        self.assertLess(
+            np.linalg.norm(
+                result_vector - rot * np.array(vector)),
+            mpy.eps_quaternion,
+            'test_rotation_vector'
+            )
 
 
 def create_test_mesh(mesh):

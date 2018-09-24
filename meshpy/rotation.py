@@ -50,15 +50,15 @@ class Rotation(object):
         Create the object from a rotation matrix.
         """
 
-        rot = cls()
-        rot.q[0] = np.sqrt(max(0, 1 + R[0, 0] + R[1, 1] + R[2, 2])) / 2
-        rot.q[1] = np.sqrt(max(0, 1 + R[0, 0] - R[1, 1] - R[2, 2])) / 2
-        rot.q[2] = np.sqrt(max(0, 1 - R[0, 0] + R[1, 1] - R[2, 2])) / 2
-        rot.q[3] = np.sqrt(max(0, 1 - R[0, 0] - R[1, 1] + R[2, 2])) / 2
-        rot.q[1] = np.copysign(rot.q[1], R[2, 1] - R[1, 2])
-        rot.q[2] = np.copysign(rot.q[2], R[0, 2] - R[2, 0])
-        rot.q[3] = np.copysign(rot.q[3], R[1, 0] - R[0, 1])
-        return rot
+        q = np.zeros(4)
+        q[0] = np.sqrt(max(0, 1 + R[0, 0] + R[1, 1] + R[2, 2])) / 2
+        q[1] = np.sqrt(max(0, 1 + R[0, 0] - R[1, 1] - R[2, 2])) / 2
+        q[2] = np.sqrt(max(0, 1 - R[0, 0] + R[1, 1] - R[2, 2])) / 2
+        q[3] = np.sqrt(max(0, 1 - R[0, 0] - R[1, 1] + R[2, 2])) / 2
+        q[1] = np.copysign(q[1], R[2, 1] - R[1, 2])
+        q[2] = np.copysign(q[2], R[0, 2] - R[2, 0])
+        q[3] = np.copysign(q[3], R[1, 0] - R[0, 1])
+        return cls(q)
 
     @classmethod
     def from_basis(cls, t1, t2):
@@ -75,6 +75,32 @@ class Rotation(object):
 
         R = np.transpose([t1_normal, t2_normal, t3_normal])
         return cls.from_rotation_matrix(R)
+
+    @classmethod
+    def from_rotation_vector(cls, rotation_vector):
+        """Create the object from a rotation vector."""
+
+        phi = np.linalg.norm(rotation_vector)
+        if np.abs(phi) < mpy.eps_quaternion:
+            return cls([0, 0, 0], 0)
+        else:
+            return cls(rotation_vector, phi)
+
+    def check_uniqueness(self):
+        """
+        We always want q0 to be positive -> the range for the rotational angle
+        is [-pi, pi].
+        """
+
+        if self.q[0] < 0:
+            self.q = -self.q
+
+    def check_quaternion_constraint(self):
+        """We want to check that q.q = 1."""
+
+        if np.abs(1 - np.linalg.norm(self.q)) > mpy.eps_quaternion:
+            raise ValueError('The rotation object is corrupted. q.q does not '
+                + 'equal 1!\n{}'.format(self))
 
     def get_rotation_matrix(self):
         """
@@ -109,10 +135,13 @@ class Rotation(object):
 
         return np.array(self.q)
 
-    def get_roation_vector(self):
+    def get_rotation_vector(self):
         """
         Return the rotation vector for this object.
         """
+
+        self.check_uniqueness()
+        self.check_quaternion_constraint()
 
         norm = np.linalg.norm(self.q[1:])
         phi = 2 * np.arctan2(norm, self.q[0])
@@ -148,9 +177,12 @@ class Rotation(object):
             added_rotation[1:] = p[0] * q[1:] + q[0] * p[1:] + \
                 np.cross(p[1:], q[1:])
             return Rotation(added_rotation)
-        elif isinstance(other, np.ndarray):
+        elif (
+                (isinstance(other, np.ndarray) or isinstance(other, list))
+                and len(other) == 3
+                ):
             # Apply rotation to vector.
-            return np.dot(self.get_rotation_matrix(), other)
+            return np.dot(self.get_rotation_matrix(), np.array(other))
         else:
             print("Error, not implemented, does not make sense anyway!")
 
@@ -173,12 +205,13 @@ class Rotation(object):
         Return a string with the triad components for the .dat line
         """
 
-        rotation_vector = self.get_roation_vector()
+        rotation_vector = self.get_rotation_vector()
         rotation_string = ' '.join([mpy.dat_precision for _i in range(3)])
+        # The zeros are added to avoid negative zeros in the input file.
         return rotation_string.format(
-            rotation_vector[0],
-            rotation_vector[1],
-            rotation_vector[2]
+            rotation_vector[0] + 0,
+            rotation_vector[1] + 0,
+            rotation_vector[2] + 0
             )
 
     def copy(self):
