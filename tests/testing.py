@@ -831,12 +831,14 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file and read solid mesh data.
         input_file = InputFile()
-        input_file.read_dat(os.path.join(testing_input, 'baci_input_solid_elements.dat'))
+        input_file.read_dat(
+            os.path.join(testing_input, 'baci_input_solid_elements.dat'))
 
         # Write VTK output.
         ref_file = os.path.join(testing_input,
             'test_meshpy_vtk_solid_elements_reference.vtu')
-        vtk_file = os.path.join(testing_temp, 'test_meshpy_vtk_elements_solid.vtu')
+        vtk_file = os.path.join(
+            testing_temp, 'test_meshpy_vtk_elements_solid.vtu')
         if os.path.isfile(vtk_file):
             os.remove(vtk_file)
         input_file.write_vtk(output_name='test_meshpy_vtk_elements',
@@ -848,7 +850,8 @@ class TestMeshpy(unittest.TestCase):
         else:
             # If the trivial compare CML function fails, compare the full
             # strings to see the differences.
-            self.compare_strings('test_meshpy_vtk_elements_solid', ref_file, vtk_file)
+            self.compare_strings(
+                'test_meshpy_vtk_elements_solid', ref_file, vtk_file)
 
 
 class TestFullBaci(unittest.TestCase):
@@ -938,23 +941,24 @@ class TestFullBaci(unittest.TestCase):
             option_overwrite=True
             ))
 
-        # First delete the results given in the input file and then add the
-        # correct results to the file.
+        # Delete the results given in the input file.
         input_file.delete_section('RESULT DESCRIPTION')
-        input_file.add(InputSection(
-            'RESULT DESCRIPTION',
-            '''
-            STRUCTURE DIS structure NODE 268 QUANTITY dispx VALUE  0.00000000000000000e+00 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 268 QUANTITY dispy VALUE -8.09347205557697258e+00 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 268 QUANTITY dispz VALUE  2.89298034569662965e+00 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 188 QUANTITY dispx VALUE  0.00000000000000000e+00 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 188 QUANTITY dispy VALUE -8.09347205557697258e+00 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 188 QUANTITY dispz VALUE  2.89298034569662965e+00 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 182 QUANTITY dispx VALUE  0.00000000000000000e+00 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 182 QUANTITY dispy VALUE -8.09347205557697258e+00 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 182 QUANTITY dispz VALUE  2.89298034569662965e+00 TOLERANCE 1e-10
-            '''
-            ))
+        input_file.add('-----RESULT DESCRIPTION')
+
+        # Add result checks.
+        displacement = [0.0, -8.09347205557697258, 2.89298034569662965]
+
+        nodes = [268, 188, 182]
+        for node in nodes:
+            for i, direction in enumerate(['x', 'y', 'z']):
+                input_file.add(
+                    InputSection('RESULT DESCRIPTION',
+                        ('STRUCTURE DIS structure NODE {} QUANTITY disp{} '
+                        + 'VALUE {} TOLERANCE 1e-10').format(
+                            node, direction, displacement[i]
+                        )
+                    )
+                )
 
         # Material for the beam.
         material = MaterialReissner(
@@ -1063,17 +1067,23 @@ class TestFullBaci(unittest.TestCase):
                 )
             )
 
-        # Add results for the simulation.
-        input_file.add(InputSection(
-            'RESULT DESCRIPTION',
-            '''
-            STRUCTURE DIS structure NODE 35 QUANTITY dispx VALUE 1.50796091342925e+00 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 35 QUANTITY dispy VALUE 1.31453288915877e-08 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 35 QUANTITY dispz VALUE 0.0439008100184687e+00 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 69 QUANTITY dispx VALUE 0.921450108160878 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 69 QUANTITY dispy VALUE 1.41113401669104e-15 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 69 QUANTITY dispz VALUE 0.0178350143764099 TOLERANCE 1e-10
-            '''))
+        # Add result checks.
+        displacement = [
+            [1.50796091342925, 1.31453288915877e-8, 0.0439008100184687],
+            [0.921450108160878, 1.41113401669104e-15, 0.0178350143764099]
+            ]
+
+        nodes = [35, 69]
+        for j, node in enumerate(nodes):
+            for i, direction in enumerate(['x', 'y', 'z']):
+                input_file.add(
+                    InputSection('RESULT DESCRIPTION',
+                        ('STRUCTURE DIS structure NODE {} QUANTITY disp{} '
+                        + 'VALUE {} TOLERANCE 1e-10').format(
+                            node, direction, displacement[j][i]
+                        )
+                    )
+                )
 
         # Call get_unique_geometry_sets to check that this does not affect the
         # mesh creation.
@@ -1185,28 +1195,134 @@ class TestFullBaci(unittest.TestCase):
                         double_nodes=mpy.double_nodes_remove))
                 counter += 1
 
-        # Add to input file and set testing results.
+        # Add mesh to input file.
         input_file.add(mesh)
-        input_file.add(InputSection(
-            'RESULT DESCRIPTION',
-            '''
-            STRUCTURE DIS structure NODE 190 QUANTITY dispx VALUE 1.31917493321867280e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 190 QUANTITY dispy VALUE 1.99335191674617163e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 190 QUANTITY dispz VALUE 6.92208840492946759e-02 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 470 QUANTITY dispx VALUE 1.32983000589799755e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 470 QUANTITY dispy VALUE 2.00555448758363231e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 470 QUANTITY dispz VALUE 6.97002973386536134e-02 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 711 QUANTITY dispx VALUE 7.69274537804140734e-02 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 711 QUANTITY dispy VALUE 1.24993807967913248e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 711 QUANTITY dispz VALUE 5.86799642123171789e-02 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 1071 QUANTITY dispx VALUE 6.98802967009408832e-02 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 1071 QUANTITY dispy VALUE 1.09892595703934184e-01 TOLERANCE 1e-10
-            STRUCTURE DIS structure NODE 1071 QUANTITY dispz VALUE 4.83525916448545312e-02 TOLERANCE 1e-10
-            '''
-            ))
+
+        # Add result checks.
+        displacement = [
+            [1.319174933218672e-1, 1.993351916746171e-1, 6.922088404929467e-2],
+            [1.329830005897997e-1, 2.005554487583632e-1, 6.970029733865361e-2],
+            [7.692745378041407e-2, 1.249938079679132e-1, 5.867996421231717e-2],
+            [6.988029670094088e-2, 1.098925957039341e-1, 4.835259164485453e-2]
+            ]
+
+        nodes = [190, 470, 711, 1071]
+        for j, node in enumerate(nodes):
+            for i, direction in enumerate(['x', 'y', 'z']):
+                input_file.add(
+                    InputSection('RESULT DESCRIPTION',
+                        ('STRUCTURE DIS structure NODE {} QUANTITY disp{} '
+                        + 'VALUE {} TOLERANCE 1e-10').format(
+                            node, direction, displacement[j][i]
+                        )
+                    )
+                )
 
         # Run the input file in Baci.
         self.run_baci_test('honeycomb_variants', input_file)
+
+    def test_rotated_beam_axis(self):
+        """
+        Create three beams that consist of two connected lines.
+        - The first case uses the same nodes for the connection of the lines,
+          and the nodes are equal in this case.
+        - The second case uses the same nodes for the connection of the lines,
+          but the nodes have a different rotation along the basis vector 1.
+        - The third case uses two nodes at the connection between the lines,
+          and couples them with a coupling.
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Create input file.
+        input_file = InputFile(
+            maintainer='Ivo Steinbrecher',
+            description='Rotation of beam along axis'
+            )
+
+        # Set header
+        input_file.set_default_header_static(time_step=0.05, n_steps=20)
+
+        # Define linear function over time.
+        ft = Function('COMPONENT 0 FUNCTION t')
+        input_file.add(ft)
+
+        # Set beam material.
+        mat = MaterialReissner(
+            youngs_modulus=2.07e2,
+            radius=0.1,
+            shear_correction=1.1)
+
+        # Direction of the lines and the rotation between the beams.
+        direction = np.array([0.5, 1, 2])
+        alpha = np.pi / 27 * 7
+        force_fac = 0.01
+
+        # Create mesh.
+        for i in range(3):
+            mesh = Mesh()
+
+            # Create the first line.
+            set_1 = mesh.create_beam_mesh_line(Beam3rHerm2Lin3, mat, [0, 0, 0],
+                1. * direction, n_el=3)
+
+            if not i == 0:
+                # In the second case rotate the line, so the triads do not
+                # match any more.
+                mesh.rotate(Rotation(direction, alpha))
+
+            if i == 2:
+                # The third line is with couplings.
+                start_node = None
+            else:
+                start_node = set_1['end']
+
+            # Add the second line.
+            set_2 = mesh.create_beam_mesh_line(Beam3rHerm2Lin3, mat,
+                1. * direction,
+                2. * direction,
+                n_el=3, start_node=start_node
+                )
+
+            # Add boundary conditions.
+            mesh.add(BoundaryCondition(set_1['start'],
+                'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL '
+                + '0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
+                bc_type=mpy.dirichlet))
+            mesh.add(BoundaryCondition(set_2['end'],
+                'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL '
+                + '{1} {1} {1} {1} {1} {1} 0 0 0 FUNCT {0} {0} {0} {0} {0} {0}'
+                + ' 0 0 0',
+                bc_type=mpy.neumann,
+                format_replacement=[ft, force_fac]))
+
+            if i == 2:
+                # In the third case add a coupling.
+                mesh.couple_nodes()
+
+            # Add the mesh to the input file.
+            input_file.add(mesh)
+
+            # Each time move the whole mesh.
+            input_file.translate([1, 0, 0])
+
+        # Add result checks.
+        displacement = [1.5015284845, 0.35139255451, -1.0126517891]
+        nodes = [13, 26, 40]
+        for node in nodes:
+            for i, direction in enumerate(['x', 'y', 'z']):
+                input_file.add(
+                    InputSection('RESULT DESCRIPTION',
+                        ('STRUCTURE DIS structure NODE {} QUANTITY disp{} '
+                        + 'VALUE {} TOLERANCE 1e-10').format(
+                            node, direction, displacement[i]
+                        )
+                    )
+                )
+
+        # Run the input file in Baci.
+        self.run_baci_test('rotated_beam_axis', input_file)
 
 
 if __name__ == '__main__':
