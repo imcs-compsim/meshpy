@@ -317,7 +317,7 @@ class InputFile(Mesh):
         section_data = []
         for line in lines:
             line = line.strip()
-            if line.startswith('----------'):
+            if line.startswith('-----'):
                 self._add_dat_section(section_line, section_data, **kwargs)
                 section_line = line
                 section_data = []
@@ -642,3 +642,84 @@ class InputFile(Mesh):
         if self.description:
             string += '\n// Description: {}'.format(self.description)
         return string_line + '\n' + string + '\n' + string_line
+
+    def set_default_header_static(self, *,
+            time_step=1.,
+            n_steps=1,
+            max_time=None,
+            max_iter=20,
+            tol_res=1e-7,
+            tol_disp=1e-11
+            ):
+        """
+        Set default header parameters for a static analysis.
+        """
+
+        self.add('''
+            ------------------------------------PROBLEM SIZE
+            DIM 3
+            ------------------------------------PROBLEM TYP
+            PROBLEMTYP                            Structure
+            RESTART                               0
+            --------------------------------------IO
+            OUTPUT_BIN                            No
+            STRUCT_DISP                           No
+            FILESTEPS                             1000
+            VERBOSITY                             Standard
+            ''')
+
+        # Output / beam output.
+        self.add(InputSection(
+            'IO/RUNTIME VTK OUTPUT',
+            '''
+            OUTPUT_DATA_FORMAT                    binary
+            INTERVAL_STEPS                        1
+            EVERY_ITERATION                       No
+            '''))
+        self.add(InputSection(
+            'IO/RUNTIME VTK OUTPUT/BEAMS',
+            '''
+            OUTPUT_BEAMS                    Yes
+            DISPLACEMENT                    Yes
+            USE_ABSOLUTE_POSITIONS          Yes
+            TRIAD_VISUALIZATIONPOINT        Yes
+            STRAINS_GAUSSPOINT              Yes
+            '''))
+
+        # Problem type settings.
+        if max_time is None:
+            max_time = time_step * n_steps
+        self.add(InputSection('STRUCTURAL DYNAMIC',
+            '''
+            LINEAR_SOLVER                         1
+            INT_STRATEGY                          Standard
+            DYNAMICTYP                            Statics
+            RESULTSEVRY                           1
+            NLNSOL                                fullnewton
+            PREDICT                               TangDis
+            TIMESTEP                              {0}
+            NUMSTEP                               {1}
+            MAXTIME                               {2}
+            TOLRES                                {3}
+            TOLDISP                               {4}
+            NORM_RESF                             Abs
+            NORM_DISP                             Abs
+            NORMCOMBI_RESFDISP                    And
+            MAXITER                               {5}
+            '''.format(
+                time_step,
+                n_steps,
+                max_time,
+                tol_res,
+                tol_disp,
+                max_iter
+                )
+            ))
+
+        # Solver
+        self.add(InputSection(
+            'SOLVER 1',
+            '''
+            NAME                                  Structure_Solver
+            SOLVER                                Superlu
+            '''))
