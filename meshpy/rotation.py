@@ -177,9 +177,12 @@ class Rotation(object):
             added_rotation[1:] = p[0] * q[1:] + q[0] * p[1:] + \
                 np.cross(p[1:], q[1:])
             return Rotation(added_rotation)
-        elif isinstance(other, np.ndarray):
+        elif (
+                (isinstance(other, np.ndarray) or isinstance(other, list))
+                and len(other) == 3
+                ):
             # Apply rotation to vector.
-            return np.dot(self.get_rotation_matrix(), other)
+            return np.dot(self.get_rotation_matrix(), np.array(other))
         else:
             print("Error, not implemented, does not make sense anyway!")
 

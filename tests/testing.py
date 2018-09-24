@@ -213,7 +213,7 @@ class TestRotation(unittest.TestCase):
     def test_rotation_vector(self):
         """Test if the rotation vector functions give a correct result."""
 
-        # Calcualte rotation vector and quaternion.
+        # Calculate rotation vector and quaternion.
         axis = np.array([1.36568, -2.96784, 3.23346878])
         angle = 0.7189467
         rotation_vector = angle * axis / np.linalg.norm(axis)
@@ -225,15 +225,41 @@ class TestRotation(unittest.TestCase):
         # vector are equal.
         rotation_from_vec = Rotation.from_rotation_vector(rotation_vector)
         self.assertTrue(Rotation(q) == rotation_from_vec)
+        self.assertTrue(Rotation(axis, angle) == rotation_from_vec)
 
         # Check that the same rotation vector is returned after being converted
         # to a quaternion.
         self.assertLess(
             np.linalg.norm(
                 rotation_vector - rotation_from_vec.get_rotation_vector()),
-            mpy.eps_pos,
-            'test_meshpy_curve_3d_helix'
+            mpy.eps_quaternion,
+            'test_rotation_vector'
             )
+
+    def test_rotation_operator_overload(self):
+        """Test if the operator overloading gives a correct result."""
+
+        # Calculate rotation and vector.
+        axis = np.array([1.36568, -2.96784, 3.23346878])
+        angle = 0.7189467
+        rot = Rotation(axis, angle)
+        vector = [2.234234, -4.213234, 6.345234]
+
+        # Check the result of the operator overloading.
+        result_vector = np.dot(rot.get_rotation_matrix(), vector)
+        self.assertLess(
+            np.linalg.norm(
+                result_vector - rot * vector),
+            mpy.eps_quaternion,
+            'test_rotation_vector'
+            )
+        self.assertLess(
+            np.linalg.norm(
+                result_vector - rot * np.array(vector)),
+            mpy.eps_quaternion,
+            'test_rotation_vector'
+            )
+
 
 def create_test_mesh(mesh):
     """Fill the mesh with a couple of test nodes and elements."""
