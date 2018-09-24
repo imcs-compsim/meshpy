@@ -260,6 +260,10 @@ class TestRotation(unittest.TestCase):
             'test_rotation_vector'
             )
 
+        # Check multiplication with None.
+        self.assertTrue(rot == rot * None)
+        self.assertTrue(rot == rot.copy() * None)
+
 
 def create_test_mesh(mesh):
     """Fill the mesh with a couple of test nodes and elements."""

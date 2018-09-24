@@ -183,6 +183,9 @@ class Rotation(object):
                 ):
             # Apply rotation to vector.
             return np.dot(self.get_rotation_matrix(), np.array(other))
+        elif other is None:
+            # If multiplied with none, nothing happens.
+            return self
         else:
             print("Error, not implemented, does not make sense anyway!")
 
