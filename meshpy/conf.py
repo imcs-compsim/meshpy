@@ -27,6 +27,10 @@ class MeshPy(object):
         self.eps_quaternion = 1e-10
         self.eps_pos = 1e-10
 
+        # Allow the rotation of beams when connected and the triads do not
+        # match.
+        self.allow_beam_rotation = True
+
         # Binning options.
         self.binning = True
         self.binning_max_nodes_brute_force = 1000

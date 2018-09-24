@@ -41,14 +41,27 @@ class Beam(Element):
         if len(self.nodes) > 0:
             raise ValueError('The beam should not have any local nodes yet!')
 
+        # Set default value for relative rotation.
+        relative_rotation = None
+
         if start_node is not None:
             pos, rot = beam_function(-1)
             if np.linalg.norm(pos
                     - start_node.coordinates) > mpy.eps_pos:
                 raise ValueError('Start node does not match with function!')
             if not start_node.rotation == rot:
-                raise ValueError('Start rotation does not match with '
-                    + 'function!')
+                # Check if the first basis vector is in the same direction.
+                relative_basis_1 = (
+                    start_node.rotation.inv() * rot * [1, 0, 0])
+                if (mpy.allow_beam_rotation and
+                        np.linalg.norm(relative_basis_1 - [1, 0, 0])
+                        < mpy.eps_quaternion
+                        ):
+                    # Calculate the relative rotation.
+                    relative_rotation = rot.inv() * start_node.rotation
+                else:
+                    raise ValueError('Start rotation does not match with '
+                        + 'function!')
             self.nodes = [start_node]
 
         # Loop over local nodes.
@@ -58,7 +71,7 @@ class Beam(Element):
                 if create_rot:
                     self.nodes.append(Node(
                         pos,
-                        rotation=rot,
+                        rotation=rot * relative_rotation,
                         is_middle_node=middle_node
                         ))
                 else:
