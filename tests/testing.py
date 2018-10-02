@@ -28,7 +28,7 @@ from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
 
 
 def get_default_paths(name, throw_error=True):
-    """Look for and return a path to cubit or pre_exodus."""
+    """Look for and return a path to baci-release."""
 
     if name == 'baci-release':
         default_paths = [
@@ -55,7 +55,7 @@ def get_default_paths(name, throw_error=True):
 testing_path = os.path.abspath(os.path.dirname(__file__))
 testing_input = os.path.join(testing_path, 'reference-files')
 testing_temp = os.path.join(testing_path, 'testing-tmp')
-baci_release = get_default_paths('baci-release')
+baci_release = get_default_paths('baci-release', False)
 
 
 class TestRotation(unittest.TestCase):
@@ -859,6 +859,14 @@ class TestFullBaci(unittest.TestCase):
     Create and run input files in Baci. They are test files and Baci should
     return 0.
     """
+
+    def setUp(self):
+        """
+        This method is called before each test. Check if BACI was found.
+        If not, skip the test.
+        """
+        if baci_release is None:
+            self.skipTest('BACI path was not found!')
 
     def run_baci_test(self, name, mesh, n_proc=2):
         """
