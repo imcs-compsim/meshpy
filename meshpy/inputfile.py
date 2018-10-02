@@ -649,11 +649,26 @@ class InputFile(Mesh):
             max_time=None,
             max_iter=20,
             tol_res=1e-7,
-            tol_disp=1e-11
+            tol_disp=1e-11,
+            binning_bounding_box=None
             ):
         """
         Set default header parameters for a static analysis.
         """
+
+        # Set values for the parameters that can not directly be set by
+        # keyword arguments.
+        if binning_bounding_box is None:
+            # No binning.
+            binning = False
+        elif isinstance(binning_bounding_box, bool) and binning_bounding_box:
+            # Default binning.
+            binning = True
+            binning_bounding_box=[-1, -1, -1, 1, 1, 1]
+        elif (isinstance(binning_bounding_box, list)
+                and len(binning_bounding_box) == 6):
+            # User given boundary box.
+            binning = True
 
         self.add('''
             ------------------------------------PROBLEM SIZE
@@ -723,3 +738,15 @@ class InputFile(Mesh):
             NAME                                  Structure_Solver
             SOLVER                                Superlu
             '''))
+
+        # Binning strategy.
+        if binning:
+            bounding_box_string = ''
+            for val in binning_bounding_box:
+                bounding_box_string += ' {}'.format(val)
+            self.add(InputSection(
+                'BINNING STRATEGY',
+                '''
+                CUTOFF_RADIUS 2
+                BOUNDINGBOX {}
+                '''.format(bounding_box_string)))

@@ -1242,7 +1242,11 @@ class TestFullBaci(unittest.TestCase):
             )
 
         # Set header
-        input_file.set_default_header_static(time_step=0.05, n_steps=20)
+        input_file.set_default_header_static(
+            time_step=0.05,
+            n_steps=20,
+            binning_bounding_box=[-10, -10, -10, 10, 10, 10]
+            )
 
         # Define linear function over time.
         ft = Function('COMPONENT 0 FUNCTION t')
