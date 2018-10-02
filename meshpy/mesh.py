@@ -247,19 +247,19 @@ class Mesh(object):
             If true the nodal positions are not changed.
         """
 
-        # get array with all quaternions and positions for the nodes
+        # Get array with all quaternions and positions for the nodes.
         pos = self.get_global_coordinates()
         rot1 = self.get_global_quaternions()
 
-        # check if origin has to be added
+        # Check if origin has to be added.
         if origin is not None:
             pos -= origin
 
-        # new arrays
+        # New arrays.
         rotnew = np.zeros_like(rot1)
         posnew = np.zeros_like(pos)
 
-        # additional rotation
+        # Additional rotation.
         if isinstance(rotation, Rotation):
             rot2 = rotation.get_quaternion()
         else:
@@ -268,32 +268,32 @@ class Mesh(object):
         # Temporary AceGen variables.
         tmp = [None for i in range(11)]
 
-        # code generated with AceGen (rotation.nb)
-        tmp[0]= 2*10**0*rot2[1]*rot2[2]
-        tmp[1]=2*10**0*rot2[0]*rot2[3]
-        tmp[2]=2*10**0*rot2[0]*rot2[2]
-        tmp[3]=2*10**0*rot2[1]*rot2[3]
-        tmp[4]=rot2[0]**2
-        tmp[5]=rot2[1]**2
-        tmp[6]=rot2[2]**2
-        tmp[10]=tmp[4]-tmp[6]
-        tmp[7]=rot2[3]**2
-        tmp[8]=2*10**0*rot2[0]*rot2[1]
-        tmp[9]=2*10**0*rot2[2]*rot2[3]
-        posnew[:,0]=(tmp[5]-tmp[7]+tmp[10])*pos[:,0]+(tmp[0]-tmp[1])*pos[:,1]+(
-            tmp[2]+tmp[3])*pos[:,2]
-        posnew[:,1]=(tmp[0]+tmp[1])*pos[:,0]+(tmp[4]-tmp[5]+tmp[6]-tmp[7])* \
-            pos[:,1]+(-tmp[8]+tmp[9])*pos[:,2]
-        posnew[:,2]=(-tmp[2]+tmp[3])*pos[:,0]+(tmp[8]+tmp[9])*pos[:,1]+(
-            -tmp[5]+tmp[7]+tmp[10])*pos[:,2]
-        rotnew[:,0]=rot1[:,0]*rot2[0]-rot1[:,1]*rot2[1]-rot1[:,2]* \
-            rot2[2]-rot1[:,3]*rot2[3]
-        rotnew[:,1]=rot1[:,1]*rot2[0]+rot1[:,0]*rot2[1]+rot1[:,3]* \
-            rot2[2]-rot1[:,2]*rot2[3]
-        rotnew[:,2]=rot1[:,2]*rot2[0]-rot1[:,3]*rot2[1]+rot1[:,0]* \
-            rot2[2]+rot1[:,1]*rot2[3]
-        rotnew[:,3]=rot1[:,3]*rot2[0]+rot1[:,2]*rot2[1]-rot1[:,1]* \
-            rot2[2]+rot1[:,0]*rot2[3]
+        # Code generated with AceGen (rotation.nb).
+        tmp[0] = 2 * 10**0 * rot2[1] * rot2[2]
+        tmp[1] = 2 * 10**0 * rot2[0] * rot2[3]
+        tmp[2] = 2 * 10**0 * rot2[0] * rot2[2]
+        tmp[3] = 2 * 10**0 * rot2[1] * rot2[3]
+        tmp[4] = rot2[0]**2
+        tmp[5] = rot2[1]**2
+        tmp[6] = rot2[2]**2
+        tmp[10] = tmp[4] - tmp[6]
+        tmp[7] = rot2[3]**2
+        tmp[8] = 2 * 10**0 * rot2[0] * rot2[1]
+        tmp[9] = 2 * 10**0 * rot2[2] * rot2[3]
+        posnew[:, 0] = (tmp[5] - tmp[7] + tmp[10]) * pos[:, 0] + (tmp[0]
+            - tmp[1]) * pos[:, 1] + (tmp[2] + tmp[3]) * pos[:, 2]
+        posnew[:, 1] = (tmp[0] + tmp[1]) * pos[:, 0] + (tmp[4] - tmp[5]
+            + tmp[6] - tmp[7]) * pos[:, 1] + (-tmp[8] + tmp[9]) * pos[:, 2]
+        posnew[:, 2] = (-tmp[2] + tmp[3]) * pos[:, 0] + (tmp[8] + tmp[9]) * \
+            pos[:, 1] + (-tmp[5] + tmp[7] + tmp[10]) * pos[:, 2]
+        rotnew[:, 0] = rot1[:, 0] * rot2[0] - rot1[:, 1] * rot2[1] - \
+            rot1[:, 2] * rot2[2] - rot1[:, 3] * rot2[3]
+        rotnew[:, 1] = rot1[:, 1] * rot2[0] + rot1[:, 0] * rot2[1] + \
+            rot1[:, 3] * rot2[2] - rot1[:, 2] * rot2[3]
+        rotnew[:, 2] = rot1[:, 2] * rot2[0] - rot1[:, 3] * rot2[1] + \
+            rot1[:, 0] * rot2[2] + rot1[:, 1] * rot2[3]
+        rotnew[:, 3] = rot1[:, 3] * rot2[0] + rot1[:, 2] * rot2[1] - \
+            rot1[:, 1] * rot2[2] + rot1[:, 0] * rot2[3]
 
         if origin is not None:
             posnew += origin
