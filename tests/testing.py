@@ -711,6 +711,70 @@ class TestMeshpy(unittest.TestCase):
             ref_file,
             input_file.get_string(header=False))
 
+    def test_curve_3d_line(self):
+        """
+        Create a line from a parametric curve. Once the interval is in
+        ascending order, once in descending. This tests checks that the
+        elements are created with the correct tangent vectors.
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Create input file.
+        input_file = InputFile(maintainer='Ivo Steinbrecher')
+
+        # Set header
+        input_file.set_default_header_static(time_step=0.05, n_steps=20)
+
+        # Add material and function.
+        mat = MaterialReissner(
+            youngs_modulus=2.07e2,
+            radius=0.1,
+            shear_correction=1.1)
+        ft = Function('COMPONENT 0 FUNCTION t')
+        input_file.add(ft)
+
+        # Create a line with a parametric curve (and a transformed parameter).
+        def line(t):
+            factor = 2
+            t_trans = (npAD.exp(factor * t / (2. * np.pi)) * t
+                / npAD.exp(factor))
+            return npAD.array([t_trans, 0, 0])
+
+        # Create mesh.
+        set_1 = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat, line,
+            [0., 5.], n_el=3)
+        input_file.translate([0, 1, 0])
+        set_2 = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat, line,
+            [5., 0.], n_el=3)
+
+        # Add boundary conditions.
+        bc_list = [
+            [set_1, ['start', 'end']],
+            [set_2, ['end', 'start']]
+            ]
+        force_fac = 0.01
+        for set_item, [name_start, name_end] in bc_list:
+            input_file.add(BoundaryCondition(set_item[name_start],
+                'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL '
+                + '0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
+                bc_type=mpy.dirichlet))
+            input_file.add(BoundaryCondition(set_item[name_end],
+                'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL '
+                + '{1} {1} {1} {1} {1} {1} 0 0 0 FUNCT {0} {0} {0} {0} {0} {0}'
+                + ' 0 0 0',
+                bc_type=mpy.neumann,
+                format_replacement=[ft, force_fac]))
+
+        # Check the output.
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_curve_3d_line_reference.dat')
+        self.compare_strings(
+            'test_meshpy_curve_3d_line',
+            ref_file,
+            input_file.get_string(header=False))
+
     def test_vtk_writer(self):
         """Test the output created by the VTK writer."""
 
