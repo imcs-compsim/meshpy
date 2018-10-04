@@ -27,7 +27,7 @@ from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
     find_close_nodes, find_close_nodes_binning
 
 
-def get_default_paths(name, throw_error=True):
+def get_default_paths(name):
     """Look for and return a path to baci-release."""
 
     if name == 'baci-release':
@@ -45,7 +45,10 @@ def get_default_paths(name, throw_error=True):
         if function(path):
             return path
     else:
-        if throw_error:
+        # In the case that no path was found, check if the script is performed
+        # by a GitLab runner.
+        if ('TESTING_GITLAB' in os.environ.keys()
+                and os.environ['TESTING_GITLAB'] == '1'):
             raise ValueError('Path for {} not found!'.format(name))
         else:
             return None
@@ -55,7 +58,7 @@ def get_default_paths(name, throw_error=True):
 testing_path = os.path.abspath(os.path.dirname(__file__))
 testing_input = os.path.join(testing_path, 'reference-files')
 testing_temp = os.path.join(testing_path, 'testing-tmp')
-baci_release = get_default_paths('baci-release', False)
+baci_release = get_default_paths('baci-release')
 
 
 class TestRotation(unittest.TestCase):

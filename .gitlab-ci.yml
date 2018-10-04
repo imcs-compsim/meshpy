@@ -10,5 +10,9 @@ meshpy-testing:
         # Run tests.
         - "cd tests"
         - "python3 testing.py"
+    variables:
+        # Indicated the testing script, that it is performed on GitLab. In this
+        # case all test have to pass.
+        TESTING_GITLAB: 1
     tags:
         - "imcs-all"
