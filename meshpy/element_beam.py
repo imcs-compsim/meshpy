@@ -120,6 +120,10 @@ class Beam(Element):
                 point_data['node_value'].append(1.)
 
             R = node.rotation.get_rotation_matrix()
+
+            # Set small values to 0.
+            R[abs(R.real) < mpy.eps_quaternion] = 0.0
+
             point_data['base_vector_1'].append(R[:, 0])
             point_data['base_vector_2'].append(R[:, 1])
             point_data['base_vector_3'].append(R[:, 2])

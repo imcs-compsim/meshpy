@@ -48,16 +48,41 @@ class Rotation(object):
     def from_rotation_matrix(cls, R):
         """
         Create the object from a rotation matrix.
+        The code is base on:
+            https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
         """
 
         q = np.zeros(4)
-        q[0] = np.sqrt(max(0, 1 + R[0, 0] + R[1, 1] + R[2, 2])) / 2
-        q[1] = np.sqrt(max(0, 1 + R[0, 0] - R[1, 1] - R[2, 2])) / 2
-        q[2] = np.sqrt(max(0, 1 - R[0, 0] + R[1, 1] - R[2, 2])) / 2
-        q[3] = np.sqrt(max(0, 1 - R[0, 0] - R[1, 1] + R[2, 2])) / 2
-        q[1] = np.copysign(q[1], R[2, 1] - R[1, 2])
-        q[2] = np.copysign(q[2], R[0, 2] - R[2, 0])
-        q[3] = np.copysign(q[3], R[1, 0] - R[0, 1])
+        trace = np.trace(R)
+        if trace > 0:
+            r = np.sqrt(1 + trace)
+            s = 0.5 / r
+            q[0] = 0.5 * r
+            q[1] = (R[2, 1] - R[1, 2]) * s
+            q[2] = (R[0, 2] - R[2, 0]) * s
+            q[3] = (R[1, 0] - R[0, 1]) * s
+        elif R[0, 0] > R[1, 1] and R[0, 0] > R[2, 2]:
+            r = np.sqrt(1 + R[0, 0] - R[1, 1] - R[2, 2])
+            s = 0.5 / r
+            q[0] = (R[2, 1] - R[1, 2]) * s
+            q[1] = 0.5 * r
+            q[2] = (R[0, 1] + R[1, 0]) * s
+            q[3] = (R[0, 2] + R[2, 0]) * s
+        elif R[1, 1] > R[2, 2]:
+            r = np.sqrt(1 - R[0, 0] + R[1, 1] - R[2, 2])
+            s = 0.5 / r
+            q[0] = (R[0, 2] - R[2, 0]) * s
+            q[1] = (R[0, 1] + R[1, 0]) * s
+            q[2] = 0.5 * r
+            q[3] = (R[1, 2] + R[2, 1]) * s
+        else:
+            r = np.sqrt(1 - R[0, 0] - R[1, 1] + R[2, 2])
+            s = 0.5 / r
+            q[0] = (R[1, 0] - R[0, 1]) * s
+            q[1] = (R[0, 2] + R[2, 0]) * s
+            q[2] = (R[1, 2] + R[2, 1]) * s
+            q[3] = 0.5 * r
+
         return cls(q)
 
     @classmethod
@@ -209,13 +234,14 @@ class Rotation(object):
         """
 
         rotation_vector = self.get_rotation_vector()
-        rotation_string = ' '.join([mpy.dat_precision for _i in range(3)])
+
         # The zeros are added to avoid negative zeros in the input file.
-        return rotation_string.format(
-            rotation_vector[0] + 0,
-            rotation_vector[1] + 0,
-            rotation_vector[2] + 0
-            )
+        return ' '.join([
+            mpy.dat_precision.format(component + 0)
+            if np.abs(component) >= mpy.eps_quaternion
+            else '0'
+            for component in rotation_vector
+            ])
 
     def copy(self):
         """Return a deep copy of this object."""
