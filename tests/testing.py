@@ -267,6 +267,29 @@ class TestRotation(unittest.TestCase):
         self.assertTrue(rot == rot * None)
         self.assertTrue(rot == rot.copy() * None)
 
+    def test_rotation_matrix(self):
+        """
+        Test if the correct quaternions are generated from a rotation matrix.
+        """
+
+        # Do one calculation for each case in
+        # Rotation().from_rotation_matrix().
+        vectors = [
+            [[1, 0, 0], [0, -1, 0]],
+            [[0, 0, 1], [0, 1, 0]],
+            [[-1, 0, 0], [0, 1, 0]],
+            [[0, 1, 0], [0, 0, 1]]
+            ]
+
+        for t1, t2 in vectors:
+            rot = Rotation().from_basis(t1, t2)
+            t1_rot = rot * [1, 0, 0]
+            t2_rot = rot * [0, 1, 0]
+            self.assertLess(np.linalg.norm(t1 - t1_rot), mpy.eps_quaternion,
+                'test_rotation_matrix: compare t1')
+            self.assertLess(np.linalg.norm(t2 - t2_rot), mpy.eps_quaternion,
+                'test_rotation_matrix: compare t2')
+
 
 def create_test_mesh(mesh):
     """Fill the mesh with a couple of test nodes and elements."""
