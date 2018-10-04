@@ -542,6 +542,13 @@ class Mesh(object):
         # the curve.
         rp = jacobian(function)
 
+        # Check which one of the boundaries is larger.
+        if (interval[0] > interval[1]):
+            # In this case rp needs to be negated.
+            def rp_negative(t):
+                return -(jacobian(function)(t))
+            rp = rp_negative
+
         def ds(t):
             """Increment along the curve."""
             return npAD.linalg.norm(rp(t))
