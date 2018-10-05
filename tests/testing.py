@@ -26,6 +26,13 @@ from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
     BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh, \
     find_close_nodes, find_close_nodes_binning
 
+# Global variable if this test is run by GitLab.
+if ('TESTING_GITLAB' in os.environ.keys()
+        and os.environ['TESTING_GITLAB'] == '1'):
+    TESTING_GITLAB = True
+else:
+    TESTING_GITLAB = True
+
 
 def get_default_paths(name):
     """Look for and return a path to baci-release."""
@@ -47,8 +54,7 @@ def get_default_paths(name):
     else:
         # In the case that no path was found, check if the script is performed
         # by a GitLab runner.
-        if ('TESTING_GITLAB' in os.environ.keys()
-                and os.environ['TESTING_GITLAB'] == '1'):
+        if TESTING_GITLAB:
             raise ValueError('Path for {} not found!'.format(name))
         else:
             return None
@@ -348,7 +354,7 @@ class TestMeshpy(unittest.TestCase):
         # Check if the strings are equal, if not compare the differences and
         # fail the test.
         is_equal = reference_string.strip() == compare_string.strip()
-        if not is_equal:
+        if not is_equal and not TESTING_GITLAB:
 
             # Check if temp directory exists, and creates it if necessary.
             os.makedirs(testing_temp, exist_ok=True)
