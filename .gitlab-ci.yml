@@ -1,6 +1,7 @@
 # Test meshpy.
 meshpy-testing:
     script:
+        - "whoami"
         - "pwd"
         - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
         # Compile cython code.
