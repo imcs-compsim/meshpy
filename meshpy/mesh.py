@@ -799,6 +799,115 @@ class Mesh(object):
             self.add(return_set)
         return return_set
 
+    def create_beam_mesh_segment(self, beam_object, material, center,
+            axis_rotation, radius, angle, n_el=1, start_node=None,
+            add_sets=False):
+        """
+        Generate a circular segment of beam elements.
+
+        Args
+        ----
+        beam_object: Beam
+            Class of beam that will be used for this line.
+        material: Material
+            Material for this segment.
+        center: np.array, list
+            Center of the arc.
+        axis_rotation: Rotation
+            The rotation of the segment axis in 3D and the segment starts on
+            the local y-axis.
+        radius: float
+            The radius of the segment.
+        angle: float
+            The central angle of this segment in radians.
+        n_el: int
+            Number of equally spaces beam elements along the segment.
+        start_node: Node, GeometrySet
+            Node to use as the first node for this line. Use this if the line
+            is connected to other lines (angles have to be the same, otherwise
+            connections should be used). If a geometry set is given, it can
+            contain one, and one node only.
+        add_sets: bool
+            If this is true the sets are added to the mesh and then displayed
+            in eventual VTK output, even if they are not used for a boundary
+            condition or coupling.
+
+        Return
+        ----
+        return_set: GeometryName
+            Set with the 'start' and 'end' node of the line. Also a 'line' set
+            with all nodes of the line.
+        """
+
+        self.add_material(material)
+
+        def get_beam_geometry(alpha, beta):
+            """
+            Return a function for the position and rotation along the beam
+            axis.
+            """
+
+            def beam_function(xi):
+                phi = 0.5 * (xi + 1) * (beta - alpha) + alpha
+                rot = axis_rotation * Rotation([0, 0, 1], phi)
+                pos = center + radius * (rot * [0, 1, 0])
+                return (pos, rot)
+            return beam_function
+
+        # List with nodes and elements of this line.
+        elements = []
+        nodes = []
+        if start_node is not None:
+            # Check type of start node.
+            if isinstance(start_node, Node):
+                nodes = [start_node]
+            elif isinstance(start_node, GeometrySet):
+                # Check if there is only one node in the set
+                if len(start_node.nodes) == 1:
+                    nodes = [start_node.nodes[0]]
+                else:
+                    raise ValueError('GeometrySet does not have one node!')
+            else:
+                raise TypeError('start_node can be node or GeometrySet '
+                    + 'got "{}"!'.format(type(start_node)))
+
+        # Create the beams.
+        for i in range(n_el):
+
+            function = get_beam_geometry(
+                angle * i / n_el,
+                angle * (i + 1) / n_el
+                )
+
+            if (start_node is None) and i == 0:
+                first_node = None
+            else:
+                first_node = nodes[-1]
+            elements.append(beam_object(material=material))
+            nodes.extend(elements[-1].create_beam(function,
+                start_node=first_node))
+
+        # Set the nodes that are at the beginning and end of line (for search
+        # of overlapping points)
+        nodes[0].is_end_node = True
+        nodes[-1].is_end_node = True
+
+        # Add items to the mesh
+        self.elements.extend(elements)
+        if start_node is None:
+            self.nodes.extend(nodes)
+        else:
+            self.nodes.extend(nodes[1:])
+
+        # Create geometry sets that will be returned.
+        return_set = GeometryName()
+        return_set['start'] = GeometrySet(mpy.point, nodes=nodes[0])
+        return_set['end'] = GeometrySet(mpy.point, nodes=nodes[-1])
+        return_set['line'] = GeometrySet(mpy.line, nodes=nodes)
+        if add_sets:
+            self.add(return_set)
+        return return_set
+
     def create_beam_mesh_honeycomb_flat(self, beam_object, material, width,
             n_width, n_height, n_el=1, closed_width=True, closed_height=True,
             create_couplings=True, add_sets=False):
