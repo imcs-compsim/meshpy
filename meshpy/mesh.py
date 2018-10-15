@@ -474,6 +474,68 @@ class Mesh(object):
                 )
             vtkwriter_solid.write_vtk(filepath, **kwargs)
 
+    def create_beam_mesh_function(self, beam_object, material,
+            function_generator, interval, n_el=1, add_sets=False,
+            start_node=None, end_node=None):
+        """TODO"""
+
+        self.add_material(material)
+
+        # List with nodes and elements of this beam.
+        elements = []
+        nodes = []
+        if start_node is not None:
+            # Check type of start node.
+            if isinstance(start_node, Node):
+                nodes = [start_node]
+            elif isinstance(start_node, GeometrySet):
+                # Check if there is only one node in the set
+                if len(start_node.nodes) == 1:
+                    nodes = [start_node.nodes[0]]
+                else:
+                    raise ValueError('GeometrySet does not have one node!')
+            else:
+                raise TypeError('start_node can be node or GeometrySet '
+                    + 'got "{}"!'.format(type(start_node)))
+
+        # Create the beams.
+        for i in range(n_el):
+            # Get the function to create this beam element.
+            function = function_generator(
+                interval[0] + i * (interval[1] - interval[0]) / n_el,
+                interval[0] + (i + 1) * (interval[1] - interval[0]) / n_el
+                )
+
+            if (start_node is None) and i == 0:
+                first_node = None
+            else:
+                first_node = nodes[-1]
+
+            element = beam_object(material=material)
+            elements.append(element)
+            nodes.extend(element.create_beam(function, start_node=first_node))
+
+        # Set the nodes that are at the beginning and end of line (for search
+        # of overlapping points)
+        nodes[0].is_end_node = True
+        nodes[-1].is_end_node = True
+
+        # Add items to the mesh
+        self.elements.extend(elements)
+        if start_node is None:
+            self.nodes.extend(nodes)
+        else:
+            self.nodes.extend(nodes[1:])
+
+        # Create geometry sets that will be returned.
+        return_set = GeometryName()
+        return_set['start'] = GeometrySet(mpy.point, nodes=nodes[0])
+        return_set['end'] = GeometrySet(mpy.point, nodes=nodes[-1])
+        return_set['line'] = GeometrySet(mpy.line, nodes=nodes)
+        if add_sets:
+            self.add(return_set)
+        return return_set
+
     def create_beam_mesh_curve(self, beam_object, material, function, interval,
             n_el=1, function_rotation=None, add_sets=False):
         """
@@ -720,8 +782,6 @@ class Mesh(object):
             with all nodes of the line.
         """
 
-        self.add_material(material)
-
         # Get geometrical values for this line.
         direction = np.array(end_point) - np.array(start_point)
         t1 = direction / np.linalg.norm(direction)
@@ -733,71 +793,23 @@ class Mesh(object):
             t2 = [0, 1, 0]
         rotation = Rotation.from_basis(t1, t2)
 
-        def get_beam_geometry(point_a, point_b):
+        def get_beam_geometry(parameter_a, parameter_b):
             """
             Return a function for the position and rotation along the beam
             axis.
             """
             def beam_function(xi):
+                point_a = start_point + parameter_a * direction
+                point_b = start_point + parameter_b * direction
                 return (
                     0.5 * (1 - xi) * point_a + 0.5 * (1 + xi) * point_b,
                     rotation
                     )
             return beam_function
 
-        # List with nodes and elements of this line.
-        elements = []
-        nodes = []
-        if start_node is not None:
-            # Check type of start node.
-            if isinstance(start_node, Node):
-                nodes = [start_node]
-            elif isinstance(start_node, GeometrySet):
-                # Check if there is only one node in the set
-                if len(start_node.nodes) == 1:
-                    nodes = [start_node.nodes[0]]
-                else:
-                    raise ValueError('GeometrySet does not have one node!')
-            else:
-                raise TypeError('start_node can be node or GeometrySet '
-                    + 'got "{}"!'.format(type(start_node)))
-
-        # Create the beams.
-        for i in range(n_el):
-
-            function = get_beam_geometry(
-                start_point + i * direction / n_el,
-                start_point + (i + 1) * direction / n_el
-                )
-
-            if (start_node is None) and i == 0:
-                first_node = None
-            else:
-                first_node = nodes[-1]
-            elements.append(beam_object(material=material))
-            nodes.extend(elements[-1].create_beam(function,
-                start_node=first_node))
-
-        # Set the nodes that are at the beginning and end of line (for search
-        # of overlapping points)
-        nodes[0].is_end_node = True
-        nodes[-1].is_end_node = True
-
-        # Add items to the mesh
-        self.elements.extend(elements)
-        if start_node is None:
-            self.nodes.extend(nodes)
-        else:
-            self.nodes.extend(nodes[1:])
-
-        # Create geometry sets that will be returned.
-        return_set = GeometryName()
-        return_set['start'] = GeometrySet(mpy.point, nodes=nodes[0])
-        return_set['end'] = GeometrySet(mpy.point, nodes=nodes[-1])
-        return_set['line'] = GeometrySet(mpy.line, nodes=nodes)
-        if add_sets:
-            self.add(return_set)
-        return return_set
+        # Create the beam in the mesh
+        return self.create_beam_mesh_function(beam_object, material,
+            get_beam_geometry, [0., 1.], n_el, add_sets, start_node)
 
     def create_beam_mesh_segment(self, beam_object, material, center,
             axis_rotation, radius, angle, n_el=1, start_node=None,
