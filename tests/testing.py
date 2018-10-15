@@ -782,7 +782,7 @@ class TestMeshpy(unittest.TestCase):
             input_file.get_string(header=False))
 
     def test_segment(self):
-        """ Create a circular segment and compare it with the reference file."""
+        """Create a circular segment and compare it with the reference file."""
 
         # Set default values for global parameters.
         mpy.set_default_values()

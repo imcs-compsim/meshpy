@@ -829,7 +829,7 @@ class Mesh(object):
             def beam_function(xi):
                 phi = 0.5 * (xi + 1) * (beta - alpha) + alpha
                 rot = axis_rotation * Rotation([0, 0, 1], phi)
-                pos = center + radius * (rot * [0, 1, 0])
+                pos = center + radius * (rot * [0, -1, 0])
                 return (pos, rot)
             return beam_function
 
