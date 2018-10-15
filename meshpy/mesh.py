@@ -474,8 +474,8 @@ class Mesh(object):
                 )
             vtkwriter_solid.write_vtk(filepath, **kwargs)
 
-    def create_beam_mesh_function(self, beam_object, material,
-            function_generator, interval, n_el=1, add_sets=False,
+    def create_beam_mesh_function(self, *, beam_object=None, material=None,
+            function_generator=None, interval=[0, 1], n_el=1, add_sets=False,
             start_node=None, end_node=None):
         """TODO"""
 
@@ -685,6 +685,10 @@ class Mesh(object):
                             np.arctan2(rprime[1], rprime[0])
                             )
 
+                if np.abs(xi - 1) < mpy.eps_pos:
+                    t_start_element = t_temp
+                    t2_temp = rot.get_rotation_matrix()[:, 1]
+
                 # Return the needed values for beam creation.
                 return (pos, rot)
 
@@ -693,13 +697,6 @@ class Mesh(object):
         # Now create the beam.
         # Get the length of the whole segment.
         length = S(interval[1])
-
-        # Add the beam elements
-        self.add_material(material)
-
-        # List with nodes and elements of this line.
-        elements = []
-        nodes = []
 
         # Create the beams.
         global t_temp, t_start_element, t2_temp
@@ -715,40 +712,10 @@ class Mesh(object):
             else:
                 t2_temp = [0, 1, 0]
 
-        for i in range(n_el):
-            function_pos_rot = get_beam_functions(
-                length * i / n_el,
-                length * (i + 1) / n_el
-                )
-            if i == 0:
-                first_node = None
-            else:
-                first_node = nodes[-1]
-            elements.append(beam_object(material=material))
-            nodes.extend(elements[-1].create_beam(function_pos_rot,
-                start_node=first_node))
-
-            # Reset the start value of t and t2.
-            t_start_element = t_temp
-            t2_temp = nodes[-1].rotation.get_rotation_matrix()[:, 1]
-
-        # Set the nodes that are at the beginning and end of line (for search
-        # of overlapping points)
-        nodes[0].is_end_node = True
-        nodes[-1].is_end_node = True
-
-        # Add items to the mesh
-        self.elements.extend(elements)
-        self.nodes.extend(nodes)
-
-        # Create geometry sets that will be returned.
-        return_set = GeometryName()
-        return_set['start'] = GeometrySet(mpy.point, nodes=nodes[0])
-        return_set['end'] = GeometrySet(mpy.point, nodes=nodes[-1])
-        return_set['line'] = GeometrySet(mpy.line, nodes=nodes)
-        if add_sets:
-            self.add(return_set)
-        return return_set
+        # Create the beam in the mesh
+        return self.create_beam_mesh_function(beam_object=beam_object,
+            material=material, function_generator=get_beam_functions,
+            interval=[0., length], n_el=n_el, add_sets=add_sets)
 
     def create_beam_mesh_line(self, beam_object, material, start_point,
             end_point, n_el=1, start_node=None, add_sets=False):
@@ -808,8 +775,10 @@ class Mesh(object):
             return beam_function
 
         # Create the beam in the mesh
-        return self.create_beam_mesh_function(beam_object, material,
-            get_beam_geometry, [0., 1.], n_el, add_sets, start_node)
+        return self.create_beam_mesh_function(beam_object=beam_object,
+            material=material, function_generator=get_beam_geometry,
+            interval=[0., 1.], n_el=n_el, add_sets=add_sets,
+            start_node=start_node)
 
     def create_beam_mesh_segment(self, beam_object, material, center,
             axis_rotation, radius, angle, n_el=1, start_node=None,
@@ -865,8 +834,10 @@ class Mesh(object):
             return beam_function
 
         # Create the beam in the mesh
-        return self.create_beam_mesh_function(beam_object, material,
-            get_beam_geometry, [0., angle], n_el, add_sets, start_node)
+        return self.create_beam_mesh_function(beam_object=beam_object,
+            material=material, function_generator=get_beam_geometry,
+            interval=[0., angle], n_el=n_el, add_sets=add_sets,
+            start_node=start_node)
 
     def create_beam_mesh_honeycomb_flat(self, beam_object, material, width,
             n_width, n_height, n_el=1, closed_width=True, closed_height=True,
