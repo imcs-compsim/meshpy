@@ -820,6 +820,11 @@ class Mesh(object):
             with all nodes of the line.
         """
 
+        # The angle can not be negative with the current implementation.
+        if angle <= 0.:
+            raise ValueError('The angle for a beam segment has to be a ' +
+                'positive number!')
+
         def get_beam_geometry(alpha, beta):
             """
             Return a function for the position and rotation along the beam
