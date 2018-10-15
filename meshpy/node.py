@@ -73,11 +73,11 @@ class Node(BaseMeshItem):
         """
         Return the line that represents this node in the input file.
         """
-        node_string = 'NODE {} COORD ' + ' '.join(
-            [mpy.dat_precision for _i in range(3)])
-        return node_string.format(
-            self.n_global,
-            self.coordinates[0],
-            self.coordinates[1],
-            self.coordinates[2]
-            )
+
+        coordinate_string = ' '.join([
+            mpy.dat_precision.format(component + 0)
+            if np.abs(component) >= mpy.eps_pos
+            else '0'
+            for component in self.coordinates
+            ])
+        return 'NODE {} COORD {}'.format(self.n_global, coordinate_string)
