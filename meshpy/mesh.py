@@ -670,7 +670,7 @@ class Mesh(object):
         def get_t_along_curve(arc_length, t0, **kwargs):
             """
             Calculate the parameter t where the length along the curve is
-            arc_length. t0 is the start point for the newton iteration.
+            arc_length. t0 is the start point for the Newton iteration.
             """
             t_root = optimize.newton(lambda t: S(t, **kwargs) - arc_length, t0,
                 fprime=ds)
@@ -722,6 +722,7 @@ class Mesh(object):
                             )
 
                 if np.abs(xi - 1) < mpy.eps_pos:
+                    # Set start values for the next element.
                     t_start_element = t_temp
                     t2_temp = rot.get_rotation_matrix()[:, 1]
 

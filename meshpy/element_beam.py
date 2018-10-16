@@ -49,6 +49,7 @@ class Beam(Element):
 
             # Get position and rotation of beam at xi.
             pos, rot = beam_function(xi)
+            relative_rotation = None
 
             # Check position.
             if np.linalg.norm(pos - node.coordinates) > mpy.eps_pos:
@@ -78,34 +79,40 @@ class Beam(Element):
                 if (np.linalg.norm(relative_basis_1 - [1, 0, 0])
                         < mpy.eps_quaternion):
                     # Calculate the relative rotation.
-                    return rot.inv() * node.rotation
+                    relative_rotation = rot.inv() * node.rotation
                 else:
                     raise ValueError('The tangent of the start node does not '
                         + 'match with the given function!')
 
             # The default value for the relative rotation is None.
-            return None
+            return pos, rot, relative_rotation
 
         # Check start and end nodes.
-        has_start_node = False
-        has_end_node = False
+        has_start_node = start_node is not None
+        has_end_node = end_node is not None
         relative_rotation = None
-        if start_node is not None:
-            relative_rotation = check_node(start_node, -1, 'start_node')
-            self.nodes = [start_node]
-            has_start_node = True
-        if end_node is not None:
-            check_node(end_node, 1, 'end_node')
-            has_end_node = True
 
         # Loop over local nodes.
         for i, [xi, create_rot, middle_node] in enumerate(self.nodes_create):
+
+            # Get the position and rotation at xi.
+            if i == 0 and has_start_node:
+                pos, rot, relative_rotation = check_node(start_node, xi,
+                    'start_node')
+                self.nodes = [start_node]
+            elif (i == len(self.nodes_create) - 1) and has_end_node:
+                pos, rot, _relative_rotation = check_node(end_node, xi,
+                    'end_node')
+            else:
+                pos, rot = beam_function(xi)
+
+            # Create the node.
             if (
                     (i > 0 or not has_start_node)
                     and
                     (i < len(self.nodes_create) - 1 or not has_end_node)
                     ):
-                pos, rot = beam_function(xi)
+
                 if create_rot:
                     self.nodes.append(Node(
                         pos,
