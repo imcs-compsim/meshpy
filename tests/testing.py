@@ -1129,7 +1129,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Add content to the mesh.
         mat = MaterialBeam(radius=0.05)
-        mesh.create_beam_mesh_honeycomb(Beam3rHerm2Lin3, mat, 2., 2, 3, 2,
+        mesh.create_beam_mesh_honeycomb(Beam3rHerm2Lin3, mat, 2., 2, 3, n_el=2,
             add_sets=True)
 
         # Write VTK output."""
@@ -1336,7 +1336,7 @@ class TestFullBaci(unittest.TestCase):
         # Create the honeycomb mesh.
         mesh_honeycomb = Mesh()
         honeycomb_set = mesh_honeycomb.create_beam_mesh_honeycomb(
-            Beam3rHerm2Lin3, material, 50.0, 10, 4, 1, closed_top=False,
+            Beam3rHerm2Lin3, material, 50.0, 10, 4, n_el=1, closed_top=False,
             add_sets=True)
         mesh_honeycomb.rotate(Rotation([0, 0, 1], 0.5 * np.pi))
 
@@ -1413,7 +1413,7 @@ class TestFullBaci(unittest.TestCase):
         # Add a straight beam.
         input_file.add(material)
         cantilever_set = input_file.create_beam_mesh_line(Beam3rHerm2Lin3,
-            material, [2, 0, -5], [2, 0, 5], 3)
+            material, [2, 0, -5], [2, 0, 5], n_el=3)
 
         # Add boundary conditions.
         input_file.add(

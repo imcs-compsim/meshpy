@@ -614,7 +614,7 @@ class Mesh(object):
         return return_set
 
     def create_beam_mesh_curve(self, beam_object, material, function, interval,
-            n_el=1, function_rotation=None, **kwargs):
+            *, function_rotation=None, **kwargs):
         """
         Generate a beam from a parametric curve. Integration along the beam is
         performed with scipy, and the gradient is calculated with autograd.
@@ -632,12 +632,15 @@ class Mesh(object):
             autograd.numpy.
         interval: [start end]
             Start and end values for the parameter of the curve.
-        n_el: int
-            Number of equally spaces beam elements along the line.
         function_rotation: function
             If this argument is given, the triads are computed with this
             function, on the same interval as the position function. Must
             return a Rotation object.
+
+        **kwargs (for all of them look into create_beam_mesh_function)
+        ----
+        n_el: int
+            Number of equally spaces beam elements along the line.
 
         Return
         ----
@@ -789,10 +792,10 @@ class Mesh(object):
         # Create the beam in the mesh
         return self.create_beam_mesh_function(beam_object=beam_object,
             material=material, function_generator=get_beam_functions,
-            interval=[0., length], n_el=n_el, **kwargs)
+            interval=[0., length], **kwargs)
 
     def create_beam_mesh_line(self, beam_object, material, start_point,
-            end_point, n_el=1, start_node=None, add_sets=False):
+            end_point, **kwargs):
         """
         Generate a straight line of beam elements.
 
@@ -804,6 +807,9 @@ class Mesh(object):
             Material for this line.
         start_point, end_point: np.array, list
             3D-coordinates for the start and end point of the line.
+
+        **kwargs (for all of them look into create_beam_mesh_function)
+        ----
         n_el: int
             Number of equally spaces beam elements along the line.
         start_node: Node, GeometrySet
@@ -851,11 +857,10 @@ class Mesh(object):
         # Create the beam in the mesh
         return self.create_beam_mesh_function(beam_object=beam_object,
             material=material, function_generator=get_beam_geometry,
-            interval=[0., 1.], n_el=n_el, add_sets=add_sets,
-            start_node=start_node)
+            interval=[0., 1.], **kwargs)
 
     def create_beam_mesh_arc_segment(self, beam_object, material, center,
-            axis_rotation, radius, angle, n_el=1, **kwargs):
+            axis_rotation, radius, angle, **kwargs):
         """
         Generate a circular segment of beam elements.
 
@@ -874,6 +879,9 @@ class Mesh(object):
             The radius of the segment.
         angle: float
             The central angle of this segment in radians.
+
+        **kwargs (for all of them look into create_beam_mesh_function)
+        ----
         n_el: int
             Number of equally spaces beam elements along the segment.
 
@@ -905,11 +913,11 @@ class Mesh(object):
         # Create the beam in the mesh
         return self.create_beam_mesh_function(beam_object=beam_object,
             material=material, function_generator=get_beam_geometry,
-            interval=[0., angle], n_el=n_el, **kwargs)
+            interval=[0., angle], **kwargs)
 
     def create_beam_mesh_honeycomb_flat(self, beam_object, material, width,
-            n_width, n_height, n_el=1, closed_width=True, closed_height=True,
-            create_couplings=True, add_sets=False):
+            n_width, n_height, *, n_el=1, closed_width=True,
+            closed_height=True, create_couplings=True, add_sets=False):
         """
         Add a flat honeycomb structure. The structure will be created in the
         x-y plane.
@@ -1039,7 +1047,7 @@ class Mesh(object):
         return return_set
 
     def create_beam_mesh_honeycomb(self, beam_object, material, diameter,
-            n_circumference, n_axis, n_el=1, closed_top=True, vertical=True,
+            n_circumference, n_axis, *, n_el=1, closed_top=True, vertical=True,
             add_sets=False):
         """
         Add a honeycomb structure around a cylinder. The cylinder axis will be
