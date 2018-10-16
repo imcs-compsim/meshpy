@@ -18,14 +18,15 @@ class GeometrySet(BaseMeshItem):
         mpy.volume: 'DVOLUME'
         }
 
-    def __init__(self, geometry_type, nodes=None, **kwargs):
+    def __init__(self, geometry_type, nodes=None, filter_double_nodes=False,
+            **kwargs):
         BaseMeshItem.__init__(self, is_dat=None, **kwargs)
 
         self.geometry_type = geometry_type
         self.nodes = []
 
         if nodes is not None:
-            self.add(nodes)
+            self.add(nodes, filter_double_nodes)
 
     @classmethod
     def from_dat(cls, geometry_key, lines, comments=None):
@@ -43,7 +44,7 @@ class GeometrySet(BaseMeshItem):
         # Set up class with values for solid mesh import
         return cls(geometry_key, nodes=nodes, comments=comments)
 
-    def add(self, value):
+    def add(self, value, filter_double_nodes):
         """
         Add nodes to this object.
 
@@ -58,16 +59,16 @@ class GeometrySet(BaseMeshItem):
             # This improves the performance considerably when large list of Nodes
             # are added.
             for item in value:
-                if ((not isinstance(item, Node))
-                        and (not isinstance(item, int))):
-                    raise TypeError('Expected Node or integer, '
-                        + 'got: {}!'.format(type(item)))
-            self.nodes.extend(value)
+                self.add(item, filter_double_nodes)
         elif isinstance(value, Node) or isinstance(value, int):
             if value not in self.nodes:
                 self.nodes.append(value)
-            else:
+            elif not filter_double_nodes:
                 raise ValueError('The node already exists in this set!')
+        elif isinstance(value, GeometrySet):
+            # Add all nodes from this geometry set.
+            for node in value.nodes:
+                self.add(node, filter_double_nodes)
         else:
             raise TypeError('Expected Node or list, but got {}'.format(
                 type(value)

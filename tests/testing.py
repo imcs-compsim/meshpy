@@ -24,7 +24,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(
 from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
     InputSection, MaterialReissner, MaterialBeam, Function, Beam3rHerm2Lin3, \
     BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh, \
-    find_close_nodes, find_close_nodes_binning
+    find_close_nodes, find_close_nodes_binning, GeometryName, GeometrySet
 
 # Global variable if this test is run by GitLab.
 if ('TESTING_GITLAB' in os.environ.keys()
@@ -814,6 +814,235 @@ class TestMeshpy(unittest.TestCase):
             'test_meshpy_segment',
             ref_file,
             input_file.get_string(header=False))
+
+    def test_close_beam(self):
+        """
+        Create a circle with different methods.
+        - Create the mesh manually by creating the nodes and connecting them to
+          the elements.
+        - Create one full circle and connect it to its beginning.
+        - Create two half circle and connect their start / end nodes.
+        All of those methods should give the exact same mesh.
+        Both variants are also tried with different rotations at the beginning.
+        """
+
+        # Ignore some strange warnings.
+        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
+
+        # Parameters for this test case.
+        n_el = 3
+        R = 1.235
+        additional_rotation = Rotation([0, 1, 0], 0.5)
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Define material.
+        mat = MaterialReissner(radius=0.1)
+
+        def create_mesh_manually(start_rotation):
+            """Create the full circle manually."""
+            input_file = InputFile(maintainer='Ivo Steinbrecher')
+            input_file.add(mat)
+
+            # Add nodes.
+            for i in range(4 * n_el):
+                basis = start_rotation * Rotation([0, 0, 1], np.pi * 0.5)
+                r = [R, 0, 0]
+                node = Node(r, basis)
+                rotation = Rotation([0, 0, 1], 0.5 * i * np.pi / n_el)
+                node.rotate(rotation, [0, 0, 0])
+                input_file.nodes.append(node)
+
+            # Add elements.
+            for i in range(2 * n_el):
+                node_index = [2 * i, 2 * i + 1, 2 * i + 2]
+                nodes = []
+                for index in node_index:
+                    if index == len(input_file.nodes):
+                        nodes.append(input_file.nodes[0])
+                    else:
+                        nodes.append(input_file.nodes[index])
+                element = Beam3rHerm2Lin3(mat, nodes)
+                input_file.add(element)
+
+            # Add sets.
+            geom_set = GeometryName()
+            geom_set['start'] = GeometrySet(mpy.point,
+                nodes=input_file.nodes[0])
+            geom_set['end'] = GeometrySet(mpy.point, nodes=input_file.nodes[0])
+            geom_set['line'] = GeometrySet(mpy.line, nodes=input_file.nodes)
+            input_file.add(geom_set)
+            return input_file
+
+        def one_full_circle_closed(function, argument_list,
+                additional_rotation=None):
+            """Create one full circle and connect it to itself."""
+
+            input_file = InputFile(maintainer='Ivo Steinbrecher')
+
+            if additional_rotation is not None:
+                start_rotation = additional_rotation * \
+                    Rotation([0, 0, 1], np.pi * 0.5)
+                input_file.add(Node([R, 0, 0], rotation=start_rotation))
+                function(input_file, start_node=input_file.nodes[0],
+                    end_node=True, add_sets=True, **(argument_list))
+            else:
+                function(input_file, end_node=True, add_sets=True,
+                    **(argument_list))
+            return input_file
+
+        def two_half_circles_closed(function, argument_list,
+                additional_rotation=None):
+            """
+            Create two half circles and close them, by reusing the connecting
+            nodes.
+            """
+
+            input_file = InputFile(maintainer='Ivo Steinbrecher')
+
+            if additional_rotation is not None:
+                start_rotation = additional_rotation * \
+                    Rotation([0, 0, 1], np.pi * 0.5)
+                input_file.add(Node([R, 0, 0], rotation=start_rotation))
+                set_1 = function(input_file, start_node=input_file.nodes[0],
+                    **(argument_list[0]))
+            else:
+                set_1 = function(input_file, **(argument_list[0]))
+
+            set_2 = function(input_file, start_node=set_1['end'],
+                end_node=set_1['start'], **(argument_list[1]))
+
+            # Add sets.
+            geom_set = GeometryName()
+            geom_set['start'] = GeometrySet(mpy.point, nodes=set_1['start'])
+            geom_set['end'] = GeometrySet(mpy.point, nodes=set_2['end'])
+            geom_set['line'] = GeometrySet(mpy.line,
+                nodes=[set_1['line'], set_2['line']], filter_double_nodes=True)
+            input_file.add(geom_set)
+
+            return input_file
+
+        def get_arguments_arc_segment(circle_type):
+            """Return the arguments for the arc segment function."""
+            if circle_type == 0:
+                # Full circle.
+                arg_rot_angle = np.pi / 2
+                arg_angle = 2 * np.pi
+                arg_n_el = 2 * n_el
+            elif circle_type == 1:
+                # First half circle.
+                arg_rot_angle = np.pi / 2
+                arg_angle = np.pi
+                arg_n_el = n_el
+            elif circle_type == 2:
+                # Second half circle.
+                arg_rot_angle = 3 * np.pi / 2
+                arg_angle = np.pi
+                arg_n_el = n_el
+            return {
+                'beam_object': Beam3rHerm2Lin3,
+                'material': mat,
+                'center': [0, 0, 0],
+                'axis_rotation': Rotation([0, 0, 1], arg_rot_angle),
+                'radius': R,
+                'angle': arg_angle,
+                'n_el': arg_n_el
+                }
+
+        def circle_function(t):
+            """Function for the circle."""
+            return R * npAD.array([npAD.cos(t), npAD.sin(t)])
+
+        def get_arguments_curve(circle_type):
+            """Return the arguments for the curve function."""
+            if circle_type == 0:
+                # Full circle.
+                arg_interval = [0, 2 * np.pi]
+                arg_n_el = 2 * n_el
+            elif circle_type == 1:
+                # First half circle.
+                arg_interval = [0, np.pi]
+                arg_n_el = n_el
+            elif circle_type == 2:
+                # Second half circle.
+                arg_interval = [np.pi, 2 * np.pi]
+                arg_n_el = n_el
+            return {
+                'beam_object': Beam3rHerm2Lin3,
+                'material': mat,
+                'function': circle_function,
+                'interval': arg_interval,
+                'n_el': arg_n_el
+                }
+
+        # Check the meshes without additional rotation.
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_close_beam_reference.dat')
+
+        self.compare_strings(
+            'test_meshpy_close_beam_manual',
+            ref_file,
+            create_mesh_manually(Rotation()).get_string(header=False))
+        self.compare_strings(
+            'test_meshpy_close_beam_full_segment',
+            ref_file,
+            one_full_circle_closed(InputFile.create_beam_mesh_arc_segment,
+                get_arguments_arc_segment(0)).get_string(header=False))
+        self.compare_strings(
+            'test_meshpy_close_beam_split_segment',
+            ref_file,
+            two_half_circles_closed(InputFile.create_beam_mesh_arc_segment,
+                [get_arguments_arc_segment(1), get_arguments_arc_segment(2)]
+                ).get_string(header=False))
+        self.compare_strings(
+            'test_meshpy_close_beam_full_curve',
+            ref_file,
+            one_full_circle_closed(InputFile.create_beam_mesh_curve,
+                get_arguments_curve(0)).get_string(header=False))
+        self.compare_strings(
+            'test_meshpy_close_beam_split_curve',
+            ref_file,
+            two_half_circles_closed(InputFile.create_beam_mesh_curve,
+                [get_arguments_curve(1), get_arguments_curve(2)]
+                ).get_string(header=False))
+
+        # Check the meshes with additional rotation.
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_close_beam_rotated_reference.dat')
+
+        self.compare_strings(
+            'test_meshpy_close_beam_manual_rotation',
+            ref_file,
+            create_mesh_manually(additional_rotation).get_string(header=False))
+        self.compare_strings(
+            'test_meshpy_close_beam_full_segment_rotation',
+            ref_file,
+            one_full_circle_closed(InputFile.create_beam_mesh_arc_segment,
+                get_arguments_arc_segment(0),
+                additional_rotation=additional_rotation).get_string(
+                    header=False))
+        self.compare_strings(
+            'test_meshpy_close_beam_split_segment_rotation',
+            ref_file,
+            two_half_circles_closed(InputFile.create_beam_mesh_arc_segment,
+                [get_arguments_arc_segment(1), get_arguments_arc_segment(2)],
+                additional_rotation=additional_rotation
+                ).get_string(header=False))
+        self.compare_strings(
+            'test_meshpy_close_beam_full_curve_rotation',
+            ref_file,
+            one_full_circle_closed(InputFile.create_beam_mesh_curve,
+                get_arguments_curve(0),
+                additional_rotation=additional_rotation).get_string(
+                    header=False))
+        self.compare_strings(
+            'test_meshpy_close_beam_split_curve_rotation',
+            ref_file,
+            two_half_circles_closed(InputFile.create_beam_mesh_curve,
+                [get_arguments_curve(1), get_arguments_curve(2)],
+                additional_rotation=additional_rotation
+                ).get_string(header=False))
 
     def test_vtk_writer(self):
         """Test the output created by the VTK writer."""

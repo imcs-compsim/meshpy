@@ -41,7 +41,7 @@ class Beam(Element):
         if len(self.nodes) > 0:
             raise ValueError('The beam should not have any local nodes yet!')
 
-        def check_node(node, xi, name):
+        def check_node(node, xi, name, relative_rotation=None):
             """
             Check if the given node matches with the function at value xi.
             The return value is the relative rotation.
@@ -49,7 +49,6 @@ class Beam(Element):
 
             # Get position and rotation of beam at xi.
             pos, rot = beam_function(xi)
-            relative_rotation = None
 
             # Check position.
             if np.linalg.norm(pos - node.coordinates) > mpy.eps_pos:
@@ -63,7 +62,7 @@ class Beam(Element):
                     # In the case of end node check if the beam is rotated.
                     if relative_rotation is not None:
                         if node.rotation == rot * relative_rotation:
-                            return
+                            return pos, rot, relative_rotation
                     # Otherwise, throw error, as the rotation has to match
                     # exactly with the given node.
                     raise ValueError('End rotation does not match with '
@@ -102,7 +101,7 @@ class Beam(Element):
                 self.nodes = [start_node]
             elif (i == len(self.nodes_create) - 1) and has_end_node:
                 pos, rot, _relative_rotation = check_node(end_node, xi,
-                    'end_node')
+                    'end_node', relative_rotation=relative_rotation)
             else:
                 pos, rot = beam_function(xi)
 
