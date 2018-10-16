@@ -554,19 +554,19 @@ class Mesh(object):
         else:
             self.nodes.extend(nodes[1:])
 
-        # Add end node if an external one was given.
-        if not close_beam and end_node is not None:
-            self.nodes.append(end_node)
+        # Set the last node of the beam.
+        if end_node is None:
+            end_node = nodes[-1]
 
         # Set the nodes that are at the beginning and end of line (for search
         # of overlapping points)
         nodes[0].is_end_node = True
-        nodes[-1].is_end_node = True
+        end_node.is_end_node = True
 
         # Create geometry sets that will be returned.
         return_set = GeometryName()
         return_set['start'] = GeometrySet(mpy.point, nodes=nodes[0])
-        return_set['end'] = GeometrySet(mpy.point, nodes=nodes[-1])
+        return_set['end'] = GeometrySet(mpy.point, nodes=end_node)
         return_set['line'] = GeometrySet(mpy.line, nodes=nodes)
         if add_sets:
             self.add(return_set)
