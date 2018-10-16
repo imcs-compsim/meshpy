@@ -479,46 +479,73 @@ class Mesh(object):
             start_node=None, end_node=None):
         """TODO"""
 
+        # Make sure the material is in the mesh.
         self.add_material(material)
 
-        # List with nodes and elements of this beam.
+        # List with nodes and elements that will be added in the creation of
+        # this beam.
         elements = []
         nodes = []
-        if start_node is not None:
-            # Check type of start node.
-            if isinstance(start_node, Node):
-                nodes = [start_node]
-            elif isinstance(start_node, GeometrySet):
+
+        def get_node(item, name):
+            """
+            Function to get a node from the input variable. This function
+            accepts a Node object as well as a GeometrySet object.
+            """
+            if isinstance(item, Node):
+                return item
+            elif isinstance(item, GeometrySet):
                 # Check if there is only one node in the set
-                if len(start_node.nodes) == 1:
-                    nodes = [start_node.nodes[0]]
+                if len(item.nodes) == 1:
+                    return item.nodes[0]
                 else:
                     raise ValueError('GeometrySet does not have one node!')
             else:
-                raise TypeError('start_node can be node or GeometrySet '
-                    + 'got "{}"!'.format(type(start_node)))
+                raise TypeError(('{} can be node or GeometrySet '
+                    + 'got "{}"!').format(name, type(item)))
+
+        # If a start node is given, set this as the first node for this beam.
+        if start_node is not None:
+            nodes = [get_node(start_node, 'start_node')]
+
+        # If an end node is given, check what behavior is wanted.
+        close_beam = False
+        if end_node is True:
+            close_beam = True
+        elif end_node is not None:
+            end_node = get_node(end_node, 'end_node')
 
         # Create the beams.
         for i in range(n_el):
+
+            # If the beam is closed with itself, set the end node to be the
+            # first node of the beam. This is done when the second element is
+            # created, as the first node already exists here.
+            if i == 1 and close_beam:
+                end_node = nodes[0]
+
             # Get the function to create this beam element.
             function = function_generator(
                 interval[0] + i * (interval[1] - interval[0]) / n_el,
                 interval[0] + (i + 1) * (interval[1] - interval[0]) / n_el
                 )
 
-            if (start_node is None) and i == 0:
-                first_node = None
-            else:
+            # Set the start node for the created beam.
+            if start_node is not None or i > 0:
                 first_node = nodes[-1]
+            else:
+                first_node = None
+
+            # If an end node is given, set this one for the last element.
+            if end_node is not None and i == n_el - 1:
+                last_node = end_node
+            else:
+                last_node = None
 
             element = beam_object(material=material)
             elements.append(element)
-            nodes.extend(element.create_beam(function, start_node=first_node))
-
-        # Set the nodes that are at the beginning and end of line (for search
-        # of overlapping points)
-        nodes[0].is_end_node = True
-        nodes[-1].is_end_node = True
+            nodes.extend(element.create_beam(function, start_node=first_node,
+                end_node=last_node))
 
         # Add items to the mesh
         self.elements.extend(elements)
@@ -526,6 +553,15 @@ class Mesh(object):
             self.nodes.extend(nodes)
         else:
             self.nodes.extend(nodes[1:])
+
+        # Add end node if an external one was given.
+        if not close_beam and end_node is not None:
+            self.nodes.append(end_node)
+
+        # Set the nodes that are at the beginning and end of line (for search
+        # of overlapping points)
+        nodes[0].is_end_node = True
+        nodes[-1].is_end_node = True
 
         # Create geometry sets that will be returned.
         return_set = GeometryName()
@@ -537,7 +573,7 @@ class Mesh(object):
         return return_set
 
     def create_beam_mesh_curve(self, beam_object, material, function, interval,
-            n_el=1, function_rotation=None, add_sets=False):
+            n_el=1, function_rotation=None, **kwargs):
         """
         Generate a beam from a parametric curve. Integration along the beam is
         performed with scipy, and the gradient is calculated with autograd.
@@ -715,7 +751,7 @@ class Mesh(object):
         # Create the beam in the mesh
         return self.create_beam_mesh_function(beam_object=beam_object,
             material=material, function_generator=get_beam_functions,
-            interval=[0., length], n_el=n_el, add_sets=add_sets)
+            interval=[0., length], n_el=n_el, **kwargs)
 
     def create_beam_mesh_line(self, beam_object, material, start_point,
             end_point, n_el=1, start_node=None, add_sets=False):
@@ -780,9 +816,8 @@ class Mesh(object):
             interval=[0., 1.], n_el=n_el, add_sets=add_sets,
             start_node=start_node)
 
-    def create_beam_mesh_segment(self, beam_object, material, center,
-            axis_rotation, radius, angle, n_el=1, start_node=None,
-            add_sets=False):
+    def create_beam_mesh_arc_segment(self, beam_object, material, center,
+            axis_rotation, radius, angle, n_el=1, **kwargs):
         """
         Generate a circular segment of beam elements.
 
@@ -841,8 +876,7 @@ class Mesh(object):
         # Create the beam in the mesh
         return self.create_beam_mesh_function(beam_object=beam_object,
             material=material, function_generator=get_beam_geometry,
-            interval=[0., angle], n_el=n_el, add_sets=add_sets,
-            start_node=start_node)
+            interval=[0., angle], n_el=n_el, **kwargs)
 
     def create_beam_mesh_honeycomb_flat(self, beam_object, material, width,
             n_width, n_height, n_el=1, closed_width=True, closed_height=True,

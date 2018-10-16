@@ -797,7 +797,7 @@ class TestMeshpy(unittest.TestCase):
             shear_correction=1.1)
 
         # Create mesh.
-        mesh = input_file.create_beam_mesh_segment(Beam3rHerm2Lin3, mat,
+        mesh = input_file.create_beam_mesh_arc_segment(Beam3rHerm2Lin3, mat,
             [3, 6, 9.2], Rotation([4.5, 7, 10], np.pi / 5), 10, np.pi / 2.3,
             n_el=5)
 
