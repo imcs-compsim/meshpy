@@ -36,6 +36,12 @@ class Beam(Element):
             coordinate xi.
         start_node: Node
             If this argument is given, this is the node of the beam at xi=-1.
+        end_node: Node
+            If this argument is given, this is the node of the beam at xi=1.
+        In the case of start_node and end_node, it is checked, that the
+        function and the node have the same coordinates / rotations. If the
+        start node has a different rotation, but the same tangent vector, the
+        beam is rotated to match the start node rotation.
         """
 
         if len(self.nodes) > 0:

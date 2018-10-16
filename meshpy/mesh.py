@@ -477,7 +477,48 @@ class Mesh(object):
     def create_beam_mesh_function(self, *, beam_object=None, material=None,
             function_generator=None, interval=[0, 1], n_el=1, add_sets=False,
             start_node=None, end_node=None):
-        """TODO"""
+        """
+        Generic beam creation function.
+
+        Args
+        ----
+        beam_object: Beam
+            Class of beam that will be used for this line.
+        material: Material
+            Material for this line.
+        function_generator: function that returns function
+            The function_generator has to take two variables, point_a and
+            point_b (both within the interval) and return a function(xi) that
+            calculates the position and rotation along the beam, where
+            point_a -> xi = -1 and point_b -> xi = 1.
+        interval: [start end]
+            Start and end values for interval that will be used to create the
+            beam.
+        n_el: int
+            Number of equally spaces beam elements along the line.
+        add_sets: bool
+            If this is true the sets are added to the mesh and then displayed
+            in eventual VTK output, even if they are not used for a boundary
+            condition or coupling.
+        start_node: Node, GeometrySet
+            Node to use as the first node for this line. Use this if the line
+            is connected to other lines (angles have to be the same, otherwise
+            connections should be used). If a geometry set is given, it can
+            contain one, and one node only. If the rotation does not match, but
+            the tangent vector is the same, the created beams triads are
+            rotated so the physical problem stays the same (for axi-symmetric
+            beam cross-sections) but the same nodes can be used.
+        end_node: Node, GeometrySet, bool
+            If this is a Node or GeometrySet, the last node of the created beam
+            is set to that node.
+            If it is True the created beam is closed within itself.
+
+        Return
+        ----
+        return_set: GeometryName
+            Set with the 'start' and 'end' node of the curve. Also a 'line' set
+            with all nodes of the curve.
+        """
 
         # Make sure the material is in the mesh.
         self.add_material(material)
@@ -597,10 +638,6 @@ class Mesh(object):
             If this argument is given, the triads are computed with this
             function, on the same interval as the position function. Must
             return a Rotation object.
-        add_sets: bool
-            If this is true the sets are added to the mesh and then displayed
-            in eventual VTK output, even if they are not used for a boundary
-            condition or coupling.
 
         Return
         ----
@@ -839,15 +876,6 @@ class Mesh(object):
             The central angle of this segment in radians.
         n_el: int
             Number of equally spaces beam elements along the segment.
-        start_node: Node, GeometrySet
-            Node to use as the first node for this line. Use this if the line
-            is connected to other lines (angles have to be the same, otherwise
-            connections should be used). If a geometry set is given, it can
-            contain one, and one node only.
-        add_sets: bool
-            If this is true the sets are added to the mesh and then displayed
-            in eventual VTK output, even if they are not used for a boundary
-            condition or coupling.
 
         Return
         ----
