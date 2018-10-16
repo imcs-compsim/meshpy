@@ -164,8 +164,8 @@ if __name__ == '__main__':
     expected_times['adonis'] = {
         'cubitpy_create_solid': 3.2,
         'meshpy_load_solid': 1.1,
-        'meshpy_load_solid_full': 2.5,
-        'meshpy_create_beams': 5.8,
+        'meshpy_load_solid_full': 3.5,
+        'meshpy_create_beams': 7.0,
         'meshpy_rotate': 0.6,
         'meshpy_translate': 0.6,
         'meshpy_wrap_around_cylinder': 0.9,
