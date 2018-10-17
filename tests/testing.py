@@ -26,6 +26,13 @@ from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
     BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh, \
     find_close_nodes, find_close_nodes_binning, GeometryName, GeometrySet
 
+# Geometry functions.
+from meshpy.mesh_creation_functions.beam_basic_geometry import \
+    create_beam_mesh_line, create_beam_mesh_arc_segment
+from meshpy.mesh_creation_functions.beam_honeycomb import \
+    create_beam_mesh_honeycomb, create_beam_mesh_honeycomb_flat
+from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
+
 # Global variable if this test is run by GitLab.
 if ('TESTING_GITLAB' in os.environ.keys()
         and os.environ['TESTING_GITLAB'] == '1'):
@@ -319,7 +326,7 @@ def create_test_mesh(mesh):
     mesh.add(beam)
 
     # Add a beam line with three elements
-    mesh.create_beam_mesh_line(Beam3rHerm2Lin3, material,
+    create_beam_mesh_line(mesh, Beam3rHerm2Lin3, material,
         [100 * random.uniform(-1, 1) for _i in range(3)],
         [100 * random.uniform(-1, 1) for _i in range(3)],
         n_el=3)
@@ -484,7 +491,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Add one element with BCs.
         mat = BaseMeshItem('material')
-        sets = mesh.create_beam_mesh_line(Beam3rHerm2Lin3, mat,
+        sets = create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat,
             [0, 0, 0], [1, 2, 3])
         mesh.add(BoundaryCondition(sets['start'], 'test',
             bc_type=mpy.dirichlet))
@@ -593,7 +600,7 @@ class TestMeshpy(unittest.TestCase):
                 R * npAD.sin(t_trans),
                 t_trans * tz / (2 * np.pi)
                 ])
-        helix_set = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat,
+        helix_set = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat,
             helix, [0., 2. * np.pi * n], n_el=n_el)
 
         # Compare the coordinates with the ones from mathematica.
@@ -641,7 +648,7 @@ class TestMeshpy(unittest.TestCase):
         # Create a helix with a parametric curve.
         def sin(t):
             return npAD.array([t, npAD.sin(t)])
-        sin_set = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat,
+        sin_set = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat,
             sin, [0., 2. * np.pi], n_el=n_el)
 
         # Compare the coordinates with the ones from mathematica.
@@ -700,7 +707,7 @@ class TestMeshpy(unittest.TestCase):
             R1 = Rotation([1, 0, 0], t * 2 * np.pi)
             R2 = Rotation.from_basis(rp, [0, 0, 1])
             return R2 * R1
-        sin_set = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat,
+        sin_set = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat,
             curve, [0., 1.], n_el=n_el, function_rotation=rotation)
 
         # Apply boundary conditions.
@@ -749,10 +756,10 @@ class TestMeshpy(unittest.TestCase):
             return npAD.array([t_trans, 0, 0])
 
         # Create mesh.
-        set_1 = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat, line,
+        set_1 = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat, line,
             [0., 5.], n_el=3)
         input_file.translate([0, 1, 0])
-        set_2 = input_file.create_beam_mesh_curve(Beam3rHerm2Lin3, mat, line,
+        set_2 = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat, line,
             [5., 0.], n_el=3)
 
         # Add boundary conditions.
@@ -797,7 +804,7 @@ class TestMeshpy(unittest.TestCase):
             shear_correction=1.1)
 
         # Create mesh.
-        mesh = input_file.create_beam_mesh_arc_segment(Beam3rHerm2Lin3, mat,
+        mesh = create_beam_mesh_arc_segment(input_file, Beam3rHerm2Lin3, mat,
             [3, 6, 9.2], Rotation([4.5, 7, 10], np.pi / 5), 10, np.pi / 2.3,
             n_el=5)
 
@@ -987,23 +994,23 @@ class TestMeshpy(unittest.TestCase):
         self.compare_strings(
             'test_meshpy_close_beam_full_segment',
             ref_file,
-            one_full_circle_closed(InputFile.create_beam_mesh_arc_segment,
+            one_full_circle_closed(create_beam_mesh_arc_segment,
                 get_arguments_arc_segment(0)).get_string(header=False))
         self.compare_strings(
             'test_meshpy_close_beam_split_segment',
             ref_file,
-            two_half_circles_closed(InputFile.create_beam_mesh_arc_segment,
+            two_half_circles_closed(create_beam_mesh_arc_segment,
                 [get_arguments_arc_segment(1), get_arguments_arc_segment(2)]
                 ).get_string(header=False))
         self.compare_strings(
             'test_meshpy_close_beam_full_curve',
             ref_file,
-            one_full_circle_closed(InputFile.create_beam_mesh_curve,
+            one_full_circle_closed(create_beam_mesh_curve,
                 get_arguments_curve(0)).get_string(header=False))
         self.compare_strings(
             'test_meshpy_close_beam_split_curve',
             ref_file,
-            two_half_circles_closed(InputFile.create_beam_mesh_curve,
+            two_half_circles_closed(create_beam_mesh_curve,
                 [get_arguments_curve(1), get_arguments_curve(2)]
                 ).get_string(header=False))
 
@@ -1018,28 +1025,28 @@ class TestMeshpy(unittest.TestCase):
         self.compare_strings(
             'test_meshpy_close_beam_full_segment_rotation',
             ref_file,
-            one_full_circle_closed(InputFile.create_beam_mesh_arc_segment,
+            one_full_circle_closed(create_beam_mesh_arc_segment,
                 get_arguments_arc_segment(0),
                 additional_rotation=additional_rotation).get_string(
                     header=False))
         self.compare_strings(
             'test_meshpy_close_beam_split_segment_rotation',
             ref_file,
-            two_half_circles_closed(InputFile.create_beam_mesh_arc_segment,
+            two_half_circles_closed(create_beam_mesh_arc_segment,
                 [get_arguments_arc_segment(1), get_arguments_arc_segment(2)],
                 additional_rotation=additional_rotation
                 ).get_string(header=False))
         self.compare_strings(
             'test_meshpy_close_beam_full_curve_rotation',
             ref_file,
-            one_full_circle_closed(InputFile.create_beam_mesh_curve,
+            one_full_circle_closed(create_beam_mesh_curve,
                 get_arguments_curve(0),
                 additional_rotation=additional_rotation).get_string(
                     header=False))
         self.compare_strings(
             'test_meshpy_close_beam_split_curve_rotation',
             ref_file,
-            two_half_circles_closed(InputFile.create_beam_mesh_curve,
+            two_half_circles_closed(create_beam_mesh_curve,
                 [get_arguments_curve(1), get_arguments_curve(2)],
                 additional_rotation=additional_rotation
                 ).get_string(header=False))
@@ -1129,7 +1136,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Add content to the mesh.
         mat = MaterialBeam(radius=0.05)
-        mesh.create_beam_mesh_honeycomb(Beam3rHerm2Lin3, mat, 2., 2, 3, n_el=2,
+        create_beam_mesh_honeycomb(mesh, Beam3rHerm2Lin3, mat, 2., 2, 3, n_el=2,
             add_sets=True)
 
         # Write VTK output."""
@@ -1335,7 +1342,7 @@ class TestFullBaci(unittest.TestCase):
 
         # Create the honeycomb mesh.
         mesh_honeycomb = Mesh()
-        honeycomb_set = mesh_honeycomb.create_beam_mesh_honeycomb(
+        honeycomb_set = create_beam_mesh_honeycomb(mesh_honeycomb,
             Beam3rHerm2Lin3, material, 50.0, 10, 4, n_el=1, closed_top=False,
             add_sets=True)
         mesh_honeycomb.rotate(Rotation([0, 0, 1], 0.5 * np.pi))
@@ -1412,7 +1419,7 @@ class TestFullBaci(unittest.TestCase):
 
         # Add a straight beam.
         input_file.add(material)
-        cantilever_set = input_file.create_beam_mesh_line(Beam3rHerm2Lin3,
+        cantilever_set = create_beam_mesh_line(input_file, Beam3rHerm2Lin3,
             material, [2, 0, -5], [2, 0, 5], n_el=3)
 
         # Add boundary conditions.
@@ -1545,7 +1552,7 @@ class TestFullBaci(unittest.TestCase):
         for vertical in [False, True]:
             for closed_top in [False, True]:
                 mesh.translate(17 * np.array([1, 0, 0]))
-                honeycomb_set = mesh.create_beam_mesh_honeycomb(
+                honeycomb_set = create_beam_mesh_honeycomb(mesh,
                     Beam3rHerm2Lin3, material, 10, 6, 3, n_el=2,
                     vertical=vertical, closed_top=closed_top)
                 mesh.add(
@@ -1635,8 +1642,8 @@ class TestFullBaci(unittest.TestCase):
             mesh = Mesh()
 
             # Create the first line.
-            set_1 = mesh.create_beam_mesh_line(Beam3rHerm2Lin3, mat, [0, 0, 0],
-                1. * direction, n_el=3)
+            set_1 = create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat,
+                [0, 0, 0], 1. * direction, n_el=3)
 
             if not i == 0:
                 # In the second case rotate the line, so the triads do not
@@ -1650,7 +1657,7 @@ class TestFullBaci(unittest.TestCase):
                 start_node = set_1['end']
 
             # Add the second line.
-            set_2 = mesh.create_beam_mesh_line(Beam3rHerm2Lin3, mat,
+            set_2 = create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat,
                 1. * direction,
                 2. * direction,
                 n_el=3, start_node=start_node
