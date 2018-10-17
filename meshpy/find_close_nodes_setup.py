@@ -19,6 +19,7 @@ if len(sys.argv) == 1:
 
 # Compile cython module.
 setup(
-    ext_modules=cythonize('find_close_nodes.pyx', annotate=True),
+    ext_modules=cythonize('find_close_nodes.pyx', annotate=True,
+        build_dir='cython_build'),
     include_dirs=[np.get_include()]
     )
