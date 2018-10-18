@@ -664,7 +664,7 @@ class InputFile(Mesh):
         elif isinstance(binning_bounding_box, bool) and binning_bounding_box:
             # Default binning.
             binning = True
-            binning_bounding_box=[-1, -1, -1, 1, 1, 1]
+            binning_bounding_box = [-1, -1, -1, 1, 1, 1]
         elif (isinstance(binning_bounding_box, list)
                 and len(binning_bounding_box) == 6):
             # User given boundary box.
