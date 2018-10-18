@@ -144,6 +144,12 @@ class Beam(Element):
         # Return the created nodes.
         return created_nodes
 
+    def flip(self):
+        """
+        Reverse the nodes of this element. This is usually used when reflected.
+        """
+        self.nodes = [self.nodes[-1 - i] for i in range(len(self.nodes))]
+
     def preview_python(self, ax):
         """Plot the beam in matplotlib, by connecting the nodes."""
 
