@@ -19,6 +19,7 @@
 
 # ignore build folders for cython
 */build
+*/cython_build
 meshpy/meshpy
 */find_close_nodes.c
 */find_close_nodes.html
