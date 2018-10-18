@@ -252,13 +252,14 @@ class Mesh(object):
         rot1 = self.get_global_quaternions()
 
         # Additional rotation.
-        if isinstance(rotation, Rotation):
-            rot2 = rotation.get_quaternion().transpose()
-        else:
-            rot2 = rotation
-        rotnew = add_rotations(rot2, rot1)
+        rotnew = add_rotations(rotation, rot1)
 
         if not only_rotate_triads:
+            if isinstance(rotation, Rotation):
+                rot2 = rotation.get_quaternion().transpose()
+            else:
+                rot2 = rotation
+
             # Get array with all positions for the nodes.
             pos = self.get_global_coordinates()
 
@@ -303,7 +304,7 @@ class Mesh(object):
                 if not only_rotate_triads:
                     node.coordinates = posnew[i, :]
 
-    def reflect(self, normal_vector, origin=None):
+    def reflect(self, normal_vector, origin=None, flip=False):
         """
         Reflect all nodes of the mesh with respect to a plane defined by its
         normal_vector. Per default the plane goes through the origin, if not
@@ -328,6 +329,9 @@ class Mesh(object):
         origin: 3D vector
             Per default the reflection plane goes through the origin. If this
             parameter is given, the point is on the plane.
+        flip: bool
+            When True, the beams are flipped, so that the direction along the
+            beam is reversed.
         """
 
         # Normalize the normal vector.
@@ -368,6 +372,16 @@ class Mesh(object):
 
         # Add to the existing rotations.
         rot_new = add_rotations(rot2, rot1)
+
+        if flip:
+            # To achieve the flip, the triads are rotated with the angle pi
+            # around the e2 axis.
+            rot_flip = Rotation([0, 1, 0], np.pi)
+            rot_new = add_rotations(rot_new, rot_flip)
+
+            # Each element has to switch its nodes internally.
+            for element in self.elements:
+                element.flip()
 
         # Set the new positions and rotations.
         for i, node in enumerate(self.nodes):
