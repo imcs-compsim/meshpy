@@ -262,3 +262,41 @@ class Rotation(object):
 def get_relative_rotation(rotation1, rotation2):
     """Return the rotation from rotation1 to rotation2."""
     return rotation2 * rotation1.inv()
+
+
+def add_rotations(rotation_21, rotation_10):
+    """
+    Multiply a rotation onto another.
+
+    Args
+    ----
+    rotation_10: np.ndarray
+        Array with the dimensions n x 4 or 4 x 1.
+        The first rotation that is applied.
+    rotation_21: np.ndarray
+        Array with the dimensions n x 4 or 4 x 1.
+        The second rotation that is applied.
+
+    Return
+    ----
+    rot_new: np.ndarray
+        Array with the dimensions n x 4.
+        This array contains the new quaternions.
+    """
+
+    # Transpose the arrays, to work with the following code.
+    rot1 = np.transpose(rotation_10)
+    rot2 = np.transpose(rotation_21)
+    rotnew = np.zeros_like(rot1)
+
+    # Multiply the two rotations.
+    rotnew[0] = rot1[0] * rot2[0] - rot1[1] * rot2[1] - rot1[2] * rot2[2] - \
+        rot1[3] * rot2[3]
+    rotnew[1] = rot1[1] * rot2[0] + rot1[0] * rot2[1] + rot1[3] * rot2[2] - \
+        rot1[2] * rot2[3]
+    rotnew[2] = rot1[2] * rot2[0] - rot1[3] * rot2[1] + rot1[0] * rot2[2] + \
+        rot1[1] * rot2[3]
+    rotnew[3] = rot1[3] * rot2[0] + rot1[2] * rot2[1] - rot1[1] * rot2[2] + \
+        rot1[0] * rot2[3]
+
+    return rotnew.transpose()

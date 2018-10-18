@@ -14,7 +14,7 @@ from .utility import get_close_nodes, flatten, compare_xml
 from .base_mesh_item import BaseMeshItem
 
 # 3D rotations for nodes.
-from .rotation import Rotation, get_relative_rotation
+from .rotation import Rotation, get_relative_rotation, add_rotations
 
 # VTK writer.
 from .vtk_writer import add_point_data_node_sets, VTKWriter
