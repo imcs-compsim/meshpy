@@ -463,6 +463,64 @@ class TestMeshpy(unittest.TestCase):
             mesh_1.get_string(header=False),
             mesh_2.get_string(header=False))
 
+    def test_mesh_reflection(self):
+        """Check the Mesh().reflect function."""
+
+        def compare_reflection(origin=False):
+            """
+            Create a mesh, and its mirrored counterpart and then compare the
+            dat files.
+            """
+
+            # Rotations to be applied.
+            rot_1 = Rotation([0, 1, 1], np.pi / 6)
+            rot_2 = Rotation([1, 2.455, -1.2324], 1.2342352)
+
+            mesh_ref = InputFile(maintainer='Ivo Steinbrecher')
+            mesh = InputFile(maintainer='Ivo Steinbrecher')
+            mat = MaterialReissner(radius=0.1)
+
+            # Create the reference mesh.
+            create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [0, 0, 0],
+                [1, 0, 0], n_el=1)
+            create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [1, 0, 0],
+                [1, 1, 0], n_el=1)
+            create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [1, 1, 0],
+                [1, 1, 1], n_el=1)
+            mesh_ref.rotate(rot_1)
+
+            # Create the mesh that will be mirrored.
+            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0],
+                [-1, 0, 0], n_el=1)
+            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [-1, 0, 0],
+                [-1, 1, 0], n_el=1)
+            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [-1, 1, 0],
+                [-1, 1, 1], n_el=1)
+            mesh.rotate(rot_1.inv())
+
+            # Rotate everything, to show generalised reflection.
+            mesh_ref.rotate(rot_2)
+            mesh.rotate(rot_2)
+
+            if origin:
+                # Translate everything so the reflection plane is not in the
+                # origin.
+                r = [1, 2.455, -1.2324]
+                mesh_ref.translate(r)
+                mesh.translate(r)
+                mesh.reflect(2 * (rot_2 * [1, 0, 0]), origin=r)
+            else:
+                mesh.reflect(2 * (rot_2 * [1, 0, 0]))
+
+            # Compare the dat files.
+            self.compare_strings(
+                'test_meshpy_reflect_origin_{}'.format(origin),
+                mesh_ref.get_string(header=False),
+                mesh.get_string(header=False))
+
+        compare_reflection()
+        compare_reflection(True)
+
     def test_comments_in_solid(self):
         """Test case with full classical import."""
         ref_file = os.path.join(testing_input,

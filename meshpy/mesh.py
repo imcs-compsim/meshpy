@@ -305,6 +305,77 @@ class Mesh(object):
                 if not only_rotate_triads:
                     node.coordinates = posnew[i, :]
 
+    def reflect(self, normal_vector, origin=None):
+        """
+        Reflect all nodes of the mesh with respect to a plane defined by its
+        normal_vector. Per default the plane goes through the origin, if not
+        a point on the plane can be given with the parameter origin.
+
+        For the reflection we assume that e1' and e2' are mirrored with respect
+        to the original frame and e3' is in the opposite direction than the
+        mirrored e3.
+
+        With the defined mirroring strategy, the quaternion to be applied on
+        the existing rotations can be calculated the following way:
+            q[0] = e3 * n
+            q[1,2,3] = e3 x n
+        This constructs a rotation with the rotation axis on the plane, and
+        normal to the vector e3. The rotation angle is twice the angle of e3
+        to n.
+
+        Args
+        ----
+        normal_3D vector
+            The normal vector of the reflection plane.
+        origin: 3D vector
+            Per default the reflection plane goes through the origin. If this
+            parameter is given, the point is on the plane.
+        """
+
+        # Normalize the normal vector.
+        normal_vector = np.array(normal_vector / np.linalg.norm(normal_vector))
+
+        # Get array with all quaternions and positions for the nodes.
+        pos = self.get_global_coordinates()
+        rot1 = self.get_global_quaternions()
+
+        # Check if origin has to be added.
+        if origin is not None:
+            pos -= origin
+
+        # Get the reflection matrix A.
+        A = np.eye(3) - 2. * np.dot(
+            np.transpose(np.asmatrix(normal_vector)),
+            np.asmatrix(normal_vector)
+            )
+
+        # Calculate the new positions.
+        pos_new = np.array(pos * A)
+
+        # Move back from the origin.
+        if origin is not None:
+            pos_new += origin
+
+        # Set the new positions.
+        for i, node in enumerate(self.nodes):
+            if not node.is_dat:
+                node.coordinates = pos_new[i, :]
+
+        # First get all e3 vectors of the nodes.
+        e3 = np.zeros_like(pos)
+        e3[:, 0] = 2 * (rot1[:, 0] * rot1[:, 2] + rot1[:, 1] * rot1[:, 3])
+        e3[:, 1] = 2 * (-1 * rot1[:, 0] * rot1[:, 1] + rot1[:, 2] * rot1[:, 3])
+        e3[:, 2] = rot1[:, 0]**2 - rot1[:, 1]**2 - rot1[:, 2]**2 + \
+            rot1[:, 3]**2
+
+        # Get the dot and cross product of e3 and the normal vector.
+        rot_new = np.zeros_like(rot1)
+        rot_new[:, 0] = np.dot(e3, normal_vector)
+        rot_new[:, 1:] = np.cross(e3, normal_vector)
+
+        # Rotate the triads.
+        self.rotate(rot_new, only_rotate_triads=True)
+
     def wrap_around_cylinder(self):
         """
         Wrap the geometry around a cylinder. The y-z plane gets morphed into
