@@ -466,7 +466,7 @@ class TestMeshpy(unittest.TestCase):
     def test_mesh_reflection(self):
         """Check the Mesh().reflect function."""
 
-        def compare_reflection(origin=False):
+        def compare_reflection(origin=False, flip=False):
             """
             Create a mesh, and its mirrored counterpart and then compare the
             dat files.
@@ -481,12 +481,30 @@ class TestMeshpy(unittest.TestCase):
             mat = MaterialReissner(radius=0.1)
 
             # Create the reference mesh.
-            create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [0, 0, 0],
-                [1, 0, 0], n_el=1)
-            create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [1, 0, 0],
-                [1, 1, 0], n_el=1)
-            create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [1, 1, 0],
-                [1, 1, 1], n_el=1)
+            if not flip:
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                    [0, 0, 0], [1, 0, 0], n_el=1)
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                    [1, 0, 0], [1, 1, 0], n_el=1)
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                    [1, 1, 0], [1, 1, 1], n_el=1)
+            else:
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                    [1, 0, 0], [0, 0, 0], n_el=1)
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                    [1, 1, 0], [1, 0, 0], n_el=1)
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                    [1, 1, 1], [1, 1, 0], n_el=1)
+
+                # Reorder the internal nodes.
+                old = mesh_ref.nodes.copy()
+                mesh_ref.nodes[0] = old[2]
+                mesh_ref.nodes[2] = old[0]
+                mesh_ref.nodes[3] = old[5]
+                mesh_ref.nodes[5] = old[3]
+                mesh_ref.nodes[6] = old[8]
+                mesh_ref.nodes[8] = old[6]
+
             mesh_ref.rotate(rot_1)
 
             # Create the mesh that will be mirrored.
@@ -508,18 +526,20 @@ class TestMeshpy(unittest.TestCase):
                 r = [1, 2.455, -1.2324]
                 mesh_ref.translate(r)
                 mesh.translate(r)
-                mesh.reflect(2 * (rot_2 * [1, 0, 0]), origin=r)
+                mesh.reflect(2 * (rot_2 * [1, 0, 0]), origin=r, flip=flip)
             else:
-                mesh.reflect(2 * (rot_2 * [1, 0, 0]))
+                mesh.reflect(2 * (rot_2 * [1, 0, 0]), flip=flip)
 
             # Compare the dat files.
             self.compare_strings(
-                'test_meshpy_reflect_origin_{}'.format(origin),
+                'test_meshpy_reflect_origin_{}_flip_{}'.format(origin, flip),
                 mesh_ref.get_string(header=False),
                 mesh.get_string(header=False))
 
-        compare_reflection()
-        compare_reflection(True)
+        # Compare all 4 possible variations.
+        for flip in [True, False]:
+            for origin in [True, False]:
+                compare_reflection(origin=origin, flip=flip)
 
     def test_comments_in_solid(self):
         """Test case with full classical import."""
