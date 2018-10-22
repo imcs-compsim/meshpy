@@ -535,6 +535,10 @@ class InputFile(Mesh):
             for i, item in enumerate(data_list):
                 item.n_global = i + 1
 
+        # Add sets from couplings and boundary conditions to a temp container.
+        self.unlink_nodes()
+        mesh_sets = self.get_unique_geometry_sets()
+
         # Assign global indices to all entries.
         set_n_global(self.nodes)
         set_n_global(self.elements)
@@ -543,9 +547,6 @@ class InputFile(Mesh):
         set_n_global(self.couplings)
         for key in self.boundary_conditions.keys():
             set_n_global(self.boundary_conditions[key])
-
-        # Add sets from couplings and boundary conditions to a temp container.
-        mesh_sets = self.get_unique_geometry_sets()
 
         def get_section_dat(section_name, data_list, header_lines=None):
             """

@@ -77,6 +77,18 @@ class Element(BaseMeshItem):
             raise TypeError('Could not find a element type for '
                 + '{}, with {} nodes'.format(dat_pre_nodes, n_nodes))
 
+    def replace_node(self, old_node, new_node):
+        """Replace old_node with new_node."""
+
+        # Look for old_node and replace it. If it is not found, throw error.
+        for i, node in enumerate(self.nodes):
+            if node == old_node:
+                self.nodes[i] = new_node
+                break
+        else:
+            raise ValueError('The node that should be replaced is not in the '
+                + 'current element')
+
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
         """
         Add representation of this element to the vtk_writers for solid and
