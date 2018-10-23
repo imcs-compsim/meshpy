@@ -99,6 +99,7 @@ class Mesh(object):
         """Add a boundary condition to this mesh."""
         bc_key = bc.bc_type
         geom_key = bc.geometry_set.geometry_type
+        bc.geometry_set.check_replaced_nodes()
         self.boundary_conditions[bc_key, geom_key].append(bc)
 
     def add_function(self, function):
@@ -128,6 +129,7 @@ class Mesh(object):
     def add_geometry_set(self, geometry_set):
         """Add a geometry set to this mesh."""
         if geometry_set not in self.geometry_sets[geometry_set.geometry_type]:
+            geometry_set.check_replaced_nodes()
             self.geometry_sets[geometry_set.geometry_type].append(geometry_set)
 
     def add_geometry_name(self, geometry_name):
@@ -434,7 +436,7 @@ class Mesh(object):
             if not node.is_dat:
                 node.coordinates = pos[i, :]
 
-    def couple_nodes(self, nodes=None, coupling_type=mpy.coupling_fix):
+    def couple_nodes(self, *, nodes=None, coupling_type=mpy.coupling_fix):
         """
         Search through nodes and connect all nodes with the same coordinates.
 

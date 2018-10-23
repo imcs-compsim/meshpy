@@ -74,6 +74,13 @@ class GeometrySet(BaseMeshItem):
                 type(value)
                 ))
 
+    def check_replaced_nodes(self):
+        """Check if nodes in this set have been replaced."""
+
+        for node in self.nodes:
+            if node.master_node is not None:
+                self.replace_node(node, node.get_master_node())
+
     def replace_node(self, old_node, new_node):
         """Replace old_node with new_node."""
 
