@@ -1129,6 +1129,118 @@ class TestMeshpy(unittest.TestCase):
                 additional_rotation=additional_rotation
                 ).get_string(header=False))
 
+    def test_replace_nodes(self):
+        """Test case for coupling of nodes, and reusing the identical nodes."""
+
+        mat = MaterialReissner(radius=0.1, youngs_modulus=1)
+        rot = Rotation([1, 2, 43], 213123)
+
+        def create_mesh():
+            """Create two empty meshes."""
+            name = 'Ivo Steinbrecher'
+            return InputFile(maintainer=name), InputFile(maintainer=name)
+
+        # Create a beam with two elements. Once immediately and once as two
+        # beams with couplings.
+        mesh_ref, mesh_couple = create_mesh()
+
+        # Create a simple beam.
+        create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [0, 0, 0],
+            [2, 0, 0], n_el=2)
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [0, 0, 0],
+            [1, 0, 0])
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [1, 0, 0],
+            [2, 0, 0])
+
+        # Rotate both meshes
+        mesh_ref.rotate(rot)
+        mesh_couple.rotate(rot)
+
+        # Couple the coupling mesh.
+        mesh_couple.couple_nodes(coupling_type=mpy.coupling_fix_reuse)
+
+        # Compare the meshes.
+        self.compare_strings('test_replace_nodes_case_1',
+            mesh_ref.get_string(header=False),
+            mesh_couple.get_string(header=False))
+
+        # Create two overlapping beams. This is to test that the middle nodes
+        # are not coupled.
+        mesh_ref, mesh_couple = create_mesh()
+
+        # Create a simple beam.
+        set_ref = create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+            [0, 0, 0], [1, 0, 0])
+        create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [0, 0, 0],
+            [1, 0, 0], start_node=set_ref['start'], end_node=set_ref['end'])
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [0, 0, 0],
+            [1, 0, 0])
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [0, 0, 0],
+            [1, 0, 0])
+
+        # Rotate both meshes
+        mesh_ref.rotate(rot)
+        mesh_couple.rotate(rot)
+
+        # Couple the coupling mesh.
+        mesh_couple.couple_nodes(coupling_type=mpy.coupling_fix_reuse)
+
+        # Compare the meshes.
+        self.compare_strings('test_replace_nodes_case_2',
+            mesh_ref.get_string(header=False),
+            mesh_couple.get_string(header=False))
+
+        # Create a beam with two elements. Once immediately and once as two
+        # beams with couplings.
+        mesh_ref, mesh_couple = create_mesh()
+
+        # Create a simple beam.
+        create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [0, 0, 0],
+            [2, 0, 0], n_el=2)
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [0, 0, 0],
+            [1, 0, 0])
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [1, 0, 0],
+            [2, 0, 0])
+
+        # Create set with all the beam nodes.
+        node_set_1_ref = GeometrySet(mpy.line, nodes=mesh_ref.nodes)
+        node_set_2_ref = GeometrySet(mpy.line, nodes=mesh_ref.nodes)
+        node_set_1_couple = GeometrySet(mpy.line, nodes=mesh_couple.nodes)
+        node_set_2_couple = GeometrySet(mpy.line, nodes=mesh_couple.nodes)
+
+        # Create connecting beams.
+        create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [1, 0, 0],
+            [2, 2, 2])
+        create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [1, 0, 0],
+            [2, -2, -2])
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [1, 0, 0],
+            [2, 2, 2])
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [1, 0, 0],
+            [2, -2, -2])
+
+        # Rotate both meshes
+        mesh_ref.rotate(rot)
+        mesh_couple.rotate(rot)
+
+        # Couple the mesh.
+        mesh_ref.couple_nodes(coupling_type=mpy.coupling_fix)
+        mesh_couple.couple_nodes(coupling_type=mpy.coupling_fix_reuse)
+
+        # Add the node sets.
+        mesh_ref.add(node_set_1_ref)
+        mesh_couple.add(node_set_1_couple)
+
+        # Add BCs.
+        mesh_ref.add(BoundaryCondition(node_set_2_ref, 'BC1',
+            bc_type=mpy.neumann))
+        mesh_couple.add(BoundaryCondition(node_set_2_couple, 'BC1',
+            bc_type=mpy.neumann))
+
+        # Compare the meshes.
+        self.compare_strings('test_replace_nodes_case_3',
+            mesh_ref.get_string(header=False),
+            mesh_couple.get_string(header=False))
+
     def test_vtk_writer(self):
         """Test the output created by the VTK writer."""
 

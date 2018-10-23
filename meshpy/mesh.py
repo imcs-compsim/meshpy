@@ -15,7 +15,7 @@ from _collections import OrderedDict
 from . import mpy, Rotation, Function, Material, Node, Element, \
     GeometryName, GeometrySet, GeometrySetContainer, BoundaryCondition, \
     Coupling, BoundaryConditionContainer, get_close_nodes, VTKWriter, \
-    add_rotations
+    add_rotations, find_close_nodes
 
 
 class Mesh(object):
@@ -99,6 +99,7 @@ class Mesh(object):
         """Add a boundary condition to this mesh."""
         bc_key = bc.bc_type
         geom_key = bc.geometry_set.geometry_type
+        bc.geometry_set.check_replaced_nodes()
         self.boundary_conditions[bc_key, geom_key].append(bc)
 
     def add_function(self, function):
@@ -128,12 +129,28 @@ class Mesh(object):
     def add_geometry_set(self, geometry_set):
         """Add a geometry set to this mesh."""
         if geometry_set not in self.geometry_sets[geometry_set.geometry_type]:
+            geometry_set.check_replaced_nodes()
             self.geometry_sets[geometry_set.geometry_type].append(geometry_set)
 
     def add_geometry_name(self, geometry_name):
         """Add a set of geometry sets to this mesh."""
         for _key, value in geometry_name.items():
             self.add(value)
+
+    def replace_node(self, old_node, new_node):
+        """Replace the first node with the second node."""
+
+        # Check that the new node is in mesh.
+        if new_node not in self.nodes:
+            raise ValueError('The new node is not in the mesh!')
+
+        for i, node in enumerate(self.nodes):
+            if node == old_node:
+                del self.nodes[i]
+                break
+        else:
+            raise ValueError('The node that should be replaced is not in the '
+                + 'mesh')
 
     def get_unique_geometry_sets(self, link_nodes=False):
         """
@@ -419,17 +436,106 @@ class Mesh(object):
             if not node.is_dat:
                 node.coordinates = pos[i, :]
 
-    def couple_nodes(self, nodes=None, coupling_type=mpy.coupling_fix):
+    def couple_nodes(self, *, nodes=None, coupling_type=mpy.coupling_fix):
         """
         Search through nodes and connect all nodes with the same coordinates.
+
+        Args:
+        ----
+        nodes: [Node]
+            List of nodes to couple. If None is given, all nodes of the mesh
+            are coupled (except middle and dat nodes).
+        coupling_type:
+            mpy.coupling_fix: Fix all positional and rotational DOFs of the
+                nodes together.
+            mpy.coupling_fix_reuse: Fix all positional and rotational DOFs of
+                the nodes together. If two nodes have the same position and
+                rotation, the nodes are reduced to one node in the mesh.
+            mpy.coupling_joint: Fix all positional DOFs of the nodes together.
         """
 
         # Get list of partner nodes
         partner_nodes = self.get_close_nodes(nodes=nodes)
 
-        # Connect close nodes with a coupling.
-        for node_list in partner_nodes:
-            self.add(Coupling(node_list, coupling_type))
+        if coupling_type is mpy.coupling_fix_reuse:
+            # Check if there are nodes with the same rotation. If there are the
+            # nodes are reused, and no coupling is inserted.
+
+            # Set the links to all nodes in the mesh.
+            self.unlink_nodes()
+            self.get_unique_geometry_sets(link_nodes=True)
+            for element in self.elements:
+                for node in element.nodes:
+                    node.element_link.append(element)
+            for node in self.nodes:
+                node.mesh = self
+
+            # Go through partner nodes.
+            for node_list in partner_nodes:
+                # Get array with rotation vectors.
+                rotation_vectors = np.zeros([len(node_list), 3])
+                for i, node in enumerate(node_list):
+                    rotation_vectors[i, :] = \
+                        node.rotation.get_rotation_vector()
+
+                # Abuse the find close nodes function to find nodes with the
+                # same rotation.
+                has_partner, n_partner = find_close_nodes(rotation_vectors,
+                    eps=mpy.eps_quaternion)
+
+                # Check if nodes with the same rotations were found.
+                if n_partner == 0:
+                    self.add(Coupling(node_list, mpy.coupling_fix))
+                else:
+                    # There are nodes that need to be combined.
+                    combining_nodes = []
+                    coupling_nodes = []
+                    found_partner_id = [None for _i in range(n_partner)]
+
+                    # Add the nodes that need to be combined and add the nodes
+                    # that will be coupled.
+                    for i, partner in enumerate(has_partner):
+
+                        if partner == -1:
+                            # This node does not have a partner with the same
+                            # rotation.
+                            coupling_nodes.append(node_list[i])
+
+                        elif found_partner_id[partner] is not None:
+                            # This node has already a processed partner, add
+                            # this one to the combining nodes.
+                            combining_nodes[found_partner_id[partner]].append(
+                                node_list[i])
+
+                        else:
+                            # This is the first node of a partner set that was
+                            # found. This one will remain, the other ones will
+                            # be replaced with this one.
+                            new_index = len(combining_nodes)
+                            found_partner_id[partner] = new_index
+                            combining_nodes.append([node_list[i]])
+                            coupling_nodes.append(node_list[i])
+
+                    # Add the coupling nodes.
+                    if len(coupling_nodes) > 1:
+                        self.add(Coupling(coupling_nodes, mpy.coupling_fix))
+
+                    # Replace the identical nodes.
+                    for combine_list in combining_nodes:
+                        master_node = combine_list[0]
+                        for node in combine_list[1:]:
+                            node.replace_with(master_node)
+
+        else:
+            # Connect close nodes with a coupling.
+            for node_list in partner_nodes:
+                self.add(Coupling(node_list, coupling_type))
+
+    def unlink_nodes(self):
+        """Delete the linked arrays and global indices in all nodes."""
+        for node in self.nodes:
+            if not node.is_dat:
+                node.unlink()
 
     def get_nodes_by_function(self, function, *args, middle_nodes=False):
         """
@@ -506,7 +612,8 @@ class Mesh(object):
 
         # Check if input argument was given
         if nodes is None:
-            node_list = [node for node in self.nodes if not node.is_dat]
+            node_list = [node for node in self.nodes if (not node.is_dat
+                and not node.is_middle_node)]
         else:
             node_list = nodes
 

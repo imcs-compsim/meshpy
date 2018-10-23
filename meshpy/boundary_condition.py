@@ -78,7 +78,7 @@ class BoundaryCondition(BaseMeshItem):
     def _check_multiple_nodes(self, double_nodes=None):
         """
         Check for point Neumann boundaries that there is not a double
-        Node in the set
+        Node in the set.
         """
 
         if isinstance(self.geometry_set, int):

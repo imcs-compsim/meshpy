@@ -34,8 +34,13 @@ class Node(BaseMeshItem):
         # If the node is in the middle of a beam element.
         self.is_middle_node = is_middle_node
 
-        # Lists with the node sets that are connected to this node.
+        # Lists with the objects that this node is linked to.
+        self.element_link = []
         self.node_sets_link = []
+        self.mesh = None
+
+        # If this node is replaced, store a link to the remaining node.
+        self.master_node = None
 
     @classmethod
     def from_dat(cls, input_line):
@@ -47,6 +52,37 @@ class Node(BaseMeshItem):
         # Convert the node coordinates into a Node object.
         return cls([float(line_split[i]) for i in range(3, 6)], is_dat=True,
             comments=input_line[1])
+
+    def get_master_node(self):
+        """
+        Return the master node of this node. If the node has not been replaced,
+        this object is returned.
+        """
+
+        if self.master_node is None:
+            return self
+        else:
+            return self.master_node.get_master_node()
+
+    def replace_with(self, master_node):
+        """Replace this node with another node object."""
+
+        # Replace the links to this node in the referenced objects.
+        self.mesh.replace_node(self, master_node)
+        for element in self.element_link:
+            element.replace_node(self, master_node)
+        for node_set in self.node_sets_link:
+            node_set.replace_node(self, master_node)
+
+        # Set link to master node.
+        self.master_node = master_node.get_master_node()
+
+    def unlink(self):
+        """Reset the links to elements, node sets and global indices."""
+        self.element_link = []
+        self.node_sets_link = []
+        self.mesh = None
+        self.n_global = None
 
     def rotate(self, rotation, origin=None, only_rotate_triads=False):
         """

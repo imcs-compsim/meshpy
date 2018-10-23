@@ -25,7 +25,9 @@ from cubitpy import cupy, CubitPy, get_methods
 # Directories and files for testing.
 testing_path = os.path.abspath(os.path.dirname(__file__))
 testing_temp = os.path.join(testing_path, 'testing-tmp')
-testing_solid_block = os.path.join(testing_temp, 'block_solid.dat')
+testing_solid_block = os.path.join(testing_temp,
+    'parformancne_testing_solid.dat')
+testing_beam = os.path.join(testing_temp, 'parformancne_testing_beam.dat')
 
 
 def create_solid_block(file_path, nx, ny, nz):
@@ -93,7 +95,7 @@ def create_large_beam_mesh(nx, ny, nz, n_el):
     "grid cells".
     """
 
-    mesh = Mesh()
+    mesh = InputFile()
     material = MaterialReissner(radius=0.25 / np.max([nx, ny, nz]))
 
     for ix in range(nx + 1):
@@ -174,7 +176,8 @@ if __name__ == '__main__':
         'meshpy_reflect': 0.7,
         'meshpy_wrap_around_cylinder': 0.9,
         'meshpy_get_close_nodes': 0.75,
-        'meshpy_write_vtk': 19,
+        'meshpy_write_dat': 12.5,
+        'meshpy_write_vtk': 19
         }
 
     time_function(
@@ -229,6 +232,12 @@ if __name__ == '__main__':
         'meshpy_get_close_nodes',
         Mesh.get_close_nodes,
         args=[mesh, mesh.nodes]
+        )
+
+    time_function(
+        'meshpy_write_dat',
+        InputFile.write_input_file,
+        args=[mesh, testing_beam]
         )
 
     time_function(

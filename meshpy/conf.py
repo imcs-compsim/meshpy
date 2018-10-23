@@ -56,6 +56,7 @@ class MeshPy(object):
 
         # Coupling types.
         self.coupling_fix = 'coupling_fix'
+        self.coupling_fix_reuse = 'coupling_fix_reuse_nodes'
         self.coupling_joint = 'coupling_joint'
 
         # Handling of multiple nodes in neuman bcs.
