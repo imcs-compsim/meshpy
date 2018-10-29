@@ -9,7 +9,8 @@ import vtk
 import warnings
 
 # Meshpy modules.
-from . import mpy, Element, Node, add_point_data_node_sets
+from . import mpy, Element, Node, add_point_data_node_sets, MaterialReissner, \
+    MaterialKirchhoff, BaseMeshItem
 
 
 class Beam(Element):
@@ -21,6 +22,9 @@ class Beam(Element):
     #        ...
     #        ]
     nodes_create = []
+
+    # A list of valid material types for this element.
+    valid_material = []
 
     def __init__(self, material=None, nodes=None):
         Element.__init__(self, nodes=nodes, material=material)
@@ -151,6 +155,17 @@ class Beam(Element):
         """
         self.nodes = [self.nodes[-1 - i] for i in range(len(self.nodes))]
 
+    def _check_material(self):
+        """
+        Check if the linked material is valid for this type of beam element.
+        """
+        for material_type in self.valid_material:
+            if type(self.material) is material_type:
+                break
+        else:
+            raise TypeError(('Beam of type {} can not have a material of '
+                + 'type {}!').format(type(self), type(self.material)))
+
     def preview_python(self, ax):
         """Plot the beam in matplotlib, by connecting the nodes."""
 
@@ -208,8 +223,8 @@ class Beam3rHerm2Lin3(Beam):
         [0, True, True],
         [1, True, False]
         ]
-
     beam_type = mpy.beam_type_reissner
+    valid_material = [MaterialReissner, BaseMeshItem]
 
     def _get_dat(self):
         """ Return the line for the input file. """
@@ -220,6 +235,9 @@ class Beam3rHerm2Lin3(Beam):
             node = self.nodes[i]
             string_nodes += '{} '.format(node.n_global)
             string_triads += ' ' + node.rotation.get_dat()
+
+        # Check the material.
+        self._check_material()
 
         return '{} BEAM3R HERM2LIN3 {}MAT {} TRIADS{}'.format(
             self.n_global,
@@ -237,8 +255,8 @@ class Beam3kClass(Beam):
         [0, True, True],
         [1, True, False]
         ]
-
     beam_type = mpy.beam_type_kirchhoff
+    valid_material = [MaterialKirchhoff, BaseMeshItem]
 
     def __init__(self, *, weak=True, rotvec=True, FAD=False, **kwargs):
         Beam.__init__(self, **kwargs)
@@ -262,6 +280,9 @@ class Beam3kClass(Beam):
             node = self.nodes[i]
             string_nodes += '{} '.format(node.n_global)
             string_triads += ' ' + node.rotation.get_dat()
+
+        # Check the material.
+        self._check_material()
 
         string_dat = ('{} BEAM3K LIN3 {} WK {} ROTVEC {} MAT {} ' +
             'TRIADS{}{}').format(

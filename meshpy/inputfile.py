@@ -594,6 +594,10 @@ class InputFile(Mesh):
 
         # Add the couplings.
         if len(self.couplings) > 0:
+            # Set the link for the nodes, so the couplings can decide which
+            # DOFs they couple.
+            self.set_node_links()
+
             get_section_dat(
                 get_section_string('DESIGN POINT COUPLING CONDITIONS'),
                 self.couplings,

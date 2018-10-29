@@ -24,7 +24,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(
 from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
     InputSection, MaterialReissner, MaterialBeam, Function, Beam3rHerm2Lin3, \
     BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh, \
-    find_close_nodes, find_close_nodes_binning, GeometryName, GeometrySet
+    find_close_nodes, find_close_nodes_binning, GeometryName, GeometrySet, \
+    MaterialKirchhoff, Beam3k, flatten
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import \
@@ -943,6 +944,53 @@ class TestMeshpy(unittest.TestCase):
             'test_meshpy_segment_reference.dat')
         self.compare_strings(
             'test_meshpy_segment',
+            ref_file,
+            input_file.get_string(header=False))
+
+    def test_kirchhoff_beam(self):
+        """
+        Test that the input file for all types of Kirchhoff beams is generated
+        correctly.
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Create input file.
+        material = MaterialKirchhoff(radius=0.1, youngs_modulus=1000)
+        input_file = InputFile()
+
+        with warnings.catch_warnings():
+            # Ignore the warnings for the rotvec beams.
+            warnings.simplefilter("ignore")
+
+            # Loop over options.
+            for FAD in [True, False]:
+                for weak in [True, False]:
+                    for rotvec in [True, False]:
+                        # Define the beam object factory function for the
+                        # creation functions.
+                        BeamObject = Beam3k(weak=weak, rotvec=rotvec, FAD=FAD)
+
+                        # Create a beam.
+                        set_1 = create_beam_mesh_line(input_file, BeamObject,
+                            material, [0, 0, 0], [1, 0, 0], n_el=2)
+                        set_2 = create_beam_mesh_line(input_file, BeamObject,
+                            material, [1, 0, 0], [2, 0, 0], n_el=2)
+
+                        # Couple the nodes.
+                        if rotvec:
+                            input_file.couple_nodes(nodes=flatten(
+                                [set_1['end'].nodes, set_2['start'].nodes]))
+
+                        # Move the mesh away from the next created beam.
+                        input_file.translate([0, 0.5, 0])
+
+        # Compare with the reference solution.
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_kirchhoff_beam_reference.dat')
+        self.compare_strings(
+            'test_kirchhoff_beam',
             ref_file,
             input_file.get_string(header=False))
 
