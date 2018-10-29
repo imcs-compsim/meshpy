@@ -591,6 +591,9 @@ class TestMeshpy(unittest.TestCase):
         return the same results.
         """
 
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
         # Set the seed for the pseudo random numbers.
         random.seed(0)
 
@@ -642,6 +645,49 @@ class TestMeshpy(unittest.TestCase):
         has_partner_brute, _partner = find_close_nodes(coords,
             0.01 * eps_medium)
         self.assertTrue(np.array_equal(has_partner, has_partner_brute))
+
+    def test_find_close_nodes_binning_flat(self):
+        """
+        Test case for coupling of nodes, when the nodes are all on a plane.
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Dummy material.
+        material = MaterialReissner(radius=0.1)
+
+        def create_flat_mesh():
+            """Create a flat honeycomb mesh."""
+            input_file = InputFile()
+            create_beam_mesh_honeycomb_flat(input_file, Beam3rHerm2Lin3,
+                material, 1, 5, 5,
+                create_couplings=False)
+            return input_file
+
+        # Get a reference solution for the coupling nodes.
+        reference_partners, _temp = create_flat_mesh().get_close_nodes(
+            nodes='all', binning=False, return_nodes=False)
+
+        # Apply different rotations and compare the partner results.
+        rotations = [
+            Rotation([1, 0, 0], np.pi * 0.5),
+            Rotation([0, 1, 0], np.pi * 0.5),
+            Rotation([0, 0, 1], np.pi * 0.5),
+            Rotation([1, 3, -4], 25.21561 * np.pi * 0.5)
+            ]
+        for rotation in rotations:
+            # Create the input file.
+            input_file = create_flat_mesh()
+            input_file.rotate(rotation)
+            partners, _temp = input_file.get_close_nodes(nodes='all',
+                return_nodes=False)
+
+            # Compare the partners with the reference.
+            self.assertTrue(np.array_equal(
+                np.array(reference_partners),
+                np.array(partners)
+                ))
 
     def test_curve_3d_helix(self):
         """
