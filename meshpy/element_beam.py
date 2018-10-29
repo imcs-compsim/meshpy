@@ -6,6 +6,7 @@ This module implements beam elements for the mesh.
 # Python modules.
 import numpy as np
 import vtk
+import warnings
 
 # Meshpy modules.
 from . import mpy, Element, Node, add_point_data_node_sets
@@ -208,6 +209,8 @@ class Beam3rHerm2Lin3(Beam):
         [1, True, False]
         ]
 
+    beam_type = mpy.beam_type_reissner
+
     def _get_dat(self):
         """ Return the line for the input file. """
 
@@ -224,3 +227,68 @@ class Beam3rHerm2Lin3(Beam):
             self.material.n_global,
             string_triads
             )
+
+
+class Beam3kClass(Beam):
+    """Represents a Kirchhoff beam element."""
+
+    nodes_create = [
+        [-1, True, False],
+        [0, True, True],
+        [1, True, False]
+        ]
+
+    beam_type = mpy.beam_type_kirchhoff
+
+    def __init__(self, *, weak=True, rotvec=True, FAD=False, **kwargs):
+        Beam.__init__(self, **kwargs)
+
+        # Set the parameters for this beam.
+        self.weak = weak
+        self.rotvec = rotvec
+        self.FAD = FAD
+
+        # Show warning when not using rotvec.
+        if not rotvec:
+            warnings.warn('Use rotvec=False with caution, especially when '
+                + 'applying the boundary conditions and couplings.')
+
+    def _get_dat(self):
+        """ Return the line for the input file. """
+
+        string_nodes = ''
+        string_triads = ''
+        for i in [0, 2, 1]:
+            node = self.nodes[i]
+            string_nodes += '{} '.format(node.n_global)
+            string_triads += ' ' + node.rotation.get_dat()
+
+        string_dat = ('{} BEAM3K LIN3 {} WK {} ROTVEC {} MAT {} ' +
+            'TRIADS{}{}').format(
+                self.n_global,
+                string_nodes,
+                '1' if self.weak else '0',
+                '1' if self.rotvec else '0',
+                self.material.n_global,
+                string_triads,
+                ' FAD' if self.FAD else ''
+                )
+
+        return string_dat
+
+
+def Beam3k(**kwargs_class):
+    """
+    This factory returns a function that creates a new Beam3kClass object with
+    certain attributes defined. The returned function behaves like a call to
+    the object.
+    """
+
+    def create_class(**kwargs):
+        """
+        The function that will be returned. This function should behave like
+        the call to the __init__ function of the class. 
+        """
+        return Beam3kClass(**kwargs_class, **kwargs)
+
+    return create_class

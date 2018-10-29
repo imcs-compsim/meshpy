@@ -13,27 +13,24 @@ from . import BaseMeshItem
 
 class Material(BaseMeshItem):
     """Base class for all materials."""
-    pass
+    def __init__(self, data=None, is_dat=False, **kwargs):
+        BaseMeshItem.__init__(self, data=data, is_dat=is_dat, **kwargs)
 
 
 class MaterialBeam(Material):
     """Base class for all beam materials."""
 
-    def __init__(self, radius=None, **kwargs):
-        """All beams have a radius attribute for visualization."""
+    def __init__(self,
+            radius=-1.,
+            material_string=None,
+            youngs_modulus=-1.,
+            nu=0.,
+            density=0.,
+            **kwargs):
+        """Set the material values that all beams have."""
         Material.__init__(self, **kwargs)
+
         self.radius = radius
-
-
-class MaterialReissner(MaterialBeam):
-    """Holds material definition for Reissner beams."""
-
-    def __init__(self, material_string='MAT_BeamReissnerElastHyper',
-            youngs_modulus=-1., nu=0., density=0., radius=-1.,
-            shear_correction=1):
-
-        MaterialBeam.__init__(self, data=None, is_dat=False)
-
         self.material_string = material_string
         self.youngs_modulus = youngs_modulus
         self.nu = nu
@@ -43,6 +40,16 @@ class MaterialReissner(MaterialBeam):
         self.mom2 = self.radius**4 * np.pi * 0.25
         self.mom3 = self.mom2
         self.polar = self.mom2 + self.mom3
+
+
+class MaterialReissner(MaterialBeam):
+    """Holds material definition for Reissner beams."""
+
+    def __init__(self, shear_correction=1, **kwargs):
+        MaterialBeam.__init__(self,
+            material_string='MAT_BeamReissnerElastHyper', **kwargs)
+
+        # Shear factor for Reissner beam.
         self.shear_correction = shear_correction
 
     def _get_dat(self):
@@ -57,6 +64,30 @@ class MaterialReissner(MaterialBeam):
             self.density,
             self.area,
             self.shear_correction,
+            self.polar,
+            self.mom2,
+            self.mom3
+            )
+
+
+class MaterialKirchhoff(MaterialBeam):
+    """Holds material definition for Kirchhoff beams."""
+
+    def __init__(self, **kwargs):
+        MaterialBeam.__init__(self,
+            material_string='MAT_BeamKirchhoffElastHyper', **kwargs)
+
+    def _get_dat(self):
+        """Return the line for this material."""
+        string = 'MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} '
+        string += 'MOMINPOL {} MOMIN2 {} MOMIN3 {}'
+        return string.format(
+            self.n_global,
+            self.material_string,
+            self.youngs_modulus,
+            self.youngs_modulus / (2. * (1. + self.nu)),
+            self.density,
+            self.area,
             self.polar,
             self.mom2,
             self.mom3

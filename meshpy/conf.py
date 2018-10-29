@@ -54,6 +54,10 @@ class MeshPy(object):
         self.neumann = 'boundary_condition_neumann'
         self.boundary_condition = [self.dirichlet, self.neumann]
 
+        # Beam types.
+        self.beam_type_reissner = 'reissner'
+        self.beam_type_kirchhoff = 'kirchhoff'
+
         # Coupling types.
         self.coupling_fix = 'coupling_fix'
         self.coupling_fix_reuse = 'coupling_fix_reuse_nodes'
