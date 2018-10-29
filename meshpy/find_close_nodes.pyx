@@ -169,7 +169,7 @@ def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
                     )
                 if node_index_xyz[k] > n_bin_xyz[k] - 1:
                     node_index_xyz[k] = n_bin_xyz[k] - 1
-                elif node_index_xyz[k] == -1:
+                elif node_index_xyz[k] < 0:
                     node_index_xyz[k] = 0
 
             # Calculate the global bin index.
