@@ -204,6 +204,19 @@ class Mesh(object):
 
         return mesh_sets
 
+    def set_node_links(self):
+        """
+        Create a link of all elements to the nodes connected to them. Also add
+        a link to this mesh.
+        """
+        for element in self.elements:
+            if not element.is_dat:
+                for node in element.nodes:
+                    node.element_link.append(element)
+        for node in self.nodes:
+            if not node.is_dat:
+                node.mesh = self
+
     def get_global_coordinates(self, nodes=None):
         """
         Return an array with the coordinates of all nodes.
@@ -457,6 +470,10 @@ class Mesh(object):
         # Get list of partner nodes
         partner_nodes = self.get_close_nodes(nodes=nodes)
 
+        if len(partner_nodes) == 0:
+            # If no partner nodes were found, end this function.
+            return
+
         if coupling_type is mpy.coupling_fix_reuse:
             # Check if there are nodes with the same rotation. If there are the
             # nodes are reused, and no coupling is inserted.
@@ -464,11 +481,7 @@ class Mesh(object):
             # Set the links to all nodes in the mesh.
             self.unlink_nodes()
             self.get_unique_geometry_sets(link_nodes=True)
-            for element in self.elements:
-                for node in element.nodes:
-                    node.element_link.append(element)
-            for node in self.nodes:
-                node.mesh = self
+            self.set_node_links()
 
             # Go through partner nodes.
             for node_list in partner_nodes:

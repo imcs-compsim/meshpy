@@ -21,12 +21,13 @@ from .vtk_writer import add_point_data_node_sets, VTKWriter
 
 # Mesh items.
 from .function import Function
-from .material import Material, MaterialBeam, MaterialReissner
+from .material import Material, MaterialBeam, MaterialReissner, \
+    MaterialKirchhoff
 from .node import Node
 from .element import Element
 from .element_solid import SolidElement, SolidHEX8, SolidHEX20, SolidHEX27, \
     SolidTET4, SolidTET10, SolidRigidSphere
-from .element_beam import Beam, Beam3rHerm2Lin3
+from .element_beam import Beam, Beam3rHerm2Lin3, Beam3k
 from .geometry_set import GeometrySet
 
 # Containers that group mesh items together.
@@ -49,7 +50,8 @@ __all__ = [
     'flatten',
     # Basic stuff.
     'Rotation', 'get_relative_rotation', 'Function', 'MaterialReissner',
-    'MaterialBeam', 'GeometrySet', 'BoundaryCondition', 'Coupling',
+    'MaterialKirchhoff', 'MaterialBeam', 'GeometrySet', 'BoundaryCondition',
+    'Coupling',
     # Mesh items
-    'Beam3rHerm2Lin3', 'Mesh', 'InputFile', 'InputSection'
+    'Beam3rHerm2Lin3', 'Beam3k', 'Mesh', 'InputFile', 'InputSection'
     ]

@@ -16,10 +16,36 @@ class Coupling(BaseMeshItem):
         self.coupling_type = coupling_type
 
     def _get_dat(self):
-        if self.coupling_type == mpy.coupling_joint:
-            string = 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0'
-        elif self.coupling_type == mpy.coupling_fix:
-            string = 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0'
+        """
+        Return the dat line for this object. It depends on the coupling type as
+        well as the beam type.
+        """
+
+        # Check the beam type.
+        beam_type = self.node_set.nodes[0].element_link[0].beam_type
+        for node in self.node_set.nodes:
+            for element in node.element_link:
+                if beam_type is not element.beam_type:
+                    raise ValueError(('The first element in this coupling is '
+                        + 'of the type "{}" another one is of type "{}"! '
+                        + 'They have to be of the same kind.'.format(beam_type,
+                            element.beam_type)))
+                elif (beam_type is mpy.beam_type_kirchhoff
+                        and element.rotvec is False):
+                    raise ValueError('Couplings for Kirchhoff beams and '
+                        + 'rotvec==False not yet implemented.')
+
+        # Get coupling string.
+        if self.coupling_type is mpy.coupling_joint:
+            if beam_type is mpy.beam_type_reissner:
+                string = 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0'
+            else:
+                string = 'NUMDOF 7 ONOFF 1 1 1 0 0 0 0'
+        elif self.coupling_type is mpy.coupling_fix:
+            if beam_type is mpy.beam_type_reissner:
+                string = 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0'
+            else:
+                string = 'NUMDOF 7 ONOFF 1 1 1 1 1 1 0'
         elif isinstance(self.coupling_type, str):
             string = self.coupling_type
         else:
