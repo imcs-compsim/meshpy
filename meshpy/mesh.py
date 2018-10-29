@@ -598,9 +598,10 @@ class Mesh(object):
 
         Args
         ----
-        nodes: list(Node)
+        nodes: list(Node), str
             If this argument is given, the closest nodes within this list are
             returned, otherwise all nodes in the mesh are checked.
+            If nodes == 'all' use all nodes of the mesh.
         kwargs:
             Keyword arguments for get_close_nodes.
 
@@ -614,6 +615,8 @@ class Mesh(object):
         if nodes is None:
             node_list = [node for node in self.nodes if (not node.is_dat
                 and not node.is_middle_node)]
+        elif nodes is 'all':
+            node_list = self.nodes
         else:
             node_list = nodes
 

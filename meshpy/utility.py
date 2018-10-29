@@ -46,7 +46,8 @@ def flatten(data):
 
 
 def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
-        ny=mpy.binning_n_bin, nz=mpy.binning_n_bin, eps=mpy.eps_pos):
+        ny=mpy.binning_n_bin, nz=mpy.binning_n_bin, eps=mpy.eps_pos,
+        return_nodes=True):
     """
     Find nodes that are close to each other.
 
@@ -61,10 +62,13 @@ def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
     eps: double
         Spherical value that the nodes have to be within, to be identified
         as overlapping.
+    return_nodes: bool
+        If true, the Node objects are returned, otherwise the index of the node
+        objects in the list nodes. This option is mainly used for testing.
 
     Return
     ----
-    partner_nodes: list(list(Node))
+    partner_nodes: list(list(Node)), list(int)
         A list of lists with partner nodes.
     """
 
@@ -85,13 +89,17 @@ def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
     else:
         has_partner, n_partner = find_close_nodes(coords, eps=eps)
 
-    # Create list with nodes.
-    partner_nodes = [[] for i in range(n_partner)]
-    for i, node in enumerate(nodes):
-        if not has_partner[i] == -1:
-            partner_nodes[has_partner[i]].append(node)
+    if return_nodes:
+        # Create list with nodes.
+        partner_nodes = [[] for i in range(n_partner)]
+        for i, node in enumerate(nodes):
+            if not has_partner[i] == -1:
+                partner_nodes[has_partner[i]].append(node)
 
-    return partner_nodes
+        return partner_nodes
+    else:
+        # Return the partner list.
+        return has_partner, n_partner
 
 
 def xml_to_dict(xml):

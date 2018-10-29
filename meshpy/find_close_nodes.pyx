@@ -57,7 +57,7 @@ def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
     cdef np.ndarray[INT_t, ndim=1] has_partner = (
         np.zeros(n_nodes, dtype=INT) - 1)
 
-    # Loop over nodes
+    # Loop over nodes.
     partner = 0
     for i in range(n_nodes):
         this_is_partner = 0
