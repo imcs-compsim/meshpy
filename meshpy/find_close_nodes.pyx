@@ -23,7 +23,6 @@ INT = np.int
 ctypedef np.int_t INT_t
 
 
-@cython.boundscheck(False)  # Deactivate bounds checking.
 @cython.wraparound(False)   # Deactivate negative indexing.
 def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
     """
@@ -81,7 +80,6 @@ def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
     return has_partner, partner
 
 
-@cython.boundscheck(False)  # Deactivate bounds checking.
 @cython.wraparound(False)   # Deactivate negative indexing.
 @cython.cdivision(True)     # Modulo
 def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
