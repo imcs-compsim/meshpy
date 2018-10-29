@@ -655,7 +655,8 @@ class InputFile(Mesh):
             max_iter=20,
             tol_res=1e-7,
             tol_disp=1e-11,
-            binning_bounding_box=None
+            binning_bounding_box=None,
+            option_overwrite=False
             ):
         """
         Set default header parameters for a static analysis.
@@ -686,7 +687,7 @@ class InputFile(Mesh):
             STRUCT_DISP                           No
             FILESTEPS                             1000
             VERBOSITY                             Standard
-            ''')
+            ''', option_overwrite=option_overwrite)
 
         # Output / beam output.
         self.add(InputSection(
@@ -695,7 +696,7 @@ class InputFile(Mesh):
             OUTPUT_DATA_FORMAT                    binary
             INTERVAL_STEPS                        1
             EVERY_ITERATION                       No
-            '''))
+            ''', option_overwrite=option_overwrite))
         self.add(InputSection(
             'IO/RUNTIME VTK OUTPUT/BEAMS',
             '''
@@ -704,7 +705,7 @@ class InputFile(Mesh):
             USE_ABSOLUTE_POSITIONS          Yes
             TRIAD_VISUALIZATIONPOINT        Yes
             STRAINS_GAUSSPOINT              Yes
-            '''))
+            ''', option_overwrite=option_overwrite))
 
         # Problem type settings.
         if max_time is None:
@@ -734,7 +735,7 @@ class InputFile(Mesh):
                 tol_disp,
                 max_iter
                 )
-            ))
+            , option_overwrite=option_overwrite))
 
         # Solver
         self.add(InputSection(
@@ -742,7 +743,7 @@ class InputFile(Mesh):
             '''
             NAME                                  Structure_Solver
             SOLVER                                Superlu
-            '''))
+            ''', option_overwrite=option_overwrite))
 
         # Binning strategy.
         if binning:
@@ -754,4 +755,5 @@ class InputFile(Mesh):
                 '''
                 CUTOFF_RADIUS 2
                 BOUNDINGBOX {}
-                '''.format(bounding_box_string)))
+                '''.format(bounding_box_string),
+                option_overwrite=option_overwrite))
