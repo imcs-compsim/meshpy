@@ -110,48 +110,72 @@ def xml_to_dict(xml):
     keys.sort()
 
     # Get string for this XML element.
-    string = xml.tag
+    string = '<' + xml.tag
+    if 'Name' in keys:
+        # If there is a key "Name" put this one first.
+        index = keys.index('Name')
+        if index == 0:
+            pass
+        else:
+            keys[0], keys[index] = keys[index], keys[0]
     for key in keys:
         string += ' '
         string += key
         string += '="'
         string += xml.get(key)
         string += '"'
-
-    # Add data.
-    if not xml.text.strip() == '':
-        string += '\n'
-        string += xml.text.strip()
+    string += '>'
 
     # Get data for this item.
     xml_dict = {}
     n_childs = len(xml.getchildren())
-    if not n_childs == 0:
+    is_text = not xml.text.strip() == ''
+    if n_childs > 0 and is_text:
+        raise ValueError('The text is not empty and there are children. This '
+            + 'case should not happen!')
+    elif n_childs > 0:
+        # Add a child xml construct.
         for child in xml.getchildren():
             key, value = xml_to_dict(child)
             xml_dict[key] = value
+    elif is_text:
+        # Add data.
+        data = xml.text.split('\n')
+        data = [line.strip() for line in data if not line.strip() == '']
+        data_string = '\n'.join(data)
+        xml_dict[''] = data_string
 
     # Return key for this item and all child items.
     return string, xml_dict
 
 
-def xml_dict_to_string(xml_dict):
+def xml_dict_to_string(item):
     """The nested XML dictionary to a string."""
 
-    # Sort the keys
-    keys = list(xml_dict.keys())
+    # Sort the keys.
+    keys = list(item.keys())
     keys.sort()
 
-    # Add content.
+    # Return the keys and the values.
     string = ''
     for key in keys:
-        string += key
-        string += '\n'
-        string += xml_dict_to_string(xml_dict[key])
-        string += '\n'
+        if key == '':
+            string += item[key]
+        else:
+            # Add content.
+            string += key
+            string += '\n'
+            string += xml_dict_to_string(item[key])
+            string += '\n'
 
-    # Return the value
-    return string
+            # Get the name of the section from the key.
+            section = key[1:].split(' ')[0]
+            if section[-1] == '>':
+                section = section[:-1]
+            string += '</{}>\n'.format(section)
+
+    # Return the value.
+    return string.strip()
 
 
 def compare_xml(path1, path2):
@@ -165,9 +189,14 @@ def compare_xml(path1, path2):
     tree2 = ET.parse(path2)
 
     key, value = xml_to_dict(tree1.getroot())
-    hash1 = hash((xml_dict_to_string({key: value})))
+    string1 = xml_dict_to_string({key: value})
+    hash1 = hash(string1)
 
     key, value = xml_to_dict(tree2.getroot())
-    hash2 = hash((xml_dict_to_string({key: value})))
+    string2 = xml_dict_to_string({key: value})
+    hash2 = hash(string2)
 
-    return hash1 == hash2
+    if hash1 == hash2:
+        return True, None, None
+    else:
+        return False, string1, string2

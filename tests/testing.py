@@ -1400,14 +1400,14 @@ class TestMeshpy(unittest.TestCase):
             'test_meshpy_vtk_writer.vtu')
         writer.write_vtk(vtk_file, ascii=True)
 
-        # Compare.
-        if compare_xml(ref_file, vtk_file):
+        # Compare the xml files.
+        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file)
+        if is_equal:
             self.assertTrue(True, '')
         else:
-            # If the trivial compare CML function fails, compare the full
-            # strings to see the differences.
-            self.compare_strings('test_meshpy_vtk_writer', ref_file,
-                vtk_file)
+            # Compare the full strings to see the difference.
+            self.compare_strings('test_meshpy_vtk_writer', string_ref,
+                string_vtk)
 
     def test_vtk_writer_beam(self):
         """Create a sample mesh and check the VTK output."""
@@ -1420,8 +1420,8 @@ class TestMeshpy(unittest.TestCase):
 
         # Add content to the mesh.
         mat = MaterialBeam(radius=0.05)
-        create_beam_mesh_honeycomb(mesh, Beam3rHerm2Lin3, mat, 2., 2, 3, n_el=2,
-            add_sets=True)
+        create_beam_mesh_honeycomb(mesh, Beam3rHerm2Lin3, mat, 2., 2, 3,
+            n_el=2, add_sets=True)
 
         # Write VTK output."""
         ref_file = os.path.join(testing_input,
@@ -1430,13 +1430,14 @@ class TestMeshpy(unittest.TestCase):
         mesh.write_vtk(output_name='test_meshpy_vtk',
             output_directory=testing_temp, ascii=True)
 
-        # Compare.
-        if compare_xml(ref_file, vtk_file):
+        # Compare the xml files.
+        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file)
+        if is_equal:
             self.assertTrue(True, '')
         else:
-            # If the trivial compare CML function fails, compare the full
-            # strings to see the differences.
-            self.compare_strings('test_vtk_writer_beam', ref_file, vtk_file)
+            # Compare the full strings to see the difference.
+            self.compare_strings('test_vtk_writer_beam', string_ref,
+                string_vtk)
 
     def test_vtk_writer_solid(self):
         """Import a solid mesh and check the VTK output."""
@@ -1460,13 +1461,14 @@ class TestMeshpy(unittest.TestCase):
         input_file.write_vtk(output_name='test_meshpy_vtk',
             output_directory=testing_temp, ascii=True)
 
-        # Compare.
-        if compare_xml(ref_file, vtk_file):
+        # Compare the xml files.
+        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file)
+        if is_equal:
             self.assertTrue(True, '')
         else:
-            # If the trivial compare CML function fails, compare the full
-            # strings to see the differences.
-            self.compare_strings('test_meshpy_vtk_solid', ref_file, vtk_file)
+            # Compare the full strings to see the difference.
+            self.compare_strings('test_meshpy_vtk_solid', string_ref,
+                string_vtk)
 
     def test_vtk_writer_solid_elements(self):
         """
@@ -1494,14 +1496,14 @@ class TestMeshpy(unittest.TestCase):
         input_file.write_vtk(output_name='test_meshpy_vtk_elements',
             output_directory=testing_temp, ascii=True)
 
-        # Compare.
-        if compare_xml(ref_file, vtk_file):
+        # Compare the xml files.
+        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file)
+        if is_equal:
             self.assertTrue(True, '')
         else:
-            # If the trivial compare CML function fails, compare the full
-            # strings to see the differences.
-            self.compare_strings(
-                'test_meshpy_vtk_elements_solid', ref_file, vtk_file)
+            # Compare the full strings to see the difference.
+            self.compare_strings('test_meshpy_vtk_elements_solid', string_ref,
+                string_vtk)
 
 
 class TestFullBaci(unittest.TestCase):
