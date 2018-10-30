@@ -734,8 +734,8 @@ class InputFile(Mesh):
                 tol_res,
                 tol_disp,
                 max_iter
-                )
-            , option_overwrite=option_overwrite))
+                ),
+            option_overwrite=option_overwrite))
 
         # Solver
         self.add(InputSection(
