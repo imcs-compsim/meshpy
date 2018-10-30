@@ -102,7 +102,7 @@ def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
         return has_partner, n_partner
 
 
-def xml_to_dict(xml):
+def xml_to_dict(xml, tol_float):
     """Convert a XML to a nested dictionary."""
 
     # Get and sort keys.
@@ -136,13 +136,25 @@ def xml_to_dict(xml):
     elif n_childs > 0:
         # Add a child xml construct.
         for child in xml.getchildren():
-            key, value = xml_to_dict(child)
+            key, value = xml_to_dict(child, tol_float)
             xml_dict[key] = value
     elif is_text:
         # Add data.
         data = xml.text.split('\n')
-        data = [line.strip() for line in data if not line.strip() == '']
-        data_string = '\n'.join(data)
+        if tol_float is None:
+            data_new = [line.strip() for line in data
+                if not line.strip() == '']
+        else:
+            data_new = []
+            for line in data:
+                if line.strip() == '':
+                    continue
+                for number in line.strip().split(' '):
+                    if np.abs(float(number)) < tol_float:
+                        data_new.append('0.0')
+                    else:
+                        data_new.append(number)
+        data_string = '\n'.join(data_new)
         xml_dict[''] = data_string
 
     # Return key for this item and all child items.
@@ -178,8 +190,17 @@ def xml_dict_to_string(item):
     return string.strip()
 
 
-def compare_xml(path1, path2):
-    """Compare the xml files at path1 and path2."""
+def compare_xml(path1, path2, tol_float=None):
+    """
+    Compare the xml files at path1 and path2.
+
+    Args
+    ----
+    tol_float: None / float
+        If it is None, the numbers are not changed.
+        If it is a number, the nubers in the xml file are set to 0 when the
+        absolute value is smaller that tol_float.
+    """
 
     # Check that both arguments are paths and exist.
     if not (os.path.isfile(path1) and os.path.isfile(path2)):
@@ -188,11 +209,11 @@ def compare_xml(path1, path2):
     tree1 = ET.parse(path1)
     tree2 = ET.parse(path2)
 
-    key, value = xml_to_dict(tree1.getroot())
+    key, value = xml_to_dict(tree1.getroot(), tol_float)
     string1 = xml_dict_to_string({key: value})
     hash1 = hash(string1)
 
-    key, value = xml_to_dict(tree2.getroot())
+    key, value = xml_to_dict(tree2.getroot(), tol_float)
     string2 = xml_dict_to_string({key: value})
     hash2 = hash(string2)
 

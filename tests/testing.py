@@ -586,6 +586,44 @@ class TestMeshpy(unittest.TestCase):
             ref_file,
             mesh.get_string(header=False).strip())
 
+    def test_wrap_cylinder_not_on_same_plane(self):
+        """Create a helix that is itself wrapped around a cylinder."""
+
+        # Ignore the warnings from wrap around cylinder.
+        warnings.filterwarnings("ignore")
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Create the mesh.
+        mesh = InputFile()
+        mat = MaterialReissner(radius=0.05)
+
+        # Create the line and bend it to a helix.
+        create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat,
+            [0.2, 0, 0],
+            [0.2, 5 * 0.2 * 2 * np.pi, 4],
+            n_el=20)
+        mesh.wrap_around_cylinder()
+
+        # Move the helix so its axis is in the y direction and goes through
+        # (2 0 0). The helix is also moved by a lot in y-direction, this only
+        # affects the agle phi when wrapping around a cylinder, not the shape
+        # of the beam.
+        mesh.rotate(Rotation([1, 0, 0], -0.5 * np.pi))
+        mesh.translate([2, 666.666, 0])
+
+        # Wrap the helix again.
+        mesh.wrap_around_cylinder(radius=2.)
+
+        # Check the output.
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_wrap_cylinder_not_on_same_plane_reference.dat')
+        self.compare_strings(
+            'test_meshpy_wrap_cylinder_not_on_same_plane',
+            ref_file,
+            mesh.get_string(header=False))
+
     def test_find_close_nodes_binning(self):
         """
         Test if the find_close nodes_binnign and find_close nodes functions
@@ -1431,7 +1469,8 @@ class TestMeshpy(unittest.TestCase):
             output_directory=testing_temp, ascii=True)
 
         # Compare the xml files.
-        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file)
+        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file,
+            tol_float=mpy.eps_pos)
         if is_equal:
             self.assertTrue(True, '')
         else:

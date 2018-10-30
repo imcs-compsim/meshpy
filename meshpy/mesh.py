@@ -10,6 +10,7 @@ import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 import os
 from _collections import OrderedDict
+import warnings
 
 # Meshpy modules.
 from . import mpy, Rotation, Function, Material, Node, Element, \
@@ -420,26 +421,59 @@ class Mesh(object):
                 if node.rotation is not None:
                     node.rotation.q = rot_new[i, :]
 
-    def wrap_around_cylinder(self):
+    def wrap_around_cylinder(self, radius=None):
         """
         Wrap the geometry around a cylinder. The y-z plane gets morphed into
-        the axis of symmetry.
+        the axis of symmetry. If all nodes are on the same y-z plane, the
+        radius of the created cylinder is the x coordinate of that plane. If
+        the nodes are not on the same y-z plane, the radius has to be given
+        explicitly.
+
+        Args
+        ----
+        radius: double
+            If this value is given AND not all nodes are on the same y-z plane,
+            then use this radius for the calculation of phi for all nodes.
+            This will still lead to distorted elements!.
         """
 
         pos = self.get_global_coordinates()
         quaternions = np.zeros([len(self.nodes), 4])
 
         # The x coordinate is the radius, the y coordinate the arc length.
-        radius = pos[:, 0].copy()
-        phi = pos[:, 1] / radius
+        points_x = pos[:, 0].copy()
+
+        # Check if all points are on the same y-z plane.
+        if np.abs(np.min(points_x) - np.max(points_x)) > mpy.eps_pos:
+            # The points are not all on the y-z plane, get the reference
+            # radius.
+            if radius is not None:
+                warnings.warn('The nodes are not on the same y-z plane. This '
+                    + 'will lead to distorted elements!')
+            else:
+                raise ValueError('The nodes that should be wrapped around a '
+                    + 'cylinder are not on the same y-z plane. This will give '
+                    + 'unexpected results. Give a reference radius!')
+            radius_phi = radius
+            radius_points = points_x
+        else:
+            # The points are on the same y-z plane. Check that the radius is
+            # not given (does not make sense).
+            if radius is not None:
+                raise ValueError('Points are all on the same plane, but a '
+                    + 'radius is given. This input does not make sense!')
+            radius_points = radius_phi = points_x[0]
+
+        # Get the angle for all nodes.
+        phi = pos[:, 1] / radius_phi
 
         # The rotation is about the z-axis.
         quaternions[:, 0] = np.cos(0.5 * phi)
         quaternions[:, 3] = np.sin(0.5 * phi)
 
         # Set the new positions in the global array.
-        pos[:, 0] = radius * np.cos(phi)
-        pos[:, 1] = radius * np.sin(phi)
+        pos[:, 0] = radius_points * np.cos(phi)
+        pos[:, 1] = radius_points * np.sin(phi)
 
         # Rotate the mesh
         self.rotate(quaternions, only_rotate_triads=True)
