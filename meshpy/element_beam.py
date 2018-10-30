@@ -258,7 +258,7 @@ class Beam3kClass(Beam):
     beam_type = mpy.beam_type_kirchhoff
     valid_material = [MaterialKirchhoff, BaseMeshItem]
 
-    def __init__(self, *, weak=True, rotvec=True, FAD=False, **kwargs):
+    def __init__(self, *, weak=True, rotvec=True, FAD=True, **kwargs):
         Beam.__init__(self, **kwargs)
 
         # Set the parameters for this beam.
