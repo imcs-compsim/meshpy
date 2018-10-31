@@ -12,10 +12,10 @@ class GeometrySet(BaseMeshItem):
 
     # Node set names for the input file file.
     geometry_set_names = {
-        mpy.point: 'DNODE',
-        mpy.line: 'DLINE',
-        mpy.surface: 'DSURFACE',
-        mpy.volume: 'DVOLUME'
+        mpy.geo.point: 'DNODE',
+        mpy.geo.line: 'DLINE',
+        mpy.geo.surface: 'DSURFACE',
+        mpy.geo.volume: 'DVOLUME'
         }
 
     def __init__(self, geometry_type, nodes=None, filter_double_nodes=False,

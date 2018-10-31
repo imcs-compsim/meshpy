@@ -189,26 +189,26 @@ class InputFile(Mesh):
 
     # Define the names of sections and boundary conditions in the input file.
     geometry_set_names = {
-        mpy.point:   'DNODE-NODE TOPOLOGY',
-        mpy.line:    'DLINE-NODE TOPOLOGY',
-        mpy.surface: 'DSURF-NODE TOPOLOGY',
-        mpy.volume:  'DVOL-NODE TOPOLOGY'
+        mpy.geo.point:   'DNODE-NODE TOPOLOGY',
+        mpy.geo.line:    'DLINE-NODE TOPOLOGY',
+        mpy.geo.surface: 'DSURF-NODE TOPOLOGY',
+        mpy.geo.volume:  'DVOL-NODE TOPOLOGY'
     }
     boundary_condition_names = {
-        (mpy.dirichlet, mpy.point  ): 'DESIGN POINT DIRICH CONDITIONS',
-        (mpy.dirichlet, mpy.line   ): 'DESIGN LINE DIRICH CONDITIONS',
-        (mpy.dirichlet, mpy.surface): 'DESIGN SURF DIRICH CONDITIONS',
-        (mpy.dirichlet, mpy.volume ): 'DESIGN VOL DIRICH CONDITIONS',
-        (mpy.neumann,   mpy.point  ): 'DESIGN POINT NEUMANN CONDITIONS',
-        (mpy.neumann,   mpy.line   ): 'DESIGN LINE NEUMANN CONDITIONS',
-        (mpy.neumann,   mpy.surface): 'DESIGN SURF NEUMANN CONDITIONS',
-        (mpy.neumann,   mpy.volume ): 'DESIGN VOL NEUMANN CONDITIONS'
+        (mpy.bc.dirichlet, mpy.geo.point  ): 'DESIGN POINT DIRICH CONDITIONS',
+        (mpy.bc.dirichlet, mpy.geo.line   ): 'DESIGN LINE DIRICH CONDITIONS',
+        (mpy.bc.dirichlet, mpy.geo.surface): 'DESIGN SURF DIRICH CONDITIONS',
+        (mpy.bc.dirichlet, mpy.geo.volume ): 'DESIGN VOL DIRICH CONDITIONS',
+        (mpy.bc.neumann,   mpy.geo.point  ): 'DESIGN POINT NEUMANN CONDITIONS',
+        (mpy.bc.neumann,   mpy.geo.line   ): 'DESIGN LINE NEUMANN CONDITIONS',
+        (mpy.bc.neumann,   mpy.geo.surface): 'DESIGN SURF NEUMANN CONDITIONS',
+        (mpy.bc.neumann,   mpy.geo.volume ): 'DESIGN VOL NEUMANN CONDITIONS'
     }
     geometry_counter = {
-        mpy.point:   'DPOINT',
-        mpy.line:    'DLINE',
-        mpy.surface: 'DSURF',
-        mpy.volume:  'DVOL'
+        mpy.geo.point:   'DPOINT',
+        mpy.geo.line:    'DLINE',
+        mpy.geo.surface: 'DSURF',
+        mpy.geo.volume:  'DVOL'
     }
 
     # Sections that won't be exported to input file.
@@ -575,10 +575,10 @@ class InputFile(Mesh):
 
         # Add the design description.
         lines.append(get_section_string('DESIGN DESCRIPTION'))
-        lines.append('NDPOINT {}'.format(len(mesh_sets[mpy.point])))
-        lines.append('NDLINE {}'.format(len(mesh_sets[mpy.line])))
-        lines.append('NDSURF {}'.format(len(mesh_sets[mpy.surface])))
-        lines.append('NDVOL {}'.format(len(mesh_sets[mpy.volume])))
+        lines.append('NDPOINT {}'.format(len(mesh_sets[mpy.geo.point])))
+        lines.append('NDLINE {}'.format(len(mesh_sets[mpy.geo.line])))
+        lines.append('NDSURF {}'.format(len(mesh_sets[mpy.geo.surface])))
+        lines.append('NDVOL {}'.format(len(mesh_sets[mpy.geo.volume])))
 
         # Add the boundary conditions.
         for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
