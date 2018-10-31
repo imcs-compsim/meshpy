@@ -61,6 +61,27 @@ class MeshPy(object):
     def __init__(self):
         self.set_default_values()
 
+        # Geometry types.
+        self.geo = Geometry
+
+        # Boundary conditions types.
+        self.bc = BoundaryCondition
+
+        # Beam types.
+        self.beam = BeamType
+
+        # Coupling types.
+        self.coupling = CouplingType
+
+        # Handling of multiple nodes in Neumann bcs.
+        self.double_nodes = DoubleNodes
+
+        # VTK types.
+        # Geometry types, cell or point.
+        self.vtk_geo = VTKGeometry
+        # Data types, scalar or vector.
+        self.vtk_data = VTKData
+
     def set_default_values(self):
 
         # Version information.
@@ -90,26 +111,6 @@ class MeshPy(object):
         # Import meshes as pure dat or import the geometry.
         self.import_mesh_full = False
 
-        # Geometry types.
-        self.geo = Geometry
-
-        # Boundary conditions types.
-        self.bc = BoundaryCondition
-
-        # Beam types.
-        self.beam = BeamType
-
-        # Coupling types.
-        self.coupling = CouplingType
-
-        # Handling of multiple nodes in neuman bcs.
-        self.double_nodes = DoubleNodes
-
-        # VTK types.
-        # Geometry types, cell or point.
-        self.vtk_geo = VTKGeometry
-        # Data types, scalar or vector.
-        self.vtk_data = VTKData
         # Number of digits for node set output (this will be set in the
         # Mesh.get_unique_geometry_sets() method.
         self.vtk_node_set_format = '{:05}'
