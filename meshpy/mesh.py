@@ -483,7 +483,7 @@ class Mesh(object):
             if not node.is_dat:
                 node.coordinates = pos[i, :]
 
-    def couple_nodes(self, *, nodes=None, coupling_type=mpy.coupling_fix):
+    def couple_nodes(self, *, nodes=None, coupling_type=mpy.coupling.fix):
         """
         Search through nodes and connect all nodes with the same coordinates.
 
@@ -508,7 +508,7 @@ class Mesh(object):
             # If no partner nodes were found, end this function.
             return
 
-        if coupling_type is mpy.coupling_fix_reuse:
+        if coupling_type is mpy.coupling.fix_reuse:
             # Check if there are nodes with the same rotation. If there are the
             # nodes are reused, and no coupling is inserted.
 
@@ -532,7 +532,7 @@ class Mesh(object):
 
                 # Check if nodes with the same rotations were found.
                 if n_partner == 0:
-                    self.add(Coupling(node_list, mpy.coupling_fix))
+                    self.add(Coupling(node_list, mpy.coupling.fix))
                 else:
                     # There are nodes that need to be combined.
                     combining_nodes = []
@@ -565,7 +565,7 @@ class Mesh(object):
 
                     # Add the coupling nodes.
                     if len(coupling_nodes) > 1:
-                        self.add(Coupling(coupling_nodes, mpy.coupling_fix))
+                        self.add(Coupling(coupling_nodes, mpy.coupling.fix))
 
                     # Replace the identical nodes.
                     for combine_list in combining_nodes:
@@ -634,7 +634,7 @@ class Mesh(object):
                         if value:
                             min_max_nodes.append(node_list[index])
                     geometry['{}_{}'.format(direction, text)] = GeometrySet(
-                        mpy.point,
+                        mpy.geo.point,
                         min_max_nodes
                         )
         return geometry
@@ -848,9 +848,9 @@ class Mesh(object):
 
         # Create geometry sets that will be returned.
         return_set = GeometryName()
-        return_set['start'] = GeometrySet(mpy.point, nodes=nodes[0])
-        return_set['end'] = GeometrySet(mpy.point, nodes=end_node)
-        return_set['line'] = GeometrySet(mpy.line, nodes=nodes)
+        return_set['start'] = GeometrySet(mpy.geo.point, nodes=nodes[0])
+        return_set['end'] = GeometrySet(mpy.geo.point, nodes=end_node)
+        return_set['line'] = GeometrySet(mpy.geo.line, nodes=nodes)
         if add_sets:
             self.add(return_set)
         return return_set

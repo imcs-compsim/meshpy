@@ -43,8 +43,8 @@ class BoundaryConditionContainer(OrderedDict):
     def __init__(self, *args, **kwargs):
         OrderedDict.__init__(self, *args, **kwargs)
 
-        for bc_key in mpy.boundary_condition:
-            for geometry_key in mpy.geometry:
+        for bc_key in mpy.bc:
+            for geometry_key in mpy.geo:
                 self[(bc_key, geometry_key)] = []
 
 
@@ -56,5 +56,5 @@ class GeometrySetContainer(OrderedDict):
     def __init__(self, *args, **kwargs):
         OrderedDict.__init__(self, *args, **kwargs)
 
-        for geometry_key in mpy.geometry:
+        for geometry_key in mpy.geo:
             self[geometry_key] = []

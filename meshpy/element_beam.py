@@ -223,7 +223,7 @@ class Beam3rHerm2Lin3(Beam):
         [0, True, True],
         [1, True, False]
         ]
-    beam_type = mpy.beam_type_reissner
+    beam_type = mpy.beam.reissner
     valid_material = [MaterialReissner, BaseMeshItem]
 
     def _get_dat(self):
@@ -255,7 +255,7 @@ class Beam3kClass(Beam):
         [0, True, True],
         [1, True, False]
         ]
-    beam_type = mpy.beam_type_kirchhoff
+    beam_type = mpy.beam.kirchhoff
     valid_material = [MaterialKirchhoff, BaseMeshItem]
 
     def __init__(self, *, weak=True, rotvec=True, FAD=True, **kwargs):

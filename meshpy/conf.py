@@ -4,6 +4,54 @@ This module defines a global object that manages all kind of stuff regarding
 meshpy.
 """
 
+# Python imports.
+from enum import IntEnum
+
+
+class Geometry(IntEnum):
+    """Enum for geometry types."""
+    point = 1
+    line = 2
+    surface = 3
+    volume = 4
+
+
+class BoundaryCondition(IntEnum):
+    """Enum for boundary condition types."""
+    dirichlet = 1
+    neumann = 2
+
+
+class BeamType(IntEnum):
+    """Enum for beam types."""
+    reissner = 1
+    kirchhoff = 2
+
+
+class CouplingType(IntEnum):
+    """Enum for coupling types."""
+    fix = 1
+    fix_reuse = 2
+    joint = 3
+
+
+class DoubleNodes(IntEnum):
+    """Enum for handing double nodes in Neumann conditions."""
+    remove = 1
+    keep = 2
+
+
+class VTKGeometry(IntEnum):
+    """Enum for handing double nodes in Neumann conditions."""
+    point = 1
+    cell = 2
+
+
+class VTKData(IntEnum):
+    """Enum for handing double nodes in Neumann conditions."""
+    scalar = 1
+    vector = 2
+
 
 class MeshPy(object):
     """
@@ -43,39 +91,25 @@ class MeshPy(object):
         self.import_mesh_full = False
 
         # Geometry types.
-        self.point = 'geometry_point'
-        self.line = 'geometry_line'
-        self.surface = 'geometry_surface'
-        self.volume = 'geometry_volume'
-        self.geometry = [self.point, self.line, self.surface, self.volume]
+        self.geo = Geometry
 
         # Boundary conditions types.
-        self.dirichlet = 'boundary_condition_dirichlet'
-        self.neumann = 'boundary_condition_neumann'
-        self.boundary_condition = [self.dirichlet, self.neumann]
+        self.bc = BoundaryCondition
 
         # Beam types.
-        self.beam_type_reissner = 'reissner'
-        self.beam_type_kirchhoff = 'kirchhoff'
+        self.beam = BeamType
 
         # Coupling types.
-        self.coupling_fix = 'coupling_fix'
-        self.coupling_fix_reuse = 'coupling_fix_reuse_nodes'
-        self.coupling_joint = 'coupling_joint'
+        self.coupling = CouplingType
 
         # Handling of multiple nodes in neuman bcs.
-        self.double_nodes_remove = 'double_nodes_remove'
-        self.double_nodes_keep = 'double_nodes_keep'
+        self.double_nodes = DoubleNodes
 
         # VTK types.
         # Geometry types, cell or point.
-        self.vtk_cell = 'vtk_cell'
-        self.vtk_point = 'vtk_point'
-        self.vtk_geom_types = [self.vtk_cell, self.vtk_point]
+        self.vtk_geo = VTKGeometry
         # Data types, scalar or vector.
-        self.vtk_scalar = 'vtk_scalar'
-        self.vtk_vector = 'vtk_vector'
-        self.vtk_data_types = [self.vtk_scalar, self.vtk_vector]
+        self.vtk_data = VTKData
         # Number of digits for node set output (this will be set in the
         # Mesh.get_unique_geometry_sets() method.
         self.vtk_node_set_format = '{:05}'

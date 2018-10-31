@@ -12,7 +12,7 @@ class Coupling(BaseMeshItem):
 
     def __init__(self, nodes, coupling_type):
         BaseMeshItem.__init__(self, is_dat=False)
-        self.node_set = GeometrySet(mpy.point, nodes=nodes)
+        self.node_set = GeometrySet(mpy.geo.point, nodes=nodes)
         self.coupling_type = coupling_type
 
     def _get_dat(self):
@@ -30,19 +30,19 @@ class Coupling(BaseMeshItem):
                         + 'of the type "{}" another one is of type "{}"! '
                         + 'They have to be of the same kind.'.format(beam_type,
                             element.beam_type)))
-                elif (beam_type is mpy.beam_type_kirchhoff
+                elif (beam_type is mpy.beam.kirchhoff
                         and element.rotvec is False):
                     raise ValueError('Couplings for Kirchhoff beams and '
                         + 'rotvec==False not yet implemented.')
 
         # Get coupling string.
-        if self.coupling_type is mpy.coupling_joint:
-            if beam_type is mpy.beam_type_reissner:
+        if self.coupling_type is mpy.coupling.joint:
+            if beam_type is mpy.beam.reissner:
                 string = 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0'
             else:
                 string = 'NUMDOF 7 ONOFF 1 1 1 0 0 0 0'
-        elif self.coupling_type is mpy.coupling_fix:
-            if beam_type is mpy.beam_type_reissner:
+        elif self.coupling_type is mpy.coupling.fix:
+            if beam_type is mpy.beam.reissner:
                 string = 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0'
             else:
                 string = 'NUMDOF 7 ONOFF 1 1 1 1 1 1 0'

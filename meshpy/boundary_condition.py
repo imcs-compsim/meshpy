@@ -85,11 +85,11 @@ class BoundaryCondition(BaseMeshItem):
             # In the case of solid imports this is a integer at initialization.
             return
 
-        if double_nodes is mpy.double_nodes_keep:
+        if double_nodes is mpy.double_nodes.keep:
             return
 
-        if (self.bc_type == mpy.neumann
-                and self.geometry_set.geometry_type == mpy.point):
+        if (self.bc_type == mpy.bc.neumann
+                and self.geometry_set.geometry_type == mpy.geo.point):
             partners = get_close_nodes(self.geometry_set.nodes)
             # Create a list with nodes that will not be kept in the set.
             double_node_list = []
@@ -98,7 +98,7 @@ class BoundaryCondition(BaseMeshItem):
                     if i > 0:
                         double_node_list.append(node)
             if (len(double_node_list) > 0 and
-                    double_nodes is mpy.double_nodes_remove):
+                    double_nodes is mpy.double_nodes.remove):
                 # Create the nodes again for the set.
                 self.geometry_set.nodes = [node for node in
                     self.geometry_set.nodes if (node not in double_node_list)]

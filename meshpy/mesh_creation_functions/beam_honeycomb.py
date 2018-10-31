@@ -140,7 +140,7 @@ def create_beam_mesh_honeycomb_flat(mesh, beam_object, material, width,
     return_set['east'] = min_max_nodes['x_max']
     return_set['south'] = min_max_nodes['y_min']
     return_set['west'] = min_max_nodes['x_min']
-    return_set['all'] = GeometrySet(mpy.line, honeycomb_nodes_all)
+    return_set['all'] = GeometrySet(mpy.geo.line, honeycomb_nodes_all)
     if add_sets:
         mesh.add(return_set)
     return return_set

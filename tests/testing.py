@@ -573,8 +573,9 @@ class TestMeshpy(unittest.TestCase):
         sets = create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat,
             [0, 0, 0], [1, 2, 3])
         mesh.add(BoundaryCondition(sets['start'], 'test',
-            bc_type=mpy.dirichlet))
-        mesh.add(BoundaryCondition(sets['end'], 'test', bc_type=mpy.neumann))
+            bc_type=mpy.bc.dirichlet))
+        mesh.add(BoundaryCondition(sets['end'], 'test',
+            bc_type=mpy.bc.neumann))
 
         # Compare the output of the mesh.
         if full_import:
@@ -778,9 +779,9 @@ class TestMeshpy(unittest.TestCase):
 
         # Apply boundary conditions.
         input_file.add(BoundaryCondition(helix_set['start'], 'BC1',
-            bc_type=mpy.dirichlet))
+            bc_type=mpy.bc.dirichlet))
         input_file.add(BoundaryCondition(helix_set['end'], 'BC2',
-            bc_type=mpy.neumann))
+            bc_type=mpy.bc.neumann))
 
         # Check the output.
         ref_file = os.path.join(testing_input,
@@ -826,9 +827,9 @@ class TestMeshpy(unittest.TestCase):
 
         # Apply boundary conditions.
         input_file.add(BoundaryCondition(sin_set['start'], 'BC1',
-            bc_type=mpy.dirichlet))
+            bc_type=mpy.bc.dirichlet))
         input_file.add(BoundaryCondition(sin_set['end'], 'BC2',
-            bc_type=mpy.neumann))
+            bc_type=mpy.bc.neumann))
 
         # Check the output.
         ref_file = os.path.join(testing_input,
@@ -875,9 +876,9 @@ class TestMeshpy(unittest.TestCase):
 
         # Apply boundary conditions.
         input_file.add(BoundaryCondition(sin_set['start'], 'BC1',
-            bc_type=mpy.dirichlet))
+            bc_type=mpy.bc.dirichlet))
         input_file.add(BoundaryCondition(sin_set['end'], 'BC2',
-            bc_type=mpy.neumann))
+            bc_type=mpy.bc.neumann))
 
         # Check the output.
         ref_file = os.path.join(testing_input,
@@ -935,12 +936,12 @@ class TestMeshpy(unittest.TestCase):
             input_file.add(BoundaryCondition(set_item[name_start],
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL '
                 + '0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
-                bc_type=mpy.dirichlet))
+                bc_type=mpy.bc.dirichlet))
             input_file.add(BoundaryCondition(set_item[name_end],
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL '
                 + '{1} {1} {1} {1} {1} {1} 0 0 0 FUNCT {0} {0} {0} {0} {0} {0}'
                 + ' 0 0 0',
-                bc_type=mpy.neumann,
+                bc_type=mpy.bc.neumann,
                 format_replacement=[ft, force_fac]))
 
         # Check the output.
@@ -973,9 +974,9 @@ class TestMeshpy(unittest.TestCase):
 
         # Add boundary conditions.
         input_file.add(BoundaryCondition(mesh['start'],
-            'rb', bc_type=mpy.dirichlet))
+            'rb', bc_type=mpy.bc.dirichlet))
         input_file.add(BoundaryCondition(mesh['end'],
-            'rb', bc_type=mpy.neumann))
+            'rb', bc_type=mpy.bc.neumann))
 
         # Check the output.
         ref_file = os.path.join(testing_input,
@@ -1085,10 +1086,12 @@ class TestMeshpy(unittest.TestCase):
 
             # Add sets.
             geom_set = GeometryName()
-            geom_set['start'] = GeometrySet(mpy.point,
+            geom_set['start'] = GeometrySet(mpy.geo.point,
                 nodes=input_file.nodes[0])
-            geom_set['end'] = GeometrySet(mpy.point, nodes=input_file.nodes[0])
-            geom_set['line'] = GeometrySet(mpy.line, nodes=input_file.nodes)
+            geom_set['end'] = GeometrySet(mpy.geo.point,
+                nodes=input_file.nodes[0])
+            geom_set['line'] = GeometrySet(mpy.geo.line,
+                nodes=input_file.nodes)
             input_file.add(geom_set)
             return input_file
 
@@ -1132,9 +1135,10 @@ class TestMeshpy(unittest.TestCase):
 
             # Add sets.
             geom_set = GeometryName()
-            geom_set['start'] = GeometrySet(mpy.point, nodes=set_1['start'])
-            geom_set['end'] = GeometrySet(mpy.point, nodes=set_2['end'])
-            geom_set['line'] = GeometrySet(mpy.line,
+            geom_set['start'] = GeometrySet(mpy.geo.point,
+                nodes=set_1['start'])
+            geom_set['end'] = GeometrySet(mpy.geo.point, nodes=set_2['end'])
+            geom_set['line'] = GeometrySet(mpy.geo.line,
                 nodes=[set_1['line'], set_2['line']], filter_double_nodes=True)
             input_file.add(geom_set)
 
@@ -1289,7 +1293,7 @@ class TestMeshpy(unittest.TestCase):
         mesh_couple.rotate(rot)
 
         # Couple the coupling mesh.
-        mesh_couple.couple_nodes(coupling_type=mpy.coupling_fix_reuse)
+        mesh_couple.couple_nodes(coupling_type=mpy.coupling.fix_reuse)
 
         # Compare the meshes.
         self.compare_strings('test_replace_nodes_case_1',
@@ -1315,7 +1319,7 @@ class TestMeshpy(unittest.TestCase):
         mesh_couple.rotate(rot)
 
         # Couple the coupling mesh.
-        mesh_couple.couple_nodes(coupling_type=mpy.coupling_fix_reuse)
+        mesh_couple.couple_nodes(coupling_type=mpy.coupling.fix_reuse)
 
         # Compare the meshes.
         self.compare_strings('test_replace_nodes_case_2',
@@ -1335,10 +1339,10 @@ class TestMeshpy(unittest.TestCase):
             [2, 0, 0])
 
         # Create set with all the beam nodes.
-        node_set_1_ref = GeometrySet(mpy.line, nodes=mesh_ref.nodes)
-        node_set_2_ref = GeometrySet(mpy.line, nodes=mesh_ref.nodes)
-        node_set_1_couple = GeometrySet(mpy.line, nodes=mesh_couple.nodes)
-        node_set_2_couple = GeometrySet(mpy.line, nodes=mesh_couple.nodes)
+        node_set_1_ref = GeometrySet(mpy.geo.line, nodes=mesh_ref.nodes)
+        node_set_2_ref = GeometrySet(mpy.geo.line, nodes=mesh_ref.nodes)
+        node_set_1_couple = GeometrySet(mpy.geo.line, nodes=mesh_couple.nodes)
+        node_set_2_couple = GeometrySet(mpy.geo.line, nodes=mesh_couple.nodes)
 
         # Create connecting beams.
         create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [1, 0, 0],
@@ -1355,8 +1359,8 @@ class TestMeshpy(unittest.TestCase):
         mesh_couple.rotate(rot)
 
         # Couple the mesh.
-        mesh_ref.couple_nodes(coupling_type=mpy.coupling_fix)
-        mesh_couple.couple_nodes(coupling_type=mpy.coupling_fix_reuse)
+        mesh_ref.couple_nodes(coupling_type=mpy.coupling.fix)
+        mesh_couple.couple_nodes(coupling_type=mpy.coupling.fix_reuse)
 
         # Add the node sets.
         mesh_ref.add(node_set_1_ref)
@@ -1364,9 +1368,9 @@ class TestMeshpy(unittest.TestCase):
 
         # Add BCs.
         mesh_ref.add(BoundaryCondition(node_set_2_ref, 'BC1',
-            bc_type=mpy.neumann))
+            bc_type=mpy.bc.neumann))
         mesh_couple.add(BoundaryCondition(node_set_2_couple, 'BC1',
-            bc_type=mpy.neumann))
+            bc_type=mpy.bc.neumann))
 
         # Compare the meshes.
         self.compare_strings('test_replace_nodes_case_3',
@@ -1681,19 +1685,19 @@ class TestFullBaci(unittest.TestCase):
         mesh_honeycomb.add(ft)
 
         # Change the sets to lines, only for purpose of matching the test file
-        honeycomb_set['bottom'].geo_type = mpy.line
-        honeycomb_set['top'].geo_type = mpy.line
+        honeycomb_set['bottom'].geo_type = mpy.geo.line
+        honeycomb_set['top'].geo_type = mpy.geo.line
         mesh_honeycomb.add(
             BoundaryCondition(honeycomb_set['bottom'],
                 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 '
                 + 'FUNCT 0 0 0 0 0 0 0 0 0',
-                bc_type=mpy.dirichlet))
+                bc_type=mpy.bc.dirichlet))
         mesh_honeycomb.add(
             BoundaryCondition(honeycomb_set['top'],
                 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 5.0 0 0 0 0 0 0 '
                 + 'FUNCT 0 0 {} 0 0 0 0 0 0',
                 format_replacement=[ft],
-                bc_type=mpy.dirichlet))
+                bc_type=mpy.bc.dirichlet))
 
         # Add the mesh to the imported solid mesh.
         input_file.add(mesh_honeycomb)
@@ -1753,7 +1757,7 @@ class TestFullBaci(unittest.TestCase):
                 cantilever_set['start'],  # bc set
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 ' + \
                 'FUNCT 0 0 0 0 0 0 0 0 0',  # bc string
-                bc_type=mpy.dirichlet
+                bc_type=mpy.bc.dirichlet
                 )
             )
         input_file.add(
@@ -1762,7 +1766,7 @@ class TestFullBaci(unittest.TestCase):
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 3. 3. 0 0 0 0 0 0 0 ' + \
                 'FUNCT {} {} 0 0 0 0 0 0 0',  # bc string
                 format_replacement=[cos, sin],
-                bc_type=mpy.dirichlet
+                bc_type=mpy.bc.dirichlet
                 )
             )
 
@@ -1884,14 +1888,14 @@ class TestFullBaci(unittest.TestCase):
                     BoundaryCondition(honeycomb_set['bottom'],
                         'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL '
                         + '0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
-                        bc_type=mpy.dirichlet))
+                        bc_type=mpy.bc.dirichlet))
                 mesh.add(
                     BoundaryCondition(honeycomb_set['top'],
                         'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL {1} {1} {1} '
                         + '0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0',
                         format_replacement=[ft[counter], 0.0001],
-                        bc_type=mpy.neumann,
-                        double_nodes=mpy.double_nodes_remove))
+                        bc_type=mpy.bc.neumann,
+                        double_nodes=mpy.double_nodes.remove))
                 counter += 1
 
         # Add mesh to input file.
@@ -1992,12 +1996,12 @@ class TestFullBaci(unittest.TestCase):
             mesh.add(BoundaryCondition(set_1['start'],
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL '
                 + '0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0',
-                bc_type=mpy.dirichlet))
+                bc_type=mpy.bc.dirichlet))
             mesh.add(BoundaryCondition(set_2['end'],
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL '
                 + '{1} {1} {1} {1} {1} {1} 0 0 0 FUNCT {0} {0} {0} {0} {0} {0}'
                 + ' 0 0 0',
-                bc_type=mpy.neumann,
+                bc_type=mpy.bc.neumann,
                 format_replacement=[ft, force_fac]))
 
             if i == 2:
