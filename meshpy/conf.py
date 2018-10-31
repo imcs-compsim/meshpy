@@ -42,13 +42,13 @@ class DoubleNodes(IntEnum):
 
 
 class VTKGeometry(IntEnum):
-    """Enum for handing double nodes in Neumann conditions."""
+    """Enum for VTK geometry types (for now cells and points)."""
     point = 1
     cell = 2
 
 
 class VTKData(IntEnum):
-    """Enum for handing double nodes in Neumann conditions."""
+    """Enum for VTK data types."""
     scalar = 1
     vector = 2
 
