@@ -47,7 +47,8 @@ def get_default_paths(name):
 
     if name == 'baci-release':
         default_paths = [
-            ['/home/ivo/workspace/baci/release/baci-release', os.path.isfile],
+            ['/home/ivo/workspace/baci/master/release/baci-release',
+                os.path.isfile],
             #['/home/ivo/baci/work/release/baci-release', os.path.isfile],
             ['/hdd/gitlab-runner/lib/baci-release/baci-release',
                 os.path.isfile]
