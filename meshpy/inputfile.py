@@ -222,6 +222,7 @@ class InputFile(Mesh):
         'ACOUSTIC ELEMENTS',
         'CELL ELEMENTS',
         'CELLSCATRA ELEMENTS',
+        'ARTERY ELEMENTS',
         'END'
     ]
 
