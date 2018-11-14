@@ -4,6 +4,8 @@ This module defines the classes that are used to create an input file for Baci.
 """
 
 # Python modules.
+import sys
+import os
 import datetime
 import re
 from _collections import OrderedDict
@@ -11,6 +13,7 @@ from _collections import OrderedDict
 # Meshpy modules.
 from . import mpy, Mesh, BaseMeshItem, Node, Element, BoundaryCondition, \
     GeometrySet
+from .utility import get_git_data
 
 
 def get_section_string(section_name):
@@ -633,22 +636,64 @@ class InputFile(Mesh):
     def _get_header(self):
         """Return the header for the input file."""
 
-        string = ('// Input file created with meshpy {}\n'
-                + '// git sha:    {}\n'
-                + '// git date:   {}\n'
-                + '// Maintainer: {}\n'
-                + '// Date:       {}').format(
-                    mpy.version,
-                    mpy.git_sha,
-                    mpy.git_date,
-                    self.maintainer,
-                    datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-                    )
+        headers = []
+
+        # Header containing model information.
+        model_header = (
+            '// Maintainer: {}\n' +
+            '// Date:       {}\n').format(
+                self.maintainer,
+                datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                )
+        if self.description:
+            model_header += '\n// Description: {}'.format(self.description)
+        headers.append(model_header)
+
+        # Get information about the script.
+        script_path = sys.argv[0]
+        script_git_sha, script_git_date = get_git_data(os.path.dirname(
+            script_path))
+        script_header = '// Script used to create input file:\n'
+        script_header += '// path:       {}\n'.format(script_path)
+        if script_git_sha is not None:
+            script_header += (
+                '// git sha:    {}\n' +
+                '// git date:   {}\n').format(script_git_sha, script_git_date)
+        headers.append(script_header)
+
+        # Header containing meshpy information.
+        headers.append(('// Input file created with meshpy {}\n'
+            + '// git sha:    {}\n'
+            + '// git date:   {}\n').format(
+                mpy.version,
+                mpy.git_sha,
+                mpy.git_date
+                ))
+
+        # Check if cubitpy is loaded.
+        if 'cubitpy.cubitpy' in sys.modules.keys():
+
+            # Load cubitpy.
+            import cubitpy
+
+            # Get git information about cubitpy.
+            cubitpy_git_sha, cubitpy_git_date = get_git_data(
+                os.path.dirname(cubitpy.__file__))
+
+            if cubitpy_git_sha is not None:
+                # Cubitpy_header.
+                headers.append(('// cubitpy was used at the following state:\n'
+                    + '// git sha:    {}\n'
+                    + '// git date:   {}\n').format(
+                        cubitpy_git_sha,
+                        cubitpy_git_date
+                        ))
+
         string_line = '// ' + ''.join(
             ['-' for _i in range(mpy.dat_len_section - 3)])
-        if self.description:
-            string += '\n// Description: {}'.format(self.description)
-        return string_line + '\n' + string + '\n' + string_line
+
+        return string_line + '\n' + (string_line + '\n').join(headers) + \
+            string_line
 
     def set_default_header_static(self, *,
             time_step=1.,
