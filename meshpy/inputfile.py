@@ -278,9 +278,7 @@ class InputFile(Mesh):
             raise RuntimeError('It is not possible to import two dat files!')
 
         with open(file_path) as dat_file:
-            lines = []
-            for line in dat_file:
-                lines.append(line)
+            lines = dat_file.readlines()
         self._add_dat_lines(lines)
 
         if mpy.import_mesh_full:
@@ -509,7 +507,8 @@ class InputFile(Mesh):
                 input_file.write(line)
                 input_file.write('\n')
 
-    def get_dat_lines(self, header=True, dat_header=True):
+    def get_dat_lines(self, header=True, dat_header=True,
+            add_script_to_header=True):
         """
         Return the lines for the input file for the whole object.
 
@@ -519,14 +518,19 @@ class InputFile(Mesh):
             If the header should be exported to the input file files.
         dat_header: bool
             If header lines from the imported dat file should be exported.
+        append_script_to_header: bool
+            If true, a copy of the executing script will be added to the input
+            file. This is only in affect when dat_header==True.
         """
 
         # List that will contain all input lines.
         lines = []
 
         # Add header to the input file.
+        end_text = None
         if header:
-            lines.append(self._get_header())
+            header_text, end_text = self._get_header(add_script_to_header)
+            lines.append(header_text)
         if dat_header:
             lines.extend(self.dat_header)
 
@@ -624,6 +628,10 @@ class InputFile(Mesh):
         # The last section is END
         lines.extend(InputSection('END').get_dat_lines())
 
+        # Add end text.
+        if end_text is not None:
+            lines.append(end_text)
+
         return lines
 
     def get_string(self, **kwargs):
@@ -633,10 +641,11 @@ class InputFile(Mesh):
     def __str__(self, **kwargs):
         return self.get_string(**kwargs)
 
-    def _get_header(self):
+    def _get_header(self, add_script):
         """Return the header for the input file."""
 
         headers = []
+        end_text = None
 
         # Header containing model information.
         model_header = (
@@ -646,11 +655,11 @@ class InputFile(Mesh):
                 datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 )
         if self.description:
-            model_header += '\n// Description: {}'.format(self.description)
+            model_header += '// Description: {}\n'.format(self.description)
         headers.append(model_header)
 
         # Get information about the script.
-        script_path = sys.argv[0]
+        script_path = os.path.realpath(sys.argv[0])
         script_git_sha, script_git_date = get_git_data(os.path.dirname(
             script_path))
         script_header = '// Script used to create input file:\n'
@@ -682,7 +691,7 @@ class InputFile(Mesh):
 
             if cubitpy_git_sha is not None:
                 # Cubitpy_header.
-                headers.append(('// cubitpy was used at the following state:\n'
+                headers.append(('// The module cubitpy was loaded\n'
                     + '// git sha:    {}\n'
                     + '// git date:   {}\n').format(
                         cubitpy_git_sha,
@@ -692,8 +701,22 @@ class InputFile(Mesh):
         string_line = '// ' + ''.join(
             ['-' for _i in range(mpy.dat_len_section - 3)])
 
-        return string_line + '\n' + (string_line + '\n').join(headers) + \
-            string_line
+        # If needed, append the contents of the script.
+        if add_script:
+            # Header for the script 'section'.
+            script_lines = [string_line
+                + '\n// Full script used to create this input file.\n'
+                + string_line + '\n']
+
+            # Get the contents of script.
+            with open(script_path) as script_file:
+                script_lines.extend(script_file.readlines())
+
+            # Comment the python code lines.
+            end_text = '//'.join(script_lines)
+
+        return (string_line + '\n' + (string_line + '\n').join(headers) + \
+            string_line), end_text
 
     def set_default_header_static(self, *,
             time_step=1.,
