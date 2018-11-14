@@ -267,7 +267,8 @@ class InputFile(Mesh):
             object.
         """
 
-        if len(self.nodes) + len(self.elements) > 0:
+        if (len(self.nodes) + len(self.elements) + len(self.materials)
+                + len(self.functions) + len(self.couplings) > 0):
             raise RuntimeError('A dat file can only be loaded for an '
                 + 'empty mesh!')
         if self._dat_file_loaded:
