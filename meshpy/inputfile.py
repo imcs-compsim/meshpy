@@ -794,6 +794,12 @@ class InputFile(Mesh):
             TRIAD_VISUALIZATIONPOINT        Yes
             STRAINS_GAUSSPOINT              Yes
             ''', option_overwrite=option_overwrite))
+        self.add(InputSection(
+            'IO/RUNTIME VTK OUTPUT/STRUCTURE',
+            '''
+            OUTPUT_STRUCTURE                Yes
+            DISPLACEMENT                    Yes
+            ''', option_overwrite=option_overwrite))
 
         # Problem type settings.
         if max_time is None:
@@ -845,3 +851,48 @@ class InputFile(Mesh):
                 BOUNDINGBOX {}
                 '''.format(bounding_box_string),
                 option_overwrite=option_overwrite))
+
+    def set_default_header_beam_to_solid_volume_meshtying(self, *,
+            penalty_parameter=1e10,
+            n_gauss_points=6,
+            strategy='segmentation',
+            n_search_points=4,
+            max_time=None,
+            max_iter=20,
+            tol_res=1e-7,
+            tol_disp=1e-11,
+            binning_bounding_box=None,
+            option_overwrite=False
+            ):
+        """
+        Set default header parameters for beam to solid meshtying.
+        """
+
+        self.add('''
+            ---------------------------------------------------BEAM INTERACTION
+            REPARTITIONSTRATEGY             Everydt
+            --------------------BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING
+            STRATEGY                        Penalty
+            PENALTY_PARAMETER               {0}
+            GAUSS_POINTS                    {1}
+            ---------------------------------------GEOMETRY PAIR/LINE TO VOLUME
+            STRATEGY                        {2}
+            SEARCH_POINTS                   {3}
+            '''.format(
+                penalty_parameter,
+                n_gauss_points,
+                strategy,
+                n_search_points
+                ), option_overwrite=True)
+
+        # Output.
+        self.add(
+            '''
+            ----------BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/RUNTIME VTK OUTPUT
+            VTK_OUTPUT               YES
+            INTERVAL_STEPS           1
+            OUTPUT_DATA_FORMAT       binary
+            EVERY_ITERATION          YES
+            CONTACT_FORCES           YES
+            SEGMENTATION             YES
+            ''', option_overwrite=option_overwrite)
