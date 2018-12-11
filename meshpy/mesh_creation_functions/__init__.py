@@ -15,7 +15,7 @@ from .beam_curve import create_beam_mesh_curve
 from .beam_honeycomb import create_beam_mesh_honeycomb_flat, \
     create_beam_mesh_honeycomb
 
-# Define the itCouplingems that will be exported by default.
+# Define the items that will be exported by default.
 __all__ = [
     # Base geometry.
     'create_beam_mesh_line',
