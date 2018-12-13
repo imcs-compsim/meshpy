@@ -8,7 +8,7 @@ import os
 
 
 # Cubitpy imports.
-from cubitpy import cupy, CubitPy, get_methods
+from cubitpy import cupy, CubitPy
 
 
 # Initialize cubit
