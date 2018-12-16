@@ -226,6 +226,7 @@ class InputFile(Mesh):
         'CELL ELEMENTS',
         'CELLSCATRA ELEMENTS',
         'ARTERY ELEMENTS',
+        'ELECTROMAGNETIC ELEMENTS',
         'END'
     ]
 
