@@ -321,7 +321,7 @@ class InputFile(Mesh):
         section_data = []
         for line in lines:
             line = line.strip()
-            if line.startswith('-----'):
+            if line.startswith('--'):
                 self._add_dat_section(section_line, section_data, **kwargs)
                 section_line = line
                 section_data = []
