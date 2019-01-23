@@ -25,7 +25,7 @@ from meshpy import mpy, Rotation, get_relative_rotation, InputFile, \
     InputSection, MaterialReissner, MaterialBeam, Function, Beam3rHerm2Lin3, \
     BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh, \
     find_close_nodes, find_close_nodes_binning, GeometryName, GeometrySet, \
-    MaterialKirchhoff, Beam3k, flatten
+    MaterialKirchhoff, Beam3k, flatten, Beam, Coupling
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import \
@@ -1548,6 +1548,33 @@ class TestMeshpy(unittest.TestCase):
             # Compare the full strings to see the difference.
             self.compare_strings('test_meshpy_vtk_elements_solid', string_ref,
                 string_vtk)
+
+    def test_mesh_add_checks(self):
+        """
+        This test checks that Mesh raises an error when double objects are
+        added to the mesh.
+        """
+
+        # Mesh instance for this test.
+        mesh = Mesh()
+
+        # Create objects that will be added to the mesh.
+        node = Node([0, 1., 2.])
+        element = Beam()
+        coupling = Coupling(mesh.nodes, mpy.coupling.fix)
+        geometry_set = GeometrySet(mpy.geo.point)
+
+        # Add each object once.
+        mesh.add(node)
+        mesh.add(element)
+        mesh.add(coupling)
+        mesh.add(geometry_set)
+
+        # Add the objects again and check for errors.
+        self.assertRaises(ValueError, mesh.add, node)
+        self.assertRaises(ValueError, mesh.add, element)
+        self.assertRaises(ValueError, mesh.add, coupling)
+        self.assertRaises(ValueError, mesh.add, geometry_set)
 
 
 class TestFullBaci(unittest.TestCase):
