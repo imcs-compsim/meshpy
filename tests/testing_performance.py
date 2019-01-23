@@ -19,15 +19,15 @@ from meshpy.mesh_creation_functions.beam_basic_geometry import \
     create_beam_mesh_line
 
 # Cubitpy imports.
-from cubitpy import cupy, CubitPy, get_methods
+from cubitpy import cupy, CubitPy
 
 
 # Directories and files for testing.
 testing_path = os.path.abspath(os.path.dirname(__file__))
 testing_temp = os.path.join(testing_path, 'testing-tmp')
 testing_solid_block = os.path.join(testing_temp,
-    'parformancne_testing_solid.dat')
-testing_beam = os.path.join(testing_temp, 'parformancne_testing_beam.dat')
+    'performance_testing_solid.dat')
+testing_beam = os.path.join(testing_temp, 'performance_testing_beam.dat')
 
 
 def create_solid_block(file_path, nx, ny, nz):
