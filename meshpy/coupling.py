@@ -6,14 +6,32 @@ This module implements a class to couple geometry together.
 # Meshpy modules.
 from . import mpy, GeometrySet, BaseMeshItem
 
+# Python modules.
+import numpy as np
+
 
 class Coupling(BaseMeshItem):
     """Represents a coupling between geometry in BACI."""
 
     def __init__(self, nodes, coupling_type):
+        """Initialize this object."""
         BaseMeshItem.__init__(self, is_dat=False)
         self.node_set = GeometrySet(mpy.geo.point, nodes=nodes)
         self.coupling_type = coupling_type
+
+        # Check that all nodes that are coupled have the same position (for now
+        # this is the only way we consider couplings, maybe this has to be
+        # enhanced later).
+        pos = np.zeros([len(nodes), 3])
+        for i, node in enumerate(nodes):
+            if node.is_dat:
+                raise TypeError('Couplings can only be applied to beam nodes!')
+            else:
+                # Get the difference to the first node.
+                pos[i, :] = node.coordinates - nodes[0].coordinates
+        if np.linalg.norm(pos) > mpy.eps_pos:
+            raise ValueError('The nodes given to Coupling do not have the same'
+                ' position. For now this case is not yet implemented.')
 
     def _get_dat(self):
         """
