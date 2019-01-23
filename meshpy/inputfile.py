@@ -542,6 +542,12 @@ class InputFile(Mesh):
 
         def set_n_global(data_list):
             """Set n_global in every item of data_list."""
+
+            # A check is performed that every entry in data_list is unique.
+            if len(data_list) != len(set(data_list)):
+                raise ValueError('Elements in data_list are not unique!')
+
+            # Set the values for n_global.
             for i, item in enumerate(data_list):
                 item.n_global = i + 1
 
