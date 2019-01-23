@@ -94,6 +94,8 @@ class Mesh(object):
 
     def add_coupling(self, coupling):
         """Add a coupling to the mesh object."""
+        if coupling in self.couplings:
+            raise ValueError('The coupling element is already in this mesh!')
         self.couplings.append(coupling)
 
     def add_bc(self, bc):
@@ -101,6 +103,8 @@ class Mesh(object):
         bc_key = bc.bc_type
         geom_key = bc.geometry_set.geometry_type
         bc.geometry_set.check_replaced_nodes()
+        if bc in self.boundary_conditions[bc_key, geom_key]:
+            raise ValueError('The boundary condition is already in this mesh!')
         self.boundary_conditions[bc_key, geom_key].append(bc)
 
     def add_function(self, function):
@@ -121,17 +125,22 @@ class Mesh(object):
 
     def add_node(self, node):
         """Add a node to this mesh."""
+        if node in self.nodes:
+            raise ValueError('The node is already in this mesh!')
         self.nodes.append(node)
 
     def add_element(self, element):
         """Add an element to this mesh."""
+        if element in self.elements:
+            raise ValueError('The element is already in this mesh!')
         self.elements.append(element)
 
     def add_geometry_set(self, geometry_set):
         """Add a geometry set to this mesh."""
-        if geometry_set not in self.geometry_sets[geometry_set.geometry_type]:
-            geometry_set.check_replaced_nodes()
-            self.geometry_sets[geometry_set.geometry_type].append(geometry_set)
+        if geometry_set in self.geometry_sets[geometry_set.geometry_type]:
+            raise ValueError('The geometry set is already in this mesh')
+        geometry_set.check_replaced_nodes()
+        self.geometry_sets[geometry_set.geometry_type].append(geometry_set)
 
     def add_geometry_name(self, geometry_name):
         """Add a set of geometry sets to this mesh."""
