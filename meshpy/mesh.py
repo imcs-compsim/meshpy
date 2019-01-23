@@ -11,6 +11,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import os
 from _collections import OrderedDict
 import warnings
+import copy
 
 # Meshpy modules.
 from . import mpy, Rotation, Function, Material, Node, Element, \
@@ -873,3 +874,10 @@ class Mesh(object):
         if add_sets:
             self.add(return_set)
         return return_set
+
+    def copy(self):
+        """
+        Return a deep copy of this mesh. The functions and materials wil not be
+        deep copied.
+        """
+        return copy.deepcopy(self)

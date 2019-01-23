@@ -16,6 +16,19 @@ class Material(BaseMeshItem):
     def __init__(self, data=None, is_dat=False, **kwargs):
         BaseMeshItem.__init__(self, data=data, is_dat=is_dat, **kwargs)
 
+    def __deepcopy__(self, memo):
+        """
+        When deepcopy is called on a mesh, we do not want the materials to be
+        copied, as this will result in multiple equal materials in the input
+        file.
+        """
+
+        # Add this object to the memo dictionary.
+        memo[id(self)] = self
+
+        # Return this object again, as no copy should be created.
+        return self
+
 
 class MaterialBeam(Material):
     """Base class for all beam materials."""
