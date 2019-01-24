@@ -227,6 +227,16 @@ class Mesh(object):
             if not node.is_dat:
                 node.mesh = self
 
+        # Add a link to the couplings. For now the implementation only allows
+        # one coupling per node.
+        for coupling in self.couplings:
+            for node in coupling.node_set.nodes:
+                if node.coupling_link is None:
+                    node.coupling_link = coupling
+                else:
+                    raise ValueError('It is currently not possible to add more'
+                        + ' than one coupling to a node.')
+
     def get_global_coordinates(self, nodes=None):
         """
         Return an array with the coordinates of all nodes.

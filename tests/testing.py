@@ -1576,6 +1576,31 @@ class TestMeshpy(unittest.TestCase):
         self.assertRaises(ValueError, mesh.add, coupling)
         self.assertRaises(ValueError, mesh.add, geometry_set)
 
+    def test_check_doulble_couplings(self):
+        """
+        The current implementation can not handle more than one coupling on a
+        node correctly, therefore we need to throw an error.
+        """
+
+        # Create mesh object.
+        mesh = InputFile()
+        mat = MaterialReissner()
+        mesh.add(mat)
+
+        # Add two beams to create an elbow structure. The beams each have a
+        # node at the intersection.
+        create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0], [1, 0, 0])
+        create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [1, 0, 0], [1, 1, 0])
+
+        # Call coupling twice -> this will create two coupling objects for the
+        # corner node.
+        mesh.couple_nodes()
+        mesh.couple_nodes()
+
+        # Create the input file. This will cause an error, as there are two
+        # couplings for one node.
+        self.assertRaises(ValueError, mesh.write_input_file, '/tmp/temp.dat')
+
 
 class TestFullBaci(unittest.TestCase):
     """
