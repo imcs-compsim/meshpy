@@ -1549,6 +1549,54 @@ class TestMeshpy(unittest.TestCase):
             self.compare_strings('test_meshpy_vtk_elements_solid', string_ref,
                 string_vtk)
 
+    def test_deep_copy(self):
+        """
+        Thist test checks that the deep copy function on a mesh does not copy
+        the materials or functions.
+        """
+
+        # Create material and function object.
+        mat = MaterialReissner(youngs_modulus=1, radius=1)
+        fun = Function('COMPONENT 0 FUNCTION t')
+
+        def create_mesh(mesh):
+            """Add material and function to the mesh and create a beam."""
+            mesh.add(fun, mat)
+            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0],
+                [1, 0, 0])
+
+        # The second mesh will be translated and rotated with those vales.
+        translate = [1., 2.34535435, 3.345353]
+        rotation = Rotation([1, 0.2342342423, -2.234234], np.pi / 15 * 27)
+
+        # First create the mesh twice, move one and get the input file.
+        mesh_ref_1 = Mesh()
+        mesh_ref_2 = Mesh()
+        create_mesh(mesh_ref_1)
+        create_mesh(mesh_ref_2)
+        mesh_ref_2.rotate(rotation)
+        mesh_ref_2.translate(translate)
+        input_file_ref = InputFile()
+        input_file_ref.add(mesh_ref_1, mesh_ref_2)
+
+        # Now copy the first mesh and add them together in the input file.
+        mesh_copy_1 = Mesh()
+        create_mesh(mesh_copy_1)
+        mesh_copy_2 = mesh_copy_1.copy()
+        mesh_copy_2.rotate(rotation)
+        mesh_copy_2.translate(translate)
+        input_file_copy = InputFile()
+        input_file_copy.add(mesh_copy_1, mesh_copy_2)
+
+        # Check that the input files are the same.
+        self.compare_strings(
+            'test_deep_copy',
+            input_file_ref.get_string(header=False, dat_header=False,
+                add_script_to_header=False),
+            input_file_copy.get_string(header=False, dat_header=False,
+                add_script_to_header=False)
+            )
+
     def test_mesh_add_checks(self):
         """
         This test checks that Mesh raises an error when double objects are

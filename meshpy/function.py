@@ -14,6 +14,19 @@ class Function(BaseMeshItem):
     def __init__(self, data):
         BaseMeshItem.__init__(self, data=data, is_dat=False)
 
+    def __deepcopy__(self, memo):
+        """
+        When deepcopy is called on a mesh, we do not want the same functions to
+        be copied, as this will result in multiple equal functions in the input
+        file.
+        """
+
+        # Add this object to the memo dictionary.
+        memo[id(self)] = self
+
+        # Return this object again, as no copy should be created.
+        return self
+
     def __str__(self):
         """
         Return the global index for this function. This is usually used then
