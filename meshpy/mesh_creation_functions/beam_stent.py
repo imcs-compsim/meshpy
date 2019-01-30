@@ -282,7 +282,8 @@ def create_beam_mesh_stent(mesh, beam_object, material, row_number, column_numbe
     return_set = GeometryName()
     return_set['top'] = min_max_nodes['z_max']
     return_set['bottom'] = min_max_nodes['z_min']
-    return_set['all'] = GeometrySet(mpy.line, stent_nodes_all)
+    return_set['all'] = GeometrySet(mpy.geo.line, stent_nodes_all)
+
     if add_sets:
         mesh.add(return_set)
     return return_set
