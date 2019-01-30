@@ -10,8 +10,9 @@ import numpy as np
 from .. import mpy, Rotation, Mesh, GeometryName, GeometrySet
 from . import create_beam_mesh_arc_segment, create_beam_mesh_line
 
-def create_stent_cell(mesh, beam_object, material, width, bottom_width, neck_width, height,
-    alpha, radius, n_el, is_bottom_cell=False, is_top_cell=False, add_sets=False):
+def create_stent_cell(mesh, beam_object, material, width, bottom_width,
+    neck_width, height, alpha, radius, n_el, is_bottom_cell=False,
+    is_top_cell=False, add_sets=False):
     """
     Create a cell of the stent. This cell is on the x-y plane.
 
@@ -183,19 +184,15 @@ def create_stent_cell_column(mesh, beam_object, material, row_number, width,
         top.add_mesh(mesh_top)
 
     mesh1 = Mesh()
-    mesh2 = Mesh()
-    for i in range(row_number - 2):
+    for _i in range(row_number - 2):
         mesh1.translate([0, height, 0])
-        mesh2.translate([0, height, 0])
         create_stent_cell(mesh1, beam_object, material, width, bottom_width,
-            neck_width, height, alpha, radius, n_el)
-        create_stent_cell(mesh2, beam_object, material, width, bottom_width,
             neck_width, height, alpha, radius, n_el)
 
     create_bottom_cell(mesh1)
     create_top_cell(mesh1)
-    create_bottom_cell(mesh2)
-    create_top_cell(mesh2)
+
+    mesh2 = mesh1.copy()
     mesh2.reflect([-1, 0, 0], [0, 0, 0])
     mesh.add_mesh(mesh1)
     mesh.add_mesh(mesh2)
