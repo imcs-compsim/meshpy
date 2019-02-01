@@ -6,8 +6,6 @@ sets, ...) for a meshed geometry.
 
 # Python modules.
 import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import os
 from _collections import OrderedDict
 import warnings
@@ -691,6 +689,10 @@ class Mesh(object):
 
     def preview_python(self):
         """Display the elements in this mesh in matplotlib."""
+
+        # Import the relevant matplotlib modules.
+        import matplotlib.pyplot as plt
+        from mpl_toolkits.mplot3d import Axes3D
 
         # Create figure.
         fig = plt.figure()
