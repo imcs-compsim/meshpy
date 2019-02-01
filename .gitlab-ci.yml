@@ -10,7 +10,7 @@ meshpy-testing:
         - "cd .."
         # Run tests.
         - "cd tests"
-        - "python3 testing.py"
+        - "python3 testing_main.py"
     variables:
         # Indicated the testing script, that it is performed on GitLab. In this
         # case all test have to pass.
