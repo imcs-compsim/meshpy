@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+# cython: language_level=3
 """
 This script contains functions that calculate points that are close together.
 It uses cython to gain performance.
