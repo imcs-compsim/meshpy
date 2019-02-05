@@ -72,6 +72,11 @@ def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
                 # to has_partner list.
                 if distance < eps:
                     this_is_partner = 1
+                    if not has_partner[j] == -1:
+                        raise RuntimeError('The case where a node connects two'
+                            ' other nodes that are more than eps apart is not'
+                            ' yet implemented. Check if the value for eps makes'
+                            ' pysical sense!')
                     has_partner[j] = partner
             # If this one has a partner set this node too.
             if this_is_partner == 1:
