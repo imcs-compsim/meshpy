@@ -397,6 +397,62 @@ class TestMeshpy(unittest.TestCase):
                 np.array(partners)
                 ))
 
+    def test_find_close_nodes_dimension(self):
+        """
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Set the seed for the pseudo random numbers.
+        random.seed(0)
+
+        # Create array with coordinates.
+        coords = np.array([
+            [0., 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0],
+            [-1, 1, 1, 0, 0, 0],
+            [1, -1, 1, 0, 0, 0],
+            [-1, -1, 1, 0, 0, 0],
+            [1, 1, -1, 0, 0, 0],
+            [-1, 1, -1, 0, 0, 0],
+            [1, -1, -1, 0, 0, 0],
+            [-1, -1, -1, 0, 0, 0],
+            [1, 1, 1, 0, 0, 1],
+            [-1, 1, 1, 0, 0, 1],
+            [1, -1, 1, 0, 0, 1],
+            [-1, -1, 1, 0, 0, 0],
+            [1, 1, -1, 0, 0, 0],
+            [-1, 1, -1, 0, 0, 0],
+            [1, -1, -1, 0, 0, 0],
+            [-1, -1, -1, 0, 0, 0],
+            ])
+
+        # Expected results.
+        has_partner_expected = [-1, -1, -1, -1, 0, 1, 2, 3, 4, -1, -1, -1, 0,
+            1, 2, 3, 4]
+        partner_expected = 5
+
+        # Get results with binning.
+        has_partner_binning, partner_binning = get_close_nodes(coords,
+            binning=True, return_nodes=False)
+
+        # Get results without binning.
+        has_partner_brute, partner_brute = get_close_nodes(coords,
+            binning=False, return_nodes=False)
+
+        # Check the results.
+        self.assertTrue(np.array_equal(
+            np.array(has_partner_expected),
+            np.array(has_partner_binning)
+            ))
+        self.assertTrue(np.array_equal(
+            np.array(has_partner_expected),
+            np.array(has_partner_brute)
+            ))
+        self.assertEqual(partner_expected, partner_binning)
+        self.assertEqual(partner_expected, partner_brute)
+
     def test_curve_3d_helix(self):
         """
         Create a helix from a parametric curve where the parameter is

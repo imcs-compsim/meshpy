@@ -87,7 +87,7 @@ def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
             + 'function find_close_nodes_binning should be used!')
 
     # Get list of closest pairs.
-    if mpy.binning:
+    if binning:
         has_partner, n_partner = find_close_nodes_binning(coords, nx, ny, nz,
             eps)
     else:
