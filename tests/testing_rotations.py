@@ -240,3 +240,8 @@ class TestRotation(unittest.TestCase):
                 'test_rotation_matrix: compare t1')
             self.assertLess(np.linalg.norm(t2 - t2_rot), mpy.eps_quaternion,
                 'test_rotation_matrix: compare t2')
+
+
+if __name__ == '__main__':
+    # Execution part of script.
+    unittest.main()

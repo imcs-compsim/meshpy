@@ -53,8 +53,8 @@ def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
 
     Args
     ----
-    nodes: list(Node)
-        Nodes that are checked for partners.
+    nodes: list(Node), np.array
+        Nodes that are checked for partners, or numpy array of coordiantes.
     binning: bool
         If binning should be used.
     nx, ny, nz: int
@@ -72,10 +72,14 @@ def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
         A list of lists with partner nodes.
     """
 
-    # Get array of coordinates.
-    coords = np.zeros([len(nodes), 3])
-    for i, node in enumerate(nodes):
-        coords[i, :] = node.coordinates
+    if isinstance(nodes, np.ndarray):
+        # Array is already given.
+        coords = nodes
+    else:
+        # Get coordiantes form nodes.
+        coords = np.zeros([len(nodes), 3])
+        for i, node in enumerate(nodes):
+            coords[i, :] = node.coordinates
 
     if len(nodes) > mpy.binning_max_nodes_brute_force and not mpy.binning:
         warnings.warn('The function get_close_nodes is called directly '
@@ -90,6 +94,11 @@ def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
         has_partner, n_partner = find_close_nodes(coords, eps=eps)
 
     if return_nodes:
+        # This is only possible if a list of nodes was given.
+        if not isinstance(nodes, list):
+            raise ValueError('The partner nodes can only be returned if a '
+                + 'list of nodes was given as input!')
+
         # Create list with nodes.
         partner_nodes = [[] for i in range(n_partner)]
         for i, node in enumerate(nodes):

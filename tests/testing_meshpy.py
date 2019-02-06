@@ -15,9 +15,8 @@ import vtk
 # Meshpy imports.
 from meshpy import (mpy, Rotation, InputFile, MaterialReissner, MaterialBeam,
     BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh,
-    find_close_nodes, find_close_nodes_binning, GeometryName, GeometrySet,
-    MaterialKirchhoff, Beam3k, flatten, Beam, Coupling, Beam3rHerm2Lin3,
-    Function)
+    get_close_nodes, GeometryName, GeometrySet, MaterialKirchhoff, Beam3k,
+    flatten, Beam, Coupling, Beam3rHerm2Lin3, Function)
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import \
@@ -348,9 +347,10 @@ class TestMeshpy(unittest.TestCase):
 
         # Test the number of partners and list of partners with the different
         # methods.
-        has_partner, _partner = find_close_nodes_binning(coords, 4, 4, 4,
-            eps_medium)
-        has_partner_brute, partner = find_close_nodes(coords, eps_medium)
+        has_partner, _partner = get_close_nodes(coords, binning=True, nx=4,
+            ny=4, nz=4, eps=eps_medium, return_nodes=False)
+        has_partner_brute, partner = get_close_nodes(coords, binning=False,
+            eps=eps_medium, return_nodes=False)
         self.assertTrue(np.array_equal(has_partner, has_partner_brute))
         self.assertEqual(partner, 146)
 
@@ -1316,3 +1316,8 @@ class TestMeshpy(unittest.TestCase):
         # Create the input file. This will cause an error, as there are two
         # couplings for one node.
         self.assertRaises(ValueError, mesh.write_input_file, '/tmp/temp.dat')
+
+
+if __name__ == '__main__':
+    # Execution part of script.
+    unittest.main()
