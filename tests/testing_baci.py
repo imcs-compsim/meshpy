@@ -507,3 +507,8 @@ class TestFullBaci(unittest.TestCase):
 
         # Run the input file in Baci.
         self.run_baci_test('rotated_beam_axis', input_file)
+
+
+if __name__ == '__main__':
+    # Execution part of script.
+    unittest.main()

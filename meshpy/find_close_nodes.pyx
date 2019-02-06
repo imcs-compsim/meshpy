@@ -46,11 +46,12 @@ def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
     """
 
     # Define types of variables for this function.
-    cdef int n_nodes, partner, this_is_partner, i, j, k
+    cdef int n_nodes, partner, this_is_partner, i, j, k, n_dim
     cdef double distance
 
-    # Number of nodes.
-    n_nodes = len(coords)
+    # Number of nodes and dimension of coordinates.
+    n_nodes = np.shape(coords)[0]
+    n_dim = np.shape(coords)[1]
 
     # This vector is -1 if a node does not belong to a pair, otherwise it is
     # the number of the pair.
@@ -65,13 +66,18 @@ def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
             for j in range(i + 1, n_nodes):
                 # Calculate the distance between the two nodes.
                 distance = 0.
-                for k in range(3):
+                for k in range(n_dim):
                     distance += (coords[i, k] - coords[j, k])**2
                 distance = sqrt(distance)
                 # Check if the distance is smaller than the threshold, and add
                 # to has_partner list.
                 if distance < eps:
                     this_is_partner = 1
+                    if not has_partner[j] == -1:
+                        raise RuntimeError('The case where a node connects two'
+                            ' other nodes that are more than eps apart is not'
+                            ' yet implemented. Check if the value for eps makes'
+                            ' pysical sense!')
                     has_partner[j] = partner
             # If this one has a partner set this node too.
             if this_is_partner == 1:
@@ -88,7 +94,8 @@ def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
     """
     Finds coordinates that are within an tolerance of each other. Create
     nx * ny * nz bins and look for neighbors in the bins. This speeds up the
-    execution considerably.
+    execution considerably. Even if the coordinates have more than 3 columns,
+    the bins will only be created for the frist 3.
 
     Args
     ----
@@ -111,7 +118,7 @@ def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
     # Define types of variables for this function.
     cdef int i, j, k, counter, n_nodes, n_bin, node_index, partner, \
         partner_bin, partner_at_start_bin, n_nodes_in_this_bin, \
-        global_partner_id, local_partner_index, partner_counter
+        global_partner_id, local_partner_index, partner_counter, n_dim
 
     # Define arrays for this function.
     cdef np.ndarray[INT_t, ndim=1] n_bin_xyz, node_index_xyz, \
@@ -128,8 +135,8 @@ def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
     n_bin_xyz[2] = nz
 
     # Get max and min coordinates of points.
-    max_coord = np.max(coords, 0)
-    min_coord = np.min(coords, 0)
+    max_coord = np.max(coords[:, :3], 0)
+    min_coord = np.min(coords[:, :3], 0)
 
     # Get size of bins.
     h_bin = (max_coord - min_coord) / n_bin_xyz
@@ -152,6 +159,7 @@ def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
 
     # Check in which bin a node belongs.
     n_nodes = len(coords)
+    n_dim = np.shape(coords)[1]
     nodes_bin = np.zeros([n_nodes, 8], dtype=INT) - 1
     node_index_xyz = np.zeros(3, dtype=INT)
     nodes_in_bin = [[] for i in range(n_bin)]
@@ -202,10 +210,10 @@ def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
                 nodes_in_this_bin[j] = nodes_in_bin[i][j]
 
             # Get the coordiantes for this bin.
-            find_close_nodes_coords = np.zeros([n_nodes_in_this_bin, 3],
+            find_close_nodes_coords = np.zeros([n_nodes_in_this_bin, n_dim],
                 dtype=FLOAT)
             for j in range(n_nodes_in_this_bin):
-                for k in range(3):
+                for k in range(n_dim):
                     find_close_nodes_coords[j, k] = (
                         coords[nodes_in_bin[i][j], k]
                         )

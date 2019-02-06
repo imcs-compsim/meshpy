@@ -15,7 +15,7 @@ import copy
 from . import mpy, Rotation, Function, Material, Node, Element, \
     GeometryName, GeometrySet, GeometrySetContainer, BoundaryCondition, \
     Coupling, BoundaryConditionContainer, get_close_nodes, VTKWriter, \
-    add_rotations, find_close_nodes
+    add_rotations
 
 
 class Mesh(object):
@@ -545,8 +545,8 @@ class Mesh(object):
 
                 # Abuse the find close nodes function to find nodes with the
                 # same rotation.
-                has_partner, n_partner = find_close_nodes(rotation_vectors,
-                    eps=mpy.eps_quaternion)
+                has_partner, n_partner = get_close_nodes(rotation_vectors,
+                    binning=False, eps=mpy.eps_quaternion, return_nodes=False)
 
                 # Check if nodes with the same rotations were found.
                 if n_partner == 0:

@@ -15,9 +15,8 @@ import vtk
 # Meshpy imports.
 from meshpy import (mpy, Rotation, InputFile, MaterialReissner, MaterialBeam,
     BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh,
-    find_close_nodes, find_close_nodes_binning, GeometryName, GeometrySet,
-    MaterialKirchhoff, Beam3k, flatten, Beam, Coupling, Beam3rHerm2Lin3,
-    Function)
+    get_close_nodes, GeometryName, GeometrySet, MaterialKirchhoff, Beam3k,
+    flatten, Beam, Coupling, Beam3rHerm2Lin3, Function)
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import \
@@ -296,7 +295,7 @@ class TestMeshpy(unittest.TestCase):
 
     def test_find_close_nodes_binning(self):
         """
-        Test if the find_close nodes_binnign and find_close nodes functions
+        Test if the find_close nodes_binning and find_close nodes functions
         return the same results.
         """
 
@@ -307,20 +306,28 @@ class TestMeshpy(unittest.TestCase):
         random.seed(0)
 
         # Add random nodes to a cube with width 2. Randomly add nodes close to
-        # existing nodes.
+        # existing nodes. The distance has to be shorter than 0.5 * eps_medium
+        # since the algorithm needs all close nodes to be withina sphere with
+        # radius eps_medium.
         eps_medium = 1e-5
-        n_nodes = 1000
+        eps_medium_factor = 0.49 * eps_medium
+        n_nodes = 999
         coords = np.zeros([n_nodes, 3])
         for i in range(n_nodes):
             # Check if this one should be close to another one.
             if random.randint(0, 4) == 0 and i > 0:
                 close_node = random.randint(0, i - 1)
                 for j in range(3):
-                    coords[i, j] = (coords[close_node, j]
-                        + eps_medium * random.uniform(-1, 1))
+                    coords[i, j] = coords[close_node, j]
             else:
                 for j in range(3):
                     coords[i, j] = random.uniform(-1, 1)
+
+        # Create a random vector for each node. The length of the random
+        # vectirs is scaled, so that is is a maximum of 1.
+        diff = np.random.rand(n_nodes, 3)
+        diff /= np.linalg.norm(diff, axis=1)[:, None]
+        coords += eps_medium_factor * diff
 
         # Add nodes between the bins.
         coords[-1, :] = [0., 0., 0.]
@@ -331,29 +338,21 @@ class TestMeshpy(unittest.TestCase):
         coords[-6, :] = [0., 0.5, 0.]
         coords[-7, :] = [0.5, 0., 0.]
         coords[-8, :] = [0.5, 0., 0.]
-        coords[-9, :] = [0. + eps_medium, 0., 0.]
-        coords[-10, :] = [0., 0. + eps_medium, 0.]
-        coords[-11, :] = [0., 0., 0. + eps_medium]
-        coords[-12, :] = [0. - eps_medium, 0., 0.]
-        coords[-13, :] = [0., 0. - eps_medium, 0.]
-        coords[-14, :] = [0., 0., 0. - eps_medium]
+        coords[-9, :] = [0. + eps_medium_factor, 0., 0.]
+        coords[-10, :] = [0., 0. + eps_medium_factor, 0.]
+        coords[-11, :] = [0., 0., 0. + eps_medium_factor]
+        coords[-12, :] = [0. - eps_medium_factor, 0., 0.]
+        coords[-13, :] = [0., 0. - eps_medium_factor, 0.]
+        coords[-14, :] = [0., 0., 0. - eps_medium_factor]
 
-        has_partner, _partner = find_close_nodes_binning(coords, 4, 4, 4,
-            100 * eps_medium)
-        has_partner_brute, _partner = find_close_nodes(
-            coords, 100 * eps_medium)
+        # Test the number of partners and list of partners with the different
+        # methods.
+        has_partner, _partner = get_close_nodes(coords, binning=True, nx=4,
+            ny=4, nz=4, eps=eps_medium, return_nodes=False)
+        has_partner_brute, partner = get_close_nodes(coords, binning=False,
+            eps=eps_medium, return_nodes=False)
         self.assertTrue(np.array_equal(has_partner, has_partner_brute))
-
-        has_partner, _partner = find_close_nodes_binning(coords, 4, 4, 4,
-            eps_medium)
-        has_partner_brute, _partner = find_close_nodes(coords, eps_medium)
-        self.assertTrue(np.array_equal(has_partner, has_partner_brute))
-
-        has_partner, _partner = find_close_nodes_binning(coords, 4, 4, 4,
-            0.01 * eps_medium)
-        has_partner_brute, _partner = find_close_nodes(coords,
-            0.01 * eps_medium)
-        self.assertTrue(np.array_equal(has_partner, has_partner_brute))
+        self.assertEqual(partner, 146)
 
     def test_find_close_nodes_binning_flat(self):
         """
@@ -397,6 +396,62 @@ class TestMeshpy(unittest.TestCase):
                 np.array(reference_partners),
                 np.array(partners)
                 ))
+
+    def test_find_close_nodes_dimension(self):
+        """
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Set the seed for the pseudo random numbers.
+        random.seed(0)
+
+        # Create array with coordinates.
+        coords = np.array([
+            [0., 0, 0, 0, 0, 0],
+            [1, 1, 1, 0, 0, 0],
+            [-1, 1, 1, 0, 0, 0],
+            [1, -1, 1, 0, 0, 0],
+            [-1, -1, 1, 0, 0, 0],
+            [1, 1, -1, 0, 0, 0],
+            [-1, 1, -1, 0, 0, 0],
+            [1, -1, -1, 0, 0, 0],
+            [-1, -1, -1, 0, 0, 0],
+            [1, 1, 1, 0, 0, 1],
+            [-1, 1, 1, 0, 0, 1],
+            [1, -1, 1, 0, 0, 1],
+            [-1, -1, 1, 0, 0, 0],
+            [1, 1, -1, 0, 0, 0],
+            [-1, 1, -1, 0, 0, 0],
+            [1, -1, -1, 0, 0, 0],
+            [-1, -1, -1, 0, 0, 0],
+            ])
+
+        # Expected results.
+        has_partner_expected = [-1, -1, -1, -1, 0, 1, 2, 3, 4, -1, -1, -1, 0,
+            1, 2, 3, 4]
+        partner_expected = 5
+
+        # Get results with binning.
+        has_partner_binning, partner_binning = get_close_nodes(coords,
+            binning=True, return_nodes=False)
+
+        # Get results without binning.
+        has_partner_brute, partner_brute = get_close_nodes(coords,
+            binning=False, return_nodes=False)
+
+        # Check the results.
+        self.assertTrue(np.array_equal(
+            np.array(has_partner_expected),
+            np.array(has_partner_binning)
+            ))
+        self.assertTrue(np.array_equal(
+            np.array(has_partner_expected),
+            np.array(has_partner_brute)
+            ))
+        self.assertEqual(partner_expected, partner_binning)
+        self.assertEqual(partner_expected, partner_brute)
 
     def test_curve_3d_helix(self):
         """
@@ -1324,3 +1379,8 @@ class TestMeshpy(unittest.TestCase):
         # Create the input file. This will cause an error, as there are two
         # couplings for one node.
         self.assertRaises(ValueError, mesh.write_input_file, '/tmp/temp.dat')
+
+
+if __name__ == '__main__':
+    # Execution part of script.
+    unittest.main()
