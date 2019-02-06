@@ -1231,8 +1231,15 @@ class TestMeshpy(unittest.TestCase):
         def create_mesh(mesh):
             """Add material and function to the mesh and create a beam."""
             mesh.add(fun, mat)
-            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0],
+            set1 = create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0],
                 [1, 0, 0])
+            set2 = create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [1, 0, 0],
+                [1, 1, 0])
+            mesh.add(BoundaryCondition(set1['line'], 'fix',
+                bc_type=mpy.bc.dirichlet))
+            mesh.add(BoundaryCondition(set2['line'], 'load',
+                bc_type=mpy.bc.neumann))
+            mesh.couple_nodes()
 
         # The second mesh will be translated and rotated with those vales.
         translate = [1., 2.34535435, 3.345353]
