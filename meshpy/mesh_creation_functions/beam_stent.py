@@ -1,8 +1,8 @@
-'''
-Created on Oct 17, 2018
+# -*- coding: utf-8 -*-
+"""
+This file has functions to create a stent accoring to Auricchio 2012.
+"""
 
-@author: dao
-'''
 # Python packages.
 import numpy as np
 
@@ -10,42 +10,47 @@ import numpy as np
 from .. import mpy, Rotation, Mesh, GeometryName, GeometrySet
 from . import create_beam_mesh_arc_segment, create_beam_mesh_line
 
-def create_stent_cell(mesh, beam_object, material, width, bottom_width,
-    neck_width, height, alpha, radius, n_el, is_bottom_cell=False,
-    is_top_cell=False, add_sets=False):
+
+def create_stent_cell(beam_object, material, width, height,
+        fac_bottom=0.6, fac_neck=0.55, fac_radius=0.36,
+        alpha=0.46 * np.pi, S1=True, S2=True, S3=True, n_el=1,
+        add_sets=False):
     """
     Create a cell of the stent. This cell is on the x-y plane.
 
     Args
     ----
-    mesh: Mesh
-        Mesh that the stent will be added to.
     beam_object: Beam
         Object that will be used to create the beam elements.
     material: Material
         Material for the beam.
     width: float
         Width of the total cell.
-    bottom_width: float
-        Width of the cell's bottom.
-    neck_width: float
-        Width of the cell's neck.
     height: float
         Height of the total cell.
+    fac_bottom: the ratio of the bottom's width to the cell's width
+    fac_neck: the ratio of the neck's width to the cell's width
+    fac_radius: the ratio of the S1's radius to the cell's width
     alpha: radiant
-        The angle between
-    radius: float
-        The radius of the two neck curve in S1.
+        The angle between the lines and horizontal line
     n_el: int
         Number of elements per beam line.
-    is_bottom_cell: bool
-        This check weather the cell is on bottom of the stent flat. If it is True S2-curve isn't created,
-        S3-curve will be twice created and one of them will be moved down.
-    is_top_cell: bool
-        This check weather the cell is on top of the stent flat. If it is True S3-curve isn't created,
-        S2-curve will be twice created and one of them will be down moved.
+    S1, S2, S3: bool
+        This check weather the curve S1, S2 or S3 will be created.
+        If the cell is on bottom of the stent flat S1 and S2 won't
+        be created. If the cell is on top of the flat S1 and S3
+        won't be created
+
     ( these variables are described in a file )
+
+    Return
+    ----
+    mesh: Mesh
+        A mesh with this structure
     """
+
+    mesh = Mesh()
+
     def add_line(pointa, pointb, n_el_line):
         """ Shortcut to add line."""
         return create_beam_mesh_line(
@@ -59,148 +64,171 @@ def create_stent_cell(mesh, beam_object, material, width, bottom_width,
 
     def add_segment(center, axis_rotation, radius, angle, n_el_segment):
         """ Shortcut to add arc segment."""
-        return create_beam_mesh_arc_segment(mesh, beam_object, material, center,
-                                            axis_rotation, radius, angle, n_el=n_el_segment)
+        return create_beam_mesh_arc_segment(mesh, beam_object, material,
+            center, axis_rotation, radius, angle, n_el=n_el_segment)
 
-    # Create S1 curve
-    neck_point = np.array([-neck_width, height * 0.5, 0])
-    d = (height * 0.5 / np.tan(alpha) + bottom_width - neck_width) / np.sin(alpha)
-    CM = np.array([-np.sin(alpha), -np.cos(alpha), 0]) * (d - radius)
-    MO = np.array([np.cos(alpha), -np.sin(alpha), 0]) * np.sqrt(radius ** 2 - (d - radius) ** 2)
-    S1_angle = np.pi / 2 + np.arcsin((d - radius) / radius)
-    S1_center1 = CM + MO + neck_point
-    S1_axis_rotation1 = Rotation([0, 0, 1], 2 * np.pi - S1_angle - alpha)
-    add_segment(S1_center1, S1_axis_rotation1, radius, S1_angle, n_el)
-    add_line([-bottom_width, 0, 0], mesh.nodes[-1].coordinates, 2 * n_el)
+    neck_width = width * fac_neck
+    bottom_width = width * fac_bottom
+    top_width = 2 * neck_width - bottom_width
+    radius = width * fac_radius
 
-    S1_center2 = 2 * neck_point - S1_center1
-    S1_axis_rotation2 = Rotation([0, 0, 1], np.pi - alpha - S1_angle)
+    if S1:
+        neck_point = np.array([-neck_width, height * 0.5, 0])
+        d = (height * 0.5 / np.tan(alpha) + bottom_width - neck_width) / \
+            np.sin(alpha)
+        CM = np.array([-np.sin(alpha), -np.cos(alpha), 0]) * (d - radius)
+        MO = np.array([np.cos(alpha), -np.sin(alpha), 0]) * np.sqrt(radius ** 2
+            - (d - radius) ** 2)
+        S1_angle = np.pi / 2 + np.arcsin((d - radius) / radius)
+        S1_center1 = CM + MO + neck_point
+        S1_axis_rotation1 = Rotation([0, 0, 1], 2 * np.pi - S1_angle - alpha)
+        add_segment(S1_center1, S1_axis_rotation1, radius, S1_angle, n_el)
+        add_line([-bottom_width, 0, 0], mesh.nodes[-1].coordinates, 2 * n_el)
 
-    add_segment(S1_center2, S1_axis_rotation2, radius, S1_angle, n_el)
-    add_line(mesh.nodes[-1].coordinates, 2 * neck_point - [-bottom_width, 0, 0], 2 * n_el)
-    top_width = - mesh.nodes[-1].coordinates[0]
+        S1_center2 = 2 * neck_point - S1_center1
+        S1_axis_rotation2 = Rotation([0, 0, 1], np.pi - alpha - S1_angle)
 
-    if is_bottom_cell:
-        S3_radius = (width - bottom_width + height * 0.5 / np.tan(alpha)) * np.tan(alpha / 2)
-        S3_center = [-width, height * 0.5, 0] + S3_radius * np.array([0, 1, 0])
+        add_segment(S1_center2, S1_axis_rotation2, radius, S1_angle, n_el)
+        add_line(mesh.nodes[-1].coordinates, 2 * neck_point
+            - [-bottom_width, 0, 0], 2 * n_el)
+
+    if S3:
+        S3_radius = (width - bottom_width + height * 0.5 / np.tan(alpha)) *\
+            np.tan(alpha / 2)
+        S3_center = [-width, height * 0.5, 0] + S3_radius * \
+            np.array([0, 1, 0])
         S3_axis_rotation = Rotation()
         S3_angle = np.pi - alpha
         add_segment(S3_center, S3_axis_rotation,
             S3_radius, S3_angle, n_el)
-        add_line(mesh.nodes[-1].coordinates, [-bottom_width, height, 0], 2 * n_el)
+        add_line(mesh.nodes[-1].coordinates, [-bottom_width, height, 0],
+            2 * n_el)
 
-        # Create S3 curve with translation down
-        S3_radius = (width - bottom_width + height * 0.5 / np.tan(alpha)) * np.tan(alpha / 2)
-        S3_center = [-width, -height * 0.5, 0] + S3_radius * np.array([0, 1, 0])
-        S3_axis_rotation = Rotation()
-        S3_angle = np.pi - alpha
-        add_segment(S3_center, S3_axis_rotation,
-            S3_radius, S3_angle, n_el)
-        add_line(mesh.nodes[-1].coordinates, [-bottom_width, 0, 0], 2 * n_el)
+    if S2:
+        S2_radius = ((height * 0.5 / np.tan(alpha) + top_width)
+            * np.tan(alpha * 0.5))
+        S2_center = [0, height * 0.5, 0] - S2_radius * np.array([0, 1, 0])
+        S2_angle = np.pi - alpha
+        S2_axis_rotation = Rotation([0, 0, 1], np.pi)
+        add_segment(S2_center, S2_axis_rotation,
+            S2_radius, S2_angle, 2 * n_el)
+        add_line(mesh.nodes[-1].coordinates, [-top_width, 0, 0], 2 * n_el)
 
-    else:
-        if is_top_cell:
-            S2_radius = (height * 0.5 / np.tan(alpha) + top_width) * np.tan(alpha * 0.5)
-            S2_center = [0, height * 0.5, 0] - S2_radius * np.array([0, 1, 0])
-            S2_angle = np.pi - alpha
-            S2_axis_rotation = Rotation([0, 0, 1], np.pi)
-            add_segment(S2_center, S2_axis_rotation,
-                S2_radius, S2_angle, 2 * n_el)
-            add_line(mesh.nodes[-1].coordinates, [-top_width, 0, 0], 2 * n_el)
-
-            # Create S2 curve with translation up
-            S2_radius = (height * 0.5 / np.tan(alpha) + top_width) * np.tan(alpha * 0.5)
-            S2_center = [0, height * 1.5, 0] - S2_radius * np.array([0, 1, 0])
-            S2_angle = np.pi - alpha
-            S2_axis_rotation = Rotation([0, 0, 1], np.pi)
-            add_segment(S2_center, S2_axis_rotation,
-                S2_radius, S2_angle, 2 * n_el)
-            add_line(mesh.nodes[-1].coordinates, [-top_width, height, 0], 2 * n_el)
-        else:
-            # Create S2 curve
-            S2_radius = (height * 0.5 / np.tan(alpha) + top_width) * np.tan(alpha * 0.5)
-            S2_center = [0, height * 0.5, 0] - S2_radius * np.array([0, 1, 0])
-            S2_angle = np.pi - alpha
-            S2_axis_rotation = Rotation([0, 0, 1], np.pi)
-            add_segment(S2_center, S2_axis_rotation,
-                S2_radius, S2_angle, 2 * n_el)
-            add_line(mesh.nodes[-1].coordinates, [-top_width, 0, 0], 2 * n_el)
-
-            # Create S3 curve
-            S3_radius = (width - bottom_width + height * 0.5 / np.tan(alpha)) * np.tan(alpha / 2)
-            S3_center = [-width, height * 0.5, 0] + S3_radius * np.array([0, 1, 0])
-            S3_axis_rotation = Rotation()
-            S3_angle = np.pi - alpha
-            add_segment(S3_center, S3_axis_rotation,
-                S3_radius, S3_angle, n_el)
-            add_line(mesh.nodes[-1].coordinates, [-bottom_width, height, 0], 2 * n_el)
+    mesh.translate([width, -height / 2, 0])
+    return mesh
 
 
-def create_stent_cell_column(mesh, beam_object, material, row_number, width,
-            bottom_width, neck_width, height, alpha, radius, n_el):
-    """ Create a column of completed cells. A completed cell consists of one cell, that is created
-    with the create cell function and it's reflection.
+def create_stent_column(beam_object, material, width, height,
+        n_height, n_el=1):
+    """ Create a column of completed cells. A completed cell
+    consists of one cell, that is created with the create
+    cell function and it's reflection.
 
     Args
     ----
-    mesh: Mesh
-        Mesh that the stent will be added to.
     beam_object: Beam
         Object that will be used to create the beam elements.
     material: Material
         Material for the beam.
-    row_number: int
-        The cell number on the column.
     width: float
         Width of the total cell.
-    bottom_width: float
-        Width of the cell's bottom.
-    neck_width: float
-        Width of the cell's neck.
     height: float
         Height of the total cell.
-    alpha: radiant
-        The angle between
-    radius: float
-        The radius of the two neck curve in S1.
+    n_height: int
+        The number of cells in the column
     n_el: int
         Number of elements per beam line.
     ( these variables are described in a file )
+
+    Return
+    ----
+    mesh: Mesh
+        A mesh with this structure.
     """
-    def create_bottom_cell(bottom):
-        """ Create a completed cell in bottom."""
-        mesh_bottom = Mesh()
-        create_stent_cell(mesh_bottom, beam_object, material, width, bottom_width,
-            neck_width, height, alpha, radius, n_el, is_bottom_cell=True)
-        mesh_bottom.translate([0, -height, 0])
-        bottom.add_mesh(mesh_bottom)
 
-    def create_top_cell(top):
-        """ Create a completed cell on top."""
-        mesh_top = Mesh()
-        create_stent_cell(mesh_top, beam_object, material, width, bottom_width,
-                neck_width, height, alpha, radius, n_el, is_top_cell=True)
-        mesh_top.translate([0, (row_number - 2) * height, 0])
-        top.add_mesh(mesh_top)
+    mesh_column = Mesh()
+    for i in range(n_height):
+        S1 = True
+        S2 = True
+        S3 = True
+        if i == 0:
+            S1 = False
+            S2 = False
+        if i == 1:
+            S2 = False
+        if i == n_height - 1:
+            S1 = False
+            S3 = False
 
-    mesh1 = Mesh()
-    for _i in range(row_number - 2):
-        mesh1.translate([0, height, 0])
-        create_stent_cell(mesh1, beam_object, material, width, bottom_width,
-            neck_width, height, alpha, radius, n_el)
+        if i == n_height - 2:
+            S3 = False
+        unit_cell = create_stent_cell(beam_object, material, width,
+            height, S1=S1, S2=S2, S3=S3, n_el=n_el)
+        unit_cell.translate([0, i * height, 0])
+        mesh_column.add(unit_cell)
 
-    create_bottom_cell(mesh1)
-    create_top_cell(mesh1)
+    column_copy = mesh_column.copy()
+    column_copy.reflect(normal_vector=[1, 0, 0], origin=[width, 0, 0])
+    mesh_column.add(column_copy)
 
-    mesh2 = mesh1.copy()
-    mesh2.reflect([-1, 0, 0], [0, 0, 0])
-    mesh.add_mesh(mesh1)
-    mesh.add_mesh(mesh2)
+    return mesh_column
 
-def create_beam_mesh_stent(mesh, beam_object, material, row_number, column_number,
-                        width, bottom_width, neck_width, height, alpha, radius, n_el=1, add_sets=False):
+
+def create_stent_flat(beam_object, material, width_flat, height_flat,
+        n_height, n_column, n_el=1):
     """
-    Create a stent structure around cylinder, The cylinder axis will be the z-axis.
+    Create a flat stent structure on the x-y plane.
+
+    Args
+    ----
+    beam_object: Beam
+        Object that will be used to create the beam elements.
+    material: Material
+        Material for the beam.
+    width_flat: float
+        The width of the flat structure.
+    height_flat: float
+        The height of the flat structure.
+    n_height: int
+        The number of cells in y direction.
+    n_column: int
+        The number of columns in x direction.
+    n_el: int
+        Number of elements per beam line.
+
+    Return
+    ----
+    mesh: Mesh
+        A mesh with this structure
+    """
+    mesh_flat = Mesh()
+    width = width_flat / n_column / 2
+    height = height_flat / n_height
+    column_mesh = create_stent_column(beam_object, material,
+        width, height, n_height)
+    for i in range(n_column):
+        column_copy = column_mesh.copy()
+        column_copy.translate([2 * width * i, 0, 0])
+        mesh_flat.add(column_copy)
+
+    for i in range(n_column // 2):
+        for j in range(n_height - 1):
+            create_beam_mesh_line(mesh_flat, beam_object, material,
+                [4 * i * width, j * height, 0],
+                [4 * i * width, (j + 1) * height, 0],
+                n_el=2 * n_el)
+            create_beam_mesh_line(mesh_flat, beam_object, material,
+                [(4 * i + 2) * width, 0, 0],
+                [(4 * i + 2) * width, height, 0], n_el=2 * n_el)
+
+    return mesh_flat
+
+
+def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
+        n_axis, n_circumference, n_el=1, add_sets=False):
+    """
+    Create a stent structure around cylinder, The cylinder axis will be
+    the z-axis.
 
     Args
     ----
@@ -210,22 +238,14 @@ def create_beam_mesh_stent(mesh, beam_object, material, row_number, column_numbe
         Object that will be used to create the beam elements.
     material: Material
         Material for the beam.
-    row_number: int
-        The cell number on a column.
-    row_number: int
-        The cell number on a row.
-    width: float
-        Width of the total cell.
-    bottom_width: float
-        Width of the cell's bottom.
-    neck_width: float
-        Width of the cell's neck.
-    height: float
-        Height of the total cell.
-    alpha: radiant
-        The angle between
-    radius: float
-        The radius of the two neck curve in S1.
+    length: float
+        The length of this stent.
+    diameter: float
+        The diameter of the stent's cross section.
+    n_axis: int
+        Number of cells in axial-direction.
+    n_circumference: int
+        Number of cells around the diameter.
     n_el: int
         Number of elements per beam line.
     ( these variables are described in a file )
@@ -238,27 +258,25 @@ def create_beam_mesh_stent(mesh, beam_object, material, row_number, column_numbe
     ----
     return_set: GeometryName
         Set with nodes on the top, bottom boundaries. Those
-        sets only contains end nodes of lines, not the middle ones. The set
-        'all' contains all nodes.
+        sets only contains end nodes of lines, not the middle ones.
+        The set 'all' contains all nodes.
     """
-    i_node_start = len(mesh.nodes)
-    for i in range(column_number):
-        create_stent_cell_column(mesh, beam_object, material, row_number, width,
-                        bottom_width, neck_width, height, alpha, radius, n_el)
-        mesh.translate([width * 2, 0, 0])
-    for i in range(column_number // 2):
-        for j in range(row_number + 1):
-            create_beam_mesh_line(mesh, beam_object, material,
-                        [4 * (i + 1) * width - width, (j - 1.5) * height, 0],
-                        [4 * (i + 1) * width - width, (j - 0.5) * height, 0], n_el=2 * n_el)
-        create_beam_mesh_line(mesh, beam_object, material, [(4 * i + 1) * width, -1.5 * height, 0],
-                    [(4 * i + 1) * width, -0.5 * height, 0], n_el=2 * n_el)
-    mesh.rotate(Rotation([1, 0, 0], np.pi / 2))
-    mesh.rotate(Rotation([0, 0, 1], np.pi / 2))
-    mesh.translate([column_number * width / np.pi, 0, 0])
-    mesh.translate([0, width, 0])
-    mesh.wrap_around_cylinder()
 
+    # Set the Parameter for other functions
+    height_flat = length
+    width_flat = np.pi * diameter
+    n_height = n_axis
+    n_column = n_circumference
+
+    i_node_start = len(mesh.nodes)
+
+    mesh_stent = create_stent_flat(beam_object, material, width_flat,
+    height_flat, n_height, n_column, n_el)
+    mesh_stent.rotate(Rotation([1, 0, 0], np.pi / 2))
+    mesh_stent.rotate(Rotation([0, 0, 1], np.pi / 2))
+    mesh_stent.translate([diameter / 2, 0, 0])
+    mesh_stent.wrap_around_cylinder()
+    mesh.add_mesh(mesh_stent)
 
     # List of nodes from the stent that are candidates for connections.
     stent_nodes_all = [
@@ -269,7 +287,6 @@ def create_beam_mesh_stent(mesh, beam_object, material, row_number, column_numbe
         ]
 
     # Add connections for the nodes with same positions.
-
     mesh.couple_nodes(nodes=stent_nodes)
 
     # Get min and max nodes of the honeycomb.
@@ -284,5 +301,3 @@ def create_beam_mesh_stent(mesh, beam_object, material, row_number, column_numbe
     if add_sets:
         mesh.add(return_set)
     return return_set
-
-

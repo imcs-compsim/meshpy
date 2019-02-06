@@ -23,10 +23,6 @@ if __name__ == '__main__':
 
     # Load the test cases.
     testsuite = unittest.TestLoader().discover('.', pattern='testing_*.py')
-#     testsuite = unittest.TestLoader().discover('.',
-#         pattern='testing_baci.py')
-#     testsuite = unittest.TestLoader().discover('.',
-#         pattern='testing_meshpy.py')
-#     testsuite = unittest.TestLoader().discover('.',
-#         pattern='testing_rotations.py')
+
+    # Perform the tests
     unittest.TextTestRunner(verbosity=1).run(testsuite)
