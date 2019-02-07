@@ -687,7 +687,7 @@ class Mesh(object):
 
         return get_close_nodes(node_list, **kwargs)
 
-    def check_overlapping_elements(self):
+    def check_overlapping_elements(self, raise_error=True):
         """
         Check if there are overlapping elements in the mesh. This is done by
         checking if all middle nodes of beam elements have unique coordinates
@@ -708,11 +708,20 @@ class Mesh(object):
             coordinates[i, :] = node.coordinates
 
         # Check if there are double entries in the coordinates.
-        _tmp, partner = get_close_nodes(coordinates, return_nodes=False)
+        has_partner, partner = get_close_nodes(coordinates, return_nodes=False)
         if partner > 0:
-            raise ValueError('There are multiple middle nodes with the same '
-                + 'coordinates. Per default this raises an error! This check '
-                + 'can be turned of with mpy.check_overlapping_elements=False')
+            if raise_error:
+                raise ValueError('There are multiple middle nodes with the '
+                    + 'same coordinates. Per default this raises an error! '
+                    + 'This check can be turned of with '
+                    + 'mpy.check_overlapping_elements=False')
+            else:
+                warnings.warn('There are multiple middle nodes with the '
+                        + 'same coordinates. When writing vtk, the elemetnts '
+                        + 'will be highlighted via cell data!')
+                for i in range(len(middle_nodes)):
+                    if not has_partner[i] == -1:
+                        middle_nodes[i].element_partner_index = has_partner[i]
 
     def preview_python(self):
         """Display the elements in this mesh in matplotlib."""
