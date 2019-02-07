@@ -1177,7 +1177,7 @@ class TestMeshpy(unittest.TestCase):
             self.assertTrue(True, '')
         else:
             # Compare the full strings to see the difference.
-            self.compare_strings('test_meshpy_vtk_writer', string_ref,
+            compare_strings(self, 'test_meshpy_vtk_writer', string_ref,
                 string_vtk)
 
     def test_vtk_writer_beam(self):
@@ -1208,7 +1208,7 @@ class TestMeshpy(unittest.TestCase):
             self.assertTrue(True, '')
         else:
             # Compare the full strings to see the difference.
-            self.compare_strings('test_vtk_writer_beam', string_ref,
+            compare_strings(self, 'test_vtk_writer_beam', string_ref,
                 string_vtk)
 
     def test_vtk_writer_solid(self):
@@ -1239,7 +1239,7 @@ class TestMeshpy(unittest.TestCase):
             self.assertTrue(True, '')
         else:
             # Compare the full strings to see the difference.
-            self.compare_strings('test_meshpy_vtk_solid', string_ref,
+            compare_strings(self, 'test_meshpy_vtk_solid', string_ref,
                 string_vtk)
 
     def test_vtk_writer_solid_elements(self):
@@ -1274,7 +1274,7 @@ class TestMeshpy(unittest.TestCase):
             self.assertTrue(True, '')
         else:
             # Compare the full strings to see the difference.
-            self.compare_strings('test_meshpy_vtk_elements_solid', string_ref,
+            compare_strings(self, 'test_meshpy_vtk_elements_solid', string_ref,
                 string_vtk)
 
     def test_deep_copy(self):
@@ -1409,6 +1409,29 @@ class TestMeshpy(unittest.TestCase):
         # The elements in the created mesh are overlapping, check that an error
         # is thrown.
         self.assertRaises(ValueError, mesh.check_overlapping_elements)
+
+        # Now do not raise the error but write the output file with the cell
+        # data for the double elements.
+        warnings.filterwarnings("ignore")
+        mesh.check_overlapping_elements(raise_error=False)
+
+        # Write VTK output."""
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_vtk_element_overlap_reference.vtu')
+        vtk_file = os.path.join(testing_temp,
+            'test_meshpy_vtk_element_overlap_beam.vtu')
+        mesh.write_vtk(output_name='test_meshpy_vtk_element_overlap',
+            output_directory=testing_temp, ascii=True)
+
+        # Compare the xml files.
+        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file,
+            tol_float=mpy.eps_pos)
+        if is_equal:
+            self.assertTrue(True, '')
+        else:
+            # Compare the full strings to see the difference.
+            compare_strings(self, 'test_check_double_elements', string_ref,
+                string_vtk)
 
 
 if __name__ == '__main__':
