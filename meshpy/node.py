@@ -37,6 +37,7 @@ class Node(BaseMeshItem):
         # Lists with the objects that this node is linked to.
         self.element_link = []
         self.node_sets_link = []
+        self.element_partner_index = None
         self.coupling_link = None
         self.mesh = None
 

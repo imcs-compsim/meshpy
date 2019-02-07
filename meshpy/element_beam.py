@@ -191,6 +191,7 @@ class Beam(Element):
 
         # Array with nodal coordinates.
         coordinates = np.zeros([len(self.nodes), 3])
+        element_partner_index = None
         for i, node in enumerate(self.nodes):
             coordinates[i, :] = node.coordinates
             if node.is_middle_node:
@@ -206,6 +207,14 @@ class Beam(Element):
             point_data['base_vector_1'].append(R[:, 0])
             point_data['base_vector_2'].append(R[:, 1])
             point_data['base_vector_3'].append(R[:, 2])
+
+            # Check if the element has a double middle node.
+            if node.element_partner_index is not None:
+                element_partner_index = node.element_partner_index + 1
+
+        # Check if a cell attribute for the partner should be added.
+        if element_partner_index is not None:
+            cell_data['partner_index'] = element_partner_index
 
         # Add the node sets connected to this element.
         add_point_data_node_sets(point_data, self.nodes)
