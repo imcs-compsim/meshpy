@@ -524,6 +524,10 @@ class InputFile(Mesh):
             file. This is only in affect when dat_header==True.
         """
 
+        # Perform some checks on the mesh.
+        if mpy.check_overlapping_elements:
+            self.check_overlapping_elements()
+
         # List that will contain all input lines.
         lines = []
 

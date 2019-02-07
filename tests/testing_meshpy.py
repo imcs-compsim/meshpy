@@ -993,6 +993,10 @@ class TestMeshpy(unittest.TestCase):
     def test_replace_nodes(self):
         """Test case for coupling of nodes, and reusing the identical nodes."""
 
+        # Set default values for global parameters.
+        mpy.set_default_values()
+        mpy.check_overlapping_elements = False
+
         mat = MaterialReissner(radius=0.1, youngs_modulus=1)
         rot = Rotation([1, 2, 43], 213123)
 
@@ -1379,6 +1383,32 @@ class TestMeshpy(unittest.TestCase):
         # Create the input file. This will cause an error, as there are two
         # couplings for one node.
         self.assertRaises(ValueError, mesh.write_input_file, '/tmp/temp.dat')
+
+    def test_check_double_elements(self):
+        """
+        Check if there are overlapping elements in a mesh.
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Create mesh object.
+        mesh = InputFile()
+        mat = MaterialReissner()
+        mesh.add(mat)
+
+        # Add two beams to create an elbow structure. The beams each have a
+        # node at the intersection.
+        create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0], [2, 0, 0],
+            n_el=2)
+        create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0], [1, 0, 0])
+
+        # Rotate the mesh with an arbitrary rotation.
+        mesh.rotate(Rotation([1, 2, 3.24313], 2.2323423), [1, 3, -2.23232323])
+
+        # The elements in the created mesh are overlapping, check that an error
+        # is thrown.
+        self.assertRaises(ValueError, mesh.check_overlapping_elements)
 
 
 if __name__ == '__main__':
