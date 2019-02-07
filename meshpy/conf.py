@@ -115,5 +115,7 @@ class MeshPy(object):
         # Mesh.get_unique_geometry_sets() method.
         self.vtk_node_set_format = '{:05}'
 
+        # Check for overlapping elements when creating a dat file.
+        self.check_overlapping_elements = True
 
 mpy = MeshPy()

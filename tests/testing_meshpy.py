@@ -993,6 +993,10 @@ class TestMeshpy(unittest.TestCase):
     def test_replace_nodes(self):
         """Test case for coupling of nodes, and reusing the identical nodes."""
 
+        # Set default values for global parameters.
+        mpy.set_default_values()
+        mpy.check_overlapping_elements = False
+
         mat = MaterialReissner(radius=0.1, youngs_modulus=1)
         rot = Rotation([1, 2, 43], 213123)
 
