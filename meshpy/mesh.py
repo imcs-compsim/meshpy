@@ -161,13 +161,19 @@ class Mesh(object):
             raise ValueError('The node that should be replaced is not in the '
                 + 'mesh')
 
-    def get_unique_geometry_sets(self, link_nodes=False):
+    def get_unique_geometry_sets(self, coupling_sets=True, link_nodes=False):
         """
-        Return a geometry set container that contains all geometry sets
-        explicitly added to the mesh, as well as all sets from boundary
-        conditions and couplings.
-        After all the sets are gathered, each sets tells its nodes that they
-        are part of the set (mainly for vtk output).
+        Return a geometry set container that contains geometry sets explicitly
+        added to the mesh, as well as sets for boundary conditions.
+
+        Args
+        ----
+        coupling_sets: bool
+            If this is true, also sets for couplings will be added. They
+            inserte after the mesh sets.
+        link_nodes: bool
+            If a link to the geomerty sets should be added to each connected
+            node (this option is mainly for vtk output).
         """
 
         if link_nodes:
@@ -178,19 +184,24 @@ class Mesh(object):
         # Make a copy of the sets in this mesh.
         mesh_sets = self.geometry_sets.copy()
 
-        # Add sets from boundary conditions and couplings.
+        # Add sets from boundary conditions.
         for (_bc_key, geom_key), bc_list in self.boundary_conditions.items():
             for bc in bc_list:
                 if not bc.is_dat:
-                    mesh_sets[geom_key].append(bc.geometry_set)
-        for coupling in self.couplings:
-            mesh_sets[coupling.node_set.geometry_type].append(
-                coupling.node_set)
+                    # Only add set if it is not already in the container. For
+                    # example if multiple Neumann boundary conditions are
+                    # applied on the same node set.
+                    if bc.geometry_set not in mesh_sets[geom_key]:
+                        mesh_sets[geom_key].append(bc.geometry_set)
+
+        if coupling_sets:
+            # Add sets from couplings. There should not be any double sets in
+            # this case.
+            for coupling in self.couplings:
+                mesh_sets[coupling.node_set.geometry_type].append(
+                    coupling.node_set)
 
         for key in mesh_sets.keys():
-            # Remove double node sets in the container.
-            mesh_sets[key] = list(OrderedDict.fromkeys(mesh_sets[key]))
-
             for i, geometry_set in enumerate(mesh_sets[key]):
                 # Add global indices to the geometry set.
                 geometry_set.n_global = i + 1
@@ -687,7 +698,8 @@ class Mesh(object):
 
         return get_close_nodes(node_list, **kwargs)
 
-    def check_overlapping_elements(self, raise_error=True):
+    def check_overlapping_elements(self, raise_error=True,
+            set_middle_node_partners=False):
         """
         Check if there are overlapping elements in the mesh. This is done by
         checking if all middle nodes of beam elements have unique coordinates
@@ -717,11 +729,12 @@ class Mesh(object):
                     + 'mpy.check_overlapping_elements=False')
             else:
                 warnings.warn('There are multiple middle nodes with the '
-                        + 'same coordinates. When writing vtk, the elemetnts '
-                        + 'will be highlighted via cell data!')
-                for i in range(len(middle_nodes)):
-                    if not has_partner[i] == -1:
-                        middle_nodes[i].element_partner_index = has_partner[i]
+                        + 'same coordinates!')
+
+            # Add the partner index to the middle nodes.
+            for i in range(len(middle_nodes)):
+                if not has_partner[i] == -1:
+                    middle_nodes[i].element_partner_index = has_partner[i]
 
     def preview_python(self):
         """Display the elements in this mesh in matplotlib."""
@@ -746,15 +759,36 @@ class Mesh(object):
         ax.set_zlabel('Z')
         plt.show()
 
-    def write_vtk(self, output_name='meshpy', output_directory='', **kwargs):
-        """Write the contents of this mesh to a VTK file."""
+    def write_vtk(self, output_name='meshpy', output_directory='',
+            overlapping_elements=True, coupling_sets=False, **kwargs):
+        """
+        Write the contents of this mesh to VTK files.
+
+        Args
+        ----
+        output_name: str
+            Base name of the output file. There will be a {}_beam.vtu and
+            {}_solid.vtu file.
+        output_directory: path
+            Directory where the output files will be written.
+        overlapping_elements: bool
+            I elements should be checked for overlapping. If they overlap, the
+            output will mark them.
+        coupling_sets: bool
+            If coupling sets should also be displayed.
+        """
 
         # Object to store VKT data and write it to file.
         vtkwriter_beam = VTKWriter()
         vtkwriter_solid = VTKWriter()
 
         # Get the set numbers of the mesh
-        self.get_unique_geometry_sets(link_nodes=True)
+        self.get_unique_geometry_sets(coupling_sets=coupling_sets,
+            link_nodes=True)
+
+        if overlapping_elements:
+            # Check for overlapping elements.
+            self.check_overlapping_elements(raise_error=False)
 
         # Get representation of elements.
         for element in self.elements:

@@ -1198,7 +1198,7 @@ class TestMeshpy(unittest.TestCase):
         ref_file = os.path.join(testing_input,
             'test_meshpy_vtk_beam_reference.vtu')
         vtk_file = os.path.join(testing_temp, 'test_meshpy_vtk_beam.vtu')
-        mesh.write_vtk(output_name='test_meshpy_vtk',
+        mesh.write_vtk(output_name='test_meshpy_vtk', coupling_sets=True,
             output_directory=testing_temp, ascii=True)
 
         # Compare the xml files.
@@ -1359,7 +1359,7 @@ class TestMeshpy(unittest.TestCase):
         self.assertRaises(ValueError, mesh.add, coupling)
         self.assertRaises(ValueError, mesh.add, geometry_set)
 
-    def test_check_doulble_couplings(self):
+    def test_check_double_couplings(self):
         """
         The current implementation can not handle more than one coupling on a
         node correctly, therefore we need to throw an error.
@@ -1410,18 +1410,15 @@ class TestMeshpy(unittest.TestCase):
         # is thrown.
         self.assertRaises(ValueError, mesh.check_overlapping_elements)
 
-        # Now do not raise the error but write the output file with the cell
-        # data for the double elements.
+        # Check if the overlapping elements are written to the vtk output.
         warnings.filterwarnings("ignore")
-        mesh.check_overlapping_elements(raise_error=False)
-
-        # Write VTK output."""
         ref_file = os.path.join(testing_input,
             'test_meshpy_vtk_element_overlap_reference.vtu')
         vtk_file = os.path.join(testing_temp,
             'test_meshpy_vtk_element_overlap_beam.vtu')
         mesh.write_vtk(output_name='test_meshpy_vtk_element_overlap',
-            output_directory=testing_temp, ascii=True)
+            output_directory=testing_temp, ascii=True,
+            overlapping_elements=True)
 
         # Compare the xml files.
         is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file,
