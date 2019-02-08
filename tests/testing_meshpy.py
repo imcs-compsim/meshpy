@@ -1194,7 +1194,7 @@ class TestMeshpy(unittest.TestCase):
         create_beam_mesh_honeycomb(mesh, Beam3rHerm2Lin3, mat, 2., 2, 3,
             n_el=2, add_sets=True)
 
-        # Write VTK output."""
+        # Write VTK output, with coupling sets."""
         ref_file = os.path.join(testing_input,
             'test_meshpy_vtk_beam_reference.vtu')
         vtk_file = os.path.join(testing_temp, 'test_meshpy_vtk_beam.vtu')
@@ -1210,6 +1210,24 @@ class TestMeshpy(unittest.TestCase):
             # Compare the full strings to see the difference.
             compare_strings(self, 'test_vtk_writer_beam', string_ref,
                 string_vtk)
+
+        # Write VTK output, without coupling sets."""
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_vtk_no_coupling_beam_reference.vtu')
+        vtk_file = os.path.join(testing_temp,
+            'test_meshpy_vtk_no_coupling_beam.vtu')
+        mesh.write_vtk(output_name='test_meshpy_vtk_no_coupling',
+            coupling_sets=False, output_directory=testing_temp, ascii=True)
+
+        # Compare the xml files.
+        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file,
+            tol_float=mpy.eps_pos)
+        if is_equal:
+            self.assertTrue(True, '')
+        else:
+            # Compare the full strings to see the difference.
+            compare_strings(self, 'test_meshpy_vtk_no_coupling_beam',
+                string_ref, string_vtk)
 
     def test_vtk_writer_solid(self):
         """Import a solid mesh and check the VTK output."""
