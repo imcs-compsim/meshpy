@@ -58,3 +58,18 @@ class GeometrySetContainer(OrderedDict):
 
         for geometry_key in mpy.geo:
             self[geometry_key] = []
+
+    def copy(self):
+        """
+        When creating a copy of this object, all lists in this object will be
+        copied also.
+        """
+
+        # Create a new geometry set container.
+        copy = GeometrySetContainer()
+
+        # Add a copy of every list from this container to the new one.
+        for geometry_key in mpy.geo:
+            copy[geometry_key] = self[geometry_key].copy()
+
+        return copy
