@@ -119,7 +119,7 @@ def create_stent_cell(beam_object, material, width, height,
 
 
 def create_stent_column(beam_object, material, width, height,
-        n_height, n_el=1):
+        n_height, n_el=1, **kwargs):
     """ Create a column of completed cells. A completed cell
     consists of one cell, that is created with the create
     cell function and it's reflection.
@@ -163,7 +163,7 @@ def create_stent_column(beam_object, material, width, height,
         if i == n_height - 2:
             S3 = False
         unit_cell = create_stent_cell(beam_object, material, width,
-            height, S1=S1, S2=S2, S3=S3, n_el=n_el)
+            height, S1=S1, S2=S2, S3=S3, n_el=n_el, **kwargs)
         unit_cell.translate([0, i * height, 0])
         mesh_column.add(unit_cell)
 
@@ -175,7 +175,7 @@ def create_stent_column(beam_object, material, width, height,
 
 
 def create_stent_flat(beam_object, material, width_flat, height_flat,
-        n_height, n_column, n_el=1):
+        n_height, n_column, n_el=1, **kwargs):
     """
     Create a flat stent structure on the x-y plane.
 
@@ -205,7 +205,7 @@ def create_stent_flat(beam_object, material, width_flat, height_flat,
     width = width_flat / n_column / 2
     height = height_flat / n_height
     column_mesh = create_stent_column(beam_object, material,
-        width, height, n_height)
+        width, height, n_height, **kwargs)
     for i in range(n_column):
         column_copy = column_mesh.copy()
         column_copy.translate([2 * width * i, 0, 0])
@@ -217,15 +217,15 @@ def create_stent_flat(beam_object, material, width_flat, height_flat,
                 [4 * i * width, j * height, 0],
                 [4 * i * width, (j + 1) * height, 0],
                 n_el=2 * n_el)
-            create_beam_mesh_line(mesh_flat, beam_object, material,
-                [(4 * i + 2) * width, 0, 0],
-                [(4 * i + 2) * width, height, 0], n_el=2 * n_el)
+        create_beam_mesh_line(mesh_flat, beam_object, material,
+            [(4 * i + 2) * width, 0, 0],
+            [(4 * i + 2) * width, height, 0], n_el=2 * n_el)
 
     return mesh_flat
 
 
 def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
-        n_axis, n_circumference, n_el=1, add_sets=False):
+        n_axis, n_circumference, n_el=1, add_sets=False, **kwargs):
     """
     Create a stent structure around cylinder, The cylinder axis will be
     the z-axis.
@@ -262,6 +262,10 @@ def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
         The set 'all' contains all nodes.
     """
 
+    # Only allow even number of columns.
+    if n_circumference % 2 == 1:
+        raise ValueError('has to be even even number!')
+
     # Set the Parameter for other functions
     height_flat = length
     width_flat = np.pi * diameter
@@ -271,7 +275,7 @@ def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
     i_node_start = len(mesh.nodes)
 
     mesh_stent = create_stent_flat(beam_object, material, width_flat,
-    height_flat, n_height, n_column, n_el)
+        height_flat, n_height, n_column, n_el, **kwargs)
     mesh_stent.rotate(Rotation([1, 0, 0], np.pi / 2))
     mesh_stent.rotate(Rotation([0, 0, 1], np.pi / 2))
     mesh_stent.translate([diameter / 2, 0, 0])
