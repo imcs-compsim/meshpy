@@ -13,8 +13,7 @@ from . import create_beam_mesh_arc_segment, create_beam_mesh_line
 
 def create_stent_cell(beam_object, material, width, height,
         fac_bottom=0.6, fac_neck=0.55, fac_radius=0.36,
-        alpha=0.46 * np.pi, S1=True, S2=True, S3=True, n_el=1,
-        add_sets=False):
+        alpha=0.46 * np.pi, S1=True, S2=True, S3=True, n_el=1):
     """
     Create a cell of the stent. This cell is on the x-y plane.
 
@@ -174,7 +173,7 @@ def create_stent_column(beam_object, material, width, height,
     return mesh_column
 
 
-def create_stent_flat(beam_object, material, width_flat, height_flat,
+def create_beam_mesh_stent_flat(beam_object, material, width_flat, height_flat,
         n_height, n_column, n_el=1, **kwargs):
     """
     Create a flat stent structure on the x-y plane.
@@ -201,11 +200,12 @@ def create_stent_flat(beam_object, material, width_flat, height_flat,
     mesh: Mesh
         A mesh with this structure
     """
+
     mesh_flat = Mesh()
     width = width_flat / n_column / 2
     height = height_flat / n_height
     column_mesh = create_stent_column(beam_object, material,
-        width, height, n_height, **kwargs)
+        width, height, n_height, n_el=n_el, **kwargs)
     for i in range(n_column):
         column_copy = column_mesh.copy()
         column_copy.translate([2 * width * i, 0, 0])
@@ -220,12 +220,11 @@ def create_stent_flat(beam_object, material, width_flat, height_flat,
         create_beam_mesh_line(mesh_flat, beam_object, material,
             [(4 * i + 2) * width, 0, 0],
             [(4 * i + 2) * width, height, 0], n_el=2 * n_el)
-
     return mesh_flat
 
 
 def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
-        n_axis, n_circumference, n_el=1, add_sets=False, **kwargs):
+        n_axis, n_circumference, add_sets=False, **kwargs):
     """
     Create a stent structure around cylinder, The cylinder axis will be
     the z-axis.
@@ -246,8 +245,6 @@ def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
         Number of cells in axial-direction.
     n_circumference: int
         Number of cells around the diameter.
-    n_el: int
-        Number of elements per beam line.
     ( these variables are described in a file )
     add_sets: bool
     If this is true the sets are added to the mesh and then displayed
@@ -274,8 +271,8 @@ def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
 
     i_node_start = len(mesh.nodes)
 
-    mesh_stent = create_stent_flat(beam_object, material, width_flat,
-        height_flat, n_height, n_column, n_el, **kwargs)
+    mesh_stent = create_beam_mesh_stent_flat(beam_object, material, width_flat,
+        height_flat, n_height, n_column, **kwargs)
     mesh_stent.rotate(Rotation([1, 0, 0], np.pi / 2))
     mesh_stent.rotate(Rotation([0, 0, 1], np.pi / 2))
     mesh_stent.translate([diameter / 2, 0, 0])

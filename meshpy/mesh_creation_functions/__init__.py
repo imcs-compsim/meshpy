@@ -15,6 +15,9 @@ from .beam_curve import create_beam_mesh_curve
 from .beam_honeycomb import create_beam_mesh_honeycomb_flat, \
     create_beam_mesh_honeycomb
 
+# Honeycomb.
+from .beam_stent import create_beam_mesh_stent, create_beam_mesh_stent_flat
+
 # Define the items that will be exported by default.
 __all__ = [
     # Base geometry.
@@ -24,5 +27,7 @@ __all__ = [
     'create_beam_mesh_curve',
     # Honeycomb.
     'create_beam_mesh_honeycomb_flat',
-    'create_beam_mesh_honeycomb'
+    'create_beam_mesh_honeycomb',
+    # Stent
+    'create_beam_mesh_stent'
     ]
