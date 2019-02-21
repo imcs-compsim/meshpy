@@ -863,7 +863,8 @@ class TestMeshpy(unittest.TestCase):
                 nodes=set_1['start'])
             geom_set['end'] = GeometrySet(mpy.geo.point, nodes=set_2['end'])
             geom_set['line'] = GeometrySet(mpy.geo.line,
-                nodes=[set_1['line'], set_2['line']], filter_double_nodes=True)
+                nodes=[set_1['line'], set_2['line']],
+                fail_on_double_nodes=False)
             input_file.add(geom_set)
 
             return input_file
