@@ -105,3 +105,23 @@ class MaterialKirchhoff(MaterialBeam):
             self.mom2,
             self.mom3
             )
+
+
+class MaterialEulerBernoulli(MaterialBeam):
+    """Holds material definition for Euler Bernoulli beams."""
+
+    def __init__(self, **kwargs):
+        MaterialBeam.__init__(self,
+            material_string='MAT_BeamKirchhoffTorsionFreeElastHyper', **kwargs)
+
+    def _get_dat(self):
+        """Return the line for this material."""
+        string = 'MAT {} {} YOUNG {} DENS {} CROSSAREA {} MOMIN {}'
+        return string.format(
+            self.n_global,
+            self.material_string,
+            self.youngs_modulus,
+            self.density,
+            self.area,
+            self.mom2
+            )
