@@ -20,6 +20,7 @@ class BoundaryCondition(IntEnum):
     """Enum for boundary condition types."""
     dirichlet = 1
     neumann = 2
+    moment_euler_bernoulli = 3
 
 
 class BeamType(IntEnum):
