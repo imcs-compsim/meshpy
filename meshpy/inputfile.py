@@ -205,7 +205,9 @@ class InputFile(Mesh):
         (mpy.bc.neumann,   mpy.geo.point  ): 'DESIGN POINT NEUMANN CONDITIONS',
         (mpy.bc.neumann,   mpy.geo.line   ): 'DESIGN LINE NEUMANN CONDITIONS',
         (mpy.bc.neumann,   mpy.geo.surface): 'DESIGN SURF NEUMANN CONDITIONS',
-        (mpy.bc.neumann,   mpy.geo.volume ): 'DESIGN VOL NEUMANN CONDITIONS'
+        (mpy.bc.neumann,   mpy.geo.volume ): 'DESIGN VOL NEUMANN CONDITIONS',
+        (mpy.bc.moment_euler_bernoulli, mpy.geo.point):
+            'DESIGN POINT MOMENT EB CONDITIONS'
     }
     geometry_counter = {
         mpy.geo.point:   'DPOINT',

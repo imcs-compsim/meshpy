@@ -10,7 +10,7 @@ import warnings
 
 # Meshpy modules.
 from . import mpy, Element, Node, add_point_data_node_sets, MaterialReissner, \
-    MaterialKirchhoff, BaseMeshItem
+    MaterialKirchhoff, MaterialEulerBernoulli, BaseMeshItem
 
 
 class Beam(Element):
@@ -322,3 +322,45 @@ def Beam3k(**kwargs_class):
         return Beam3kClass(**kwargs_class, **kwargs)
 
     return create_class
+
+
+class Beam3eb(Beam):
+    """Represents a Euler Bernoulli beam element."""
+
+    nodes_create = [
+        [-1, True, False],
+        [1, True, False]
+        ]
+    beam_type = mpy.beam.bernoulli_euler
+    valid_material = [MaterialEulerBernoulli, BaseMeshItem]
+
+    def _get_dat(self):
+        """ Return the line for the input file. """
+
+        # The two rotations must be the same and the x1 vector must point from
+        # the start point to the end point.
+        if (not self.nodes[0].rotation == self.nodes[1].rotation):
+            raise ValueError('The two nodal rotations in Euler Bernoulli ' +
+                'beams must be the same!')
+        direction = self.nodes[1].coordinates - self.nodes[0].coordinates
+        t1 = self.nodes[0].rotation * [1, 0, 0]
+        if (np.linalg.norm(direction / np.linalg.norm(direction) - t1)
+                >= mpy.eps_pos):
+            raise ValueError('The rotations do not match the direction of '
+                + 'the Euler Bernoulli beam!')
+
+        string_nodes = ''
+        string_triads = ''
+        for i in [0, 1]:
+            node = self.nodes[i]
+            string_nodes += '{} '.format(node.n_global)
+            string_triads += ' ' + node.rotation.get_dat()
+
+        # Check the material.
+        self._check_material()
+
+        return '{} BEAM3EB LIN2 {}MAT {}'.format(
+            self.n_global,
+            string_nodes,
+            self.material.n_global
+            )

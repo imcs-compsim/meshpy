@@ -16,7 +16,8 @@ import vtk
 from meshpy import (mpy, Rotation, InputFile, MaterialReissner, MaterialBeam,
     BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh,
     get_close_nodes, GeometryName, GeometrySet, MaterialKirchhoff, Beam3k,
-    flatten, Beam, Coupling, Beam3rHerm2Lin3, Function)
+    flatten, Beam, Coupling, Beam3rHerm2Lin3, Function, MaterialEulerBernoulli,
+    Beam3eb, InputSection)
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import \
@@ -756,6 +757,75 @@ class TestMeshpy(unittest.TestCase):
             'test_kirchhoff_beam',
             ref_file,
             input_file.get_string(header=False))
+
+    def test_euler_bernoulli_beam(self):
+        """
+        Recreate the baci test case beam3eb_static_endmoment_quartercircle.dat
+        This tests the implementation for Euler Bernoulli beams.
+        """
+
+        # Create the input file and add function and material.
+        input_file = InputFile()
+        input_file.set_default_header_static()
+        fun = Function('COMPONENT 0 FUNCTION t')
+        input_file.add(fun)
+        mat = MaterialEulerBernoulli(youngs_modulus=1., density=1.3e9)
+
+        # Set the parameters that are also set in the test file.
+        mat.area = 1
+        mat.mom2 = 1e-4
+
+        # Create the beam.
+        beam_set = create_beam_mesh_line(input_file, Beam3eb, mat,
+            [-1, 0, 0], [1, 0, 0], n_el=16)
+
+        # Add boundary conditions.
+        input_file.add(
+            BoundaryCondition(
+                beam_set['start'],
+                'NUMDOF 6 ONOFF 1 1 1 0 1 1 VAL 0.0 0.0 0.0 0.0 0.0 0.0 '
+                + 'FUNCT 0 0 0 0 0 0',
+                bc_type=mpy.bc.dirichlet
+                )
+            )
+        input_file.add(
+            BoundaryCondition(
+                beam_set['end'],
+                'NUMDOF 6 ONOFF 0 0 0 0 0 1 VAL 0.0 0.0 0.0 0.0 0.0 '
+                + '7.8539816339744e-05 FUNCT 0 0 0 0 0 {}',
+                bc_type=mpy.bc.moment_euler_bernoulli, format_replacement=[fun]
+                )
+            )
+
+        # Add input sections for Euler Bernoulli beam.
+        input_file.add(InputSection('STRUCTURAL DYNAMIC','LOADLIN Yes'))
+        input_file.add(InputSection(
+            'IO/RUNTIME VTK OUTPUT/BEAMS',
+            'TRIAD_VISUALIZATIONPOINT No',
+            option_overwrite=True))
+
+        # Compare with the reference solution.
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_euler_bernoulli_reference.dat')
+        compare_strings(self,
+            'test_meshpy_euler_bernoulli',
+            ref_file,
+            input_file.get_string(header=False))
+
+        # Test consistency checks.
+        rot = Rotation([1, 2, 3], 2.3434)
+        input_file.nodes[-1].rotation = rot
+        with self.assertRaises(ValueError):
+            # This raises an error because not all rotation in the beams are
+            # the same.
+            input_file.get_string(header=False)
+
+        for node in input_file.nodes:
+            node.rotation = rot
+        with self.assertRaises(ValueError):
+            # This raises an error because the rotations do not match the
+            # director between the nodes.
+            input_file.get_string(header=False)
 
     def test_close_beam(self):
         """
