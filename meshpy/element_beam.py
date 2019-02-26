@@ -346,7 +346,7 @@ class Beam3eb(Beam):
         t1 = self.nodes[0].rotation * [1, 0, 0]
         if (np.linalg.norm(direction / np.linalg.norm(direction) - t1)
                 >= mpy.eps_pos):
-            raise ValueError('The rotations don not match the direction of'
+            raise ValueError('The rotations do not match the direction of '
                 + 'the Euler Bernoulli beam!')
 
         string_nodes = ''
