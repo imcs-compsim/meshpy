@@ -27,7 +27,7 @@ class BeamType(IntEnum):
     """Enum for beam types."""
     reissner = 1
     kirchhoff = 2
-    bernoulli_euler = 3
+    euler_bernoulli = 3
 
 
 class CouplingType(IntEnum):

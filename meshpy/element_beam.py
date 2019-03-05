@@ -331,7 +331,7 @@ class Beam3eb(Beam):
         [-1, True, False],
         [1, True, False]
         ]
-    beam_type = mpy.beam.bernoulli_euler
+    beam_type = mpy.beam.euler_bernoulli
     valid_material = [MaterialEulerBernoulli, BaseMeshItem]
 
     def _get_dat(self):
