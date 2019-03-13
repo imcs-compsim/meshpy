@@ -111,6 +111,11 @@ class Rotation(object):
         else:
             return cls(rotation_vector, phi)
 
+    def check(self):
+        """Perform all checks for the rotation."""
+        self.check_uniqueness()
+        self.check_quaternion_constraint()
+
     def check_uniqueness(self):
         """
         We always want q0 to be positive -> the range for the rotational angle
@@ -165,8 +170,7 @@ class Rotation(object):
         Return the rotation vector for this object.
         """
 
-        self.check_uniqueness()
-        self.check_quaternion_constraint()
+        self.check()
 
         norm = np.linalg.norm(self.q[1:])
         phi = 2 * np.arctan2(norm, self.q[0])
@@ -253,6 +257,7 @@ class Rotation(object):
         String representation of object.
         """
 
+        self.check()
         return 'Rotation:\n    q0: {}\n    q: {}'.format(
             str(self.q[0]),
             str(self.q[1:])
