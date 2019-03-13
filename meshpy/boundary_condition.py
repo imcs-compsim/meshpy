@@ -7,7 +7,9 @@ This module implements a class to handle boundary conditions in the input file.
 import warnings
 
 # Meshpy modules.
-from . import mpy, BaseMeshItem, get_close_nodes
+from .conf import mpy
+from .base_mesh_item import BaseMeshItem
+from .utility import get_close_nodes
 
 
 class BoundaryCondition(BaseMeshItem):

@@ -8,7 +8,7 @@ file.
 import numpy as np
 
 # Meshpy modules.
-from . import BaseMeshItem
+from .base_mesh_item import BaseMeshItem
 
 
 class Material(BaseMeshItem):

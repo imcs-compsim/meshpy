@@ -8,7 +8,8 @@ import numpy as np
 import vtk
 
 # Meshpy modules.
-from . import Element, add_point_data_node_sets
+from .element import Element
+from .vtk_writer import add_point_data_node_sets
 
 
 class SolidElement(Element):

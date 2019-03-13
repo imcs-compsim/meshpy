@@ -4,7 +4,7 @@ This module implements the class that represents one element in the Mesh.
 """
 
 # Meshpy modules.
-from . import BaseMeshItem
+from .base_mesh_item import BaseMeshItem
 
 
 class Element(BaseMeshItem):
@@ -31,8 +31,8 @@ class Element(BaseMeshItem):
         """
 
         # Import solid element classes for creation of the element.
-        from . import SolidHEX8, SolidRigidSphere, SolidHEX27, SolidHEX20, \
-            SolidTET10, SolidTET4
+        from .element_solid import (SolidHEX8, SolidRigidSphere, SolidHEX27,
+            SolidHEX20, SolidTET10, SolidTET4)
 
         # Split up input line and get pre node string.
         line_split = input_line[0].split()

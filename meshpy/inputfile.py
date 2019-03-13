@@ -11,8 +11,13 @@ import re
 from _collections import OrderedDict
 
 # Meshpy modules.
-from . import mpy, Mesh, BaseMeshItem, Node, Element, BoundaryCondition, \
-    GeometrySet
+from .conf import mpy
+from .mesh import Mesh
+from .base_mesh_item import BaseMeshItem
+from .node import Node
+from .element import Element
+from .boundary_condition import BoundaryCondition
+from .geometry_set import GeometrySet
 from .utility import get_git_data
 
 

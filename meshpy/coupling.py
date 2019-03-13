@@ -3,11 +3,13 @@
 This module implements a class to couple geometry together.
 """
 
-# Meshpy modules.
-from . import mpy, GeometrySet, BaseMeshItem
-
 # Python modules.
 import numpy as np
+
+# Meshpy modules.
+from .conf import mpy
+from .base_mesh_item import BaseMeshItem
+from .geometry_set import GeometrySet
 
 
 class Coupling(BaseMeshItem):

@@ -9,8 +9,12 @@ import vtk
 import warnings
 
 # Meshpy modules.
-from . import mpy, Element, Node, add_point_data_node_sets, MaterialReissner, \
-    MaterialKirchhoff, MaterialEulerBernoulli, BaseMeshItem
+from .conf import mpy
+from .element import Element
+from .node import Node
+from .vtk_writer import add_point_data_node_sets
+from .material import (MaterialReissner, MaterialKirchhoff,
+    MaterialEulerBernoulli, BaseMeshItem)
 
 
 class Beam(Element):

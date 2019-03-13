@@ -4,7 +4,9 @@ This module implements a basic class to manage geometry in the input file.
 """
 
 # Meshpy modules.
-from . import mpy, BaseMeshItem, Node
+from .conf import mpy
+from .base_mesh_item import BaseMeshItem
+from .node import Node
 
 
 class GeometrySet(BaseMeshItem):

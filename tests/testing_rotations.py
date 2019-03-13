@@ -9,7 +9,8 @@ import unittest
 import numpy as np
 
 # Meshpy imports.
-from meshpy import mpy, Rotation, get_relative_rotation
+from meshpy import mpy, Rotation
+from meshpy.rotation import get_relative_rotation
 
 
 class TestRotation(unittest.TestCase):
