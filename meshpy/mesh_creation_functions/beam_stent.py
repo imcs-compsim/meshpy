@@ -12,7 +12,8 @@ from ..rotation import Rotation
 from ..mesh import Mesh
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
-from . import create_beam_mesh_arc_segment, create_beam_mesh_line
+from .beam_basic_geometry import (create_beam_mesh_arc_segment,
+    create_beam_mesh_line)
 
 
 def create_stent_cell(beam_object, material, width, height,
