@@ -5,6 +5,8 @@ This module defines a class that represents a rotation in 3D.
 
 # Python modules.
 import numpy as np
+
+# Meshpy modules.
 from . import mpy
 
 

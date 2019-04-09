@@ -8,7 +8,8 @@ sets in one object.
 from _collections import OrderedDict
 
 # Meshpy modules.
-from . import mpy, GeometrySet
+from .conf import mpy
+from .geometry_set import GeometrySet
 
 
 class GeometryName(OrderedDict):

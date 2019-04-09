@@ -7,7 +7,7 @@ This file has functions to create basic geometry items with meshpy.
 import numpy as np
 
 # Meshpy modules.
-from .. import Rotation
+from ..rotation import Rotation
 
 
 def create_beam_mesh_line(mesh, beam_object, material, start_point,

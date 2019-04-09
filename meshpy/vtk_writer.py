@@ -11,7 +11,7 @@ import os
 import warnings
 
 # Meshpy modules.
-from . import mpy
+from .conf import mpy
 
 
 def add_point_data_node_sets(point_data, nodes):

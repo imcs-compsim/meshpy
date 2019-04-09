@@ -7,7 +7,8 @@ This file has functions to create a beam from a parametric curve.
 import numpy as np
 
 # Meshpy modules.
-from .. import mpy, Rotation
+from ..conf import mpy
+from ..rotation import Rotation
 
 
 def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
