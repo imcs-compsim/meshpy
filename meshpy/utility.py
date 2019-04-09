@@ -12,7 +12,8 @@ import xml.etree.ElementTree as ET
 import warnings
 
 # Meshpy modules.
-from . import mpy, find_close_nodes, find_close_nodes_binning
+from .conf import mpy
+from .meshpy.find_close_nodes import find_close_nodes, find_close_nodes_binning
 
 
 def get_git_data(repo):

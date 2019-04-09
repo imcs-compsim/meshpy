@@ -14,10 +14,15 @@ import vtk
 
 # Meshpy imports.
 from meshpy import (mpy, Rotation, InputFile, MaterialReissner, MaterialBeam,
-    BoundaryCondition, Node, BaseMeshItem, VTKWriter, compare_xml, Mesh,
-    get_close_nodes, GeometryName, GeometrySet, MaterialKirchhoff, Beam3k,
-    flatten, Beam, Coupling, Beam3rHerm2Lin3, Function, MaterialEulerBernoulli,
-    Beam3eb, InputSection)
+    BoundaryCondition, MaterialKirchhoff, Mesh, Coupling, Beam3rHerm2Lin3,
+    Function, MaterialEulerBernoulli, Beam3eb, InputSection, Beam3k)
+from meshpy.node import Node
+from meshpy.base_mesh_item import BaseMeshItem
+from meshpy.vtk_writer import VTKWriter
+from meshpy.geometry_set import GeometrySet
+from meshpy.container import GeometryName
+from meshpy.element_beam import Beam
+from meshpy.utility import compare_xml, get_close_nodes, flatten
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import \

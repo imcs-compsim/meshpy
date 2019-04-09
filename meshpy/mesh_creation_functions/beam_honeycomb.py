@@ -7,8 +7,12 @@ This file has functions to create a honeycomb beam mesh.
 import numpy as np
 
 # Meshpy modules.
-from .. import mpy, Rotation, Mesh, GeometryName, GeometrySet
-from . import create_beam_mesh_line
+from ..conf import mpy
+from ..rotation import Rotation
+from ..mesh import Mesh
+from ..container import GeometryName
+from ..geometry_set import GeometrySet
+from .beam_basic_geometry import create_beam_mesh_line
 
 
 def create_beam_mesh_honeycomb_flat(mesh, beam_object, material, width,

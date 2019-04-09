@@ -7,7 +7,8 @@ This module implements the class that represents one node in the Mesh.
 import numpy as np
 
 # Meshpy modules.
-from . import mpy, BaseMeshItem
+from .conf import mpy
+from .base_mesh_item import BaseMeshItem
 
 
 class Node(BaseMeshItem):

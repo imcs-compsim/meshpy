@@ -12,10 +12,19 @@ import warnings
 import copy
 
 # Meshpy modules.
-from . import mpy, Rotation, Function, Material, Node, Element, \
-    GeometryName, GeometrySet, GeometrySetContainer, BoundaryCondition, \
-    Coupling, BoundaryConditionContainer, get_close_nodes, VTKWriter, \
-    add_rotations
+from .conf import mpy
+from .rotation import Rotation, add_rotations
+from .function import Function
+from .material import Material
+from .node import Node
+from .element import Element
+from .geometry_set import GeometrySet
+from .container import (GeometryName, GeometrySetContainer,
+    BoundaryConditionContainer)
+from .boundary_condition import BoundaryCondition
+from .coupling import Coupling
+from .vtk_writer import VTKWriter
+from .utility import get_close_nodes
 
 
 class Mesh(object):

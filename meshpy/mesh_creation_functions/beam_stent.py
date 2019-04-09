@@ -7,8 +7,13 @@ This file has functions to create a stent accoring to Auricchio 2012.
 import numpy as np
 
 # Meshpy modules.
-from .. import mpy, Rotation, Mesh, GeometryName, GeometrySet
-from . import create_beam_mesh_arc_segment, create_beam_mesh_line
+from ..conf import mpy
+from ..rotation import Rotation
+from ..mesh import Mesh
+from ..container import GeometryName
+from ..geometry_set import GeometrySet
+from .beam_basic_geometry import (create_beam_mesh_arc_segment,
+    create_beam_mesh_line)
 
 
 def create_stent_cell(beam_object, material, width, height,
