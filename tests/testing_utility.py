@@ -7,6 +7,8 @@ Define utility functions for the testing process.
 import os
 import shutil
 import subprocess
+import warnings
+
 
 # Global variable if this test is run by GitLab.
 if ('TESTING_GITLAB' in os.environ.keys()
@@ -16,30 +18,25 @@ else:
     TESTING_GITLAB = False
 
 
-def get_default_paths(name):
+def get_baci_path():
     """Look for and return a path to baci-release."""
 
-    if name == 'baci-release':
-        default_paths = [
-            ['/home/ivo/workspace/baci/master/release/baci-release',
-                os.path.isfile],
-            #['/home/ivo/baci/work/release/baci-release', os.path.isfile],
-            ['/hdd/gitlab-runner/lib/baci-master/release/baci-release',
-                os.path.isfile]
-            ]
+    if 'BACI_RELEASE' in os.environ.keys():
+        path = os.environ['BACI_RELEASE']
     else:
-        raise ValueError('Type {} not implemented!'.format(name))
+        path = ''
 
-    # Check which path exists.
-    for [path, function] in default_paths:
-        if function(path):
-            return path
+    # Check if the path exists.
+    if os.path.isfile(path):
+        return path
     else:
         # In the case that no path was found, check if the script is performed
         # by a GitLab runner.
         if TESTING_GITLAB:
-            raise ValueError('Path for {} not found!'.format(name))
+            raise ValueError('Path to baci-release not found!')
         else:
+            warnings.warn('Path to baci-release not found. Did you set the ' +
+                'environment variable BACI_RELEASE?')
             return None
 
 
@@ -47,7 +44,7 @@ def get_default_paths(name):
 testing_path = os.path.abspath(os.path.dirname(__file__))
 testing_input = os.path.join(testing_path, 'reference-files')
 testing_temp = os.path.join(testing_path, 'testing-tmp')
-baci_release = get_default_paths('baci-release')
+baci_release = get_baci_path()
 
 # Check and clean the temp directory.
 os.makedirs(testing_temp, exist_ok=True)

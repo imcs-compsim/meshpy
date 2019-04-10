@@ -15,5 +15,6 @@ meshpy-testing:
         # Indicated the testing script, that it is performed on GitLab. In this
         # case all test have to pass.
         TESTING_GITLAB: 1
+        BACI_RELEASE: "/hdd/gitlab-runner/lib/baci-master/release/baci-release"
     tags:
         - "imcs-all"
