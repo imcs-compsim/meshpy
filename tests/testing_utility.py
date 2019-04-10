@@ -49,6 +49,9 @@ testing_input = os.path.join(testing_path, 'reference-files')
 testing_temp = os.path.join(testing_path, 'testing-tmp')
 baci_release = get_default_paths('baci-release')
 
+# Check and clean the temp directory.
+os.makedirs(testing_temp, exist_ok=True)
+
 
 def empty_testing_directory():
     """Delete all files in the testing directory, if it exists."""
