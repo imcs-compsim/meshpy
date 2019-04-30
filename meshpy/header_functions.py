@@ -174,7 +174,8 @@ def set_beam_to_solid_volume_meshtying(input_file, *,
             option_overwrite=option_overwrite)
         segmentation_strategy = 'gauss_point_projection_cross_section'
     else:
-        raise ValueError('Wrong contact_discretization given!')
+        raise ValueError('Wrong contact_discretization "{}" given!'.format(
+            contact_discretization))
     geometry_pair = InputSection('GEOMETRY PAIR/LINE TO VOLUME',
         '''
         STRATEGY {}
@@ -215,12 +216,18 @@ def set_header_static(input_file, *,
     """
 
     # Set the parameters for a static analysis.
-    input_file.add(InputSection('PROBLEM SIZE', 'DIM 3',
-        option_overwrite=option_overwrite))
     input_file.add(InputSection('PROBLEM TYP',
         '''
         PROBLEMTYP Structure
         RESTART    0
+        ''',
+        option_overwrite=option_overwrite))
+    input_file.add(InputSection('IO',
+        '''
+        OUTPUT_BIN     No
+        STRUCT_DISP    No
+        FILESTEPS      1000
+        VERBOSITY      Standard
         ''',
         option_overwrite=option_overwrite))
 
