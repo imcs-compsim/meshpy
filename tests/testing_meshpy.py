@@ -631,9 +631,6 @@ class TestMeshpy(unittest.TestCase):
         # Create input file.
         input_file = InputFile(maintainer='Ivo Steinbrecher')
 
-        # Set header
-        input_file.set_default_header_static(time_step=0.05, n_steps=20)
-
         # Add material and function.
         mat = MaterialReissner(
             youngs_modulus=2.07e2,
@@ -771,7 +768,6 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file and add function and material.
         input_file = InputFile()
-        input_file.set_default_header_static()
         fun = Function('COMPONENT 0 FUNCTION t')
         input_file.add(fun)
         mat = MaterialEulerBernoulli(youngs_modulus=1., density=1.3e9)
