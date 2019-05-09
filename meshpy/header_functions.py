@@ -27,9 +27,9 @@ def _get_segmentation_strategy(segmentation):
 
 def set_runtime_output(input_file, *,
         btsvmt_output=True,
+        output_triad=True,
         every_iteration=False,
-        option_overwrite=False,
-        get_triad=True):
+        option_overwrite=False):
     """
     Set the basic runtime output options.
 
@@ -39,6 +39,8 @@ def set_runtime_output(input_file, *,
         Input file that the options will be added to.
     btsvmt_output: bool
         If the output for btsvmt should be written.
+    output_triad: bool
+        If the triads along the beam should be written.
     every_iteration: int
         If output at every Newton iteration should be written.
     option_overwrite: bool
@@ -71,7 +73,8 @@ def set_runtime_output(input_file, *,
         DISPLACEMENT                    yes
         USE_ABSOLUTE_POSITIONS          yes
         TRIAD_VISUALIZATIONPOINT        {}
-        STRAINS_GAUSSPOINT              yes'''.format(_get_yes_no(get_triad)),
+        STRAINS_GAUSSPOINT              yes'''.format(
+            _get_yes_no(output_triad)),
         option_overwrite=option_overwrite))
 
     if btsvmt_output:
@@ -192,6 +195,7 @@ def set_header_static(input_file, *,
         max_iter=20,
         tol_residuum=1e-8,
         tol_increment=1e-10,
+        load_lin=False,
         option_overwrite=False
         ):
     """
@@ -211,6 +215,8 @@ def set_header_static(input_file, *,
         Tolerance for the convergence of the residuum.
     tol_increment: int
         Tolerance for the convergence of the displacement increment.
+    load_lin: bool
+        If the load_lin option should be set.
     option_overwrite: bool
         If existing options should be overwritten. If this is false and an
         option is already defined, and error will be thrown.
@@ -244,7 +250,9 @@ def set_header_static(input_file, *,
         TIMESTEP          {0}
         NUMSTEP           {1}
         MAXTIME           {2}
-        '''.format(time_step, n_steps, time_step * n_steps),
+        LOADLIN           {3}
+        '''.format(time_step, n_steps, time_step * n_steps,
+            _get_yes_no(load_lin)),
         option_overwrite=option_overwrite))
     input_file.add(InputSection(
         'SOLVER 1',

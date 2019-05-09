@@ -260,6 +260,7 @@ class InputFile(Mesh):
 
         # Contents of NOX xml file.
         self.nox_xml = None
+        self._nox_xml_file = None
 
         # Dictionary for all sections other than mesh sections.
         self.sections = OrderedDict()
@@ -521,8 +522,7 @@ class InputFile(Mesh):
                 os.path.basename(file_path))[0] + '.xml'
 
             # Write the xml file to the disc.
-            with open(os.path.join(
-                        os.path.dirname(file_path),
+            with open(os.path.join(os.path.dirname(file_path),
                         self._nox_xml_file
                     ), 'w') as xml_file:
                 xml_file.write(self.nox_xml)
@@ -533,7 +533,7 @@ class InputFile(Mesh):
                 input_file.write('\n')
 
     def get_dat_lines(self, header=True, dat_header=True,
-            add_script_to_header=True):
+            add_script_to_header=True, check_nox=True):
         """
         Return the lines for the input file for the whole object.
 
@@ -546,6 +546,8 @@ class InputFile(Mesh):
         append_script_to_header: bool
             If true, a copy of the executing script will be added to the input
             file. This is only in affect when dat_header==True.
+        check_nox: bool
+            If this is true, an error will be thrown if no nox file is set.
         """
 
         # Perform some checks on the mesh.
@@ -565,12 +567,17 @@ class InputFile(Mesh):
 
         # Check if a file has to be created for the NOX xml information.
         if self.nox_xml is not None:
-            if not hasattr(self, '_nox_xml_file'):
-                raise ValueError('NOX xml content is given, but no '
-                    + 'file defined!')
+            if self._nox_xml_file is None:
+                if check_nox:
+                    raise ValueError('NOX xml content is given, but no '
+                        + 'file defined!')
+                else:
+                    nox_xml_name = 'NOT_DEFINED'
+            else:
+                nox_xml_name = self._nox_xml_file
             self.add(InputSection(
                 'STRUCT NOX/Status Test',
-                'XML File = {}'.format(self._nox_xml_file)))
+                'XML File = {}'.format(nox_xml_name)))
 
         # Export the basic sections in the input file.
         for section in self.sections.values():

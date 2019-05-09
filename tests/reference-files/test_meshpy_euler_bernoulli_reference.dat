@@ -1,7 +1,75 @@
+---------------------------------------------------------------------PROBLEM TYP
+PROBLEMTYP                            Structure
+RESTART                               0
+------------------------------------------------------------------------------IO
+OUTPUT_BIN                            No
+STRUCT_DISP                           No
+FILESTEPS                             1000
+VERBOSITY                             Standard
 --------------------------------------------------------------STRUCTURAL DYNAMIC
-LOADLIN                               Yes
+LINEAR_SOLVER                         1
+INT_STRATEGY                          Standard
+DYNAMICTYP                            Statics
+RESULTSEVRY                           1
+NLNSOL                                fullnewton
+PREDICT                               TangDis
+TIMESTEP                              0.2
+NUMSTEP                               5
+MAXTIME                               1.0
+LOADLIN                               yes
+------------------------------------------------------------------------SOLVER 1
+NAME                                  Structure_Solver
+SOLVER                                Superlu
+-------------------------------------------------------------STRUCT NOX/Printing
+Error                               = Yes
+Warning                             = Yes
+Outer Iteration                     = Yes
+Inner Iteration                     = No
+Parameters                          = No
+Details                             = Yes
+Outer Iteration StatusTest          = Yes
+Linear Solver Details               = Yes
+Test Details                        = Yes
+Debug                               = No
+-----------------------------------------------------------IO/RUNTIME VTK OUTPUT
+OUTPUT_DATA_FORMAT                    binary
+INTERVAL_STEPS                        1
+EVERY_ITERATION                       no
+-------------------------------------------------IO/RUNTIME VTK OUTPUT/STRUCTURE
+OUTPUT_STRUCTURE                      yes
+DISPLACEMENT                          yes
 -----------------------------------------------------IO/RUNTIME VTK OUTPUT/BEAMS
-TRIAD_VISUALIZATIONPOINT              No
+OUTPUT_BEAMS                          yes
+DISPLACEMENT                          yes
+USE_ABSOLUTE_POSITIONS                yes
+TRIAD_VISUALIZATIONPOINT              no
+STRAINS_GAUSSPOINT                    yes
+--------------BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/RUNTIME VTK OUTPUT
+WRITE_OUTPUT                          yes
+NODAL_FORCES                          yes
+MORTAR_LAMBDA_DISCRET                 yes
+MORTAR_LAMBDA_CONTINUOUS              yes
+MORTAR_LAMBDA_CONTINUOUS_SEGMENTS     5
+SEGMENTATION                          yes
+INTEGRATION_POINTS                    yes
+----------------------------------------------------------------BEAM INTERACTION
+REPARTITIONSTRATEGY                   Everydt
+--------------------------------------------------------------------BEAM CONTACT
+MODELEVALUATOR                        Standard
+----------------------------------------------------------------BINNING STRATEGY
+CUTOFF_RADIUS                         -1
+BOUNDINGBOX 6 6 6
+---------------------------------BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING
+CONSTRAINT_STRATEGY                   penalty
+PENALTY_PARAMETER                     None
+GAUSS_POINTS                          6
+CONTACT_DISCRETIZATION                mortar
+MORTAR_SHAPE_FUNCTION                 None
+----------------------------------------------------GEOMETRY PAIR/LINE TO VOLUME
+STRATEGY                              segmentation
+SEARCH_POINTS                         2
+----------------------------------------------------------STRUCT NOX/Status Test
+XML File                            = NOT_DEFINED
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_BeamKirchhoffTorsionFreeElastHyper YOUNG 1.0 DENS 1300000000.0 CROSSAREA 1 MOMIN 0.0001
 --------------------------------------------------------------------------FUNCT1
