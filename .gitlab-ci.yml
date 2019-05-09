@@ -3,7 +3,14 @@ meshpy-testing:
     script:
         - "whoami"
         - "pwd"
+        - MESHPY_PATH=$(pwd)
+        # Update the cubitpy repository.
+        - cd $CUBITPY_MASTER
+        - git pull
+        - cd $MESHPY_PATH
+        # Add python paths.
         - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+        - export PYTHONPATH="${PYTHONPATH}:${CUBITPY_MASTER}"
         # Compile cython code.
         - "cd meshpy"
         - "python3 find_close_nodes_setup.py"
@@ -16,5 +23,8 @@ meshpy-testing:
         # case all test have to pass.
         TESTING_GITLAB: 1
         BACI_RELEASE: "/hdd/gitlab-runner/lib/baci-master/release/baci-release"
+        BACI_PRE_EXODUS: "/hdd/gitlab-runner/lib/baci-master/release/pre_exodus"
+        CUBITPY_MASTER: "/hdd/gitlab-runner/lib/cubitpy-master"
+        CUBIT: "/rzhome/nas/compsim/public/opt/cubit-13.2"
     tags:
         - "imcs-all"

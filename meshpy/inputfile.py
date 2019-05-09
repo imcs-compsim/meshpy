@@ -237,7 +237,8 @@ class InputFile(Mesh):
         'END'
     ]
 
-    def __init__(self, maintainer='', description=None, dat_file=None):
+    def __init__(self, maintainer='', description=None, dat_file=None,
+            cubit=None):
         """
         Initialize the input file.
 
@@ -250,6 +251,10 @@ class InputFile(Mesh):
         dat_file: str
             A file path to an existing input file that will be read into this
             object.
+        cubit:
+            A cubit object, that contains an input file. The input lines are
+            loaded with the get_dat_lines method. Mutually exclusive with the
+            option dat_file.
         """
 
         Mesh.__init__(self)
@@ -264,8 +269,12 @@ class InputFile(Mesh):
         # Flag if dat file was loaded.
         self._dat_file_loaded = False
 
+        # Load existing dat files. If both of the following if statements are
+        # true, an error will be thrown.
         if dat_file is not None:
             self.read_dat(dat_file)
+        if cubit is not None:
+            self._read_dat_lines(cubit.get_dat_lines())
 
     def read_dat(self, file_path):
         """
@@ -278,6 +287,20 @@ class InputFile(Mesh):
             object.
         """
 
+        with open(file_path) as dat_file:
+            lines = dat_file.readlines()
+        self._read_dat_lines(lines)
+
+    def _read_dat_lines(self, dat_lines):
+        """
+        Add an existing input file into this object.
+
+        Args
+        ----
+        dat_lines: [str]
+            A list containing the lines of the input file.
+        """
+
         if (len(self.nodes) + len(self.elements) + len(self.materials)
                 + len(self.functions) + len(self.couplings) > 0):
             raise RuntimeError('A dat file can only be loaded for an '
@@ -285,9 +308,8 @@ class InputFile(Mesh):
         if self._dat_file_loaded:
             raise RuntimeError('It is not possible to import two dat files!')
 
-        with open(file_path) as dat_file:
-            lines = dat_file.readlines()
-        self._add_dat_lines(lines)
+        # Add the lines to this input file.
+        self._add_dat_lines(dat_lines)
 
         if mpy.import_mesh_full:
             # If the solid mesh is imported as objects, link the relevant data
