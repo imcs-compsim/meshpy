@@ -28,7 +28,8 @@ def _get_segmentation_strategy(segmentation):
 def set_runtime_output(input_file, *,
         btsvmt_output=True,
         every_iteration=False,
-        option_overwrite=False):
+        option_overwrite=False,
+        get_triad=True):
     """
     Set the basic runtime output options.
 
@@ -69,8 +70,8 @@ def set_runtime_output(input_file, *,
         OUTPUT_BEAMS                    yes
         DISPLACEMENT                    yes
         USE_ABSOLUTE_POSITIONS          yes
-        TRIAD_VISUALIZATIONPOINT        yes
-        STRAINS_GAUSSPOINT              yes''',
+        TRIAD_VISUALIZATIONPOINT        {}
+        STRAINS_GAUSSPOINT              yes'''.format(_get_yes_no(get_triad)),
         option_overwrite=option_overwrite))
 
     if btsvmt_output:
