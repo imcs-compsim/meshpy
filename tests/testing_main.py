@@ -25,6 +25,5 @@ if __name__ == '__main__':
     testsuite = unittest.TestLoader().discover('.', pattern='testing_*.py')
 
     # Perform the tests
-    ret = (not
-        unittest.TextTestRunner(verbosity=1).run(testsuite).wasSuccessful())
-    sys.exit(ret)
+    run = unittest.TextTestRunner(verbosity=1).run(testsuite)
+    sys.exit(not (run.wasSuccessful() and len(run.skipped) == 0))
