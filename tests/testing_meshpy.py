@@ -1316,7 +1316,8 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file and read solid mesh data.
         input_file = InputFile()
-        input_file.read_dat(os.path.join(testing_input, 'baci_input_tube.dat'))
+        input_file.read_dat(os.path.join(testing_input,
+            'baci_input_tube_vtk.dat'))
 
         # Write VTK output.
         ref_file = os.path.join(testing_input,
