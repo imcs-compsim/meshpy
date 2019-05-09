@@ -197,16 +197,11 @@ class TestFullBaci(unittest.TestCase):
     def create_beam_and_solid_tube(self, name):
         """Merge a solid tube with a beam tube and simulate them together."""
 
-        # Create the solid input file.
-        file_path = os.path.join(testing_temp, 'baci_input_tube.dat')
-        from tests.create_baci_input_tube import create_tube
-        create_tube(file_path)
-
         # Create the input file and read solid mesh data.
         input_file = InputFile(
             maintainer='Ivo Steinbrecher',
             description='Solid tube with beam tube')
-        input_file.read_dat(file_path)
+        input_file.read_dat(os.path.join(testing_input, 'baci_input_tube.dat'))
 
         # Add options for beam_output.
         input_file.add(InputSection(

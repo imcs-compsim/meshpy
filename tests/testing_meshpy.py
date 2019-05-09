@@ -1316,8 +1316,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file and read solid mesh data.
         input_file = InputFile()
-        input_file.read_dat(os.path.join(testing_input,
-            'baci_input_tube_vtk.dat'))
+        input_file.read_dat(os.path.join(testing_input, 'baci_input_tube.dat'))
 
         # Write VTK output.
         ref_file = os.path.join(testing_input,
@@ -1378,7 +1377,14 @@ class TestMeshpy(unittest.TestCase):
         dat file.
         """
 
-        # Load the test creation functions.
+        # Check if cubitpy can be loaded.
+        import importlib
+        found = importlib.util.find_spec('cubitpy') is not None
+        if not found:
+            # In this case skip the test.
+            self.skipTest('CubitPy could not be loaded!')
+
+        # Load the mesh creation functions.
         from tests.create_baci_input_tube import create_tube, create_tube_cubit
 
         # Set default values for global parameters.
@@ -1392,10 +1398,17 @@ class TestMeshpy(unittest.TestCase):
         # Create the input file and read the cubit object.
         input_file_cubit = InputFile(cubit=create_tube_cubit())
 
+        # Load the file from the reference folder.
+        file_path_ref = os.path.join(testing_input, 'baci_input_tube.dat')
+        input_file_ref = InputFile(dat_file=file_path_ref)
+
         # Compare the input files.
         compare_strings(self, 'test_cubitpy_import',
             input_file.get_string(header=False),
             input_file_cubit.get_string(header=False))
+        compare_strings(self, 'test_cubitpy_import_reference',
+            input_file.get_string(header=False),
+            input_file_ref.get_string(header=False))
 
     def test_deep_copy(self):
         """
