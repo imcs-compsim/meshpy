@@ -23,6 +23,8 @@ meshpy-testing:
         # case all test have to pass.
         TESTING_GITLAB: 1
         BACI_RELEASE: "/hdd/gitlab-runner/lib/baci-master/release/baci-release"
+        BACI_PRE_EXODUS: "/hdd/gitlab-runner/lib/baci-master/release/pre_exodus"
         CUBITPY_MASTER: "/hdd/gitlab-runner/lib/cubitpy-master"
+        CUBIT: "/rzhome/nas/compsim/public/opt/cubit-13.2"
     tags:
         - "imcs-all"
