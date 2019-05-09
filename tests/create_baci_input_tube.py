@@ -11,8 +11,8 @@ import os
 from cubitpy import CubitPy
 
 
-def create_tube(file_path):
-    """ Create a solid tube used by the meshpy testing functions."""
+def create_tube_cubit():
+    """Create a solid tube used by the meshpy testing functions."""
 
     # Initialize cubit.
     cubit = CubitPy()
@@ -99,8 +99,15 @@ def create_tube(file_path):
         'DESIGN SURF DIRICH CONDITIONS',
         'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0'])
 
+    # Return the cubit object.
+    return cubit
+
+
+def create_tube(file_path):
+    """Write the solid tube to a file."""
+
     # Export mesh.
-    cubit.create_dat(file_path)
+    create_tube_cubit().create_dat(file_path)
 
 
 if __name__ == '__main__':

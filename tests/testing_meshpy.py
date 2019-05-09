@@ -1372,6 +1372,31 @@ class TestMeshpy(unittest.TestCase):
             compare_strings(self, 'test_meshpy_vtk_elements_solid', string_ref,
                 string_vtk)
 
+    def test_cubitpy_import(self):
+        """
+        Check that a import from a cubitpy object is the same as importing the
+        dat file.
+        """
+
+        # Load the test creation functions.
+        from tests.create_baci_input_tube import create_tube, create_tube_cubit
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Create the input file and read the file.
+        file_path = os.path.join(testing_temp, 'test_cubitpy_import.dat')
+        create_tube(file_path)
+        input_file = InputFile(dat_file=file_path)
+
+        # Create the input file and read the cubit object.
+        input_file_cubit = InputFile(cubit=create_tube_cubit())
+
+        # Compare the input files.
+        compare_strings(self, 'test_cubitpy_import',
+            input_file.get_string(header=False),
+            input_file_cubit.get_string(header=False))
+
     def test_deep_copy(self):
         """
         Thist test checks that the deep copy function on a mesh does not copy
