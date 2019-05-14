@@ -5,7 +5,6 @@ This script is used to test the header functions.
 
 # Python imports.
 import unittest
-import numpy as np
 import os
 
 # Meshpy imports.
