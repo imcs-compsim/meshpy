@@ -24,10 +24,6 @@ from meshpy.container import GeometryName
 from meshpy.element_beam import Beam
 from meshpy.utility import compare_xml, get_close_nodes, flatten
 
-# Header functions.
-from meshpy.header_functions import (set_header_static, set_runtime_output,
-    set_beam_to_solid_volume_meshtying)
-
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import \
     create_beam_mesh_line, create_beam_mesh_arc_segment
@@ -768,8 +764,6 @@ class TestMeshpy(unittest.TestCase):
         """
         Recreate the baci test case beam3eb_static_endmoment_quartercircle.dat
         This tests the implementation for Euler Bernoulli beams.
-
-        This test case also tests the default header functions.
         """
 
         # Create the input file and add function and material.
@@ -803,13 +797,6 @@ class TestMeshpy(unittest.TestCase):
                 bc_type=mpy.bc.moment_euler_bernoulli, format_replacement=[fun]
                 )
             )
-
-        # Add input sections for Euler Bernoulli beam.
-        set_header_static(input_file, n_steps=5, time_step=0.2, load_lin=True)
-        set_runtime_output(input_file, output_triad=False)
-        set_beam_to_solid_volume_meshtying(input_file,
-            contact_discretization='mortar',
-            binning_bounding_box=[6, 6, 6])
 
         # Compare with the reference solution.
         ref_file = os.path.join(testing_input,
