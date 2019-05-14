@@ -631,9 +631,6 @@ class TestMeshpy(unittest.TestCase):
         # Create input file.
         input_file = InputFile(maintainer='Ivo Steinbrecher')
 
-        # Set header
-        input_file.set_default_header_static(time_step=0.05, n_steps=20)
-
         # Add material and function.
         mat = MaterialReissner(
             youngs_modulus=2.07e2,
@@ -771,7 +768,6 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file and add function and material.
         input_file = InputFile()
-        input_file.set_default_header_static()
         fun = Function('COMPONENT 0 FUNCTION t')
         input_file.add(fun)
         mat = MaterialEulerBernoulli(youngs_modulus=1., density=1.3e9)
@@ -802,20 +798,13 @@ class TestMeshpy(unittest.TestCase):
                 )
             )
 
-        # Add input sections for Euler Bernoulli beam.
-        input_file.add(InputSection('STRUCTURAL DYNAMIC','LOADLIN Yes'))
-        input_file.add(InputSection(
-            'IO/RUNTIME VTK OUTPUT/BEAMS',
-            'TRIAD_VISUALIZATIONPOINT No',
-            option_overwrite=True))
-
         # Compare with the reference solution.
         ref_file = os.path.join(testing_input,
             'test_meshpy_euler_bernoulli_reference.dat')
         compare_strings(self,
             'test_meshpy_euler_bernoulli',
             ref_file,
-            input_file.get_string(header=False))
+            input_file.get_string(header=False, check_nox=False))
 
         # Test consistency checks.
         rot = Rotation([1, 2, 3], 2.3434)

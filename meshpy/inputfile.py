@@ -263,6 +263,10 @@ class InputFile(Mesh):
         self.description = description
         self.dat_header = []
 
+        # Contents of NOX xml file.
+        self.nox_xml = None
+        self._nox_xml_file = None
+
         # Dictionary for all sections other than mesh sections.
         self.sections = OrderedDict()
 
@@ -532,13 +536,26 @@ class InputFile(Mesh):
 
     def write_input_file(self, file_path, **kwargs):
         """Write the input to a file."""
+
+        # Check if a xml file needs to be written.
+        if self.nox_xml is not None:
+            # Get the name of the xml file.
+            self._nox_xml_file = os.path.splitext(
+                os.path.basename(file_path))[0] + '.xml'
+
+            # Write the xml file to the disc.
+            with open(os.path.join(os.path.dirname(file_path),
+                        self._nox_xml_file
+                    ), 'w') as xml_file:
+                xml_file.write(self.nox_xml)
+
         with open(file_path, 'w') as input_file:
             for line in self.get_dat_lines(**kwargs):
                 input_file.write(line)
                 input_file.write('\n')
 
     def get_dat_lines(self, header=True, dat_header=True,
-            add_script_to_header=True):
+            add_script_to_header=True, check_nox=True):
         """
         Return the lines for the input file for the whole object.
 
@@ -551,6 +568,8 @@ class InputFile(Mesh):
         append_script_to_header: bool
             If true, a copy of the executing script will be added to the input
             file. This is only in affect when dat_header==True.
+        check_nox: bool
+            If this is true, an error will be thrown if no nox file is set.
         """
 
         # Perform some checks on the mesh.
@@ -567,6 +586,20 @@ class InputFile(Mesh):
             lines.append(header_text)
         if dat_header:
             lines.extend(self.dat_header)
+
+        # Check if a file has to be created for the NOX xml information.
+        if self.nox_xml is not None:
+            if self._nox_xml_file is None:
+                if check_nox:
+                    raise ValueError('NOX xml content is given, but no '
+                        + 'file defined!')
+                else:
+                    nox_xml_name = 'NOT_DEFINED'
+            else:
+                nox_xml_name = self._nox_xml_file
+            self.add(InputSection(
+                'STRUCT NOX/Status Test',
+                'XML File = {}'.format(nox_xml_name)))
 
         # Export the basic sections in the input file.
         for section in self.sections.values():
@@ -757,113 +790,3 @@ class InputFile(Mesh):
 
         return (string_line + '\n' + (string_line + '\n').join(headers) + \
             string_line), end_text
-
-    def set_default_header_static(self, *,
-            time_step=1.,
-            n_steps=1,
-            max_time=None,
-            max_iter=20,
-            tol_res=1e-7,
-            tol_disp=1e-11,
-            binning_bounding_box=None,
-            option_overwrite=False
-            ):
-        """
-        Set default header parameters for a static analysis.
-        """
-
-        # Set values for the parameters that can not directly be set by
-        # keyword arguments.
-        if binning_bounding_box is None:
-            # No binning.
-            binning = False
-        elif isinstance(binning_bounding_box, bool) and binning_bounding_box:
-            # Default binning.
-            binning = True
-            binning_bounding_box = [-1, -1, -1, 1, 1, 1]
-        elif (isinstance(binning_bounding_box, list)
-                and len(binning_bounding_box) == 6):
-            # User given boundary box.
-            binning = True
-
-        self.add('''
-            ------------------------------------PROBLEM SIZE
-            DIM 3
-            ------------------------------------PROBLEM TYP
-            PROBLEMTYP                            Structure
-            RESTART                               0
-            --------------------------------------IO
-            OUTPUT_BIN                            No
-            STRUCT_DISP                           No
-            FILESTEPS                             1000
-            VERBOSITY                             Standard
-            ''', option_overwrite=option_overwrite)
-
-        # Output / beam output.
-        self.add(InputSection(
-            'IO/RUNTIME VTK OUTPUT',
-            '''
-            OUTPUT_DATA_FORMAT                    binary
-            INTERVAL_STEPS                        1
-            EVERY_ITERATION                       No
-            ''', option_overwrite=option_overwrite))
-        self.add(InputSection(
-            'IO/RUNTIME VTK OUTPUT/BEAMS',
-            '''
-            OUTPUT_BEAMS                    Yes
-            DISPLACEMENT                    Yes
-            USE_ABSOLUTE_POSITIONS          Yes
-            TRIAD_VISUALIZATIONPOINT        Yes
-            STRAINS_GAUSSPOINT              Yes
-            ''', option_overwrite=option_overwrite))
-
-        # Problem type settings.
-        if max_time is None:
-            max_time = time_step * n_steps
-        self.add(InputSection('STRUCTURAL DYNAMIC',
-            '''
-            LINEAR_SOLVER                         1
-            INT_STRATEGY                          Standard
-            DYNAMICTYP                            Statics
-            RESULTSEVRY                           1
-            NLNSOL                                fullnewton
-            PREDICT                               TangDis
-            TIMESTEP                              {0}
-            NUMSTEP                               {1}
-            MAXTIME                               {2}
-            TOLRES                                {3}
-            TOLDISP                               {4}
-            NORM_RESF                             Abs
-            NORM_DISP                             Abs
-            NORMCOMBI_RESFDISP                    And
-            MAXITER                               {5}
-            '''.format(
-                time_step,
-                n_steps,
-                max_time,
-                tol_res,
-                tol_disp,
-                max_iter
-                ),
-            option_overwrite=option_overwrite))
-
-        # Solver
-        self.add(InputSection(
-            'SOLVER 1',
-            '''
-            NAME                                  Structure_Solver
-            SOLVER                                Superlu
-            ''', option_overwrite=option_overwrite))
-
-        # Binning strategy.
-        if binning:
-            bounding_box_string = ''
-            for val in binning_bounding_box:
-                bounding_box_string += ' {}'.format(val)
-            self.add(InputSection(
-                'BINNING STRATEGY',
-                '''
-                CUTOFF_RADIUS 2
-                BOUNDINGBOX {}
-                '''.format(bounding_box_string),
-                option_overwrite=option_overwrite))

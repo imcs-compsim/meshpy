@@ -17,7 +17,7 @@ from tests.testing_utility import (baci_release, testing_temp, testing_path,
 
 # Meshpy imports.
 from meshpy import (mpy, Rotation, InputFile, InputSection, MaterialReissner,
-    Function, Beam3rHerm2Lin3, BoundaryCondition, Mesh)
+    Function, Beam3rHerm2Lin3, BoundaryCondition, Mesh, set_header_static)
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
@@ -422,10 +422,9 @@ class TestFullBaci(unittest.TestCase):
             )
 
         # Set header
-        input_file.set_default_header_static(
+        set_header_static(input_file,
             time_step=0.05,
-            n_steps=20,
-            binning_bounding_box=[-10, -10, -10, 10, 10, 10]
+            n_steps=20
             )
 
         # Define linear function over time.
