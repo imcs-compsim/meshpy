@@ -168,7 +168,7 @@ def set_beam_to_solid_volume_meshtying(input_file, *,
             option_overwrite=option_overwrite)
         segmentation_strategy = _get_segmentation_strategy(segmentation)
     elif contact_discretization is 'gp':
-        btsvmt.add('CONTACT_DISCRETIZATION gauss_point_to_segments',
+        btsvmt.add('CONTACT_DISCRETIZATION gauss_point_to_segment',
             option_overwrite=option_overwrite)
         segmentation_strategy = _get_segmentation_strategy(segmentation)
     elif contact_discretization is 'circ':
