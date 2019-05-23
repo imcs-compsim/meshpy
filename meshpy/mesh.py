@@ -487,7 +487,7 @@ class Mesh(object):
             # radius.
             if radius is not None:
                 warnings.warn('The nodes are not on the same y-z plane. This '
-                    + 'will lead to distorted elements!')
+                    + 'may lead to distorted elements!')
             else:
                 raise ValueError('The nodes that should be wrapped around a '
                     + 'cylinder are not on the same y-z plane. This will give '
