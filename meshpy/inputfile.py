@@ -744,10 +744,9 @@ class InputFile(Mesh):
         headers.append(script_header)
 
         # Header containing meshpy information.
-        headers.append(('// Input file created with meshpy {}\n'
+        headers.append(('// Input file created with meshpy\n'
             + '// git sha:    {}\n'
             + '// git date:   {}\n').format(
-                mpy.version,
                 mpy.git_sha,
                 mpy.git_date
                 ))
