@@ -49,10 +49,20 @@ class MaterialBeam(Material):
         self.nu = nu
         self.density = density
         self.radius = radius
-        self.area = 4 * self.radius**2 * np.pi * 0.25
-        self.mom2 = self.radius**4 * np.pi * 0.25
-        self.mom3 = self.mom2
-        self.polar = self.mom2 + self.mom3
+        self.area = None
+        self.mom2 = None
+        self.mom3 = None
+        self.polar = None
+
+    def calc_area_stiffness(self):
+        """
+        Calculate the relevant stiffness terms and the area for the given beam.
+        """
+        area = 4 * self.radius**2 * np.pi * 0.25
+        mom2 = self.radius**4 * np.pi * 0.25
+        mom3 = mom2
+        polar = mom2 + mom3
+        return area, mom2, mom3, polar
 
 
 class MaterialReissner(MaterialBeam):
@@ -67,6 +77,23 @@ class MaterialReissner(MaterialBeam):
 
     def _get_dat(self):
         """Return the line for this material."""
+        if (self.area is None
+                and self.mom2 is None
+                and self.mom3 is None
+                and self.polar is None):
+            area, mom2, mom3, polar = self.calc_area_stiffness()
+        elif (self.area is not None
+                and self.mom2 is not None
+                and self.mom3 is not None
+                and self.polar is not None):
+            area = self.area
+            mom2 = self.mom2
+            mom3 = self.mom3
+            polar = self.polar
+        else:
+            raise ValueError('Either all relevant material parameters are set '
+                + 'by the user, or a circular crosssection will be assumed. '
+                + 'A combination is not possible')
         string = 'MAT {} {} YOUNG {} POISSONRATIO {} DENS {} CROSSAREA {} '
         string += 'SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}'
         return string.format(
@@ -75,11 +102,11 @@ class MaterialReissner(MaterialBeam):
             self.youngs_modulus,
             self.nu,
             self.density,
-            self.area,
+            area,
             self.shear_correction,
-            self.polar,
-            self.mom2,
-            self.mom3
+            polar,
+            mom2,
+            mom3
             )
 
 
@@ -92,6 +119,23 @@ class MaterialKirchhoff(MaterialBeam):
 
     def _get_dat(self):
         """Return the line for this material."""
+        if (self.area is None
+                and self.mom2 is None
+                and self.mom3 is None
+                and self.polar is None):
+            area, mom2, mom3, polar = self.calc_area_stiffness()
+        elif (self.area is not None
+                and self.mom2 is not None
+                and self.mom3 is not None
+                and self.polar is not None):
+            area = self.area
+            mom2 = self.mom2
+            mom3 = self.mom3
+            polar = self.polar
+        else:
+            raise ValueError('Either all relevant material parameters are set '
+                + 'by the user, or a circular crosssection will be assumed. '
+                + 'A combination is not possible')
         string = 'MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} '
         string += 'MOMINPOL {} MOMIN2 {} MOMIN3 {}'
         return string.format(
@@ -100,10 +144,10 @@ class MaterialKirchhoff(MaterialBeam):
             self.youngs_modulus,
             self.youngs_modulus / (2. * (1. + self.nu)),
             self.density,
-            self.area,
-            self.polar,
-            self.mom2,
-            self.mom3
+            area,
+            polar,
+            mom2,
+            mom3
             )
 
 
@@ -116,12 +160,22 @@ class MaterialEulerBernoulli(MaterialBeam):
 
     def _get_dat(self):
         """Return the line for this material."""
+        area, mom2, _mom3, _polar = self.calc_area_stiffness()
+        if (self.area is None and self.mom2 is None):
+            area, mom2, _mom3, _polar = self.calc_area_stiffness()
+        elif (self.area is not None and self.mom2 is not None):
+            area = self.area
+            mom2 = self.mom2
+        else:
+            raise ValueError('Either all relevant material parameters are set '
+                + 'by the user, or a circular crosssection will be assumed. '
+                + 'A combination is not possible')
         string = 'MAT {} {} YOUNG {} DENS {} CROSSAREA {} MOMIN {}'
         return string.format(
             self.n_global,
             self.material_string,
             self.youngs_modulus,
             self.density,
-            self.area,
-            self.mom2
+            area,
+            mom2
             )
