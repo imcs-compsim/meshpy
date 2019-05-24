@@ -10,6 +10,7 @@ from .conf import mpy
 from .rotation import Rotation
 
 # Mesh items.
+from .base_mesh_item import BaseMeshItem
 from .function import Function
 from .material import (MaterialBeam, MaterialReissner, MaterialKirchhoff,
     MaterialEulerBernoulli)
@@ -33,9 +34,9 @@ __all__ = [
     # Option object.
     'mpy',
     # Basic stuff.
-    'Rotation', 'Function', 'MaterialReissner', 'MaterialKirchhoff',
-    'MaterialBeam', 'GeometrySet', 'BoundaryCondition', 'Coupling',
-    'MaterialEulerBernoulli',
+    'Rotation', 'BaseMeshItem', 'Function', 'MaterialReissner',
+    'MaterialKirchhoff', 'MaterialBeam', 'GeometrySet', 'BoundaryCondition',
+    'Coupling', 'MaterialEulerBernoulli',
     # Mesh items.
     'Beam3rHerm2Lin3', 'Beam3k', 'Mesh', 'InputFile', 'InputSection',
     'Beam3eb',
