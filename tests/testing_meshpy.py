@@ -15,9 +15,9 @@ import vtk
 # Meshpy imports.
 from meshpy import (mpy, Rotation, InputFile, MaterialReissner, MaterialBeam,
     BoundaryCondition, MaterialKirchhoff, Mesh, Coupling, Beam3rHerm2Lin3,
-    Function, MaterialEulerBernoulli, Beam3eb, InputSection, Beam3k)
+    Function, MaterialEulerBernoulli, Beam3eb, InputSection, Beam3k,
+    BaseMeshItem)
 from meshpy.node import Node
-from meshpy.base_mesh_item import BaseMeshItem
 from meshpy.vtk_writer import VTKWriter
 from meshpy.geometry_set import GeometrySet
 from meshpy.container import GeometryName
