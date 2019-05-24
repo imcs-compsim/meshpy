@@ -8,7 +8,7 @@ import os
 
 
 # Cubitpy imports.
-from cubitpy import CubitPy
+from cubitpy import CubitPy, cupy
 
 
 def create_tube_cubit():
@@ -87,20 +87,18 @@ def create_tube_cubit():
     cylinder.volumes()[0].mesh()
 
     # Set blocks and sets.
-    cubit.add_element_type(cylinder.volumes()[0], 'HEX8', name='tube', bc=[
-        'STRUCTURE',
-        'MAT 1 KINEM nonlinear EAS none',
-        'SOLIDH8'
-        ])
-    cubit.add_node_set(cylinder.surfaces()[1], name='fix', bc=[
-        'DESIGN SURF DIRICH CONDITIONS',
-        ('NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 '
-            + 'FUNCT 0 0 0 0 0 0')])
+    cubit.add_element_type(cylinder.volumes()[0], cupy.element_type.hex8,
+        name='tube')
+    cubit.add_node_set(cylinder.surfaces()[1], name='fix',
+        bc_section='DESIGN SURF DIRICH CONDITIONS',
+        bc_description=(
+            'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 '
+            + 'FUNCT 0 0 0 0 0 0'))
     cubit.add_node_set(cylinder.surfaces()[2], name='dirichlet_controlled',
-        bc=[
-            'DESIGN SURF DIRICH CONDITIONS',
-            ('NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 '
-                + 'FUNCT 1 2 0 0 0 0')])
+        bc_section='DESIGN SURF DIRICH CONDITIONS',
+        bc_description=(
+            'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 '
+            + 'FUNCT 1 2 0 0 0 0'))
 
     # Return the cubit object.
     return cubit

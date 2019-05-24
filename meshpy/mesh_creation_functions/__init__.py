@@ -11,6 +11,9 @@ from .beam_basic_geometry import create_beam_mesh_line, \
 # Parametric curve.
 from .beam_curve import create_beam_mesh_curve
 
+# Fibers in rectangle.
+#from .beam_fibers_in_rectangle import
+
 # Honeycomb.
 from .beam_honeycomb import create_beam_mesh_honeycomb_flat, \
     create_beam_mesh_honeycomb
