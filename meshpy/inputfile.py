@@ -599,7 +599,7 @@ class InputFile(Mesh):
                 nox_xml_name = self._nox_xml_file
             self.add(InputSection(
                 'STRUCT NOX/Status Test',
-                'XML File = {}'.format(nox_xml_name)))
+                'XML File = {}'.format(nox_xml_name), option_overwrite=True))
 
         # Export the basic sections in the input file.
         for section in self.sections.values():
