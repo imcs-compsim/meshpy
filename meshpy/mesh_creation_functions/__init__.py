@@ -12,7 +12,7 @@ from .beam_basic_geometry import create_beam_mesh_line, \
 from .beam_curve import create_beam_mesh_curve
 
 # Fibers in rectangle.
-#from .beam_fibers_in_rectangle import
+from .beam_fibers_in_rectangle import create_fibers_in_rectangle
 
 # Honeycomb.
 from .beam_honeycomb import create_beam_mesh_honeycomb_flat, \
@@ -32,5 +32,7 @@ __all__ = [
     'create_beam_mesh_honeycomb_flat',
     'create_beam_mesh_honeycomb',
     # Stent
-    'create_beam_mesh_stent'
+    'create_beam_mesh_stent',
+    # Fibers in rectanle
+    'create_fibers_in_rectangle'
     ]
