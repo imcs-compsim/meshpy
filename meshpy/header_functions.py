@@ -184,7 +184,8 @@ def set_beam_to_solid_volume_meshtying(input_file, *,
         '''
         STRATEGY {}
         SEARCH_POINTS {}
-        '''.format(segmentation_strategy, segmentation_search_points))
+        '''.format(segmentation_strategy, segmentation_search_points),
+                option_overwrite=option_overwrite)
     input_file.add(btsvmt)
     input_file.add(geometry_pair)
 
