@@ -8,6 +8,8 @@ import os
 import shutil
 import subprocess
 import warnings
+import xml.etree.ElementTree as ET
+import numpy as np
 
 
 # Global variable if this test is run by GitLab.
@@ -120,3 +122,124 @@ def compare_strings(self, name, reference, compare):
 
     # Check the results.
     self.assertTrue(is_equal, name)
+
+
+def xml_to_dict(xml, tol_float):
+    """Convert a XML to a nested dictionary."""
+
+    # Get and sort keys.
+    keys = xml.keys()
+    keys.sort()
+
+    # Get string for this XML element.
+    string = '<' + xml.tag
+    if 'Name' in keys:
+        # If there is a key "Name" put this one first.
+        index = keys.index('Name')
+        if index == 0:
+            pass
+        else:
+            keys[0], keys[index] = keys[index], keys[0]
+    for key in keys:
+        string += ' '
+        string += key
+        string += '="'
+        string += xml.get(key)
+        string += '"'
+    string += '>'
+
+    # Get data for this item.
+    xml_dict = {}
+    n_childs = len(xml.getchildren())
+    is_text = not xml.text.strip() == ''
+    if n_childs > 0 and is_text:
+        raise ValueError('The text is not empty and there are children. This '
+            + 'case should not happen!')
+    elif n_childs > 0:
+        # Add a child xml construct.
+        for child in xml.getchildren():
+            key, value = xml_to_dict(child, tol_float)
+            xml_dict[key] = value
+    elif is_text:
+        # Add data.
+        data = xml.text.split('\n')
+        if tol_float is None:
+            data_new = [line.strip() for line in data
+                if not line.strip() == '']
+        else:
+            data_new = []
+            for line in data:
+                if line.strip() == '':
+                    continue
+                for number in line.strip().split(' '):
+                    if np.abs(float(number)) < tol_float:
+                        data_new.append('0.0')
+                    else:
+                        data_new.append(number)
+        data_string = '\n'.join(data_new)
+        xml_dict[''] = data_string
+
+    # Return key for this item and all child items.
+    return string, xml_dict
+
+
+def xml_dict_to_string(item):
+    """The nested XML dictionary to a string."""
+
+    # Sort the keys.
+    keys = list(item.keys())
+    keys.sort()
+
+    # Return the keys and the values.
+    string = ''
+    for key in keys:
+        if key == '':
+            string += item[key]
+        else:
+            # Add content.
+            string += key
+            string += '\n'
+            string += xml_dict_to_string(item[key])
+            string += '\n'
+
+            # Get the name of the section from the key.
+            section = key[1:].split(' ')[0]
+            if section[-1] == '>':
+                section = section[:-1]
+            string += '</{}>\n'.format(section)
+
+    # Return the value.
+    return string.strip()
+
+
+def compare_xml(path1, path2, tol_float=None):
+    """
+    Compare the xml files at path1 and path2.
+
+    Args
+    ----
+    tol_float: None / float
+        If it is None, the numbers are not changed.
+        If it is a number, the nubers in the xml file are set to 0 when the
+        absolute value is smaller that tol_float.
+    """
+
+    # Check that both arguments are paths and exist.
+    if not (os.path.isfile(path1) and os.path.isfile(path2)):
+        raise ValueError('The paths given are not ok!')
+
+    tree1 = ET.parse(path1)
+    tree2 = ET.parse(path2)
+
+    key, value = xml_to_dict(tree1.getroot(), tol_float)
+    string1 = xml_dict_to_string({key: value})
+    hash1 = hash(string1)
+
+    key, value = xml_to_dict(tree2.getroot(), tol_float)
+    string2 = xml_dict_to_string({key: value})
+    hash2 = hash(string2)
+
+    if hash1 == hash2:
+        return True, None, None
+    else:
+        return False, string1, string2
