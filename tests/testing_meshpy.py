@@ -22,7 +22,7 @@ from meshpy.vtk_writer import VTKWriter
 from meshpy.geometry_set import GeometrySet
 from meshpy.container import GeometryName
 from meshpy.element_beam import Beam
-from meshpy.utility import compare_xml, get_close_nodes, flatten
+from meshpy.utility import get_close_nodes, flatten
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import \
@@ -33,7 +33,7 @@ from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
 
 # Testing imports.
 from tests.testing_utility import (testing_temp, testing_input,
-    compare_strings)
+    compare_strings, compare_xml)
 
 
 def create_test_mesh(mesh):
