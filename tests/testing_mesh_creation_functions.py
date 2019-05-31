@@ -82,13 +82,19 @@ class TestMeshCreationFunctions(unittest.TestCase):
         create_fibers_in_rectangle(input_file, Beam3eb, mat,
             4, 1, 235, 0.45, 0.35)
         input_file.translate([0, 0, 1])
+        create_fibers_in_rectangle(input_file, Beam3eb, mat,
+            1, 4, 30, 0.45, 5)
+        input_file.translate([0, 0, 1])
+        create_fibers_in_rectangle(input_file, Beam3eb, mat,
+            4, 1, 30, 0.45, 0.9)
+        input_file.translate([0, 0, 1])
 
         # Check the output.
         ref_file = os.path.join(testing_input,
             'test_mesh_fiber_rectangle_reference.dat')
         compare_strings(
             self,
-            'test_mesh_stent',
+            'test_mesh_fiber_rectangle',
             ref_file,
             input_file.get_string(header=False))
 
