@@ -143,6 +143,7 @@ def create_fibers_in_rectangle(mesh, beam_object, material, length, width,
 
             # Calculate the number of elements in this fiber.
             fiber_nel = int(fiber_length // fiber_element_length)
+            fiber_nel = np.max([fiber_nel, 1])
             create_beam_mesh_line(mesh, beam_object, material,
                 np.append(start, 0.),
                 np.append(end, 0.),
