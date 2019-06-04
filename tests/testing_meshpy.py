@@ -261,6 +261,53 @@ class TestMeshpy(unittest.TestCase):
             ref_file,
             mesh.get_string(header=False).strip())
 
+    def test_mesh_translations_with_solid(self):
+        """Create a line that will be wrapped to a helix."""
+
+        def test_mesh_translations(*, import_full=False, radius=None):
+            """
+            Create the line and wrap it with passing radius to the wrap function.
+            """
+
+            # Set default values for global parameters.
+            mpy.set_default_values()
+
+            mpy.import_mesh_full = import_full
+
+            # Create the mesh.
+            mesh = InputFile(dat_file=os.path.join(testing_input,
+                'baci_input_solid_cuboid.dat'))
+            mat = MaterialReissner(radius=0.05)
+
+            # Create the line.
+            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat,
+                [0.2, 0, 0],
+                [0.2, 5 * 0.2 * 2 * np.pi, 4],
+                n_el=3)
+
+            # Transform the mesh.
+            mesh.wrap_around_cylinder(radius=radius)
+            mesh.translate([1, 2, 3])
+            mesh.rotate(Rotation([1, 2, 3], np.pi * 17. / 27.))
+            mesh.reflect([0.1, -2, 1])
+
+            # Check the output.
+            ref_file = os.path.join(testing_input,
+                'test_meshpy_mesh_translations_with_solid_reference.dat')
+            compare_strings(self,
+                'test_meshpy_mesh_translations_with_solid',
+                ref_file,
+                mesh.get_string(header=False))
+
+        test_mesh_translations(import_full=False, radius=None)
+        test_mesh_translations(import_full=False, radius=0.2)
+        self.assertRaises(ValueError,
+            test_mesh_translations, import_full=False, radius=666)
+        test_mesh_translations(import_full=True, radius=None)
+        test_mesh_translations(import_full=True, radius=0.2)
+        self.assertRaises(ValueError,
+            test_mesh_translations, import_full=True, radius=666)
+
     def test_wrap_cylinder_not_on_same_plane(self):
         """Create a helix that is itself wrapped around a cylinder."""
 
@@ -381,7 +428,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Get a reference solution for the coupling nodes.
         reference_partners, _temp = create_flat_mesh().get_close_nodes(
-            nodes='all', binning=False, return_nodes=False)
+            binning=False, return_nodes=False)
 
         # Apply different rotations and compare the partner results.
         rotations = [
@@ -394,8 +441,7 @@ class TestMeshpy(unittest.TestCase):
             # Create the input file.
             input_file = create_flat_mesh()
             input_file.rotate(rotation)
-            partners, _temp = input_file.get_close_nodes(nodes='all',
-                return_nodes=False)
+            partners, _temp = input_file.get_close_nodes(return_nodes=False)
 
             # Compare the partners with the reference.
             self.assertTrue(np.array_equal(
@@ -502,7 +548,8 @@ class TestMeshpy(unittest.TestCase):
                 'test_meshpy_curve_3d_helix_mathematica.csv'), delimiter=',')
         self.assertLess(
             np.linalg.norm(
-                coordinates_mathematica - input_file.get_global_coordinates()),
+                coordinates_mathematica
+                - input_file.get_global_coordinates()[0]),
             mpy.eps_pos,
             'test_meshpy_curve_3d_helix'
             )
@@ -550,7 +597,8 @@ class TestMeshpy(unittest.TestCase):
                 'test_meshpy_curve_2d_sin_mathematica.csv'), delimiter=',')
         self.assertLess(
             np.linalg.norm(
-                coordinates_mathematica - input_file.get_global_coordinates()),
+                coordinates_mathematica
+                - input_file.get_global_coordinates()[0]),
             mpy.eps_pos,
             'test_meshpy_curve_2d_sin'
             )

@@ -256,54 +256,95 @@ class Mesh(object):
                     raise ValueError('It is currently not possible to add more'
                         + ' than one coupling to a node.')
 
-    def get_global_coordinates(self, nodes=None):
+    def get_global_nodes(self, *, nodes=None):
         """
-        Return an array with the coordinates of all nodes.
+        Return a list with the global beam nodes. If in the future we also want
+        to perform translate / rotate / cylinder wrapping / ... on solid
+        elements this can be implemented here.
 
         Args
         ----
         nodes: list(Nodes)
-            If this one is given return an array with the coordinates of the
-            nodes in list, otherwise of all nodes in the mesh.
+            If this list is given it will be returned as is.
         """
-        if nodes is None:
-            node_list = self.nodes
-        else:
-            node_list = nodes
-        pos = np.zeros([len(node_list), 3])
-        for i, node in enumerate(node_list):
-            if not node.is_dat:
-                pos[i, :] = node.coordinates
-            else:
-                pos[i, :] = [1, 0, 0]
-        return pos
 
-    def get_global_quaternions(self):
-        """Return an array with the quaternions of all nodes."""
-        rot = np.zeros([len(self.nodes), 4])
-        for i, node in enumerate(self.nodes):
-            if (not node.is_dat) and (node.rotation is not None):
+        if nodes is None:
+            return [node for node in self.nodes if not node.is_dat]
+        else:
+            for node in nodes:
+                if node.is_dat:
+                    raise ValueError('When the nodes are explicitly given, '
+                        + 'all nodes have to be beam nodes!')
+            return nodes
+
+    def get_global_coordinates(self, **kwargs):
+        """
+        Return an array with the coordinates of some nodes. As well as a list
+        with the corresponding nodes.
+
+        Args
+        ----
+        kwargs:
+            Will be passed to sefl.get_global_nodes.
+
+        Return
+        ----
+        pos: np.array
+            Numpy array with all the positions of the nodes.
+        beam_nodes: [Node]
+            List of the nodes corresponding to the rows in the pos array. If
+            the input argument nodes was given, it will be returned as is.
+        """
+        beam_nodes = self.get_global_nodes(**kwargs)
+        pos = np.zeros([len(beam_nodes), 3])
+        for i, node in enumerate(beam_nodes):
+            pos[i, :] = node.coordinates
+        return pos, beam_nodes
+
+    def get_global_quaternions(self, **kwargs):
+        """
+        Return an array with the quaternions of some beam nodes. As well as a
+        list with the corresponding nodes.
+
+        Args
+        ----
+        kwargs:
+            Will be passed to sefl.get_global_nodes.
+
+        Return
+        ----
+        rot: np.array
+            Numpy array with all the quaternions of the nodes.
+        beam_nodes: [Node]
+            List of the nodes corresponding to the rows in the rot array. If
+            the input argument nodes was given, it will be returned as is.
+        """
+        beam_nodes = self.get_global_nodes(**kwargs)
+        rot = np.zeros([len(beam_nodes), 4])
+        for i, node in enumerate(beam_nodes):
+            if node.rotation is not None:
                 rot[i, :] = node.rotation.get_quaternion()
             else:
-                rot[i, 0] = 1
-        return rot
+                raise ValueError('Got a node without rotation, this should not'
+                    + ' happen here!')
+        return rot, beam_nodes
 
     def translate(self, vector):
         """
-        Translate all nodes of this mesh.
+        Translate all beam nodes of this mesh.
 
         Args
         ----
         vector: np.array, list
             3D vector that will be added to all nodes.
         """
-        for node in self.nodes:
-            if not node.is_dat:
-                node.coordinates += vector
+        beam_nodes = self.get_global_nodes()
+        for node in beam_nodes:
+            node.coordinates += vector
 
     def rotate(self, rotation, origin=None, only_rotate_triads=False):
         """
-        Rotate all nodes of the mesh with rotation.
+        Rotate all beam nodes of the mesh with rotation.
 
         Args
         ----
@@ -318,7 +359,7 @@ class Mesh(object):
         """
 
         # Get array with all quaternions for the nodes.
-        rot1 = self.get_global_quaternions()
+        rot1, beam_nodes = self.get_global_quaternions()
 
         # Additional rotation.
         rotnew = add_rotations(rotation, rot1)
@@ -330,7 +371,7 @@ class Mesh(object):
                 rot2 = rotation
 
             # Get array with all positions for the nodes.
-            pos = self.get_global_coordinates()
+            pos, _beam_nodes = self.get_global_coordinates(nodes=beam_nodes)
 
             # Check if origin has to be added.
             if origin is not None:
@@ -366,12 +407,11 @@ class Mesh(object):
             if origin is not None:
                 posnew += origin
 
-        for i, node in enumerate(self.nodes):
-            if not node.is_dat:
-                if node.rotation is not None:
-                    node.rotation.q = rotnew[i, :]
-                if not only_rotate_triads:
-                    node.coordinates = posnew[i, :]
+        for i, node in enumerate(beam_nodes):
+            if node.rotation is not None:
+                node.rotation.q = rotnew[i, :]
+            if not only_rotate_triads:
+                node.coordinates = posnew[i, :]
 
     def reflect(self, normal_vector, origin=None, flip=False):
         """
@@ -407,8 +447,8 @@ class Mesh(object):
         normal_vector = np.array(normal_vector / np.linalg.norm(normal_vector))
 
         # Get array with all quaternions and positions for the nodes.
-        pos = self.get_global_coordinates()
-        rot1 = self.get_global_quaternions()
+        pos, beam_nodes = self.get_global_coordinates()
+        rot1, _beam_nodes = self.get_global_quaternions(nodes=beam_nodes)
 
         # Check if origin has to be added.
         if origin is not None:
@@ -453,11 +493,9 @@ class Mesh(object):
                 element.flip()
 
         # Set the new positions and rotations.
-        for i, node in enumerate(self.nodes):
-            if not node.is_dat:
-                node.coordinates = pos_new[i, :]
-                if node.rotation is not None:
-                    node.rotation.q = rot_new[i, :]
+        for i, node in enumerate(beam_nodes):
+            node.coordinates = pos_new[i, :]
+            node.rotation.q = rot_new[i, :]
 
     def wrap_around_cylinder(self, radius=None):
         """
@@ -475,8 +513,8 @@ class Mesh(object):
             This will still lead to distorted elements!.
         """
 
-        pos = self.get_global_coordinates()
-        quaternions = np.zeros([len(self.nodes), 4])
+        pos, beam_nodes = self.get_global_coordinates()
+        quaternions = np.zeros([len(beam_nodes), 4])
 
         # The x coordinate is the radius, the y coordinate the arc length.
         points_x = pos[:, 0].copy()
@@ -494,13 +532,12 @@ class Mesh(object):
                     + 'unexpected results. Give a reference radius!')
             radius_phi = radius
             radius_points = points_x
-        else:
-            # The points are on the same y-z plane. Check that the radius is
-            # not given (does not make sense).
-            if radius is not None:
-                raise ValueError('Points are all on the same plane, but a '
-                    + 'radius is given. This input does not make sense!')
+        elif radius is None or np.abs(points_x[0] - radius) < mpy.eps_pos:
             radius_points = radius_phi = points_x[0]
+        else:
+            raise ValueError(('The points are all on the same y-z plane with '
+                + 'the x-coordinate {} but the given radius {} is different. '
+                + 'This does not make sense.').format(points_x[0], radius))
 
         # Get the angle for all nodes.
         phi = pos[:, 1] / radius_phi
@@ -517,9 +554,8 @@ class Mesh(object):
         self.rotate(quaternions, only_rotate_triads=True)
 
         # Set the new position for the nodes.
-        for i, node in enumerate(self.nodes):
-            if not node.is_dat:
-                node.coordinates = pos[i, :]
+        for i, node in enumerate(beam_nodes):
+            node.coordinates = pos[i, :]
 
     def couple_nodes(self, *, nodes=None, coupling_type=mpy.coupling.fix):
         """
@@ -654,11 +690,7 @@ class Mesh(object):
 
         geometry = GeometryName()
 
-        if nodes is None:
-            node_list = self.nodes
-        else:
-            node_list = nodes
-        pos = self.get_global_coordinates(nodes=node_list)
+        pos, beam_nodes = self.get_global_coordinates(nodes=nodes)
         for i, direction in enumerate(['x', 'y', 'z']):
             # Check if there is more than one value in dimension.
             min_max = [np.min(pos[:, i]), np.max(pos[:, i])]
@@ -670,7 +702,7 @@ class Mesh(object):
                             np.abs(pos[:, i] - min_max[j]) < mpy.eps_pos
                             ):
                         if value:
-                            min_max_nodes.append(node_list[index])
+                            min_max_nodes.append(beam_nodes[index])
                     geometry['{}_{}'.format(direction, text)] = GeometrySet(
                         mpy.geo.point,
                         min_max_nodes
@@ -679,14 +711,13 @@ class Mesh(object):
 
     def get_close_nodes(self, nodes=None, **kwargs):
         """
-        Find nodes that are close to each other.
+        Find beam nodes that are close to each other.
 
         Args
         ----
-        nodes: list(Node), str
-            If this argument is given, the closest nodes within this list are
-            returned, otherwise all nodes in the mesh are checked.
-            If nodes == 'all' use all nodes of the mesh.
+        nodes: list(Node)
+            If this argument is given, the closest beam nodes within this list
+            are returned, otherwise all beam nodes in the mesh are checked.
         kwargs:
             Keyword arguments for get_close_nodes.
 
@@ -696,19 +727,13 @@ class Mesh(object):
             A list of lists with partner nodes.
         """
 
-        # Check if input argument was given
-        if nodes is None:
-            node_list = [node for node in self.nodes if (not node.is_dat
-                and not node.is_middle_node)]
-        elif nodes is 'all':
-            node_list = self.nodes
-        else:
-            node_list = nodes
-
+        # Check if input argument was given.
+        node_list_with_middle_nodes = self.get_global_nodes(nodes=nodes)
+        node_list = [node for node in node_list_with_middle_nodes
+            if not node.is_middle_node]
         return get_close_nodes(node_list, **kwargs)
 
-    def check_overlapping_elements(self, raise_error=True,
-            set_middle_node_partners=False):
+    def check_overlapping_elements(self, raise_error=True):
         """
         Check if there are overlapping elements in the mesh. This is done by
         checking if all middle nodes of beam elements have unique coordinates
