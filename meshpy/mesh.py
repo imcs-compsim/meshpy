@@ -532,13 +532,12 @@ class Mesh(object):
                     + 'unexpected results. Give a reference radius!')
             radius_phi = radius
             radius_points = points_x
-        else:
-            # The points are on the same y-z plane. Check that the radius is
-            # not given (does not make sense).
-            if radius is not None:
-                raise ValueError('Points are all on the same plane, but a '
-                    + 'radius is given. This input does not make sense!')
+        elif radius is None or np.abs(points_x[0] - radius) < mpy.eps_pos:
             radius_points = radius_phi = points_x[0]
+        else:
+            raise ValueError(('The points are all on the same y-z plane with '
+                + 'the x-coordinate {} but the given radius {} is different. '
+                + 'This does not make sense.').format(points_x[0], radius))
 
         # Get the angle for all nodes.
         phi = pos[:, 1] / radius_phi
