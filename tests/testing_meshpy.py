@@ -381,7 +381,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Get a reference solution for the coupling nodes.
         reference_partners, _temp = create_flat_mesh().get_close_nodes(
-            nodes='all', binning=False, return_nodes=False)
+            binning=False, return_nodes=False)
 
         # Apply different rotations and compare the partner results.
         rotations = [
@@ -394,8 +394,7 @@ class TestMeshpy(unittest.TestCase):
             # Create the input file.
             input_file = create_flat_mesh()
             input_file.rotate(rotation)
-            partners, _temp = input_file.get_close_nodes(nodes='all',
-                return_nodes=False)
+            partners, _temp = input_file.get_close_nodes(return_nodes=False)
 
             # Compare the partners with the reference.
             self.assertTrue(np.array_equal(
@@ -502,7 +501,8 @@ class TestMeshpy(unittest.TestCase):
                 'test_meshpy_curve_3d_helix_mathematica.csv'), delimiter=',')
         self.assertLess(
             np.linalg.norm(
-                coordinates_mathematica - input_file.get_global_coordinates()),
+                coordinates_mathematica
+                - input_file.get_global_coordinates()[0]),
             mpy.eps_pos,
             'test_meshpy_curve_3d_helix'
             )
@@ -550,7 +550,8 @@ class TestMeshpy(unittest.TestCase):
                 'test_meshpy_curve_2d_sin_mathematica.csv'), delimiter=',')
         self.assertLess(
             np.linalg.norm(
-                coordinates_mathematica - input_file.get_global_coordinates()),
+                coordinates_mathematica
+                - input_file.get_global_coordinates()[0]),
             mpy.eps_pos,
             'test_meshpy_curve_2d_sin'
             )
