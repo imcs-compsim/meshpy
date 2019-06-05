@@ -53,26 +53,25 @@ def create_solid_block(file_path, nx, ny, nz):
     brick.volumes()[0].mesh()
 
     # Add block and sets.
-    cubit.add_element_type(brick.volumes()[0], 'HEX8', name='brick', bc=[
-        'STRUCTURE',
-        'MAT 1 KINEM nonlinear EAS none',
-        'SOLIDH8'
-        ])
+    cubit.add_element_type(brick.volumes()[0], cupy.element_type.hex8,
+        name='brick',
+        bc_description='MAT 1 KINEM nonlinear EAS none'
+        )
     counter = 0
     for item in brick.vertices():
-        cubit.add_node_set(item, name='node_set_' + str(counter), bc=[
-            'DESIGN POINT NEUMANN CONDITIONS',
-            'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0'])
+        cubit.add_node_set(item, name='node_set_' + str(counter),
+            bc_type=cupy.bc_type.neumann,
+            bc_description='NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0')
         counter += 1
     for item in brick.curves():
-        cubit.add_node_set(item, name='node_set_' + str(counter), bc=[
-            'DESIGN LINE DIRICH CONDITIONS',
-            'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0'])
+        cubit.add_node_set(item, name='node_set_' + str(counter),
+            bc_type=cupy.bc_type.dirichlet,
+            bc_description='NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0')
         counter += 1
     for item in brick.surfaces():
-        cubit.add_node_set(item, name='node_set_' + str(counter), bc=[
-            'DESIGN SURF NEUMANN CONDITIONS',
-            'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0'])
+        cubit.add_node_set(item, name='node_set_' + str(counter),
+            bc_type=cupy.bc_type.neumann,
+            bc_description='NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0')
         counter += 1
 
     # Export mesh
