@@ -68,14 +68,21 @@ def create_test_mesh(mesh):
 class TestMeshpy(unittest.TestCase):
     """Test various stuff from the meshpy module."""
 
+    def setUp(self):
+        """
+        This method is called before each test and sets the default meshpy
+        values for each test. The values can be changed in the individual
+        tests.
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
     def test_mesh_rotations(self):
         """
         Check if the Mesh function rotation gives the same results as rotating
         each node it self.
         """
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
 
         mesh_1 = InputFile()
         create_test_mesh(mesh_1)
@@ -107,9 +114,6 @@ class TestMeshpy(unittest.TestCase):
         Check if the Mesh function rotation gives the same results as rotating
         each node it self, when an array is passed with different rotations.
         """
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
 
         mesh_1 = InputFile()
         create_test_mesh(mesh_1)
@@ -235,8 +239,7 @@ class TestMeshpy(unittest.TestCase):
         inside a mesh section.
         """
 
-        # Set default values for global parameters.
-        mpy.set_default_values()
+        # Convert the solid mesh to meshpy objects.
         mpy.import_mesh_full = full_import
 
         solid_file = os.path.join(testing_input,
@@ -265,14 +268,16 @@ class TestMeshpy(unittest.TestCase):
     def test_mesh_translations_with_solid(self):
         """Create a line that will be wrapped to a helix."""
 
-        def test_mesh_translations(*, import_full=False, radius=None):
+        def base_test_mesh_translations(*, import_full=False, radius=None):
             """
-            Create the line and wrap it with passing radius to the wrap function.
+            Create the line and wrap it with passing radius to the wrap
+            function.
             """
 
             # Set default values for global parameters.
             mpy.set_default_values()
 
+            # Convert the solid mesh to meshpy objects.
             mpy.import_mesh_full = import_full
 
             # Create the mesh.
@@ -300,23 +305,20 @@ class TestMeshpy(unittest.TestCase):
                 ref_file,
                 mesh.get_string(header=False))
 
-        test_mesh_translations(import_full=False, radius=None)
-        test_mesh_translations(import_full=False, radius=0.2)
+        base_test_mesh_translations(import_full=False, radius=None)
+        base_test_mesh_translations(import_full=False, radius=0.2)
         self.assertRaises(ValueError,
-            test_mesh_translations, import_full=False, radius=666)
-        test_mesh_translations(import_full=True, radius=None)
-        test_mesh_translations(import_full=True, radius=0.2)
+            base_test_mesh_translations, import_full=False, radius=666)
+        base_test_mesh_translations(import_full=True, radius=None)
+        base_test_mesh_translations(import_full=True, radius=0.2)
         self.assertRaises(ValueError,
-            test_mesh_translations, import_full=True, radius=666)
+            base_test_mesh_translations, import_full=True, radius=666)
 
     def test_wrap_cylinder_not_on_same_plane(self):
         """Create a helix that is itself wrapped around a cylinder."""
 
         # Ignore the warnings from wrap around cylinder.
         warnings.filterwarnings("ignore")
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
 
         # Create the mesh.
         mesh = InputFile()
@@ -352,9 +354,6 @@ class TestMeshpy(unittest.TestCase):
         Test if the find_close nodes_binning and find_close nodes functions
         return the same results.
         """
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
 
         # Set the seed for the pseudo random numbers.
         random.seed(0)
@@ -413,9 +412,6 @@ class TestMeshpy(unittest.TestCase):
         Test case for coupling of nodes, when the nodes are all on a plane.
         """
 
-        # Set default values for global parameters.
-        mpy.set_default_values()
-
         # Dummy material.
         material = MaterialReissner(radius=0.1)
 
@@ -453,9 +449,6 @@ class TestMeshpy(unittest.TestCase):
     def test_find_close_nodes_dimension(self):
         """
         """
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
 
         # Set the seed for the pseudo random numbers.
         random.seed(0)
@@ -513,9 +506,6 @@ class TestMeshpy(unittest.TestCase):
         the parameter.
         """
 
-        # Set default values for global parameters.
-        mpy.set_default_values()
-
         # Ignore some strange warnings.
         warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
@@ -572,9 +562,6 @@ class TestMeshpy(unittest.TestCase):
     def test_curve_2d_sin(self):
         """Create a sin from a parametric curve."""
 
-        # Set default values for global parameters.
-        mpy.set_default_values()
-
         # Ignore some strange warnings.
         warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
@@ -620,9 +607,6 @@ class TestMeshpy(unittest.TestCase):
 
     def test_curve_3d_curve_rotation(self):
         """Create a line from a parametric curve and prescribe the rotation."""
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
 
         # AD.
         from autograd import jacobian
@@ -673,9 +657,6 @@ class TestMeshpy(unittest.TestCase):
         ascending order, once in descending. This tests checks that the
         elements are created with the correct tangent vectors.
         """
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
 
         # Create input file.
         input_file = InputFile(maintainer='Ivo Steinbrecher')
@@ -731,9 +712,6 @@ class TestMeshpy(unittest.TestCase):
     def test_segment(self):
         """Create a circular segment and compare it with the reference file."""
 
-        # Set default values for global parameters.
-        mpy.set_default_values()
-
         # Create input file.
         input_file = InputFile(maintainer='Ivo Steinbrecher')
 
@@ -767,9 +745,6 @@ class TestMeshpy(unittest.TestCase):
         Test that the input file for all types of Kirchhoff beams is generated
         correctly.
         """
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
 
         # Create input file.
         material = MaterialKirchhoff(radius=0.1, youngs_modulus=1000)
@@ -888,9 +863,6 @@ class TestMeshpy(unittest.TestCase):
         n_el = 3
         R = 1.235
         additional_rotation = Rotation([0, 1, 0], 0.5)
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
 
         # Define material.
         mat = MaterialReissner(radius=0.1)
@@ -1107,8 +1079,6 @@ class TestMeshpy(unittest.TestCase):
     def test_replace_nodes(self):
         """Test case for coupling of nodes, and reusing the identical nodes."""
 
-        # Set default values for global parameters.
-        mpy.set_default_values()
         mpy.check_overlapping_elements = False
 
         mat = MaterialReissner(radius=0.1, youngs_modulus=1)
@@ -1318,9 +1288,6 @@ class TestMeshpy(unittest.TestCase):
     def test_vtk_writer(self):
         """Test the output created by the VTK writer."""
 
-        # Set default values for global parameters.
-        mpy.set_default_values()
-
         # Initialize writer.
         writer = VTKWriter()
 
@@ -1392,9 +1359,6 @@ class TestMeshpy(unittest.TestCase):
     def test_vtk_writer_beam(self):
         """Create a sample mesh and check the VTK output."""
 
-        # Set default values for global parameters.
-        mpy.set_default_values()
-
         # Create the mesh.
         mesh = Mesh()
 
@@ -1441,10 +1405,8 @@ class TestMeshpy(unittest.TestCase):
     def test_vtk_writer_solid(self):
         """Import a solid mesh and check the VTK output."""
 
-        # Set default values for global parameters.
-        mpy.set_default_values()
-
-        # Without this parameter no solid VTK file would be written.
+        # Convert the solid mesh to meshpy objects. Without this parameter no
+        # solid VTK file would be written.
         mpy.import_mesh_full = True
 
         # Create the input file and read solid mesh data.
@@ -1474,10 +1436,8 @@ class TestMeshpy(unittest.TestCase):
         Import a solid mesh with all solid types and check the VTK output.
         """
 
-        # Set default values for global parameters.
-        mpy.set_default_values()
-
-        # Without this parameter no solid VTK file would be written.
+        # Convert the solid mesh to meshpy objects. Without this parameter no
+        # solid VTK file would be written.
         mpy.import_mesh_full = True
 
         # Create the input file and read solid mesh data.
@@ -1519,9 +1479,6 @@ class TestMeshpy(unittest.TestCase):
 
         # Load the mesh creation functions.
         from tests.create_baci_input_tube import create_tube, create_tube_cubit
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
 
         # Create the input file and read the file.
         file_path = os.path.join(testing_temp, 'test_cubitpy_import.dat')
@@ -1654,9 +1611,6 @@ class TestMeshpy(unittest.TestCase):
         """
         Check if there are overlapping elements in a mesh.
         """
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
 
         # Create mesh object.
         mesh = InputFile()
