@@ -192,6 +192,23 @@ class InputSection(object):
         return lines
 
 
+class InputSectionMultiKey(InputSection):
+    """
+    Represent a single section in the input file.
+    This section can have the same key multiple times.
+    """
+
+    def _add_data(self, option):
+        """
+        Add an InputLine object to the item. Each key can exist multiple times.
+        """
+
+        # We add each line with a key that represents the index of the line.
+        # This would be better with a list, but by doing it his way we can use
+        # the same structure as in the base class.
+        self.data[len(self.data)] = option
+
+
 class InputFile(Mesh):
     """A item that represents a complete Baci input file."""
 
@@ -267,8 +284,11 @@ class InputFile(Mesh):
         self.nox_xml = None
         self._nox_xml_file = None
 
-        # Dictionary for all sections other than mesh sections.
+        # Dictionaries for sections other than mesh sections. The multi key
+        # dictionary stores sections that can have the same key multiple times,
+        # for example knot vector section in IGA meshes.
         self.sections = OrderedDict()
+        self.sections_multi_key = []
 
         # Flag if dat file was loaded.
         self._dat_file_loaded = False
@@ -431,6 +451,10 @@ class InputFile(Mesh):
             def add_set(section_header, section_data_comment):
                 """
                 Add sets of points, lines, surfaces or volumes to the object.
+                We have to do a check of the set index, as it is possible that
+                the existing input file skips sections. If a section is skipped
+                a dummy section will be inserted, so the final numbering
+                matches the sections again.
                 """
 
                 def add_to_set(section_header, dat_list, comments):
@@ -455,14 +479,26 @@ class InputFile(Mesh):
                     dat_list = []
                     current_comments = []
                     for line, comments in section_data_comment:
-                        if last_index == int(line.split()[3]):
+                        index_line = int(line.split()[3])
+                        if last_index == index_line:
                             dat_list.append(line)
-                        else:
-                            last_index = int(line.split()[3])
+                        elif index_line > last_index:
                             add_to_set(section_header, dat_list,
                                 current_comments)
+                            # If indices were skipped, add a dummy section
+                            # here, so the final ordering will match the
+                            # original one.
+                            for skip_index in range(last_index + 1,
+                                    index_line):
+                                add_to_set(section_header,
+                                    ['// Empty set {}'.format(skip_index)],
+                                    None)
+                            last_index = index_line
                             dat_list = [line]
                             current_comments = comments
+                        else:
+                            raise ValueError('The node set indices must be '
+                                + 'given in ascending order!')
                     # Add the last set.
                     add_to_set(section_header, dat_list, current_comments)
 
@@ -494,6 +530,9 @@ class InputFile(Mesh):
                 add_bc(section_name, section_data_comment)
             elif section_name.endswith('TOPOLOGY'):
                 add_set(section_name, section_data_comment)
+            elif section_name == 'STRUCTURE KNOTVECTORS':
+                self.sections_multi_key.append(InputSectionMultiKey(
+                    section_name, section_data, **kwargs))
             elif section_name == 'DESIGN DESCRIPTION' or \
                     section_name == 'END':
                 # Skip those sections as they won't be used!
@@ -693,6 +732,10 @@ class InputFile(Mesh):
                     self.geometry_set_names[geom_key],
                     item
                     )
+
+        # Add the multi key sections, eg. knot vectors for nurbs.
+        for section in self.sections_multi_key:
+            lines.extend(section.get_dat_lines())
 
         # Add the nodes and elements.
         get_section_dat('NODE COORDS', self.nodes)

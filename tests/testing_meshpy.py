@@ -16,7 +16,8 @@ import vtk
 from meshpy import (mpy, Rotation, InputFile, MaterialReissner, MaterialBeam,
     BoundaryCondition, MaterialKirchhoff, Mesh, Coupling, Beam3rHerm2Lin3,
     Function, MaterialEulerBernoulli, Beam3eb, InputSection, Beam3k,
-    BaseMeshItem)
+    BaseMeshItem, set_header_static, set_beam_to_solid_volume_meshtying,
+    set_runtime_output)
 from meshpy.node import Node
 from meshpy.vtk_writer import VTKWriter
 from meshpy.geometry_set import GeometrySet
@@ -1218,6 +1219,101 @@ class TestMeshpy(unittest.TestCase):
         compare_strings(self, 'test_replace_nodes_case_3',
             mesh_ref.get_string(header=False),
             mesh_couple.get_string(header=False))
+
+    def test_nurbs_import(self):
+        """
+        Test if the import of a nurbs mesh works as expected.
+        This script generates the baci test case: beam3r_herm2lin3_static_beam_to_solid_volume_meshtying_nurbs27_mortar_penalty_line4
+        """
+
+        # Create beam mesh and load solid file.
+        input_file = InputFile('Ivo Steinbrecher',
+            dat_file=os.path.join(
+                testing_input,
+                'test_meshpy_nurbs_import_solid_mesh.dat')
+            )
+        set_header_static(input_file, time_step=0.5, n_steps=2,
+            tol_residuum=1e-14, tol_increment=1e-8,
+            option_overwrite=True)
+        set_beam_to_solid_volume_meshtying(
+            input_file,
+            contact_discretization='mortar',
+            mortar_shape='line4',
+            penalty_parameter=1000,
+            n_gauss_points=6,
+            segmentation=True,
+            binning_bounding_box=[-3, -3, -1, 3, 3, 5],
+            binning_cutoff_radius=1)
+        set_runtime_output(input_file, output_solid=False)
+        input_file.add(InputSection('IO',
+            '''
+            OUTPUT_BIN     yes
+            STRUCT_DISP    yes
+            FILESTEPS      1000
+            VERBOSITY      Standard
+            ''',
+            option_overwrite=True))
+        fun = Function('COMPONENT 0 FUNCTION t')
+        input_file.add(fun)
+
+        # Create the beam material.
+        material = MaterialReissner(youngs_modulus=1000, radius=0.05)
+
+        # Create the beams.
+        set_1 = create_beam_mesh_line(input_file, Beam3rHerm2Lin3, material,
+            [0, 0, 0.95], [1, 0, 0.95], n_el=2)
+        set_2 = create_beam_mesh_line(input_file, Beam3rHerm2Lin3, material,
+            [-0.25, -0.3, 0.85], [-0.25, 0.5, 0.85], n_el=2)
+
+        # Add boundary conditions on the beams.
+        input_file.add(
+            BoundaryCondition(set_1['start'],
+                'NUMDOF 9 ONOFF 0 0 0 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 '
+                + 'FUNCT 0 0 0 0 0 0 0 0 0',
+                bc_type=mpy.bc.dirichlet))
+        input_file.add(
+            BoundaryCondition(set_1['end'],
+                'NUMDOF 9 ONOFF 0 1 0 0 0 0 0 0 0 VAL 0 0.02 0 0 0 0 0 0 0 '
+                + 'FUNCT 0 {} 0 0 0 0 0 0 0',
+                format_replacement=[fun],
+                bc_type=mpy.bc.neumann))
+        input_file.add(
+            BoundaryCondition(set_2['start'],
+                'NUMDOF 9 ONOFF 0 0 0 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 '
+                + 'FUNCT 0 0 0 0 0 0 0 0 0',
+                bc_type=mpy.bc.dirichlet))
+        input_file.add(
+            BoundaryCondition(set_2['end'],
+                'NUMDOF 9 ONOFF 1 0 0 0 0 0 0 0 0 VAL -0.06 0 0 0 0 0 0 0 0 '
+                + 'FUNCT {} 0 0 0 0 0 0 0 0',
+                format_replacement=[fun],
+                bc_type=mpy.bc.neumann))
+
+        # Add result checks.
+        displacement = [
+            [-5.14451531793581718e-01, -1.05846397858073843e-01,
+                -1.77822866851472888e-01]
+            ]
+
+        nodes = [64]
+        for j, node in enumerate(nodes):
+            for i, direction in enumerate(['x', 'y', 'z']):
+                input_file.add(
+                    InputSection('RESULT DESCRIPTION',
+                        ('STRUCTURE DIS structure NODE {} QUANTITY disp{} '
+                        + 'VALUE {} TOLERANCE 1e-10').format(
+                            node, direction, displacement[j][i]
+                        )
+                    )
+                )
+
+        # Compare with the reference solution.
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_nurbs_import_reference.dat')
+        compare_strings(self,
+            'test_meshpy_nurbs_import',
+            ref_file,
+            input_file.get_string(header=False, check_nox=False))
 
     def test_vtk_writer(self):
         """Test the output created by the VTK writer."""
