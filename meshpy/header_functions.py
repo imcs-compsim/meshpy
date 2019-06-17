@@ -26,6 +26,7 @@ def _get_segmentation_strategy(segmentation):
 
 
 def set_runtime_output(input_file, *,
+        output_solid=True,
         btsvmt_output=True,
         output_triad=True,
         every_iteration=False,
@@ -37,6 +38,8 @@ def set_runtime_output(input_file, *,
     ----
     input_file:
         Input file that the options will be added to.
+    output_solid: bool
+        If the solid output should be written at runtime.
     btsvmt_output: bool
         If the output for btsvmt should be written.
     output_triad: bool
@@ -61,8 +64,9 @@ def set_runtime_output(input_file, *,
     input_file.add(InputSection(
         'IO/RUNTIME VTK OUTPUT/STRUCTURE',
         '''
-        OUTPUT_STRUCTURE                yes
-        DISPLACEMENT                    yes''',
+        OUTPUT_STRUCTURE                {}
+        DISPLACEMENT                    yes'''.format(
+            _get_yes_no(output_solid)),
         option_overwrite=option_overwrite))
 
     # Set the beam runtime output options.
