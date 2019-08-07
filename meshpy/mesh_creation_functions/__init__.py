@@ -33,6 +33,6 @@ __all__ = [
     'create_beam_mesh_honeycomb',
     # Stent
     'create_beam_mesh_stent',
-    # Fibers in rectanle
+    # Fibers in rectangle
     'create_fibers_in_rectangle'
     ]

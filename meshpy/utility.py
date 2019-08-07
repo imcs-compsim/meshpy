@@ -54,7 +54,7 @@ def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
     Args
     ----
     nodes: list(Node), np.array
-        Nodes that are checked for partners, or numpy array of coordiantes.
+        Nodes that are checked for partners, or numpy array of coordinates.
     binning: bool
         If binning should be used.
     nx, ny, nz: int
@@ -76,7 +76,7 @@ def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
         # Array is already given.
         coords = nodes
     else:
-        # Get coordiantes form nodes.
+        # Get coordinates form nodes.
         coords = np.zeros([len(nodes), 3])
         for i, node in enumerate(nodes):
             coords[i, :] = node.coordinates

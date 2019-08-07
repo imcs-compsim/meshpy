@@ -109,14 +109,14 @@ class VTKWriter(object):
             if not n_points == len(topology):
                 raise ValueError(('Coordinates is of size {}, '
                         + 'while topology is of size {}!').format(
-                        n_points, len(topology)))
+                            n_points, len(topology)))
 
         # Check if point data containers are of the correct size.
         if point_data is not None:
             for key, value in point_data.items():
                 if not len(value) == n_points:
-                    raise IndexError(('The len of coordinates is {}, the len '
-                        + 'of {} is {}, does not match!').format(
+                    raise IndexError(('The length of coordinates is {},'
+                        + 'the length of {} is {}, does not match!').format(
                             n_points,
                             key,
                             len(value)

@@ -38,7 +38,7 @@ class GeometryName(OrderedDict):
 
 class BoundaryConditionContainer(OrderedDict):
     """
-    A class to group boundary conditions together. The key of the dicitonary
+    A class to group boundary conditions together. The key of the dictionary
     are (bc_type, geometry_type).
     """
     def __init__(self, *args, **kwargs):

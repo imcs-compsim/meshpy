@@ -179,9 +179,9 @@ class Mesh(object):
         ----
         coupling_sets: bool
             If this is true, also sets for couplings will be added. They
-            inserte after the mesh sets.
+            are inserted after the mesh sets.
         link_nodes: bool
-            If a link to the geomerty sets should be added to each connected
+            If a link to the geometry sets should be added to each connected
             node (this option is mainly for vtk output).
         """
 
@@ -983,7 +983,7 @@ class Mesh(object):
 
     def copy(self):
         """
-        Return a deep copy of this mesh. The functions and materials wil not be
-        deep copied.
+        Return a deep copy of this mesh. The functions and materials will not
+        be deep copied.
         """
         return copy.deepcopy(self)

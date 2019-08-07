@@ -92,7 +92,7 @@ class MaterialReissner(MaterialBeam):
             polar = self.polar
         else:
             raise ValueError('Either all relevant material parameters are set '
-                + 'by the user, or a circular crosssection will be assumed. '
+                + 'by the user, or a circular cross-section will be assumed. '
                 + 'A combination is not possible')
         string = 'MAT {} {} YOUNG {} POISSONRATIO {} DENS {} CROSSAREA {} '
         string += 'SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}'
@@ -134,7 +134,7 @@ class MaterialKirchhoff(MaterialBeam):
             polar = self.polar
         else:
             raise ValueError('Either all relevant material parameters are set '
-                + 'by the user, or a circular crosssection will be assumed. '
+                + 'by the user, or a circular cross-section will be assumed. '
                 + 'A combination is not possible')
         string = 'MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} '
         string += 'MOMINPOL {} MOMIN2 {} MOMIN3 {}'
@@ -168,7 +168,7 @@ class MaterialEulerBernoulli(MaterialBeam):
             mom2 = self.mom2
         else:
             raise ValueError('Either all relevant material parameters are set '
-                + 'by the user, or a circular crosssection will be assumed. '
+                + 'by the user, or a circular cross-section will be assumed. '
                 + 'A combination is not possible')
         string = 'MAT {} {} YOUNG {} DENS {} CROSSAREA {} MOMIN {}'
         return string.format(
