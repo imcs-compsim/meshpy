@@ -28,7 +28,7 @@ class GeometrySet(BaseMeshItem):
         Args
         ----
         geometry_type: mpy.geo
-            Type of geometry. This is neccessary, as the boundary conditions
+            Type of geometry. This is  necessary, as the boundary conditions
             and input file depend on that type.
         value: Node, list(Nodes)
             Node(s) or list of nodes to be added to this geometry set.

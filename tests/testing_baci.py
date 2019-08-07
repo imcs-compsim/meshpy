@@ -231,17 +231,17 @@ class TestFullBaci(unittest.TestCase):
         # Add boundary conditions.
         input_file.add(
             BoundaryCondition(
-                cantilever_set['start'],  # bc set
+                cantilever_set['start'],
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 ' + \
-                'FUNCT 0 0 0 0 0 0 0 0 0',  # bc string
+                'FUNCT 0 0 0 0 0 0 0 0 0',
                 bc_type=mpy.bc.dirichlet
                 )
             )
         input_file.add(
             BoundaryCondition(
-                cantilever_set['end'],  # bc set
+                cantilever_set['end'],
                 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 3. 3. 0 0 0 0 0 0 0 ' + \
-                'FUNCT {} {} 0 0 0 0 0 0 0',  # bc string
+                'FUNCT {} {} 0 0 0 0 0 0 0',
                 format_replacement=[cos, sin],
                 bc_type=mpy.bc.dirichlet
                 )

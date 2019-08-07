@@ -18,7 +18,7 @@ class TestRotation(unittest.TestCase):
 
     def rotation_matrix(self, axis, alpha):
         """
-        Create a rotation about one of the cartesian axis.
+        Create a rotation about one of the Cartesian axis.
 
         Args
         ----
@@ -69,7 +69,7 @@ class TestRotation(unittest.TestCase):
                 0.)
 
     def test_euler_angles(self):
-        """Create a rotation with euler angles and compare to known results."""
+        """Create a rotation with Euler angles and compare to known results."""
 
         # Set default values for global parameters.
         mpy.set_default_values()

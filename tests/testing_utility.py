@@ -48,7 +48,7 @@ testing_input = os.path.join(testing_path, 'reference-files')
 testing_temp = os.path.join(testing_path, 'testing-tmp')
 baci_release = get_baci_path()
 
-# Check and clean the temp directory.
+# Check and clean the temporary directory.
 os.makedirs(testing_temp, exist_ok=True)
 
 
@@ -94,7 +94,7 @@ def compare_strings(self, name, reference, compare):
     is_equal = reference_string.strip() == compare_string.strip()
     if not is_equal and not TESTING_GITLAB:
 
-        # Check if temp directory exists, and creates it if necessary.
+        # Check if temporary directory exists, and creates it if necessary.
         os.makedirs(testing_temp, exist_ok=True)
 
         # Get the paths of the files to compare. If a string was given
@@ -220,13 +220,13 @@ def compare_xml(path1, path2, tol_float=None):
     ----
     tol_float: None / float
         If it is None, the numbers are not changed.
-        If it is a number, the nubers in the xml file are set to 0 when the
+        If it is a number, the numbers in the xml file are set to 0 when the
         absolute value is smaller that tol_float.
     """
 
     # Check that both arguments are paths and exist.
     if not (os.path.isfile(path1) and os.path.isfile(path2)):
-        raise ValueError('The paths given are not ok!')
+        raise ValueError('The paths given are not OK!')
 
     tree1 = ET.parse(path1)
     tree2 = ET.parse(path2)

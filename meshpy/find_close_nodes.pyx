@@ -76,8 +76,8 @@ def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
                     if not has_partner[j] == -1:
                         raise RuntimeError('The case where a node connects two'
                             ' other nodes that are more than eps apart is not'
-                            ' yet implemented. Check if the value for eps makes'
-                            ' pysical sense!')
+                            ' yet implemented. Check if the value for eps'
+                            ' makes physical sense!')
                     has_partner[j] = partner
             # If this one has a partner set this node too.
             if this_is_partner == 1:
@@ -95,7 +95,7 @@ def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
     Finds coordinates that are within an tolerance of each other. Create
     nx * ny * nz bins and look for neighbors in the bins. This speeds up the
     execution considerably. Even if the coordinates have more than 3 columns,
-    the bins will only be created for the frist 3.
+    the bins will only be created for the first 3.
 
     Args
     ----
@@ -209,7 +209,7 @@ def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
             for j in range(n_nodes_in_this_bin):
                 nodes_in_this_bin[j] = nodes_in_bin[i][j]
 
-            # Get the coordiantes for this bin.
+            # Get the coordinates for this bin.
             find_close_nodes_coords = np.zeros([n_nodes_in_this_bin, n_dim],
                 dtype=FLOAT)
             for j in range(n_nodes_in_this_bin):

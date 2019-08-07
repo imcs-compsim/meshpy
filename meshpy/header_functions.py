@@ -125,7 +125,7 @@ def set_beam_to_solid_volume_meshtying(input_file, *,
     n_gauss_points: int
         Number of Gauss points for numerical integration.
     n_integration_points_circ: int
-        Number of integration points along the circumfence of the cross
+        Number of integration points along the circumference of the cross
         section.
     penalty_parameter: float
         Penalty parameter for contact enforcement.
@@ -156,7 +156,7 @@ def set_beam_to_solid_volume_meshtying(input_file, *,
         '''.format(bounding_box_string, binning_cutoff_radius),
         option_overwrite=option_overwrite))
 
-    # Add the btsvmt options.
+    # Add the beam to solid volume mesh tying options.
     btsvmt = InputSection('BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING')
     btsvmt.add('''
         CONSTRAINT_STRATEGY penalty
@@ -189,7 +189,7 @@ def set_beam_to_solid_volume_meshtying(input_file, *,
         STRATEGY {}
         SEARCH_POINTS {}
         '''.format(segmentation_strategy, segmentation_search_points),
-                option_overwrite=option_overwrite)
+            option_overwrite=option_overwrite)
     input_file.add(btsvmt)
     input_file.add(geometry_pair)
 

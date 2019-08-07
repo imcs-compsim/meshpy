@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath(os.path.join(
 
 
 if __name__ == '__main__':
-    # Ececution part of scritpt.
+    # Execution part of script.
 
     empty_testing_directory()
 

@@ -196,7 +196,7 @@ class TestMeshpy(unittest.TestCase):
                 [-1, 1, 1], n_el=1)
             mesh.rotate(rot_1.inv())
 
-            # Rotate everything, to show generalised reflection.
+            # Rotate everything, to show generalized reflection.
             mesh_ref.rotate(rot_2)
             mesh.rotate(rot_2)
 
@@ -333,7 +333,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Move the helix so its axis is in the y direction and goes through
         # (2 0 0). The helix is also moved by a lot in y-direction, this only
-        # affects the agle phi when wrapping around a cylinder, not the shape
+        # affects the angle phi when wrapping around a cylinder, not the shape
         # of the beam.
         mesh.rotate(Rotation([1, 0, 0], -0.5 * np.pi))
         mesh.translate([2, 666.666, 0])
@@ -360,7 +360,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Add random nodes to a cube with width 2. Randomly add nodes close to
         # existing nodes. The distance has to be shorter than 0.5 * eps_medium
-        # since the algorithm needs all close nodes to be withina sphere with
+        # since the algorithm needs all close nodes to be within a sphere with
         # radius eps_medium.
         eps_medium = 1e-5
         eps_medium_factor = 0.49 * eps_medium
@@ -377,7 +377,7 @@ class TestMeshpy(unittest.TestCase):
                     coords[i, j] = random.uniform(-1, 1)
 
         # Create a random vector for each node. The length of the random
-        # vectirs is scaled, so that is is a maximum of 1.
+        # vectors is scaled, so that is is a maximum of 1.
         diff = np.random.rand(n_nodes, 3)
         diff /= np.linalg.norm(diff, axis=1)[:, None]
         coords += eps_medium_factor * diff
@@ -534,7 +534,7 @@ class TestMeshpy(unittest.TestCase):
         helix_set = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat,
             helix, [0., 2. * np.pi * n], n_el=n_el)
 
-        # Compare the coordinates with the ones from mathematica.
+        # Compare the coordinates with the ones from Mathematica.
         coordinates_mathematica = np.loadtxt(os.path.join(testing_input,
                 'test_meshpy_curve_3d_helix_mathematica.csv'), delimiter=',')
         self.assertLess(
@@ -580,7 +580,7 @@ class TestMeshpy(unittest.TestCase):
         sin_set = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat,
             sin, [0., 2. * np.pi], n_el=n_el)
 
-        # Compare the coordinates with the ones from mathematica.
+        # Compare the coordinates with the ones from Mathematica.
         coordinates_mathematica = np.loadtxt(os.path.join(testing_input,
                 'test_meshpy_curve_2d_sin_mathematica.csv'), delimiter=',')
         self.assertLess(
@@ -1327,7 +1327,7 @@ class TestMeshpy(unittest.TestCase):
             ], [0, 2, 4, 6, 1, 3, 5, 7],
             cell_data=cell_data, point_data=point_data)
 
-        # Add tetraeder.
+        # Add tetrahedron.
         cell_data = {}
         cell_data['cell_data_2'] = [5, 0, 10]
         point_data = {}
