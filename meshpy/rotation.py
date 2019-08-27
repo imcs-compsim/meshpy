@@ -13,12 +13,22 @@ from . import mpy
 class Rotation(object):
     """
     A class that represents a rotation of a coordinate system.
-    The internal parameters are the unit vector n and the rotation angle phi.
+    Internally the rotations are stored as quaternions.
     """
 
     def __init__(self, *args):
         """
-        The default constructor is from an rotation vector n and an angle phi.
+        Initialize the rotation object.
+
+        Args
+        ----
+        *args:
+            - Rotation()
+                Create a identity rotation.
+            - Rotation(axis, phi)
+                Create a rotation around the vector axis with the angle phi.
+            - Rotation([q0, q1, q2, q3])
+                Create a rotation with the quaternion values q0...q3.
         """
 
         self.q = np.zeros(4)
