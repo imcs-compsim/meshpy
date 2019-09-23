@@ -38,6 +38,7 @@ EVERY_ITERATION                       no
 -------------------------------------------------IO/RUNTIME VTK OUTPUT/STRUCTURE
 OUTPUT_STRUCTURE                      yes
 DISPLACEMENT                          yes
+ELEMENT_OWNER                         yes
 -----------------------------------------------------IO/RUNTIME VTK OUTPUT/BEAMS
 OUTPUT_BEAMS                          yes
 DISPLACEMENT                          yes

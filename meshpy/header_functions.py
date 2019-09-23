@@ -65,7 +65,8 @@ def set_runtime_output(input_file, *,
         'IO/RUNTIME VTK OUTPUT/STRUCTURE',
         '''
         OUTPUT_STRUCTURE                {}
-        DISPLACEMENT                    yes'''.format(
+        DISPLACEMENT                    yes
+        ELEMENT_OWNER                   yes'''.format(
             _get_yes_no(output_solid)),
         option_overwrite=option_overwrite))
 
