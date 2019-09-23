@@ -66,7 +66,7 @@ def set_runtime_output(input_file, *,
         '''
         OUTPUT_STRUCTURE                {}
         DISPLACEMENT                    yes
-        OWNER                           yes'''.format(
+        ELEMENT_OWNER                   yes'''.format(
             _get_yes_no(output_solid)),
         option_overwrite=option_overwrite))
 
