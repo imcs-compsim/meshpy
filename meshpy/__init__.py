@@ -6,6 +6,9 @@ This module defines classes and functions to create and edit a Baci input file.
 # Global configuration object.
 from .conf import mpy
 
+# Utility functions.
+from .utility import flatten
+
 # 3D rotations for nodes.
 from .rotation import Rotation
 
