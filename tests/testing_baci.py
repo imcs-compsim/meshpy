@@ -201,7 +201,8 @@ class TestFullBaci(unittest.TestCase):
         input_file = InputFile(
             maintainer='Ivo Steinbrecher',
             description='Solid tube with beam tube')
-        input_file.read_dat(os.path.join(testing_input, 'baci_input_tube.dat'))
+        input_file.read_dat(os.path.join(testing_input,
+            'baci_input_solid_tube.dat'))
 
         # Add options for beam_output.
         input_file.add(InputSection(
