@@ -229,7 +229,15 @@ class InputFile(Mesh):
         (mpy.bc.neumann,   mpy.geo.surface): 'DESIGN SURF NEUMANN CONDITIONS',
         (mpy.bc.neumann,   mpy.geo.volume ): 'DESIGN VOL NEUMANN CONDITIONS',
         (mpy.bc.moment_euler_bernoulli, mpy.geo.point):
-            'DESIGN POINT MOMENT EB CONDITIONS'
+            'DESIGN POINT MOMENT EB CONDITIONS',
+        (mpy.bc.beam_to_solid_volume_meshtying, mpy.geo.line):
+            'BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING LINE',
+        (mpy.bc.beam_to_solid_volume_meshtying, mpy.geo.volume):
+            'BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING VOLUME',
+        (mpy.bc.beam_to_solid_surface_meshtying, mpy.geo.line):
+            'BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING LINE',
+        (mpy.bc.beam_to_solid_surface_meshtying, mpy.geo.surface):
+            'BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING SURFACE'
     }
     geometry_counter = {
         mpy.geo.point:   'DPOINT',
@@ -526,7 +534,7 @@ class InputFile(Mesh):
                         add_line(self.elements, line)
             elif section_name.startswith('FUNCT'):
                 self.functions.append(BaseMeshItem(section_data))
-            elif section_name.endswith('CONDITIONS'):
+            elif section_name in self.boundary_condition_names.values():
                 add_bc(section_name, section_data_comment)
             elif section_name.endswith('TOPOLOGY'):
                 add_set(section_name, section_data_comment)

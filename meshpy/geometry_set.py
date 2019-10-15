@@ -30,7 +30,7 @@ class GeometrySet(BaseMeshItem):
         geometry_type: mpy.geo
             Type of geometry. This is  necessary, as the boundary conditions
             and input file depend on that type.
-        value: Node, list(Nodes)
+        nodes: Node, list(Nodes)
             Node(s) or list of nodes to be added to this geometry set.
         fail_on_double_nodes: bool
             If True, an error will be thrown if the same node is added twice.
@@ -89,6 +89,7 @@ class GeometrySet(BaseMeshItem):
             for node in value.nodes:
                 self._add(node, fail_on_double_nodes)
         else:
+            print(value.data)
             raise TypeError('Expected Node or list, but got {}'.format(
                 type(value)
                 ))

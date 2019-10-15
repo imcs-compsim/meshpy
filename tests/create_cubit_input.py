@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This script creates a tube for the meshpy test case.
+This script creates a solid input files with cubitpy.
 """
 
 # Python imports.
@@ -9,6 +9,7 @@ import os
 
 # Cubitpy imports.
 from cubitpy import CubitPy, cupy
+from cubitpy.mesh_creation_functions import create_brick
 
 
 def create_tube_cubit():
@@ -111,9 +112,42 @@ def create_tube(file_path):
     create_tube_cubit().create_dat(file_path)
 
 
+def create_block_cubit():
+    """Create a solid block in cubit and add a volume condition."""
+
+    # Initialize cubit.
+    cubit = CubitPy()
+
+    # Create the block.
+    cube = create_brick(cubit, 1, 1, 1, mesh_factor=9)
+
+    # Add the boundary condition.
+    cubit.add_node_set(cube.volumes()[0],
+        bc_type=cupy.bc_type.beam_to_solid_volume_meshtying,
+        bc_description='COUPLING_ID 1')
+
+    # Return the cubit object.
+    return cubit
+
+
+def create_block(file_path):
+    """Create the solid cube in cubit and write it to a file."""
+
+    # Export mesh.
+    create_block_cubit().create_dat(file_path)
+
+
 if __name__ == '__main__':
     # Execution part of script.
 
     dir_path = os.path.abspath(os.path.dirname(__file__))
-    file_path = os.path.join(dir_path, 'testing-tmp/baci_input_tube.dat')
+
+    # Create the input file for the solid tube.
+    file_path = os.path.join(dir_path,
+        'reference-files/baci_input_solid_tube.dat')
     create_tube(file_path)
+
+    # Create the input files for the solid cube.
+    file_path = os.path.join(dir_path,
+        'reference-files/test_meshpy_btsvm_coupling_solid_mesh.dat')
+    create_block(file_path)

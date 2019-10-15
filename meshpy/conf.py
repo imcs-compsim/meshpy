@@ -21,6 +21,8 @@ class BoundaryCondition(IntEnum):
     dirichlet = 1
     neumann = 2
     moment_euler_bernoulli = 3
+    beam_to_solid_volume_meshtying = 4
+    beam_to_solid_surface_meshtying = 5
 
 
 class BeamType(IntEnum):

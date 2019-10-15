@@ -1190,8 +1190,44 @@ class TestMeshpy(unittest.TestCase):
             mesh_ref.get_string(header=False),
             mesh_couple.get_string(header=False))
 
-    def test_nurbs_import(self):
+    def test_beam_to_solid_conditions(self):
         """
+        Create beam to solid input conditions.
+        """
+
+        # Create input file.
+        input_file = InputFile(maintainer='Ivo Steinbrecher',
+            dat_file=os.path.join(testing_input,
+                'test_meshpy_btsvm_coupling_solid_mesh.dat'))
+
+        # Add beams to the model.
+        beam_mesh = Mesh()
+        material = MaterialReissner(youngs_modulus=1000, radius=0.05)
+        create_beam_mesh_line(beam_mesh, Beam3rHerm2Lin3,
+            material, [0, 0, 0], [0, 0, 1], n_el=3)
+        create_beam_mesh_line(beam_mesh, Beam3rHerm2Lin3,
+            material, [0, 0.5, 0], [0, 0.5, 1], n_el=3)
+
+        # Set coupling condition.
+        beam_mesh.add(
+            BoundaryCondition(
+                GeometrySet(mpy.geo.line, beam_mesh.nodes),
+                bc_type=mpy.bc.beam_to_solid_volume_meshtying,
+                bc_string='COUPLING_ID 1'
+                )
+            )
+
+        # Add the beam to the solid mesh.
+        input_file.add(beam_mesh)
+
+        # Compare with the reference file.
+        compare_strings(self, 'test_meshpy_btsvm_coupling',
+            os.path.join(testing_input,
+                'test_meshpy_btsvm_coupling_reference.dat'),
+            input_file.get_string(header=False))
+
+    def test_nurbs_import(self):
+        """ 
         Test if the import of a nurbs mesh works as expected.
         This script generates the baci test case: beam3r_herm2lin3_static_beam_to_solid_volume_meshtying_nurbs27_mortar_penalty_line4
         """
@@ -1411,7 +1447,8 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file and read solid mesh data.
         input_file = InputFile()
-        input_file.read_dat(os.path.join(testing_input, 'baci_input_tube.dat'))
+        input_file.read_dat(os.path.join(testing_input,
+            'baci_input_solid_tube.dat'))
 
         # Write VTK output.
         ref_file = os.path.join(testing_input,
@@ -1478,7 +1515,7 @@ class TestMeshpy(unittest.TestCase):
             self.skipTest('CubitPy could not be loaded!')
 
         # Load the mesh creation functions.
-        from tests.create_baci_input_tube import create_tube, create_tube_cubit
+        from tests.create_cubit_input import create_tube, create_tube_cubit
 
         # Create the input file and read the file.
         file_path = os.path.join(testing_temp, 'test_cubitpy_import.dat')
@@ -1489,7 +1526,8 @@ class TestMeshpy(unittest.TestCase):
         input_file_cubit = InputFile(cubit=create_tube_cubit())
 
         # Load the file from the reference folder.
-        file_path_ref = os.path.join(testing_input, 'baci_input_tube.dat')
+        file_path_ref = os.path.join(testing_input,
+            'baci_input_solid_tube.dat')
         input_file_ref = InputFile(dat_file=file_path_ref)
 
         # Compare the input files.
