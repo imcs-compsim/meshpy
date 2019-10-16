@@ -345,7 +345,7 @@ class Beam3eb(Beam):
         # the start point to the end point.
         if (not self.nodes[0].rotation == self.nodes[1].rotation):
             raise ValueError('The two nodal rotations in Euler Bernoulli ' +
-                'beams must be the same!')
+                'beams must be the same, i.e. the beam has to be straight!')
         direction = self.nodes[1].coordinates - self.nodes[0].coordinates
         t1 = self.nodes[0].rotation * [1, 0, 0]
         if (np.linalg.norm(direction / np.linalg.norm(direction) - t1)
