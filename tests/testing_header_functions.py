@@ -12,7 +12,7 @@ from meshpy import (mpy, InputFile)
 
 # Header functions.
 from meshpy.header_functions import (set_header_static, set_runtime_output,
-    set_beam_to_solid_volume_meshtying)
+    set_beam_to_solid_meshtying)
 
 # Testing imports.
 from tests.testing_utility import testing_input, compare_strings
@@ -37,8 +37,15 @@ class TestHeaderFunctions(unittest.TestCase):
         # Set the header.
         set_header_static(input_file, time_step=0.1, n_steps=17, load_lin=True)
         set_runtime_output(input_file, output_triad=False)
-        set_beam_to_solid_volume_meshtying(input_file,
+        set_beam_to_solid_meshtying(input_file,
+            mpy.beam_to_solid.volume_meshtying,
             contact_discretization='mortar',
+            binning_bounding_box=[1, 2, 3, 4, 5, 6],
+            binning_cutoff_radius=0.69)
+
+        set_beam_to_solid_meshtying(input_file,
+            mpy.beam_to_solid.surface_meshtying,
+            contact_discretization='gp',
             binning_bounding_box=[1, 2, 3, 4, 5, 6],
             binning_cutoff_radius=0.69)
 
