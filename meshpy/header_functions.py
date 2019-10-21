@@ -6,6 +6,7 @@ input file.
 
 
 # Meshpy imports.
+from .conf import mpy
 from .inputfile import InputSection
 
 
@@ -85,7 +86,8 @@ def set_runtime_output(input_file, *,
     if btsvmt_output:
         # Set the beam to solid volume mesh tying runtime output options.
         input_file.add(InputSection(
-            'BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/RUNTIME VTK OUTPUT',
+            ('BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/'
+                + 'RUNTIME VTK OUTPUT'),
             '''
             WRITE_OUTPUT                          yes
             NODAL_FORCES                          yes
@@ -97,7 +99,7 @@ def set_runtime_output(input_file, *,
             option_overwrite=option_overwrite))
 
 
-def set_beam_to_solid_volume_meshtying(input_file, *,
+def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         contact_discretization=None,
         segmentation=True,
         segmentation_search_points=2,
@@ -109,12 +111,14 @@ def set_beam_to_solid_volume_meshtying(input_file, *,
         binning_cutoff_radius=-1,
         option_overwrite=False):
     """
-    Set the beam to solid volume mesh tying options.
+    Set the beam to solid meshtying options.
 
     Args
     ----
     input_file:
         Input file that the options will be added to.
+    interaction_type: BeamToSolidInteractionType
+        Type of beam-to-solid interation.
     contact_discretization: str
         Type of contact (mortar, Gauss point, ...)
     segmentation: bool
@@ -142,10 +146,10 @@ def set_beam_to_solid_volume_meshtying(input_file, *,
     # Set the beam contact options.
     input_file.add(InputSection(
         'BEAM INTERACTION', 'REPARTITIONSTRATEGY Everydt',
-        option_overwrite=option_overwrite))
+        option_overwrite=True))
     input_file.add(InputSection(
         'BEAM CONTACT', 'MODELEVALUATOR Standard',
-        option_overwrite=option_overwrite))
+        option_overwrite=True))
 
     # Set the binning strategy.
     bounding_box_string = ' '.join([str(val) for val in binning_bounding_box])
@@ -155,29 +159,32 @@ def set_beam_to_solid_volume_meshtying(input_file, *,
         CUTOFF_RADIUS {1}
         BOUNDINGBOX {0}
         '''.format(bounding_box_string, binning_cutoff_radius),
-        option_overwrite=option_overwrite))
+        option_overwrite=True))
 
     # Add the beam to solid volume mesh tying options.
-    btsvmt = InputSection('BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING')
-    btsvmt.add('''
+    if interaction_type == mpy.beam_to_solid.volume_meshtying:
+        bts = InputSection('BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING')
+    elif interaction_type == mpy.beam_to_solid.surface_meshtying:
+        bts = InputSection('BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING')
+    bts.add('''
         CONSTRAINT_STRATEGY penalty
         PENALTY_PARAMETER {}
         GAUSS_POINTS {}
         '''.format(penalty_parameter, n_gauss_points),
         option_overwrite=option_overwrite)
     if contact_discretization is 'mortar':
-        btsvmt.add('''
+        bts.add('''
             CONTACT_DISCRETIZATION mortar
             MORTAR_SHAPE_FUNCTION {}
             '''.format(mortar_shape),
             option_overwrite=option_overwrite)
         segmentation_strategy = _get_segmentation_strategy(segmentation)
     elif contact_discretization is 'gp':
-        btsvmt.add('CONTACT_DISCRETIZATION gauss_point_to_segment',
+        bts.add('CONTACT_DISCRETIZATION gauss_point_to_segment',
             option_overwrite=option_overwrite)
         segmentation_strategy = _get_segmentation_strategy(segmentation)
     elif contact_discretization is 'circ':
-        btsvmt.add('''
+        bts.add('''
         CONTACT_DISCRETIZATION gauss_point_cross_section
         INTEGRATION_POINTS_CIRCUMFENCE {}'''.format(n_integration_points_circ),
             option_overwrite=option_overwrite)
@@ -185,14 +192,12 @@ def set_beam_to_solid_volume_meshtying(input_file, *,
     else:
         raise ValueError('Wrong contact_discretization "{}" given!'.format(
             contact_discretization))
-    geometry_pair = InputSection('GEOMETRY PAIR/LINE TO VOLUME',
+    bts.add(
         '''
-        STRATEGY {}
-        SEARCH_POINTS {}
-        '''.format(segmentation_strategy, segmentation_search_points),
-            option_overwrite=option_overwrite)
-    input_file.add(btsvmt)
-    input_file.add(geometry_pair)
+        GEOMETRY_PAIR_STRATEGY {}
+        GEOMETRY_PAIR_SEARCH_POINTS {}
+        '''.format(segmentation_strategy, segmentation_search_points))
+    input_file.add(bts)
 
 
 def set_header_static(input_file, *,

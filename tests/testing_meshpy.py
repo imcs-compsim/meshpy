@@ -16,7 +16,7 @@ import vtk
 from meshpy import (mpy, Rotation, InputFile, MaterialReissner, MaterialBeam,
     BoundaryCondition, MaterialKirchhoff, Mesh, Coupling, Beam3rHerm2Lin3,
     Function, MaterialEulerBernoulli, Beam3eb, InputSection, Beam3k,
-    BaseMeshItem, set_header_static, set_beam_to_solid_volume_meshtying,
+    BaseMeshItem, set_header_static, set_beam_to_solid_meshtying,
     set_runtime_output)
 from meshpy.node import Node
 from meshpy.vtk_writer import VTKWriter
@@ -1227,7 +1227,7 @@ class TestMeshpy(unittest.TestCase):
             input_file.get_string(header=False))
 
     def test_nurbs_import(self):
-        """ 
+        """
         Test if the import of a nurbs mesh works as expected.
         This script generates the baci test case: beam3r_herm2lin3_static_beam_to_solid_volume_meshtying_nurbs27_mortar_penalty_line4
         """
@@ -1241,8 +1241,9 @@ class TestMeshpy(unittest.TestCase):
         set_header_static(input_file, time_step=0.5, n_steps=2,
             tol_residuum=1e-14, tol_increment=1e-8,
             option_overwrite=True)
-        set_beam_to_solid_volume_meshtying(
+        set_beam_to_solid_meshtying(
             input_file,
+            mpy.beam_to_solid.volume_meshtying,
             contact_discretization='mortar',
             mortar_shape='line4',
             penalty_parameter=1000,

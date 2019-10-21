@@ -39,6 +39,12 @@ class CouplingType(IntEnum):
     joint = 3
 
 
+class BeamToSolidInteractionType(IntEnum):
+    """Enum for beam-to-solid interaction types."""
+    volume_meshtying = 1
+    surface_meshtying = 2
+
+
 class DoubleNodes(IntEnum):
     """Enum for handing double nodes in Neumann conditions."""
     remove = 1
@@ -73,6 +79,9 @@ class MeshPy(object):
 
         # Beam types.
         self.beam = BeamType
+
+        # Beam-to-solid interaction types.
+        self.beam_to_solid = BeamToSolidInteractionType
 
         # Coupling types.
         self.coupling = CouplingType
