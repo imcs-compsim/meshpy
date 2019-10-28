@@ -260,6 +260,40 @@ class Beam3rHerm2Lin3(Beam):
             )
 
 
+class Beam3rLin2Lin2(Beam):
+    """
+    Represents a Reissner beam with linear shapefunctions in the rotations as
+    well as the displacements.
+    """
+
+    nodes_create = [
+        [-1, True, False],
+        [1, True, False]
+        ]
+    beam_type = mpy.beam.reissner
+    valid_material = [MaterialReissner, BaseMeshItem]
+
+    def _get_dat(self):
+        """ Return the line for the input file. """
+
+        string_nodes = ''
+        string_triads = ''
+        for i in [0, 1]:
+            node = self.nodes[i]
+            string_nodes += '{} '.format(node.n_global)
+            string_triads += ' ' + node.rotation.get_dat()
+
+        # Check the material.
+        self._check_material()
+
+        return '{} BEAM3R LIN2 {}MAT {} TRIADS{}'.format(
+            self.n_global,
+            string_nodes,
+            self.material.n_global,
+            string_triads
+            )
+
+
 class Beam3kClass(Beam):
     """Represents a Kirchhoff beam element."""
 
