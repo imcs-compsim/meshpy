@@ -17,7 +17,7 @@ from .base_mesh_item import BaseMeshItem
 from .function import Function
 from .material import (MaterialBeam, MaterialReissner, MaterialKirchhoff,
     MaterialEulerBernoulli)
-from .element_beam import Beam3rHerm2Lin3, Beam3k, Beam3eb
+from .element_beam import Beam3rHerm2Lin3, Beam3rLin2Lin2, Beam3k, Beam3eb
 from .geometry_set import GeometrySet
 
 # Boundary conditions and couplings for geometry in the mesh.
@@ -41,8 +41,8 @@ __all__ = [
     'MaterialKirchhoff', 'MaterialBeam', 'GeometrySet', 'BoundaryCondition',
     'Coupling', 'MaterialEulerBernoulli',
     # Mesh items.
-    'Beam3rHerm2Lin3', 'Beam3k', 'Mesh', 'InputFile', 'InputSection',
-    'Beam3eb',
+    'Beam3rHerm2Lin3', 'Beam3rLin2Lin2', 'Beam3k', 'Mesh', 'InputFile',
+    'InputSection', 'Beam3eb',
     # Header functions.
     'set_header_static', 'set_runtime_output', 'set_beam_to_solid_meshtying'
     ]
