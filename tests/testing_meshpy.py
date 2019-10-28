@@ -22,7 +22,7 @@ from meshpy.node import Node
 from meshpy.vtk_writer import VTKWriter
 from meshpy.geometry_set import GeometrySet
 from meshpy.container import GeometryName
-from meshpy.element_beam import Beam
+from meshpy.element_beam import Beam, Beam3rLin2Lin2
 from meshpy.utility import get_close_nodes, flatten
 
 # Geometry functions.
@@ -737,6 +737,30 @@ class TestMeshpy(unittest.TestCase):
             'test_meshpy_segment_reference.dat')
         compare_strings(self,
             'test_meshpy_segment',
+            ref_file,
+            input_file.get_string(header=False))
+
+    def test_reissner_beam(self):
+        """
+        Test that the input file for all types of Reissner beams is generated
+        correctly.
+        """
+
+        # Create input file.
+        material = MaterialReissner(radius=0.1, youngs_modulus=1000)
+        input_file = InputFile()
+
+        # Create a beam arc with the different Reissner beam types.
+        for i, beam_type in enumerate([Beam3rHerm2Lin3, Beam3rLin2Lin2]):
+            create_beam_mesh_arc_segment(input_file, beam_type, material,
+                [0.0, 0.0, i], Rotation([0.0, 0.0, 1.0], np.pi / 2.0), 2.0,
+                np.pi / 2.0, n_el=2)
+
+        # Compare with the reference solution.
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_reissner_beam_reference.dat')
+        compare_strings(self,
+            'test_reissner_beam',
             ref_file,
             input_file.get_string(header=False))
 
