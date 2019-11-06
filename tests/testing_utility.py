@@ -5,11 +5,13 @@ Define utility functions for the testing process.
 
 # Python imports.
 import os
+import numpy as np
 import shutil
 import subprocess
 import warnings
 import xml.etree.ElementTree as ET
-import numpy as np
+import vtk
+from vtk.util import numpy_support as vtk_numpy
 
 
 # Global variable if this test is run by GitLab.
@@ -214,7 +216,8 @@ def xml_dict_to_string(item):
 
 def compare_xml(path1, path2, tol_float=None):
     """
-    Compare the xml files at path1 and path2.
+    Compare the xml files at path1 and path2, by checking the xml data of the
+    files.
 
     Args
     ----
@@ -243,3 +246,120 @@ def compare_xml(path1, path2, tol_float=None):
         return True, None, None
     else:
         return False, string1, string2
+
+
+def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
+    """
+    Compare the vtk files at path1 and path2, by compairing the stored data.
+
+    Args
+    ----
+    raise_error: bool
+        If true, then an error will be raised in case the files do not match.
+        Otherwise False will be returned.
+    tol_float: None / float
+        If given, numbers will be considered equal if the difference between
+        them is smaller than tol_float.
+    """
+
+    # Check that both arguments are paths and exist.
+    if not (os.path.isfile(path1) and os.path.isfile(path2)):
+        raise ValueError('The paths given are not OK!')
+
+    # Default value for the numerical tolerance.
+    if tol_float is None:
+        tol_float = 1e-16
+
+    def get_vtk(path):
+        """
+        Return a vtk object for the file at path.
+        """
+        reader = vtk.vtkXMLGenericDataObjectReader()
+        reader.SetFileName(path)
+        reader.Update()
+        return reader.GetOutput()
+
+    def compare_arrays(array1, array2, name=None):
+        """
+        Compare two vtk arrays.
+        """
+
+        diff = vtk_numpy.vtk_to_numpy(array1) - vtk_numpy.vtk_to_numpy(array2)
+        if not np.max(np.abs(diff)) < tol_float:
+            error_string = 'VTK array comparison failed!'
+            if name is not None:
+                error_string += ' Name of the array: {}'.format(name)
+            raise ValueError(error_string)
+
+    def compare_data_sets(data1, data2):
+        """
+        Compare data sets obtained from vtk objects.
+        """
+
+        # Both data sets need to have the same number of arrays.
+        if not data1.GetNumberOfArrays() == data2.GetNumberOfArrays():
+            raise ValueError('Length of vtk data objects do not match!')
+
+        # Compare each array.
+        for i in range(data1.GetNumberOfArrays()):
+
+            # Get the arrays with the same name.
+            name = data1.GetArrayName(i)
+            array1 = data1.GetArray(name)
+            array2 = data2.GetArray(name)
+            compare_arrays(array1, array2, name=name)
+
+    # Perform all checks, catch errors.
+    try:
+        # Load the vtk files.
+        data1 = get_vtk(path1)
+        data2 = get_vtk(path2)
+
+        # Compare the point positions.
+        compare_arrays(
+            data1.GetPoints().GetData(),
+            data2.GetPoints().GetData(),
+            name='point_positions'
+            )
+
+        # Compare the cell and point data of the array.
+        compare_data_sets(data1.GetCellData(), data2.GetCellData())
+        compare_data_sets(data1.GetPointData(), data2.GetPointData())
+
+        # Compare the cell connectivity.
+        compare_arrays(
+            data1.GetCells().GetData(),
+            data2.GetCells().GetData(),
+            name='cell_connectivity')
+
+        # Compare the cell types.
+        compare_arrays(
+            data1.GetCellTypesArray(),
+            data2.GetCellTypesArray(),
+            name='cell_type')
+
+    except Exception as error:
+        if raise_error:
+            raise error
+        return False
+
+    return True
+
+
+def compare_vtk(self, name, ref_file, vtk_file, tol_float=None):
+    """
+    Compare two vtk files. Two different methods are used. Once the xml
+    structure is compared and once the vtk data is compared.
+    """
+
+    # Compare the xml structure.
+    is_equal_xml, _string_ref, _string_vtk = compare_xml(ref_file,
+        vtk_file, tol_float=tol_float)
+
+    # Compare the raw data.
+    is_equal_data = compare_vtk_data(ref_file, vtk_file, tol_float=tol_float)
+
+    # Check that both comparisons yield true.
+    error_string = name + ('\ncompare results: is_equal_xml={}, '
+        + 'is_equal_data={}').format(is_equal_xml, is_equal_data)
+    self.assertTrue(is_equal_xml and is_equal_data, error_string)
