@@ -326,11 +326,17 @@ def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
         compare_data_sets(data1.GetCellData(), data2.GetCellData())
         compare_data_sets(data1.GetPointData(), data2.GetPointData())
 
-        # Compare the cell types and connectivity.
+        # Compare the cell connectivity.
         compare_arrays(
             data1.GetCells().GetData(),
             data2.GetCells().GetData(),
-            name='cell_types_connectivity')
+            name='cell_connectivity')
+
+        # Compare the cell types.
+        compare_arrays(
+            data1.GetCellTypesArray(),
+            data2.GetCellTypesArray(),
+            name='cell_type')
 
     except Exception as error:
         if raise_error:
