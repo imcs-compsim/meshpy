@@ -346,11 +346,11 @@ def compare_vtk(self, name, ref_file, vtk_file, tol_float=None):
     structure is compared and once the vtk data is compared.
     """
 
-    # Compare the raw data.
+    # Compare the xml structure.
     is_equal_xml, _string_ref, _string_vtk = compare_xml(ref_file,
         vtk_file, tol_float=tol_float)
 
-    # Compare the xml structure.
+    # Compare the raw data.
     is_equal_data = compare_vtk_data(ref_file, vtk_file, tol_float=tol_float)
 
     # Check that both comparisons yield true.
