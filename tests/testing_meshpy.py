@@ -34,7 +34,7 @@ from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
 
 # Testing imports.
 from tests.testing_utility import (testing_temp, testing_input,
-    compare_strings, compare_xml)
+    compare_strings, compare_vtk)
 
 
 def create_test_mesh(mesh):
@@ -1408,14 +1408,8 @@ class TestMeshpy(unittest.TestCase):
             'test_meshpy_vtk_writer.vtu')
         writer.write_vtk(vtk_file, ascii=True)
 
-        # Compare the xml files.
-        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file)
-        if is_equal:
-            self.assertTrue(True, '')
-        else:
-            # Compare the full strings to see the difference.
-            compare_strings(self, 'test_meshpy_vtk_writer', string_ref,
-                string_vtk)
+        # Compare the vtk files.
+        compare_vtk(self, 'test_meshpy_vtk_writer', ref_file, vtk_file)
 
     def test_vtk_writer_beam(self):
         """Create a sample mesh and check the VTK output."""
@@ -1435,15 +1429,9 @@ class TestMeshpy(unittest.TestCase):
         mesh.write_vtk(output_name='test_meshpy_vtk', coupling_sets=True,
             output_directory=testing_temp, ascii=True)
 
-        # Compare the xml files.
-        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file,
+        # Compare the vtk files.
+        compare_vtk(self, 'test_vtk_writer_beam', ref_file, vtk_file,
             tol_float=mpy.eps_pos)
-        if is_equal:
-            self.assertTrue(True, '')
-        else:
-            # Compare the full strings to see the difference.
-            compare_strings(self, 'test_vtk_writer_beam', string_ref,
-                string_vtk)
 
         # Write VTK output, without coupling sets."""
         ref_file = os.path.join(testing_input,
@@ -1453,15 +1441,9 @@ class TestMeshpy(unittest.TestCase):
         mesh.write_vtk(output_name='test_meshpy_vtk_no_coupling',
             coupling_sets=False, output_directory=testing_temp, ascii=True)
 
-        # Compare the xml files.
-        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file,
-            tol_float=mpy.eps_pos)
-        if is_equal:
-            self.assertTrue(True, '')
-        else:
-            # Compare the full strings to see the difference.
-            compare_strings(self, 'test_meshpy_vtk_no_coupling_beam',
-                string_ref, string_vtk)
+        # Compare the vtk files.
+        compare_vtk(self, 'test_meshpy_vtk_no_coupling_beam', ref_file,
+            vtk_file, tol_float=mpy.eps_pos)
 
     def test_vtk_writer_solid(self):
         """Import a solid mesh and check the VTK output."""
@@ -1484,14 +1466,8 @@ class TestMeshpy(unittest.TestCase):
         input_file.write_vtk(output_name='test_meshpy_vtk',
             output_directory=testing_temp, ascii=True)
 
-        # Compare the xml files.
-        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file)
-        if is_equal:
-            self.assertTrue(True, '')
-        else:
-            # Compare the full strings to see the difference.
-            compare_strings(self, 'test_meshpy_vtk_solid', string_ref,
-                string_vtk)
+        # Compare the vtk files.
+        compare_vtk(self, 'test_meshpy_vtk_solid', ref_file, vtk_file)
 
     def test_vtk_writer_solid_elements(self):
         """
@@ -1517,14 +1493,8 @@ class TestMeshpy(unittest.TestCase):
         input_file.write_vtk(output_name='test_meshpy_vtk_elements',
             output_directory=testing_temp, ascii=True)
 
-        # Compare the xml files.
-        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file)
-        if is_equal:
-            self.assertTrue(True, '')
-        else:
-            # Compare the full strings to see the difference.
-            compare_strings(self, 'test_meshpy_vtk_elements_solid', string_ref,
-                string_vtk)
+        # Compare the vtk files.
+        compare_vtk(self, 'test_meshpy_vtk_elements_solid', ref_file, vtk_file)
 
     def test_cubitpy_import(self):
         """
@@ -1703,15 +1673,8 @@ class TestMeshpy(unittest.TestCase):
             output_directory=testing_temp, ascii=True,
             overlapping_elements=True)
 
-        # Compare the xml files.
-        is_equal, string_ref, string_vtk = compare_xml(ref_file, vtk_file,
-            tol_float=mpy.eps_pos)
-        if is_equal:
-            self.assertTrue(True, '')
-        else:
-            # Compare the full strings to see the difference.
-            compare_strings(self, 'test_check_double_elements', string_ref,
-                string_vtk)
+        # Compare the vtk files.
+        compare_vtk(self, 'test_check_double_elements', ref_file, vtk_file)
 
 
 if __name__ == '__main__':
