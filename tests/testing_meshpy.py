@@ -14,15 +14,15 @@ import vtk
 
 # Meshpy imports.
 from meshpy import (mpy, Rotation, InputFile, MaterialReissner, MaterialBeam,
-    BoundaryCondition, MaterialKirchhoff, Mesh, Coupling, Beam3rHerm2Lin3,
+    BoundaryCondition, MaterialKirchhoff, Mesh, Coupling, Beam3rHerm2Line3,
     Function, MaterialEulerBernoulli, Beam3eb, InputSection, Beam3k,
     BaseMeshItem, set_header_static, set_beam_to_solid_meshtying,
-    set_runtime_output)
+    set_runtime_output, Beam3rLine2Line2)
 from meshpy.node import Node
 from meshpy.vtk_writer import VTKWriter
 from meshpy.geometry_set import GeometrySet
 from meshpy.container import GeometryName
-from meshpy.element_beam import Beam, Beam3rLin2Lin2
+from meshpy.element_beam import Beam
 from meshpy.utility import get_close_nodes, flatten
 
 # Geometry functions.
@@ -55,11 +55,11 @@ def create_test_mesh(mesh):
                 [100 * random.uniform(-1, 1) for _i in range(3)],
                 100 * random.uniform(-1, 1)
                 )))
-    beam = Beam3rHerm2Lin3(material=material, nodes=mesh.nodes)
+    beam = Beam3rHerm2Line3(material=material, nodes=mesh.nodes)
     mesh.add(beam)
 
     # Add a beam line with three elements
-    create_beam_mesh_line(mesh, Beam3rHerm2Lin3, material,
+    create_beam_mesh_line(mesh, Beam3rHerm2Line3, material,
         [100 * random.uniform(-1, 1) for _i in range(3)],
         [100 * random.uniform(-1, 1) for _i in range(3)],
         n_el=3)
@@ -162,18 +162,18 @@ class TestMeshpy(unittest.TestCase):
 
             # Create the reference mesh.
             if not flip:
-                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat,
                     [0, 0, 0], [1, 0, 0], n_el=1)
-                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat,
                     [1, 0, 0], [1, 1, 0], n_el=1)
-                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat,
                     [1, 1, 0], [1, 1, 1], n_el=1)
             else:
-                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat,
                     [1, 0, 0], [0, 0, 0], n_el=1)
-                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat,
                     [1, 1, 0], [1, 0, 0], n_el=1)
-                create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+                create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat,
                     [1, 1, 1], [1, 1, 0], n_el=1)
 
                 # Reorder the internal nodes.
@@ -188,11 +188,11 @@ class TestMeshpy(unittest.TestCase):
             mesh_ref.rotate(rot_1)
 
             # Create the mesh that will be mirrored.
-            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0],
+            create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0],
                 [-1, 0, 0], n_el=1)
-            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [-1, 0, 0],
+            create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [-1, 0, 0],
                 [-1, 1, 0], n_el=1)
-            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [-1, 1, 0],
+            create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [-1, 1, 0],
                 [-1, 1, 1], n_el=1)
             mesh.rotate(rot_1.inv())
 
@@ -248,7 +248,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Add one element with BCs.
         mat = BaseMeshItem('material')
-        sets = create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat,
+        sets = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
             [0, 0, 0], [1, 2, 3])
         mesh.add(BoundaryCondition(sets['start'], 'test',
             bc_type=mpy.bc.dirichlet))
@@ -286,7 +286,7 @@ class TestMeshpy(unittest.TestCase):
             mat = MaterialReissner(radius=0.05)
 
             # Create the line.
-            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat,
+            create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
                 [0.2, 0, 0],
                 [0.2, 5 * 0.2 * 2 * np.pi, 4],
                 n_el=3)
@@ -325,7 +325,7 @@ class TestMeshpy(unittest.TestCase):
         mat = MaterialReissner(radius=0.05)
 
         # Create the line and bend it to a helix.
-        create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat,
+        create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
             [0.2, 0, 0],
             [0.2, 5 * 0.2 * 2 * np.pi, 4],
             n_el=20)
@@ -418,7 +418,7 @@ class TestMeshpy(unittest.TestCase):
         def create_flat_mesh():
             """Create a flat honeycomb mesh."""
             input_file = InputFile()
-            create_beam_mesh_honeycomb_flat(input_file, Beam3rHerm2Lin3,
+            create_beam_mesh_honeycomb_flat(input_file, Beam3rHerm2Line3,
                 material, 1, 5, 5,
                 create_couplings=False)
             return input_file
@@ -531,7 +531,7 @@ class TestMeshpy(unittest.TestCase):
                 R * npAD.sin(t_trans),
                 t_trans * tz / (2 * np.pi)
                 ])
-        helix_set = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat,
+        helix_set = create_beam_mesh_curve(input_file, Beam3rHerm2Line3, mat,
             helix, [0., 2. * np.pi * n], n_el=n_el)
 
         # Compare the coordinates with the ones from Mathematica.
@@ -577,7 +577,7 @@ class TestMeshpy(unittest.TestCase):
         # Create a helix with a parametric curve.
         def sin(t):
             return npAD.array([t, npAD.sin(t)])
-        sin_set = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat,
+        sin_set = create_beam_mesh_curve(input_file, Beam3rHerm2Line3, mat,
             sin, [0., 2. * np.pi], n_el=n_el)
 
         # Compare the coordinates with the ones from Mathematica.
@@ -634,7 +634,7 @@ class TestMeshpy(unittest.TestCase):
             R1 = Rotation([1, 0, 0], t * 2 * np.pi)
             R2 = Rotation.from_basis(rp, [0, 0, 1])
             return R2 * R1
-        sin_set = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat,
+        sin_set = create_beam_mesh_curve(input_file, Beam3rHerm2Line3, mat,
             curve, [0., 1.], n_el=n_el, function_rotation=rotation)
 
         # Apply boundary conditions.
@@ -677,10 +677,10 @@ class TestMeshpy(unittest.TestCase):
             return npAD.array([t_trans, 0, 0])
 
         # Create mesh.
-        set_1 = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat, line,
+        set_1 = create_beam_mesh_curve(input_file, Beam3rHerm2Line3, mat, line,
             [0., 5.], n_el=3)
         input_file.translate([0, 1, 0])
-        set_2 = create_beam_mesh_curve(input_file, Beam3rHerm2Lin3, mat, line,
+        set_2 = create_beam_mesh_curve(input_file, Beam3rHerm2Line3, mat, line,
             [5., 0.], n_el=3)
 
         # Add boundary conditions.
@@ -722,7 +722,7 @@ class TestMeshpy(unittest.TestCase):
             shear_correction=1.1)
 
         # Create mesh.
-        mesh = create_beam_mesh_arc_segment(input_file, Beam3rHerm2Lin3, mat,
+        mesh = create_beam_mesh_arc_segment(input_file, Beam3rHerm2Line3, mat,
             [3, 6, 9.2], Rotation([4.5, 7, 10], np.pi / 5), 10, np.pi / 2.3,
             n_el=5)
 
@@ -751,7 +751,7 @@ class TestMeshpy(unittest.TestCase):
         input_file = InputFile()
 
         # Create a beam arc with the different Reissner beam types.
-        for i, beam_type in enumerate([Beam3rHerm2Lin3, Beam3rLin2Lin2]):
+        for i, beam_type in enumerate([Beam3rHerm2Line3, Beam3rLine2Line2]):
             create_beam_mesh_arc_segment(input_file, beam_type, material,
                 [0.0, 0.0, i], Rotation([0.0, 0.0, 1.0], np.pi / 2.0), 2.0,
                 np.pi / 2.0, n_el=2)
@@ -914,7 +914,7 @@ class TestMeshpy(unittest.TestCase):
                         nodes.append(input_file.nodes[0])
                     else:
                         nodes.append(input_file.nodes[index])
-                element = Beam3rHerm2Lin3(mat, nodes)
+                element = Beam3rHerm2Line3(mat, nodes)
                 input_file.add(element)
 
             # Add sets.
@@ -996,7 +996,7 @@ class TestMeshpy(unittest.TestCase):
                 arg_angle = np.pi
                 arg_n_el = n_el
             return {
-                'beam_object': Beam3rHerm2Lin3,
+                'beam_object': Beam3rHerm2Line3,
                 'material': mat,
                 'center': [0, 0, 0],
                 'axis_rotation': Rotation([0, 0, 1], arg_rot_angle),
@@ -1024,7 +1024,7 @@ class TestMeshpy(unittest.TestCase):
                 arg_interval = [np.pi, 2 * np.pi]
                 arg_n_el = n_el
             return {
-                'beam_object': Beam3rHerm2Lin3,
+                'beam_object': Beam3rHerm2Line3,
                 'material': mat,
                 'function': circle_function,
                 'interval': arg_interval,
@@ -1118,11 +1118,11 @@ class TestMeshpy(unittest.TestCase):
         mesh_ref, mesh_couple = create_mesh()
 
         # Create a simple beam.
-        create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [0, 0, 0],
+        create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat, [0, 0, 0],
             [2, 0, 0], n_el=2)
-        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [0, 0, 0],
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Line3, mat, [0, 0, 0],
             [1, 0, 0])
-        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [1, 0, 0],
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Line3, mat, [1, 0, 0],
             [2, 0, 0])
 
         # Rotate both meshes
@@ -1142,13 +1142,13 @@ class TestMeshpy(unittest.TestCase):
         mesh_ref, mesh_couple = create_mesh()
 
         # Create a simple beam.
-        set_ref = create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat,
+        set_ref = create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat,
             [0, 0, 0], [1, 0, 0])
-        create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [0, 0, 0],
+        create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat, [0, 0, 0],
             [1, 0, 0], start_node=set_ref['start'], end_node=set_ref['end'])
-        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [0, 0, 0],
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Line3, mat, [0, 0, 0],
             [1, 0, 0])
-        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [0, 0, 0],
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Line3, mat, [0, 0, 0],
             [1, 0, 0])
 
         # Rotate both meshes
@@ -1168,11 +1168,11 @@ class TestMeshpy(unittest.TestCase):
         mesh_ref, mesh_couple = create_mesh()
 
         # Create a simple beam.
-        create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [0, 0, 0],
+        create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat, [0, 0, 0],
             [2, 0, 0], n_el=2)
-        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [0, 0, 0],
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Line3, mat, [0, 0, 0],
             [1, 0, 0])
-        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [1, 0, 0],
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Line3, mat, [1, 0, 0],
             [2, 0, 0])
 
         # Create set with all the beam nodes.
@@ -1182,13 +1182,13 @@ class TestMeshpy(unittest.TestCase):
         node_set_2_couple = GeometrySet(mpy.geo.line, nodes=mesh_couple.nodes)
 
         # Create connecting beams.
-        create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [1, 0, 0],
+        create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat, [1, 0, 0],
             [2, 2, 2])
-        create_beam_mesh_line(mesh_ref, Beam3rHerm2Lin3, mat, [1, 0, 0],
+        create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat, [1, 0, 0],
             [2, -2, -2])
-        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [1, 0, 0],
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Line3, mat, [1, 0, 0],
             [2, 2, 2])
-        create_beam_mesh_line(mesh_couple, Beam3rHerm2Lin3, mat, [1, 0, 0],
+        create_beam_mesh_line(mesh_couple, Beam3rHerm2Line3, mat, [1, 0, 0],
             [2, -2, -2])
 
         # Rotate both meshes
@@ -1227,9 +1227,9 @@ class TestMeshpy(unittest.TestCase):
         # Add beams to the model.
         beam_mesh = Mesh()
         material = MaterialReissner(youngs_modulus=1000, radius=0.05)
-        create_beam_mesh_line(beam_mesh, Beam3rHerm2Lin3,
+        create_beam_mesh_line(beam_mesh, Beam3rHerm2Line3,
             material, [0, 0, 0], [0, 0, 1], n_el=3)
-        create_beam_mesh_line(beam_mesh, Beam3rHerm2Lin3,
+        create_beam_mesh_line(beam_mesh, Beam3rHerm2Line3,
             material, [0, 0.5, 0], [0, 0.5, 1], n_el=3)
 
         # Set coupling condition.
@@ -1253,7 +1253,8 @@ class TestMeshpy(unittest.TestCase):
     def test_nurbs_import(self):
         """
         Test if the import of a nurbs mesh works as expected.
-        This script generates the baci test case: beam3r_herm2lin3_static_beam_to_solid_volume_meshtying_nurbs27_mortar_penalty_line4
+        This script generates the baci test case:
+        beam3r_herm2line3_static_beam_to_solid_volume_meshtying_nurbs27_mortar_penalty_line4
         """
 
         # Create beam mesh and load solid file.
@@ -1291,9 +1292,9 @@ class TestMeshpy(unittest.TestCase):
         material = MaterialReissner(youngs_modulus=1000, radius=0.05)
 
         # Create the beams.
-        set_1 = create_beam_mesh_line(input_file, Beam3rHerm2Lin3, material,
+        set_1 = create_beam_mesh_line(input_file, Beam3rHerm2Line3, material,
             [0, 0, 0.95], [1, 0, 0.95], n_el=2)
-        set_2 = create_beam_mesh_line(input_file, Beam3rHerm2Lin3, material,
+        set_2 = create_beam_mesh_line(input_file, Beam3rHerm2Line3, material,
             [-0.25, -0.3, 0.85], [-0.25, 0.5, 0.85], n_el=2)
 
         # Add boundary conditions on the beams.
@@ -1419,7 +1420,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Add content to the mesh.
         mat = MaterialBeam(radius=0.05)
-        create_beam_mesh_honeycomb(mesh, Beam3rHerm2Lin3, mat, 2., 2, 3,
+        create_beam_mesh_honeycomb(mesh, Beam3rHerm2Line3, mat, 2., 2, 3,
             n_el=2, add_sets=True)
 
         # Write VTK output, with coupling sets."""
@@ -1546,10 +1547,10 @@ class TestMeshpy(unittest.TestCase):
         def create_mesh(mesh):
             """Add material and function to the mesh and create a beam."""
             mesh.add(fun, mat)
-            set1 = create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0],
-                [1, 0, 0])
-            set2 = create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [1, 0, 0],
-                [1, 1, 0])
+            set1 = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
+                [0, 0, 0], [1, 0, 0])
+            set2 = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
+                [1, 0, 0], [1, 1, 0])
             mesh.add(BoundaryCondition(set1['line'], 'fix',
                 bc_type=mpy.bc.dirichlet))
             mesh.add(BoundaryCondition(set2['line'], 'load',
@@ -1628,8 +1629,10 @@ class TestMeshpy(unittest.TestCase):
 
         # Add two beams to create an elbow structure. The beams each have a
         # node at the intersection.
-        create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0], [1, 0, 0])
-        create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [1, 0, 0], [1, 1, 0])
+        create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
+            [0, 0, 0], [1, 0, 0])
+        create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
+            [1, 0, 0], [1, 1, 0])
 
         # Call coupling twice -> this will create two coupling objects for the
         # corner node.
@@ -1652,9 +1655,10 @@ class TestMeshpy(unittest.TestCase):
 
         # Add two beams to create an elbow structure. The beams each have a
         # node at the intersection.
-        create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0], [2, 0, 0],
-            n_el=2)
-        create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat, [0, 0, 0], [1, 0, 0])
+        create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
+            [0, 0, 0], [2, 0, 0], n_el=2)
+        create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
+            [0, 0, 0], [1, 0, 0])
 
         # Rotate the mesh with an arbitrary rotation.
         mesh.rotate(Rotation([1, 2, 3.24313], 2.2323423), [1, 3, -2.23232323])

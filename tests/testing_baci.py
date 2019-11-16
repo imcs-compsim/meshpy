@@ -17,7 +17,7 @@ from tests.testing_utility import (baci_release, testing_temp, testing_path,
 
 # Meshpy imports.
 from meshpy import (mpy, Rotation, InputFile, InputSection, MaterialReissner,
-    Function, Beam3rHerm2Lin3, BoundaryCondition, Mesh, set_header_static)
+    Function, Beam3rHerm2Line3, BoundaryCondition, Mesh, set_header_static)
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
@@ -149,7 +149,7 @@ class TestFullBaci(unittest.TestCase):
         # Create the honeycomb mesh.
         mesh_honeycomb = Mesh()
         honeycomb_set = create_beam_mesh_honeycomb(mesh_honeycomb,
-            Beam3rHerm2Lin3, material, 50.0, 10, 4, n_el=1, closed_top=False,
+            Beam3rHerm2Line3, material, 50.0, 10, 4, n_el=1, closed_top=False,
             add_sets=True)
         mesh_honeycomb.rotate(Rotation([0, 0, 1], 0.5 * np.pi))
 
@@ -226,7 +226,7 @@ class TestFullBaci(unittest.TestCase):
 
         # Add a straight beam.
         input_file.add(material)
-        cantilever_set = create_beam_mesh_line(input_file, Beam3rHerm2Lin3,
+        cantilever_set = create_beam_mesh_line(input_file, Beam3rHerm2Line3,
             material, [2, 0, -5], [2, 0, 5], n_el=3)
 
         # Add boundary conditions.
@@ -360,7 +360,7 @@ class TestFullBaci(unittest.TestCase):
             for closed_top in [False, True]:
                 mesh.translate(17 * np.array([1, 0, 0]))
                 honeycomb_set = create_beam_mesh_honeycomb(mesh,
-                    Beam3rHerm2Lin3, material, 10, 6, 3, n_el=2,
+                    Beam3rHerm2Line3, material, 10, 6, 3, n_el=2,
                     vertical=vertical, closed_top=closed_top)
                 mesh.add(
                     BoundaryCondition(honeycomb_set['bottom'],
@@ -448,7 +448,7 @@ class TestFullBaci(unittest.TestCase):
             mesh = Mesh()
 
             # Create the first line.
-            set_1 = create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat,
+            set_1 = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
                 [0, 0, 0], 1. * direction, n_el=3)
 
             if not i == 0:
@@ -463,7 +463,7 @@ class TestFullBaci(unittest.TestCase):
                 start_node = set_1['end']
 
             # Add the second line.
-            set_2 = create_beam_mesh_line(mesh, Beam3rHerm2Lin3, mat,
+            set_2 = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
                 1. * direction,
                 2. * direction,
                 n_el=3, start_node=start_node
