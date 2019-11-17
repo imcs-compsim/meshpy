@@ -12,11 +12,12 @@ import socket
 import warnings
 
 # Meshpy imports.
-from meshpy import mpy, InputFile, Mesh, MaterialReissner, Beam3rHerm2Lin3, \
-    Rotation
+from meshpy import (mpy, InputFile, Mesh, MaterialReissner, Beam3rHerm2Line3,
+    Rotation)
 
-from meshpy.mesh_creation_functions.beam_basic_geometry import \
+from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_line
+    )
 
 # Cubitpy imports.
 from cubitpy import cupy, CubitPy
@@ -102,19 +103,19 @@ def create_large_beam_mesh(nx, ny, nz, n_el):
 
     for ix in range(nx + 1):
         for iy in range(ny + 1):
-            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, material,
+            create_beam_mesh_line(mesh, Beam3rHerm2Line3, material,
                 [ix / nx, iy / ny, 0],
                 [ix / nx, iy / ny, 1],
                 n_el=nz * n_el)
     for iy in range(ny + 1):
         for iz in range(nz + 1):
-            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, material,
+            create_beam_mesh_line(mesh, Beam3rHerm2Line3, material,
                 [0, iy / ny, iz / nz],
                 [1, iy / ny, iz / nz],
                 n_el=nx * n_el)
     for iz in range(nz + 1):
         for ix in range(nx + 1):
-            create_beam_mesh_line(mesh, Beam3rHerm2Lin3, material,
+            create_beam_mesh_line(mesh, Beam3rHerm2Line3, material,
                 [ix / nx, 0, iz / nz],
                 [ix / nx, 1, iz / nz],
                 n_el=ny * n_el)
