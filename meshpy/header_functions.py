@@ -156,8 +156,8 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
     input_file.add(InputSection(
         'BINNING STRATEGY',
         '''
-        CUTOFF_RADIUS {1}
-        BOUNDINGBOX {0}
+        BIN_SIZE_LOWER_BOUND {1}
+        DOMAINBOUNDINGBOX {0}
         '''.format(bounding_box_string, binning_cutoff_radius),
         option_overwrite=True))
 

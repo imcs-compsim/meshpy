@@ -77,8 +77,8 @@ BEAMS_ADDITEXT                  Yes
 BEAMS_EXTVAL                    0.01
 BEAMS_BTSPH                     Yes
 --------------------------------------------------------------------BINNING STRATEGY
-CUTOFF_RADIUS                   20
-BOUNDINGBOX                     -100 -100 -100 100 100 100
+BIN_SIZE_LOWER_BOUND            20
+DOMAINBOUNDINGBOX               -100 -100 -100 100 100 100
 ------------------------------------------------STRUCT NOX/Printing
 Outer Iteration                 = Yes
 Inner Iteration                 = No

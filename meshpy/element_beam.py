@@ -228,8 +228,8 @@ class Beam(Element):
             cell_data=cell_data, point_data=point_data)
 
 
-class Beam3rHerm2Lin3(Beam):
-    """Represents a BEAM3R HERM2LIN3 element."""
+class Beam3rHerm2Line3(Beam):
+    """Represents a BEAM3R HERM2LINE3 element."""
 
     nodes_create = [
         [-1, True, False],
@@ -252,7 +252,7 @@ class Beam3rHerm2Lin3(Beam):
         # Check the material.
         self._check_material()
 
-        return '{} BEAM3R HERM2LIN3 {}MAT {} TRIADS{}'.format(
+        return '{} BEAM3R HERM2LINE3 {}MAT {} TRIADS{}'.format(
             self.n_global,
             string_nodes,
             self.material.n_global,
@@ -260,7 +260,7 @@ class Beam3rHerm2Lin3(Beam):
             )
 
 
-class Beam3rLin2Lin2(Beam):
+class Beam3rLine2Line2(Beam):
     """
     Represents a Reissner beam with linear shapefunctions in the rotations as
     well as the displacements.
@@ -286,7 +286,7 @@ class Beam3rLin2Lin2(Beam):
         # Check the material.
         self._check_material()
 
-        return '{} BEAM3R LIN2 {}MAT {} TRIADS{}'.format(
+        return '{} BEAM3R LINE2 {}MAT {} TRIADS{}'.format(
             self.n_global,
             string_nodes,
             self.material.n_global,
@@ -331,7 +331,7 @@ class Beam3kClass(Beam):
         # Check the material.
         self._check_material()
 
-        string_dat = ('{} BEAM3K LIN3 {} WK {} ROTVEC {} MAT {} ' +
+        string_dat = ('{} BEAM3K LINE3 {} WK {} ROTVEC {} MAT {} ' +
             'TRIADS{}{}').format(
                 self.n_global,
                 string_nodes,
@@ -397,7 +397,7 @@ class Beam3eb(Beam):
         # Check the material.
         self._check_material()
 
-        return '{} BEAM3EB LIN2 {}MAT {}'.format(
+        return '{} BEAM3EB LINE2 {}MAT {}'.format(
             self.n_global,
             string_nodes,
             self.material.n_global

@@ -9,7 +9,7 @@ import numpy as np
 import os
 
 # Meshpy imports.
-from meshpy import (mpy, InputFile, MaterialReissner, Beam3rHerm2Lin3,
+from meshpy import (mpy, InputFile, MaterialReissner, Beam3rHerm2Line3,
     MaterialEulerBernoulli, Beam3eb)
 
 # Geometry functions.
@@ -41,7 +41,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         mat = MaterialReissner()
 
         # Create mesh.
-        create_beam_mesh_stent(input_file, Beam3rHerm2Lin3, mat, 0.11, 0.02,
+        create_beam_mesh_stent(input_file, Beam3rHerm2Line3, mat, 0.11, 0.02,
             5, 8, fac_bottom=0.6, fac_neck=0.52, fac_radius=0.36,
             alpha=0.47 * np.pi, n_el=2)
 
