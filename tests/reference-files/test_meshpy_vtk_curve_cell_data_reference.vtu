@@ -1,0 +1,84 @@
+<?xml version="1.0"?>
+<VTKFile type="UnstructuredGrid" version="0.1" byte_order="LittleEndian" header_type="UInt32" compressor="vtkZLibDataCompressor">
+  <UnstructuredGrid>
+    <Piece NumberOfPoints="18" NumberOfCells="6">
+      <PointData>
+        <DataArray type="Float64" Name="base_vector_3" NumberOfComponents="3" format="ascii" RangeMin="1" RangeMax="1">
+          0 0 1 0 0 1
+          0 0 1 0 0 1
+          0 0 1 0 0 1
+          0 0 1 0 0 1
+          0 0 1 0 0 1
+          0 0 1 0 0 1
+          0 0 -1 0 0 -1
+          0 0 -1 0 0 -1
+          0 0 -1 0 0 -1
+        </DataArray>
+        <DataArray type="Float64" Name="base_vector_1" NumberOfComponents="3" format="ascii" RangeMin="1" RangeMax="1">
+          1 0 0 1 0 0
+          1 0 0 1 0 0
+          1 0 0 1 0 0
+          1 0 0 1 0 0
+          1 0 0 1 0 0
+          1 0 0 1 0 0
+          1 0 0 0.92387953251 -0.38268343237 0
+          0.70710678119 -0.70710678119 0 0.70710678119 -0.70710678119 0
+          0.38268343237 -0.92387953251 0 0 -1 0
+        </DataArray>
+        <DataArray type="Float64" Name="base_vector_2" NumberOfComponents="3" format="ascii" RangeMin="1" RangeMax="1">
+          0 1 0 0 1 0
+          0 1 0 0 1 0
+          0 1 0 0 1 0
+          0 1 0 0 1 0
+          0 1 0 0 1 0
+          0 1 0 0 1 0
+          0 -1 0 -0.38268343237 -0.92387953251 0
+          -0.70710678119 -0.70710678119 0 -0.70710678119 -0.70710678119 0
+          -0.92387953251 -0.38268343237 0 -1 0 0
+        </DataArray>
+        <DataArray type="Float64" Name="node_value" format="ascii" RangeMin="0.5" RangeMax="1">
+          1 0.5 1 1 0.5 1
+          1 0.5 1 1 0.5 1
+          1 0.5 1 1 0.5 1
+        </DataArray>
+      </PointData>
+      <CellData>
+        <DataArray type="Float64" Name="other_data" format="ascii" RangeMin="0" RangeMax="69">
+          0 0 0 0 69 69
+        </DataArray>
+        <DataArray type="Float64" Name="cross_section_radius" format="ascii" RangeMin="0.05" RangeMax="0.05">
+          0.05 0.05 0.05 0.05 0.05 0.05
+        </DataArray>
+        <DataArray type="Float64" Name="cell_data" format="ascii" RangeMin="0" RangeMax="2">
+          0 0 1 1 2 2
+        </DataArray>
+      </CellData>
+      <Points>
+        <DataArray type="Float32" Name="Points" NumberOfComponents="3" format="ascii" RangeMin="0" RangeMax="3.5">
+          0 0 0 0.5 0 0
+          1 0 0 1 0 0
+          1.5 0 0 2 0 0
+          0 1 0 0.5 1 0
+          1 1 0 1 1 0
+          1.5 1 0 2 1 0
+          0 3.5 -1.8369701465e-16 0.57402515411 3.3858191967 -1.6971391683e-16
+          1.0606601238 3.0606601238 -1.2989340243e-16 1.0606601238 3.0606601238 -1.2989340243e-16
+          1.3858193159 2.5740251541 -7.0297805391e-17 1.5 2 -3.6977854932e-32
+        </DataArray>
+      </Points>
+      <Cells>
+        <DataArray type="Int64" Name="connectivity" format="ascii" RangeMin="0" RangeMax="17">
+          0 1 2 3 4 5
+          6 7 8 9 10 11
+          12 13 14 15 16 17
+        </DataArray>
+        <DataArray type="Int64" Name="offsets" format="ascii" RangeMin="3" RangeMax="18">
+          3 6 9 12 15 18
+        </DataArray>
+        <DataArray type="UInt8" Name="types" format="ascii" RangeMin="4" RangeMax="4">
+          4 4 4 4 4 4
+        </DataArray>
+      </Cells>
+    </Piece>
+  </UnstructuredGrid>
+</VTKFile>

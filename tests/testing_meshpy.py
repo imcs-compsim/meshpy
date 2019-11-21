@@ -1497,6 +1497,34 @@ class TestMeshpy(unittest.TestCase):
         # Compare the vtk files.
         compare_vtk(self, 'test_meshpy_vtk_elements_solid', ref_file, vtk_file)
 
+    def test_vtk_curve_cell_data(self):
+        """Test that when creating a beam, cell data can be given."""
+
+        # Create the mesh.
+        mesh = Mesh()
+
+        # Add content to the mesh.
+        mat = MaterialBeam(radius=0.05)
+        create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
+            [0, 0, 0], [2, 0, 0], n_el=2)
+        create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
+            [0, 1, 0], [2, 1, 0], n_el=2, vtk_cell_data={'cell_data': 1})
+        create_beam_mesh_arc_segment(mesh, Beam3rHerm2Line3, mat,
+            [0, 2, 0], Rotation([1, 0, 0], np.pi), 1.5, np.pi / 2.0, n_el=2,
+            vtk_cell_data={'cell_data': 2, 'other_data': 69})
+
+        # Write VTK output, with coupling sets."""
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_vtk_curve_cell_data_reference.vtu')
+        vtk_file = os.path.join(testing_temp,
+            'test_meshpy_vtk_curve_cell_data_beam.vtu')
+        mesh.write_vtk(output_name='test_meshpy_vtk_curve_cell_data',
+            output_directory=testing_temp, ascii=True)
+
+        # Compare the vtk files.
+        compare_vtk(self, 'test_meshpy_vtk_curve_cell_data', ref_file,
+            vtk_file)
+
     def test_cubitpy_import(self):
         """
         Check that a import from a cubitpy object is the same as importing the
