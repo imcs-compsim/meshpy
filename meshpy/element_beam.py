@@ -355,7 +355,7 @@ def Beam3k(**kwargs_class):
     def create_class(**kwargs):
         """
         The function that will be returned. This function should behave like
-        the call to the __init__ function of the class. 
+        the call to the __init__ function of the class.
         """
         return Beam3kClass(**kwargs_class, **kwargs)
 
