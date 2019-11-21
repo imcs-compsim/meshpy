@@ -22,6 +22,9 @@ class Element(BaseMeshItem):
         # Material of this element.
         self.material = material
 
+        # VTK cell data for this element.
+        self.vtk_cell_data = {}
+
     @classmethod
     def from_dat(cls, input_line):
         """

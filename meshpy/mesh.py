@@ -844,7 +844,7 @@ class Mesh(object):
 
     def create_beam_mesh_function(self, *, beam_object=None, material=None,
             function_generator=None, interval=[0, 1], n_el=1, add_sets=False,
-            start_node=None, end_node=None):
+            start_node=None, end_node=None, vtk_cell_data=None):
         """
         Generic beam creation function.
 
@@ -880,6 +880,10 @@ class Mesh(object):
             If this is a Node or GeometrySet, the last node of the created beam
             is set to that node.
             If it is True the created beam is closed within itself.
+        vtk_cell_data: {cell_data_name (str): cell_data_value (float)}
+            With this argument, a vtk cell data can be set for the elements
+            created within this function. This can be used to check which
+            elements are created by which function.
 
         Return
         ----
@@ -955,6 +959,15 @@ class Mesh(object):
             elements.append(element)
             nodes.extend(element.create_beam(function, start_node=first_node,
                 end_node=last_node))
+
+        # Set vtk cell data on created elements.
+        if vtk_cell_data is not None:
+            for data_name, data_value in vtk_cell_data.items():
+                for element in elements:
+                    if data_name in element.vtk_cell_data.keys():
+                        raise KeyError(('The cell data "{}" '
+                            + 'already exists!').format(data_name))
+                    element.vtk_cell_data[data_name] = data_value
 
         # Add items to the mesh
         self.elements.extend(elements)
