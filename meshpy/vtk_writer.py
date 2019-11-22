@@ -35,9 +35,9 @@ def add_point_data_node_sets(point_data, nodes):
         data_vector = np.zeros(len(nodes))
         for i, node in enumerate(nodes):
             if geometry_set in node.node_sets_link:
-                data_vector[i] = 1.
+                data_vector[i] = 1
             else:
-                data_vector[i] = 0.
+                data_vector[i] = mpy.vtk_nan_int
 
         # Get the name of the geometry type.
         if geometry_set.geometry_type is mpy.geo.point:
@@ -277,14 +277,20 @@ class VTKWriter(object):
 
     def _add_data(self, data, vtk_tensor_type, non_zero_data=None):
         """Add data to a VTK data array."""
+
+        if _get_vtk_array_type(data) == mpy.vtk_type.int:
+            nan_value = mpy.vtk_nan_int
+        elif _get_vtk_array_type(data) == mpy.vtk_type.float:
+            nan_value = mpy.vtk_nan_float
+
         if vtk_tensor_type == mpy.vtk_tensor.scalar:
             if non_zero_data is None:
-                data.InsertNextTuple1(0)
+                data.InsertNextTuple1(nan_value)
             else:
                 data.InsertNextTuple1(non_zero_data)
         else:
             if non_zero_data is None:
-                data.InsertNextTuple3(0, 0, 0)
+                data.InsertNextTuple3(nan_value, nan_value, nan_value)
             else:
                 data.InsertNextTuple3(non_zero_data[0], non_zero_data[1],
                     non_zero_data[2])
