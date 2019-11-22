@@ -57,10 +57,15 @@ class VTKGeometry(IntEnum):
     cell = 2
 
 
-class VTKData(IntEnum):
-    """Enum for VTK data types."""
+class VTKTensor(IntEnum):
+    """Enum for VTK tensor types."""
     scalar = 1
     vector = 2
+
+class VTKType(IntEnum):
+    """Enum for VTK value types."""
+    int = 1
+    float = 2
 
 
 class MeshPy(object):
@@ -92,8 +97,10 @@ class MeshPy(object):
         # VTK types.
         # Geometry types, cell or point.
         self.vtk_geo = VTKGeometry
-        # Data types, scalar or vector.
-        self.vtk_data = VTKData
+        # Tensor types, scalar or vector.
+        self.vtk_tensor = VTKTensor
+        # Data types, integer or float.
+        self.vtk_type = VTKType
 
     def set_default_values(self):
 
@@ -126,6 +133,9 @@ class MeshPy(object):
         # Number of digits for node set output (this will be set in the
         # Mesh.get_unique_geometry_sets() method.
         self.vtk_node_set_format = '{:05}'
+        # Nan values for vtk data, since we currently can't set nan explicitly.
+        self.vtk_nan_int = -1
+        self.vtk_nan_float = 0.0
 
         # Check for overlapping elements when creating a dat file.
         self.check_overlapping_elements = True

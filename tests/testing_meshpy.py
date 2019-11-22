@@ -1431,7 +1431,7 @@ class TestMeshpy(unittest.TestCase):
             output_directory=testing_temp, ascii=True)
 
         # Compare the vtk files.
-        compare_vtk(self, 'test_vtk_writer_beam', ref_file, vtk_file,
+        compare_vtk(self, 'test_vtk_beam', ref_file, vtk_file,
             tol_float=mpy.eps_pos)
 
         # Write VTK output, without coupling sets."""
@@ -1498,20 +1498,28 @@ class TestMeshpy(unittest.TestCase):
         compare_vtk(self, 'test_meshpy_vtk_elements_solid', ref_file, vtk_file)
 
     def test_vtk_curve_cell_data(self):
-        """Test that when creating a beam, cell data can be given."""
+        """
+        Test that when creating a beam, cell data can be given.
+        This test also checks, that the nan values in vtk can be explicitly
+        given.
+        """
 
         # Create the mesh.
         mesh = Mesh()
+        mpy.vtk_nan_float = 69.69
+        mpy.vtk_nan_int = 69
 
         # Add content to the mesh.
         mat = MaterialBeam(radius=0.05)
         create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
             [0, 0, 0], [2, 0, 0], n_el=2)
         create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
-            [0, 1, 0], [2, 1, 0], n_el=2, vtk_cell_data={'cell_data': 1})
+            [0, 1, 0], [2, 1, 0], n_el=2,
+            vtk_cell_data={'cell_data': (1, mpy.vtk_type.int)})
         create_beam_mesh_arc_segment(mesh, Beam3rHerm2Line3, mat,
             [0, 2, 0], Rotation([1, 0, 0], np.pi), 1.5, np.pi / 2.0, n_el=2,
-            vtk_cell_data={'cell_data': 2, 'other_data': 69})
+            vtk_cell_data={'cell_data': (2, mpy.vtk_type.int),
+                'other_data': 69})
 
         # Write VTK output, with coupling sets."""
         ref_file = os.path.join(testing_input,

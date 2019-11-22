@@ -43,14 +43,14 @@
         </DataArray>
       </PointData>
       <CellData>
-        <DataArray type="Float64" Name="other_data" format="ascii" RangeMin="0" RangeMax="69">
-          0 0 0 0 69 69
+        <DataArray type="Float64" Name="other_data" format="ascii" RangeMin="69" RangeMax="69.69">
+          69.69 69.69 69.69 69.69 69 69
         </DataArray>
         <DataArray type="Float64" Name="cross_section_radius" format="ascii" RangeMin="0.05" RangeMax="0.05">
           0.05 0.05 0.05 0.05 0.05 0.05
         </DataArray>
-        <DataArray type="Float64" Name="cell_data" format="ascii" RangeMin="0" RangeMax="2">
-          0 0 1 1 2 2
+        <DataArray type="Int32" Name="cell_data" format="ascii" RangeMin="1" RangeMax="69">
+          69 69 1 1 2 2
         </DataArray>
       </CellData>
       <Points>
