@@ -49,7 +49,7 @@
         <DataArray type="Float64" Name="cross_section_radius" format="ascii" RangeMin="0.05" RangeMax="0.05">
           0.05 0.05 0.05 0.05 0.05 0.05
         </DataArray>
-        <DataArray type="Float64" Name="cell_data" format="ascii" RangeMin="0" RangeMax="2">
+        <DataArray type="Int32" Name="cell_data" format="ascii" RangeMin="0" RangeMax="2">
           0 0 1 1 2 2
         </DataArray>
       </CellData>

@@ -56,7 +56,31 @@ def add_point_data_node_sets(point_data, nodes):
             geometry_name,
             mpy.vtk_node_set_format.format(geometry_set.n_global)
             )
-        point_data[set_name] = data_vector
+        point_data[set_name] = (data_vector, mpy.vtk_type.int)
+
+
+def _get_data_value_and_type(data):
+    """
+    Return the data and its type if one was given.
+    The default type, if none was given is float.
+    """
+    if type(data) is tuple:
+        return data[0], data[1]
+    else:
+        return data, mpy.vtk_type.float
+
+
+def _get_vtk_array_type(data):
+    """
+    Return the corresponding meshpy type.
+    """
+    data_type = data.GetDataTypeAsString()
+    if data_type == 'int':
+        return mpy.vtk_type.int
+    elif data_type == 'double':
+        return mpy.vtk_type.float
+    else:
+        raise ValueError('Got unexpected type ""!'.format(data_type))
 
 
 class VTKWriter(object):
@@ -113,7 +137,8 @@ class VTKWriter(object):
 
         # Check if point data containers are of the correct size.
         if point_data is not None:
-            for key, value in point_data.items():
+            for key, item_value in point_data.items():
+                value, _data_type = _get_data_value_and_type(item_value)
                 if not len(value) == n_points:
                     raise IndexError(('The length of coordinates is {},'
                         + 'the length of {} is {}, does not match!').format(
@@ -131,7 +156,10 @@ class VTKWriter(object):
                 if input_data is not None]:
 
             # Loop through output fields.
-            for key, value in data_container.items():
+            for key, item_value in data_container.items():
+
+                # Get the data and the value type (int or float).
+                value, data_type = _get_data_value_and_type(item_value)
 
                 # Data type.
                 if vtk_geom_type == mpy.vtk_geo.cell:
@@ -144,7 +172,10 @@ class VTKWriter(object):
                 if key not in self.data[vtk_geom_type, vtk_tensor_type].keys():
 
                     # Set up the VTK data array.
-                    data = vtk.vtkDoubleArray()
+                    if data_type is mpy.vtk_type.float:
+                        data = vtk.vtkDoubleArray()
+                    else:
+                        data = vtk.vtkIntArray()
                     data.SetName(key)
                     if vtk_tensor_type == mpy.vtk_tensor.scalar:
                         data.SetNumberOfComponents(1)
@@ -159,6 +190,16 @@ class VTKWriter(object):
                     for i in range(n_items):
                         self._add_data(data, vtk_tensor_type)
                     self.data[vtk_geom_type, vtk_tensor_type][key] = data
+
+                else:
+                    # In this case we just check that the already existing
+                    # data has the same type.
+                    data_array = self.data[vtk_geom_type, vtk_tensor_type][key]
+                    if not _get_vtk_array_type(data_array) == data_type:
+                        raise ValueError(('The existing data with the key "{}"'
+                            + ' is of type "{}", but the type you tried to add'
+                            + ' is "{}"!').format(key,
+                                data_array.GetDataTypeAsString(), data_type))
 
         # Create the cell.
         geometry_item = cell_type()
@@ -199,12 +240,17 @@ class VTKWriter(object):
 
                 # Check if an existing field is also given for this function.
                 if key in data_container.keys():
+
+                    # Get the data and the value type (int or float).
+                    data_values, _ = _get_data_value_and_type(
+                        data_container[key])
+
                     # Add the given data.
                     if key_geom == mpy.vtk_geo.cell:
                         self._add_data(value, key_data,
-                            non_zero_data=data_container[key])
+                            non_zero_data=data_values)
                     else:
-                        for item in data_container[key]:
+                        for item in data_values:
                             self._add_data(value, key_data, non_zero_data=item)
                 else:
                     # Add empty data.

@@ -207,7 +207,7 @@
           0.70710678119 -0.70710678119 0 0.70710678119 -0.70710678119 0
           0.92387953251 -0.38268343237 0 1 0 0
         </DataArray>
-        <DataArray type="Float64" Name="geometry_point_set_2" format="ascii" RangeMin="0" RangeMax="1">
+        <DataArray type="Int32" Name="geometry_point_set_2" format="ascii" RangeMin="0" RangeMax="1">
           0 0 0 0 0 1
           1 0 0 0 0 0
           0 0 0 0 0 0
@@ -231,7 +231,7 @@
           0 0 0 0 0 0
           0 0 0 0 0 0
         </DataArray>
-        <DataArray type="Float64" Name="geometry_point_set_1" format="ascii" RangeMin="0" RangeMax="1">
+        <DataArray type="Int32" Name="geometry_point_set_1" format="ascii" RangeMin="0" RangeMax="1">
           0 0 0 0 0 0
           0 0 0 0 0 0
           0 0 0 0 0 0
@@ -279,7 +279,7 @@
           1 0.5 1 1 0.5 1
           1 0.5 1 1 0.5 1
         </DataArray>
-        <DataArray type="Float64" Name="geometry_line_set_1" format="ascii" RangeMin="1" RangeMax="1">
+        <DataArray type="Int32" Name="geometry_line_set_1" format="ascii" RangeMin="1" RangeMax="1">
           1 1 1 1 1 1
           1 1 1 1 1 1
           1 1 1 1 1 1
