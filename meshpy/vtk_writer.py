@@ -74,7 +74,7 @@ class VTKWriter(object):
         # Container for output data.
         self.data = {}
         for key1 in mpy.vtk_geo:
-            for key2 in mpy.vtk_data:
+            for key2 in mpy.vtk_tensor:
                 self.data[key1, key2] = {}
 
     def add_cell(self, cell_type, coordinates, topology=None, cell_data=None,
@@ -135,18 +135,18 @@ class VTKWriter(object):
 
                 # Data type.
                 if vtk_geom_type == mpy.vtk_geo.cell:
-                    vtk_data_type = self._get_vtk_data_type(value)
+                    vtk_tensor_type = self._get_vtk_data_type(value)
                 else:
                     for item in value:
-                        vtk_data_type = self._get_vtk_data_type(item)
+                        vtk_tensor_type = self._get_vtk_data_type(item)
 
                 # Check if key already exists.
-                if key not in self.data[vtk_geom_type, vtk_data_type].keys():
+                if key not in self.data[vtk_geom_type, vtk_tensor_type].keys():
 
                     # Set up the VTK data array.
                     data = vtk.vtkDoubleArray()
                     data.SetName(key)
-                    if vtk_data_type == mpy.vtk_data.scalar:
+                    if vtk_tensor_type == mpy.vtk_tensor.scalar:
                         data.SetNumberOfComponents(1)
                     else:
                         data.SetNumberOfComponents(3)
@@ -157,8 +157,8 @@ class VTKWriter(object):
                     else:
                         n_items = self.grid.GetNumberOfPoints()
                     for i in range(n_items):
-                        self._add_data(data, vtk_data_type)
-                    self.data[vtk_geom_type, vtk_data_type][key] = data
+                        self._add_data(data, vtk_tensor_type)
+                    self.data[vtk_geom_type, vtk_tensor_type][key] = data
 
         # Create the cell.
         geometry_item = cell_type()
@@ -219,19 +219,19 @@ class VTKWriter(object):
 
         if isinstance(data, list) or isinstance(data, np.ndarray):
             if len(data) == 3:
-                return mpy.vtk_data.vector
+                return mpy.vtk_tensor.vector
             else:
                 raise IndexError('Only 3d vectors are implemented yet! Got '
                     + 'len(data) = {}'.format(len(data)))
         elif isinstance(data, numbers.Number):
-            return mpy.vtk_data.scalar
+            return mpy.vtk_tensor.scalar
 
         raise ValueError('Data {} did not match any expected case!'.format(
             data))
 
-    def _add_data(self, data, vtk_data_type, non_zero_data=None):
+    def _add_data(self, data, vtk_tensor_type, non_zero_data=None):
         """Add data to a VTK data array."""
-        if vtk_data_type == mpy.vtk_data.scalar:
+        if vtk_tensor_type == mpy.vtk_tensor.scalar:
             if non_zero_data is None:
                 data.InsertNextTuple1(0)
             else:
