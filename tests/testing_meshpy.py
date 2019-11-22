@@ -1498,10 +1498,16 @@ class TestMeshpy(unittest.TestCase):
         compare_vtk(self, 'test_meshpy_vtk_elements_solid', ref_file, vtk_file)
 
     def test_vtk_curve_cell_data(self):
-        """Test that when creating a beam, cell data can be given."""
+        """
+        Test that when creating a beam, cell data can be given.
+        This test also checks, that the nan values in vtk can be explicitly
+        given.
+        """
 
         # Create the mesh.
         mesh = Mesh()
+        mpy.vtk_nan_float = 69.69
+        mpy.vtk_nan_int = 69
 
         # Add content to the mesh.
         mat = MaterialBeam(radius=0.05)
