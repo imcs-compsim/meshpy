@@ -1716,6 +1716,49 @@ class TestMeshpy(unittest.TestCase):
         # Compare the vtk files.
         compare_vtk(self, 'test_check_double_elements', ref_file, vtk_file)
 
+    def perform_test_check_overlapping_coupling_nodes(self, check=True):
+        """
+        Per default, we check that coupling nodes are at the same physical
+        position. This check can be deactivated with the global option
+        mpy.check_overlapping_coupling_nodes = False
+        """
+
+        # Set the global option.
+        mpy.check_overlapping_coupling_nodes = check
+
+        # Create mesh object.
+        mesh = InputFile()
+        mat = MaterialReissner()
+        mesh.add(mat)
+
+        # Add two beams to create an elbow structure. The beams each have a
+        # node at the intersection.
+        set_1 = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
+            [0, 0, 0], [1, 0, 0])
+        set_2 = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
+            [2, 0, 0], [3, 0, 0])
+
+        # Couple two nodes that are not at the same position.
+
+        # Create the input file. This will cause an error, as there are two
+        # couplings for one node.
+        args = [
+            flatten([set_1['start'].nodes, set_2['end'].nodes]),
+            'coupling_type_string'
+            ]
+        if check:
+            self.assertRaises(ValueError, mesh.add, args)
+        else:
+            mesh.add(Coupling(*args))
+
+    def test_check_overlapping_coupling_nodes(self):
+        """
+        Perform the test that the coupling nodes can be tested if they are at
+        the same position.
+        """
+        self.perform_test_check_overlapping_coupling_nodes(True)
+        self.perform_test_check_overlapping_coupling_nodes(False)
+
 
 if __name__ == '__main__':
     # Execution part of script.

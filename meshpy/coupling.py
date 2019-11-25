@@ -31,9 +31,10 @@ class Coupling(BaseMeshItem):
             else:
                 # Get the difference to the first node.
                 pos[i, :] = node.coordinates - nodes[0].coordinates
-        if np.linalg.norm(pos) > mpy.eps_pos:
-            raise ValueError('The nodes given to Coupling do not have the same'
-                ' position. For now this case is not yet implemented.')
+        if mpy.check_overlapping_coupling_nodes:
+            if np.linalg.norm(pos) > mpy.eps_pos:
+                raise ValueError('The nodes given to Coupling do not have the '
+                    'same position. For now this case is not yet implemented.')
 
     def _get_dat(self):
         """
