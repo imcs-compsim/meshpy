@@ -23,6 +23,7 @@ class BoundaryCondition(IntEnum):
     moment_euler_bernoulli = 3
     beam_to_solid_volume_meshtying = 4
     beam_to_solid_surface_meshtying = 5
+    point_coupling = 6
 
 
 class BeamType(IntEnum):
