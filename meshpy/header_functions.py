@@ -31,6 +31,7 @@ def set_runtime_output(input_file, *,
         btsvmt_output=True,
         output_triad=True,
         every_iteration=False,
+        absolute_beam_positons=True,
         option_overwrite=False):
     """
     Set the basic runtime output options.
@@ -47,6 +48,9 @@ def set_runtime_output(input_file, *,
         If the triads along the beam should be written.
     every_iteration: int
         If output at every Newton iteration should be written.
+    absolute_beam_positions: bool
+        If the beams should be written at the current position or always at
+        the reference position.
     option_overwrite: bool
         If existing options should be overwritten. If this is false and an
         option is already defined, and error will be thrown.
@@ -77,9 +81,10 @@ def set_runtime_output(input_file, *,
         '''
         OUTPUT_BEAMS                    yes
         DISPLACEMENT                    yes
-        USE_ABSOLUTE_POSITIONS          yes
+        USE_ABSOLUTE_POSITIONS          {}
         TRIAD_VISUALIZATIONPOINT        {}
         STRAINS_GAUSSPOINT              yes'''.format(
+            _get_yes_no(absolute_beam_positons),
             _get_yes_no(output_triad)),
         option_overwrite=option_overwrite))
 
