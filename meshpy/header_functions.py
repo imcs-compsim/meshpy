@@ -171,6 +171,10 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         bts = InputSection('BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING')
     elif interaction_type == mpy.beam_to_solid.surface_meshtying:
         bts = InputSection('BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING')
+    else:
+        raise ValueError('Got wrong beam-to-solid mesh tying type. '
+            + 'Got {} of type {}.'.format(
+                interaction_type, type(interaction_type)))
     bts.add('''
         CONSTRAINT_STRATEGY penalty
         PENALTY_PARAMETER {}
