@@ -18,7 +18,7 @@ class Coupling(BaseMeshItem):
     def __init__(self, nodes, coupling_type):
         """Initialize this object."""
         BaseMeshItem.__init__(self, is_dat=False)
-        self.node_set = GeometrySet(mpy.geo.point, nodes=nodes)
+        self.geometry_set = GeometrySet(mpy.geo.point, nodes=nodes)
         self.coupling_type = coupling_type
 
         # Check that all nodes that are coupled have the same position (for now
@@ -43,8 +43,8 @@ class Coupling(BaseMeshItem):
         """
 
         # Check the beam type.
-        beam_type = self.node_set.nodes[0].element_link[0].beam_type
-        for node in self.node_set.nodes:
+        beam_type = self.geometry_set.nodes[0].element_link[0].beam_type
+        for node in self.geometry_set.nodes:
             for element in node.element_link:
                 if beam_type is not element.beam_type:
                     raise ValueError(('The first element in this coupling is '
@@ -73,4 +73,4 @@ class Coupling(BaseMeshItem):
             raise ValueError('coupling_type "{}" is not implemented!'.format(
                 self.coupling_type
                 ))
-        return 'E {} - {}'.format(self.node_set.n_global, string)
+        return 'E {} - {}'.format(self.geometry_set.n_global, string)

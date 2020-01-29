@@ -336,7 +336,7 @@ class InputFile(Mesh):
         """
 
         if (len(self.nodes) + len(self.elements) + len(self.materials)
-                + len(self.functions) + len(self.couplings) > 0):
+                + len(self.functions) > 0):
             raise RuntimeError('A dat file can only be loaded for an '
                 + 'empty mesh!')
         if self._dat_file_loaded:
@@ -675,7 +675,6 @@ class InputFile(Mesh):
         set_n_global(self.elements)
         set_n_global(self.materials)
         set_n_global(self.functions)
-        set_n_global(self.couplings)
         for key in self.boundary_conditions.keys():
             set_n_global(self.boundary_conditions[key])
 
@@ -711,6 +710,13 @@ class InputFile(Mesh):
         lines.append('NDSURF {}'.format(len(mesh_sets[mpy.geo.surface])))
         lines.append('NDVOL {}'.format(len(mesh_sets[mpy.geo.volume])))
 
+        # If there are couplings in the mesh, set the link between the nodes
+        # and elements, so the couplings can decide which DOFs they couple,
+        # depending on the type of the connected beam element.
+        if (len(self.boundary_conditions[mpy.bc.point_coupling, mpy.geo.point])
+                > 0):
+            self.set_node_links()
+
         # Add the boundary conditions.
         for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
             if len(bc_list) > 0:
@@ -722,18 +728,6 @@ class InputFile(Mesh):
                         len(self.boundary_conditions[bc_key, geom_key])
                         )
                     )
-
-        # Add the couplings.
-        if len(self.couplings) > 0:
-            # Set the link for the nodes, so the couplings can decide which
-            # DOFs they couple.
-            self.set_node_links()
-
-            get_section_dat(
-                get_section_string('DESIGN POINT COUPLING CONDITIONS'),
-                self.couplings,
-                header_lines='DPOINT {}'.format(len(self.couplings))
-                )
 
         # Add the geometry sets.
         for geom_key, item in mesh_sets.items():
