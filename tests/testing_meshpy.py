@@ -1232,12 +1232,20 @@ class TestMeshpy(unittest.TestCase):
         create_beam_mesh_line(beam_mesh, Beam3rHerm2Line3,
             material, [0, 0.5, 0], [0, 0.5, 1], n_el=3)
 
-        # Set coupling condition.
+        # Set coupling conditions.
+        line_set = GeometrySet(mpy.geo.line, beam_mesh.nodes)
         beam_mesh.add(
             BoundaryCondition(
-                GeometrySet(mpy.geo.line, beam_mesh.nodes),
+                line_set,
                 bc_type=mpy.bc.beam_to_solid_volume_meshtying,
                 bc_string='COUPLING_ID 1'
+                )
+            )
+        beam_mesh.add(
+            BoundaryCondition(
+                line_set,
+                bc_type=mpy.bc.beam_to_solid_surface_meshtying,
+                bc_string='COUPLING_ID 2'
                 )
             )
 

@@ -126,6 +126,11 @@ def create_block_cubit():
         bc_type=cupy.bc_type.beam_to_solid_volume_meshtying,
         bc_description='COUPLING_ID 1')
 
+    # Add the boundary condition.
+    cubit.add_node_set(cube.surfaces()[0],
+        bc_type=cupy.bc_type.beam_to_solid_surface_meshtying,
+        bc_description='COUPLING_ID 2')
+
     # Return the cubit object.
     return cubit
 
