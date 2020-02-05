@@ -131,6 +131,15 @@ def create_block_cubit():
         bc_type=cupy.bc_type.beam_to_solid_surface_meshtying,
         bc_description='COUPLING_ID 2')
 
+    # Set point coupling conditions.
+    nodes = cubit.group()
+    nodes.add([cube.vertices()[0], cube.vertices()[2]])
+    cubit.add_node_set(
+        nodes,
+        bc_type=cupy.bc_type.point_coupling,
+        bc_description='NUMDOF 3 ONOFF 1 2 3'
+        )
+
     # Return the cubit object.
     return cubit
 

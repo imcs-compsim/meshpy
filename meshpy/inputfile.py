@@ -365,6 +365,7 @@ class InputFile(Mesh):
                     geom_list = self.geometry_sets[bc_key[1]]
                     geom_index = boundary_condition.geometry_set
                     boundary_condition.geometry_set = geom_list[geom_index]
+                    boundary_condition.check()
 
         self._dat_file_loaded = True
 

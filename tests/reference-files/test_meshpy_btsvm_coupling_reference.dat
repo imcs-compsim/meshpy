@@ -11,7 +11,7 @@ DIM                                   3
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_BeamReissnerElastHyper YOUNG 1000 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.007853981633974483 SHEARCORR 1 MOMINPOL 9.817477042468105e-06 MOMIN2 4.9087385212340526e-06 MOMIN3 4.9087385212340526e-06
 --------------------------------------------------------------DESIGN DESCRIPTION
-NDPOINT 0
+NDPOINT 1
 NDLINE 1
 NDSURF 1
 NDVOL 1
@@ -27,6 +27,12 @@ E 1 - COUPLING_ID 2
 ------------------------BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING SURFACE
 DSURF 1
 E 1 - COUPLING_ID 2
+------------------------------------------------DESIGN POINT COUPLING CONDITIONS
+DPOINT 1
+E 1 - NUMDOF 3 ONOFF 1 2 3
+-------------------------------------------------------------DNODE-NODE TOPOLOGY
+NODE    14 DNODE 1
+NODE    19 DNODE 1
 -------------------------------------------------------------DLINE-NODE TOPOLOGY
 NODE 28 DLINE 1
 NODE 29 DLINE 1

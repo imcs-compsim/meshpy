@@ -141,9 +141,5 @@ class MeshPy(object):
         # Check for overlapping elements when creating a dat file.
         self.check_overlapping_elements = True
 
-        # Check if all nodes of a coupling condition are at the same physical
-        # position.
-        self.check_overlapping_coupling_nodes = True
-
 
 mpy = MeshPy()

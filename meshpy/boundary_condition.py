@@ -18,22 +18,21 @@ class BoundaryConditionBase(BaseMeshItem):
     file.
     """
 
-    def __init__(self, geometry_set, bc_string, **kwargs):
+    def __init__(self, geometry_set, bc_type, **kwargs):
         """
         Initialize the object.
 
         Args
         ----
-        geometry_set: GeometrySet
-            Geometry that this boundary condition acts on.
-        bc_string: str
-            Text that will be displayed in the input file for this boundary
-            condition.
+        geometry_set: GeometrySet, int
+            Geometry that this boundary condition acts on. An integer can be
+            given, in the case a dat file is imported. This integer is only
+            temporary and will be replaced with the GeometrySet object.
         """
 
-        BaseMeshItem.__init__(self, is_dat=False, **kwargs)
-        self.bc_string = bc_string
+        BaseMeshItem.__init__(self, **kwargs)
         self.geometry_set = geometry_set
+        self.bc_type = bc_type
 
     @classmethod
     def from_dat(cls, bc_key, line, **kwargs):
@@ -46,15 +45,19 @@ class BoundaryConditionBase(BaseMeshItem):
         # Split up the input line.
         split = line.split()
 
-        if (bc_key == mpy.bc.dirichlet
-                or bc_key == mpy.bc.neumann
-                or bc_key == mpy.bc.beam_to_solid_surface_meshtying
-                or bc_key == mpy.bc.beam_to_solid_volume_meshtying):
+        if (bc_key is mpy.bc.dirichlet
+                or bc_key is mpy.bc.neumann
+                or bc_key is mpy.bc.beam_to_solid_surface_meshtying
+                or bc_key is mpy.bc.beam_to_solid_volume_meshtying):
             # Normal boundary condition (including beam-to-solid conditions).
             return BoundaryCondition(
                 int(split[1]) - 1, ' '.join(split[3:]),
-                bc_type=bc_key, **kwargs
+                bc_type=bc_key, is_dat=True, **kwargs
                 )
+        elif bc_key is mpy.bc.point_coupling:
+            from .coupling import Coupling
+            return Coupling(int(split[1]) - 1, ' '.join(split[3:]),
+                is_dat=True, **kwargs)
         else:
             raise ValueError('Got unexpected boundary condition!')
 
@@ -66,7 +69,7 @@ class BoundaryCondition(BoundaryConditionBase):
     """
 
     def __init__(self, geometry_set, bc_string, format_replacement=None,
-            bc_type=None, double_nodes=None, **kwargs):
+            bc_type=None, double_nodes=None, is_dat=False, **kwargs):
         """
         Initialize the object.
 
@@ -86,12 +89,14 @@ class BoundaryCondition(BoundaryConditionBase):
             conditions do contain nodes at the same spatial positions.
         """
 
-        BoundaryConditionBase.__init__(self, geometry_set, bc_string, **kwargs)
-        self.bc_type = bc_type
+        BoundaryConditionBase.__init__(self, geometry_set, bc_type,
+            is_dat=is_dat,**kwargs)
+        self.bc_string = bc_string
         self.format_replacement = format_replacement
+        self.double_nodes = double_nodes
 
         # Check the parameters for this object.
-        self._check_multiple_nodes(double_nodes=double_nodes)
+        self.check()
 
     def _get_dat(self):
         """
@@ -113,7 +118,7 @@ class BoundaryCondition(BoundaryConditionBase):
             dat_string
             )
 
-    def _check_multiple_nodes(self, double_nodes=None):
+    def check(self):
         """
         Check for point Neumann boundaries that there is not a double
         Node in the set.
@@ -123,7 +128,7 @@ class BoundaryCondition(BoundaryConditionBase):
             # In the case of solid imports this is a integer at initialization.
             return
 
-        if double_nodes is mpy.double_nodes.keep:
+        if self.double_nodes is mpy.double_nodes.keep:
             return
 
         if (self.bc_type == mpy.bc.neumann
@@ -136,7 +141,7 @@ class BoundaryCondition(BoundaryConditionBase):
                     if i > 0:
                         double_node_list.append(node)
             if (len(double_node_list) > 0 and
-                    double_nodes is mpy.double_nodes.remove):
+                    self.double_nodes is mpy.double_nodes.remove):
                 # Create the nodes again for the set.
                 self.geometry_set.nodes = [node for node in
                     self.geometry_set.nodes if (node not in double_node_list)]

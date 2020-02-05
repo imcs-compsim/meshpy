@@ -1232,7 +1232,7 @@ class TestMeshpy(unittest.TestCase):
         create_beam_mesh_line(beam_mesh, Beam3rHerm2Line3,
             material, [0, 0.5, 0], [0, 0.5, 1], n_el=3)
 
-        # Set coupling conditions.
+        # Set beam-to-solid coupling conditions.
         line_set = GeometrySet(mpy.geo.line, beam_mesh.nodes)
         beam_mesh.add(
             BoundaryCondition(
@@ -1684,7 +1684,7 @@ class TestMeshpy(unittest.TestCase):
         self.assertRaises(ValueError, mesh.add, coupling)
         self.assertRaises(ValueError, mesh.add, geometry_set)
 
-    def test_check_double_couplings(self):
+    def test_check_two_couplings(self):
         """
         The current implementation can not handle more than one coupling on a
         node correctly, therefore we need to throw an error.
@@ -1751,12 +1751,9 @@ class TestMeshpy(unittest.TestCase):
     def perform_test_check_overlapping_coupling_nodes(self, check=True):
         """
         Per default, we check that coupling nodes are at the same physical
-        position. This check can be deactivated with the global option
-        mpy.check_overlapping_coupling_nodes = False
+        position. This check can be deactivated with the keyword
+        check_overlapping_nodes when creating a Coupling.
         """
-
-        # Set the global option.
-        mpy.check_overlapping_coupling_nodes = check
 
         # Create mesh object.
         mesh = InputFile()
@@ -1775,13 +1772,13 @@ class TestMeshpy(unittest.TestCase):
         # Create the input file. This will cause an error, as there are two
         # couplings for one node.
         args = [
-            flatten([set_1['start'].nodes, set_2['end'].nodes]),
+            [set_1['start'].nodes[0], set_2['end'].nodes[0]],
             'coupling_type_string'
             ]
         if check:
-            self.assertRaises(ValueError, mesh.add, args)
+            self.assertRaises(ValueError, Coupling, *args)
         else:
-            mesh.add(Coupling(*args))
+            Coupling(*args, check_overlapping_nodes=False)
 
     def test_check_overlapping_coupling_nodes(self):
         """

@@ -246,12 +246,13 @@ class Mesh(object):
         # one coupling per node.
         for coupling in self.boundary_conditions[
                 mpy.bc.point_coupling, mpy.geo.point]:
-            for node in coupling.geometry_set.nodes:
-                if node.coupling_link is None:
-                    node.coupling_link = coupling
-                else:
-                    raise ValueError('It is currently not possible to add more'
-                        + ' than one coupling to a node.')
+            if not coupling.is_dat:
+                for node in coupling.geometry_set.nodes:
+                    if node.coupling_link is None:
+                        node.coupling_link = coupling
+                    else:
+                        raise ValueError('It is currently not possible to add '
+                            + 'more than one coupling to a node.')
 
     def get_global_nodes(self, *, nodes=None):
         """
