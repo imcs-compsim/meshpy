@@ -1214,9 +1214,9 @@ class TestMeshpy(unittest.TestCase):
             mesh_ref.get_string(header=False),
             mesh_couple.get_string(header=False))
 
-    def test_beam_to_solid_conditions(self):
+    def create_beam_to_solid_conditions_model(self):
         """
-        Create beam to solid input conditions.
+        Create the inpuf file for the beam-to-solid input conditions tests.
         """
 
         # Create input file.
@@ -1232,22 +1232,54 @@ class TestMeshpy(unittest.TestCase):
         create_beam_mesh_line(beam_mesh, Beam3rHerm2Line3,
             material, [0, 0.5, 0], [0, 0.5, 1], n_el=3)
 
-        # Set coupling condition.
+        # Set beam-to-solid coupling conditions.
+        line_set = GeometrySet(mpy.geo.line, beam_mesh.nodes)
         beam_mesh.add(
             BoundaryCondition(
-                GeometrySet(mpy.geo.line, beam_mesh.nodes),
+                line_set,
                 bc_type=mpy.bc.beam_to_solid_volume_meshtying,
                 bc_string='COUPLING_ID 1'
+                )
+            )
+        beam_mesh.add(
+            BoundaryCondition(
+                line_set,
+                bc_type=mpy.bc.beam_to_solid_surface_meshtying,
+                bc_string='COUPLING_ID 2'
                 )
             )
 
         # Add the beam to the solid mesh.
         input_file.add(beam_mesh)
+        return input_file
+
+    def test_beam_to_solid_conditions(self):
+        """
+        Create beam-to-solid input conditions.
+        """
+
+        # Create input file.
+        input_file = self.create_beam_to_solid_conditions_model()
 
         # Compare with the reference file.
         compare_strings(self, 'test_meshpy_btsvm_coupling',
             os.path.join(testing_input,
                 'test_meshpy_btsvm_coupling_reference.dat'),
+            input_file.get_string(header=False))
+
+    def test_beam_to_solid_conditions_full(self):
+        """
+        Create beam-to-solid input conditions with full import.
+        """
+
+        # Create input file.
+        mpy.import_mesh_full = True
+        input_file = self.create_beam_to_solid_conditions_model()
+
+        # Compare with the reference file.
+        compare_strings(self, 'test_meshpy_btsvm_coupling_full',
+            os.path.join(testing_input,
+                'test_meshpy_btsvm_coupling_full_reference.dat'),
             input_file.get_string(header=False))
 
     def test_nurbs_import(self):
@@ -1652,7 +1684,7 @@ class TestMeshpy(unittest.TestCase):
         self.assertRaises(ValueError, mesh.add, coupling)
         self.assertRaises(ValueError, mesh.add, geometry_set)
 
-    def test_check_double_couplings(self):
+    def test_check_two_couplings(self):
         """
         The current implementation can not handle more than one coupling on a
         node correctly, therefore we need to throw an error.
@@ -1719,12 +1751,9 @@ class TestMeshpy(unittest.TestCase):
     def perform_test_check_overlapping_coupling_nodes(self, check=True):
         """
         Per default, we check that coupling nodes are at the same physical
-        position. This check can be deactivated with the global option
-        mpy.check_overlapping_coupling_nodes = False
+        position. This check can be deactivated with the keyword
+        check_overlapping_nodes when creating a Coupling.
         """
-
-        # Set the global option.
-        mpy.check_overlapping_coupling_nodes = check
 
         # Create mesh object.
         mesh = InputFile()
@@ -1743,13 +1772,13 @@ class TestMeshpy(unittest.TestCase):
         # Create the input file. This will cause an error, as there are two
         # couplings for one node.
         args = [
-            flatten([set_1['start'].nodes, set_2['end'].nodes]),
+            [set_1['start'].nodes[0], set_2['end'].nodes[0]],
             'coupling_type_string'
             ]
         if check:
-            self.assertRaises(ValueError, mesh.add, args)
+            self.assertRaises(ValueError, Coupling, *args)
         else:
-            mesh.add(Coupling(*args))
+            Coupling(*args, check_overlapping_nodes=False)
 
     def test_check_overlapping_coupling_nodes(self):
         """

@@ -10,16 +10,33 @@ DIM           3
 
 
 ------------------------------------------------DESIGN DESCRIPTION
-NDPOINT 0
+NDPOINT 1
 NDLINE  0
-NDSURF  0
+NDSURF  1
 NDVOL   1
+----------------------------------DESIGN POINT COUPLING CONDITIONS
+DPOINT 1
+E 1 - NUMDOF 3 ONOFF 1 2 3
 ------------BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING VOLUME
 DVOL   1
 E 1 - COUPLING_ID 1
+----------BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING SURFACE
+DSURF  1
+E 1 - COUPLING_ID 2
 -----------------------------------------------DNODE-NODE TOPOLOGY
+NODE    14 DNODE 1
+NODE    19 DNODE 1
 -----------------------------------------------DLINE-NODE TOPOLOGY
 -----------------------------------------------DSURF-NODE TOPOLOGY
+NODE    1 DSURFACE 1
+NODE    4 DSURFACE 1
+NODE    5 DSURFACE 1
+NODE    8 DSURFACE 1
+NODE    14 DSURFACE 1
+NODE    16 DSURFACE 1
+NODE    19 DSURFACE 1
+NODE    22 DSURFACE 1
+NODE    26 DSURFACE 1
 ------------------------------------------------DVOL-NODE TOPOLOGY
 NODE    1 DVOL 1
 NODE    2 DVOL 1

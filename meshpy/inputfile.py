@@ -16,7 +16,7 @@ from .mesh import Mesh
 from .base_mesh_item import BaseMeshItem
 from .node import Node
 from .element import Element
-from .boundary_condition import BoundaryCondition
+from .boundary_condition import BoundaryConditionBase
 from .geometry_set import GeometrySet
 from .utility import get_git_data
 
@@ -237,7 +237,9 @@ class InputFile(Mesh):
         (mpy.bc.beam_to_solid_surface_meshtying, mpy.geo.line):
             'BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING LINE',
         (mpy.bc.beam_to_solid_surface_meshtying, mpy.geo.surface):
-            'BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING SURFACE'
+            'BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING SURFACE',
+        (mpy.bc.point_coupling, mpy.geo.point):
+            'DESIGN POINT COUPLING CONDITIONS'
     }
     geometry_counter = {
         mpy.geo.point:   'DPOINT',
@@ -334,7 +336,7 @@ class InputFile(Mesh):
         """
 
         if (len(self.nodes) + len(self.elements) + len(self.materials)
-                + len(self.functions) + len(self.couplings) > 0):
+                + len(self.functions) > 0):
             raise RuntimeError('A dat file can only be loaded for an '
                 + 'empty mesh!')
         if self._dat_file_loaded:
@@ -363,6 +365,7 @@ class InputFile(Mesh):
                     geom_list = self.geometry_sets[bc_key[1]]
                     geom_index = boundary_condition.geometry_set
                     boundary_condition.geometry_set = geom_list[geom_index]
+                    boundary_condition.check()
 
         self._dat_file_loaded = True
 
@@ -448,7 +451,7 @@ class InputFile(Mesh):
                                 break
 
                         if mpy.import_mesh_full:
-                            bc = BoundaryCondition.from_dat(bc_key, item,
+                            bc = BoundaryConditionBase.from_dat(bc_key, item,
                                 comments=comments)
                         else:
                             bc = BaseMeshItem(item, comments=comments)
@@ -673,7 +676,6 @@ class InputFile(Mesh):
         set_n_global(self.elements)
         set_n_global(self.materials)
         set_n_global(self.functions)
-        set_n_global(self.couplings)
         for key in self.boundary_conditions.keys():
             set_n_global(self.boundary_conditions[key])
 
@@ -709,6 +711,13 @@ class InputFile(Mesh):
         lines.append('NDSURF {}'.format(len(mesh_sets[mpy.geo.surface])))
         lines.append('NDVOL {}'.format(len(mesh_sets[mpy.geo.volume])))
 
+        # If there are couplings in the mesh, set the link between the nodes
+        # and elements, so the couplings can decide which DOFs they couple,
+        # depending on the type of the connected beam element.
+        if (len(self.boundary_conditions[mpy.bc.point_coupling, mpy.geo.point])
+                > 0):
+            self.set_node_links()
+
         # Add the boundary conditions.
         for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
             if len(bc_list) > 0:
@@ -720,18 +729,6 @@ class InputFile(Mesh):
                         len(self.boundary_conditions[bc_key, geom_key])
                         )
                     )
-
-        # Add the couplings.
-        if len(self.couplings) > 0:
-            # Set the link for the nodes, so the couplings can decide which
-            # DOFs they couple.
-            self.set_node_links()
-
-            get_section_dat(
-                get_section_string('DESIGN POINT COUPLING CONDITIONS'),
-                self.couplings,
-                header_lines='DPOINT {}'.format(len(self.couplings))
-                )
 
         # Add the geometry sets.
         for geom_key, item in mesh_sets.items():

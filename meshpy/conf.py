@@ -23,6 +23,7 @@ class BoundaryCondition(IntEnum):
     moment_euler_bernoulli = 3
     beam_to_solid_volume_meshtying = 4
     beam_to_solid_surface_meshtying = 5
+    point_coupling = 6
 
 
 class BeamType(IntEnum):
@@ -139,10 +140,6 @@ class MeshPy(object):
 
         # Check for overlapping elements when creating a dat file.
         self.check_overlapping_elements = True
-
-        # Check if all nodes of a coupling condition are at the same physical
-        # position.
-        self.check_overlapping_coupling_nodes = True
 
 
 mpy = MeshPy()

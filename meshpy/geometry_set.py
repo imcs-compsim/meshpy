@@ -17,7 +17,7 @@ class GeometrySet(BaseMeshItem):
         mpy.geo.point: 'DNODE',
         mpy.geo.line: 'DLINE',
         mpy.geo.surface: 'DSURFACE',
-        mpy.geo.volume: 'DVOLUME'
+        mpy.geo.volume: 'DVOL'
         }
 
     def __init__(self, geometry_type, nodes=None, fail_on_double_nodes=True,

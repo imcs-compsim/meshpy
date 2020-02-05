@@ -21,7 +21,7 @@ from .element import Element
 from .geometry_set import GeometrySet
 from .container import (GeometryName, GeometrySetContainer,
     BoundaryConditionContainer)
-from .boundary_condition import BoundaryCondition
+from .boundary_condition import BoundaryConditionBase
 from .coupling import Coupling
 from .vtk_writer import VTKWriter
 from .utility import get_close_nodes
@@ -40,7 +40,6 @@ class Mesh(object):
         self.elements = []
         self.materials = []
         self.functions = []
-        self.couplings = []
         self.geometry_sets = GeometrySetContainer()
         self.boundary_conditions = BoundaryConditionContainer()
 
@@ -60,7 +59,7 @@ class Mesh(object):
                 self.add_mesh(add_item, **kwargs)
             elif isinstance(add_item, Function):
                 self.add_function(add_item, **kwargs)
-            elif isinstance(add_item, BoundaryCondition):
+            elif isinstance(add_item, BoundaryConditionBase):
                 self.add_bc(add_item, **kwargs)
             elif isinstance(add_item, Material):
                 self.add_material(add_item, **kwargs)
@@ -72,8 +71,6 @@ class Mesh(object):
                 self.add_geometry_set(add_item, **kwargs)
             elif isinstance(add_item, GeometryName):
                 self.add_geometry_name(add_item, **kwargs)
-            elif isinstance(add_item, Coupling):
-                self.add_coupling(add_item, **kwargs)
             elif isinstance(add_item, list):
                 for item in add_item:
                     self.add(item, **kwargs)
@@ -94,17 +91,10 @@ class Mesh(object):
         self.add(mesh.elements)
         self.add(mesh.materials)
         self.add(mesh.functions)
-        self.add(mesh.couplings)
         for key in self.geometry_sets.keys():
             self.add(mesh.geometry_sets[key])
         for key in self.boundary_conditions.keys():
             self.add(mesh.boundary_conditions[key])
-
-    def add_coupling(self, coupling):
-        """Add a coupling to the mesh object."""
-        if coupling in self.couplings:
-            raise ValueError('The coupling element is already in this mesh!')
-        self.couplings.append(coupling)
 
     def add_bc(self, bc):
         """Add a boundary condition to this mesh."""
@@ -178,8 +168,7 @@ class Mesh(object):
         Args
         ----
         coupling_sets: bool
-            If this is true, also sets for couplings will be added. They
-            are inserted after the mesh sets.
+            If this is true, also sets for couplings will be added.
         link_nodes: bool
             If a link to the geometry sets should be added to each connected
             node (this option is mainly for vtk output).
@@ -194,21 +183,17 @@ class Mesh(object):
         mesh_sets = self.geometry_sets.copy()
 
         # Add sets from boundary conditions.
-        for (_bc_key, geom_key), bc_list in self.boundary_conditions.items():
+        for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
             for bc in bc_list:
                 if not bc.is_dat:
-                    # Only add set if it is not already in the container. For
-                    # example if multiple Neumann boundary conditions are
-                    # applied on the same node set.
-                    if bc.geometry_set not in mesh_sets[geom_key]:
-                        mesh_sets[geom_key].append(bc.geometry_set)
-
-        if coupling_sets:
-            # Add sets from couplings. There should not be any double sets in
-            # this case.
-            for coupling in self.couplings:
-                mesh_sets[coupling.node_set.geometry_type].append(
-                    coupling.node_set)
+                    # Check if sets from couplings should be added.
+                    if ((bc_key == mpy.bc.point_coupling and coupling_sets)
+                            or not bc_key == mpy.bc.point_coupling):
+                        # Only add set if it is not already in the container.
+                        # For example if multiple Neumann boundary conditions
+                        # are applied on the same node set.
+                        if bc.geometry_set not in mesh_sets[geom_key]:
+                            mesh_sets[geom_key].append(bc.geometry_set)
 
         for key in mesh_sets.keys():
             for i, geometry_set in enumerate(mesh_sets[key]):
@@ -248,13 +233,15 @@ class Mesh(object):
 
         # Add a link to the couplings. For now the implementation only allows
         # one coupling per node.
-        for coupling in self.couplings:
-            for node in coupling.node_set.nodes:
-                if node.coupling_link is None:
-                    node.coupling_link = coupling
-                else:
-                    raise ValueError('It is currently not possible to add more'
-                        + ' than one coupling to a node.')
+        for coupling in self.boundary_conditions[
+                mpy.bc.point_coupling, mpy.geo.point]:
+            if not coupling.is_dat:
+                for node in coupling.geometry_set.nodes:
+                    if node.coupling_link is None:
+                        node.coupling_link = coupling
+                    else:
+                        raise ValueError('It is currently not possible to add '
+                            + 'more than one coupling to a node.')
 
     def get_global_nodes(self, *, nodes=None):
         """
