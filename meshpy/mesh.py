@@ -21,7 +21,7 @@ from .element import Element
 from .geometry_set import GeometrySet
 from .container import (GeometryName, GeometrySetContainer,
     BoundaryConditionContainer)
-from .boundary_condition import BoundaryCondition
+from .boundary_condition import BoundaryConditionBase
 from .coupling import Coupling
 from .vtk_writer import VTKWriter
 from .utility import get_close_nodes
@@ -59,7 +59,7 @@ class Mesh(object):
                 self.add_mesh(add_item, **kwargs)
             elif isinstance(add_item, Function):
                 self.add_function(add_item, **kwargs)
-            elif isinstance(add_item, BoundaryCondition):
+            elif isinstance(add_item, BoundaryConditionBase):
                 self.add_bc(add_item, **kwargs)
             elif isinstance(add_item, Material):
                 self.add_material(add_item, **kwargs)

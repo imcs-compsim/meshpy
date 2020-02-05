@@ -12,11 +12,61 @@ from .base_mesh_item import BaseMeshItem
 from .utility import get_close_nodes
 
 
-class BoundaryCondition(BaseMeshItem):
-    """This object represents one boundary condition in the input file."""
+class BoundaryConditionBase(BaseMeshItem):
+    """
+    This is a base object, which represents one boundary condition in the input
+    file.
+    """
+
+    def __init__(self, geometry_set, bc_string, **kwargs):
+        """
+        Initialize the object.
+
+        Args
+        ----
+        geometry_set: GeometrySet
+            Geometry that this boundary condition acts on.
+        bc_string: str
+            Text that will be displayed in the input file for this boundary
+            condition.
+        """
+
+        BaseMeshItem.__init__(self, is_dat=False, **kwargs)
+        self.bc_string = bc_string
+        self.geometry_set = geometry_set
+
+    @classmethod
+    def from_dat(cls, bc_key, line, **kwargs):
+        """
+        Get a boundary condition from an input line in a dat file. The geometry
+        set is passed as integer (0 based index) and will be connected after
+        the whole input file is parsed.
+        """
+
+        # Split up the input line.
+        split = line.split()
+
+        if (bc_key == mpy.bc.dirichlet
+                or bc_key == mpy.bc.neumann
+                or bc_key == mpy.bc.beam_to_solid_surface_meshtying
+                or bc_key == mpy.bc.beam_to_solid_volume_meshtying):
+            # Normal boundary condition (including beam-to-solid conditions).
+            return BoundaryCondition(
+                int(split[1]) - 1, ' '.join(split[3:]),
+                bc_type=bc_key, **kwargs
+                )
+        else:
+            raise ValueError('Got unexpected boundary condition!')
+
+
+class BoundaryCondition(BoundaryConditionBase):
+    """
+    This object represents a Dirichlet, Neumann or beam-to-solid boundary
+    condition.
+    """
 
     def __init__(self, geometry_set, bc_string, format_replacement=None,
-            bc_type=None, comments=None, **kwargs):
+            bc_type=None, double_nodes=None, **kwargs):
         """
         Initialize the object.
 
@@ -30,34 +80,20 @@ class BoundaryCondition(BaseMeshItem):
         format_replacement: str, list
             Replacement with the str.format() function for bc_string.
         bc_type: mpy.boundary
-            Type of the boundary condition (dirichlet or neumann).
+            Type of the boundary condition.
+        double_nodes: mpy.double_nodes
+            Depending on this parameter, it will be checked if point Neumann
+            conditions do contain nodes at the same spatial positions.
         """
 
-        BaseMeshItem.__init__(self, is_dat=False, comments=comments)
-        self.bc_string = bc_string
+        BoundaryConditionBase.__init__(self, geometry_set, bc_string, **kwargs)
         self.bc_type = bc_type
         self.format_replacement = format_replacement
-        self.geometry_set = geometry_set
 
         # Check the parameters for this object.
-        self._check_multiple_nodes(**kwargs)
+        self._check_multiple_nodes(double_nodes=double_nodes)
 
-    @classmethod
-    def from_dat(cls, bc_key, line, **kwargs):
-        """
-        Get a boundary condition from an input line in a dat file. The geometry
-        set is passed as integer (0 based index) and will be connected after
-        the whole input file is parsed.
-        """
-
-        # Split up the input line.
-        split = line.split()
-
-        # Set up class with values for solid mesh import
-        return cls(int(split[1]) - 1, ' '.join(split[3:]), bc_type=bc_key,
-            **kwargs)
-
-    def _get_dat(self, **kwargs):
+    def _get_dat(self):
         """
         Add the content of this object to the list of lines.
 

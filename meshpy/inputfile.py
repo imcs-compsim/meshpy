@@ -16,7 +16,7 @@ from .mesh import Mesh
 from .base_mesh_item import BaseMeshItem
 from .node import Node
 from .element import Element
-from .boundary_condition import BoundaryCondition
+from .boundary_condition import BoundaryConditionBase
 from .geometry_set import GeometrySet
 from .utility import get_git_data
 
@@ -450,7 +450,7 @@ class InputFile(Mesh):
                                 break
 
                         if mpy.import_mesh_full:
-                            bc = BoundaryCondition.from_dat(bc_key, item,
+                            bc = BoundaryConditionBase.from_dat(bc_key, item,
                                 comments=comments)
                         else:
                             bc = BaseMeshItem(item, comments=comments)

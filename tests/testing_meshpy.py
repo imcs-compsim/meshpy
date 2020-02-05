@@ -1214,9 +1214,9 @@ class TestMeshpy(unittest.TestCase):
             mesh_ref.get_string(header=False),
             mesh_couple.get_string(header=False))
 
-    def test_beam_to_solid_conditions(self):
+    def create_beam_to_solid_conditions_model(self):
         """
-        Create beam to solid input conditions.
+        Create the inpuf file for the beam-to-solid input conditions tests.
         """
 
         # Create input file.
@@ -1243,11 +1243,35 @@ class TestMeshpy(unittest.TestCase):
 
         # Add the beam to the solid mesh.
         input_file.add(beam_mesh)
+        return input_file
+
+    def test_beam_to_solid_conditions(self):
+        """
+        Create beam-to-solid input conditions.
+        """
+
+        # Create input file.
+        input_file = self.create_beam_to_solid_conditions_model()
 
         # Compare with the reference file.
         compare_strings(self, 'test_meshpy_btsvm_coupling',
             os.path.join(testing_input,
                 'test_meshpy_btsvm_coupling_reference.dat'),
+            input_file.get_string(header=False))
+
+    def test_beam_to_solid_conditions_full(self):
+        """
+        Create beam-to-solid input conditions with full import.
+        """
+
+        # Create input file.
+        mpy.import_mesh_full = True
+        input_file = self.create_beam_to_solid_conditions_model()
+
+        # Compare with the reference file.
+        compare_strings(self, 'test_meshpy_btsvm_coupling_full',
+            os.path.join(testing_input,
+                'test_meshpy_btsvm_coupling_full_reference.dat'),
             input_file.get_string(header=False))
 
     def test_nurbs_import(self):
