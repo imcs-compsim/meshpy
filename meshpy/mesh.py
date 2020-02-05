@@ -71,8 +71,6 @@ class Mesh(object):
                 self.add_geometry_set(add_item, **kwargs)
             elif isinstance(add_item, GeometryName):
                 self.add_geometry_name(add_item, **kwargs)
-            elif isinstance(add_item, Coupling):
-                self.add_coupling(add_item, **kwargs)
             elif isinstance(add_item, list):
                 for item in add_item:
                     self.add(item, **kwargs)
@@ -97,14 +95,6 @@ class Mesh(object):
             self.add(mesh.geometry_sets[key])
         for key in self.boundary_conditions.keys():
             self.add(mesh.boundary_conditions[key])
-
-    def add_coupling(self, coupling):
-        """Add a coupling to the mesh object."""
-        if (coupling in self.boundary_conditions[
-                mpy.bc.point_coupling, mpy.geo.point]):
-            raise ValueError('The coupling element is already in this mesh!')
-        self.boundary_conditions[mpy.bc.point_coupling, mpy.geo.point].append(
-            coupling)
 
     def add_bc(self, bc):
         """Add a boundary condition to this mesh."""
@@ -178,8 +168,7 @@ class Mesh(object):
         Args
         ----
         coupling_sets: bool
-            If this is true, also sets for couplings will be added. They
-            are inserted after the mesh sets.
+            If this is true, also sets for couplings will be added.
         link_nodes: bool
             If a link to the geometry sets should be added to each connected
             node (this option is mainly for vtk output).

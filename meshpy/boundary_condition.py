@@ -15,10 +15,10 @@ from .utility import get_close_nodes
 class BoundaryConditionBase(BaseMeshItem):
     """
     This is a base object, which represents one boundary condition in the input
-    file.
+    file, e.g. Dirichlet, Neumann, coupling or beam-to-solid.
     """
 
-    def __init__(self, geometry_set, bc_type, **kwargs):
+    def __init__(self, geometry_set, bc_type=None, is_dat=False, **kwargs):
         """
         Initialize the object.
 
@@ -28,18 +28,23 @@ class BoundaryConditionBase(BaseMeshItem):
             Geometry that this boundary condition acts on. An integer can be
             given, in the case a dat file is imported. This integer is only
             temporary and will be replaced with the GeometrySet object.
+        bc_type: mpy.bc
+            Type of the boundary condition.
+        is_dat: bool
+            If this object stems from an dat file.
         """
 
-        BaseMeshItem.__init__(self, **kwargs)
-        self.geometry_set = geometry_set
+        BaseMeshItem.__init__(self, is_dat=is_dat, **kwargs)
         self.bc_type = bc_type
+        self.geometry_set = geometry_set
 
     @classmethod
     def from_dat(cls, bc_key, line, **kwargs):
         """
-        Get a boundary condition from an input line in a dat file. The geometry
-        set is passed as integer (0 based index) and will be connected after
-        the whole input file is parsed.
+        This function acts as a factory and creates the correct boundary
+        condition object from a line in the dat file. The geometry set is
+        passed as integer (0 based index) and will be connected after the whole
+        input file is parsed.
         """
 
         # Split up the input line.
@@ -55,6 +60,7 @@ class BoundaryConditionBase(BaseMeshItem):
                 bc_type=bc_key, is_dat=True, **kwargs
                 )
         elif bc_key is mpy.bc.point_coupling:
+            # Coupling condition.
             from .coupling import Coupling
             return Coupling(int(split[1]) - 1, ' '.join(split[3:]),
                 is_dat=True, **kwargs)
@@ -69,7 +75,7 @@ class BoundaryCondition(BoundaryConditionBase):
     """
 
     def __init__(self, geometry_set, bc_string, format_replacement=None,
-            bc_type=None, double_nodes=None, is_dat=False, **kwargs):
+            bc_type=None, double_nodes=None, **kwargs):
         """
         Initialize the object.
 
@@ -89,8 +95,8 @@ class BoundaryCondition(BoundaryConditionBase):
             conditions do contain nodes at the same spatial positions.
         """
 
-        BoundaryConditionBase.__init__(self, geometry_set, bc_type,
-            is_dat=is_dat,**kwargs)
+        BoundaryConditionBase.__init__(self, geometry_set, bc_type=bc_type,
+            **kwargs)
         self.bc_string = bc_string
         self.format_replacement = format_replacement
         self.double_nodes = double_nodes
@@ -108,7 +114,7 @@ class BoundaryCondition(BoundaryConditionBase):
             The contents of this object will be added to the end of lines.
         """
 
-        if self.format_replacement:
+        if self.format_replacement is not None:
             dat_string = self.bc_string.format(*self.format_replacement)
         else:
             dat_string = self.bc_string

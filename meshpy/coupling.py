@@ -16,7 +16,7 @@ class Coupling(BoundaryConditionBase):
     """Represents a coupling between geometry in BACI."""
 
     def __init__(self, geometry_set, coupling_type,
-            check_overlapping_nodes=True, is_dat=False, **kwargs):
+            check_overlapping_nodes=True, **kwargs):
         """
         Initialize this object.
 
@@ -24,11 +24,9 @@ class Coupling(BoundaryConditionBase):
         ----
         geometry_set: GeometrySet, [Nodes]
             Geometry that this boundary condition acts on.
+        coupling_type: mpy.coupling, str
             If this is a string it is the string that will be used in the input
             file, otherwise it has to be of type mpy.coupling.
-        coupling_type: mpy.coupling, str
-            Either the explicit string to be used in the input file or the tpye
-            of coupling.
         check_overlapping_nodes: bool
             If all nodes of this coupling condition have to be at the same
             physical position.
@@ -37,14 +35,12 @@ class Coupling(BoundaryConditionBase):
         if isinstance(geometry_set, list):
             geometry_set = GeometrySet(mpy.geo.point, geometry_set)
         BoundaryConditionBase.__init__(self, geometry_set,
-            mpy.bc.point_coupling, is_dat=is_dat, **kwargs)
+            bc_type=mpy.bc.point_coupling, **kwargs)
         self.coupling_type = coupling_type
-        self.bc_type = mpy.bc.point_coupling
         self.check_overlapping_nodes = check_overlapping_nodes
 
-        # If we already have a geometry set at this point, perform the checks.
-        if isinstance(geometry_set, GeometrySet):
-            self.check()
+        # Perform the checks on this boundary condition.
+        self.check()
 
     def check(self):
         """
@@ -53,14 +49,14 @@ class Coupling(BoundaryConditionBase):
         come from a dat file).
         """
 
-        if self.is_dat:
+        if self.is_dat or (not self.check_overlapping_nodes):
             return
-        pos = np.zeros([len(self.geometry_set.nodes), 3])
-        for i, node in enumerate(self.geometry_set.nodes):
-            # Get the difference to the first node.
-            pos[i, :] = (node.coordinates
-                - self.geometry_set.nodes[0].coordinates)
-        if self.check_overlapping_nodes:
+        else:
+            pos = np.zeros([len(self.geometry_set.nodes), 3])
+            for i, node in enumerate(self.geometry_set.nodes):
+                # Get the difference to the first node.
+                pos[i, :] = (node.coordinates
+                    - self.geometry_set.nodes[0].coordinates)
             if np.linalg.norm(pos) > mpy.eps_pos:
                 raise ValueError('The nodes given to Coupling do not have the '
                     'same position.')
@@ -76,6 +72,8 @@ class Coupling(BoundaryConditionBase):
         else:
             # In this case we have to check which beams are connected to the
             # node.
+            # TODO: Coupling also makes sense for different beam types, this
+            # can be implemented at some point.
             beam_type = self.geometry_set.nodes[0].element_link[0].beam_type
             for node in self.geometry_set.nodes:
                 for element in node.element_link:
