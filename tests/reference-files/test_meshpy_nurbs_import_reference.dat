@@ -69,6 +69,11 @@ MORTAR_LAMBDA_CONTINUOUS              yes
 MORTAR_LAMBDA_CONTINUOUS_SEGMENTS     5
 SEGMENTATION                          yes
 INTEGRATION_POINTS                    yes
+-----------------------BEAM INTERACTION/BEAM TO SOLID SURFACE/RUNTIME VTK OUTPUT
+WRITE_OUTPUT                          yes
+NODAL_FORCES                          yes
+SEGMENTATION                          yes
+AVERAGED_NORMALS                      yes
 --------------------------------------------------------------RESULT DESCRIPTION
 STRUCTURE DIS structure NODE 64 QUANTITY dispx VALUE -0.5144515317935817 TOLERANCE 1e-10
 STRUCTURE DIS structure NODE 64 QUANTITY dispy VALUE -0.10584639785807384 TOLERANCE 1e-10

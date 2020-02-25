@@ -29,6 +29,7 @@ def _get_segmentation_strategy(segmentation):
 def set_runtime_output(input_file, *,
         output_solid=True,
         btsvmt_output=True,
+        btss_output=True,
         output_triad=True,
         every_iteration=False,
         absolute_beam_positons=True,
@@ -44,6 +45,8 @@ def set_runtime_output(input_file, *,
         If the solid output should be written at runtime.
     btsvmt_output: bool
         If the output for btsvmt should be written.
+    btss_output: bool
+        If the output for beam-to-surface coupling should be written.
     output_triad: bool
         If the triads along the beam should be written.
     every_iteration: int
@@ -101,6 +104,17 @@ def set_runtime_output(input_file, *,
             MORTAR_LAMBDA_CONTINUOUS_SEGMENTS     5
             SEGMENTATION                          yes
             INTEGRATION_POINTS                    yes''',
+            option_overwrite=option_overwrite))
+
+    if btss_output:
+        # Set the beam to solid surface coupling runtime output options.
+        input_file.add(InputSection(
+            'BEAM INTERACTION/BEAM TO SOLID SURFACE/RUNTIME VTK OUTPUT',
+            '''
+            WRITE_OUTPUT                          yes
+            NODAL_FORCES                          yes
+            SEGMENTATION                          yes
+            AVERAGED_NORMALS                      yes''',
             option_overwrite=option_overwrite))
 
 
