@@ -53,6 +53,11 @@ MORTAR_LAMBDA_CONTINUOUS              yes
 MORTAR_LAMBDA_CONTINUOUS_SEGMENTS     5
 SEGMENTATION                          yes
 INTEGRATION_POINTS                    yes
+-----------------------BEAM INTERACTION/BEAM TO SOLID SURFACE/RUNTIME VTK OUTPUT
+WRITE_OUTPUT                          yes
+NODAL_FORCES                          yes
+SEGMENTATION                          yes
+AVERAGED_NORMALS                      yes
 ----------------------------------------------------------------BEAM INTERACTION
 REPARTITIONSTRATEGY                   Everydt
 --------------------------------------------------------------------BEAM CONTACT
