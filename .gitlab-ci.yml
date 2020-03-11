@@ -22,9 +22,15 @@ meshpy-testing:
         # Indicated the testing script, that it is performed on GitLab. In this
         # case all test have to pass.
         TESTING_GITLAB: 1
+        
+        # Some test require baci-release to check if the created input file
+        # works with baci.
         BACI_RELEASE: "/hdd/gitlab-runner/lib/baci-master/release/baci-release"
-        BACI_PRE_EXODUS: "/hdd/gitlab-runner/lib/baci-master/release/pre_exodus"
+        
+        # Meshpy can interact with cubitpy, to perform the corresponding tests,
+        # the foloowing paths have to be set.
         CUBITPY_MASTER: "/hdd/gitlab-runner/lib/cubitpy-master"
+        BACI_PRE_EXODUS: "/hdd/gitlab-runner/lib/baci-master/release/pre_exodus"
         CUBIT: "/rzhome/nas/compsim/public/opt/cubit-13.2"
     tags:
         - "imcs-all"
