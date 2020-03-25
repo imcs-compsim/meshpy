@@ -7,6 +7,7 @@ This file has functions to create basic geometry items with meshpy.
 import numpy as np
 
 # Meshpy modules.
+from ..conf import mpy
 from ..rotation import Rotation
 
 
@@ -94,8 +95,8 @@ def create_beam_mesh_arc_segment(mesh, beam_object, material, center,
     center: np.array, list
         Center of the arc.
     axis_rotation: Rotation
-        The rotation of the segment axis in 3D and the segment starts on
-        the local y-axis.
+        The 3rd base vector of this rotation is the rotation axis of the arc
+        segment. The segment starts on the 2nd basis vector.
     radius: float
         The radius of the segment.
     angle: float
@@ -135,3 +136,62 @@ def create_beam_mesh_arc_segment(mesh, beam_object, material, center,
     return mesh.create_beam_mesh_function(beam_object=beam_object,
         material=material, function_generator=get_beam_geometry,
         interval=[0., angle], **kwargs)
+
+
+def create_beam_mesh_arc_segment_2d(mesh, beam_object, material, center,
+        radius, phi_start, phi_end, **kwargs):
+    """
+    Generate a circular segment of beam elements in the x-y plane.
+
+    Args
+    ----
+    mesh: Mesh
+        Mesh that the arc segment will be added to.
+    beam_object: Beam
+        Class of beam that will be used for this line.
+    material: Material
+        Material for this segment.
+    center: np.array, list
+        Center of the arc. If the z component is not 0, an error will be
+        thrown.
+    radius: float
+        The radius of the segment.
+    phi_start, phi_end: float
+        The start and end angles of the arc w.r.t the x-axis. If the start
+        angle is larger than the end angle the beam faces in counter-clockwise
+        direction, and if the start angle is smaller than the end angle, the
+        beam faces in clockwise direction.
+
+    **kwargs (for all of them look into Mesh().create_beam_mesh_function)
+    ----
+    n_el: int
+        Number of equally spaces beam elements along the segment.
+
+    Return
+    ----
+    return_set: GeometryName
+        Set with the 'start' and 'end' node of the line. Also a 'line' set
+        with all nodes of the line.
+    """
+
+    # The center point has to be on the x-y plane.
+    if np.abs(center[2]) > mpy.eps_pos:
+        raise ValueError('The z-value of center has to be 0!')
+
+    # Check if the beam is in clockwise or counter clockwise direction.
+    angle = phi_end - phi_start
+    clockwise = not np.sign(angle) == 1
+
+    # Create rotation for the general arc segment function.
+    axis_rotation = Rotation([0, 0, 1], np.pi * 0.5 + phi_start)
+    if clockwise:
+        # If the beam is in counter clockwise direction, we have to rotate the
+        # rotation axis around its first basis vector - this will result in the
+        # arc facing in the other direction. Additionally we have to rotate
+        # around the z-axis for the angles to fit.
+        t1 = [-np.sin(phi_start), np.cos(phi_start), 0.0]
+        axis_rotation = (Rotation([0, 0, 1], np.pi) * Rotation(t1, np.pi) *
+            axis_rotation)
+
+    return create_beam_mesh_arc_segment(mesh, beam_object, material, center,
+            axis_rotation, radius, np.abs(angle), **kwargs)

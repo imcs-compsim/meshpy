@@ -5,8 +5,8 @@ complex stent craft structures.
 """
 
 # Basic geometry functions
-from .beam_basic_geometry import create_beam_mesh_line, \
-    create_beam_mesh_arc_segment
+from .beam_basic_geometry import (create_beam_mesh_line,
+    create_beam_mesh_arc_segment, create_beam_mesh_arc_segment_2d)
 
 # Parametric curve.
 from .beam_curve import create_beam_mesh_curve
@@ -15,8 +15,8 @@ from .beam_curve import create_beam_mesh_curve
 from .beam_fibers_in_rectangle import create_fibers_in_rectangle
 
 # Honeycomb.
-from .beam_honeycomb import create_beam_mesh_honeycomb_flat, \
-    create_beam_mesh_honeycomb
+from .beam_honeycomb import (create_beam_mesh_honeycomb_flat,
+    create_beam_mesh_honeycomb)
 
 # Honeycomb.
 from .beam_stent import create_beam_mesh_stent, create_beam_mesh_stent_flat
@@ -26,6 +26,7 @@ __all__ = [
     # Base geometry.
     'create_beam_mesh_line',
     'create_beam_mesh_arc_segment',
+    'create_beam_mesh_arc_segment_2d',
     # Parametric curve.
     'create_beam_mesh_curve',
     # Honeycomb.
