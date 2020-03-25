@@ -154,7 +154,7 @@ def create_beam_mesh_honeycomb(mesh, beam_object, material, diameter,
         n_circumference, n_axis, *, n_el=1, closed_top=True, vertical=True,
         add_sets=False):
     """
-    Add a honeycomb structure around a cylinder. The cylinder axis will be
+    Wrap a honeycomb structure around a cylinder. The cylinder axis will be
     the z-axis.
 
     Args
