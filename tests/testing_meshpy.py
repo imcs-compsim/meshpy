@@ -1678,7 +1678,8 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file. This will cause an error, as there are two
         # couplings for one node.
-        self.assertRaises(ValueError, mesh.write_input_file, '/tmp/temp.dat')
+        self.assertRaises(ValueError, mesh.write_input_file, '/tmp/temp.dat',
+                    add_script_to_header=False)
 
     def test_check_double_elements(self):
         """

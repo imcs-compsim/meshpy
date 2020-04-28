@@ -8,6 +8,8 @@ meshpy-testing:
         - cd $CUBITPY_MASTER
         - git pull
         - cd $MESHPY_PATH
+        # Source the virtual environment
+        - source "${PYTHON_ENV}/bin/activate"
         # Add python paths.
         - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
         - export PYTHONPATH="${PYTHONPATH}:${CUBITPY_MASTER}"
@@ -17,7 +19,12 @@ meshpy-testing:
         - "cd .."
         # Run tests.
         - "cd tests"
-        - "python3 testing_main.py"
+        - "coverage run --rcfile=coverage.config -m unittest discover"
+        - "coverage html"
+        - coverage-badge -o htmlcov/coverage.svg
+    artifacts:
+        paths:
+          - tests/htmlcov/
     variables:
         # Indicated the testing script, that it is performed on GitLab. In this
         # case all test have to pass.
@@ -29,8 +36,27 @@ meshpy-testing:
         
         # Meshpy can interact with cubitpy, to perform the corresponding tests,
         # the foloowing paths have to be set.
+        PYTHON_ENV: "/hdd/gitlab-runner/lib/python-interpreter/meshpy-env"
         CUBITPY_MASTER: "/hdd/gitlab-runner/lib/cubitpy-master"
         BACI_PRE_EXODUS: "/hdd/gitlab-runner/lib/baci-master/release/pre_exodus"
         CUBIT: "/rzhome/nas/compsim/public/opt/cubit-13.2"
     tags:
         - "imcs-all"
+
+
+# For the master branch add the coverage report.
+pages:
+    stage: deploy
+    dependencies:
+        - meshpy-testing
+    script:
+        - mv tests/htmlcov/ public/
+    artifacts:
+        paths:
+            - public
+        expire_in: 30 days
+    tags:
+        - "imcs-all"
+    only:
+        refs:
+            - master

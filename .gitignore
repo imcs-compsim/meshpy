@@ -1,9 +1,13 @@
 # general filetypes to ignorer
 *.txt
 *.pyc
+.*
 
 # test file in root folder
 /test.py
+
+# coverage report
+*/htmlcov/*
 
 # eclipse stuff
 *.project
