@@ -60,7 +60,7 @@ class TestFullBaci(unittest.TestCase):
 
         # Create input file.
         input_file = os.path.join(testing_temp, name + '.dat')
-        mesh.write_input_file(input_file)
+        mesh.write_input_file(input_file, add_script_to_header=False)
 
         # Run Baci with the input file.
         child = subprocess.Popen([
