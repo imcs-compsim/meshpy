@@ -34,9 +34,11 @@ meshpy-testing:
         # works with baci.
         BACI_RELEASE: "/hdd/gitlab-runner/lib/baci-master/release/baci-release"
         
+        # Path to the virtual python environment on the testing machine.
+        PYTHON_ENV: "/hdd/gitlab-runner/lib/python-interpreter/meshpy-env"
+
         # Meshpy can interact with cubitpy, to perform the corresponding tests,
         # the foloowing paths have to be set.
-        PYTHON_ENV: "/hdd/gitlab-runner/lib/python-interpreter/meshpy-env"
         CUBITPY_MASTER: "/hdd/gitlab-runner/lib/cubitpy-master"
         BACI_PRE_EXODUS: "/hdd/gitlab-runner/lib/baci-master/release/pre_exodus"
         CUBIT: "/rzhome/nas/compsim/public/opt/cubit-13.2"
