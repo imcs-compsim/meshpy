@@ -584,14 +584,27 @@ class InputFile(Mesh):
         else:
             raise Warning('Section {} does not exist!'.format(section_name))
 
-    def write_input_file(self, file_path, **kwargs):
-        """Write the input to a file."""
+    def write_input_file(self, file_path, nox_xml_file=None, **kwargs):
+        """
+        Write the input to a file.
+
+        Args
+        ----
+        file_path: str
+            Path to the input file that should be created.
+        nox_xml_file: str
+            (optional) If this argument is given, the xml file will be created
+            with this name, in the same directory as the input file.
+        """
 
         # Check if a xml file needs to be written.
         if self.nox_xml is not None:
-            # Get the name of the xml file.
-            self._nox_xml_file = os.path.splitext(
-                os.path.basename(file_path))[0] + '.xml'
+            if nox_xml_file is None:
+                # Get the name of the xml file.
+                self._nox_xml_file = os.path.splitext(
+                    os.path.basename(file_path))[0] + '.xml'
+            else:
+                self._nox_xml_file = nox_xml_file
 
             # Write the xml file to the disc.
             with open(os.path.join(os.path.dirname(file_path),

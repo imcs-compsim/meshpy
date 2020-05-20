@@ -40,7 +40,7 @@ class TestFullBaci(unittest.TestCase):
         if baci_release is None:
             self.skipTest('BACI path was not found!')
 
-    def run_baci_test(self, name, mesh, n_proc=2):
+    def run_baci_test(self, name, mesh, n_proc=2, **kwargs):
         """
         Run Baci with a input file and check the output. If the test passes,
         the created files are deleted.
@@ -60,7 +60,8 @@ class TestFullBaci(unittest.TestCase):
 
         # Create input file.
         input_file = os.path.join(testing_temp, name + '.dat')
-        mesh.write_input_file(input_file, add_script_to_header=False)
+        mesh.write_input_file(input_file, add_script_to_header=False,
+            **kwargs)
 
         # Run Baci with the input file.
         child = subprocess.Popen([
@@ -400,7 +401,8 @@ class TestFullBaci(unittest.TestCase):
                 )
 
         # Run the input file in Baci.
-        self.run_baci_test('honeycomb_variants', input_file)
+        self.run_baci_test('honeycomb_variants', input_file,
+            nox_xml_file='xml_name')
 
     def test_rotated_beam_axis(self):
         """
