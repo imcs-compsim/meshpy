@@ -401,8 +401,7 @@ class TestFullBaci(unittest.TestCase):
                 )
 
         # Run the input file in Baci.
-        self.run_baci_test('honeycomb_variants', input_file,
-            nox_xml_file='xml_name')
+        self.run_baci_test('honeycomb_variants', input_file)
 
     def test_rotated_beam_axis(self):
         """
@@ -509,6 +508,8 @@ class TestFullBaci(unittest.TestCase):
 
         # Run the input file in Baci.
         self.run_baci_test('rotated_beam_axis', input_file)
+        self.run_baci_test('rotated_beam_axis', input_file,
+            nox_xml_file='xml_name')
 
 
 if __name__ == '__main__':
