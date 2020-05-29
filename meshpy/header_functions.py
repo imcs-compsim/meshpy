@@ -33,6 +33,8 @@ def set_runtime_output(input_file, *,
         output_triad=True,
         every_iteration=False,
         absolute_beam_positons=True,
+        element_owner=True,
+        element_gid=True,
         option_overwrite=False):
     """
     Set the basic runtime output options.
@@ -54,6 +56,12 @@ def set_runtime_output(input_file, *,
     absolute_beam_positions: bool
         If the beams should be written at the current position or always at
         the reference position.
+    element_owner: bool
+        If the owing rank of each element should be output (currently
+        only affects the solid elements in BACI, beam element owners are
+        written by default).
+    element_gid: bool
+        If the BACI internal GID of each element should be output.
     option_overwrite: bool
         If existing options should be overwritten. If this is false and an
         option is already defined, and error will be thrown.
@@ -74,8 +82,11 @@ def set_runtime_output(input_file, *,
         '''
         OUTPUT_STRUCTURE                {}
         DISPLACEMENT                    yes
-        ELEMENT_OWNER                   yes'''.format(
-            _get_yes_no(output_solid)),
+        ELEMENT_OWNER                   {}
+        ELEMENT_GID                     {}'''.format(
+            _get_yes_no(output_solid),
+            _get_yes_no(element_owner),
+            _get_yes_no(element_gid)),
         option_overwrite=option_overwrite))
 
     # Set the beam runtime output options.
@@ -86,9 +97,11 @@ def set_runtime_output(input_file, *,
         DISPLACEMENT                    yes
         USE_ABSOLUTE_POSITIONS          {}
         TRIAD_VISUALIZATIONPOINT        {}
-        STRAINS_GAUSSPOINT              yes'''.format(
+        STRAINS_GAUSSPOINT              yes
+        ELEMENT_GID                     {}'''.format(
             _get_yes_no(absolute_beam_positons),
-            _get_yes_no(output_triad)),
+            _get_yes_no(output_triad),
+            _get_yes_no(element_gid)),
         option_overwrite=option_overwrite))
 
     if btsvmt_output:
