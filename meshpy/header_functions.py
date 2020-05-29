@@ -126,7 +126,11 @@ def set_runtime_output(input_file, *,
             '''
             WRITE_OUTPUT                          yes
             NODAL_FORCES                          yes
+            MORTAR_LAMBDA_DISCRET                 yes
+            MORTAR_LAMBDA_CONTINUOUS              yes
+            MORTAR_LAMBDA_CONTINUOUS_SEGMENTS     5
             SEGMENTATION                          yes
+            INTEGRATION_POINTS                    yes
             AVERAGED_NORMALS                      yes''',
             option_overwrite=option_overwrite))
 
