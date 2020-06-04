@@ -80,6 +80,7 @@ MORTAR_SHAPE_FUNCTION                 None
 GEOMETRY_PAIR_STRATEGY                segmentation
 GEOMETRY_PAIR_SEARCH_POINTS           2
 --------------------------------BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING
+COUPLING_TYPE                         consistent_fad
 CONSTRAINT_STRATEGY                   penalty
 PENALTY_PARAMETER                     None
 GAUSS_POINTS                          6
