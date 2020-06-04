@@ -143,6 +143,7 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         n_gauss_points=6,
         n_integration_points_circ=None,
         penalty_parameter=None,
+        coupling_type=None,
         binning_bounding_box=None,
         binning_cutoff_radius=-1,
         option_overwrite=False):
@@ -170,6 +171,8 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         section.
     penalty_parameter: float
         Penalty parameter for contact enforcement.
+    coupling_type: str
+        Type of coupling for beam-to-surface coupling.
     binning_bounding_box: [float]
         List with the limits of the bounding box.
     binning_cutoff_radius: float
@@ -202,6 +205,8 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         bts = InputSection('BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING')
     elif interaction_type == mpy.beam_to_solid.surface_meshtying:
         bts = InputSection('BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING')
+        if coupling_type is not None:
+            bts.add('COUPLING_TYPE {}'.format(coupling_type))
     else:
         raise ValueError('Got wrong beam-to-solid mesh tying type. '
             + 'Got {} of type {}.'.format(
