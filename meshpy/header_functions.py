@@ -35,6 +35,7 @@ def set_runtime_output(input_file, *,
         absolute_beam_positons=True,
         element_owner=True,
         element_gid=True,
+        output_energy=False,
         option_overwrite=False):
     """
     Set the basic runtime output options.
@@ -62,6 +63,8 @@ def set_runtime_output(input_file, *,
         written by default).
     element_gid: bool
         If the BACI internal GID of each element should be output.
+    output_energy: bool
+        If the energy output from BACI should be activated.
     option_overwrite: bool
         If existing options should be overwritten. If this is false and an
         option is already defined, and error will be thrown.
@@ -133,6 +136,9 @@ def set_runtime_output(input_file, *,
             INTEGRATION_POINTS                    yes
             AVERAGED_NORMALS                      yes''',
             option_overwrite=option_overwrite))
+
+    if output_energy:
+        input_file.add('--STRUCTURAL DYNAMIC\nRESEVRYERGY 1')
 
 
 def set_beam_to_solid_meshtying(input_file, interaction_type, *,
