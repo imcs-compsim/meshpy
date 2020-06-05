@@ -151,7 +151,7 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         penalty_parameter=None,
         coupling_type=None,
         binning_bounding_box=None,
-        binning_cutoff_radius=-1,
+        binning_cutoff_radius=None,
         option_overwrite=False):
     """
     Set the beam to solid meshtying options.
@@ -197,14 +197,21 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         option_overwrite=True))
 
     # Set the binning strategy.
-    bounding_box_string = ' '.join([str(val) for val in binning_bounding_box])
-    input_file.add(InputSection(
-        'BINNING STRATEGY',
-        '''
-        BIN_SIZE_LOWER_BOUND {1}
-        DOMAINBOUNDINGBOX {0}
-        '''.format(bounding_box_string, binning_cutoff_radius),
-        option_overwrite=True))
+    if ((binning_bounding_box is not None)
+            and binning_cutoff_radius is not None):
+        bounding_box_string = ' '.join([str(val) for val in binning_bounding_box])
+        input_file.add(InputSection(
+            'BINNING STRATEGY',
+            '''
+            BIN_SIZE_LOWER_BOUND {1}
+            DOMAINBOUNDINGBOX {0}
+            '''.format(bounding_box_string, binning_cutoff_radius),
+            option_overwrite=True))
+    elif ((binning_bounding_box is not None)
+            or binning_cutoff_radius is not None):
+        raise ValueError(('Binning bounding box ({}) and binning cutoff radius'
+            + ' both have to be set or none of them.').format(
+                binning_bounding_box, binning_cutoff_radius))
 
     # Add the beam to solid volume mesh tying options.
     if interaction_type == mpy.beam_to_solid.volume_meshtying:

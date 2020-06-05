@@ -54,8 +54,6 @@ class TestHeaderFunctions(unittest.TestCase):
         set_beam_to_solid_meshtying(input_file,
             mpy.beam_to_solid.surface_meshtying,
             contact_discretization='gp',
-            binning_bounding_box=[1, 2, 3, 4, 5, 6],
-            binning_cutoff_radius=0.69,
             option_overwrite=True)
 
         # Check the output.
