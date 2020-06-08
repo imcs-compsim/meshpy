@@ -39,12 +39,14 @@ EVERY_ITERATION                       no
 OUTPUT_STRUCTURE                      yes
 DISPLACEMENT                          yes
 ELEMENT_OWNER                         yes
+ELEMENT_GID                           yes
 -----------------------------------------------------IO/RUNTIME VTK OUTPUT/BEAMS
 OUTPUT_BEAMS                          yes
 DISPLACEMENT                          yes
 USE_ABSOLUTE_POSITIONS                yes
 TRIAD_VISUALIZATIONPOINT              no
 STRAINS_GAUSSPOINT                    yes
+ELEMENT_GID                           yes
 --------------BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/RUNTIME VTK OUTPUT
 WRITE_OUTPUT                          yes
 NODAL_FORCES                          yes
@@ -56,7 +58,11 @@ INTEGRATION_POINTS                    yes
 -----------------------BEAM INTERACTION/BEAM TO SOLID SURFACE/RUNTIME VTK OUTPUT
 WRITE_OUTPUT                          yes
 NODAL_FORCES                          yes
+MORTAR_LAMBDA_DISCRET                 yes
+MORTAR_LAMBDA_CONTINUOUS              yes
+MORTAR_LAMBDA_CONTINUOUS_SEGMENTS     5
 SEGMENTATION                          yes
+INTEGRATION_POINTS                    yes
 AVERAGED_NORMALS                      yes
 ----------------------------------------------------------------BEAM INTERACTION
 REPARTITIONSTRATEGY                   Everydt
@@ -74,6 +80,7 @@ MORTAR_SHAPE_FUNCTION                 None
 GEOMETRY_PAIR_STRATEGY                segmentation
 GEOMETRY_PAIR_SEARCH_POINTS           2
 --------------------------------BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING
+COUPLING_TYPE                         consistent_fad
 CONSTRAINT_STRATEGY                   penalty
 PENALTY_PARAMETER                     None
 GAUSS_POINTS                          6

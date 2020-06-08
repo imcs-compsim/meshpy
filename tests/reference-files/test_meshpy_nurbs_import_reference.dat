@@ -55,12 +55,14 @@ EVERY_ITERATION                       no
 OUTPUT_STRUCTURE                      no
 DISPLACEMENT                          yes
 ELEMENT_OWNER                         yes
+ELEMENT_GID                           yes
 -----------------------------------------------------IO/RUNTIME VTK OUTPUT/BEAMS
 OUTPUT_BEAMS                          yes
 DISPLACEMENT                          yes
 USE_ABSOLUTE_POSITIONS                yes
 TRIAD_VISUALIZATIONPOINT              yes
 STRAINS_GAUSSPOINT                    yes
+ELEMENT_GID                           yes
 --------------BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/RUNTIME VTK OUTPUT
 WRITE_OUTPUT                          yes
 NODAL_FORCES                          yes
@@ -72,7 +74,11 @@ INTEGRATION_POINTS                    yes
 -----------------------BEAM INTERACTION/BEAM TO SOLID SURFACE/RUNTIME VTK OUTPUT
 WRITE_OUTPUT                          yes
 NODAL_FORCES                          yes
+MORTAR_LAMBDA_DISCRET                 yes
+MORTAR_LAMBDA_CONTINUOUS              yes
+MORTAR_LAMBDA_CONTINUOUS_SEGMENTS     5
 SEGMENTATION                          yes
+INTEGRATION_POINTS                    yes
 AVERAGED_NORMALS                      yes
 --------------------------------------------------------------RESULT DESCRIPTION
 STRUCTURE DIS structure NODE 64 QUANTITY dispx VALUE -0.5144515317935817 TOLERANCE 1e-10

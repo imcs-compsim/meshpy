@@ -33,6 +33,9 @@ def set_runtime_output(input_file, *,
         output_triad=True,
         every_iteration=False,
         absolute_beam_positons=True,
+        element_owner=True,
+        element_gid=True,
+        output_energy=False,
         option_overwrite=False):
     """
     Set the basic runtime output options.
@@ -54,6 +57,14 @@ def set_runtime_output(input_file, *,
     absolute_beam_positions: bool
         If the beams should be written at the current position or always at
         the reference position.
+    element_owner: bool
+        If the owing rank of each element should be output (currently
+        only affects the solid elements in BACI, beam element owners are
+        written by default).
+    element_gid: bool
+        If the BACI internal GID of each element should be output.
+    output_energy: bool
+        If the energy output from BACI should be activated.
     option_overwrite: bool
         If existing options should be overwritten. If this is false and an
         option is already defined, and error will be thrown.
@@ -74,8 +85,11 @@ def set_runtime_output(input_file, *,
         '''
         OUTPUT_STRUCTURE                {}
         DISPLACEMENT                    yes
-        ELEMENT_OWNER                   yes'''.format(
-            _get_yes_no(output_solid)),
+        ELEMENT_OWNER                   {}
+        ELEMENT_GID                     {}'''.format(
+            _get_yes_no(output_solid),
+            _get_yes_no(element_owner),
+            _get_yes_no(element_gid)),
         option_overwrite=option_overwrite))
 
     # Set the beam runtime output options.
@@ -86,9 +100,11 @@ def set_runtime_output(input_file, *,
         DISPLACEMENT                    yes
         USE_ABSOLUTE_POSITIONS          {}
         TRIAD_VISUALIZATIONPOINT        {}
-        STRAINS_GAUSSPOINT              yes'''.format(
+        STRAINS_GAUSSPOINT              yes
+        ELEMENT_GID                     {}'''.format(
             _get_yes_no(absolute_beam_positons),
-            _get_yes_no(output_triad)),
+            _get_yes_no(output_triad),
+            _get_yes_no(element_gid)),
         option_overwrite=option_overwrite))
 
     if btsvmt_output:
@@ -113,9 +129,16 @@ def set_runtime_output(input_file, *,
             '''
             WRITE_OUTPUT                          yes
             NODAL_FORCES                          yes
+            MORTAR_LAMBDA_DISCRET                 yes
+            MORTAR_LAMBDA_CONTINUOUS              yes
+            MORTAR_LAMBDA_CONTINUOUS_SEGMENTS     5
             SEGMENTATION                          yes
+            INTEGRATION_POINTS                    yes
             AVERAGED_NORMALS                      yes''',
             option_overwrite=option_overwrite))
+
+    if output_energy:
+        input_file.add('--STRUCTURAL DYNAMIC\nRESEVRYERGY 1')
 
 
 def set_beam_to_solid_meshtying(input_file, interaction_type, *,
@@ -126,8 +149,9 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         n_gauss_points=6,
         n_integration_points_circ=None,
         penalty_parameter=None,
+        coupling_type=None,
         binning_bounding_box=None,
-        binning_cutoff_radius=-1,
+        binning_cutoff_radius=None,
         option_overwrite=False):
     """
     Set the beam to solid meshtying options.
@@ -153,6 +177,8 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         section.
     penalty_parameter: float
         Penalty parameter for contact enforcement.
+    coupling_type: str
+        Type of coupling for beam-to-surface coupling.
     binning_bounding_box: [float]
         List with the limits of the bounding box.
     binning_cutoff_radius: float
@@ -171,20 +197,29 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         option_overwrite=True))
 
     # Set the binning strategy.
-    bounding_box_string = ' '.join([str(val) for val in binning_bounding_box])
-    input_file.add(InputSection(
-        'BINNING STRATEGY',
-        '''
-        BIN_SIZE_LOWER_BOUND {1}
-        DOMAINBOUNDINGBOX {0}
-        '''.format(bounding_box_string, binning_cutoff_radius),
-        option_overwrite=True))
+    if ((binning_bounding_box is not None)
+            and binning_cutoff_radius is not None):
+        bounding_box_string = ' '.join([str(val) for val in binning_bounding_box])
+        input_file.add(InputSection(
+            'BINNING STRATEGY',
+            '''
+            BIN_SIZE_LOWER_BOUND {1}
+            DOMAINBOUNDINGBOX {0}
+            '''.format(bounding_box_string, binning_cutoff_radius),
+            option_overwrite=True))
+    elif ((binning_bounding_box is not None)
+            or binning_cutoff_radius is not None):
+        raise ValueError(('Binning bounding box ({}) and binning cutoff radius'
+            + ' both have to be set or none of them.').format(
+                binning_bounding_box, binning_cutoff_radius))
 
     # Add the beam to solid volume mesh tying options.
     if interaction_type == mpy.beam_to_solid.volume_meshtying:
         bts = InputSection('BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING')
     elif interaction_type == mpy.beam_to_solid.surface_meshtying:
         bts = InputSection('BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING')
+        if coupling_type is not None:
+            bts.add('COUPLING_TYPE {}'.format(coupling_type))
     else:
         raise ValueError('Got wrong beam-to-solid mesh tying type. '
             + 'Got {} of type {}.'.format(
