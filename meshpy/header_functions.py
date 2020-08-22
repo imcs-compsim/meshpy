@@ -244,7 +244,7 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
     elif contact_discretization is 'circ':
         bts.add('''
         CONTACT_DISCRETIZATION gauss_point_cross_section
-        INTEGRATION_POINTS_CIRCUMFENCE {}'''.format(n_integration_points_circ),
+        INTEGRATION_POINTS_CIRCUMFERENCE {}'''.format(n_integration_points_circ),
             option_overwrite=option_overwrite)
         segmentation_strategy = 'gauss_point_projection_cross_section'
     else:
