@@ -1,6 +1,6 @@
 autograd
 Cython
 matplotlib
-numpy==1.14.5
+numpy
 scipy
 vtk
