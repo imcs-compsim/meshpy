@@ -230,18 +230,18 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         GAUSS_POINTS {}
         '''.format(penalty_parameter, n_gauss_points),
         option_overwrite=option_overwrite)
-    if contact_discretization is 'mortar':
+    if contact_discretization == 'mortar':
         bts.add('''
             CONTACT_DISCRETIZATION mortar
             MORTAR_SHAPE_FUNCTION {}
             '''.format(mortar_shape),
             option_overwrite=option_overwrite)
         segmentation_strategy = _get_segmentation_strategy(segmentation)
-    elif contact_discretization is 'gp':
+    elif contact_discretization == 'gp':
         bts.add('CONTACT_DISCRETIZATION gauss_point_to_segment',
             option_overwrite=option_overwrite)
         segmentation_strategy = _get_segmentation_strategy(segmentation)
-    elif contact_discretization is 'circ':
+    elif contact_discretization == 'circ':
         bts.add('''
         CONTACT_DISCRETIZATION gauss_point_cross_section
         INTEGRATION_POINTS_CIRCUMFERENCE {}'''.format(n_integration_points_circ),
