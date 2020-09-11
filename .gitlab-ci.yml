@@ -10,6 +10,9 @@ meshpy-testing:
         - cd $MESHPY_PATH
         # Source the virtual environment
         - source "${PYTHON_ENV}/bin/activate"
+        # Print information on the python environment.
+        - "python --version"
+        - "pip list"
         # Add python paths.
         - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
         - export PYTHONPATH="${PYTHONPATH}:${CUBITPY_MASTER}"
@@ -29,11 +32,11 @@ meshpy-testing:
         # Indicated the testing script, that it is performed on GitLab. In this
         # case all test have to pass.
         TESTING_GITLAB: 1
-        
+
         # Some test require baci-release to check if the created input file
         # works with baci.
         BACI_RELEASE: "/hdd/gitlab-runner/lib/baci-master/release/baci-release"
-        
+
         # Path to the virtual python environment on the testing machine.
         PYTHON_ENV: "/hdd/gitlab-runner/lib/python-interpreter/meshpy-env"
 
