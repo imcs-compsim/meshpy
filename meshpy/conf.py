@@ -5,68 +5,69 @@ meshpy.
 """
 
 # Python imports.
-from enum import IntEnum
+from enum import Enum, auto
 
 
-class Geometry(IntEnum):
+class Geometry(Enum):
     """Enum for geometry types."""
-    point = 1
-    line = 2
-    surface = 3
-    volume = 4
+    point = auto()
+    line = auto()
+    surface = auto()
+    volume = auto()
 
 
-class BoundaryCondition(IntEnum):
+class BoundaryCondition(Enum):
     """Enum for boundary condition types."""
-    dirichlet = 1
-    neumann = 2
-    moment_euler_bernoulli = 3
-    beam_to_solid_volume_meshtying = 4
-    beam_to_solid_surface_meshtying = 5
-    point_coupling = 6
+    dirichlet = auto()
+    neumann = auto()
+    moment_euler_bernoulli = auto()
+    beam_to_solid_volume_meshtying = auto()
+    beam_to_solid_surface_meshtying = auto()
+    point_coupling = auto()
 
 
-class BeamType(IntEnum):
+class BeamType(Enum):
     """Enum for beam types."""
-    reissner = 1
-    kirchhoff = 2
-    euler_bernoulli = 3
+    reissner = auto()
+    kirchhoff = auto()
+    euler_bernoulli = auto()
 
 
-class CouplingType(IntEnum):
+class CouplingType(Enum):
     """Enum for coupling types."""
-    fix = 1
-    fix_reuse = 2
-    joint = 3
+    fix = auto()
+    fix_reuse = auto()
+    joint = auto()
 
 
-class BeamToSolidInteractionType(IntEnum):
+class BeamToSolidInteractionType(Enum):
     """Enum for beam-to-solid interaction types."""
-    volume_meshtying = 1
-    surface_meshtying = 2
+    volume_meshtying = auto()
+    surface_meshtying = auto()
 
 
-class DoubleNodes(IntEnum):
+class DoubleNodes(Enum):
     """Enum for handing double nodes in Neumann conditions."""
-    remove = 1
-    keep = 2
+    remove = auto()
+    keep = auto()
 
 
-class VTKGeometry(IntEnum):
+class VTKGeometry(Enum):
     """Enum for VTK geometry types (for now cells and points)."""
-    point = 1
-    cell = 2
+    point = auto()
+    cell = auto()
 
 
-class VTKTensor(IntEnum):
+class VTKTensor(Enum):
     """Enum for VTK tensor types."""
-    scalar = 1
-    vector = 2
+    scalar = auto()
+    vector = auto()
 
-class VTKType(IntEnum):
+
+class VTKType(Enum):
     """Enum for VTK value types."""
-    int = 1
-    float = 2
+    int = auto()
+    float = auto()
 
 
 class MeshPy(object):

@@ -154,15 +154,13 @@ def xml_to_dict(xml, tol_float):
     xml_dict = {}
     n_childs = len(xml.getchildren())
     is_text = not xml.text.strip() == ''
-    if n_childs > 0 and is_text:
-        raise ValueError('The text is not empty and there are children. This '
-            + 'case should not happen!')
-    elif n_childs > 0:
+    if n_childs > 0:
         # Add a child xml construct.
         for child in xml.getchildren():
             key, value = xml_to_dict(child, tol_float)
             xml_dict[key] = value
-    elif is_text:
+
+    if is_text:
         # Add data.
         data = xml.text.split('\n')
         if tol_float is None:
