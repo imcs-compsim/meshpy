@@ -4,7 +4,7 @@ Meshpy is a beam input generator for BACI.
 
 ## Installation
 
-Cubitpy is developed with `python3.8`.
+Meshpy is developed with `python3.8`.
 Other versions of Python might lead to issues.
 It is recommended to use virtual environments with `python`.
 On Debian systems the package `python3-venv` has to be installed.
