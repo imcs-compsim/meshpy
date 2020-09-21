@@ -372,7 +372,9 @@ class TestMeshpy(unittest.TestCase):
             [0, 1, 0],
             [10, 1, 0],
             n_el=10)
+
         nodes = mesh.get_nodes_by_function(get_nodes_at_x, 1.0)
+        self.assertTrue(2 == len(nodes))
         for node in nodes:
             self.assertTrue(np.abs(1.0 - node.coordinates[0]) < 1e-10)
 
