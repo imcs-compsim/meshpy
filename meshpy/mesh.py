@@ -651,7 +651,7 @@ class Mesh(object):
 
         Args
         ----
-        function: function(node)
+        function: function(node, *args)
             Nodes for which this function is true are returned.
         middle_nodes: bool
             If this is true, middle nodes of a beam are also returned.
