@@ -351,7 +351,7 @@ class TestMeshpy(unittest.TestCase):
 
     def test_get_nodes_by_function(self):
         """
-        Check if the get_nodes_by_function mehod of Mesh works properly.
+        Check if the get_nodes_by_function method of Mesh works properly.
         """
 
         def get_nodes_at_x(node, x_value):
