@@ -373,6 +373,9 @@ class TestMeshpy(unittest.TestCase):
             [10, 1, 0],
             n_el=10)
 
+        # Add a dummy node to check that dat file nodes are skipped.
+        mesh.add_node(BaseMeshItem())
+
         nodes = mesh.get_nodes_by_function(get_nodes_at_x, 1.0)
         self.assertTrue(2 == len(nodes))
         for node in nodes:

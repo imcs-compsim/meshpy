@@ -659,7 +659,7 @@ class Mesh(object):
 
         node_list = []
         for node in self.nodes:
-            if middle_nodes or (not node.is_middle_node):
+            if not node.is_dat and (middle_nodes or (not node.is_middle_node)):
                 if function(node, *args):
                     node_list.append(node)
         return node_list
