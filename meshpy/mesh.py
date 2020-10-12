@@ -645,7 +645,8 @@ class Mesh(object):
             if not node.is_dat:
                 node.unlink()
 
-    def get_nodes_by_function(self, function, *args, middle_nodes=False):
+    def get_nodes_by_function(self, function, *args, middle_nodes=False,
+            **kwargs):
         """
         Return all nodes for which the function evaluates to true.
 
@@ -660,7 +661,7 @@ class Mesh(object):
         node_list = []
         for node in self.nodes:
             if not node.is_dat and (middle_nodes or (not node.is_middle_node)):
-                if function(node, *args):
+                if function(node, *args, **kwargs):
                     node_list.append(node)
         return node_list
 
