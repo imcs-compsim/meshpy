@@ -131,3 +131,22 @@ def check_node_by_coordinate(node, axis, value, eps=1e-10):
         return True
     else:
         return False
+
+
+def get_min_max_coordinates(nodes):
+    """
+    Return an array with the minimal and maximal coordinates of the given
+    nodes.
+
+    Return
+    ----
+    min_max_coordinates:
+        [min_x, min_y, min_z, max_x, max_y, max_z]
+    """
+    coordinates = np.zeros([len(nodes), 3])
+    for i, node in enumerate(nodes):
+        coordinates[i, :] = node.coordinates
+    min_max = np.zeros(6)
+    min_max[:3] = np.min(coordinates, axis=0)
+    min_max[3:] = np.max(coordinates, axis=0)
+    return min_max
