@@ -7,6 +7,9 @@ This file has functions to create a honeycomb beam mesh.
 import numpy as np
 
 # Meshpy modules.
+from .. import mpy, GeometrySet
+from ..container import GeometryName
+from ..utility import check_node_by_coordinate
 from .beam_basic_geometry import create_beam_mesh_line
 
 
@@ -175,3 +178,16 @@ def create_fibers_in_rectangle(mesh, beam_object, material, length, width,
                     np.append(start, 0.),
                     np.append(end, 0.),
                     n_el=fiber_nel)
+
+    return_set = GeometryName()
+    return_set['north'] = GeometrySet(mpy.geo.point,
+        nodes=mesh.get_nodes_by_function(check_node_by_coordinate, 1, width))
+    return_set['east'] = GeometrySet(mpy.geo.point,
+        nodes=mesh.get_nodes_by_function(check_node_by_coordinate, 0, length))
+    return_set['south'] = GeometrySet(mpy.geo.point,
+        nodes=mesh.get_nodes_by_function(check_node_by_coordinate, 1, 0))
+    return_set['west'] = GeometrySet(mpy.geo.point,
+        nodes=mesh.get_nodes_by_function(check_node_by_coordinate, 0, 0))
+    return_set['all'] = GeometrySet(mpy.geo.line,
+        nodes=mesh.get_global_nodes())
+    return return_set
