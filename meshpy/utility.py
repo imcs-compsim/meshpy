@@ -109,3 +109,25 @@ def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
     else:
         # Return the partner list.
         return has_partner, n_partner
+
+
+def check_node_by_coordinate(node, axis, value, eps=1e-10):
+    """
+    Check if the node is at a certain coordinate value.
+
+    Args
+    ----
+    node: Node
+        The node to be checked for its position.
+    axis: int
+        Coordinate axis to check.
+        0 -> x, 1 -> y, 2 -> z
+    value: float
+        Value for the coordinate that the node should have.
+    eps: float
+        Tolerance to check for equality.
+    """
+    if np.abs(node.coordinates[axis] - value) < eps:
+        return True
+    else:
+        return False
