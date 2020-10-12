@@ -194,6 +194,32 @@ class TestMeshCreationFunctions(unittest.TestCase):
             ref_file,
             input_file.get_string(header=False))
 
+    def test_fibers_in_rectangle_return_set(self):
+        """
+        Test the set returned by the create_fibers_in_rectangle function.
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Create input file.
+        input_file = InputFile(maintainer='Ivo Steinbrecher')
+
+        # Create mesh.
+        mat = MaterialEulerBernoulli()
+        beam_set = create_fibers_in_rectangle(input_file, Beam3eb, mat,
+            4, 1, 45, 0.45, 0.35)
+        input_file.add(beam_set)
+
+        # Check the output.
+        ref_file = os.path.join(testing_input,
+            'test_mesh_fiber_rectangle_return_sets_reference.dat')
+        compare_strings(
+            self,
+            'test_mesh_fiber_return_sets_rectangle',
+            ref_file,
+            input_file.get_string(header=False))
+
 
 if __name__ == '__main__':
     # Execution part of script.
