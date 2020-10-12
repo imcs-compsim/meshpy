@@ -23,7 +23,7 @@ from meshpy.vtk_writer import VTKWriter
 from meshpy.geometry_set import GeometrySet
 from meshpy.container import GeometryName
 from meshpy.element_beam import Beam
-from meshpy.utility import get_close_nodes, flatten
+from meshpy.utility import get_close_nodes, flatten, get_min_max_coordinates
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
@@ -380,6 +380,26 @@ class TestMeshpy(unittest.TestCase):
         self.assertTrue(2 == len(nodes))
         for node in nodes:
             self.assertTrue(np.abs(1.0 - node.coordinates[0]) < 1e-10)
+
+    def test_get_min_max_coordinates(self):
+        """
+        Test if the get_min_max_coordinates function works properly.
+        """
+
+        # Create the mesh.
+        mpy.import_mesh_full = True
+        mesh = InputFile(dat_file=os.path.join(testing_input,
+            'baci_input_solid_cuboid.dat'))
+        mat = MaterialReissner(radius=0.05)
+        create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat,
+            [0, 0, 0],
+            [2, 3, 4],
+            n_el=10)
+
+        # Check the results.
+        min_max = get_min_max_coordinates(mesh.nodes)
+        ref_solution = [-0.5, -1.0, -1.5, 2.0, 3.0, 4.0]
+        self.assertTrue(np.linalg.norm(min_max - ref_solution) < 1e-10)
 
     def test_find_close_nodes_binning(self):
         """
