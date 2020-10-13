@@ -177,7 +177,8 @@ if __name__ == '__main__':
         'meshpy_rotate': 0.6,
         'meshpy_translate': 0.6,
         'meshpy_reflect': 0.7,
-        'meshpy_wrap_around_cylinder': 0.9,
+        'meshpy_wrap_around_cylinder': 3.0,
+        'meshpy_wrap_around_cylinder_without_check': 0.9,
         'meshpy_get_close_nodes': 1.1,
         'meshpy_write_dat': 12.5,
         'meshpy_write_vtk': 19
@@ -230,6 +231,13 @@ if __name__ == '__main__':
         Mesh.wrap_around_cylinder,
         args=[mesh],
         kwargs={'radius': 1.}
+        )
+
+    time_function(
+        'meshpy_wrap_around_cylinder_without_check',
+        Mesh.wrap_around_cylinder,
+        args=[mesh],
+        kwargs={'radius': 1., 'advanced_warning': False}
         )
 
     time_function(
