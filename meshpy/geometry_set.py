@@ -89,7 +89,6 @@ class GeometrySet(BaseMeshItem):
             for node in value.nodes:
                 self._add(node, fail_on_double_nodes)
         else:
-            print(value.data)
             raise TypeError('Expected Node or list, but got {}'.format(
                 type(value)
                 ))
