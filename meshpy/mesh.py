@@ -490,7 +490,7 @@ class Mesh(object):
             node.coordinates = pos_new[i, :]
             node.rotation.q = rot_new[i, :]
 
-    def wrap_around_cylinder(self, radius=None):
+    def wrap_around_cylinder(self, radius=None, advanced_warning=True):
         """
         Wrap the geometry around a cylinder. The y-z plane gets morphed into
         the axis of symmetry. If all nodes are on the same y-z plane, the
@@ -503,7 +503,11 @@ class Mesh(object):
         radius: double
             If this value is given AND not all nodes are on the same y-z plane,
             then use this radius for the calculation of phi for all nodes.
-            This will still lead to distorted elements!.
+            This might still lead to distorted elements!.
+        advanced_warning: bool
+            If each element should be checked if it is either parallel to the
+            y-z or x-z plane. This is computationally expensive, but in most
+            cases (up to 100,000 elements) this check can be left activated.
         """
 
         pos, beam_nodes = self.get_global_coordinates()
@@ -517,8 +521,31 @@ class Mesh(object):
             # The points are not all on the y-z plane, get the reference
             # radius.
             if radius is not None:
-                warnings.warn('The nodes are not on the same y-z plane. This '
-                    + 'may lead to distorted elements!')
+                if advanced_warning:
+                    # Here we check, if each element lays on a plane parallel
+                    # to the y-z plane, or parallel to the x-z plane.
+                    #
+                    # To be exactly sure, we could check the rotations here,
+                    # i.e. if they are also in plane.
+                    element_warning = []
+                    for i_element, element in enumerate(
+                            [e for e in self.elements if not e.is_dat]):
+                        element_coordinates = np.zeros([len(element.nodes), 3])
+                        for i_node, node in enumerate(element.nodes):
+                            element_coordinates[i_node, :] = node.coordinates
+                        is_yz = np.max(np.abs(element_coordinates[:, 0]
+                            - element_coordinates[0, 0])) < mpy.eps_pos
+                        is_xz = np.max(np.abs(element_coordinates[:, 1]
+                            - element_coordinates[0, 1])) < mpy.eps_pos
+                        if not(is_yz or is_xz):
+                            element_warning.append(i_element)
+                    if len(element_warning) != 0:
+                        warnings.warn('There are elements which are not '
+                            'parallel to the y-z or x-y plane. This will lead '
+                            'to distorted elements!')
+                else:
+                    warnings.warn('The nodes are not on the same y-z plane. '
+                        'This may lead to distorted elements!')
             else:
                 raise ValueError('The nodes that should be wrapped around a '
                     + 'cylinder are not on the same y-z plane. This will give '
