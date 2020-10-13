@@ -1146,6 +1146,30 @@ class TestMeshpy(unittest.TestCase):
         create_beam_mesh_line(mesh_couple, Beam3rHerm2Line3, mat, [1, 0, 0],
             [2, 0, 0])
 
+        ref_nodes = list(mesh_ref.nodes)
+        coupling_nodes = list(mesh_couple.nodes)
+
+        # Add a line set with all nodes, to check that the nodes in the
+        # boundary condition are replaced correctly.
+        mesh_ref.add(GeometrySet(mpy.geo.line, nodes=ref_nodes))
+        mesh_couple.add(GeometrySet(mpy.geo.line, nodes=coupling_nodes))
+
+        # Add another line set with all nodes, this time only the coupling node
+        # that will be kept is in this set.
+        mesh_ref.add(GeometrySet(mpy.geo.line, nodes=ref_nodes))
+        coupling_nodes_without_replace_node = list(coupling_nodes)
+        del coupling_nodes_without_replace_node[3]
+        mesh_couple.add(GeometrySet(mpy.geo.line,
+            nodes=coupling_nodes_without_replace_node))
+
+        # Add another line set with all nodes, this time only the coupling node
+        # that will be replaced is in this set.
+        mesh_ref.add(GeometrySet(mpy.geo.line, nodes=ref_nodes))
+        coupling_nodes_without_replace_node = list(coupling_nodes)
+        del coupling_nodes_without_replace_node[2]
+        mesh_couple.add(GeometrySet(mpy.geo.line,
+            nodes=coupling_nodes_without_replace_node))
+
         # Rotate both meshes
         mesh_ref.rotate(rot)
         mesh_couple.rotate(rot)
