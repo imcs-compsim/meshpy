@@ -9,13 +9,13 @@ import numpy as np
 import os
 
 # Meshpy imports.
-from meshpy import (mpy, InputFile, MaterialReissner, Beam3rHerm2Line3,
+from meshpy import (mpy, Mesh, InputFile, MaterialReissner, Beam3rHerm2Line3,
     MaterialEulerBernoulli, Beam3eb, Rotation, BoundaryCondition)
 
 # Geometry functions.
 from meshpy.mesh_creation_functions import (create_beam_mesh_arc_segment,
     create_beam_mesh_arc_segment_2d, create_beam_mesh_stent,
-    create_fibers_in_rectangle)
+    create_fibers_in_rectangle, create_wire_fibers)
 
 # Testing imports.
 from tests.testing_utility import testing_input, compare_strings
@@ -217,6 +217,37 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_strings(
             self,
             'test_mesh_fiber_return_sets_rectangle',
+            ref_file,
+            input_file.get_string(header=False))
+
+    def test_wire(self):
+        """
+        Test the create_wire_fibers function
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Create input file.
+        input_file = InputFile(maintainer='Ivo Steinbrecher')
+
+        # Create two wires with different parameters.
+        mat = MaterialEulerBernoulli(radius=0.05)
+        mesh_1 = Mesh()
+        set_1 = create_wire_fibers(mesh_1, Beam3eb, mat, 3.0, layers=2,
+            n_el=2)
+        mesh_2 = Mesh()
+        set_2 = create_wire_fibers(mesh_2, Beam3eb, mat, 3.0, layers=2,
+            n_el=2, radius=0.1)
+        mesh_2.translate([0.0, 1.5, 0.0])
+        input_file.add(mesh_1, mesh_2, set_1, set_2)
+
+        # Check the output.
+        ref_file = os.path.join(testing_input,
+            'test_mesh_wire_reference.dat')
+        compare_strings(
+            self,
+            'test_mesh_wire',
             ref_file,
             input_file.get_string(header=False))
 
