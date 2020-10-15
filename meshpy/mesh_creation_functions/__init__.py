@@ -21,6 +21,9 @@ from .beam_honeycomb import (create_beam_mesh_honeycomb_flat,
 # Honeycomb.
 from .beam_stent import create_beam_mesh_stent, create_beam_mesh_stent_flat
 
+# Wire.
+from .beam_wire import create_wire_fibers
+
 # Define the items that will be exported by default.
 __all__ = [
     # Base geometry.
@@ -35,5 +38,7 @@ __all__ = [
     # Stent
     'create_beam_mesh_stent',
     # Fibers in rectangle
-    'create_fibers_in_rectangle'
+    'create_fibers_in_rectangle',
+    # Wire
+    'create_wire_fibers'
     ]
