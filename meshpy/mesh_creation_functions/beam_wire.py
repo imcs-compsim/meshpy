@@ -1,0 +1,91 @@
+# -*- coding: utf-8 -*-
+"""
+Create a steel wire.
+"""
+
+
+# Import python modules.
+import numpy as np
+
+# Import meshpy modules.
+from ..conf import mpy
+from ..container import GeometryName
+from ..geometry_set import GeometrySet
+from .beam_basic_geometry import create_beam_mesh_line
+from ..utility import check_node_by_coordinate
+
+
+def create_wire_fibers(mesh, beam_object, material, length, *, radius=None,
+        layers=1, n_el=1):
+    """
+    Create a steel wire consisting of multiple filaments. The wire will be
+    oriented in x-direction.
+
+    Args
+    ----
+    mesh: Mesh
+        Mesh that the line will be added to.
+    beam_object: Beam
+        Class of beam that will be used for this line.
+    material: Material
+        Material for this line.
+    length: float
+        Length of the wire.
+    radius: float
+        If this parameter is given, not the beam cross section radius will be
+        taken, but this one.
+    layers: int
+        Number of layers to be used for the wire.
+    n_el: int
+        Number of beam elements per filament.
+
+    Return
+    ----
+    return_set: GeometryName
+        Set with the 'start' and 'end' nodes of the wire. Also a 'all' set
+        with all nodes of the wire.
+    """
+
+    if len(mesh.nodes) != 0:
+        raise ValueError('The create_wire_fibers function can only be used '
+            'with an empty mesh.')
+
+    if radius is None:
+        wire_beam_radius = material.radius
+    else:
+        wire_beam_radius = radius
+
+    def create_line(pos_yz):
+        """
+        Create a line starting at the yz-plane with the 2D coordinates pos_yz.
+        """
+        create_beam_mesh_line(mesh, beam_object, material,
+            [0.0, pos_yz[0], pos_yz[1]],
+            [length, pos_yz[0], pos_yz[1]],
+            n_el=n_el)
+
+    # Create the center filament.
+    create_line([0.0, 0.0])
+
+    # Create the filaments in the layers.
+    for i_angle in range(6):
+        angle = i_angle * np.pi / 3.0
+        direction_radial = np.array([np.cos(angle), np.sin(angle)])
+        angle = i_angle * np.pi / 3.0 + 2.0 * np.pi / 3.0
+        direction_tangential = np.array([np.cos(angle), np.sin(angle)])
+        for i_layer in range(layers):
+            for i_tangent in range(i_layer + 1):
+                pos = 2.0 * wire_beam_radius * (
+                    direction_radial * (i_layer + 1) +
+                    direction_tangential * i_tangent)
+                create_line(pos)
+
+    # Create the sets to return.
+    return_set = GeometryName()
+    start_nodes = mesh.get_nodes_by_function(check_node_by_coordinate, 0, 0.0)
+    end_nodes = mesh.get_nodes_by_function(check_node_by_coordinate, 0, length)
+    return_set['start'] = GeometrySet(mpy.geo.point, nodes=start_nodes)
+    return_set['end'] = GeometrySet(mpy.geo.point, nodes=end_nodes)
+    return_set['all'] = GeometrySet(mpy.geo.line,
+        nodes=mesh.get_global_nodes())
+    return return_set
