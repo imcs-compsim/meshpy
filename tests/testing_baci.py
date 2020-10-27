@@ -40,7 +40,7 @@ class TestFullBaci(unittest.TestCase):
         if baci_release is None:
             self.skipTest('BACI path was not found!')
 
-    def run_baci_test(self, name, mesh, n_proc=2, **kwargs):
+    def run_baci_test(self, name, mesh, n_proc=2, delete_files=True, **kwargs):
         """
         Run Baci with a input file and check the output. If the test passes,
         the created files are deleted.
@@ -53,6 +53,8 @@ class TestFullBaci(unittest.TestCase):
             The InputFile object that contains the simulation.
         n_proc: int
             Number of processors to run Baci on.
+        delete_files: bool
+            If the created files should be deleted.
         """
 
         # Check if temp directory exists.
@@ -75,8 +77,10 @@ class TestFullBaci(unittest.TestCase):
             msg='Test {} failed!'.format(name))
 
         # If successful delete created files directory.
-        if int(child.returncode) == 0:
+        if int(child.returncode) == 0 and delete_files:
             os.remove(input_file)
+            if mesh._nox_xml_file is not None:
+                os.remove(os.path.join(testing_temp, mesh._nox_xml_file))
             items = glob.glob(testing_temp + '/xxx_' + name + '*')
             for item in items:
                 if os.path.isdir(item):
