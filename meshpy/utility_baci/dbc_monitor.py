@@ -71,9 +71,9 @@ def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3):
     geo = GeometrySet(mpy.geo.point, nodes=mesh_nodes)
     extra_dof_zero = ' 0' * (n_dof - 3)
     bc = BoundaryCondition(geo,
-        ('NUMDOF 6 ONOFF 1 1 1{edz} VAL {data[0]} {data[1]} {data[2]}{edz}'
+        ('NUMDOF {n_dof} ONOFF 1 1 1{edz} VAL {data[0]} {data[1]} {data[2]}{edz}'
         + ' FUNCT {{0}} {{0}} {{0}}{edz}').format(
-            data=data_force[step], edz=extra_dof_zero),
+            n_dof=n_dof, data=data_force[step], edz=extra_dof_zero),
         bc_type=mpy.bc.neumann,
         format_replacement=[function]
         )
