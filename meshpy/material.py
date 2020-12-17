@@ -14,7 +14,7 @@ from .base_mesh_item import BaseMeshItem
 class Material(BaseMeshItem):
     """Base class for all materials."""
     def __init__(self, data=None, is_dat=False, **kwargs):
-        BaseMeshItem.__init__(self, data=data, is_dat=is_dat, **kwargs)
+        super().__init__(data=data, is_dat=is_dat, **kwargs)
 
     def __deepcopy__(self, memo):
         """
@@ -41,7 +41,7 @@ class MaterialBeam(Material):
             density=0.,
             **kwargs):
         """Set the material values that all beams have."""
-        Material.__init__(self, **kwargs)
+        super().__init__(**kwargs)
 
         self.radius = radius
         self.material_string = material_string
@@ -69,8 +69,8 @@ class MaterialReissner(MaterialBeam):
     """Holds material definition for Reissner beams."""
 
     def __init__(self, shear_correction=1, **kwargs):
-        MaterialBeam.__init__(self,
-            material_string='MAT_BeamReissnerElastHyper', **kwargs)
+        super().__init__(material_string='MAT_BeamReissnerElastHyper',
+            **kwargs)
 
         # Shear factor for Reissner beam.
         self.shear_correction = shear_correction
@@ -114,8 +114,8 @@ class MaterialKirchhoff(MaterialBeam):
     """Holds material definition for Kirchhoff beams."""
 
     def __init__(self, **kwargs):
-        MaterialBeam.__init__(self,
-            material_string='MAT_BeamKirchhoffElastHyper', **kwargs)
+        super().__init__(material_string='MAT_BeamKirchhoffElastHyper',
+            **kwargs)
 
     def _get_dat(self):
         """Return the line for this material."""
@@ -155,7 +155,7 @@ class MaterialEulerBernoulli(MaterialBeam):
     """Holds material definition for Euler Bernoulli beams."""
 
     def __init__(self, **kwargs):
-        MaterialBeam.__init__(self,
+        super().__init__(
             material_string='MAT_BeamKirchhoffTorsionFreeElastHyper', **kwargs)
 
     def _get_dat(self):

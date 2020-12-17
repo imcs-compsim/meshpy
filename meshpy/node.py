@@ -19,7 +19,7 @@ class Node(BaseMeshItem):
 
     def __init__(self, coordinates, rotation=None, is_middle_node=False,
                 is_dat=False, **kwargs):
-        BaseMeshItem.__init__(self, data=None, is_dat=is_dat, **kwargs)
+        super().__init__(data=None, is_dat=is_dat, **kwargs)
 
         # Coordinates and rotation of this node.
         self.coordinates = np.array(coordinates)

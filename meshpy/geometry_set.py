@@ -36,7 +36,7 @@ class GeometrySet(BaseMeshItem):
             If True, an error will be thrown if the same node is added twice.
             If False, the node will only be added once.
         """
-        BaseMeshItem.__init__(self, is_dat=None, **kwargs)
+        super().__init__(is_dat=None, **kwargs)
 
         self.geometry_type = geometry_type
         self.nodes = []

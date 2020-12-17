@@ -34,7 +34,7 @@ class Coupling(BoundaryConditionBase):
 
         if isinstance(geometry_set, list):
             geometry_set = GeometrySet(mpy.geo.point, geometry_set)
-        BoundaryConditionBase.__init__(self, geometry_set,
+        super().__init__(geometry_set,
             bc_type=mpy.bc.point_coupling, **kwargs)
         self.coupling_type = coupling_type
         self.check_overlapping_nodes = check_overlapping_nodes

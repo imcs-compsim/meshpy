@@ -12,7 +12,7 @@ class Function(BaseMeshItem):
     """Holds information for a function."""
 
     def __init__(self, data):
-        BaseMeshItem.__init__(self, data=data, is_dat=False)
+        super().__init__(data=data, is_dat=False)
 
     def __deepcopy__(self, memo):
         """

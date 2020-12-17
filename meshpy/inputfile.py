@@ -284,7 +284,7 @@ class InputFile(Mesh):
             option dat_file.
         """
 
-        Mesh.__init__(self)
+        super().__init__()
 
         self.maintainer = maintainer
         self.description = description
@@ -565,7 +565,7 @@ class InputFile(Mesh):
         elif len(args) == 1 and isinstance(args[0], str):
             self._add_dat_lines(args[0], **kwargs)
         else:
-            Mesh.add(self, *args, **kwargs)
+            super().add(*args, **kwargs)
 
     def add_section(self, section):
         """
