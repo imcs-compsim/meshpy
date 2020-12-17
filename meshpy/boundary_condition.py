@@ -34,7 +34,7 @@ class BoundaryConditionBase(BaseMeshItem):
             If this object stems from an dat file.
         """
 
-        BaseMeshItem.__init__(self, is_dat=is_dat, **kwargs)
+        super().__init__(is_dat=is_dat, **kwargs)
         self.bc_type = bc_type
         self.geometry_set = geometry_set
 

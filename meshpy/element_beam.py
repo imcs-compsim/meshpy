@@ -31,7 +31,7 @@ class Beam(Element):
     valid_material = []
 
     def __init__(self, material=None, nodes=None):
-        Element.__init__(self, nodes=nodes, material=material)
+        super().__init__(nodes=nodes, material=material)
 
     def create_beam(self, beam_function, start_node=None, end_node=None):
         """

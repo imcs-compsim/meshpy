@@ -11,7 +11,7 @@ class Element(BaseMeshItem):
     """A base class for an FEM element in the mesh."""
 
     def __init__(self, nodes=None, material=None, is_dat=False, **kwargs):
-        BaseMeshItem.__init__(self, data=None, is_dat=is_dat, **kwargs)
+        super().__init__(data=None, is_dat=is_dat, **kwargs)
 
         # List of nodes that are connected to the element.
         if nodes is None:

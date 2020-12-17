@@ -29,11 +29,11 @@ class GeometryName(OrderedDict):
         if not isinstance(key, str):
             raise TypeError('Expected string, got {}!'.format(type(key)))
         elif isinstance(value, GeometrySet):
-            OrderedDict.__setitem__(self, key, value)
+            super().__setitem__(key, value)
         else:
             raise NotImplementedError('TODO: This case needs to be '
                 + 'implemented')
-            OrderedDict.__setitem__(self, key, GeometrySet(nodes=value))
+            super().__setitem__(key, GeometrySet(nodes=value))
 
 
 class BoundaryConditionContainer(OrderedDict):
@@ -42,7 +42,7 @@ class BoundaryConditionContainer(OrderedDict):
     are (bc_type, geometry_type).
     """
     def __init__(self, *args, **kwargs):
-        OrderedDict.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         for bc_key in mpy.bc:
             for geometry_key in mpy.geo:
@@ -55,7 +55,7 @@ class GeometrySetContainer(OrderedDict):
     type.
     """
     def __init__(self, *args, **kwargs):
-        OrderedDict.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
 
         for geometry_key in mpy.geo:
             self[geometry_key] = []

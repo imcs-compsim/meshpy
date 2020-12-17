@@ -22,7 +22,7 @@ class SolidElement(Element):
 
     def __init__(self, nodes=None, dat_pre_nodes='', dat_post_nodes='',
             **kwargs):
-        Element.__init__(self, nodes=nodes, material=None, is_dat=True,
+        super().__init__(nodes=nodes, material=None, is_dat=True,
             **kwargs)
         self.dat_pre_nodes = dat_pre_nodes
         self.dat_post_nodes = dat_post_nodes
@@ -108,7 +108,7 @@ class SolidRigidSphere(SolidElement):
         SolidElement.__init__(self, **kwargs)
 
         # Set radius of sphere from input file.
-        arg_name = self.dat_post_nodes.split()[0] 
+        arg_name = self.dat_post_nodes.split()[0]
         if not arg_name == 'RADIUS':
             raise ValueError('The first argument after the node should be '
                 + 'RADIUS, but it is "{}"!'.format(arg_name))
