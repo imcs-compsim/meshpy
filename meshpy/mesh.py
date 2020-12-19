@@ -244,7 +244,8 @@ class Mesh(object):
                         raise ValueError('It is currently not possible to add '
                             + 'more than one coupling to a node.')
 
-    def get_global_nodes(self, *, nodes=None, include_solid_nodes=False):
+    def get_global_nodes(self, *, nodes=None, include_solid_nodes=False,
+            middle_nodes=True):
         """
         Return a list with the global beam nodes. If in the future we also want
         to perform translate / rotate / cylinder wrapping / ... on solid
@@ -258,18 +259,18 @@ class Mesh(object):
             If solid nodes should be included. This only works if the solid
             mesh is imported as a full mesh and not just the lines in the input
             file.
+        middle_nodes: bool
+            If middle nodes should be returned or not.
         """
 
         if nodes is None:
-            return [node for node in self.nodes
-                if (not node.is_dat or include_solid_nodes)]
+            node_list = self.nodes
         else:
-            if not include_solid_nodes:
-                for node in nodes:
-                    if node.is_dat:
-                        raise ValueError('When the nodes are explicitly given,'
-                            + ' all nodes have to be beam nodes!')
-            return nodes
+            node_list = nodes
+        return [node for node in node_list if
+            (include_solid_nodes or not node.is_dat) and
+            (middle_nodes or not node.is_middle_node)
+            ]
 
     def get_global_coordinates(self, **kwargs):
         """
