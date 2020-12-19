@@ -7,7 +7,6 @@ sets, ...) for a meshed geometry.
 # Python modules.
 import numpy as np
 import os
-from _collections import OrderedDict
 import warnings
 import copy
 
