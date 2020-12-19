@@ -24,7 +24,8 @@ from .container import (GeometryName, GeometrySetContainer,
 from .boundary_condition import BoundaryConditionBase
 from .coupling import Coupling
 from .vtk_writer import VTKWriter
-from .utility import get_close_nodes
+from .utility import (find_close_points, find_close_nodes,
+    partner_indices_to_point_partners)
 
 
 class Mesh(object):
@@ -243,7 +244,8 @@ class Mesh(object):
                         raise ValueError('It is currently not possible to add '
                             + 'more than one coupling to a node.')
 
-    def get_global_nodes(self, *, nodes=None, include_solid_nodes=False):
+    def get_global_nodes(self, *, nodes=None, include_solid_nodes=False,
+            middle_nodes=True):
         """
         Return a list with the global beam nodes. If in the future we also want
         to perform translate / rotate / cylinder wrapping / ... on solid
@@ -257,18 +259,18 @@ class Mesh(object):
             If solid nodes should be included. This only works if the solid
             mesh is imported as a full mesh and not just the lines in the input
             file.
+        middle_nodes: bool
+            If middle nodes should be returned or not.
         """
 
         if nodes is None:
-            return [node for node in self.nodes
-                if (not node.is_dat or include_solid_nodes)]
+            node_list = self.nodes
         else:
-            if not include_solid_nodes:
-                for node in nodes:
-                    if node.is_dat:
-                        raise ValueError('When the nodes are explicitly given,'
-                            + ' all nodes have to be beam nodes!')
-            return nodes
+            node_list = nodes
+        return [node for node in node_list if
+            (include_solid_nodes or not node.is_dat) and
+            (middle_nodes or not node.is_middle_node)
+            ]
 
     def get_global_coordinates(self, **kwargs):
         """
@@ -595,9 +597,10 @@ class Mesh(object):
             mpy.coupling_joint: Fix all positional DOFs of the nodes together.
         """
 
-        # Get list of partner nodes
-        partner_nodes = self.get_close_nodes(nodes=nodes)
-
+        # Get the nodes that should be checked for coupling. Middle nodes are
+        # not checked, as coupling can only be applied to the boundary nodes.
+        node_list = self.get_global_nodes(nodes=nodes, middle_nodes=False)
+        partner_nodes = find_close_nodes(node_list)
         if len(partner_nodes) == 0:
             # If no partner nodes were found, end this function.
             return
@@ -621,17 +624,19 @@ class Mesh(object):
 
                 # Abuse the find close nodes function to find nodes with the
                 # same rotation.
-                has_partner, n_partner = get_close_nodes(rotation_vectors,
-                    binning=False, eps=mpy.eps_quaternion, return_nodes=False)
+                rot_partner_indices = find_close_points(rotation_vectors,
+                    binning=False, eps=mpy.eps_quaternion)
+                has_partner, n_partners = partner_indices_to_point_partners(
+                    rot_partner_indices, len(node_list))
 
                 # Check if nodes with the same rotations were found.
-                if n_partner == 0:
+                if len(rot_partner_indices) == 0:
                     self.add(Coupling(node_list, mpy.coupling.fix))
                 else:
                     # There are nodes that need to be combined.
                     combining_nodes = []
                     coupling_nodes = []
-                    found_partner_id = [None for _i in range(n_partner)]
+                    found_partner_id = [None for _i in range(n_partners)]
 
                     # Add the nodes that need to be combined and add the nodes
                     # that will be coupled.
@@ -690,13 +695,8 @@ class Mesh(object):
         middle_nodes: bool
             If this is true, middle nodes of a beam are also returned.
         """
-
-        node_list = []
-        for node in self.nodes:
-            if not node.is_dat and (middle_nodes or (not node.is_middle_node)):
-                if function(node, *args, **kwargs):
-                    node_list.append(node)
-        return node_list
+        node_list = self.get_global_nodes(middle_nodes=middle_nodes)
+        return [node for node in node_list if function(node, *args, **kwargs)]
 
     def get_min_max_nodes(self, nodes=None):
         """
@@ -730,30 +730,6 @@ class Mesh(object):
                         )
         return geometry
 
-    def get_close_nodes(self, nodes=None, **kwargs):
-        """
-        Find beam nodes that are close to each other.
-
-        Args
-        ----
-        nodes: list(Node)
-            If this argument is given, the closest beam nodes within this list
-            are returned, otherwise all beam nodes in the mesh are checked.
-        kwargs:
-            Keyword arguments for get_close_nodes.
-
-        Return
-        ----
-        partner_nodes: list(list(Node))
-            A list of lists with partner nodes.
-        """
-
-        # Check if input argument was given.
-        node_list_with_middle_nodes = self.get_global_nodes(nodes=nodes)
-        node_list = [node for node in node_list_with_middle_nodes
-            if not node.is_middle_node]
-        return get_close_nodes(node_list, **kwargs)
-
     def check_overlapping_elements(self, raise_error=True):
         """
         Check if there are overlapping elements in the mesh. This is done by
@@ -775,8 +751,8 @@ class Mesh(object):
             coordinates[i, :] = node.coordinates
 
         # Check if there are double entries in the coordinates.
-        has_partner, partner = get_close_nodes(coordinates, return_nodes=False)
-        if partner > 0:
+        partner_indices = find_close_points(coordinates)
+        if len(partner_indices) > 0:
             if raise_error:
                 raise ValueError('There are multiple middle nodes with the '
                     + 'same coordinates. Per default this raises an error! '
@@ -787,9 +763,9 @@ class Mesh(object):
                         + 'same coordinates!')
 
             # Add the partner index to the middle nodes.
-            for i in range(len(middle_nodes)):
-                if not has_partner[i] == -1:
-                    middle_nodes[i].element_partner_index = has_partner[i]
+            for i_partner, partners in enumerate(partner_indices):
+                for i_node in partners:
+                    middle_nodes[i_node].element_partner_index = i_partner
 
     def preview_python(self):
         """Display the elements in this mesh in matplotlib."""
@@ -808,7 +784,7 @@ class Mesh(object):
                 element.preview_python(ax)
 
         # Finish plot.
-        ax.set_aspect('equal')
+        ax.set_aspect('auto')
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')

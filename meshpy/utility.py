@@ -12,7 +12,7 @@ import warnings
 
 # Meshpy modules.
 from .conf import mpy
-from .meshpy.find_close_nodes import find_close_nodes, find_close_nodes_binning
+from .meshpy import find_close_points as find_points
 
 
 def get_git_data(repo):
@@ -45,70 +45,91 @@ def flatten(data):
         return [data]
 
 
-def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
-        ny=mpy.binning_n_bin, nz=mpy.binning_n_bin, eps=mpy.eps_pos,
-        return_nodes=True):
+def point_partners_to_partner_indices(point_partners, n_partners):
+    """
+    Convert the partner indices for each point to a list of lists with the
+    indices for all partners.
+    """
+    partner_indices = [[] for i in range(n_partners)]
+    for i, partner_index in enumerate(point_partners):
+        if partner_index != -1:
+            partner_indices[partner_index].append(i)
+    return partner_indices
+
+
+def partner_indices_to_point_partners(partner_indices, n_points):
+    """
+    Convert the list of lists with the indices for all partners to the partner
+    indices for each point.
+    """
+    point_partners = [-1 for _i in range(n_points)]
+    for i_partner, partners in enumerate(partner_indices):
+        for index in partners:
+            point_partners[index] = i_partner
+    return point_partners, len(partner_indices)
+
+
+def find_close_points(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
+        ny=mpy.binning_n_bin, nz=mpy.binning_n_bin, eps=mpy.eps_pos):
+    """
+    Find n-dimensional points that are close to each other.
+
+    Args
+    ----
+    nodes: np.array(n_points x n_dim)
+        Point coordinates that are checked for partners.
+    binning: bool
+        If binning should be used. Only the first three dimensions will be used
+        for binning.
+    nx, ny, nz: int
+        Number of bins in the first three dimensions.
+    eps: double
+        Hypersphere radius value that the coordinates have to be within, to be
+        identified as overlapping.
+
+    Return
+    ----
+    partner_indices: list(list(int))
+        A list of lists of point indices that are close to each other.
+    """
+
+    if len(nodes) > mpy.binning_max_nodes_brute_force and not mpy.binning:
+        warnings.warn('The function get_close_points is called directly '
+            + 'with {} points, for performance reasons the '.format(len(nodes))
+            + 'function find_close_points_binning should be used!')
+
+    # Get list of closest pairs.
+    if binning:
+        has_partner, n_partner = find_points.find_close_points_binning(nodes,
+            nx, ny, nz, eps)
+    else:
+        has_partner, n_partner = find_points.find_close_points(nodes, eps=eps)
+
+    return point_partners_to_partner_indices(has_partner, n_partner)
+
+
+def find_close_nodes(nodes, **kwargs):
     """
     Find nodes that are close to each other.
 
     Args
     ----
-    nodes: list(Node), np.array
-        Nodes that are checked for partners, or numpy array of coordinates.
-    binning: bool
-        If binning should be used.
-    nx, ny, nz: int
-        Number of bins in the directions.
-    eps: double
-        Spherical value that the nodes have to be within, to be identified
-        as overlapping.
-    return_nodes: bool
-        If true, the Node objects are returned, otherwise the index of the node
-        objects in the list nodes. This option is mainly used for testing.
+    nodes: list(Node)
+        Nodes that are checked for partners.
+    **kwargs:
+        Arguments passed on to find_close_points
 
     Return
     ----
-    partner_nodes: list(list(Node)), list(int)
-        A list of lists with partner nodes.
+    partner_nodes: list(list(Node))
+        A list of lists of nodes that are close to each other.
     """
 
-    if isinstance(nodes, np.ndarray):
-        # Array is already given.
-        coords = nodes
-    else:
-        # Get coordinates form nodes.
-        coords = np.zeros([len(nodes), 3])
-        for i, node in enumerate(nodes):
-            coords[i, :] = node.coordinates
-
-    if len(nodes) > mpy.binning_max_nodes_brute_force and not mpy.binning:
-        warnings.warn('The function get_close_nodes is called directly '
-            + 'with {} nodes, for performance reasons the '.format(len(nodes))
-            + 'function find_close_nodes_binning should be used!')
-
-    # Get list of closest pairs.
-    if binning:
-        has_partner, n_partner = find_close_nodes_binning(coords, nx, ny, nz,
-            eps)
-    else:
-        has_partner, n_partner = find_close_nodes(coords, eps=eps)
-
-    if return_nodes:
-        # This is only possible if a list of nodes was given.
-        if not isinstance(nodes, list):
-            raise ValueError('The partner nodes can only be returned if a '
-                + 'list of nodes was given as input!')
-
-        # Create list with nodes.
-        partner_nodes = [[] for i in range(n_partner)]
-        for i, node in enumerate(nodes):
-            if not has_partner[i] == -1:
-                partner_nodes[has_partner[i]].append(node)
-
-        return partner_nodes
-    else:
-        # Return the partner list.
-        return has_partner, n_partner
+    coords = np.zeros([len(nodes), 3])
+    for i, node in enumerate(nodes):
+        coords[i, :] = node.coordinates
+    partner_indices = find_close_points(coords, **kwargs)
+    return [[nodes[i] for i in partners] for partners in partner_indices]
 
 
 def check_node_by_coordinate(node, axis, value, eps=1e-10):

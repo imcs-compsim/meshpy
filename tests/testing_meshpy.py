@@ -23,7 +23,9 @@ from meshpy.vtk_writer import VTKWriter
 from meshpy.geometry_set import GeometrySet
 from meshpy.container import GeometryName
 from meshpy.element_beam import Beam
-from meshpy.utility import get_close_nodes, flatten, get_min_max_coordinates
+from meshpy.utility import (find_close_points, flatten,
+    get_min_max_coordinates, partner_indices_to_point_partners,
+    point_partners_to_partner_indices)
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
@@ -401,9 +403,9 @@ class TestMeshpy(unittest.TestCase):
         ref_solution = [-0.5, -1.0, -1.5, 2.0, 3.0, 4.0]
         self.assertTrue(np.linalg.norm(min_max - ref_solution) < 1e-10)
 
-    def test_find_close_nodes_binning(self):
+    def test_find_close_points_binning(self):
         """
-        Test if the find_close nodes_binning and find_close nodes functions
+        Test if the find_close_points_binning and find_close_points functions
         return the same results.
         """
 
@@ -452,16 +454,74 @@ class TestMeshpy(unittest.TestCase):
 
         # Test the number of partners and list of partners with the different
         # methods.
-        has_partner, _partner = get_close_nodes(coords, binning=True, nx=4,
-            ny=4, nz=4, eps=eps_medium, return_nodes=False)
-        has_partner_brute, partner = get_close_nodes(coords, binning=False,
-            eps=eps_medium, return_nodes=False)
-        self.assertTrue(np.array_equal(has_partner, has_partner_brute))
-        self.assertEqual(partner, 146)
+        partner_indices = find_close_points(coords, binning=True, nx=4,
+            ny=4, nz=4, eps=eps_medium)
+        partner_indices_brute = find_close_points(coords, binning=False,
+            eps=eps_medium)
+        self.assertTrue(np.array_equal(partner_indices, partner_indices_brute))
+        self.assertEqual(len(partner_indices), 146)
 
-    def test_find_close_nodes_binning_flat(self):
+        # Also compare to the reference solution.
+        point_partners_reference = -1 * np.ones([n_nodes], dtype=int)
+        index_vector = [0, 1, 3, 6, 8, 9, 10, 11, 12, 13, 16, 19, 20, 21, 22,
+            25, 26, 29, 30, 31, 32, 34, 35, 37, 38, 39, 40, 41, 43, 44, 48, 49,
+            50, 51, 55, 59, 61, 62, 63, 65, 66, 67, 68, 69, 72, 73, 74, 77, 78,
+            79, 80, 82, 83, 84, 85, 86, 88, 89, 92, 94, 95, 96, 98, 103, 104,
+            106, 110, 111, 115, 119, 120, 121, 123, 125, 127, 128, 130, 132,
+            133, 134, 136, 137, 138, 139, 140, 141, 143, 144, 146, 147, 149,
+            151, 154, 156, 157, 160, 165, 168, 170, 172, 175, 176, 179, 180,
+            181, 183, 185, 188, 189, 190, 193, 196, 197, 198, 202, 203, 206,
+            209, 211, 212, 214, 215, 219, 221, 222, 225, 229, 230, 232, 239,
+            241, 242, 245, 247, 248, 250, 253, 254, 255, 256, 260, 261, 265,
+            270, 273, 276, 278, 281, 288, 289, 295, 301, 302, 305, 308, 312,
+            313, 315, 318, 322, 328, 337, 343, 346, 347, 352, 354, 356, 359,
+            361, 363, 365, 367, 368, 369, 373, 376, 377, 379, 381, 384, 391,
+            392, 393, 397, 398, 400, 401, 405, 417, 419, 421, 424, 429, 431,
+            435, 437, 440, 441, 442, 444, 446, 456, 459, 462, 469, 470, 471,
+            473, 474, 475, 476, 480, 484, 486, 490, 498, 501, 506, 513, 518,
+            522, 523, 524, 525, 526, 536, 539, 541, 544, 545, 548, 560, 567,
+            570, 571, 572, 576, 577, 596, 598, 600, 601, 603, 606, 611, 615,
+            616, 621, 622, 625, 632, 633, 637, 639, 643, 646, 647, 649, 650,
+            653, 672, 675, 676, 678, 679, 680, 682, 691, 693, 695, 700, 701,
+            715, 719, 721, 725, 730, 736, 738, 742, 746, 749, 750, 756, 759,
+            761, 762, 767, 769, 777, 778, 781, 783, 785, 787, 789, 792, 795,
+            806, 811, 817, 826, 827, 830, 833, 834, 835, 839, 840, 841, 842,
+            847, 850, 853, 854, 857, 859, 861, 864, 867, 869, 872, 875, 887,
+            890, 895, 902, 904, 905, 912, 913, 914, 915, 926, 928, 932, 934,
+            935, 944, 956, 958, 965, 979, 985, 986, 987, 988, 989, 990, 991,
+            992, 993, 994, 995, 996, 997, 998]
+        val_vector = [0, 1, 2, 3, 4, 5, 5, 6, 2, 7, 8, 9, 9, 10, 11, 12, 13,
+            11, 14, 2, 15, 16, 17, 18, 19, 20, 15, 21, 22, 22, 23, 11, 10, 16,
+            0, 5, 24, 2, 25, 8, 16, 26, 26, 27, 15, 28, 9, 25, 29, 30, 31, 32,
+            33, 20, 34, 35, 36, 19, 5, 37, 38, 39, 26, 40, 41, 42, 16, 4, 43,
+            44, 37, 45, 46, 24, 35, 47, 48, 49, 44, 50, 51, 49, 52, 53, 5, 54,
+            55, 18, 42, 12, 56, 57, 1, 58, 59, 51, 60, 39, 61, 62, 63, 64, 65,
+            27, 0, 66, 67, 68, 69, 70, 71, 50, 63, 63, 72, 73, 74, 75, 76, 77,
+            6, 21, 73, 44, 23, 78, 24, 76, 75, 22, 69, 79, 80, 54, 81, 16, 82,
+            59, 50, 83, 84, 85, 3, 75, 86, 35, 87, 66, 53, 48, 13, 88, 31, 73,
+            85, 67, 89, 90, 39, 47, 17, 21, 26, 87, 3, 62, 91, 78, 75, 7, 60,
+            92, 61, 93, 94, 54, 95, 96, 60, 97, 98, 86, 28, 99, 68, 100, 101,
+            56, 100, 102, 67, 103, 104, 80, 105, 57, 103, 79, 106, 46, 82, 58,
+            107, 69, 50, 108, 90, 109, 47, 92, 53, 91, 84, 110, 111, 30, 112,
+            106, 98, 113, 114, 82, 115, 45, 116, 62, 117, 34, 35, 118, 32, 4,
+            39, 109, 32, 33, 81, 115, 107, 10, 119, 64, 118, 120, 52, 108, 119,
+            70, 102, 121, 23, 117, 5, 97, 122, 123, 124, 99, 111, 95, 125, 83,
+            126, 127, 123, 114, 126, 107, 128, 117, 129, 130, 65, 116, 75, 72,
+            131, 93, 132, 40, 129, 133, 131, 18, 134, 95, 124, 135, 77, 58,
+            105, 128, 38, 136, 21, 41, 130, 137, 120, 132, 36, 138, 127, 110,
+            136, 22, 96, 88, 29, 121, 74, 112, 133, 58, 42, 139, 64, 113, 117,
+            125, 135, 137, 63, 14, 59, 83, 138, 140, 141, 94, 21, 140, 122, 89,
+            43, 71, 101, 1, 139, 55, 134, 63, 104, 141, 142, 142, 142, 142,
+            142, 142, 143, 143, 144, 144, 145, 145, 142, 142]
+        point_partners_reference[index_vector] = val_vector
+        point_partners, _n_partners = partner_indices_to_point_partners(
+            partner_indices, len(coords))
+        self.assertTrue(np.array_equal(point_partners,
+            point_partners_reference))
+
+    def test_find_close_points_binning_flat(self):
         """
-        Test case for coupling of nodes, when the nodes are all on a plane.
+        Test case for coupling of points, when the nodes are all on a plane.
         """
 
         # Dummy material.
@@ -476,8 +536,27 @@ class TestMeshpy(unittest.TestCase):
             return input_file
 
         # Get a reference solution for the coupling nodes.
-        reference_partners, _temp = create_flat_mesh().get_close_nodes(
-            binning=False, return_nodes=False)
+        reference_partners_list = [0, 1, 1, 2, 0, 3, 2, 4, 4, 5, 2, 6, 5, 7, 7,
+            8, 5, 9, 8, 10, 10, 11, 8, 12, 11, 13, 13, 14, 11, 15, 14, 16, 3,
+            17, 17, 6, 17, 18, 6, 19, 19, 9, 19, 20, 9, 21, 21, 12, 21, 22, 12,
+            23, 23, 15, 23, 24, 15, 25, 25, 16, 25, 26, 27, 18, 18, 28, 27, 29,
+            28, 20, 20, 30, 28, 31, 30, 22, 22, 32, 30, 33, 32, 24, 24, 34, 32,
+            35, 34, 26, 26, 36, 34, 37, 36, 38, 29, 39, 39, 31, 39, 40, 31, 41,
+            41, 33, 41, 42, 33, 43, 43, 35, 43, 44, 35, 45, 45, 37, 45, 46, 37,
+            47, 47, 38, 47, 48, 49, 40, 40, 50, 49, 51, 50, 42, 42, 52, 50, 53,
+            52, 44, 44, 54, 52, 55, 54, 46, 46, 56, 54, 57, 56, 48, 48, 58, 56,
+            59, 58, 60, 51, 61, 61, 53, 53, 62, 62, 55, 55, 63, 63, 57, 57, 64,
+            64, 59, 59, 65, 65, 60]
+        reference_partners = point_partners_to_partner_indices(
+            reference_partners_list, 66)
+
+        # The reference data was created for the nodes without the middle
+        # nodes, therefore we filter the middle nodes here.
+        partners_no_binning = find_close_points(
+            create_flat_mesh().get_global_coordinates(middle_nodes=False)[0],
+            binning=False)
+        self.assertTrue(np.array_equal(reference_partners,
+            partners_no_binning))
 
         # Apply different rotations and compare the partner results.
         rotations = [
@@ -490,16 +569,18 @@ class TestMeshpy(unittest.TestCase):
             # Create the input file.
             input_file = create_flat_mesh()
             input_file.rotate(rotation)
-            partners, _temp = input_file.get_close_nodes(return_nodes=False)
+            partners_binning = find_close_points(
+                input_file.get_global_coordinates(middle_nodes=False)[0],
+                binning=True)
 
             # Compare the partners with the reference.
-            self.assertTrue(np.array_equal(
-                np.array(reference_partners),
-                np.array(partners)
-                ))
+            self.assertTrue(np.array_equal(partners_binning,
+                partners_no_binning))
 
-    def test_find_close_nodes_dimension(self):
+    def test_find_close_points_dimension(self):
         """
+        Test that the find_close_points function also works properly with
+        multidimensional points.
         """
 
         # Set the seed for the pseudo random numbers.
@@ -532,22 +613,18 @@ class TestMeshpy(unittest.TestCase):
         partner_expected = 5
 
         # Get results with binning.
-        has_partner_binning, partner_binning = get_close_nodes(coords,
-            binning=True, return_nodes=False)
+        partner_indices = find_close_points(coords, binning=True)
+        has_partner_binning, partner_binning = (
+            partner_indices_to_point_partners(partner_indices, len(coords)))
 
         # Get results without binning.
-        has_partner_brute, partner_brute = get_close_nodes(coords,
-            binning=False, return_nodes=False)
+        partner_indices = find_close_points(coords, binning=False)
+        has_partner_brute, partner_brute = (
+            partner_indices_to_point_partners(partner_indices, len(coords)))
 
         # Check the results.
-        self.assertTrue(np.array_equal(
-            np.array(has_partner_expected),
-            np.array(has_partner_binning)
-            ))
-        self.assertTrue(np.array_equal(
-            np.array(has_partner_expected),
-            np.array(has_partner_brute)
-            ))
+        self.assertTrue(has_partner_expected, has_partner_binning)
+        self.assertTrue(has_partner_expected, has_partner_brute)
         self.assertEqual(partner_expected, partner_binning)
         self.assertEqual(partner_expected, partner_brute)
 

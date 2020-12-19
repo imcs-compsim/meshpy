@@ -25,7 +25,7 @@ ctypedef np.int_t INT_t
 
 
 @cython.wraparound(False)   # Deactivate negative indexing.
-def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
+def find_close_points(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
     """
     Finds coordinates that are within an tolerance of each other.
 
@@ -89,7 +89,7 @@ def find_close_nodes(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
 
 @cython.wraparound(False)   # Deactivate negative indexing.
 @cython.cdivision(True)     # Modulo
-def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
+def find_close_points_binning(np.ndarray[FLOAT_t, ndim=2] coords,
         INT_t nx, INT_t ny, INT_t nz, FLOAT_t eps):
     """
     Finds coordinates that are within an tolerance of each other. Create
@@ -126,7 +126,7 @@ def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
         local_to_global_partner_id, partner_counter_list
     cdef np.ndarray[INT_t, ndim=2] nodes_bin, fac_xyz
     cdef np.ndarray[FLOAT_t, ndim=1] max_coord, min_coord, h_bin
-    cdef np.ndarray[FLOAT_t, ndim=2] find_close_nodes_coords
+    cdef np.ndarray[FLOAT_t, ndim=2] find_close_points_coords
 
     # Set array with number of bins.
     n_bin_xyz = np.zeros(3, dtype=INT)
@@ -210,15 +210,15 @@ def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
                 nodes_in_this_bin[j] = nodes_in_bin[i][j]
 
             # Get the coordinates for this bin.
-            find_close_nodes_coords = np.zeros([n_nodes_in_this_bin, n_dim],
+            find_close_points_coords = np.zeros([n_nodes_in_this_bin, n_dim],
                 dtype=FLOAT)
             for j in range(n_nodes_in_this_bin):
                 for k in range(n_dim):
-                    find_close_nodes_coords[j, k] = (
+                    find_close_points_coords[j, k] = (
                         coords[nodes_in_bin[i][j], k]
                         )
-            has_partner_bin, partner_bin = find_close_nodes(
-                find_close_nodes_coords, eps)
+            has_partner_bin, partner_bin = find_close_points(
+                find_close_points_coords, eps)
 
             # Set empty array for local to global ids.
             local_to_global_partner_id = np.zeros(partner_bin, dtype=INT) - 1
@@ -276,7 +276,8 @@ def find_close_nodes_binning(np.ndarray[FLOAT_t, ndim=2] coords,
                     has_partner[nodes_in_this_bin[j]] = \
                         local_to_global_partner_id[local_partner_index]
 
-    # Renumber the partners so results can be compared with find_close_nodes().
+    # Renumber the partners so results can be compared with
+    # find_close_points().
     partner_counter_list = np.zeros(partner, dtype=INT) - 1
     partner_counter = 0
     for i in range(n_nodes):

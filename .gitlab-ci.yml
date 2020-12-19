@@ -18,7 +18,7 @@ meshpy-testing:
         - export PYTHONPATH="${PYTHONPATH}:${CUBITPY_MASTER}"
         # Compile cython code.
         - "cd meshpy"
-        - "python3 find_close_nodes_setup.py"
+        - "python3 find_close_points_setup.py"
         - "cd .."
         # Run tests.
         - "cd tests"
