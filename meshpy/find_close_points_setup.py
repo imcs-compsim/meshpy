@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 This script is used to compile the cyton code.
-python3 find_close_nodes_setup.py build_ext --inplace
+python3 find_close_points_setup.py build_ext --inplace
 """
 
 # Python packages.
@@ -19,7 +19,7 @@ if len(sys.argv) == 1:
 
 # Compile cython module.
 setup(
-    ext_modules=cythonize('find_close_nodes.pyx', annotate=True,
+    ext_modules=cythonize('find_close_points.pyx', annotate=True,
         build_dir='cython_build'),
     include_dirs=[np.get_include()]
     )

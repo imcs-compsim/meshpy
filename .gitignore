@@ -25,8 +25,8 @@
 */build
 */cython_build
 meshpy/meshpy
-*/find_close_nodes.c
-*/find_close_nodes.html
+*/find_close_points.c
+*/find_close_points.html
 
 # AceGen stuff
 */rotation_matrix.cpp

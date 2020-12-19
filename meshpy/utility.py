@@ -12,7 +12,7 @@ import warnings
 
 # Meshpy modules.
 from .conf import mpy
-from .meshpy.find_close_nodes import find_close_nodes, find_close_nodes_binning
+from .meshpy import find_close_points as find_points
 
 
 def get_git_data(repo):
@@ -88,10 +88,10 @@ def get_close_nodes(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
 
     # Get list of closest pairs.
     if binning:
-        has_partner, n_partner = find_close_nodes_binning(coords, nx, ny, nz,
-            eps)
+        has_partner, n_partner = find_points.find_close_points_binning(coords,
+            nx, ny, nz, eps)
     else:
-        has_partner, n_partner = find_close_nodes(coords, eps=eps)
+        has_partner, n_partner = find_points.find_close_points(coords, eps=eps)
 
     if return_nodes:
         # This is only possible if a list of nodes was given.
