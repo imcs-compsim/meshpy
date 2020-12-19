@@ -597,15 +597,10 @@ class Mesh(object):
             mpy.coupling_joint: Fix all positional DOFs of the nodes together.
         """
 
-        # Get list of partner nodes.
-        if nodes is not None:
-            partner_nodes = find_close_nodes(nodes=nodes)
-        else:
-            node_list_with_middle_nodes = self.get_global_nodes()
-            node_list = [node for node in node_list_with_middle_nodes
-                if not node.is_middle_node]
-            partner_nodes = find_close_nodes(node_list)
-
+        # Get the nodes that should be checked for coupling. Middle nodes are
+        # not checked, as coupling can only be applied to the boundary nodes.
+        node_list = self.get_global_nodes(nodes=nodes, middle_nodes=False)
+        partner_nodes = find_close_nodes(node_list)
         if len(partner_nodes) == 0:
             # If no partner nodes were found, end this function.
             return
