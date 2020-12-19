@@ -695,13 +695,8 @@ class Mesh(object):
         middle_nodes: bool
             If this is true, middle nodes of a beam are also returned.
         """
-
-        node_list = []
-        for node in self.nodes:
-            if not node.is_dat and (middle_nodes or (not node.is_middle_node)):
-                if function(node, *args, **kwargs):
-                    node_list.append(node)
-        return node_list
+        node_list = self.get_global_nodes(middle_nodes=middle_nodes)
+        return [node for node in node_list if function(node, *args, **kwargs)]
 
     def get_min_max_nodes(self, nodes=None):
         """
