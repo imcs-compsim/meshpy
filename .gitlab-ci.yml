@@ -22,7 +22,7 @@ meshpy-testing:
         - "cd .."
         # Run tests.
         - "cd tests"
-        - "coverage run --rcfile=coverage.config -m unittest discover"
+        - "coverage run --rcfile=coverage.config testing_main.py"
         - "coverage html"
         - coverage-badge -o htmlcov/coverage.svg
     artifacts:
