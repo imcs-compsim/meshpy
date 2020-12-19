@@ -9,7 +9,7 @@ import warnings
 # Meshpy modules.
 from .conf import mpy
 from .base_mesh_item import BaseMeshItem
-from .utility import get_close_nodes
+from .utility import find_close_nodes
 
 
 class BoundaryConditionBase(BaseMeshItem):
@@ -139,7 +139,7 @@ class BoundaryCondition(BoundaryConditionBase):
 
         if (self.bc_type == mpy.bc.neumann
                 and self.geometry_set.geometry_type == mpy.geo.point):
-            partners = get_close_nodes(self.geometry_set.nodes)
+            partners = find_close_nodes(self.geometry_set.nodes)
             # Create a list with nodes that will not be kept in the set.
             double_node_list = []
             for node_list in partners:

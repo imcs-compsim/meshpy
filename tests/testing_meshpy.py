@@ -23,7 +23,8 @@ from meshpy.vtk_writer import VTKWriter
 from meshpy.geometry_set import GeometrySet
 from meshpy.container import GeometryName
 from meshpy.element_beam import Beam
-from meshpy.utility import get_close_nodes, flatten, get_min_max_coordinates
+from meshpy.utility import (find_close_points, find_close_nodes, flatten,
+    get_min_max_coordinates, partner_indices_to_point_partners)
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
@@ -401,9 +402,9 @@ class TestMeshpy(unittest.TestCase):
         ref_solution = [-0.5, -1.0, -1.5, 2.0, 3.0, 4.0]
         self.assertTrue(np.linalg.norm(min_max - ref_solution) < 1e-10)
 
-    def test_find_close_nodes_binning(self):
+    def test_find_close_points_binning(self):
         """
-        Test if the find_close nodes_binning and find_close nodes functions
+        Test if the find_close_points_binning and find_close_points functions
         return the same results.
         """
 
@@ -452,16 +453,16 @@ class TestMeshpy(unittest.TestCase):
 
         # Test the number of partners and list of partners with the different
         # methods.
-        has_partner, _partner = get_close_nodes(coords, binning=True, nx=4,
-            ny=4, nz=4, eps=eps_medium, return_nodes=False)
-        has_partner_brute, partner = get_close_nodes(coords, binning=False,
-            eps=eps_medium, return_nodes=False)
-        self.assertTrue(np.array_equal(has_partner, has_partner_brute))
-        self.assertEqual(partner, 146)
+        partner_indices = find_close_points(coords, binning=True, nx=4,
+            ny=4, nz=4, eps=eps_medium)
+        partner_indices_brute = find_close_points(coords, binning=False,
+            eps=eps_medium)
+        self.assertTrue(np.array_equal(partner_indices, partner_indices_brute))
+        self.assertEqual(len(partner_indices), 146)
 
-    def test_find_close_nodes_binning_flat(self):
+    def test_find_close_points_binning_flat(self):
         """
-        Test case for coupling of nodes, when the nodes are all on a plane.
+        Test case for coupling of points, when the nodes are all on a plane.
         """
 
         # Dummy material.
@@ -476,8 +477,9 @@ class TestMeshpy(unittest.TestCase):
             return input_file
 
         # Get a reference solution for the coupling nodes.
-        reference_partners, _temp = create_flat_mesh().get_close_nodes(
-            binning=False, return_nodes=False)
+        reference_partners = find_close_points(
+            create_flat_mesh().get_global_coordinates()[0],
+            binning=False)
 
         # Apply different rotations and compare the partner results.
         rotations = [
@@ -490,16 +492,21 @@ class TestMeshpy(unittest.TestCase):
             # Create the input file.
             input_file = create_flat_mesh()
             input_file.rotate(rotation)
-            partners, _temp = input_file.get_close_nodes(return_nodes=False)
+            partners = find_close_points(
+                input_file.get_global_coordinates()[0],
+                binning=True)
 
             # Compare the partners with the reference.
             self.assertTrue(np.array_equal(
-                np.array(reference_partners),
-                np.array(partners)
+                reference_partners,
+                partners
                 ))
 
-    def test_find_close_nodes_dimension(self):
+
+    def test_find_close_points_dimension(self):
         """
+        Test that the find_close_points function also works properly with
+        multidimensional points.
         """
 
         # Set the seed for the pseudo random numbers.
@@ -532,12 +539,14 @@ class TestMeshpy(unittest.TestCase):
         partner_expected = 5
 
         # Get results with binning.
-        has_partner_binning, partner_binning = get_close_nodes(coords,
-            binning=True, return_nodes=False)
+        partner_indices = find_close_points(coords, binning=True)
+        has_partner_binning, partner_binning = (
+            partner_indices_to_point_partners(partner_indices, len(coords)))
 
         # Get results without binning.
-        has_partner_brute, partner_brute = get_close_nodes(coords,
-            binning=False, return_nodes=False)
+        partner_indices = find_close_points(coords, binning=False)
+        has_partner_brute, partner_brute = (
+            partner_indices_to_point_partners(partner_indices, len(coords)))
 
         # Check the results.
         self.assertTrue(np.array_equal(

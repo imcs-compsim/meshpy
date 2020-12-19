@@ -24,7 +24,8 @@ from .container import (GeometryName, GeometrySetContainer,
 from .boundary_condition import BoundaryConditionBase
 from .coupling import Coupling
 from .vtk_writer import VTKWriter
-from .utility import get_close_nodes
+from .utility import (find_close_points, find_close_nodes,
+    partner_indices_to_point_partners)
 
 
 class Mesh(object):
@@ -595,8 +596,14 @@ class Mesh(object):
             mpy.coupling_joint: Fix all positional DOFs of the nodes together.
         """
 
-        # Get list of partner nodes
-        partner_nodes = self.get_close_nodes(nodes=nodes)
+        # Get list of partner nodes.
+        if nodes is not None:
+            partner_nodes = find_close_nodes(nodes=nodes)
+        else:
+            node_list_with_middle_nodes = self.get_global_nodes()
+            node_list = [node for node in node_list_with_middle_nodes
+                if not node.is_middle_node]
+            partner_nodes = find_close_nodes(node_list)
 
         if len(partner_nodes) == 0:
             # If no partner nodes were found, end this function.
@@ -621,17 +628,19 @@ class Mesh(object):
 
                 # Abuse the find close nodes function to find nodes with the
                 # same rotation.
-                has_partner, n_partner = get_close_nodes(rotation_vectors,
-                    binning=False, eps=mpy.eps_quaternion, return_nodes=False)
+                rot_partner_indices = find_close_points(rotation_vectors,
+                    binning=False, eps=mpy.eps_quaternion)
+                has_partner, n_partners = partner_indices_to_point_partners(
+                    rot_partner_indices, len(node_list))
 
                 # Check if nodes with the same rotations were found.
-                if n_partner == 0:
+                if len(rot_partner_indices) == 0:
                     self.add(Coupling(node_list, mpy.coupling.fix))
                 else:
                     # There are nodes that need to be combined.
                     combining_nodes = []
                     coupling_nodes = []
-                    found_partner_id = [None for _i in range(n_partner)]
+                    found_partner_id = [None for _i in range(n_partners)]
 
                     # Add the nodes that need to be combined and add the nodes
                     # that will be coupled.
@@ -730,30 +739,6 @@ class Mesh(object):
                         )
         return geometry
 
-    def get_close_nodes(self, nodes=None, **kwargs):
-        """
-        Find beam nodes that are close to each other.
-
-        Args
-        ----
-        nodes: list(Node)
-            If this argument is given, the closest beam nodes within this list
-            are returned, otherwise all beam nodes in the mesh are checked.
-        kwargs:
-            Keyword arguments for get_close_nodes.
-
-        Return
-        ----
-        partner_nodes: list(list(Node))
-            A list of lists with partner nodes.
-        """
-
-        # Check if input argument was given.
-        node_list_with_middle_nodes = self.get_global_nodes(nodes=nodes)
-        node_list = [node for node in node_list_with_middle_nodes
-            if not node.is_middle_node]
-        return get_close_nodes(node_list, **kwargs)
-
     def check_overlapping_elements(self, raise_error=True):
         """
         Check if there are overlapping elements in the mesh. This is done by
@@ -775,8 +760,8 @@ class Mesh(object):
             coordinates[i, :] = node.coordinates
 
         # Check if there are double entries in the coordinates.
-        has_partner, partner = get_close_nodes(coordinates, return_nodes=False)
-        if partner > 0:
+        partner_indices = find_close_points(coordinates)
+        if len(partner_indices) > 0:
             if raise_error:
                 raise ValueError('There are multiple middle nodes with the '
                     + 'same coordinates. Per default this raises an error! '
@@ -787,9 +772,10 @@ class Mesh(object):
                         + 'same coordinates!')
 
             # Add the partner index to the middle nodes.
-            for i in range(len(middle_nodes)):
-                if not has_partner[i] == -1:
-                    middle_nodes[i].element_partner_index = has_partner[i]
+            for i_partner, partners in enumerate(partner_indices):
+                for i_node in partners:
+                    middle_nodes[i_node].element_partner_index = i_partner
+
 
     def preview_python(self):
         """Display the elements in this mesh in matplotlib."""
