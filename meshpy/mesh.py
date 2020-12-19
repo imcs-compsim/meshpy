@@ -767,7 +767,6 @@ class Mesh(object):
                 for i_node in partners:
                     middle_nodes[i_node].element_partner_index = i_partner
 
-
     def preview_python(self):
         """Display the elements in this mesh in matplotlib."""
 
@@ -785,7 +784,7 @@ class Mesh(object):
                 element.preview_python(ax)
 
         # Finish plot.
-        ax.set_aspect('equal')
+        ax.set_aspect('auto')
         ax.set_xlabel('X')
         ax.set_ylabel('Y')
         ax.set_zlabel('Z')
