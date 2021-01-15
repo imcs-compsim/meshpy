@@ -129,6 +129,26 @@ def compare_strings(self, name, reference, compare):
 def xml_to_dict(xml, tol_float):
     """Convert a XML to a nested dictionary."""
 
+    def item_with_tol(item):
+        """
+        Check if item is a number and if so, format it to match the given
+        tolerance.
+        """
+
+        if tol_float is None:
+            return item
+        else:
+            try:
+                number = float(item)
+                if np.abs(float(number)) < tol_float:
+                    return '0.0'
+                else:
+                    # We check the numbers to a precision of 13.
+                    number_float = float(number)
+                    return '{:.13e}'.format(number_float)
+            except ValueError:
+                return item
+
     # Get and sort keys.
     keys = xml.keys()
     keys.sort()
@@ -146,7 +166,7 @@ def xml_to_dict(xml, tol_float):
         string += ' '
         string += key
         string += '="'
-        string += xml.get(key)
+        string += item_with_tol(xml.get(key))
         string += '"'
     string += '>'
 
@@ -172,10 +192,7 @@ def xml_to_dict(xml, tol_float):
                 if line.strip() == '':
                     continue
                 for number in line.strip().split(' '):
-                    if np.abs(float(number)) < tol_float:
-                        data_new.append('0.0')
-                    else:
-                        data_new.append(number)
+                    data_new.append(item_with_tol(number))
         data_string = '\n'.join(data_new)
         xml_dict[''] = data_string
 

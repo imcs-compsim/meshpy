@@ -44,7 +44,7 @@ meshpy-testing:
         # the foloowing paths have to be set.
         CUBITPY_MASTER: "/hdd/gitlab-runner/lib/cubitpy-master"
         BACI_PRE_EXODUS: "/hdd/gitlab-runner/lib/baci-master/release/pre_exodus"
-        CUBIT: "/rzhome/nas/compsim/public/opt/cubit-13.2"
+        CUBIT: "/imcs/public/compsim/opt/cubit-13.2"
     tags:
         - "imcs-all"
 
