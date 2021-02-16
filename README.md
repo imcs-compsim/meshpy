@@ -45,7 +45,7 @@ As a last step the `cython` code within `meshpy` has to be compiled
 
 ```bash
 cd path_to_meshpy/meshpy
-python find_close_nodes_setup.py
+python find_close_points_setup.py
 ```
 
 Add the meshpy path to `PYTHONPATH`
