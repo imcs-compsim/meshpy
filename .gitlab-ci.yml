@@ -1,5 +1,33 @@
+# Stages for the gitlab testing
+stages:
+  - test
+  - performance-test
+  - deploy
+
+
+# Default variables for the jobs
+variables:
+    # Indicated the testing script, that it is performed on GitLab. In this
+    # case all test have to pass.
+    TESTING_GITLAB: 1
+
+    # Some test require baci-release to check if the created input file
+    # works with baci.
+    BACI_RELEASE: "/hdd/gitlab-runner/lib/baci-master/release/baci-release"
+
+    # Path to the virtual python environment on the testing machine.
+    PYTHON_ENV: "/hdd/gitlab-runner/lib/python-interpreter/meshpy-env"
+
+    # Meshpy can interact with cubitpy, to perform the corresponding tests,
+    # the foloowing paths have to be set.
+    CUBITPY_MASTER: "/hdd/gitlab-runner/lib/cubitpy-master"
+    BACI_PRE_EXODUS: "/hdd/gitlab-runner/lib/baci-master/release/pre_exodus"
+    CUBIT: "/imcs/public/compsim/opt/cubit-13.2"
+  
+
 # Test meshpy.
 meshpy-testing:
+    stage: test
     script:
         - "whoami"
         - "pwd"
@@ -28,25 +56,35 @@ meshpy-testing:
     artifacts:
         paths:
           - tests/htmlcov/
-    variables:
-        # Indicated the testing script, that it is performed on GitLab. In this
-        # case all test have to pass.
-        TESTING_GITLAB: 1
-
-        # Some test require baci-release to check if the created input file
-        # works with baci.
-        BACI_RELEASE: "/hdd/gitlab-runner/lib/baci-master/release/baci-release"
-
-        # Path to the virtual python environment on the testing machine.
-        PYTHON_ENV: "/hdd/gitlab-runner/lib/python-interpreter/meshpy-env"
-
-        # Meshpy can interact with cubitpy, to perform the corresponding tests,
-        # the foloowing paths have to be set.
-        CUBITPY_MASTER: "/hdd/gitlab-runner/lib/cubitpy-master"
-        BACI_PRE_EXODUS: "/hdd/gitlab-runner/lib/baci-master/release/pre_exodus"
-        CUBIT: "/imcs/public/compsim/opt/cubit-13.2"
     tags:
         - "imcs-all"
+
+
+# Performance tests.
+meshpy-performance-testing:
+    stage: performance-test
+    script:
+        - "whoami"
+        - "pwd"
+        - MESHPY_PATH=$(pwd)
+        # Source the virtual environment
+        - source "${PYTHON_ENV}/bin/activate"
+        # Print information on the python environment.
+        - "python --version"
+        - "pip list"
+        # Add python paths.
+        - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
+        - export PYTHONPATH="${PYTHONPATH}:${CUBITPY_MASTER}"
+        # Compile cython code.
+        - "cd meshpy"
+        - "python3 find_close_points_setup.py"
+        - "cd .."
+        # Run performance tests.
+        - "cd tests"
+        - "python3 performance_testing.py"
+    tags:
+        - "imcs-all"
+    allow_failure: true
 
 
 # For the master branch add the coverage report.
@@ -59,7 +97,7 @@ pages:
     artifacts:
         paths:
             - public
-        expire_in: 30 days
+        expire_in: 90 days
     tags:
         - "imcs-all"
     only:
