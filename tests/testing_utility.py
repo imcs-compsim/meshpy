@@ -118,7 +118,7 @@ def compare_strings(self, name, reference, compare):
                 input_file.write(compare_string)
 
         child = subprocess.Popen(
-            ['kompare', reference_file, compare_file],
+            ['meld', reference_file, compare_file],
             stderr=subprocess.PIPE)
         child.communicate()
 
