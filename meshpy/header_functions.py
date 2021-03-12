@@ -36,6 +36,7 @@ def set_runtime_output(input_file, *,
         element_owner=True,
         element_gid=True,
         output_energy=False,
+        output_strains=True,
         option_overwrite=False):
     """
     Set the basic runtime output options.
@@ -65,6 +66,8 @@ def set_runtime_output(input_file, *,
         If the BACI internal GID of each element should be output.
     output_energy: bool
         If the energy output from BACI should be activated.
+    output_strains: bool
+        If the strains in the Gauss points should be output.
     option_overwrite: bool
         If existing options should be overwritten. If this is false and an
         option is already defined, and error will be thrown.
@@ -100,10 +103,11 @@ def set_runtime_output(input_file, *,
         DISPLACEMENT                    yes
         USE_ABSOLUTE_POSITIONS          {}
         TRIAD_VISUALIZATIONPOINT        {}
-        STRAINS_GAUSSPOINT              yes
+        STRAINS_GAUSSPOINT              {}
         ELEMENT_GID                     {}'''.format(
             _get_yes_no(absolute_beam_positons),
             _get_yes_no(output_triad),
+            _get_yes_no(output_strains),
             _get_yes_no(element_gid)),
         option_overwrite=option_overwrite))
 
