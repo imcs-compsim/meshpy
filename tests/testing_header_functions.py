@@ -12,7 +12,7 @@ from meshpy import (mpy, InputFile)
 
 # Header functions.
 from meshpy.header_functions import (set_header_static, set_runtime_output,
-    set_beam_to_solid_meshtying)
+    set_beam_to_solid_meshtying, get_comment)
 
 # Testing imports.
 from tests.testing_utility import testing_input, compare_strings
@@ -55,6 +55,9 @@ class TestHeaderFunctions(unittest.TestCase):
             mpy.beam_to_solid.surface_meshtying,
             contact_discretization='gp',
             option_overwrite=True)
+
+        input_file.add('--Test\n{}on\n{}off'.format(get_comment(True),
+            get_comment(False)))
 
         # Check the output.
         ref_file = os.path.join(testing_input,

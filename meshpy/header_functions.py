@@ -10,12 +10,20 @@ from .conf import mpy
 from .inputfile import InputSection
 
 
-def _get_yes_no(bool_var):
+def get_yes_no(bool_var):
     """Convert a bool into a string for the baci input file."""
     if bool_var:
         return 'yes'
     else:
         return 'no'
+
+
+def get_comment(bool_var):
+    """Convert a bool into a comment or no comment for the baci input file."""
+    if bool_var:
+        return ''
+    else:
+        return '//'
 
 
 def _get_segmentation_strategy(segmentation):
@@ -79,7 +87,7 @@ def set_runtime_output(input_file, *,
         '''
         OUTPUT_DATA_FORMAT        binary
         INTERVAL_STEPS            1
-        EVERY_ITERATION           {}'''.format(_get_yes_no(every_iteration)),
+        EVERY_ITERATION           {}'''.format(get_yes_no(every_iteration)),
         option_overwrite=option_overwrite))
 
     # Set the structure runtime output options.
@@ -90,9 +98,9 @@ def set_runtime_output(input_file, *,
         DISPLACEMENT                    yes
         ELEMENT_OWNER                   {}
         ELEMENT_GID                     {}'''.format(
-            _get_yes_no(output_solid),
-            _get_yes_no(element_owner),
-            _get_yes_no(element_gid)),
+            get_yes_no(output_solid),
+            get_yes_no(element_owner),
+            get_yes_no(element_gid)),
         option_overwrite=option_overwrite))
 
     # Set the beam runtime output options.
@@ -105,10 +113,10 @@ def set_runtime_output(input_file, *,
         TRIAD_VISUALIZATIONPOINT        {}
         STRAINS_GAUSSPOINT              {}
         ELEMENT_GID                     {}'''.format(
-            _get_yes_no(absolute_beam_positons),
-            _get_yes_no(output_triad),
-            _get_yes_no(output_strains),
-            _get_yes_no(element_gid)),
+            get_yes_no(absolute_beam_positons),
+            get_yes_no(output_triad),
+            get_yes_no(output_strains),
+            get_yes_no(element_gid)),
         option_overwrite=option_overwrite))
 
     if btsvmt_output:
@@ -326,7 +334,7 @@ def set_header_static(input_file, *,
         MAXTIME           {2}
         LOADLIN           {3}
         '''.format(time_step, n_steps, time_step * n_steps,
-            _get_yes_no(load_lin)),
+            get_yes_no(load_lin)),
         option_overwrite=option_overwrite))
     input_file.add(InputSection(
         'SOLVER 1',

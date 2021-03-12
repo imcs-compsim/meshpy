@@ -87,6 +87,9 @@ GAUSS_POINTS                          6
 CONTACT_DISCRETIZATION                gauss_point_to_segment
 GEOMETRY_PAIR_STRATEGY                segmentation
 GEOMETRY_PAIR_SEARCH_POINTS           2
+----------------------------------------------------------------------------Test
+on
+//off
 ----------------------------------------------------------STRUCT NOX/Status Test
 XML File                            = NOT_DEFINED
 -----------------------------------------------------------------------MATERIALS
