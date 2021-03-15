@@ -29,8 +29,8 @@ from .mesh import Mesh
 from .inputfile import InputFile, InputSection
 
 # Functions to set default header options.
-from .header_functions import (set_header_static, set_runtime_output,
-    set_beam_to_solid_meshtying)
+from .header_functions import (get_comment, get_yes_no, set_header_static,
+    set_runtime_output, set_beam_to_solid_meshtying)
 
 # Define the itCouplingems that will be exported by default.
 __all__ = [
