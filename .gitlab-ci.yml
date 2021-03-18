@@ -52,6 +52,7 @@ meshpy-testing:
         - "cd tests"
         - "coverage run --rcfile=coverage.config testing_main.py"
         - "coverage html"
+        - "coverage report"
         - coverage-badge -o htmlcov/coverage.svg
     artifacts:
         paths:
