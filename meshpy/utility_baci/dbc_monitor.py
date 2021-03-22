@@ -69,14 +69,14 @@ def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3):
     input_file: InputFile
         The input file where the created Neumann boundary condition is added
         to. The nodes refered to in the log file have to match with the ones
-        in the input section. It is advisable to only call this cuntion once
+        in the input section. It is advisable to only call this function once
         all nodes have been added to the input file.
     file_path: str
         Path to the Dirichlet boundary condition log file.
     step: int
         Step values to be used. Default is -1, i.e. the last step.
     function: Function, int
-        Function for the Neuman boundary condition.
+        Function for the Neumann boundary condition.
     n_dof: int
         Number of DOFs per node.
     """
