@@ -238,6 +238,10 @@ class InputFile(Mesh):
             'BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING LINE',
         (mpy.bc.beam_to_solid_surface_meshtying, mpy.geo.surface):
             'BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING SURFACE',
+        (mpy.bc.beam_to_solid_surface_contact, mpy.geo.line):
+            'BEAM INTERACTION/BEAM TO SOLID CONTACT LINE',
+        (mpy.bc.beam_to_solid_surface_contact, mpy.geo.surface):
+            'BEAM INTERACTION/BEAM TO SOLID CONTACT SURFACE',
         (mpy.bc.point_coupling, mpy.geo.point):
             'DESIGN POINT COUPLING CONDITIONS'
     }
