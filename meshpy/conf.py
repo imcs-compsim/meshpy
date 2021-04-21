@@ -23,6 +23,7 @@ class BoundaryCondition(Enum):
     moment_euler_bernoulli = auto()
     beam_to_solid_volume_meshtying = auto()
     beam_to_solid_surface_meshtying = auto()
+    beam_to_solid_surface_contact = auto()
     point_coupling = auto()
 
 
