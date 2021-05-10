@@ -5,8 +5,8 @@ tests.
 """
 
 # Meshpy modules.
-from .. import Beam, SolidElement, SolidHEX8, SolidHEX20, SolidHEX27, \
-    SolidTET4, SolidTET10
+from .. import Beam, VolumeElement, VolumeHEX8, VolumeHEX20, VolumeHEX27, \
+    VolumeTET4, VolumeTET10
 
 
 def get_unit_test_code(mesh, function_name):
@@ -75,7 +75,7 @@ def get_unit_test_code(mesh, function_name):
 
     # Loop over solid elements.
     for i, element in enumerate([element for element in mesh.elements if
-            isinstance(element, SolidElement)]):
+            isinstance(element, VolumeElement)]):
 
         # Number of nodes for this element.
         n_nodes = len(element.nodes)
@@ -88,15 +88,15 @@ def get_unit_test_code(mesh, function_name):
             list_function_definition.append('std::vector<Teuchos::RCP<GEOMETRYPAIR::GeometryPairLineToVolumeSegmentation<double, 2, 2, {}, 1>>>& geometry_pairs'.format(n_nodes))
 
         # Add the element.
-        if isinstance(element, SolidHEX8):
+        if isinstance(element, VolumeHEX8):
             list_solid_elements.append('volume_elements.push_back(Teuchos::rcp(new DRT::ELEMENTS::So_hex8({}, 0)));'.format(element_counter))
-        elif isinstance(element, SolidHEX20):
+        elif isinstance(element, VolumeHEX20):
             list_solid_elements.append('volume_elements.push_back(Teuchos::rcp(new DRT::ELEMENTS::So_hex20({}, 0)));'.format(element_counter))
-        elif isinstance(element, SolidHEX27):
+        elif isinstance(element, VolumeHEX27):
             list_solid_elements.append('volume_elements.push_back(Teuchos::rcp(new DRT::ELEMENTS::So_hex27({}, 0)));'.format(element_counter))
-        elif isinstance(element, SolidTET4):
+        elif isinstance(element, VolumeTET4):
             list_solid_elements.append('volume_elements.push_back(Teuchos::rcp(new DRT::ELEMENTS::So_tet4({}, 0)));'.format(element_counter))
-        elif isinstance(element, SolidTET10):
+        elif isinstance(element, VolumeTET10):
             list_solid_elements.append('volume_elements.push_back(Teuchos::rcp(new DRT::ELEMENTS::So_tet10({}, 0)));'.format(element_counter))
         else:
             raise TypeError('Element type not implemented!')

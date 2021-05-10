@@ -254,7 +254,6 @@ class InputFile(Mesh):
 
     # Sections that won't be exported to input file.
     skip_sections = [
-        'FLUID ELEMENTS',
         'ALE ELEMENTS',
         'LUBRICATION ELEMENTS',
         'TRANSPORT ELEMENTS',
@@ -539,6 +538,15 @@ class InputFile(Mesh):
                         self.elements.append(Element.from_dat(line))
                     else:
                         add_line(self.elements, line)
+            elif section_name == 'FLUID ELEMENTS':
+                for line in section_data_comment:
+                    if mpy.import_mesh_full:
+                        raise NotImplementedError(
+                            'Fluid elements in combination with '
+                            + 'mpy.import_mesh_full == True is not yet '
+                            + 'implemented!')
+                    else:
+                        add_line(self.elements_fluid, line)
             elif section_name.startswith('FUNCT'):
                 self.functions.append(BaseMeshItem(section_data))
             elif section_name in self.boundary_condition_names.values():
@@ -690,7 +698,7 @@ class InputFile(Mesh):
 
         # Assign global indices to all entries.
         set_n_global(self.nodes)
-        set_n_global(self.elements)
+        set_n_global(self.elements_fluid + self.elements)
         set_n_global(self.materials)
         set_n_global(self.functions)
         for key in self.boundary_conditions.keys():
@@ -762,6 +770,7 @@ class InputFile(Mesh):
         # Add the nodes and elements.
         get_section_dat('NODE COORDS', self.nodes)
         get_section_dat('STRUCTURE ELEMENTS', self.elements)
+        get_section_dat('FLUID ELEMENTS', self.elements_fluid)
 
         # The last section is END
         lines.extend(InputSection('END').get_dat_lines())
