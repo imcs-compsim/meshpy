@@ -16,7 +16,7 @@ from .rotation import Rotation, add_rotations
 from .function import Function
 from .material import Material
 from .node import Node
-from .element import Element
+from .element_beam import Beam
 from .geometry_set import GeometrySet
 from .container import (GeometryName, GeometrySetContainer,
     BoundaryConditionContainer)
@@ -38,6 +38,7 @@ class Mesh(object):
 
         self.nodes = []
         self.elements = []
+        self.elements_fluid = []
         self.materials = []
         self.functions = []
         self.geometry_sets = GeometrySetContainer()
@@ -65,7 +66,7 @@ class Mesh(object):
                 self.add_material(add_item, **kwargs)
             elif isinstance(add_item, Node):
                 self.add_node(add_item, **kwargs)
-            elif isinstance(add_item, Element):
+            elif isinstance(add_item, Beam):
                 self.add_element(add_item, **kwargs)
             elif isinstance(add_item, GeometrySet):
                 self.add_geometry_set(add_item, **kwargs)

@@ -316,6 +316,32 @@ class TestMeshpy(unittest.TestCase):
         self.assertRaises(ValueError,
             base_test_mesh_translations, import_full=True, radius=666)
 
+    def test_using_fluid_element_section(self):
+        """"Add beam elements to an input file containing fluid elements"""
+
+        input_file = InputFile(dat_file=os.path.join(testing_input,
+            'fluid_element_input.dat'))
+
+        beam_mesh = Mesh()
+        material = MaterialEulerBernoulli(
+        youngs_modulus=1e8,
+        radius=0.001,
+        density=10)
+        beam_mesh.add(material)
+
+        create_beam_mesh_line(beam_mesh,
+            Beam3eb, material, [0, -0.5, 0], [0, 0.2, 0], n_el=5)
+        input_file.add(beam_mesh)
+
+        # Check the output.
+        ref_file = os.path.join(testing_input,
+            'test_meshpy_mesh_beam_with_fluid_reference.dat')
+        compare_strings(self,
+            'test_meshpy_mesh_beam_with_fluid',
+            ref_file,
+            input_file.get_string(header=False))
+
+
     def test_wrap_cylinder_not_on_same_plane(self):
         """Create a helix that is itself wrapped around a cylinder."""
 

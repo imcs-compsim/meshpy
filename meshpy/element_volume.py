@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-This module implements solid elements for the mesh.
+This module implements volume elements for the mesh.
 """
 
 # Python modules.
@@ -12,8 +12,8 @@ from .element import Element
 from .vtk_writer import add_point_data_node_sets
 
 
-class SolidElement(Element):
-    """A base class for a solid element."""
+class VolumeElement(Element):
+    """A base class for a volume element."""
 
     # This class variables stores the information about the element shape in
     # vtk. And the connectivity to the nodes.
@@ -71,41 +71,41 @@ class SolidElement(Element):
             self.vtk_topology, cell_data=cell_data, point_data=point_data)
 
 
-class SolidHEX8(SolidElement):
-    """A HEX8 solid element."""
+class VolumeHEX8(VolumeElement):
+    """A HEX8 volume element."""
     vtk_cell_type = vtk.vtkHexahedron
 
 
-class SolidTET4(SolidElement):
-    """A TET4 solid element."""
+class VolumeTET4(VolumeElement):
+    """A TET4 volume element."""
     vtk_cell_type = vtk.vtkTetra
 
 
-class SolidTET10(SolidElement):
-    """A TET10 solid element."""
+class VolumeTET10(VolumeElement):
+    """A TET10 volume element."""
     vtk_cell_type = vtk.vtkQuadraticTetra
 
 
-class SolidHEX20(SolidElement):
-    """A HEX20 solid element."""
+class VolumeHEX20(VolumeElement):
+    """A HEX20 volume element."""
     vtk_cell_type = vtk.vtkQuadraticHexahedron
     vtk_topology = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16, 17, 18, 19, 12,
         13, 14, 15]
 
 
-class SolidHEX27(SolidElement):
-    """A HEX27 solid element."""
+class VolumeHEX27(VolumeElement):
+    """A HEX27 volume element."""
     vtk_cell_type = vtk.vtkTriQuadraticHexahedron
     vtk_topology = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16, 17, 18, 19, 12,
         13, 14, 15, 24, 22, 21, 23, 20, 25, 26]
 
 
-class SolidRigidSphere(SolidElement):
+class SolidRigidSphere(VolumeElement):
     """A rigid sphere solid element."""
 
     def __init__(self, **kwargs):
         """Initialize solid sphere object."""
-        SolidElement.__init__(self, **kwargs)
+        VolumeElement.__init__(self, **kwargs)
 
         # Set radius of sphere from input file.
         arg_name = self.dat_post_nodes.split()[0]
