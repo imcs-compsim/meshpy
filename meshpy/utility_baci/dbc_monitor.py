@@ -56,7 +56,7 @@ def read_dbc_monitor_file(file_path):
         data.append(np.fromstring(line, dtype=float, sep=' '))
     data = np.array(data)
 
-    return nodes, data[:, 0], data[:, 4:7], data[:, 7:]
+    return nodes, data[:, 1], data[:, 4:7], data[:, 7:]
 
 
 def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3):
