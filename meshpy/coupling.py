@@ -89,13 +89,19 @@ class Coupling(BoundaryConditionBase):
             if self.coupling_type is mpy.coupling.joint:
                 if beam_type is mpy.beam.reissner:
                     string = 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0'
-                else:
+                elif beam_type is mpy.beam.kirchhoff:
                     string = 'NUMDOF 7 ONOFF 1 1 1 0 0 0 0'
+                elif beam_type is mpy.beam.euler_bernoulli:
+                    string = 'NUMDOF 6 ONOFF 1 1 1 0 0 0'
+                else:
+                    raise TypeError('Got unknown beam type')
             elif self.coupling_type is mpy.coupling.fix:
                 if beam_type is mpy.beam.reissner:
                     string = 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0'
-                else:
+                elif beam_type is mpy.beam.kirchhoff:
                     string = 'NUMDOF 7 ONOFF 1 1 1 1 1 1 0'
+                else:
+                    raise TypeError('Bernoulli Euler beams can not be fixed')
             else:
                 raise ValueError(('coupling_type "{}" is not '
                     + 'implemented!').format(self.coupling_type))
