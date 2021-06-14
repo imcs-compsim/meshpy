@@ -26,4 +26,4 @@ if __name__ == '__main__':
 
     # Perform the tests
     run = unittest.TextTestRunner(verbosity=1).run(testsuite)
-    sys.exit(not (run.wasSuccessful() and len(run.skipped) == 0))
+    sys.exit(not (run.wasSuccessful()))

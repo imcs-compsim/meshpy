@@ -35,7 +35,7 @@ from meshpy.mesh_creation_functions.beam_honeycomb import (
 from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
 
 # Testing imports.
-from tests.testing_utility import (testing_temp, testing_input,
+from tests.testing_utility import (skip_fail_test, testing_temp, testing_input,
     compare_strings, compare_vtk)
 
 
@@ -1724,7 +1724,7 @@ class TestMeshpy(unittest.TestCase):
         found = importlib.util.find_spec('cubitpy') is not None
         if not found:
             # In this case skip the test.
-            self.skipTest('CubitPy could not be loaded!')
+            skip_fail_test(self, 'CubitPy could not be loaded!')
 
         # Load the mesh creation functions.
         from tests.create_cubit_input import create_tube, create_tube_cubit
