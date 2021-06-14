@@ -41,6 +41,8 @@ class TestFullBaci(unittest.TestCase):
         """
         if baci_release is None:
             self.skipTest('BACI path was not found!')
+        if shutil.which('mpirun') is None:
+            self.skipTest('mpirun was not found!')
 
     def run_baci_test(self, name, mesh, n_proc=2, delete_files=True,
             restart=None, **kwargs):

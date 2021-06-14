@@ -22,6 +22,16 @@ else:
     TESTING_GITLAB = False
 
 
+def skip_fail_test(self, message):
+    """
+    Skip or fail the test depending if the test are run in GitLab or not.
+    """
+    if TESTING_GITLAB:
+        self.skipTest(message)
+    else:
+        self.skipTest(message)
+
+
 def get_baci_path():
     """Look for and return a path to baci-release."""
 
