@@ -18,7 +18,7 @@ from utility import check_license
 
 
 class TestHeaders(unittest.TestCase):
-    """This class tests the headers in the repositroy."""
+    """This class tests the headers in the repository."""
 
     def test_headers(self):
         """
