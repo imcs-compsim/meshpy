@@ -100,6 +100,7 @@ def check_license():
     source_files = get_all_source_files()
 
     skip_list = []
+    wrong_headers = []
 
     for key in source_files:
         header = license_to_source(license_text, key)
@@ -108,10 +109,12 @@ def check_license():
                 if file.endswith(skip):
                     break
             else:
-                with open(file, encoding='ISO-8859-1') as source_file:
+                with open(file) as source_file:
                     source_text = source_file.read()
                     if not source_text.startswith(header):
-                        print('Wrong header in: {}'.format(file))
+                        wrong_headers.append(file)
+
+    return wrong_headers
 
 
 if __name__ == '__main__':
@@ -119,4 +122,6 @@ if __name__ == '__main__':
     Execution part of script.
     """
 
-    check_license()
+    wrong_headers = check_license()
+    for file in wrong_headers:
+        print('Wrong header in: {}'.format(file))
