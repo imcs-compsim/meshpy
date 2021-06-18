@@ -1,4 +1,14 @@
 # -*- coding: utf-8 -*-
+# -----------------------------------------------------------------------------
+# MeshPy: A beam finite element input generator.
+#
+# Copyright (c) 2021 Ivo Steinbrecher
+#                    Institute for Mathematics and Computer-Based Simulation
+#                    Universitaet der Bundeswehr Muenchen
+#                    https://www.unibw.de/imcs-en
+#
+# TODO: Add license.
+# -----------------------------------------------------------------------------
 """
 This script contains a tutorial for meshpy. Most basic is covert by
 this tutorial. For more informations have a closer look at the test cases, as
