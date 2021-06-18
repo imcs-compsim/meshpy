@@ -1,3 +1,10 @@
+// -----------------------------------------------------------------------------
+// This input file was created with MeshPy.
+// Copyright (c) 2021 Ivo Steinbrecher
+//            Institute for Mathematics and Computer-Based Simulation
+//            Universitaet der Bundeswehr Muenchen
+//            https://www.unibw.de/imcs-en
+// -----------------------------------------------------------------------------
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0e+09 NUE 0.0 DENS 7.80E-6 THEXPANS 0.0
 MAT 2 MAT_BeamReissnerElastHyper YOUNG -1.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.007853981633974483 SHEARCORR 1 MOMINPOL 9.817477042468105e-06 MOMIN2 4.9087385212340526e-06 MOMIN3 4.9087385212340526e-06
