@@ -27,7 +27,7 @@ from meshpy.mesh_creation_functions import (create_beam_mesh_line,
     create_beam_mesh_arc_segment_2d, create_beam_mesh_curve)
 
 
-def tutorial(base_dir, preview=False):
+def meshpy_tutorial(base_dir, preview=False):
     """
     Create a honeycomb like structure with different type of connectors.
 
@@ -250,11 +250,13 @@ def tutorial(base_dir, preview=False):
         TRIAD_VISUALIZATIONPOINT              yes
         STRAINS_GAUSSPOINT                    yes
         """)
-    input_file.write_input_file(os.path.join(base_dir, 'tutorial.dat'))
+
+    return input_file
 
 
 if __name__ == '__main__':
     """Execution part of script."""
 
-    tutorial('/home/ivo/temp/tutorial')
-
+    base_dir = '/home/ivo/temp/tutorial'
+    input_file = meshpy_tutorial()
+    input_file.write_input_file(os.path.join(base_dir, 'tutorial.dat'))
