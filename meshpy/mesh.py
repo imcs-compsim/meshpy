@@ -505,7 +505,7 @@ class Mesh(object):
     def wrap_around_cylinder(self, radius=None, advanced_warning=True):
         """
         Wrap the geometry around a cylinder. The y-z plane gets morphed into
-        the axis of symmetry. If all nodes are on the same y-z plane, the
+        the z-axis of symmetry. If all nodes are on the same y-z plane, the
         radius of the created cylinder is the x coordinate of that plane. If
         the nodes are not on the same y-z plane, the radius has to be given
         explicitly.
