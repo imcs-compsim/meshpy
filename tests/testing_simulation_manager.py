@@ -131,9 +131,8 @@ class TestSimulationManager(unittest.TestCase):
                     baci_build_dir=os.path.dirname(get_baci_path()),
                     status=False)
             else:
-                baci_build_dir = '/home/a11bivst/baci/work/release'
                 manager.submit_batch_files_and_wait_for_finish(
-                    baci_build_dir=baci_build_dir,
+                    baci_build_dir=os.path.dirname(get_baci_path()),
                     check_interval=1)
         else:
             self.skipTest('{} was not found'.format(command))
