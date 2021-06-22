@@ -257,6 +257,8 @@ def meshpy_tutorial(base_dir, preview=False):
 if __name__ == '__main__':
     """Execution part of script."""
 
-    base_dir = '/home/ivo/temp/tutorial'
-    input_file = meshpy_tutorial()
-    input_file.write_input_file(os.path.join(base_dir, 'tutorial.dat'))
+    # Adapt this path to the directory you want to store the tutorial files in.
+    tutorial_directory = None
+    input_file = meshpy_tutorial(tutorial_directory)
+    input_file.write_input_file(
+        os.path.join(tutorial_directory, 'tutorial.dat'))
