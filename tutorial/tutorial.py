@@ -174,15 +174,18 @@ def meshpy_tutorial(base_dir, preview=False):
     print('Point couplings after "couple_nodes": {}'.format(
         len(mesh.boundary_conditions[(mpy.bc.point_coupling, mpy.geo.point)])))
 
+    # We can also display the coupling points in the vtk output.
+    mesh.write_vtk('step_10', base_dir, coupling_sets=True)
+
     # Finally the mesh is wrapped around a cylinder. Therefore, the mesh is
     # has to be moved to the correct position. For details look into the
     # documentation of wrap_around_cylinder.
     mesh.rotate(Rotation([0, 1, 0], 0.5 * np.pi))
     mesh.translate([1, 0, 0])
-    mesh.write_vtk('step_10', base_dir)
+    mesh.write_vtk('step_11', base_dir)
 
     mesh.wrap_around_cylinder()
-    mesh.write_vtk('step_11', base_dir)
+    mesh.write_vtk('step_12', base_dir)
 
     # The geometry of the mesh is now complete.
     # We add a line load in y-direction to all beam elements. The line load
@@ -196,6 +199,9 @@ def meshpy_tutorial(base_dir, preview=False):
         + 'FUNCT 0 {} 0 0 0 0 0 0 0'),
         format_replacement=[line_load_val, fun_t],
         bc_type=mpy.bc.neumann))
+
+    # The vtk output will also show all node sets for BCs on the mesh.
+    mesh.write_vtk('step_13', base_dir)
 
     # The object InputFile is a mesh, but can also store BACI input parameters.
     # Additionally we load an existing solid mesh. This shows how solid, or in
