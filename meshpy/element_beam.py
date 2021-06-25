@@ -40,6 +40,10 @@ class Beam(Element):
     # A list of valid material types for this element.
     valid_material = []
 
+    # Coupling strings.
+    coupling_fix_string = None
+    coupling_joint_string = None
+
     def __init__(self, material=None, nodes=None):
         super().__init__(nodes=nodes, material=material)
 
@@ -163,6 +167,26 @@ class Beam(Element):
         # Return the created nodes.
         return created_nodes
 
+    @classmethod
+    def get_coupling_string(cls, coupling_type):
+        """
+        Return the string to couple this beam to another beam.
+        """
+
+        if coupling_type is mpy.coupling.joint:
+            if cls.coupling_joint_string is None:
+                raise ValueError(('Joint coupling is not implemented for '
+                    '{}').format(cls))
+            return cls.coupling_joint_string
+        elif coupling_type is mpy.coupling.fix:
+            if cls.coupling_fix_string is None:
+                raise ValueError(('Fix coupling is not implemented for '
+                    '{}').format(cls))
+            return cls.coupling_fix_string
+        else:
+            raise ValueError(('coupling_type "{}" is not '
+                + 'implemented!').format(coupling_type))
+
     def flip(self):
         """
         Reverse the nodes of this element. This is usually used when reflected.
@@ -249,6 +273,9 @@ class Beam3rHerm2Line3(Beam):
     beam_type = mpy.beam.reissner
     valid_material = [MaterialReissner, BaseMeshItem]
 
+    coupling_fix_string = 'NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0'
+    coupling_joint_string = 'NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0'
+
     def _get_dat(self):
         """ Return the line for the input file. """
 
@@ -283,6 +310,9 @@ class Beam3rLine2Line2(Beam):
     beam_type = mpy.beam.reissner
     valid_material = [MaterialReissner, BaseMeshItem]
 
+    coupling_fix_string = 'NUMDOF 6 ONOFF 1 1 1 1 1 1'
+    coupling_joint_string = 'NUMDOF 6 ONOFF 1 1 1 0 0 0'
+
     def _get_dat(self):
         """ Return the line for the input file. """
 
@@ -314,6 +344,9 @@ class Beam3kClass(Beam):
         ]
     beam_type = mpy.beam.kirchhoff
     valid_material = [MaterialKirchhoff, BaseMeshItem]
+
+    coupling_fix_string = 'NUMDOF 7 ONOFF 1 1 1 1 1 1 0'
+    coupling_joint_string = 'NUMDOF 7 ONOFF 1 1 1 0 0 0 0'
 
     def __init__(self, *, weak=True, rotvec=True, FAD=True, **kwargs):
         Beam.__init__(self, **kwargs)
