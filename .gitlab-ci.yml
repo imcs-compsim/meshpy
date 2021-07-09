@@ -23,6 +23,9 @@ variables:
     CUBITPY_MASTER: "/hdd/gitlab-runner/lib/cubitpy-master"
     BACI_PRE_EXODUS: "/hdd/gitlab-runner/lib/baci-master/release/pre_exodus"
     CUBIT: "/imcs/public/compsim/opt/cubit-13.2"
+
+    # For building the website.
+    JEKYLL_ENV: production
   
 
 # Test meshpy.
@@ -57,6 +60,7 @@ meshpy-testing:
     artifacts:
         paths:
           - tests/htmlcov/
+        expire_in: 30 days
     tags:
         - "imcs-all"
 
@@ -88,13 +92,37 @@ meshpy-performance-testing:
     allow_failure: true
 
 
-# For the master branch add the coverage report.
+# For non master branches test the website. The build can be viewed under GitLab CI/CD artifacts.
+website-test:
+    stage: test
+    script:
+        - cd website
+        - bundle exec jekyll build -d website-test
+        - mv website-test ../
+    artifacts:
+        paths:
+            - website-test
+        expire_in: 30 days
+    tags:
+        - "imcs-all"
+    except:
+        refs:
+            - master
+
+
+# For the master branch add the coverage report and the website.
 pages:
     stage: deploy
     dependencies:
         - meshpy-testing
     script:
+        - mkdir public
+        - mkdir public/htmlcov
         - mv tests/htmlcov/ public/
+        - cd website
+        - bundle exec jekyll build -d public
+        - cd public
+        - mv * ../../public
     artifacts:
         paths:
             - public

@@ -31,3 +31,10 @@ meshpy/meshpy
 # AceGen stuff
 */rotation_matrix.cpp
 */AceShare
+
+# Website stuff
+_site
+.sass-cache
+.jekyll-metadata
+*.lock
+website/public/
