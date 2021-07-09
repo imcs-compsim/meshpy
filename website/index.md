@@ -18,7 +18,7 @@ MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulat
 Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as follows:
 
 ```
-Steinbrecher, I.: MeshPy -- A general purpose 3D beam finite element input generator, https://compsim.gitlab.io/codes/meshpy/index.html
+Steinbrecher, I.: MeshPy -- A general purpose 3D beam finite element input generator, https://compsim.gitlab.io/codes/meshpy
 ```
 
 
