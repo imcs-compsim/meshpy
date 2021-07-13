@@ -21,6 +21,20 @@ Whenever you use or mention MeshPy in some sort of scientific document/publicati
 Steinbrecher, I., Popp, A.: MeshPy -- A general purpose 3D beam finite element input generator, https://compsim.gitlab.io/codes/meshpy
 ```
 
+With the following BiBTeX entry:
+{% raw %}
+```TeX
+@Misc{MeshPyWebsite,
+  author       = {Steinbrecher, I. and Popp, A.},
+  howpublished = {\url{https://compsim.gitlab.io/codes/meshpy}},
+  title        = {{M}esh{P}y -- {A} general purpose {3D} beam finite element input generator},
+  year         = {2021},
+  key          = {MeshPyWebsite},
+  url          = {https://compsim.gitlab.io/codes/meshpy},
+}
+```
+{% endraw %}
+
 
 ## Contributors
 
@@ -37,7 +51,7 @@ Nora Hagmeyer
 
 ## Publications
 
-Journal publications in which MeshPy has been used
+Journal publications in which MeshPy has been used:
 
 ### 2021
 Hagmeyer, N., Mayr, M., Steinbrecher, I., Popp, A.: Fluid-beam interaction: Capturing the effect of embedded slender bodies on global fluid flow and vice versa (2021), submitted, [arXiv:2104.09844](https://arxiv.org/abs/2104.09844)
