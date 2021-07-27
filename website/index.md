@@ -54,10 +54,11 @@ Nora Hagmeyer
 Journal publications in which MeshPy has been used:
 
 ### 2021
-Hagmeyer, N., Mayr, M., Steinbrecher, I., Popp, A.: Fluid-beam interaction: Capturing the effect of embedded slender bodies on global fluid flow and vice versa (2021), submitted, [arXiv:2104.09844](https://arxiv.org/abs/2104.09844)
+- Steinbrecher, I., Popp, A., Meier, C.: Consistent coupling of positions and rotations for embedding 1D Cosserat beams into 3D solid volumes (2021), submitted, [arXiv:2107.11151](https://arxiv.org/abs/2107.11151)
+- Hagmeyer, N., Mayr, M., Steinbrecher, I., Popp, A.: Fluid-beam interaction: Capturing the effect of embedded slender bodies on global fluid flow and vice versa (2021), submitted, [arXiv:2104.09844](https://arxiv.org/abs/2104.09844)
 
 ### 2020
-Steinbrecher, I., Mayr, M., Grill, M. J., Kremheller, J., Meier, C., Popp, A.: A mortar-type finite element approach for embedding 1D beams into 3D solid volumes, Comput. Mech. 66 (6) (2020) 1377–1398. doi: [10.1007/s00466-020-01907-0](https://doi.org/10.1007/s00466-020-01907-0)
+- Steinbrecher, I., Mayr, M., Grill, M. J., Kremheller, J., Meier, C., Popp, A.: A mortar-type finite element approach for embedding 1D beams into 3D solid volumes, Comput. Mech. 66 (6) (2020) 1377–1398. doi: [10.1007/s00466-020-01907-0](https://doi.org/10.1007/s00466-020-01907-0)
 
 
 ## Examples created using MeshPy
