@@ -67,6 +67,7 @@ class MaterialBeam(Material):
             youngs_modulus=-1.,
             nu=0.,
             density=0.,
+            interaction_radius=None,
             **kwargs):
         """Set the material values that all beams have."""
         super().__init__(**kwargs)
@@ -77,6 +78,7 @@ class MaterialBeam(Material):
         self.nu = nu
         self.density = density
         self.radius = radius
+        self.interaction_radius = interaction_radius
         self.area = None
         self.mom2 = None
         self.mom3 = None
@@ -124,6 +126,8 @@ class MaterialReissner(MaterialBeam):
                 + 'A combination is not possible')
         string = 'MAT {} {} YOUNG {} POISSONRATIO {} DENS {} CROSSAREA {} '
         string += 'SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}'
+        if self.interaction_radius is not None:
+            string += ' INTERACTIONRADIUS {}'.format(self.interaction_radius)
         return string.format(
             self.n_global,
             self.material_string,

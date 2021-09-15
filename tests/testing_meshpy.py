@@ -899,7 +899,8 @@ class TestMeshpy(unittest.TestCase):
         """
 
         # Create input file.
-        material = MaterialReissner(radius=0.1, youngs_modulus=1000)
+        material = MaterialReissner(radius=0.1, youngs_modulus=1000,
+            interaction_radius=2.0)
         input_file = InputFile()
 
         # Create a beam arc with the different Reissner beam types.
