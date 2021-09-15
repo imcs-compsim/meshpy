@@ -6,7 +6,7 @@
 //            https://www.unibw.de/imcs-en
 // -----------------------------------------------------------------------------
 -----------------------------------------------------------------------MATERIALS
-MAT 1 MAT_BeamReissnerElastHyper YOUNG 1000 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.031415926535897934 SHEARCORR 1 MOMINPOL 0.00015707963267948968 MOMIN2 7.853981633974484e-05 MOMIN3 7.853981633974484e-05
+MAT 1 MAT_BeamReissnerElastHyper YOUNG 1000 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.031415926535897934 SHEARCORR 1 MOMINPOL 0.00015707963267948968 MOMIN2 7.853981633974484e-05 MOMIN3 7.853981633974484e-05 INTERACTIONRADIUS 2.0
 --------------------------------------------------------------DESIGN DESCRIPTION
 NDPOINT 0
 NDLINE 0
