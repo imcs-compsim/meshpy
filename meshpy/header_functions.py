@@ -306,6 +306,7 @@ def set_header_static(input_file, *,
         tol_residuum=1e-8,
         tol_increment=1e-10,
         load_lin=False,
+        write_bin=False,
         option_overwrite=False
         ):
     """
@@ -327,6 +328,8 @@ def set_header_static(input_file, *,
         Tolerance for the convergence of the displacement increment.
     load_lin: bool
         If the load_lin option should be set.
+    write_bin: bool
+        If binary output should be written.
     option_overwrite: bool
         If existing options should be overwritten. If this is false and an
         option is already defined, and error will be thrown.
@@ -341,11 +344,11 @@ def set_header_static(input_file, *,
         option_overwrite=option_overwrite))
     input_file.add(InputSection('IO',
         '''
-        OUTPUT_BIN     No
+        OUTPUT_BIN     {}
         STRUCT_DISP    No
         FILESTEPS      1000
         VERBOSITY      Standard
-        ''',
+        '''.format(get_yes_no(write_bin)),
         option_overwrite=option_overwrite))
 
     input_file.add(InputSection(
