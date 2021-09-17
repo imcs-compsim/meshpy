@@ -9,7 +9,7 @@
 PROBLEMTYP                            Structure
 RESTART                               0
 ------------------------------------------------------------------------------IO
-OUTPUT_BIN                            No
+OUTPUT_BIN                            no
 STRUCT_DISP                           No
 FILESTEPS                             1000
 VERBOSITY                             Standard
