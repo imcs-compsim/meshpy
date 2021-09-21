@@ -43,7 +43,8 @@ from meshpy import (mpy, InputFile, MaterialReissner, BoundaryCondition,
     Beam3rHerm2Line3, Function, set_header_static, set_runtime_output)
 from meshpy.mesh_creation_functions import create_beam_mesh_line
 from meshpy.simulation_manager import (Simulation, SimulationManager)
-from tests.testing_utility import (testing_temp, get_baci_path)
+from tests.testing_utility import (testing_temp, get_baci_path,
+    testing_input, compare_strings)
 
 
 def create_cantilever(convergence_base_dir, subpath, n_el):
@@ -170,6 +171,30 @@ class TestSimulationManager(unittest.TestCase):
         Create a convergence study on the cluster and check the results.
         """
         self.xtest_simulation_manager('sbatch')
+
+    def test_batch_file(self):
+        """
+        Test that the created batch file is correct.
+        """
+
+        sim = Simulation(os.path.join(testing_temp, 'dummy.dat'),
+            n_proc=37,
+            n_nodes=69,
+            exclusive=True,
+            output_prefix='xxxXXXxxx',
+            wall_time='66:66:66',
+            restart_step=17,
+            restart_dir='../old_sim',
+            restart_from_prefix='xxx_old',
+            job_name='awsome_job',
+            feature='skylake')
+
+        sim.create_batch_file(testing_temp, 'batch_name')
+
+        compare_strings(self,
+            'test_batch_file',
+            os.path.join(testing_temp, 'batch_name'),
+            os.path.join(testing_input, 'batch_name_reference'))
 
 
 if __name__ == '__main__':
