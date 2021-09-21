@@ -13,6 +13,9 @@
 #SBATCH --output=slurm-%j.out
 #SBATCH --error=slurm-%j.err
 #
+# Define if the job should only be run on certain nodes.
+#{is_feature}SBATCH --constraint={self.feature}
+#
 # Standard case: specify only number of cpus
 # #SBATCH --ntasks=24
 #
@@ -30,7 +33,7 @@
 #{is_exclusive}SBATCH --exclusive
 #
 # Walltime:
-#SBATCH --time={wall_time}
+#SBATCH --time={self.wall_time}
 ###########################################
 
 # Store calling directroy
@@ -60,15 +63,15 @@ INPUT="$SIMULATIONS_DIR/{input_file_name}"
 ######################
 # OUTPUT SPECIFICATION
 ######################
-OUTPUT_PREFIX="{output_prefix}"
+OUTPUT_PREFIX="{self.output_prefix}"
 BACI_OUTPUT_DIR="$SIMULATIONS_DIR"
 
 #######################
 # RESTART SPECIFICATION
 #######################
-RESTART_FROM_STEP={restart_step}                 # <= specify your restart step
-RESTART_FROM_DIR="{restart_dir}"
-RESTART_FROM_PREFIX="{restart_from_prefix}" # <= specify the result prefix from which restart read
+RESTART_FROM_STEP={self.restart_step}                 # <= specify your restart step
+RESTART_FROM_DIR="{self.restart_dir}"
+RESTART_FROM_PREFIX="{self.restart_from_prefix}" # <= specify the result prefix from which restart read
 
 #################################################################
 # BEGIN ############### DO NOT TOUCH ME #########################
