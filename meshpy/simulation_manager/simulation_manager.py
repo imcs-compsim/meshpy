@@ -102,7 +102,7 @@ class Simulation():
     def __init__(self, input_file_path, *, n_proc=1, n_nodes=1,
             exclusive=False, output_prefix='xxx', wall_time='08:00:00',
             restart_step=0, restart_dir='', restart_from_prefix='',
-            job_name=None):
+            job_name=None, feature=None):
         """
         Initialize the simulation object. The input file will be written to
         the specified path.
@@ -130,6 +130,9 @@ class Simulation():
             Directory where the previous simulation was performed.
         restart_from_prefix: str
             Name of the previous simulation.
+        feature: str
+            If the job can only be run on certain nodes, configured via a slurm
+            feature.
         """
 
         # Class variables.
@@ -141,6 +144,7 @@ class Simulation():
         self.output_prefix = output_prefix
         self.wall_time = wall_time
         self.job_name = job_name
+        self.feature = feature
 
         # Restart options
         self.restart_step = restart_step
@@ -208,11 +212,7 @@ class Simulation():
         batch_string = batch_string.format(self=self, job_name=job_name,
             input_file_name=os.path.basename(self.file_path),
             is_exclusive=is_true_batch(self.exclusive),
-            output_prefix=self.output_prefix,
-            restart_step=self.restart_step,
-            restart_dir=self.restart_dir,
-            restart_from_prefix=self.restart_from_prefix,
-            wall_time=self.wall_time
+            is_feature=is_true_batch(self.feature is not None)
             )
         batch_script_path = os.path.join(os.path.dirname(self.file_path),
             batch_name)
