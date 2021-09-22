@@ -35,7 +35,12 @@ This module defines classes and functions to create and edit a Baci input file.
 from .conf import mpy
 
 # Utility functions.
-from .utility import flatten, find_close_nodes, find_close_points
+from .utility import (
+    clean_simulation_directory,
+    find_close_nodes,
+    find_close_points,
+    flatten
+    )
 
 # 3D rotations for nodes.
 from .rotation import Rotation
@@ -43,9 +48,18 @@ from .rotation import Rotation
 # Mesh items.
 from .base_mesh_item import BaseMeshItem
 from .function import Function
-from .material import (MaterialBeam, MaterialReissner, MaterialKirchhoff,
-    MaterialEulerBernoulli)
-from .element_beam import Beam3rHerm2Line3, Beam3rLine2Line2, Beam3k, Beam3eb
+from .material import (
+    MaterialBeam,
+    MaterialEulerBernoulli,
+    MaterialKirchhoff,
+    MaterialReissner
+    )
+from .element_beam import (
+    Beam3eb,
+    Beam3k,
+    Beam3rHerm2Line3,
+    Beam3rLine2Line2
+    )
 from .geometry_set import GeometrySet
 
 # Boundary conditions and couplings for geometry in the mesh.
@@ -57,8 +71,13 @@ from .mesh import Mesh
 from .inputfile import InputFile, InputSection
 
 # Functions to set default header options.
-from .header_functions import (get_comment, get_yes_no, set_header_static,
-    set_runtime_output, set_beam_to_solid_meshtying)
+from .header_functions import (
+    get_comment,
+    get_yes_no,
+    set_beam_to_solid_meshtying,
+    set_header_static,
+    set_runtime_output
+    )
 
 # Define the itCouplingems that will be exported by default.
 __all__ = [

@@ -35,6 +35,8 @@ application.
 # Python modules.
 import subprocess
 import os
+import shutil
+from pathlib import Path
 import numpy as np
 import warnings
 
@@ -199,3 +201,33 @@ def get_min_max_coordinates(nodes):
     min_max[:3] = np.min(coordinates, axis=0)
     min_max[3:] = np.max(coordinates, axis=0)
     return min_max
+
+
+def clean_simulation_directory(sim_dir):
+    """
+    If the simulation directory exists, the user is asked if the contents
+    should be removed. If it does not exist, it is created.
+    """
+
+    # Check if simulation directory exists.
+    if os.path.exists(sim_dir):
+        print('Path "{}" already exists'.format(sim_dir))
+        while True:
+            answer = input('DELETE all contents? (y/n): ')
+            if answer.lower() == 'y':
+                for filename in os.listdir(sim_dir):
+                    file_path = os.path.join(sim_dir, filename)
+                    try:
+                        if (os.path.isfile(file_path)
+                                or os.path.islink(file_path)):
+                            os.unlink(file_path)
+                        elif os.path.isdir(file_path):
+                            shutil.rmtree(file_path)
+                    except Exception as e:
+                        ValueError(
+                            'Failed to delete %s. Reason: %s' % (file_path, e))
+                return
+            elif answer.lower() == 'n':
+                raise ValueError('Directory is not deleted!')
+    else:
+        Path(sim_dir).mkdir(parents=True, exist_ok=True)
