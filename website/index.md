@@ -13,6 +13,11 @@ It is currently used in combination with the academic finite element solver [**B
 MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulation (IMCS)](https://www.unibw.de/imcs-en) at the Universität der Bundeswehr München.
 
 
+## Download MeshPy
+
+A clone of the current MeshPy `master` branch is hosted on [GitHub]().
+
+
 ## How to cite MeshPy?
 
 Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as follows:
