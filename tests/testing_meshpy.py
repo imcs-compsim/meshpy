@@ -369,6 +369,30 @@ class TestMeshpy(unittest.TestCase):
             ref_file,
             input_file.get_string(header=False))
 
+    def test_domain_geometry_sets(self):
+        """Add geometry set based on a baci internal domain"""
+
+        input_file = InputFile()
+
+        input_file.add('''
+        -----------------------------------------------FLUID DOMAIN
+        LOWER_BOUND     -1.5 -0.5 -0.5
+        UPPER_BOUND     1.5 0.5 0.5
+        INTERVALS       48 16 16
+        ELEMENTS        FLUID HEX8 MAT 1 NA Euler
+        PARTITION       structured
+        -----------------------------------------------DLINE-NODE TOPOLOGY
+        EDGE fluid y+ z+ DLINE 1
+        -----------------------------------------------DSURF-NODE TOPOLOGY
+        SIDE fluid z+ DSURFACE 1
+        ''')
+
+        # Compare the output of the mesh.
+        compare_strings(self,
+            'test_domain_geometry_sets',
+            os.path.join(
+                testing_input, 'test_domain_geometry_sets_reference.dat'),
+            input_file.get_string(header=False).strip())
 
     def test_wrap_cylinder_not_on_same_plane(self):
         """Create a helix that is itself wrapped around a cylinder."""
