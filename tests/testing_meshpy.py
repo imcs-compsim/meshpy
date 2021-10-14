@@ -387,6 +387,12 @@ class TestMeshpy(unittest.TestCase):
         SIDE fluid z+ DSURFACE 1
         ''')
 
+        # Compare the output of the mesh.
+        compare_strings(self,
+            'test_domain_geometry_sets',
+            os.path.join(
+                testing_input, 'test_domain_geometry_sets_reference.dat'),
+            input_file.get_string(header=False).strip())
 
     def test_wrap_cylinder_not_on_same_plane(self):
         """Create a helix that is itself wrapped around a cylinder."""
