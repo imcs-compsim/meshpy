@@ -521,7 +521,7 @@ class InputFile(Mesh):
                     dat_list = []
                     current_comments = []
                     for line, comments in section_data_comment:
-                        index_line = int(line.split()[3])
+                        index_line = int(line.split()[-1])
                         if last_index == index_line:
                             dat_list.append(line)
                         elif index_line > last_index:
