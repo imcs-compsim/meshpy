@@ -82,6 +82,7 @@ class TestHeaderFunctions(unittest.TestCase):
         set_beam_to_solid_meshtying(input_file,
             mpy.beam_to_solid.surface_meshtying,
             contact_discretization='gp',
+            segmentation=False,
             option_overwrite=True)
 
         input_file.add('--Test\n{}on\n{}off'.format(get_comment(True),

@@ -59,7 +59,7 @@ def _get_segmentation_strategy(segmentation):
     if segmentation:
         return 'segmentation'
     else:
-        return 'gauss_point_projection'
+        return 'gauss_point_projection_without_boundary_segmentation'
 
 
 def set_runtime_output(input_file, *,
