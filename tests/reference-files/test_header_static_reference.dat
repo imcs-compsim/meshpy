@@ -92,7 +92,7 @@ CONSTRAINT_STRATEGY                   penalty
 PENALTY_PARAMETER                     None
 GAUSS_POINTS                          6
 CONTACT_DISCRETIZATION                gauss_point_to_segment
-GEOMETRY_PAIR_STRATEGY                segmentation
+GEOMETRY_PAIR_STRATEGY                gauss_point_projection_without_boundary_segmentation
 GEOMETRY_PAIR_SEARCH_POINTS           2
 ----------------------------------------------------------------------------Test
 on
