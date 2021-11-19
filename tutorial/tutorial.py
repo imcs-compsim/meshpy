@@ -101,7 +101,7 @@ def meshpy_tutorial(base_dir, preview=False):
     # mpy is a global object that stores enums and other options for meshpy.
     mesh.add(BoundaryCondition(beam_set_1['start'],
         ('NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 '
-        + 'FUNCT 1 1 1 1 1 1 0 0 0'),
+        + 'FUNCT 0 0 0 0 0 0 0 0 0'),
         bc_type=mpy.bc.dirichlet))
 
     # In the next few steps we will create the honeycomb structure. Therefore,
