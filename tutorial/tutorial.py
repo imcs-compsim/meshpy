@@ -28,8 +28,8 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This script contains a tutorial for meshpy. Most basic functionality is covert
-by this tutorial. For more informations have a closer look at the test cases,
+This script contains a tutorial for meshpy. Most basic functionality is covered
+by this tutorial. For more information have a closer look at the test cases,
 as they cover all functionality.
 """
 
@@ -58,7 +58,7 @@ def meshpy_tutorial(base_dir, preview=False):
     # In the first step an empty Mesh object is created, which in general holds
     # information about the nodes, elements, materials and boundary conditions.
     # A mesh can be added to a mesh, i.e. created geometries can be combined.
-    # The first geometry is created in the final mesh, as it's position is
+    # The first geometry is created in the final mesh, as its position is
     # already final.
     mesh = Mesh()
 
