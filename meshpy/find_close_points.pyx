@@ -287,11 +287,11 @@ def find_close_points_binning(np.ndarray[FLOAT_t, ndim=2] coords,
                             # this is not implemented,
                             raise NotImplementedError('Not implemented!')
                     elif local_to_global_partner_id[local_partner_index] == -1:
-                            # No global partner exists for this code.
-                            # No local to global indices set yet, add new one.
-                            local_to_global_partner_id[
-                                local_partner_index] = partner
-                            partner += 1
+                        # No global partner exists for this code.
+                        # No local to global indices set yet, add new one.
+                        local_to_global_partner_id[
+                            local_partner_index] = partner
+                        partner += 1
 
             # Write local to global parters.
             for j in range(n_nodes_in_this_bin):
