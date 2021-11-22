@@ -59,7 +59,7 @@ NDSURF 2
 NDVOL 0
 --------------------------------------------------DESIGN POINT DIRICH CONDITIONS
 DPOINT 1
-E 1 - NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 1 1 1 1 1 1 0 0 0
+E 1 - NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0
 ---------------------------------------------------DESIGN SURF DIRICH CONDITIONS
 DSURF 2
 // fix
