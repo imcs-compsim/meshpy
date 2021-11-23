@@ -15,7 +15,7 @@ MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulat
 
 ## Download MeshPy
 
-A clone of the current MeshPy `master` branch is hosted on [GitHub]().
+A clone of the current MeshPy `master` branch is hosted on [GitHub](https://github.com/imcs-compsim/meshpy).
 
 
 ## How to cite MeshPy?
