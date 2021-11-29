@@ -61,7 +61,7 @@ Matthias Mayr
 Journal publications in which MeshPy has been used:
 
 ### 2021
-- Steinbrecher, I., Popp, A. & Meier, C.: Consistent coupling of positions and rotations for embedding 1D Cosserat beams into 3D solid volumes. Comput Mech (2021). [10.1007/s00466-021-02111-4](https://doi.org/10.1007/s00466-021-02111-4)
+- Steinbrecher, I., Popp, A., Meier, C.: Consistent coupling of positions and rotations for embedding 1D Cosserat beams into 3D solid volumes. Comput Mech (2021). doi: [10.1007/s00466-021-02111-4](https://doi.org/10.1007/s00466-021-02111-4)
 - Hagmeyer, N., Mayr, M., Steinbrecher, I., Popp, A.: Fluid-beam interaction: Capturing the effect of embedded slender bodies on global fluid flow and vice versa (2021), submitted, [arXiv:2104.09844](https://arxiv.org/abs/2104.09844)
 
 ### 2020
