@@ -28,7 +28,9 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This file has functions to create a honeycomb beam mesh.
+This file has functions to generate multiple parallel fibers within a
+rectangle. This can for example be used to create fiber reinforced composite
+plates.
 """
 
 # Python packages.
