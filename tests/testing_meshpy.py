@@ -1583,6 +1583,61 @@ class TestMeshpy(unittest.TestCase):
             ref_file,
             input_file.get_string(header=False, check_nox=False))
 
+    def test_point_couplings(self):
+        """
+        Test that the different point coupling types can be created.
+        """
+
+        # The "old" way of coupling points.
+        input_file = self.x_test_point_couplings(mpy.bc.point_coupling,
+            mpy.coupling_dof.fix)
+        ref_file = os.path.join(testing_input,
+            'test_point_couplings_exact_reference.dat')
+        compare_strings(self,
+            'test_point_couplings_exact',
+            ref_file,
+            input_file.get_string(header=False))
+
+        # The "new" way of coupling points.
+        input_file = self.x_test_point_couplings(mpy.bc.point_coupling_penalty,
+            'PENALTY_VALUE')
+        ref_file = os.path.join(testing_input,
+            'test_point_couplings_penalty_reference.dat')
+        compare_strings(self,
+            'test_point_couplings_penalty',
+            ref_file,
+            input_file.get_string(header=False))
+
+    def x_test_point_couplings(self, coupling_type, coupling_dof_type):
+        """
+        Create the input file for the test_point_couplings method.
+        """
+
+        # Create input file.
+        material = MaterialReissner(radius=0.1, youngs_modulus=1000,
+            interaction_radius=2.0)
+        input_file = InputFile()
+
+        # Create a 2x2 grid of beams.
+        for i in range(3):
+            for j in range(2):
+                create_beam_mesh_line(input_file, Beam3rHerm2Line3, material,
+                    [j, i, 0.0], [j + 1, i, 0.0])
+                create_beam_mesh_line(input_file, Beam3rHerm2Line3, material,
+                    [i, j, 0.0], [i, j + 1, 0.0])
+
+        # Couple the beams.
+        input_file.couple_nodes(
+            reuse_matching_nodes=True,
+            coupling_type=coupling_type,
+            coupling_dof_type=coupling_dof_type
+            )
+
+        return input_file
+
+        input_file.write_vtk('af', '/home/ivo/temp')
+        input_file.write_input_file('/home/ivo/temp/test.dat')
+
     def test_vtk_writer(self):
         """Test the output created by the VTK writer."""
 
