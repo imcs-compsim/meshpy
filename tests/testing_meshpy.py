@@ -1331,7 +1331,8 @@ class TestMeshpy(unittest.TestCase):
         mesh_couple.rotate(rot)
 
         # Couple the coupling mesh.
-        mesh_couple.couple_nodes(coupling_type=mpy.coupling.fix_reuse)
+        mesh_couple.couple_nodes(coupling_dof_type=mpy.coupling_dof.fix,
+            reuse_matching_nodes=True)
 
         # Compare the meshes.
         compare_strings(self, 'test_replace_nodes_case_1',
@@ -1357,7 +1358,8 @@ class TestMeshpy(unittest.TestCase):
         mesh_couple.rotate(rot)
 
         # Couple the coupling mesh.
-        mesh_couple.couple_nodes(coupling_type=mpy.coupling.fix_reuse)
+        mesh_couple.couple_nodes(coupling_dof_type=mpy.coupling_dof.fix,
+            reuse_matching_nodes=True)
 
         # Compare the meshes.
         compare_strings(self, 'test_replace_nodes_case_2',
@@ -1397,8 +1399,9 @@ class TestMeshpy(unittest.TestCase):
         mesh_couple.rotate(rot)
 
         # Couple the mesh.
-        mesh_ref.couple_nodes(coupling_type=mpy.coupling.fix)
-        mesh_couple.couple_nodes(coupling_type=mpy.coupling.fix_reuse)
+        mesh_ref.couple_nodes(coupling_dof_type=mpy.coupling_dof.fix)
+        mesh_couple.couple_nodes(coupling_dof_type=mpy.coupling_dof.fix,
+            reuse_matching_nodes=True)
 
         # Add the node sets.
         mesh_ref.add(node_set_1_ref)
@@ -1870,19 +1873,24 @@ class TestMeshpy(unittest.TestCase):
         # Create objects that will be added to the mesh.
         node = Node([0, 1., 2.])
         element = Beam()
-        coupling = Coupling(mesh.nodes, mpy.coupling.fix)
+        coupling = Coupling(mesh.nodes, mpy.bc.point_coupling,
+            mpy.coupling_dof.fix)
+        coupling_penalty = Coupling(mesh.nodes, mpy.bc.point_coupling_penalty,
+            mpy.coupling_dof.fix)
         geometry_set = GeometrySet(mpy.geo.point)
 
         # Add each object once.
         mesh.add(node)
         mesh.add(element)
         mesh.add(coupling)
+        mesh.add(coupling_penalty)
         mesh.add(geometry_set)
 
         # Add the objects again and check for errors.
         self.assertRaises(ValueError, mesh.add, node)
         self.assertRaises(ValueError, mesh.add, element)
         self.assertRaises(ValueError, mesh.add, coupling)
+        self.assertRaises(ValueError, mesh.add, coupling_penalty)
         self.assertRaises(ValueError, mesh.add, geometry_set)
 
     def test_check_two_couplings(self):
@@ -1975,6 +1983,7 @@ class TestMeshpy(unittest.TestCase):
         # couplings for one node.
         args = [
             [set_1['start'].nodes[0], set_2['end'].nodes[0]],
+            mpy.bc.point_coupling,
             'coupling_type_string'
             ]
         if check:
