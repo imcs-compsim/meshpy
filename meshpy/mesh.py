@@ -308,7 +308,7 @@ class Mesh(object):
         Args
         ----
         kwargs:
-            Will be passed to sefl.get_global_nodes.
+            Will be passed to self.get_global_nodes.
 
         Return
         ----
@@ -332,7 +332,7 @@ class Mesh(object):
         Args
         ----
         kwargs:
-            Will be passed to sefl.get_global_nodes.
+            Will be passed to self.get_global_nodes.
 
         Return
         ----
@@ -403,29 +403,39 @@ class Mesh(object):
             # New position array.
             posnew = np.zeros_like(pos)
 
-            # Temporary AceGen variables.
-            tmp = [None for i in range(11)]
-
-            # Code generated with AceGen (rotation.nb).
+            # Evaluate the new positions using the numpy data structure.
+            # (code is taken from /utility/rotation.nb)
             rot2 = rot2.transpose()
-            tmp[0] = 2 * rot2[1] * rot2[2]
-            tmp[1] = 2 * rot2[0] * rot2[3]
-            tmp[2] = 2 * rot2[0] * rot2[2]
-            tmp[3] = 2 * rot2[1] * rot2[3]
-            tmp[4] = rot2[0]**2
-            tmp[5] = rot2[1]**2
-            tmp[6] = rot2[2]**2
-            tmp[10] = tmp[4] - tmp[6]
-            tmp[7] = rot2[3]**2
-            tmp[8] = 2 * rot2[0] * rot2[1]
-            tmp[9] = 2 * rot2[2] * rot2[3]
-            posnew[:, 0] = (tmp[5] - tmp[7] + tmp[10]) * pos[:, 0] + (tmp[0]
-                - tmp[1]) * pos[:, 1] + (tmp[2] + tmp[3]) * pos[:, 2]
-            posnew[:, 1] = (tmp[0] + tmp[1]) * pos[:, 0] + (tmp[4] - tmp[5]
-                + tmp[6] - tmp[7]) * pos[:, 1] + (-tmp[8] + tmp[9]) * pos[:, 2]
-            posnew[:, 2] = (-tmp[2] + tmp[3]) * pos[:, 0] + (tmp[8]
-                + tmp[9]) * pos[:, 1] + (-tmp[5] + tmp[7] + tmp[10]) * \
-                pos[:, 2]
+
+            q0_q0 = np.square(rot2[0])
+            q0_q1_2 = 2.0 * rot2[0] * rot2[1]
+            q0_q2_2 = 2.0 * rot2[0] * rot2[2]
+            q0_q3_2 = 2.0 * rot2[0] * rot2[3]
+
+            q1_q1 = np.square(rot2[1])
+            q1_q2_2 = 2.0 * rot2[1] * rot2[2]
+            q1_q3_2 = 2.0 * rot2[1] * rot2[3]
+
+            q2_q2 = np.square(rot2[2])
+            q2_q3_2 = 2.0 * rot2[2] * rot2[3]
+
+            q3_q3 = np.square(rot2[3])
+
+            posnew[:, 0] = (
+                (q0_q0 + q1_q1 - q2_q2 - q3_q3) * pos[:, 0] +
+                (q1_q2_2 - q0_q3_2) * pos[:, 1] +
+                (q0_q2_2 + q1_q3_2) * pos[:, 2]
+                )
+            posnew[:, 1] = (
+                (q1_q2_2 + q0_q3_2) * pos[:, 0] +
+                (q0_q0 - q1_q1 + q2_q2 - q3_q3) * pos[:, 1] +
+                (-q0_q1_2 + q2_q3_2) * pos[:, 2]
+                )
+            posnew[:, 2] = (
+                (-q0_q2_2 + q1_q3_2) * pos[:, 0] +
+                (q0_q1_2 + q2_q3_2) * pos[:, 1] +
+                (q0_q0 - q1_q1 - q2_q2 + q3_q3) * pos[:, 2]
+                )
 
             if origin is not None:
                 posnew += origin
