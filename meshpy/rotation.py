@@ -344,7 +344,7 @@ def add_rotations(rotation_21, rotation_10):
     else:
         rotnew = np.zeros_like(rot2)
 
-    # Multiply the two rotations.
+    # Multiply the two rotations (code is taken from /utility/rotation.nb).
     rotnew[0] = rot1[0] * rot2[0] - rot1[1] * rot2[1] - rot1[2] * rot2[2] - \
         rot1[3] * rot2[3]
     rotnew[1] = rot1[1] * rot2[0] + rot1[0] * rot2[1] + rot1[3] * rot2[2] - \
