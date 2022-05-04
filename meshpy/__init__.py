@@ -68,7 +68,7 @@ from .coupling import Coupling
 
 # The mesh class itself and the input file classes.
 from .mesh import Mesh
-from .inputfile import InputFile, InputSection
+from .inputfile import InputFile, InputSection, InputSectionMultiKey
 
 # Functions to set default header options.
 from .header_functions import (
