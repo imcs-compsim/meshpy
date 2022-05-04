@@ -325,11 +325,8 @@ class InputFile(Mesh):
         self.nox_xml = None
         self._nox_xml_file = None
 
-        # Dictionaries for sections other than mesh sections. The multi key
-        # dictionary stores sections that can have the same key multiple times,
-        # for example knot vector section in IGA meshes.
+        # Dictionaries for sections other than mesh sections.
         self.sections = OrderedDict()
-        self.sections_multi_key = []
 
         # Flag if dat file was loaded.
         self._dat_file_loaded = False
@@ -582,7 +579,7 @@ class InputFile(Mesh):
             elif section_name.endswith('TOPOLOGY'):
                 add_set(section_name, section_data_comment)
             elif section_name == 'STRUCTURE KNOTVECTORS':
-                self.sections_multi_key.append(InputSectionMultiKey(
+                self.add_section(InputSectionMultiKey(
                     section_name, section_data, **kwargs))
             elif section_name == 'DESIGN DESCRIPTION' or \
                     section_name == 'END':
@@ -798,10 +795,6 @@ class InputFile(Mesh):
                     self.geometry_set_names[geom_key],
                     item
                     )
-
-        # Add the multi key sections, eg. knot vectors for nurbs.
-        for section in self.sections_multi_key:
-            lines.extend(section.get_dat_lines())
 
         # Add the nodes and elements.
         get_section_dat('NODE COORDS', self.nodes)
