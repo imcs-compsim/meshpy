@@ -53,6 +53,7 @@ class BoundaryCondition(Enum):
     beam_to_solid_surface_meshtying = auto()
     beam_to_solid_surface_contact = auto()
     point_coupling = auto()
+    point_coupling_penalty = auto()
 
 
 class BeamType(Enum):
@@ -62,10 +63,9 @@ class BeamType(Enum):
     euler_bernoulli = auto()
 
 
-class CouplingType(Enum):
+class CouplingDofType(Enum):
     """Enum for coupling types."""
     fix = auto()
-    fix_reuse = auto()
     joint = auto()
 
 
@@ -120,7 +120,7 @@ class MeshPy(object):
         self.beam_to_solid = BeamToSolidInteractionType
 
         # Coupling types.
-        self.coupling = CouplingType
+        self.coupling_dof = CouplingDofType
 
         # Handling of multiple nodes in Neumann bcs.
         self.double_nodes = DoubleNodes

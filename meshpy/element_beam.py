@@ -186,24 +186,24 @@ class Beam(Element):
         return created_nodes
 
     @classmethod
-    def get_coupling_string(cls, coupling_type):
+    def get_coupling_string(cls, coupling_dof_type):
         """
         Return the string to couple this beam to another beam.
         """
 
-        if coupling_type is mpy.coupling.joint:
+        if coupling_dof_type is mpy.coupling_dof.joint:
             if cls.coupling_joint_string is None:
                 raise ValueError(('Joint coupling is not implemented for '
                     '{}').format(cls))
             return cls.coupling_joint_string
-        elif coupling_type is mpy.coupling.fix:
+        elif coupling_dof_type is mpy.coupling_dof.fix:
             if cls.coupling_fix_string is None:
                 raise ValueError(('Fix coupling is not implemented for '
                     '{}').format(cls))
             return cls.coupling_fix_string
         else:
-            raise ValueError(('coupling_type "{}" is not '
-                + 'implemented!').format(coupling_type))
+            raise ValueError(('coupling_dof_type "{}" is not '
+                + 'implemented!').format(coupling_dof_type))
 
     def flip(self):
         """

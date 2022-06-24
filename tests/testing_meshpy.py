@@ -1331,7 +1331,8 @@ class TestMeshpy(unittest.TestCase):
         mesh_couple.rotate(rot)
 
         # Couple the coupling mesh.
-        mesh_couple.couple_nodes(coupling_type=mpy.coupling.fix_reuse)
+        mesh_couple.couple_nodes(coupling_dof_type=mpy.coupling_dof.fix,
+            reuse_matching_nodes=True)
 
         # Compare the meshes.
         compare_strings(self, 'test_replace_nodes_case_1',
@@ -1357,7 +1358,8 @@ class TestMeshpy(unittest.TestCase):
         mesh_couple.rotate(rot)
 
         # Couple the coupling mesh.
-        mesh_couple.couple_nodes(coupling_type=mpy.coupling.fix_reuse)
+        mesh_couple.couple_nodes(coupling_dof_type=mpy.coupling_dof.fix,
+            reuse_matching_nodes=True)
 
         # Compare the meshes.
         compare_strings(self, 'test_replace_nodes_case_2',
@@ -1397,8 +1399,9 @@ class TestMeshpy(unittest.TestCase):
         mesh_couple.rotate(rot)
 
         # Couple the mesh.
-        mesh_ref.couple_nodes(coupling_type=mpy.coupling.fix)
-        mesh_couple.couple_nodes(coupling_type=mpy.coupling.fix_reuse)
+        mesh_ref.couple_nodes(coupling_dof_type=mpy.coupling_dof.fix)
+        mesh_couple.couple_nodes(coupling_dof_type=mpy.coupling_dof.fix,
+            reuse_matching_nodes=True)
 
         # Add the node sets.
         mesh_ref.add(node_set_1_ref)
@@ -1579,6 +1582,58 @@ class TestMeshpy(unittest.TestCase):
             'test_meshpy_nurbs_import',
             ref_file,
             input_file.get_string(header=False, check_nox=False))
+
+    def test_point_couplings(self):
+        """
+        Test that the different point coupling types can be created.
+        """
+
+        # The "old" way of coupling points.
+        input_file = self.x_test_point_couplings(mpy.bc.point_coupling,
+            mpy.coupling_dof.fix)
+        ref_file = os.path.join(testing_input,
+            'test_point_couplings_exact_reference.dat')
+        compare_strings(self,
+            'test_point_couplings_exact',
+            ref_file,
+            input_file.get_string(header=False))
+
+        # The "new" way of coupling points.
+        input_file = self.x_test_point_couplings(mpy.bc.point_coupling_penalty,
+            'PENALTY_VALUE')
+        ref_file = os.path.join(testing_input,
+            'test_point_couplings_penalty_reference.dat')
+        compare_strings(self,
+            'test_point_couplings_penalty',
+            ref_file,
+            input_file.get_string(header=False))
+
+    def x_test_point_couplings(self, coupling_type, coupling_dof_type):
+        """
+        Create the input file for the test_point_couplings method.
+        """
+
+        # Create input file.
+        material = MaterialReissner(radius=0.1, youngs_modulus=1000,
+            interaction_radius=2.0)
+        input_file = InputFile()
+
+        # Create a 2x2 grid of beams.
+        for i in range(3):
+            for j in range(2):
+                create_beam_mesh_line(input_file, Beam3rHerm2Line3, material,
+                    [j, i, 0.0], [j + 1, i, 0.0])
+                create_beam_mesh_line(input_file, Beam3rHerm2Line3, material,
+                    [i, j, 0.0], [i, j + 1, 0.0])
+
+        # Couple the beams.
+        input_file.couple_nodes(
+            reuse_matching_nodes=True,
+            coupling_type=coupling_type,
+            coupling_dof_type=coupling_dof_type
+            )
+
+        return input_file
 
     def test_vtk_writer(self):
         """Test the output created by the VTK writer."""
@@ -1870,19 +1925,24 @@ class TestMeshpy(unittest.TestCase):
         # Create objects that will be added to the mesh.
         node = Node([0, 1., 2.])
         element = Beam()
-        coupling = Coupling(mesh.nodes, mpy.coupling.fix)
+        coupling = Coupling(mesh.nodes, mpy.bc.point_coupling,
+            mpy.coupling_dof.fix)
+        coupling_penalty = Coupling(mesh.nodes, mpy.bc.point_coupling_penalty,
+            mpy.coupling_dof.fix)
         geometry_set = GeometrySet(mpy.geo.point)
 
         # Add each object once.
         mesh.add(node)
         mesh.add(element)
         mesh.add(coupling)
+        mesh.add(coupling_penalty)
         mesh.add(geometry_set)
 
         # Add the objects again and check for errors.
         self.assertRaises(ValueError, mesh.add, node)
         self.assertRaises(ValueError, mesh.add, element)
         self.assertRaises(ValueError, mesh.add, coupling)
+        self.assertRaises(ValueError, mesh.add, coupling_penalty)
         self.assertRaises(ValueError, mesh.add, geometry_set)
 
     def test_check_two_couplings(self):
@@ -1975,6 +2035,7 @@ class TestMeshpy(unittest.TestCase):
         # couplings for one node.
         args = [
             [set_1['start'].nodes[0], set_2['end'].nodes[0]],
+            mpy.bc.point_coupling,
             'coupling_type_string'
             ]
         if check:

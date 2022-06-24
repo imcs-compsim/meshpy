@@ -91,7 +91,7 @@ class BoundaryConditionBase(BaseMeshItem):
         elif bc_key is mpy.bc.point_coupling:
             # Coupling condition.
             from .coupling import Coupling
-            return Coupling(int(split[1]) - 1, ' '.join(split[3:]),
+            return Coupling(int(split[1]) - 1, bc_key, ' '.join(split[3:]),
                 is_dat=True, **kwargs)
         else:
             raise ValueError('Got unexpected boundary condition!')

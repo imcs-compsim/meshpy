@@ -271,7 +271,9 @@ class InputFile(Mesh):
         (mpy.bc.beam_to_solid_surface_contact, mpy.geo.surface):
             'BEAM INTERACTION/BEAM TO SOLID SURFACE CONTACT SURFACE',
         (mpy.bc.point_coupling, mpy.geo.point):
-            'DESIGN POINT COUPLING CONDITIONS'
+            'DESIGN POINT COUPLING CONDITIONS',
+        (mpy.bc.point_coupling_penalty, mpy.geo.point):
+            'DESIGN POINT PENALTY COUPLING CONDITIONS'
     }
     geometry_counter = {
         mpy.geo.point:   'DPOINT',
@@ -772,8 +774,10 @@ class InputFile(Mesh):
         # If there are couplings in the mesh, set the link between the nodes
         # and elements, so the couplings can decide which DOFs they couple,
         # depending on the type of the connected beam element.
-        if (len(self.boundary_conditions[mpy.bc.point_coupling, mpy.geo.point])
-                > 0):
+        n_coupling = (len(self.boundary_conditions[mpy.bc.point_coupling,
+            mpy.geo.point]) + len(self.boundary_conditions[
+                mpy.bc.point_coupling_penalty, mpy.geo.point]))
+        if n_coupling > 0:
             self.set_node_links()
 
         # Add the boundary conditions.

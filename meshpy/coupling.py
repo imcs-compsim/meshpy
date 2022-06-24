@@ -43,7 +43,7 @@ from .boundary_condition import BoundaryConditionBase
 class Coupling(BoundaryConditionBase):
     """Represents a coupling between geometry in BACI."""
 
-    def __init__(self, geometry_set, coupling_type,
+    def __init__(self, geometry_set, coupling_type, coupling_dof_type,
             check_overlapping_nodes=True, **kwargs):
         """
         Initialize this object.
@@ -52,9 +52,11 @@ class Coupling(BoundaryConditionBase):
         ----
         geometry_set: GeometrySet, [Nodes]
             Geometry that this boundary condition acts on.
-        coupling_type: mpy.coupling, str
+        coupling_type: mpy.bc
+            Type of point coupling.
+        coupling_dof_type: mpy.coupling_dof, str
             If this is a string it is the string that will be used in the input
-            file, otherwise it has to be of type mpy.coupling.
+            file, otherwise it has to be of type mpy.coupling_dof.
         check_overlapping_nodes: bool
             If all nodes of this coupling condition have to be at the same
             physical position.
@@ -62,9 +64,8 @@ class Coupling(BoundaryConditionBase):
 
         if isinstance(geometry_set, list):
             geometry_set = GeometrySet(mpy.geo.point, geometry_set)
-        super().__init__(geometry_set,
-            bc_type=mpy.bc.point_coupling, **kwargs)
-        self.coupling_type = coupling_type
+        super().__init__(geometry_set, bc_type=coupling_type, **kwargs)
+        self.coupling_dof_type = coupling_dof_type
         self.check_overlapping_nodes = check_overlapping_nodes
 
         # Perform the checks on this boundary condition.
@@ -95,8 +96,8 @@ class Coupling(BoundaryConditionBase):
         it depends on the coupling type as well as the beam type.
         """
 
-        if isinstance(self.coupling_type, str):
-            string = self.coupling_type
+        if isinstance(self.coupling_dof_type, str):
+            string = self.coupling_dof_type
         else:
             # In this case we have to check which beams are connected to the
             # node.
@@ -128,6 +129,6 @@ class Coupling(BoundaryConditionBase):
                         raise ValueError('Coupling beams of different types '
                             'is not yet possible!')
 
-            string = beam_baci_type.get_coupling_string(self.coupling_type)
+            string = beam_baci_type.get_coupling_string(self.coupling_dof_type)
 
         return 'E {} - {}'.format(self.geometry_set.n_global, string)

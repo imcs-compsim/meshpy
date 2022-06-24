@@ -216,8 +216,9 @@ class Mesh(object):
             for bc in bc_list:
                 if not bc.is_dat:
                     # Check if sets from couplings should be added.
-                    if ((bc_key == mpy.bc.point_coupling and coupling_sets)
-                            or not bc_key == mpy.bc.point_coupling):
+                    is_coupling = (bc_key == mpy.bc.point_coupling or
+                        bc_key == mpy.bc.point_coupling_penalty)
+                    if (is_coupling and coupling_sets) or (not is_coupling):
                         # Only add set if it is not already in the container.
                         # For example if multiple Neumann boundary conditions
                         # are applied on the same node set.
@@ -262,15 +263,17 @@ class Mesh(object):
 
         # Add a link to the couplings. For now the implementation only allows
         # one coupling per node.
-        for coupling in self.boundary_conditions[
-                mpy.bc.point_coupling, mpy.geo.point]:
-            if not coupling.is_dat:
-                for node in coupling.geometry_set.nodes:
-                    if node.coupling_link is None:
-                        node.coupling_link = coupling
-                    else:
-                        raise ValueError('It is currently not possible to add '
-                            + 'more than one coupling to a node.')
+        for coupling_type in [mpy.bc.point_coupling,
+                mpy.bc.point_coupling_penalty]:
+            for coupling in self.boundary_conditions[
+                    coupling_type, mpy.geo.point]:
+                if not coupling.is_dat:
+                    for node in coupling.geometry_set.nodes:
+                        if node.coupling_link is None:
+                            node.coupling_link = coupling
+                        else:
+                            raise ValueError('It is currently not possible to '
+                                + 'add more than one coupling to a node.')
 
     def get_global_nodes(self, *, nodes=None, include_solid_nodes=False,
             middle_nodes=True):
@@ -617,7 +620,9 @@ class Mesh(object):
         for i, node in enumerate(beam_nodes):
             node.coordinates = pos[i, :]
 
-    def couple_nodes(self, *, nodes=None, coupling_type=mpy.coupling.fix):
+    def couple_nodes(self, *, nodes=None, reuse_matching_nodes=False,
+            coupling_type=mpy.bc.point_coupling,
+            coupling_dof_type=mpy.coupling_dof.fix):
         """
         Search through nodes and connect all nodes with the same coordinates.
 
@@ -626,14 +631,25 @@ class Mesh(object):
         nodes: [Node]
             List of nodes to couple. If None is given, all nodes of the mesh
             are coupled (except middle and dat nodes).
-        coupling_type:
-            mpy.coupling_fix: Fix all positional and rotational DOFs of the
+        reuse_matching_nodes: bool
+            If two nodes have the same position and rotation, the nodes are
+            reduced to one node in the mesh. Be aware, that this might lead to
+            issues if not all DOFs of the nodes should be coupled.
+        coupling_type: mpy.bc
+            Type of point coupling.
+        coupling_dof_type: str, mpy.coupling_dof
+            str: The string that will be used in the input file.
+            mpy.coupling_dof.fix: Fix all positional and rotational DOFs of the
                 nodes together.
-            mpy.coupling_fix_reuse: Fix all positional and rotational DOFs of
-                the nodes together. If two nodes have the same position and
-                rotation, the nodes are reduced to one node in the mesh.
-            mpy.coupling_joint: Fix all positional DOFs of the nodes together.
+            mpy.coupling_dof.joint: Fix all positional DOFs of the nodes
+                together.
         """
+
+        # Check that a coupling BC is given.
+        if not (coupling_type == mpy.bc.point_coupling
+                or coupling_type == mpy.bc.point_coupling_penalty):
+            raise ValueError('Only coupling conditions can be applied in '
+                '"couple_nodes"!')
 
         # Get the nodes that should be checked for coupling. Middle nodes are
         # not checked, as coupling can only be applied to the boundary nodes.
@@ -643,7 +659,7 @@ class Mesh(object):
             # If no partner nodes were found, end this function.
             return
 
-        if coupling_type is mpy.coupling.fix_reuse:
+        if reuse_matching_nodes:
             # Check if there are nodes with the same rotation. If there are the
             # nodes are reused, and no coupling is inserted.
 
@@ -669,7 +685,8 @@ class Mesh(object):
 
                 # Check if nodes with the same rotations were found.
                 if len(rot_partner_indices) == 0:
-                    self.add(Coupling(node_list, mpy.coupling.fix))
+                    self.add(Coupling(node_list, coupling_type,
+                        coupling_dof_type))
                 else:
                     # There are nodes that need to be combined.
                     combining_nodes = []
@@ -702,7 +719,8 @@ class Mesh(object):
 
                     # Add the coupling nodes.
                     if len(coupling_nodes) > 1:
-                        self.add(Coupling(coupling_nodes, mpy.coupling.fix))
+                        self.add(Coupling(coupling_nodes, coupling_type,
+                            coupling_dof_type))
 
                     # Replace the identical nodes.
                     for combine_list in combining_nodes:
@@ -713,7 +731,7 @@ class Mesh(object):
         else:
             # Connect close nodes with a coupling.
             for node_list in partner_nodes:
-                self.add(Coupling(node_list, coupling_type))
+                self.add(Coupling(node_list, coupling_type, coupling_dof_type))
 
     def unlink_nodes(self):
         """Delete the linked arrays and global indices in all nodes."""
