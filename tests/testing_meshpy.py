@@ -1635,9 +1635,6 @@ class TestMeshpy(unittest.TestCase):
 
         return input_file
 
-        input_file.write_vtk('af', '/home/ivo/temp')
-        input_file.write_input_file('/home/ivo/temp/test.dat')
-
     def test_vtk_writer(self):
         """Test the output created by the VTK writer."""
 
