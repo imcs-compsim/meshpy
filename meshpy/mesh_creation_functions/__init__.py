@@ -46,6 +46,8 @@ from .beam_fibers_in_rectangle import create_fibers_in_rectangle
 from .beam_honeycomb import (create_beam_mesh_honeycomb_flat,
     create_beam_mesh_honeycomb)
 
+from .beam_nurbs import create_beam_mesh_from_nurbs
+
 # Honeycomb.
 from .beam_stent import create_beam_mesh_stent, create_beam_mesh_stent_flat
 
@@ -65,6 +67,8 @@ __all__ = [
     'create_beam_mesh_honeycomb',
     # Stent
     'create_beam_mesh_stent',
+    # Spline based geometry
+    'create_beam_mesh_from_nurbs',
     # Fibers in rectangle
     'create_fibers_in_rectangle',
     # Wire

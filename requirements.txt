@@ -5,6 +5,7 @@ matplotlib
 numpy
 scipy
 vtk
+geomdl
 
 # Required for full test suite on GitLab
 ## For coverage stuff

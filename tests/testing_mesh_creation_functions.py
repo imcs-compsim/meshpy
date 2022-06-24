@@ -43,7 +43,8 @@ from meshpy import (mpy, Mesh, InputFile, MaterialReissner, Beam3rHerm2Line3,
 # Geometry functions.
 from meshpy.mesh_creation_functions import (create_beam_mesh_arc_segment,
     create_beam_mesh_arc_segment_2d, create_beam_mesh_stent,
-    create_fibers_in_rectangle, create_wire_fibers)
+    create_fibers_in_rectangle, create_wire_fibers,
+    create_beam_mesh_from_nurbs)
 
 # Testing imports.
 from tests.testing_utility import testing_input, compare_strings
@@ -276,6 +277,35 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_strings(
             self,
             'test_mesh_wire',
+            ref_file,
+            input_file.get_string(header=False))
+
+    def test_nurbs(self):
+        """
+        Test the create_beam_mesh_from_nurbs function.
+        """
+
+        # Setup the nurbs curve.
+        from geomdl import NURBS
+        curve = NURBS.Curve()
+        curve.degree = 2
+        curve.ctrlpts = [[0, 0, 0], [1, 2, -1], [2, 0, 0]]
+        curve.knotvector = [0, 0, 0, 1, 1, 1]
+
+        # Create beam elements.
+        mat = MaterialReissner(radius=0.05)
+        mesh = Mesh()
+        create_beam_mesh_from_nurbs(mesh, Beam3rHerm2Line3, mat, curve,
+            n_el=3)
+
+        # Check the output.
+        input_file = InputFile()
+        input_file.add(mesh)
+        ref_file = os.path.join(testing_input,
+            'test_mesh_nurbs_reference.dat')
+        compare_strings(
+            self,
+            'test_mesh_nurbs',
             ref_file,
             input_file.get_string(header=False))
 

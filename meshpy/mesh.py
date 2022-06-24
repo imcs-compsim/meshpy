@@ -896,7 +896,7 @@ class Mesh(object):
             vtkwriter_solid.write_vtk(filepath, **kwargs)
 
     def create_beam_mesh_function(self, *, beam_object=None, material=None,
-            function_generator=None, interval=[0, 1], n_el=1, add_sets=False,
+            function_generator=None, interval=None, n_el=1, add_sets=False,
             start_node=None, end_node=None, vtk_cell_data=None):
         """
         Generic beam creation function.

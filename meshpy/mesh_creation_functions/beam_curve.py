@@ -40,10 +40,11 @@ from ..rotation import Rotation
 
 
 def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
-        *, function_rotation=None, **kwargs):
+        *, function_derivative=None, function_rotation=None, **kwargs):
     """
     Generate a beam from a parametric curve. Integration along the beam is
-    performed with scipy, and the gradient is calculated with autograd.
+    performed with scipy, and if the gradient is not explicitly provided, it is
+    calculated with autograd.
 
     Args
     ----
@@ -60,6 +61,8 @@ def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
         autograd.numpy.
     interval: [start end]
         Start and end values for the parameter of the curve.
+    function_derivative: function:
+        Explicitly provide the jacobian of the centerline position.
     function_rotation: function
         If this argument is given, the triads are computed with this
         function, on the same interval as the position function. Must
@@ -106,14 +109,16 @@ def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
 
     # Get the derivative of the position function and the increment along
     # the curve.
-    rp = jacobian(function)
+    if function_derivative is None:
+        rp = jacobian(function)
+    else:
+        rp = function_derivative
 
     # Check which one of the boundaries is larger.
     if (interval[0] > interval[1]):
         # In this case rp needs to be negated.
-        def rp_negative(t):
-            return -(jacobian(function)(t))
-        rp = rp_negative
+        rp_positive = rp
+        rp = lambda t : -(rp_positive(t))
 
     def ds(t):
         """Increment along the curve."""
