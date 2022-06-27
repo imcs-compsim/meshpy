@@ -97,6 +97,69 @@ class TestHeaderFunctions(unittest.TestCase):
             ref_file,
             input_file.get_string(header=False, check_nox=False))
 
+    def test_static_prestress(self):
+        """
+        Test the static header function with non default prestressing
+        parameter.
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Create input file.
+        input_file = InputFile(maintainer='Ivo Steinbrecher')
+
+        # Set the header.
+        set_header_static(input_file, time_step=0.1, n_steps=17,
+        load_lin=True, prestress='mulf', prestress_time=1)
+        set_beam_to_solid_meshtying(input_file,
+            mpy.beam_to_solid.volume_meshtying,
+            contact_discretization='mortar',
+            binning_bounding_box=[1, 2, 3, 4, 5, 6],
+            binning_cutoff_radius=0.69,
+            couple_restart=True)
+
+        set_beam_to_solid_meshtying(input_file,
+            mpy.beam_to_solid.surface_meshtying,
+            contact_discretization='gp',
+            segmentation=False,
+            couple_restart=False)
+
+        # Check the output.
+        ref_file = os.path.join(testing_input,
+            'test_header_static_prestress_reference.dat')
+        compare_strings(
+            self,
+            'test_header_static_prestress',
+            ref_file,
+            input_file.get_string(header=False, check_nox=False))
+
+    def test_stress_output(self):
+        """
+        Test the static header function with non default stress output
+        parameter.
+        """
+
+        # Set default values for global parameters.
+        mpy.set_default_values()
+
+        # Create input file.
+        input_file = InputFile(maintainer='Ivo Steinbrecher')
+
+        # Set the header.
+        set_header_static(input_file, time_step=0.1, n_steps=17,
+        load_lin=True, write_stress='cauchy', write_strain='gl')
+        set_runtime_output(input_file, output_stress_strain=True)
+
+        # Check the output.
+        ref_file = os.path.join(testing_input,
+            'test_header_stress_output_reference.dat')
+        compare_strings(
+            self,
+            'test_header_stress_output',
+            ref_file,
+            input_file.get_string(header=False, check_nox=False))
+
 
 if __name__ == '__main__':
     # Execution part of script.

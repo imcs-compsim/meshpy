@@ -22,8 +22,8 @@ DYNAMICTYP                            Statics
 RESULTSEVRY                           1
 NLNSOL                                fullnewton
 PREDICT                               TangDis
-PRESTRESS                             none
-PRESTRESSTIME                         0
+PRESTRESS                             mulf
+PRESTRESSTIME                         1
 TIMESTEP                              0.1
 NUMSTEP                               17
 MAXTIME                               1.7000000000000002
@@ -42,40 +42,6 @@ Outer Iteration StatusTest          = Yes
 Linear Solver Details               = Yes
 Test Details                        = Yes
 Debug                               = No
------------------------------------------------------------IO/RUNTIME VTK OUTPUT
-OUTPUT_DATA_FORMAT                    binary
-INTERVAL_STEPS                        1
-EVERY_ITERATION                       no
--------------------------------------------------IO/RUNTIME VTK OUTPUT/STRUCTURE
-OUTPUT_STRUCTURE                      yes
-DISPLACEMENT                          yes
-STRESS_STRAIN                         no
-ELEMENT_OWNER                         yes
-ELEMENT_GID                           yes
------------------------------------------------------IO/RUNTIME VTK OUTPUT/BEAMS
-OUTPUT_BEAMS                          yes
-DISPLACEMENT                          yes
-USE_ABSOLUTE_POSITIONS                yes
-TRIAD_VISUALIZATIONPOINT              no
-STRAINS_GAUSSPOINT                    yes
-ELEMENT_GID                           yes
---------------BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/RUNTIME VTK OUTPUT
-WRITE_OUTPUT                          yes
-NODAL_FORCES                          yes
-MORTAR_LAMBDA_DISCRET                 yes
-MORTAR_LAMBDA_CONTINUOUS              yes
-MORTAR_LAMBDA_CONTINUOUS_SEGMENTS     5
-SEGMENTATION                          yes
-INTEGRATION_POINTS                    yes
------------------------BEAM INTERACTION/BEAM TO SOLID SURFACE/RUNTIME VTK OUTPUT
-WRITE_OUTPUT                          yes
-NODAL_FORCES                          yes
-MORTAR_LAMBDA_DISCRET                 yes
-MORTAR_LAMBDA_CONTINUOUS              yes
-MORTAR_LAMBDA_CONTINUOUS_SEGMENTS     5
-SEGMENTATION                          yes
-INTEGRATION_POINTS                    yes
-AVERAGED_NORMALS                      yes
 ----------------------------------------------------------------BEAM INTERACTION
 REPARTITIONSTRATEGY                   Everydt
 --------------------------------------------------------------------BEAM CONTACT
@@ -91,17 +57,14 @@ CONTACT_DISCRETIZATION                mortar
 MORTAR_SHAPE_FUNCTION                 None
 GEOMETRY_PAIR_STRATEGY                segmentation
 GEOMETRY_PAIR_SEARCH_POINTS           2
+COUPLE_RESTART_STATE                  yes
 --------------------------------BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING
-COUPLING_TYPE                         consistent_fad
 CONSTRAINT_STRATEGY                   penalty
 PENALTY_PARAMETER                     None
 GAUSS_POINTS                          6
 CONTACT_DISCRETIZATION                gauss_point_to_segment
 GEOMETRY_PAIR_STRATEGY                gauss_point_projection_without_boundary_segmentation
 GEOMETRY_PAIR_SEARCH_POINTS           2
-----------------------------------------------------------------------------Test
-on
-//off
 ----------------------------------------------------------STRUCT NOX/Status Test
 XML File                            = NOT_DEFINED
 -----------------------------------------------------------------------MATERIALS
