@@ -64,6 +64,7 @@ def _get_segmentation_strategy(segmentation):
 
 def set_runtime_output(input_file, *,
         output_solid=True,
+        output_stress_strain=False,
         btsvmt_output=True,
         btss_output=True,
         output_triad=True,
@@ -83,6 +84,8 @@ def set_runtime_output(input_file, *,
         Input file that the options will be added to.
     output_solid: bool
         If the solid output should be written at runtime.
+    output_stress_strain: bool
+        If stress and strain output should be written for the solid.
     btsvmt_output: bool
         If the output for btsvmt should be written.
     btss_output: bool
@@ -124,9 +127,11 @@ def set_runtime_output(input_file, *,
         '''
         OUTPUT_STRUCTURE                {}
         DISPLACEMENT                    yes
+        STRESS_STRAIN                   {}
         ELEMENT_OWNER                   {}
         ELEMENT_GID                     {}'''.format(
             get_yes_no(output_solid),
+            get_yes_no(output_stress_strain),
             get_yes_no(element_owner),
             get_yes_no(element_gid)),
         option_overwrite=option_overwrite))
@@ -185,6 +190,7 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         contact_discretization=None,
         segmentation=True,
         segmentation_search_points=2,
+        couple_restart=False,
         mortar_shape=None,
         n_gauss_points=6,
         n_integration_points_circ=None,
@@ -208,6 +214,8 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
         If segmentation should be used in the numerical integration.
     segmentation_search_points: int
         Number of search points for segmentation.
+    couple_restart: bool
+        If the restart configuration should be used for the coupling
     mortar_shape: str
         Type of shape function for mortar discretization.
     n_gauss_points: int
@@ -239,7 +247,8 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
     # Set the binning strategy.
     if ((binning_bounding_box is not None)
             and binning_cutoff_radius is not None):
-        bounding_box_string = ' '.join([str(val) for val in binning_bounding_box])
+        bounding_box_string = ' '.join([str(val) for val
+            in binning_bounding_box])
         input_file.add(InputSection(
             'BINNING STRATEGY',
             '''
@@ -284,18 +293,23 @@ def set_beam_to_solid_meshtying(input_file, interaction_type, *,
     elif contact_discretization == 'circ':
         bts.add('''
         CONTACT_DISCRETIZATION gauss_point_cross_section
-        INTEGRATION_POINTS_CIRCUMFERENCE {}'''.format(n_integration_points_circ),
+        INTEGRATION_POINTS_CIRCUMFERENCE {}'''.format(
+            n_integration_points_circ),
             option_overwrite=option_overwrite)
         segmentation_strategy = 'gauss_point_projection_cross_section'
     else:
         raise ValueError('Wrong contact_discretization "{}" given!'.format(
             contact_discretization))
+
     bts.add(
         '''
         GEOMETRY_PAIR_STRATEGY {}
         GEOMETRY_PAIR_SEARCH_POINTS {}
         '''.format(segmentation_strategy, segmentation_search_points),
         option_overwrite=option_overwrite)
+    if couple_restart:
+        bts.add('COUPLE_RESTART_STATE yes', option_overwrite=option_overwrite)
+
     input_file.add(bts)
 
 
@@ -307,6 +321,10 @@ def set_header_static(input_file, *,
         tol_increment=1e-10,
         load_lin=False,
         write_bin=False,
+        write_stress='no',
+        write_strain='no',
+        prestress='none',
+        prestress_time=0,
         option_overwrite=False
         ):
     """
@@ -330,6 +348,14 @@ def set_header_static(input_file, *,
         If the load_lin option should be set.
     write_bin: bool
         If binary output should be written.
+    write_stress: string
+        If and which stress output to write
+    write_strain: string
+        If and which strain output to write
+    prestress: string
+        Type of prestressing strategy to be used
+    presetrss_time: int
+        Prestress Time
     option_overwrite: bool
         If existing options should be overwritten. If this is false and an
         option is already defined, and error will be thrown.
@@ -344,11 +370,13 @@ def set_header_static(input_file, *,
         option_overwrite=option_overwrite))
     input_file.add(InputSection('IO',
         '''
-        OUTPUT_BIN     {}
+        OUTPUT_BIN     {0}
         STRUCT_DISP    No
+        STRUCT_STRESS  {1}
+        STRUCT_STRAIN  {2}
         FILESTEPS      1000
         VERBOSITY      Standard
-        '''.format(get_yes_no(write_bin)),
+        '''.format(get_yes_no(write_bin), write_stress, write_strain),
         option_overwrite=option_overwrite))
 
     input_file.add(InputSection(
@@ -360,12 +388,14 @@ def set_header_static(input_file, *,
         RESULTSEVRY       1
         NLNSOL            fullnewton
         PREDICT           TangDis
-        TIMESTEP          {0}
-        NUMSTEP           {1}
-        MAXTIME           {2}
-        LOADLIN           {3}
-        '''.format(time_step, n_steps, time_step * n_steps,
-            get_yes_no(load_lin)),
+        PRESTRESS         {0}
+        PRESTRESSTIME     {1}
+        TIMESTEP          {2}
+        NUMSTEP           {3}
+        MAXTIME           {4}
+        LOADLIN           {5}
+        '''.format(prestress, prestress_time, time_step, n_steps,
+            time_step * n_steps, get_yes_no(load_lin)),
         option_overwrite=option_overwrite))
     input_file.add(InputSection(
         'SOLVER 1',

@@ -11,6 +11,8 @@ RESTART                               0
 ------------------------------------------------------------------------------IO
 OUTPUT_BIN                            yes
 STRUCT_DISP                           yes
+STRUCT_STRESS                         no
+STRUCT_STRAIN                         no
 FILESTEPS                             1000
 VERBOSITY                             Standard
 --------------------------------------------------------------STRUCTURAL DYNAMIC
@@ -20,6 +22,8 @@ DYNAMICTYP                            Statics
 RESULTSEVRY                           1
 NLNSOL                                fullnewton
 PREDICT                               TangDis
+PRESTRESS                             none
+PRESTRESSTIME                         0
 TIMESTEP                              0.5
 NUMSTEP                               21
 MAXTIME                               10.5
