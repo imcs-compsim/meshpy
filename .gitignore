@@ -28,10 +28,6 @@ meshpy/meshpy
 */find_close_points.c
 */find_close_points.html
 
-# AceGen stuff
-*/rotation_matrix.cpp
-*/AceShare
-
 # Website stuff
 _site
 .sass-cache
