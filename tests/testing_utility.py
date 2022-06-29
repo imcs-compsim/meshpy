@@ -210,11 +210,11 @@ def xml_to_dict(xml, tol_float):
 
     # Get data for this item.
     xml_dict = {}
-    n_childs = len(xml.getchildren())
+    n_childs = len(list(xml))
     is_text = not xml.text.strip() == ''
     if n_childs > 0:
         # Add a child xml construct.
-        for child in xml.getchildren():
+        for child in list(xml):
             key, value = xml_to_dict(child, tol_float)
             xml_dict[key] = value
 
