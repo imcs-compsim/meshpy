@@ -166,7 +166,7 @@ class TestPerformance(object):
         'meshpy_write_dat': 12.5,
         'meshpy_write_vtk': 19
         }
-    expected_times['sisyphos.bauv.unibw-muenchen.de'] = {
+    expected_times['ares.bauv.unibw-muenchen.de'] = {
         'cubitpy_create_solid': 3.0,
         'meshpy_load_solid': 0.9,
         'meshpy_load_solid_full': 2.8,
