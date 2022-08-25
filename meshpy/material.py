@@ -150,6 +150,40 @@ class MaterialReissner(MaterialBeam):
         )
 
 
+class MaterialReissnerElastoplastic(MaterialReissner):
+    """Holds elasto-plastic material definition for Reissner beams."""
+
+    def __init__(
+        self,
+        *,
+        yield_moment=None,
+        isohardening_modulus_moment=None,
+        torsion_plasticity=False,
+        **kwargs
+    ):
+        super().__init__(**kwargs)
+        self.material_string = "MAT_BeamReissnerElastPlastic"
+
+        if yield_moment is None or isohardening_modulus_moment is None:
+            raise ValueError(
+                "The yield moment and the isohardening modulus for moments must be specified for plasticity."
+            )
+
+        self.yield_moment = yield_moment
+        self.isohardening_modulus_moment = isohardening_modulus_moment
+        self.torsion_plasticity = torsion_plasticity
+
+    def _get_dat(self):
+        """Return the line for this material."""
+        super_dat = super()._get_dat()
+        string = super_dat + " YIELDM {} ISOHARDM {} TORSIONPLAST {}"
+        return string.format(
+            self.yield_moment,
+            self.isohardening_modulus_moment,
+            1 if self.torsion_plasticity else 0,
+        )
+
+
 class MaterialKirchhoff(MaterialBeam):
     """Holds material definition for Kirchhoff beams."""
 

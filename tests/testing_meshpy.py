@@ -46,6 +46,7 @@ from meshpy import (
     Rotation,
     InputFile,
     MaterialReissner,
+    MaterialReissnerElastoplastic,
     MaterialBeam,
     BoundaryCondition,
     MaterialKirchhoff,
@@ -816,6 +817,30 @@ class TestMeshpy(unittest.TestCase):
         compare_strings(
             self, "test_reissner_beam", ref_file, input_file.get_string(header=False)
         )
+
+    def test_reissner_elasto_plastic(self):
+        """Test the elasto plastic Reissner beam material"""
+
+        kwargs = {
+            "radius": 0.1,
+            "youngs_modulus": 1000,
+            "interaction_radius": 2.0,
+            "shear_correction": 5.0 / 6.0,
+            "yield_moment": 2.3,
+            "isohardening_modulus_moment": 4.5,
+            "torsion_plasticity": False,
+        }
+
+        ref_string = "MAT 69 MAT_BeamReissnerElastPlastic YOUNG 1000 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.031415926535897934 SHEARCORR 0.8333333333333334 MOMINPOL 0.00015707963267948968 MOMIN2 7.853981633974484e-05 MOMIN3 7.853981633974484e-05 INTERACTIONRADIUS 2.0 YIELDM 2.3 ISOHARDM 4.5 TORSIONPLAST "
+
+        mat = MaterialReissnerElastoplastic(**kwargs)
+        mat.n_global = 69
+        self.assertEqual(mat.get_dat_lines(), [ref_string + "0"])
+
+        kwargs["torsion_plasticity"] = True
+        mat = MaterialReissnerElastoplastic(**kwargs)
+        mat.n_global = 69
+        self.assertEqual(mat.get_dat_lines(), [ref_string + "1"])
 
     def test_kirchhoff_beam(self):
         """
