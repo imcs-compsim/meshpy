@@ -55,12 +55,11 @@ class GeometryName(OrderedDict):
         """Set an geometry set in this container."""
 
         if not isinstance(key, str):
-            raise TypeError('Expected string, got {}!'.format(type(key)))
+            raise TypeError("Expected string, got {}!".format(type(key)))
         elif isinstance(value, GeometrySet):
             super().__setitem__(key, value)
         else:
-            raise NotImplementedError('TODO: This case needs to be '
-                + 'implemented')
+            raise NotImplementedError("TODO: This case needs to be implemented")
             super().__setitem__(key, GeometrySet(nodes=value))
 
 
@@ -69,6 +68,7 @@ class BoundaryConditionContainer(OrderedDict):
     A class to group boundary conditions together. The key of the dictionary
     are (bc_type, geometry_type).
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
@@ -82,6 +82,7 @@ class GeometrySetContainer(OrderedDict):
     A class to group geometry sets together with the key being the geometry
     type.
     """
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 

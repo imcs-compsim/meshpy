@@ -69,21 +69,20 @@ def add_point_data_node_sets(point_data, nodes):
 
         # Get the name of the geometry type.
         if geometry_set.geometry_type is mpy.geo.point:
-            geometry_name = 'geometry_point'
+            geometry_name = "geometry_point"
         elif geometry_set.geometry_type is mpy.geo.line:
-            geometry_name = 'geometry_line'
+            geometry_name = "geometry_line"
         elif geometry_set.geometry_type is mpy.geo.surface:
-            geometry_name = 'geometry_surface'
+            geometry_name = "geometry_surface"
         elif geometry_set.geometry_type is mpy.geo.volume:
-            geometry_name = 'geometry_volume'
+            geometry_name = "geometry_volume"
         else:
-            raise TypeError('The geometry type is wrong!')
+            raise TypeError("The geometry type is wrong!")
 
         # Add the data vector.
-        set_name = '{}_set_{}'.format(
-            geometry_name,
-            mpy.vtk_node_set_format.format(geometry_set.n_global)
-            )
+        set_name = "{}_set_{}".format(
+            geometry_name, mpy.vtk_node_set_format.format(geometry_set.n_global)
+        )
         point_data[set_name] = (data_vector, mpy.vtk_type.int)
 
 
@@ -103,9 +102,9 @@ def _get_vtk_array_type(data):
     Return the corresponding meshpy type.
     """
     data_type = data.GetDataTypeAsString()
-    if data_type == 'int':
+    if data_type == "int":
         return mpy.vtk_type.int
-    elif data_type == 'double':
+    elif data_type == "double":
         return mpy.vtk_type.float
     else:
         raise ValueError('Got unexpected type ""!'.format(data_type))
@@ -129,8 +128,9 @@ class VTKWriter(object):
             for key2 in mpy.vtk_tensor:
                 self.data[key1, key2] = {}
 
-    def add_cell(self, cell_type, coordinates, topology=None, cell_data=None,
-            point_data=None):
+    def add_cell(
+        self, cell_type, coordinates, topology=None, cell_data=None, point_data=None
+    ):
         """
         Create a cell and add it to the global array.
 
@@ -159,29 +159,34 @@ class VTKWriter(object):
             topology = list(range(n_points))
         else:
             if not n_points == len(topology):
-                raise ValueError(('Coordinates is of size {}, '
-                        + 'while topology is of size {}!').format(
-                            n_points, len(topology)))
+                raise ValueError(
+                    "Coordinates is of size {}, while topology is of size {}!".format(
+                        n_points, len(topology)
+                    )
+                )
 
         # Check if point data containers are of the correct size.
         if point_data is not None:
             for key, item_value in point_data.items():
                 value, _data_type = _get_data_value_and_type(item_value)
                 if not len(value) == n_points:
-                    raise IndexError(('The length of coordinates is {},'
-                        + 'the length of {} is {}, does not match!').format(
-                            n_points,
-                            key,
-                            len(value)
-                            ))
+                    raise IndexError(
+                        (
+                            "The length of coordinates is {},"
+                            + "the length of {} is {}, does not match!"
+                        ).format(n_points, key, len(value))
+                    )
 
         # Check if data container already exists. If not, add it and also add
         # previous entries.
         for data_container, vtk_geom_type in [
-                (input_data, vtk_geom_type) for (input_data, vtk_geom_type)
-                in [(cell_data, mpy.vtk_geo.cell),
-                    (point_data, mpy.vtk_geo.point)]
-                if input_data is not None]:
+            (input_data, vtk_geom_type)
+            for (input_data, vtk_geom_type) in [
+                (cell_data, mpy.vtk_geo.cell),
+                (point_data, mpy.vtk_geo.point),
+            ]
+            if input_data is not None
+        ]:
 
             # Loop through output fields.
             for key, item_value in data_container.items():
@@ -224,10 +229,13 @@ class VTKWriter(object):
                     # data has the same type.
                     data_array = self.data[vtk_geom_type, vtk_tensor_type][key]
                     if not _get_vtk_array_type(data_array) == data_type:
-                        raise ValueError(('The existing data with the key "{}"'
-                            + ' is of type "{}", but the type you tried to add'
-                            + ' is "{}"!').format(key,
-                                data_array.GetDataTypeAsString(), data_type))
+                        raise ValueError(
+                            (
+                                'The existing data with the key "{}"'
+                                + ' is of type "{}", but the type you tried to add'
+                                + ' is "{}"!'
+                            ).format(key, data_array.GetDataTypeAsString(), data_type)
+                        )
 
         # Create the cell.
         geometry_item = cell_type()
@@ -241,16 +249,12 @@ class VTKWriter(object):
             self.points.InsertNextPoint(coord[0], coord[1], coord[2])
 
             # Set the local connectivity.
-            geometry_item.GetPointIds().SetId(
-                i,
-                n_grid_points + topology[i]
-                )
+            geometry_item.GetPointIds().SetId(i, n_grid_points + topology[i])
 
         # Add to global cells.
         self.grid.InsertNextCell(
-            geometry_item.GetCellType(),
-            geometry_item.GetPointIds()
-            )
+            geometry_item.GetCellType(), geometry_item.GetPointIds()
+        )
 
         # Add to global data. Loop over data items and check if there is
         # something to be added in this cell. If not an empty value is added.
@@ -270,13 +274,11 @@ class VTKWriter(object):
                 if key in data_container.keys():
 
                     # Get the data and the value type (int or float).
-                    data_values, _ = _get_data_value_and_type(
-                        data_container[key])
+                    data_values, _ = _get_data_value_and_type(data_container[key])
 
                     # Add the given data.
                     if key_geom == mpy.vtk_geo.cell:
-                        self._add_data(value, key_data,
-                            non_zero_data=data_values)
+                        self._add_data(value, key_data, non_zero_data=data_values)
                     else:
                         for item in data_values:
                             self._add_data(value, key_data, non_zero_data=item)
@@ -295,13 +297,14 @@ class VTKWriter(object):
             if len(data) == 3:
                 return mpy.vtk_tensor.vector
             else:
-                raise IndexError('Only 3d vectors are implemented yet! Got '
-                    + 'len(data) = {}'.format(len(data)))
+                raise IndexError(
+                    "Only 3d vectors are implemented yet! Got "
+                    + "len(data) = {}".format(len(data))
+                )
         elif isinstance(data, numbers.Number):
             return mpy.vtk_tensor.scalar
 
-        raise ValueError('Data {} did not match any expected case!'.format(
-            data))
+        raise ValueError("Data {} did not match any expected case!".format(data))
 
     def _add_data(self, data, vtk_tensor_type, non_zero_data=None):
         """Add data to a VTK data array."""
@@ -320,8 +323,9 @@ class VTKWriter(object):
             if non_zero_data is None:
                 data.InsertNextTuple3(nan_value, nan_value, nan_value)
             else:
-                data.InsertNextTuple3(non_zero_data[0], non_zero_data[1],
-                    non_zero_data[2])
+                data.InsertNextTuple3(
+                    non_zero_data[0], non_zero_data[1], non_zero_data[2]
+                )
 
     def write_vtk(self, filepath, ascii=False):
         """
@@ -337,9 +341,9 @@ class VTKWriter(object):
 
         # Check if directory for file exits.
         if not os.path.isdir(os.path.dirname(filepath)):
-            raise ValueError('Directory {} does not exist!'.format(
-                os.path.dirname(filepath)
-                ))
+            raise ValueError(
+                "Directory {} does not exist!".format(os.path.dirname(filepath))
+            )
 
         # Add data to grid.
         for (key_geom, _key_data), value in self.data.items():
@@ -358,9 +362,10 @@ class VTKWriter(object):
 
         # Check the file extension.
         _filename, file_extension = os.path.splitext(filepath)
-        if not file_extension.lower() == '.vtu':
-            warnings.warn('The extension should be "vtu", got {}!'.format(
-                file_extension))
+        if not file_extension.lower() == ".vtu":
+            warnings.warn(
+                'The extension should be "vtu", got {}!'.format(file_extension)
+            )
 
         # Write geometry and data to file.
         writer.SetFileName(filepath)

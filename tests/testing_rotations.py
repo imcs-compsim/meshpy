@@ -77,7 +77,7 @@ class TestRotation(unittest.TestCase):
         # Set default values for global parameters.
         mpy.set_default_values()
 
-        theta = 1.
+        theta = 1.0
         # Loop per directions.
         for i in range(3):
             rot3D = self.rotation_matrix(i, theta)
@@ -90,11 +90,12 @@ class TestRotation(unittest.TestCase):
             # quaternion and then created from its own rotation matrix.
             rotation = Rotation(rotation.get_quaternion())
             rotation_matrix = Rotation.from_rotation_matrix(
-                rotation.get_rotation_matrix())
+                rotation.get_rotation_matrix()
+            )
 
             self.assertAlmostEqual(
-                np.linalg.norm(rot3D - rotation_matrix.get_rotation_matrix()),
-                0.)
+                np.linalg.norm(rot3D - rotation_matrix.get_rotation_matrix()), 0.0
+            )
 
     def test_euler_angles(self):
         """Create a rotation with Euler angles and compare to known results."""
@@ -119,10 +120,9 @@ class TestRotation(unittest.TestCase):
         rotation_z = Rotation([0, 0, 1], gamma)
         rotation_euler = rotation_z * rotation_y * rotation_x
         self.assertAlmostEqual(
-            np.linalg.norm(R_euler - rotation_euler.get_rotation_matrix()), 0.)
-        self.assertTrue(
-            rotation_euler == Rotation.from_rotation_matrix(R_euler)
-            )
+            np.linalg.norm(R_euler - rotation_euler.get_rotation_matrix()), 0.0
+        )
+        self.assertTrue(rotation_euler == Rotation.from_rotation_matrix(R_euler))
 
         # Direct formula for quaternions for Euler angles.
         quaternion = np.zeros(4)
@@ -138,9 +138,9 @@ class TestRotation(unittest.TestCase):
         quaternion[3] = sy * cr * cp - cy * sr * sp
         self.assertTrue(Rotation(quaternion) == rotation_euler)
         self.assertTrue(
-            Rotation(quaternion) == Rotation(rotation_euler.get_quaternion()))
-        self.assertTrue(
-            Rotation(quaternion) == Rotation.from_rotation_matrix(R_euler))
+            Rotation(quaternion) == Rotation(rotation_euler.get_quaternion())
+        )
+        self.assertTrue(Rotation(quaternion) == Rotation.from_rotation_matrix(R_euler))
 
     def test_negative_angles(self):
         """
@@ -213,11 +213,10 @@ class TestRotation(unittest.TestCase):
         # Check that the same rotation vector is returned after being converted
         # to a quaternion.
         self.assertLess(
-            np.linalg.norm(
-                rotation_vector - rotation_from_vec.get_rotation_vector()),
+            np.linalg.norm(rotation_vector - rotation_from_vec.get_rotation_vector()),
             mpy.eps_quaternion,
-            'test_rotation_vector'
-            )
+            "test_rotation_vector",
+        )
 
     def test_rotation_operator_overload(self):
         """Test if the operator overloading gives a correct result."""
@@ -231,17 +230,15 @@ class TestRotation(unittest.TestCase):
         # Check the result of the operator overloading.
         result_vector = np.dot(rot.get_rotation_matrix(), vector)
         self.assertLess(
-            np.linalg.norm(
-                result_vector - rot * vector),
+            np.linalg.norm(result_vector - rot * vector),
             mpy.eps_quaternion,
-            'test_rotation_vector'
-            )
+            "test_rotation_vector",
+        )
         self.assertLess(
-            np.linalg.norm(
-                result_vector - rot * np.array(vector)),
+            np.linalg.norm(result_vector - rot * np.array(vector)),
             mpy.eps_quaternion,
-            'test_rotation_vector'
-            )
+            "test_rotation_vector",
+        )
 
         # Check multiplication with None.
         self.assertTrue(rot == rot * None)
@@ -258,19 +255,25 @@ class TestRotation(unittest.TestCase):
             [[1, 0, 0], [0, -1, 0]],
             [[0, 0, 1], [0, 1, 0]],
             [[-1, 0, 0], [0, 1, 0]],
-            [[0, 1, 0], [0, 0, 1]]
-            ]
+            [[0, 1, 0], [0, 0, 1]],
+        ]
 
         for t1, t2 in vectors:
             rot = Rotation().from_basis(t1, t2)
             t1_rot = rot * [1, 0, 0]
             t2_rot = rot * [0, 1, 0]
-            self.assertLess(np.linalg.norm(t1 - t1_rot), mpy.eps_quaternion,
-                'test_rotation_matrix: compare t1')
-            self.assertLess(np.linalg.norm(t2 - t2_rot), mpy.eps_quaternion,
-                'test_rotation_matrix: compare t2')
+            self.assertLess(
+                np.linalg.norm(t1 - t1_rot),
+                mpy.eps_quaternion,
+                "test_rotation_matrix: compare t1",
+            )
+            self.assertLess(
+                np.linalg.norm(t2 - t2_rot),
+                mpy.eps_quaternion,
+                "test_rotation_matrix: compare t2",
+            )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Execution part of script.
     unittest.main()

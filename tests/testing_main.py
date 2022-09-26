@@ -40,17 +40,16 @@ import unittest
 from tests.testing_utility import empty_testing_directory
 
 # Set path to find meshpy.
-sys.path.insert(0, os.path.abspath(os.path.join(
-    os.path.dirname(__file__), '..')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Execution part of script.
 
     empty_testing_directory()
 
     # Load the test cases.
-    testsuite = unittest.TestLoader().discover('.', pattern='testing_*.py')
+    testsuite = unittest.TestLoader().discover(".", pattern="testing_*.py")
 
     # Perform the tests
     run = unittest.TextTestRunner(verbosity=1).run(testsuite)

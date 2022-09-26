@@ -43,8 +43,7 @@ from vtk.util import numpy_support as vtk_numpy
 
 
 # Global variable if this test is run by GitLab.
-if ('TESTING_GITLAB' in os.environ.keys()
-        and os.environ['TESTING_GITLAB'] == '1'):
+if "TESTING_GITLAB" in os.environ.keys() and os.environ["TESTING_GITLAB"] == "1":
     TESTING_GITLAB = True
 else:
     TESTING_GITLAB = False
@@ -63,10 +62,10 @@ def skip_fail_test(self, message):
 def get_baci_path():
     """Look for and return a path to baci-release."""
 
-    if 'BACI_RELEASE' in os.environ.keys():
-        path = os.environ['BACI_RELEASE']
+    if "BACI_RELEASE" in os.environ.keys():
+        path = os.environ["BACI_RELEASE"]
     else:
-        path = ''
+        path = ""
 
     # Check if the path exists.
     if os.path.isfile(path):
@@ -75,17 +74,19 @@ def get_baci_path():
         # In the case that no path was found, check if the script is performed
         # by a GitLab runner.
         if TESTING_GITLAB:
-            raise ValueError('Path to baci-release not found!')
+            raise ValueError("Path to baci-release not found!")
         else:
-            warnings.warn('Path to baci-release not found. Did you set the ' +
-                'environment variable BACI_RELEASE?')
+            warnings.warn(
+                "Path to baci-release not found. Did you set the "
+                + "environment variable BACI_RELEASE?"
+            )
             return None
 
 
 # Define the testing paths.
 testing_path = os.path.abspath(os.path.dirname(__file__))
-testing_input = os.path.join(testing_path, 'reference-files')
-testing_temp = os.path.join(testing_path, 'testing-tmp')
+testing_input = os.path.join(testing_path, "reference-files")
+testing_temp = os.path.join(testing_path, "testing-tmp")
 baci_release = get_baci_path()
 
 # Check and clean the temporary directory.
@@ -118,13 +119,13 @@ def compare_strings(self, name, reference, compare):
 
     # Get the correct data
     if reference_is_file:
-        with open(reference, 'r') as myfile:
+        with open(reference, "r") as myfile:
             reference_string = myfile.read()
     else:
         reference_string = reference
 
     if compare_is_file:
-        with open(compare, 'r') as myfile:
+        with open(compare, "r") as myfile:
             compare_string = myfile.read()
     else:
         compare_string = compare
@@ -142,22 +143,20 @@ def compare_strings(self, name, reference, compare):
         if reference_is_file:
             reference_file = reference
         else:
-            reference_file = os.path.join(testing_temp,
-                '{}_reference.dat'.format(name))
-            with open(reference_file, 'w') as input_file:
+            reference_file = os.path.join(testing_temp, "{}_reference.dat".format(name))
+            with open(reference_file, "w") as input_file:
                 input_file.write(reference_string)
 
         if compare_is_file:
             compare_file = compare
         else:
-            compare_file = os.path.join(testing_temp,
-                '{}_compare.dat'.format(name))
-            with open(compare_file, 'w') as input_file:
+            compare_file = os.path.join(testing_temp, "{}_compare.dat".format(name))
+            with open(compare_file, "w") as input_file:
                 input_file.write(compare_string)
 
         child = subprocess.Popen(
-            ['meld', reference_file, compare_file],
-            stderr=subprocess.PIPE)
+            ["meld", reference_file, compare_file], stderr=subprocess.PIPE
+        )
         child.communicate()
 
     # Check the results.
@@ -179,11 +178,11 @@ def xml_to_dict(xml, tol_float):
             try:
                 number = float(item)
                 if np.abs(float(number)) < tol_float:
-                    return '0.0'
+                    return "0.0"
                 else:
                     # We check the numbers to a precision of 13.
                     number_float = float(number)
-                    return '{:.13e}'.format(number_float)
+                    return "{:.13e}".format(number_float)
             except ValueError:
                 return item
 
@@ -192,26 +191,26 @@ def xml_to_dict(xml, tol_float):
     keys.sort()
 
     # Get string for this XML element.
-    string = '<' + xml.tag
-    if 'Name' in keys:
+    string = "<" + xml.tag
+    if "Name" in keys:
         # If there is a key "Name" put this one first.
-        index = keys.index('Name')
+        index = keys.index("Name")
         if index == 0:
             pass
         else:
             keys[0], keys[index] = keys[index], keys[0]
     for key in keys:
-        string += ' '
+        string += " "
         string += key
         string += '="'
         string += item_with_tol(xml.get(key))
         string += '"'
-    string += '>'
+    string += ">"
 
     # Get data for this item.
     xml_dict = {}
     n_childs = len(list(xml))
-    is_text = not xml.text.strip() == ''
+    is_text = not xml.text.strip() == ""
     if n_childs > 0:
         # Add a child xml construct.
         for child in list(xml):
@@ -220,19 +219,18 @@ def xml_to_dict(xml, tol_float):
 
     if is_text:
         # Add data.
-        data = xml.text.split('\n')
+        data = xml.text.split("\n")
         if tol_float is None:
-            data_new = [line.strip() for line in data
-                if not line.strip() == '']
+            data_new = [line.strip() for line in data if not line.strip() == ""]
         else:
             data_new = []
             for line in data:
-                if line.strip() == '':
+                if line.strip() == "":
                     continue
-                for number in line.strip().split(' '):
+                for number in line.strip().split(" "):
                     data_new.append(item_with_tol(number))
-        data_string = '\n'.join(data_new)
-        xml_dict[''] = data_string
+        data_string = "\n".join(data_new)
+        xml_dict[""] = data_string
 
     # Return key for this item and all child items.
     return string, xml_dict
@@ -246,22 +244,22 @@ def xml_dict_to_string(item):
     keys.sort()
 
     # Return the keys and the values.
-    string = ''
+    string = ""
     for key in keys:
-        if key == '':
+        if key == "":
             string += item[key]
         else:
             # Add content.
             string += key
-            string += '\n'
+            string += "\n"
             string += xml_dict_to_string(item[key])
-            string += '\n'
+            string += "\n"
 
             # Get the name of the section from the key.
-            section = key[1:].split(' ')[0]
-            if section[-1] == '>':
+            section = key[1:].split(" ")[0]
+            if section[-1] == ">":
                 section = section[:-1]
-            string += '</{}>\n'.format(section)
+            string += "</{}>\n".format(section)
 
     # Return the value.
     return string.strip()
@@ -282,7 +280,7 @@ def compare_xml(path1, path2, tol_float=None):
 
     # Check that both arguments are paths and exist.
     if not (os.path.isfile(path1) and os.path.isfile(path2)):
-        raise ValueError('The paths given are not OK!')
+        raise ValueError("The paths given are not OK!")
 
     tree1 = ET.parse(path1)
     tree2 = ET.parse(path2)
@@ -317,7 +315,7 @@ def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
 
     # Check that both arguments are paths and exist.
     if not (os.path.isfile(path1) and os.path.isfile(path2)):
-        raise ValueError('The paths given are not OK!')
+        raise ValueError("The paths given are not OK!")
 
     # Default value for the numerical tolerance.
     if tol_float is None:
@@ -339,9 +337,9 @@ def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
 
         diff = vtk_numpy.vtk_to_numpy(array1) - vtk_numpy.vtk_to_numpy(array2)
         if not np.max(np.abs(diff)) < tol_float:
-            error_string = 'VTK array comparison failed!'
+            error_string = "VTK array comparison failed!"
             if name is not None:
-                error_string += ' Name of the array: {}'.format(name)
+                error_string += " Name of the array: {}".format(name)
             raise ValueError(error_string)
 
     def compare_data_sets(data1, data2):
@@ -351,7 +349,7 @@ def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
 
         # Both data sets need to have the same number of arrays.
         if not data1.GetNumberOfArrays() == data2.GetNumberOfArrays():
-            raise ValueError('Length of vtk data objects do not match!')
+            raise ValueError("Length of vtk data objects do not match!")
 
         # Compare each array.
         for i in range(data1.GetNumberOfArrays()):
@@ -372,8 +370,8 @@ def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
         compare_arrays(
             data1.GetPoints().GetData(),
             data2.GetPoints().GetData(),
-            name='point_positions'
-            )
+            name="point_positions",
+        )
 
         # Compare the cell and point data of the array.
         compare_data_sets(data1.GetCellData(), data2.GetCellData())
@@ -383,13 +381,13 @@ def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
         compare_arrays(
             data1.GetCells().GetData(),
             data2.GetCells().GetData(),
-            name='cell_connectivity')
+            name="cell_connectivity",
+        )
 
         # Compare the cell types.
         compare_arrays(
-            data1.GetCellTypesArray(),
-            data2.GetCellTypesArray(),
-            name='cell_type')
+            data1.GetCellTypesArray(), data2.GetCellTypesArray(), name="cell_type"
+        )
 
     except Exception as error:
         if raise_error:
@@ -406,13 +404,15 @@ def compare_vtk(self, name, ref_file, vtk_file, tol_float=None):
     """
 
     # Compare the xml structure.
-    is_equal_xml, _string_ref, _string_vtk = compare_xml(ref_file,
-        vtk_file, tol_float=tol_float)
+    is_equal_xml, _string_ref, _string_vtk = compare_xml(
+        ref_file, vtk_file, tol_float=tol_float
+    )
 
     # Compare the raw data.
     is_equal_data = compare_vtk_data(ref_file, vtk_file, tol_float=tol_float)
 
     # Check that both comparisons yield true.
-    error_string = name + ('\ncompare results: is_equal_xml={}, '
-        + 'is_equal_data={}').format(is_equal_xml, is_equal_data)
+    error_string = name + "\ncompare results: is_equal_xml={}, is_equal_data={}".format(
+        is_equal_xml, is_equal_data
+    )
     self.assertTrue(is_equal_xml and is_equal_data, error_string)

@@ -63,4 +63,4 @@ class Function(BaseMeshItem):
         if self.n_global:
             return str(self.n_global)
         else:
-            raise IndexError('The function does not have a global index!')
+            raise IndexError("The function does not have a global index!")

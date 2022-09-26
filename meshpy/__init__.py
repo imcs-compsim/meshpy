@@ -39,8 +39,8 @@ from .utility import (
     clean_simulation_directory,
     find_close_nodes,
     find_close_points,
-    flatten
-    )
+    flatten,
+)
 
 # 3D rotations for nodes.
 from .rotation import Rotation
@@ -52,14 +52,9 @@ from .material import (
     MaterialBeam,
     MaterialEulerBernoulli,
     MaterialKirchhoff,
-    MaterialReissner
-    )
-from .element_beam import (
-    Beam3eb,
-    Beam3k,
-    Beam3rHerm2Line3,
-    Beam3rLine2Line2
-    )
+    MaterialReissner,
+)
+from .element_beam import Beam3eb, Beam3k, Beam3rHerm2Line3, Beam3rLine2Line2
 from .geometry_set import GeometrySet
 
 # Boundary conditions and couplings for geometry in the mesh.
@@ -76,20 +71,34 @@ from .header_functions import (
     get_yes_no,
     set_beam_to_solid_meshtying,
     set_header_static,
-    set_runtime_output
-    )
+    set_runtime_output,
+)
 
 # Define the itCouplingems that will be exported by default.
 __all__ = [
     # Option object.
-    'mpy',
+    "mpy",
     # Basic stuff.
-    'Rotation', 'BaseMeshItem', 'Function', 'MaterialReissner',
-    'MaterialKirchhoff', 'MaterialBeam', 'GeometrySet', 'BoundaryCondition',
-    'Coupling', 'MaterialEulerBernoulli',
+    "Rotation",
+    "BaseMeshItem",
+    "Function",
+    "MaterialReissner",
+    "MaterialKirchhoff",
+    "MaterialBeam",
+    "GeometrySet",
+    "BoundaryCondition",
+    "Coupling",
+    "MaterialEulerBernoulli",
     # Mesh items.
-    'Beam3rHerm2Line3', 'Beam3rLine2Line2', 'Beam3k', 'Mesh', 'InputFile',
-    'InputSection', 'Beam3eb',
+    "Beam3rHerm2Line3",
+    "Beam3rLine2Line2",
+    "Beam3k",
+    "Mesh",
+    "InputFile",
+    "InputSection",
+    "Beam3eb",
     # Header functions.
-    'set_header_static', 'set_runtime_output', 'set_beam_to_solid_meshtying'
-    ]
+    "set_header_static",
+    "set_runtime_output",
+    "set_beam_to_solid_meshtying",
+]

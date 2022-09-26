@@ -43,8 +43,14 @@ from .boundary_condition import BoundaryConditionBase
 class Coupling(BoundaryConditionBase):
     """Represents a coupling between geometry in BACI."""
 
-    def __init__(self, geometry_set, coupling_type, coupling_dof_type,
-            check_overlapping_nodes=True, **kwargs):
+    def __init__(
+        self,
+        geometry_set,
+        coupling_type,
+        coupling_dof_type,
+        check_overlapping_nodes=True,
+        **kwargs
+    ):
         """
         Initialize this object.
 
@@ -84,11 +90,11 @@ class Coupling(BoundaryConditionBase):
             pos = np.zeros([len(self.geometry_set.nodes), 3])
             for i, node in enumerate(self.geometry_set.nodes):
                 # Get the difference to the first node.
-                pos[i, :] = (node.coordinates
-                    - self.geometry_set.nodes[0].coordinates)
+                pos[i, :] = node.coordinates - self.geometry_set.nodes[0].coordinates
             if np.linalg.norm(pos) > mpy.eps_pos:
-                raise ValueError('The nodes given to Coupling do not have the '
-                    'same position.')
+                raise ValueError(
+                    "The nodes given to Coupling do not have the same position."
+                )
 
     def _get_dat(self):
         """
@@ -107,14 +113,17 @@ class Coupling(BoundaryConditionBase):
             for node in self.geometry_set.nodes:
                 for element in node.element_link:
                     if beam_type is not element.beam_type:
-                        raise ValueError(('The first element in this coupling '
-                            + 'is of the type "{}" another one is of type '
-                            + '"{}"! They have to be of the same kind.'.format(
-                                beam_type, element.beam_type)))
-                    elif (beam_type is mpy.beam.kirchhoff
-                            and element.rotvec is False):
-                        raise ValueError('Couplings for Kirchhoff beams and '
-                            + 'rotvec==False not yet implemented.')
+                        raise ValueError(
+                            (
+                                'The first element in this coupling is of the type "{}" another one is of type "{}"! They have to be of the same kind.'.format(
+                                    beam_type, element.beam_type
+                                )
+                            )
+                        )
+                    elif beam_type is mpy.beam.kirchhoff and element.rotvec is False:
+                        raise ValueError(
+                            "Couplings for Kirchhoff beams and rotvec==False not yet implemented."
+                        )
 
             # In BACI it is not possible to couple beams of the same type, but
             # with different centerline discretizations, e.g. Beam3rHerm2Line3
@@ -126,9 +135,10 @@ class Coupling(BoundaryConditionBase):
             for node in self.geometry_set.nodes:
                 for element in node.element_link:
                     if not beam_baci_type == type(element):
-                        raise ValueError('Coupling beams of different types '
-                            'is not yet possible!')
+                        raise ValueError(
+                            "Coupling beams of different types is not yet possible!"
+                        )
 
             string = beam_baci_type.get_coupling_string(self.coupling_dof_type)
 
-        return 'E {} - {}'.format(self.geometry_set.n_global, string)
+        return "E {} - {}".format(self.geometry_set.n_global, string)

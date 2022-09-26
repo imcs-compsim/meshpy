@@ -38,6 +38,7 @@ from enum import Enum, auto
 
 class Geometry(Enum):
     """Enum for geometry types."""
+
     point = auto()
     line = auto()
     surface = auto()
@@ -46,6 +47,7 @@ class Geometry(Enum):
 
 class BoundaryCondition(Enum):
     """Enum for boundary condition types."""
+
     dirichlet = auto()
     neumann = auto()
     moment_euler_bernoulli = auto()
@@ -58,6 +60,7 @@ class BoundaryCondition(Enum):
 
 class BeamType(Enum):
     """Enum for beam types."""
+
     reissner = auto()
     kirchhoff = auto()
     euler_bernoulli = auto()
@@ -65,36 +68,42 @@ class BeamType(Enum):
 
 class CouplingDofType(Enum):
     """Enum for coupling types."""
+
     fix = auto()
     joint = auto()
 
 
 class BeamToSolidInteractionType(Enum):
     """Enum for beam-to-solid interaction types."""
+
     volume_meshtying = auto()
     surface_meshtying = auto()
 
 
 class DoubleNodes(Enum):
     """Enum for handing double nodes in Neumann conditions."""
+
     remove = auto()
     keep = auto()
 
 
 class VTKGeometry(Enum):
     """Enum for VTK geometry types (for now cells and points)."""
+
     point = auto()
     cell = auto()
 
 
 class VTKTensor(Enum):
     """Enum for VTK tensor types."""
+
     scalar = auto()
     vector = auto()
 
 
 class VTKType(Enum):
     """Enum for VTK value types."""
+
     int = auto()
     float = auto()
 
@@ -140,7 +149,7 @@ class MeshPy(object):
         self.git_date = None
 
         # Precision for floats in output.
-        self.dat_precision = '{:.12g}'
+        self.dat_precision = "{:.12g}"
 
         # Set the epsilons for comparison of different types of values.
         self.eps_quaternion = 1e-10
@@ -163,7 +172,7 @@ class MeshPy(object):
 
         # Number of digits for node set output (this will be set in the
         # Mesh.get_unique_geometry_sets() method.
-        self.vtk_node_set_format = '{:05}'
+        self.vtk_node_set_format = "{:05}"
         # Nan values for vtk data, since we currently can't set nan explicitly.
         self.vtk_nan_int = -1
         self.vtk_nan_float = 0.0

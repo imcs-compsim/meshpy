@@ -45,8 +45,9 @@ class Node(BaseMeshItem):
     and can be rotated moved and so on.
     """
 
-    def __init__(self, coordinates, rotation=None, is_middle_node=False,
-                is_dat=False, **kwargs):
+    def __init__(
+        self, coordinates, rotation=None, is_middle_node=False, is_dat=False, **kwargs
+    ):
         super().__init__(data=None, is_dat=is_dat, **kwargs)
 
         # Coordinates and rotation of this node.
@@ -81,8 +82,11 @@ class Node(BaseMeshItem):
         line_split = input_line[0].split()
 
         # Convert the node coordinates into a Node object.
-        return cls([float(line_split[i]) for i in range(3, 6)], is_dat=True,
-            comments=input_line[1])
+        return cls(
+            [float(line_split[i]) for i in range(3, 6)],
+            is_dat=True,
+            comments=input_line[1],
+        )
 
     def get_master_node(self):
         """
@@ -142,10 +146,12 @@ class Node(BaseMeshItem):
         Return the line that represents this node in the input file.
         """
 
-        coordinate_string = ' '.join([
-            mpy.dat_precision.format(component + 0)
-            if np.abs(component) >= mpy.eps_pos
-            else '0'
-            for component in self.coordinates
-            ])
-        return 'NODE {} COORD {}'.format(self.n_global, coordinate_string)
+        coordinate_string = " ".join(
+            [
+                mpy.dat_precision.format(component + 0)
+                if np.abs(component) >= mpy.eps_pos
+                else "0"
+                for component in self.coordinates
+            ]
+        )
+        return "NODE {} COORD {}".format(self.n_global, coordinate_string)
