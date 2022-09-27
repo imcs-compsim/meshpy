@@ -39,8 +39,9 @@ from ..conf import mpy
 from ..rotation import Rotation
 
 
-def create_beam_mesh_line(mesh, beam_object, material, start_point,
-        end_point, **kwargs):
+def create_beam_mesh_line(
+    mesh, beam_object, material, start_point, end_point, **kwargs
+):
     """
     Generate a straight line of beam elements.
 
@@ -92,23 +93,27 @@ def create_beam_mesh_line(mesh, beam_object, material, start_point,
         Return a function for the position and rotation along the beam
         axis.
         """
+
         def beam_function(xi):
             point_a = start_point + parameter_a * direction
             point_b = start_point + parameter_b * direction
-            return (
-                0.5 * (1 - xi) * point_a + 0.5 * (1 + xi) * point_b,
-                rotation
-                )
+            return (0.5 * (1 - xi) * point_a + 0.5 * (1 + xi) * point_b, rotation)
+
         return beam_function
 
     # Create the beam in the mesh
-    return mesh.create_beam_mesh_function(beam_object=beam_object,
-        material=material, function_generator=get_beam_geometry,
-        interval=[0., 1.], **kwargs)
+    return mesh.create_beam_mesh_function(
+        beam_object=beam_object,
+        material=material,
+        function_generator=get_beam_geometry,
+        interval=[0.0, 1.0],
+        **kwargs
+    )
 
 
-def create_beam_mesh_arc_segment(mesh, beam_object, material, center,
-        axis_rotation, radius, angle, **kwargs):
+def create_beam_mesh_arc_segment(
+    mesh, beam_object, material, center, axis_rotation, radius, angle, **kwargs
+):
     """
     Generate a circular segment of beam elements.
 
@@ -143,9 +148,8 @@ def create_beam_mesh_arc_segment(mesh, beam_object, material, center,
     """
 
     # The angle can not be negative with the current implementation.
-    if angle <= 0.:
-        raise ValueError('The angle for a beam segment has to be a ' +
-            'positive number!')
+    if angle <= 0.0:
+        raise ValueError("The angle for a beam segment has to be a positive number!")
 
     def get_beam_geometry(alpha, beta):
         """
@@ -158,16 +162,22 @@ def create_beam_mesh_arc_segment(mesh, beam_object, material, center,
             rot = axis_rotation * Rotation([0, 0, 1], phi)
             pos = center + radius * (rot * [0, -1, 0])
             return (pos, rot)
+
         return beam_function
 
     # Create the beam in the mesh
-    return mesh.create_beam_mesh_function(beam_object=beam_object,
-        material=material, function_generator=get_beam_geometry,
-        interval=[0., angle], **kwargs)
+    return mesh.create_beam_mesh_function(
+        beam_object=beam_object,
+        material=material,
+        function_generator=get_beam_geometry,
+        interval=[0.0, angle],
+        **kwargs
+    )
 
 
-def create_beam_mesh_arc_segment_2d(mesh, beam_object, material, center,
-        radius, phi_start, phi_end, **kwargs):
+def create_beam_mesh_arc_segment_2d(
+    mesh, beam_object, material, center, radius, phi_start, phi_end, **kwargs
+):
     """
     Generate a circular segment of beam elements in the x-y plane.
 
@@ -204,7 +214,7 @@ def create_beam_mesh_arc_segment_2d(mesh, beam_object, material, center,
 
     # The center point has to be on the x-y plane.
     if np.abs(center[2]) > mpy.eps_pos:
-        raise ValueError('The z-value of center has to be 0!')
+        raise ValueError("The z-value of center has to be 0!")
 
     # Check if the beam is in clockwise or counter clockwise direction.
     angle = phi_end - phi_start
@@ -218,8 +228,15 @@ def create_beam_mesh_arc_segment_2d(mesh, beam_object, material, center,
         # arc facing in the other direction. Additionally we have to rotate
         # around the z-axis for the angles to fit.
         t1 = [-np.sin(phi_start), np.cos(phi_start), 0.0]
-        axis_rotation = (Rotation([0, 0, 1], np.pi) * Rotation(t1, np.pi) *
-            axis_rotation)
+        axis_rotation = Rotation([0, 0, 1], np.pi) * Rotation(t1, np.pi) * axis_rotation
 
-    return create_beam_mesh_arc_segment(mesh, beam_object, material, center,
-            axis_rotation, radius, np.abs(angle), **kwargs)
+    return create_beam_mesh_arc_segment(
+        mesh,
+        beam_object,
+        material,
+        center,
+        axis_rotation,
+        radius,
+        np.abs(angle),
+        **kwargs
+    )

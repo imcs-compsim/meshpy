@@ -47,21 +47,28 @@ from .meshpy import find_close_points as find_points
 
 def get_git_data(repo):
     """Return the hash and date of the current git commit."""
-    out_sha = subprocess.run(['git', 'rev-parse', 'HEAD'], cwd=repo,
-        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
-    out_date = subprocess.run(['git', 'show', '-s', '--format=%ci'], cwd=repo,
-        stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
+    out_sha = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=repo,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    )
+    out_date = subprocess.run(
+        ["git", "show", "-s", "--format=%ci"],
+        cwd=repo,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.DEVNULL,
+    )
     if not out_sha.returncode + out_date.returncode == 0:
         return None, None
     else:
-        sha = out_sha.stdout.decode('ascii').strip()
-        date = out_date.stdout.decode('ascii').strip()
+        sha = out_sha.stdout.decode("ascii").strip()
+        date = out_date.stdout.decode("ascii").strip()
         return sha, date
 
 
 # Set the git version in the global configuration object.
-mpy.git_sha, mpy.git_date = get_git_data(
-    os.path.dirname(os.path.realpath(__file__)))
+mpy.git_sha, mpy.git_date = get_git_data(os.path.dirname(os.path.realpath(__file__)))
 
 
 def flatten(data):
@@ -99,8 +106,14 @@ def partner_indices_to_point_partners(partner_indices, n_points):
     return point_partners, len(partner_indices)
 
 
-def find_close_points(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
-        ny=mpy.binning_n_bin, nz=mpy.binning_n_bin, eps=mpy.eps_pos):
+def find_close_points(
+    nodes,
+    binning=mpy.binning,
+    nx=mpy.binning_n_bin,
+    ny=mpy.binning_n_bin,
+    nz=mpy.binning_n_bin,
+    eps=mpy.eps_pos,
+):
     """
     Find n-dimensional points that are close to each other.
 
@@ -124,14 +137,17 @@ def find_close_points(nodes, binning=mpy.binning, nx=mpy.binning_n_bin,
     """
 
     if len(nodes) > mpy.binning_max_nodes_brute_force and not mpy.binning:
-        warnings.warn('The function get_close_points is called directly '
-            + 'with {} points, for performance reasons the '.format(len(nodes))
-            + 'function find_close_points_binning should be used!')
+        warnings.warn(
+            "The function get_close_points is called directly "
+            + "with {} points, for performance reasons the ".format(len(nodes))
+            + "function find_close_points_binning should be used!"
+        )
 
     # Get list of closest pairs.
     if binning:
-        has_partner, n_partner = find_points.find_close_points_binning(nodes,
-            nx, ny, nz, eps)
+        has_partner, n_partner = find_points.find_close_points_binning(
+            nodes, nx, ny, nz, eps
+        )
     else:
         has_partner, n_partner = find_points.find_close_points(nodes, eps=eps)
 
@@ -213,21 +229,19 @@ def clean_simulation_directory(sim_dir):
     if os.path.exists(sim_dir):
         print('Path "{}" already exists'.format(sim_dir))
         while True:
-            answer = input('DELETE all contents? (y/n): ')
-            if answer.lower() == 'y':
+            answer = input("DELETE all contents? (y/n): ")
+            if answer.lower() == "y":
                 for filename in os.listdir(sim_dir):
                     file_path = os.path.join(sim_dir, filename)
                     try:
-                        if (os.path.isfile(file_path)
-                                or os.path.islink(file_path)):
+                        if os.path.isfile(file_path) or os.path.islink(file_path):
                             os.unlink(file_path)
                         elif os.path.isdir(file_path):
                             shutil.rmtree(file_path)
                     except Exception as e:
-                        ValueError(
-                            'Failed to delete %s. Reason: %s' % (file_path, e))
+                        ValueError("Failed to delete %s. Reason: %s" % (file_path, e))
                 return
-            elif answer.lower() == 'n':
-                raise ValueError('Directory is not deleted!')
+            elif answer.lower() == "n":
+                raise ValueError("Directory is not deleted!")
     else:
         Path(sim_dir).mkdir(parents=True, exist_ok=True)

@@ -40,8 +40,7 @@ from ..conf import mpy
 from .beam_curve import create_beam_mesh_curve
 
 
-def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve,
-        **kwargs):
+def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, **kwargs):
     """
     Generate a beam from a nurbs curve.
 
@@ -93,8 +92,9 @@ def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve,
         elif np.abs(t - curve_end) < mpy.eps_pos:
             return eval_r(curve_end)
         else:
-            raise ValueError('Can not evaluate the curve function outside '
-                'of the interval (plus tolerances).')
+            raise ValueError(
+                "Can not evaluate the curve function outside of the interval (plus tolerances)."
+            )
 
     def jacobian(t):
         """Convert the spline to a Jacobian function that can be used for curve
@@ -111,5 +111,12 @@ def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve,
             return eval_rp(curve_end)
 
     # Create the beams.
-    return create_beam_mesh_curve(mesh, beam_object, material, function,
-        [curve_start, curve_end], function_derivative=jacobian, **kwargs)
+    return create_beam_mesh_curve(
+        mesh,
+        beam_object,
+        material,
+        function,
+        [curve_start, curve_end],
+        function_derivative=jacobian,
+        **kwargs
+    )

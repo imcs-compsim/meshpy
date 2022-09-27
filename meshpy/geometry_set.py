@@ -42,14 +42,13 @@ class GeometrySet(BaseMeshItem):
 
     # Node set names for the input file file.
     geometry_set_names = {
-        mpy.geo.point: 'DNODE',
-        mpy.geo.line: 'DLINE',
-        mpy.geo.surface: 'DSURFACE',
-        mpy.geo.volume: 'DVOL'
-        }
+        mpy.geo.point: "DNODE",
+        mpy.geo.line: "DLINE",
+        mpy.geo.surface: "DSURFACE",
+        mpy.geo.volume: "DVOL",
+    }
 
-    def __init__(self, geometry_type, nodes=None, fail_on_double_nodes=True,
-            **kwargs):
+    def __init__(self, geometry_type, nodes=None, fail_on_double_nodes=True, **kwargs):
         """
         Initialize the geometry set.
 
@@ -111,15 +110,13 @@ class GeometrySet(BaseMeshItem):
             if value not in self.nodes:
                 self.nodes.append(value)
             elif fail_on_double_nodes:
-                raise ValueError('The node already exists in this set!')
+                raise ValueError("The node already exists in this set!")
         elif isinstance(value, GeometrySet):
             # Add all nodes from this geometry set.
             for node in value.nodes:
                 self._add(node, fail_on_double_nodes)
         else:
-            raise TypeError('Expected Node or list, but got {}'.format(
-                type(value)
-                ))
+            raise TypeError("Expected Node or list, but got {}".format(type(value)))
 
     def check_replaced_nodes(self):
         """Check if nodes in this set have been replaced."""
@@ -142,8 +139,9 @@ class GeometrySet(BaseMeshItem):
                     self.nodes[i] = new_node
                 break
         else:
-            raise ValueError('The node that should be replaced is not in the '
-                + 'current node set')
+            raise ValueError(
+                "The node that should be replaced is not in the current node set"
+            )
 
     def __iter__(self):
         for node in self.nodes:
@@ -151,7 +149,11 @@ class GeometrySet(BaseMeshItem):
 
     def _get_dat(self):
         """Get the lines for the input file."""
-        return ['NODE {} {} {}'.format(
-            node.n_global,
-            self.geometry_set_names[self.geometry_type], self.n_global
-            ) for node in self.nodes]
+        return [
+            "NODE {} {} {}".format(
+                node.n_global,
+                self.geometry_set_names[self.geometry_type],
+                self.n_global,
+            )
+            for node in self.nodes
+        ]

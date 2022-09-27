@@ -7,6 +7,11 @@ Meshpy is a general purpose 3D beam input generator.
 Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as described on the [MeshPy website](https://compsim.gitlab.io/codes/meshpy/index.html).
 
 
+## Code formating
+
+MeshPy uses the python code formater [black](https://github.com/psf/black).
+The testsuite checks if all files are formated accordingly.
+
 ## Installation
 
 Meshpy is developed with `python3.8`.

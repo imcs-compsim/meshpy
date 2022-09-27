@@ -39,8 +39,13 @@ import os
 from tutorial import meshpy_tutorial
 
 # Import testing utilities.
-from tests.testing_utility import (skip_fail_test, testing_temp, testing_input,
-    compare_strings, compare_vtk)
+from tests.testing_utility import (
+    skip_fail_test,
+    testing_temp,
+    testing_input,
+    compare_strings,
+    compare_vtk,
+)
 
 
 class Testtutorial(unittest.TestCase):
@@ -52,19 +57,15 @@ class Testtutorial(unittest.TestCase):
         """
 
         input_file = meshpy_tutorial(testing_temp)
-        input_file.write_input_file(os.path.join(testing_temp, 'tutorial.dat'),
-            header=False, dat_header=False)
+        input_file.write_input_file(
+            os.path.join(testing_temp, "tutorial.dat"), header=False, dat_header=False
+        )
 
-        tutorial_file = os.path.join(testing_temp,
-            'tutorial.dat')
-        ref_file = os.path.join(testing_input,
-            'test_tutorial_reference.dat')
-        compare_strings(self,
-            'test_tutorial',
-            ref_file,
-            tutorial_file)
+        tutorial_file = os.path.join(testing_temp, "tutorial.dat")
+        ref_file = os.path.join(testing_input, "test_tutorial_reference.dat")
+        compare_strings(self, "test_tutorial", ref_file, tutorial_file)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Execution part of script.
     unittest.main()

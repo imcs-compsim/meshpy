@@ -33,8 +33,11 @@ complex stent craft structures.
 """
 
 # Basic geometry functions
-from .beam_basic_geometry import (create_beam_mesh_line,
-    create_beam_mesh_arc_segment, create_beam_mesh_arc_segment_2d)
+from .beam_basic_geometry import (
+    create_beam_mesh_line,
+    create_beam_mesh_arc_segment,
+    create_beam_mesh_arc_segment_2d,
+)
 
 # Parametric curve.
 from .beam_curve import create_beam_mesh_curve
@@ -43,8 +46,7 @@ from .beam_curve import create_beam_mesh_curve
 from .beam_fibers_in_rectangle import create_fibers_in_rectangle
 
 # Honeycomb.
-from .beam_honeycomb import (create_beam_mesh_honeycomb_flat,
-    create_beam_mesh_honeycomb)
+from .beam_honeycomb import create_beam_mesh_honeycomb_flat, create_beam_mesh_honeycomb
 
 from .beam_nurbs import create_beam_mesh_from_nurbs
 
@@ -57,20 +59,20 @@ from .beam_wire import create_wire_fibers
 # Define the items that will be exported by default.
 __all__ = [
     # Base geometry.
-    'create_beam_mesh_line',
-    'create_beam_mesh_arc_segment',
-    'create_beam_mesh_arc_segment_2d',
+    "create_beam_mesh_line",
+    "create_beam_mesh_arc_segment",
+    "create_beam_mesh_arc_segment_2d",
     # Parametric curve.
-    'create_beam_mesh_curve',
+    "create_beam_mesh_curve",
     # Honeycomb.
-    'create_beam_mesh_honeycomb_flat',
-    'create_beam_mesh_honeycomb',
+    "create_beam_mesh_honeycomb_flat",
+    "create_beam_mesh_honeycomb",
     # Stent
-    'create_beam_mesh_stent',
+    "create_beam_mesh_stent",
     # Spline based geometry
-    'create_beam_mesh_from_nurbs',
+    "create_beam_mesh_from_nurbs",
     # Fibers in rectangle
-    'create_fibers_in_rectangle',
+    "create_fibers_in_rectangle",
     # Wire
-    'create_wire_fibers'
-    ]
+    "create_wire_fibers",
+]

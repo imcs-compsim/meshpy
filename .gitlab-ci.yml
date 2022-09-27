@@ -57,6 +57,11 @@ meshpy-testing:
         - "coverage html"
         - "coverage report"
         - coverage-badge -o htmlcov/coverage.svg
+        # Check codestyle
+        - "cd $MESHPY_PATH"
+        - "black . --check && exit 0"
+        # If we did not exit earlier, raise an error here
+        - "exit 1"
     artifacts:
         paths:
           - tests/htmlcov/
