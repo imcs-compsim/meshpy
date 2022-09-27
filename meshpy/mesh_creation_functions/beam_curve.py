@@ -39,8 +39,17 @@ from ..conf import mpy
 from ..rotation import Rotation
 
 
-def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
-        *, function_derivative=None, function_rotation=None, **kwargs):
+def create_beam_mesh_curve(
+    mesh,
+    beam_object,
+    material,
+    function,
+    interval,
+    *,
+    function_derivative=None,
+    function_rotation=None,
+    **kwargs
+):
     """
     Generate a beam from a parametric curve. Integration along the beam is
     performed with scipy, and if the gradient is not explicitly provided, it is
@@ -92,7 +101,7 @@ def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
     elif len(function(interval[0])) == 3:
         is_3d_curve = True
     else:
-        raise ValueError('Function must return either 2d or 3d curve!')
+        raise ValueError("Function must return either 2d or 3d curve!")
 
     # Check rotation function.
     if function_rotation is None:
@@ -103,9 +112,10 @@ def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
     # Check that the position is an np.array
     if not isinstance(function(float(interval[0])), np.ndarray):
         raise TypeError(
-            'Function must be of type np.ndarray, got {}!'.format(
+            "Function must be of type np.ndarray, got {}!".format(
                 type(function(float(interval[0])))
-                ))
+            )
+        )
 
     # Get the derivative of the position function and the increment along
     # the curve.
@@ -115,10 +125,10 @@ def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
         rp = function_derivative
 
     # Check which one of the boundaries is larger.
-    if (interval[0] > interval[1]):
+    if interval[0] > interval[1]:
         # In this case rp needs to be negated.
         rp_positive = rp
-        rp = lambda t : -(rp_positive(t))
+        rp = lambda t: -(rp_positive(t))
 
     def ds(t):
         """Increment along the curve."""
@@ -137,7 +147,7 @@ def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
             st = start_t
             sS = start_S
         else:
-            raise ValueError('Input parameters are wrong!')
+            raise ValueError("Input parameters are wrong!")
         return integrate.quad(ds, st, t)[0] + sS
 
     def get_t_along_curve(arc_length, t0, **kwargs):
@@ -145,8 +155,7 @@ def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
         Calculate the parameter t where the length along the curve is
         arc_length. t0 is the start point for the Newton iteration.
         """
-        t_root = optimize.newton(lambda t: S(t, **kwargs) - arc_length, t0,
-            fprime=ds)
+        t_root = optimize.newton(lambda t: S(t, **kwargs) - arc_length, t0, fprime=ds)
         return t_root
 
     def get_beam_functions(length_a, length_b):
@@ -170,7 +179,10 @@ def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
             # Parameter for xi.
             t = get_t_along_curve(
                 length_a + 0.5 * (xi + 1) * L,
-                t_start_element, start_t=t_start_element, start_S=length_a)
+                t_start_element,
+                start_t=t_start_element,
+                start_S=length_a,
+            )
             t_temp = t
 
             # Position at xi.
@@ -189,10 +201,7 @@ def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
                 else:
                     # The rotation simplifies in the 2d case.
                     rprime = rp(t)
-                    rot = Rotation(
-                        [0, 0, 1],
-                        np.arctan2(rprime[1], rprime[0])
-                        )
+                    rot = Rotation([0, 0, 1], np.arctan2(rprime[1], rprime[0]))
 
             if np.abs(xi - 1) < mpy.eps_pos:
                 # Set start values for the next element.
@@ -216,13 +225,16 @@ def create_beam_mesh_curve(mesh, beam_object, material, function, interval,
     # The first t2 basis is the one with the larger projection on rp.
     if is_3d_curve:
         rprime = rp(float(interval[0]))
-        if abs(np.dot(rprime, [0, 0, 1])) < \
-                abs(np.dot(rprime, [0, 1, 0])):
+        if abs(np.dot(rprime, [0, 0, 1])) < abs(np.dot(rprime, [0, 1, 0])):
             t2_temp = [0, 0, 1]
         else:
             t2_temp = [0, 1, 0]
 
     # Create the beam in the mesh
-    return mesh.create_beam_mesh_function(beam_object=beam_object,
-        material=material, function_generator=get_beam_functions,
-        interval=[0., length], **kwargs)
+    return mesh.create_beam_mesh_function(
+        beam_object=beam_object,
+        material=material,
+        function_generator=get_beam_functions,
+        interval=[0.0, length],
+        **kwargs
+    )

@@ -75,14 +75,12 @@ class Rotation(object):
             if np.abs(phi) < mpy.eps_quaternion:
                 self.q[0] = 1
             elif norm < mpy.eps_quaternion:
-                raise ValueError('The rotation axis can not be a zero vector!')
+                raise ValueError("The rotation axis can not be a zero vector!")
             else:
                 self.q[0] = np.cos(0.5 * phi)
-                self.q[1:] = np.sin(0.5 * phi) * \
-                    np.array(vector) / norm
+                self.q[1:] = np.sin(0.5 * phi) * np.array(vector) / norm
         else:
-            raise ValueError(
-                'The given arguments {} are invalid!'.format(args))
+            raise ValueError("The given arguments {} are invalid!".format(args))
 
     @classmethod
     def from_rotation_matrix(cls, R):
@@ -169,8 +167,10 @@ class Rotation(object):
         """We want to check that q.q = 1."""
 
         if np.abs(1 - np.linalg.norm(self.q)) > mpy.eps_quaternion:
-            raise ValueError('The rotation object is corrupted. q.q does not '
-                + 'equal 1!\n{}'.format(self))
+            raise ValueError(
+                "The rotation object is corrupted. q.q does not "
+                + "equal 1!\n{}".format(self)
+            )
 
     def get_rotation_matrix(self):
         """
@@ -178,9 +178,11 @@ class Rotation(object):
         (Krenk (3.50))
         """
 
-        R = (self.q[0]**2 - np.dot(self.q[1:], self.q[1:])) * np.eye(3) + \
-            2 * self.q[0] * self.get_q_skew() + \
-            2 * ([self.q[1:]] * np.transpose([self.q[1:]]))
+        R = (
+            (self.q[0] ** 2 - np.dot(self.q[1:], self.q[1:])) * np.eye(3)
+            + 2 * self.q[0] * self.get_q_skew()
+            + 2 * ([self.q[1:]] * np.transpose([self.q[1:]]))
+        )
 
         return R
 
@@ -227,7 +229,7 @@ class Rotation(object):
         """
 
         tmp_quaternion = self.q.copy()
-        tmp_quaternion[0] *= -1.
+        tmp_quaternion[0] *= -1.0
         return Rotation(tmp_quaternion)
 
     def __mul__(self, other):
@@ -243,21 +245,20 @@ class Rotation(object):
             # Add the rotations.
             added_rotation = np.zeros_like(self.q)
             added_rotation[0] = p[0] * q[0] - np.dot(p[1:], q[1:])
-            added_rotation[1:] = p[0] * q[1:] + q[0] * p[1:] + \
-                np.cross(p[1:], q[1:])
+            added_rotation[1:] = p[0] * q[1:] + q[0] * p[1:] + np.cross(p[1:], q[1:])
             return Rotation(added_rotation)
-        elif (
-                (isinstance(other, np.ndarray) or isinstance(other, list))
-                and len(other) == 3
-                ):
+        elif (isinstance(other, np.ndarray) or isinstance(other, list)) and len(
+            other
+        ) == 3:
             # Apply rotation to vector.
             return np.dot(self.get_rotation_matrix(), np.array(other))
         elif other is None:
             # If multiplied with none, nothing happens.
             return self
         else:
-            raise NotImplementedError('Error, not implemented, does not ' +
-                'make sense anyway!')
+            raise NotImplementedError(
+                "Error, not implemented, does not make sense anyway!"
+            )
 
     def __eq__(self, other):
         """
@@ -265,8 +266,9 @@ class Rotation(object):
         """
 
         if isinstance(other, Rotation):
-            if (np.linalg.norm(self.q - other.q) < mpy.eps_quaternion) or \
-                    (np.linalg.norm(self.q + other.q) < mpy.eps_quaternion):
+            if (np.linalg.norm(self.q - other.q) < mpy.eps_quaternion) or (
+                np.linalg.norm(self.q + other.q) < mpy.eps_quaternion
+            ):
                 return True
             else:
                 return False
@@ -281,12 +283,14 @@ class Rotation(object):
         rotation_vector = self.get_rotation_vector()
 
         # The zeros are added to avoid negative zeros in the input file.
-        return ' '.join([
-            mpy.dat_precision.format(component + 0)
-            if np.abs(component) >= mpy.eps_quaternion
-            else '0'
-            for component in rotation_vector
-            ])
+        return " ".join(
+            [
+                mpy.dat_precision.format(component + 0)
+                if np.abs(component) >= mpy.eps_quaternion
+                else "0"
+                for component in rotation_vector
+            ]
+        )
 
     def copy(self):
         """Return a deep copy of this object."""
@@ -298,10 +302,9 @@ class Rotation(object):
         """
 
         self.check()
-        return 'Rotation:\n    q0: {}\n    q: {}'.format(
-            str(self.q[0]),
-            str(self.q[1:])
-            )
+        return "Rotation:\n    q0: {}\n    q: {}".format(
+            str(self.q[0]), str(self.q[1:])
+        )
 
 
 def get_relative_rotation(rotation1, rotation2):
@@ -345,13 +348,17 @@ def add_rotations(rotation_21, rotation_10):
         rotnew = np.zeros_like(rot2)
 
     # Multiply the two rotations (code is taken from /utility/rotation.nb).
-    rotnew[0] = rot1[0] * rot2[0] - rot1[1] * rot2[1] - rot1[2] * rot2[2] - \
-        rot1[3] * rot2[3]
-    rotnew[1] = rot1[1] * rot2[0] + rot1[0] * rot2[1] + rot1[3] * rot2[2] - \
-        rot1[2] * rot2[3]
-    rotnew[2] = rot1[2] * rot2[0] - rot1[3] * rot2[1] + rot1[0] * rot2[2] + \
-        rot1[1] * rot2[3]
-    rotnew[3] = rot1[3] * rot2[0] + rot1[2] * rot2[1] - rot1[1] * rot2[2] + \
-        rot1[0] * rot2[3]
+    rotnew[0] = (
+        rot1[0] * rot2[0] - rot1[1] * rot2[1] - rot1[2] * rot2[2] - rot1[3] * rot2[3]
+    )
+    rotnew[1] = (
+        rot1[1] * rot2[0] + rot1[0] * rot2[1] + rot1[3] * rot2[2] - rot1[2] * rot2[3]
+    )
+    rotnew[2] = (
+        rot1[2] * rot2[0] - rot1[3] * rot2[1] + rot1[0] * rot2[2] + rot1[1] * rot2[3]
+    )
+    rotnew[3] = (
+        rot1[3] * rot2[0] + rot1[2] * rot2[1] - rot1[1] * rot2[2] + rot1[0] * rot2[3]
+    )
 
     return rotnew.transpose()

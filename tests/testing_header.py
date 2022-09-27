@@ -44,10 +44,10 @@ class TestHeaders(unittest.TestCase):
         """
 
         wrong_headers = check_license()
-        wrong_headers_string = 'Wrong headers in: ' + ', '.join(wrong_headers)
+        wrong_headers_string = "Wrong headers in: " + ", ".join(wrong_headers)
         self.assertTrue(len(wrong_headers) == 0, wrong_headers_string)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Execution part of script.
     unittest.main()

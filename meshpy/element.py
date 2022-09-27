@@ -62,12 +62,18 @@ class Element(BaseMeshItem):
         """
 
         # Import solid element classes for creation of the element.
-        from .element_volume import (VolumeHEX8, SolidRigidSphere, VolumeHEX27,
-            VolumeHEX20, VolumeTET10, VolumeTET4)
+        from .element_volume import (
+            VolumeHEX8,
+            SolidRigidSphere,
+            VolumeHEX27,
+            VolumeHEX20,
+            VolumeTET10,
+            VolumeTET4,
+        )
 
         # Split up input line and get pre node string.
         line_split = input_line[0].split()
-        dat_pre_nodes = ' '.join(line_split[1:3])
+        dat_pre_nodes = " ".join(line_split[1:3])
 
         # Get a list of the element nodes.
         element_nodes = []
@@ -77,36 +83,65 @@ class Element(BaseMeshItem):
             else:
                 break
         else:
-            raise ValueError(('The input line:\n"{}"\ncould not be converted '
-                + 'to a solid element!').format(input_line))
+            raise ValueError(
+                (
+                    'The input line:\n"{}"\ncould not be converted to a solid element!'
+                ).format(input_line)
+            )
 
         # Get the post node string
-        dat_post_nodes = ' '.join(line_split[3 + i:])
+        dat_post_nodes = " ".join(line_split[3 + i :])
 
         # Depending on the number of nodes chose which solid element to return.
         n_nodes = len(element_nodes)
         if n_nodes == 8:
-            return VolumeHEX8(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+            return VolumeHEX8(
+                nodes=element_nodes,
+                dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes,
+                comments=input_line[1],
+            )
         elif len(element_nodes) == 4:
-            return VolumeTET4(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+            return VolumeTET4(
+                nodes=element_nodes,
+                dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes,
+                comments=input_line[1],
+            )
         elif len(element_nodes) == 10:
-            return VolumeTET10(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+            return VolumeTET10(
+                nodes=element_nodes,
+                dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes,
+                comments=input_line[1],
+            )
         elif len(element_nodes) == 20:
-            return VolumeHEX20(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+            return VolumeHEX20(
+                nodes=element_nodes,
+                dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes,
+                comments=input_line[1],
+            )
         elif len(element_nodes) == 27:
-            return VolumeHEX27(nodes=element_nodes, dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes, comments=input_line[1])
+            return VolumeHEX27(
+                nodes=element_nodes,
+                dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes,
+                comments=input_line[1],
+            )
         elif len(element_nodes) == 1:
-            return SolidRigidSphere(nodes=element_nodes,
-                dat_pre_nodes=dat_pre_nodes, dat_post_nodes=dat_post_nodes,
-                comments=input_line[1])
+            return SolidRigidSphere(
+                nodes=element_nodes,
+                dat_pre_nodes=dat_pre_nodes,
+                dat_post_nodes=dat_post_nodes,
+                comments=input_line[1],
+            )
         else:
-            raise TypeError('Could not find a element type for '
-                + '{}, with {} nodes'.format(dat_pre_nodes, n_nodes))
+            raise TypeError(
+                "Could not find a element type for {}, with {} nodes".format(
+                    dat_pre_nodes, n_nodes
+                )
+            )
 
     def replace_node(self, old_node, new_node):
         """Replace old_node with new_node."""
@@ -117,13 +152,13 @@ class Element(BaseMeshItem):
                 self.nodes[i] = new_node
                 break
         else:
-            raise ValueError('The node that should be replaced is not in the '
-                + 'current element')
+            raise ValueError(
+                "The node that should be replaced is not in the current element"
+            )
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
         """
         Add representation of this element to the vtk_writers for solid and
         beam.
         """
-        raise NotImplementedError(
-            'VTK output has to be implemented in the class!')
+        raise NotImplementedError("VTK output has to be implemented in the class!")

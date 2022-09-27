@@ -69,11 +69,10 @@ def create_tube_cubit_mesh(r, h, n_circumference, n_height):
     # Set the mesh size.
     for curve in cylinder.curves():
         cubit.set_line_interval(curve, n_circumference)
-    cubit.cmd('surface 1 size {}'.format(h / n_height))
+    cubit.cmd("surface 1 size {}".format(h / n_height))
 
     # Set blocks and sets.
-    cubit.add_element_type(cylinder.volumes()[0], cupy.element_type.hex8,
-        name='tube')
+    cubit.add_element_type(cylinder.volumes()[0], cupy.element_type.hex8, name="tube")
 
     # Return the cubit object.
     return cubit, cylinder
@@ -89,19 +88,25 @@ def create_tube_cubit():
     cylinder.volumes()[0].mesh()
 
     # Set boundary conditions.
-    cubit.add_node_set(cylinder.surfaces()[1], name='fix',
-        bc_section='DESIGN SURF DIRICH CONDITIONS',
+    cubit.add_node_set(
+        cylinder.surfaces()[1],
+        name="fix",
+        bc_section="DESIGN SURF DIRICH CONDITIONS",
         bc_description=(
-            'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 '
-            + 'FUNCT 0 0 0 0 0 0'))
-    cubit.add_node_set(cylinder.surfaces()[2], name='dirichlet_controlled',
-        bc_section='DESIGN SURF DIRICH CONDITIONS',
+            "NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0"
+        ),
+    )
+    cubit.add_node_set(
+        cylinder.surfaces()[2],
+        name="dirichlet_controlled",
+        bc_section="DESIGN SURF DIRICH CONDITIONS",
         bc_description=(
-            'NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 '
-            + 'FUNCT 1 2 0 0 0 0'))
+            "NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0"
+        ),
+    )
 
     # Set header.
-    cubit.head = '''
+    cubit.head = """
         ------------------------------------------------------------PROBLEM TYP
         PROBLEMTYP                      Structure
         RESTART                         0
@@ -148,7 +153,7 @@ def create_tube_cubit():
         COMPONENT 0 FUNCTION cos(2*pi*t)
         -----------------------------------------------------------------FUNCT2
         COMPONENT 0 FUNCTION sin(2*pi*t)
-        '''
+        """
 
     # Return the cubit object.
     return cubit
@@ -168,25 +173,31 @@ def create_tube_tutorial(file_path):
     cubit, cylinder = create_tube_cubit_mesh(0.05, 3.0, 6, 10)
 
     # Put the tube in the correct position.
-    cubit.cmd('rotate volume 1 angle -90 about X include_merged')
+    cubit.cmd("rotate volume 1 angle -90 about X include_merged")
     cubit.move(cylinder, [0, 1.5, 1.5])
 
     # Mesh the geometry.
     cylinder.volumes()[0].mesh()
 
     # Set boundary conditions.
-    cubit.add_node_set(cylinder.surfaces()[1], name='fix',
+    cubit.add_node_set(
+        cylinder.surfaces()[1],
+        name="fix",
         bc_type=cupy.bc_type.dirichlet,
-        bc_description='NUMDOF 3 ONOFF 1 1 1 VAL 0 0 0 FUNCT 0 0 0')
-    cubit.add_node_set(cylinder.surfaces()[2], name='dirichlet_controlled',
+        bc_description="NUMDOF 3 ONOFF 1 1 1 VAL 0 0 0 FUNCT 0 0 0",
+    )
+    cubit.add_node_set(
+        cylinder.surfaces()[2],
+        name="dirichlet_controlled",
         bc_type=cupy.bc_type.dirichlet,
-        bc_description='NUMDOF 3 ONOFF 1 0 0 VAL 0.5 0 0 FUNCT 1 0 0')
+        bc_description="NUMDOF 3 ONOFF 1 0 0 VAL 0.5 0 0 FUNCT 1 0 0",
+    )
 
     # Set header.
-    cubit.head = '''
+    cubit.head = """
         ------------------------------------------------------------------MATERIALS
         MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0 NUE 0 DENS 0 THEXPANS 0
-        '''
+        """
 
     # Export mesh.
     cubit.create_dat(file_path)
@@ -202,14 +213,18 @@ def create_block_cubit():
     cube = create_brick(cubit, 1, 1, 1, mesh_factor=9)
 
     # Add the boundary condition.
-    cubit.add_node_set(cube.volumes()[0],
+    cubit.add_node_set(
+        cube.volumes()[0],
         bc_type=cupy.bc_type.beam_to_solid_volume_meshtying,
-        bc_description='COUPLING_ID 1')
+        bc_description="COUPLING_ID 1",
+    )
 
     # Add the boundary condition.
-    cubit.add_node_set(cube.surfaces()[0],
+    cubit.add_node_set(
+        cube.surfaces()[0],
         bc_type=cupy.bc_type.beam_to_solid_surface_meshtying,
-        bc_description='COUPLING_ID 2')
+        bc_description="COUPLING_ID 2",
+    )
 
     # Set point coupling conditions.
     nodes = cubit.group()
@@ -217,8 +232,8 @@ def create_block_cubit():
     cubit.add_node_set(
         nodes,
         bc_type=cupy.bc_type.point_coupling,
-        bc_description='NUMDOF 3 ONOFF 1 2 3'
-        )
+        bc_description="NUMDOF 3 ONOFF 1 2 3",
+    )
 
     # Return the cubit object.
     return cubit
@@ -231,22 +246,21 @@ def create_block(file_path):
     create_block_cubit().create_dat(file_path)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Execution part of script.
 
     dir_path = os.path.abspath(os.path.dirname(__file__))
 
     # Create the input file for the solid tube.
-    file_path = os.path.join(dir_path,
-        'reference-files/baci_input_solid_tube.dat')
+    file_path = os.path.join(dir_path, "reference-files/baci_input_solid_tube.dat")
     create_tube(file_path)
 
     # Create the input files for the solid cube.
-    file_path = os.path.join(dir_path,
-        'reference-files/test_meshpy_btsvm_coupling_solid_mesh.dat')
+    file_path = os.path.join(
+        dir_path, "reference-files/test_meshpy_btsvm_coupling_solid_mesh.dat"
+    )
     create_block(file_path)
 
     # Create the tube for the tutorial.
-    file_path = os.path.join(dir_path,
-        'reference-files/baci_input_solid_tutorial.dat')
+    file_path = os.path.join(dir_path, "reference-files/baci_input_solid_tutorial.dat")
     create_tube_tutorial(file_path)

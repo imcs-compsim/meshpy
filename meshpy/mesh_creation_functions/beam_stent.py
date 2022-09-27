@@ -40,13 +40,23 @@ from ..rotation import Rotation
 from ..mesh import Mesh
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
-from .beam_basic_geometry import (create_beam_mesh_arc_segment,
-    create_beam_mesh_line)
+from .beam_basic_geometry import create_beam_mesh_arc_segment, create_beam_mesh_line
 
 
-def create_stent_cell(beam_object, material, width, height,
-        fac_bottom=0.6, fac_neck=0.55, fac_radius=0.36,
-        alpha=0.46 * np.pi, S1=True, S2=True, S3=True, n_el=1):
+def create_stent_cell(
+    beam_object,
+    material,
+    width,
+    height,
+    fac_bottom=0.6,
+    fac_neck=0.55,
+    fac_radius=0.36,
+    alpha=0.46 * np.pi,
+    S1=True,
+    S2=True,
+    S3=True,
+    n_el=1,
+):
     """
     Create a cell of the stent. This cell is on the x-y plane.
 
@@ -84,20 +94,23 @@ def create_stent_cell(beam_object, material, width, height,
     mesh = Mesh()
 
     def add_line(pointa, pointb, n_el_line):
-        """ Shortcut to add line."""
+        """Shortcut to add line."""
         return create_beam_mesh_line(
+            mesh, beam_object, material, pointa, pointb, n_el=n_el_line
+        )
+
+    def add_segment(center, axis_rotation, radius, angle, n_el_segment):
+        """Shortcut to add arc segment."""
+        return create_beam_mesh_arc_segment(
             mesh,
             beam_object,
             material,
-            pointa,
-            pointb,
-            n_el=n_el_line
-            )
-
-    def add_segment(center, axis_rotation, radius, angle, n_el_segment):
-        """ Shortcut to add arc segment."""
-        return create_beam_mesh_arc_segment(mesh, beam_object, material,
-            center, axis_rotation, radius, angle, n_el=n_el_segment)
+            center,
+            axis_rotation,
+            radius,
+            angle,
+            n_el=n_el_segment,
+        )
 
     neck_width = width * fac_neck
     bottom_width = width * fac_bottom
@@ -106,11 +119,11 @@ def create_stent_cell(beam_object, material, width, height,
 
     if S1:
         neck_point = np.array([-neck_width, height * 0.5, 0])
-        d = (height * 0.5 / np.tan(alpha) + bottom_width - neck_width) / \
-            np.sin(alpha)
+        d = (height * 0.5 / np.tan(alpha) + bottom_width - neck_width) / np.sin(alpha)
         CM = np.array([-np.sin(alpha), -np.cos(alpha), 0]) * (d - radius)
-        MO = np.array([np.cos(alpha), -np.sin(alpha), 0]) * np.sqrt(radius ** 2
-            - (d - radius) ** 2)
+        MO = np.array([np.cos(alpha), -np.sin(alpha), 0]) * np.sqrt(
+            radius**2 - (d - radius) ** 2
+        )
         S1_angle = np.pi / 2 + np.arcsin((d - radius) / radius)
         S1_center1 = CM + MO + neck_point
         S1_axis_rotation1 = Rotation([0, 0, 1], 2 * np.pi - S1_angle - alpha)
@@ -121,38 +134,36 @@ def create_stent_cell(beam_object, material, width, height,
         S1_axis_rotation2 = Rotation([0, 0, 1], np.pi - alpha - S1_angle)
 
         add_segment(S1_center2, S1_axis_rotation2, radius, S1_angle, n_el)
-        add_line(mesh.nodes[-1].coordinates, 2 * neck_point
-            - [-bottom_width, 0, 0], 2 * n_el)
+        add_line(
+            mesh.nodes[-1].coordinates, 2 * neck_point - [-bottom_width, 0, 0], 2 * n_el
+        )
 
     if S3:
-        S3_radius = (width - bottom_width + height * 0.5 / np.tan(alpha)) *\
-            np.tan(alpha / 2)
-        S3_center = [-width, height * 0.5, 0] + S3_radius * \
-            np.array([0, 1, 0])
+        S3_radius = (width - bottom_width + height * 0.5 / np.tan(alpha)) * np.tan(
+            alpha / 2
+        )
+        S3_center = [-width, height * 0.5, 0] + S3_radius * np.array([0, 1, 0])
         S3_axis_rotation = Rotation()
         S3_angle = np.pi - alpha
-        add_segment(S3_center, S3_axis_rotation,
-            S3_radius, S3_angle, n_el)
-        add_line(mesh.nodes[-1].coordinates, [-bottom_width, height, 0],
-            2 * n_el)
+        add_segment(S3_center, S3_axis_rotation, S3_radius, S3_angle, n_el)
+        add_line(mesh.nodes[-1].coordinates, [-bottom_width, height, 0], 2 * n_el)
 
     if S2:
-        S2_radius = ((height * 0.5 / np.tan(alpha) + top_width)
-            * np.tan(alpha * 0.5))
+        S2_radius = (height * 0.5 / np.tan(alpha) + top_width) * np.tan(alpha * 0.5)
         S2_center = [0, height * 0.5, 0] - S2_radius * np.array([0, 1, 0])
         S2_angle = np.pi - alpha
         S2_axis_rotation = Rotation([0, 0, 1], np.pi)
-        add_segment(S2_center, S2_axis_rotation,
-            S2_radius, S2_angle, 2 * n_el)
+        add_segment(S2_center, S2_axis_rotation, S2_radius, S2_angle, 2 * n_el)
         add_line(mesh.nodes[-1].coordinates, [-top_width, 0, 0], 2 * n_el)
 
     mesh.translate([width, -height / 2, 0])
     return mesh
 
 
-def create_stent_column(beam_object, material, width, height,
-        n_height, n_el=1, **kwargs):
-    """ Create a column of completed cells. A completed cell
+def create_stent_column(
+    beam_object, material, width, height, n_height, n_el=1, **kwargs
+):
+    """Create a column of completed cells. A completed cell
     consists of one cell, that is created with the create
     cell function and it's reflection.
 
@@ -194,8 +205,17 @@ def create_stent_column(beam_object, material, width, height,
 
         if i == n_height - 2:
             S3 = False
-        unit_cell = create_stent_cell(beam_object, material, width,
-            height, S1=S1, S2=S2, S3=S3, n_el=n_el, **kwargs)
+        unit_cell = create_stent_cell(
+            beam_object,
+            material,
+            width,
+            height,
+            S1=S1,
+            S2=S2,
+            S3=S3,
+            n_el=n_el,
+            **kwargs
+        )
         unit_cell.translate([0, i * height, 0])
         mesh_column.add(unit_cell)
 
@@ -206,8 +226,9 @@ def create_stent_column(beam_object, material, width, height,
     return mesh_column
 
 
-def create_beam_mesh_stent_flat(beam_object, material, width_flat, height_flat,
-        n_height, n_column, n_el=1, **kwargs):
+def create_beam_mesh_stent_flat(
+    beam_object, material, width_flat, height_flat, n_height, n_column, n_el=1, **kwargs
+):
     """
     Create a flat stent structure on the x-y plane.
 
@@ -237,8 +258,9 @@ def create_beam_mesh_stent_flat(beam_object, material, width_flat, height_flat,
     mesh_flat = Mesh()
     width = width_flat / n_column / 2
     height = height_flat / n_height
-    column_mesh = create_stent_column(beam_object, material,
-        width, height, n_height, n_el=n_el, **kwargs)
+    column_mesh = create_stent_column(
+        beam_object, material, width, height, n_height, n_el=n_el, **kwargs
+    )
     for i in range(n_column):
         column_copy = column_mesh.copy()
         column_copy.translate([2 * width * i, 0, 0])
@@ -246,18 +268,36 @@ def create_beam_mesh_stent_flat(beam_object, material, width_flat, height_flat,
 
     for i in range(n_column // 2):
         for j in range(n_height - 1):
-            create_beam_mesh_line(mesh_flat, beam_object, material,
+            create_beam_mesh_line(
+                mesh_flat,
+                beam_object,
+                material,
                 [4 * i * width, j * height, 0],
                 [4 * i * width, (j + 1) * height, 0],
-                n_el=2 * n_el)
-        create_beam_mesh_line(mesh_flat, beam_object, material,
+                n_el=2 * n_el,
+            )
+        create_beam_mesh_line(
+            mesh_flat,
+            beam_object,
+            material,
             [(4 * i + 2) * width, 0, 0],
-            [(4 * i + 2) * width, height, 0], n_el=2 * n_el)
+            [(4 * i + 2) * width, height, 0],
+            n_el=2 * n_el,
+        )
     return mesh_flat
 
 
-def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
-        n_axis, n_circumference, add_sets=False, **kwargs):
+def create_beam_mesh_stent(
+    mesh,
+    beam_object,
+    material,
+    length,
+    diameter,
+    n_axis,
+    n_circumference,
+    add_sets=False,
+    **kwargs
+):
     """
     Create a stent structure around cylinder, The cylinder axis will be
     the z-axis.
@@ -294,7 +334,7 @@ def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
 
     # Only allow even number of columns.
     if n_circumference % 2 == 1:
-        raise ValueError('has to be even even number!')
+        raise ValueError("has to be even even number!")
 
     # Set the Parameter for other functions
     height_flat = length
@@ -304,8 +344,9 @@ def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
 
     i_node_start = len(mesh.nodes)
 
-    mesh_stent = create_beam_mesh_stent_flat(beam_object, material, width_flat,
-        height_flat, n_height, n_column, **kwargs)
+    mesh_stent = create_beam_mesh_stent_flat(
+        beam_object, material, width_flat, height_flat, n_height, n_column, **kwargs
+    )
     mesh_stent.rotate(Rotation([1, 0, 0], np.pi / 2))
     mesh_stent.rotate(Rotation([0, 0, 1], np.pi / 2))
     mesh_stent.translate([diameter / 2, 0, 0])
@@ -313,12 +354,8 @@ def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
     mesh.add_mesh(mesh_stent)
 
     # List of nodes from the stent that are candidates for connections.
-    stent_nodes_all = [
-        mesh.nodes[i] for i in range(i_node_start, len(mesh.nodes))
-        ]
-    stent_nodes = [
-        node for node in stent_nodes_all if node.is_end_node
-        ]
+    stent_nodes_all = [mesh.nodes[i] for i in range(i_node_start, len(mesh.nodes))]
+    stent_nodes = [node for node in stent_nodes_all if node.is_end_node]
 
     # Add connections for the nodes with same positions.
     mesh.couple_nodes(nodes=stent_nodes)
@@ -328,9 +365,9 @@ def create_beam_mesh_stent(mesh, beam_object, material, length, diameter,
 
     # Return the geometry set.
     return_set = GeometryName()
-    return_set['top'] = min_max_nodes['z_max']
-    return_set['bottom'] = min_max_nodes['z_min']
-    return_set['all'] = GeometrySet(mpy.geo.line, stent_nodes_all)
+    return_set["top"] = min_max_nodes["z_max"]
+    return_set["bottom"] = min_max_nodes["z_min"]
+    return_set["all"] = GeometrySet(mpy.geo.line, stent_nodes_all)
 
     if add_sets:
         mesh.add(return_set)

@@ -48,10 +48,8 @@ class VolumeElement(Element):
     vtk_cell_type = None
     vtk_topology = None
 
-    def __init__(self, nodes=None, dat_pre_nodes='', dat_post_nodes='',
-            **kwargs):
-        super().__init__(nodes=nodes, material=None, is_dat=True,
-            **kwargs)
+    def __init__(self, nodes=None, dat_pre_nodes="", dat_post_nodes="", **kwargs):
+        super().__init__(nodes=nodes, material=None, is_dat=True, **kwargs)
         self.dat_pre_nodes = dat_pre_nodes
         self.dat_post_nodes = dat_post_nodes
 
@@ -59,17 +57,14 @@ class VolumeElement(Element):
         """Return the dat line for this element."""
 
         # String with the node ids.
-        nodes_string = ''
+        nodes_string = ""
         for node in self.nodes:
-            nodes_string += '{} '.format(node.n_global)
+            nodes_string += "{} ".format(node.n_global)
 
         # Return the dat line.
-        return '{} {} {} {}'.format(
-            self.n_global,
-            self.dat_pre_nodes,
-            nodes_string,
-            self.dat_post_nodes
-            )
+        return "{} {} {} {}".format(
+            self.n_global, self.dat_pre_nodes, nodes_string, self.dat_post_nodes
+        )
 
     def get_vtk(self, vtkwriter_beam, vtkwriter_solid):
         """
@@ -78,7 +73,7 @@ class VolumeElement(Element):
 
         # Check that the element has a valid vtk cell type.
         if self.vtk_cell_type is None:
-            raise TypeError('vtk_cell_type for {} not set!'.format(type(self)))
+            raise TypeError("vtk_cell_type for {} not set!".format(type(self)))
 
         # Dictionary with cell data.
         cell_data = {}
@@ -95,37 +90,94 @@ class VolumeElement(Element):
         add_point_data_node_sets(point_data, self.nodes)
 
         # Add hex8 line to writer.
-        vtkwriter_solid.add_cell(self.vtk_cell_type, coordinates,
-            self.vtk_topology, cell_data=cell_data, point_data=point_data)
+        vtkwriter_solid.add_cell(
+            self.vtk_cell_type,
+            coordinates,
+            self.vtk_topology,
+            cell_data=cell_data,
+            point_data=point_data,
+        )
 
 
 class VolumeHEX8(VolumeElement):
     """A HEX8 volume element."""
+
     vtk_cell_type = vtk.vtkHexahedron
 
 
 class VolumeTET4(VolumeElement):
     """A TET4 volume element."""
+
     vtk_cell_type = vtk.vtkTetra
 
 
 class VolumeTET10(VolumeElement):
     """A TET10 volume element."""
+
     vtk_cell_type = vtk.vtkQuadraticTetra
 
 
 class VolumeHEX20(VolumeElement):
     """A HEX20 volume element."""
+
     vtk_cell_type = vtk.vtkQuadraticHexahedron
-    vtk_topology = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16, 17, 18, 19, 12,
-        13, 14, 15]
+    vtk_topology = [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        16,
+        17,
+        18,
+        19,
+        12,
+        13,
+        14,
+        15,
+    ]
 
 
 class VolumeHEX27(VolumeElement):
     """A HEX27 volume element."""
+
     vtk_cell_type = vtk.vtkTriQuadraticHexahedron
-    vtk_topology = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 16, 17, 18, 19, 12,
-        13, 14, 15, 24, 22, 21, 23, 20, 25, 26]
+    vtk_topology = [
+        0,
+        1,
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        16,
+        17,
+        18,
+        19,
+        12,
+        13,
+        14,
+        15,
+        24,
+        22,
+        21,
+        23,
+        20,
+        25,
+        26,
+    ]
 
 
 class SolidRigidSphere(VolumeElement):
@@ -137,7 +189,9 @@ class SolidRigidSphere(VolumeElement):
 
         # Set radius of sphere from input file.
         arg_name = self.dat_post_nodes.split()[0]
-        if not arg_name == 'RADIUS':
-            raise ValueError('The first argument after the node should be '
-                + 'RADIUS, but it is "{}"!'.format(arg_name))
+        if not arg_name == "RADIUS":
+            raise ValueError(
+                "The first argument after the node should be "
+                + 'RADIUS, but it is "{}"!'.format(arg_name)
+            )
         self.radius = float(self.dat_post_nodes.split()[1])

@@ -36,11 +36,15 @@ import unittest
 import os
 
 # Meshpy imports.
-from meshpy import (mpy, InputFile)
+from meshpy import mpy, InputFile
 
 # Header functions.
-from meshpy.header_functions import (set_header_static, set_runtime_output,
-    set_beam_to_solid_meshtying, get_comment)
+from meshpy.header_functions import (
+    set_header_static,
+    set_runtime_output,
+    set_beam_to_solid_meshtying,
+    get_comment,
+)
 
 # Testing imports.
 from tests.testing_utility import testing_input, compare_strings
@@ -60,42 +64,49 @@ class TestHeaderFunctions(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(maintainer='Ivo Steinbrecher')
+        input_file = InputFile(maintainer="Ivo Steinbrecher")
 
         # Set the header.
         set_header_static(input_file, time_step=0.1, n_steps=17, load_lin=True)
         set_runtime_output(input_file, output_triad=False)
-        set_beam_to_solid_meshtying(input_file,
+        set_beam_to_solid_meshtying(
+            input_file,
             mpy.beam_to_solid.volume_meshtying,
-            contact_discretization='mortar',
+            contact_discretization="mortar",
             binning_bounding_box=[1, 2, 3, 4, 5, 6],
-            binning_cutoff_radius=0.69)
+            binning_cutoff_radius=0.69,
+        )
 
-        set_beam_to_solid_meshtying(input_file,
+        set_beam_to_solid_meshtying(
+            input_file,
             mpy.beam_to_solid.surface_meshtying,
-            contact_discretization='gp',
+            contact_discretization="gp",
             binning_bounding_box=[1, 2, 3, 4, 5, 6],
             binning_cutoff_radius=0.69,
             segmentation_search_points=6,
-            coupling_type='consistent_fad')
+            coupling_type="consistent_fad",
+        )
 
-        set_beam_to_solid_meshtying(input_file,
+        set_beam_to_solid_meshtying(
+            input_file,
             mpy.beam_to_solid.surface_meshtying,
-            contact_discretization='gp',
+            contact_discretization="gp",
             segmentation=False,
-            option_overwrite=True)
+            option_overwrite=True,
+        )
 
-        input_file.add('--Test\n{}on\n{}off'.format(get_comment(True),
-            get_comment(False)))
+        input_file.add(
+            "--Test\n{}on\n{}off".format(get_comment(True), get_comment(False))
+        )
 
         # Check the output.
-        ref_file = os.path.join(testing_input,
-            'test_header_static_reference.dat')
+        ref_file = os.path.join(testing_input, "test_header_static_reference.dat")
         compare_strings(
             self,
-            'test_header_static',
+            "test_header_static",
             ref_file,
-            input_file.get_string(header=False, check_nox=False))
+            input_file.get_string(header=False, check_nox=False),
+        )
 
     def test_static_prestress(self):
         """
@@ -107,32 +118,44 @@ class TestHeaderFunctions(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(maintainer='Ivo Steinbrecher')
+        input_file = InputFile(maintainer="Ivo Steinbrecher")
 
         # Set the header.
-        set_header_static(input_file, time_step=0.1, n_steps=17,
-        load_lin=True, prestress='mulf', prestress_time=1)
-        set_beam_to_solid_meshtying(input_file,
+        set_header_static(
+            input_file,
+            time_step=0.1,
+            n_steps=17,
+            load_lin=True,
+            prestress="mulf",
+            prestress_time=1,
+        )
+        set_beam_to_solid_meshtying(
+            input_file,
             mpy.beam_to_solid.volume_meshtying,
-            contact_discretization='mortar',
+            contact_discretization="mortar",
             binning_bounding_box=[1, 2, 3, 4, 5, 6],
             binning_cutoff_radius=0.69,
-            couple_restart=True)
+            couple_restart=True,
+        )
 
-        set_beam_to_solid_meshtying(input_file,
+        set_beam_to_solid_meshtying(
+            input_file,
             mpy.beam_to_solid.surface_meshtying,
-            contact_discretization='gp',
+            contact_discretization="gp",
             segmentation=False,
-            couple_restart=False)
+            couple_restart=False,
+        )
 
         # Check the output.
-        ref_file = os.path.join(testing_input,
-            'test_header_static_prestress_reference.dat')
+        ref_file = os.path.join(
+            testing_input, "test_header_static_prestress_reference.dat"
+        )
         compare_strings(
             self,
-            'test_header_static_prestress',
+            "test_header_static_prestress",
             ref_file,
-            input_file.get_string(header=False, check_nox=False))
+            input_file.get_string(header=False, check_nox=False),
+        )
 
     def test_stress_output(self):
         """
@@ -144,23 +167,31 @@ class TestHeaderFunctions(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(maintainer='Ivo Steinbrecher')
+        input_file = InputFile(maintainer="Ivo Steinbrecher")
 
         # Set the header.
-        set_header_static(input_file, time_step=0.1, n_steps=17,
-        load_lin=True, write_stress='cauchy', write_strain='gl')
+        set_header_static(
+            input_file,
+            time_step=0.1,
+            n_steps=17,
+            load_lin=True,
+            write_stress="cauchy",
+            write_strain="gl",
+        )
         set_runtime_output(input_file, output_stress_strain=True)
 
         # Check the output.
-        ref_file = os.path.join(testing_input,
-            'test_header_stress_output_reference.dat')
+        ref_file = os.path.join(
+            testing_input, "test_header_stress_output_reference.dat"
+        )
         compare_strings(
             self,
-            'test_header_stress_output',
+            "test_header_stress_output",
             ref_file,
-            input_file.get_string(header=False, check_nox=False))
+            input_file.get_string(header=False, check_nox=False),
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     # Execution part of script.
     unittest.main()

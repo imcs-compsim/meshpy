@@ -6,6 +6,7 @@ numpy
 scipy
 vtk
 geomdl
+black
 
 # Required for full test suite on GitLab
 ## For coverage stuff

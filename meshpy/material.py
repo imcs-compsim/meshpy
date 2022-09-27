@@ -41,6 +41,7 @@ from .base_mesh_item import BaseMeshItem
 
 class Material(BaseMeshItem):
     """Base class for all materials."""
+
     def __init__(self, data=None, is_dat=False, **kwargs):
         super().__init__(data=data, is_dat=is_dat, **kwargs)
 
@@ -61,14 +62,16 @@ class Material(BaseMeshItem):
 class MaterialBeam(Material):
     """Base class for all beam materials."""
 
-    def __init__(self,
-            radius=-1.,
-            material_string=None,
-            youngs_modulus=-1.,
-            nu=0.,
-            density=0.,
-            interaction_radius=None,
-            **kwargs):
+    def __init__(
+        self,
+        radius=-1.0,
+        material_string=None,
+        youngs_modulus=-1.0,
+        nu=0.0,
+        density=0.0,
+        interaction_radius=None,
+        **kwargs
+    ):
         """Set the material values that all beams have."""
         super().__init__(**kwargs)
 
@@ -99,35 +102,40 @@ class MaterialReissner(MaterialBeam):
     """Holds material definition for Reissner beams."""
 
     def __init__(self, shear_correction=1, **kwargs):
-        super().__init__(material_string='MAT_BeamReissnerElastHyper',
-            **kwargs)
+        super().__init__(material_string="MAT_BeamReissnerElastHyper", **kwargs)
 
         # Shear factor for Reissner beam.
         self.shear_correction = shear_correction
 
     def _get_dat(self):
         """Return the line for this material."""
-        if (self.area is None
-                and self.mom2 is None
-                and self.mom3 is None
-                and self.polar is None):
+        if (
+            self.area is None
+            and self.mom2 is None
+            and self.mom3 is None
+            and self.polar is None
+        ):
             area, mom2, mom3, polar = self.calc_area_stiffness()
-        elif (self.area is not None
-                and self.mom2 is not None
-                and self.mom3 is not None
-                and self.polar is not None):
+        elif (
+            self.area is not None
+            and self.mom2 is not None
+            and self.mom3 is not None
+            and self.polar is not None
+        ):
             area = self.area
             mom2 = self.mom2
             mom3 = self.mom3
             polar = self.polar
         else:
-            raise ValueError('Either all relevant material parameters are set '
-                + 'by the user, or a circular cross-section will be assumed. '
-                + 'A combination is not possible')
-        string = 'MAT {} {} YOUNG {} POISSONRATIO {} DENS {} CROSSAREA {} '
-        string += 'SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}'
+            raise ValueError(
+                "Either all relevant material parameters are set "
+                + "by the user, or a circular cross-section will be assumed. "
+                + "A combination is not possible"
+            )
+        string = "MAT {} {} YOUNG {} POISSONRATIO {} DENS {} CROSSAREA {} "
+        string += "SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}"
         if self.interaction_radius is not None:
-            string += ' INTERACTIONRADIUS {}'.format(self.interaction_radius)
+            string += " INTERACTIONRADIUS {}".format(self.interaction_radius)
         return string.format(
             self.n_global,
             self.material_string,
@@ -138,49 +146,54 @@ class MaterialReissner(MaterialBeam):
             self.shear_correction,
             polar,
             mom2,
-            mom3
-            )
+            mom3,
+        )
 
 
 class MaterialKirchhoff(MaterialBeam):
     """Holds material definition for Kirchhoff beams."""
 
     def __init__(self, **kwargs):
-        super().__init__(material_string='MAT_BeamKirchhoffElastHyper',
-            **kwargs)
+        super().__init__(material_string="MAT_BeamKirchhoffElastHyper", **kwargs)
 
     def _get_dat(self):
         """Return the line for this material."""
-        if (self.area is None
-                and self.mom2 is None
-                and self.mom3 is None
-                and self.polar is None):
+        if (
+            self.area is None
+            and self.mom2 is None
+            and self.mom3 is None
+            and self.polar is None
+        ):
             area, mom2, mom3, polar = self.calc_area_stiffness()
-        elif (self.area is not None
-                and self.mom2 is not None
-                and self.mom3 is not None
-                and self.polar is not None):
+        elif (
+            self.area is not None
+            and self.mom2 is not None
+            and self.mom3 is not None
+            and self.polar is not None
+        ):
             area = self.area
             mom2 = self.mom2
             mom3 = self.mom3
             polar = self.polar
         else:
-            raise ValueError('Either all relevant material parameters are set '
-                + 'by the user, or a circular cross-section will be assumed. '
-                + 'A combination is not possible')
-        string = 'MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} '
-        string += 'MOMINPOL {} MOMIN2 {} MOMIN3 {}'
+            raise ValueError(
+                "Either all relevant material parameters are set "
+                + "by the user, or a circular cross-section will be assumed. "
+                + "A combination is not possible"
+            )
+        string = "MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} "
+        string += "MOMINPOL {} MOMIN2 {} MOMIN3 {}"
         return string.format(
             self.n_global,
             self.material_string,
             self.youngs_modulus,
-            self.youngs_modulus / (2. * (1. + self.nu)),
+            self.youngs_modulus / (2.0 * (1.0 + self.nu)),
             self.density,
             area,
             polar,
             mom2,
-            mom3
-            )
+            mom3,
+        )
 
 
 class MaterialEulerBernoulli(MaterialBeam):
@@ -188,26 +201,29 @@ class MaterialEulerBernoulli(MaterialBeam):
 
     def __init__(self, **kwargs):
         super().__init__(
-            material_string='MAT_BeamKirchhoffTorsionFreeElastHyper', **kwargs)
+            material_string="MAT_BeamKirchhoffTorsionFreeElastHyper", **kwargs
+        )
 
     def _get_dat(self):
         """Return the line for this material."""
         area, mom2, _mom3, _polar = self.calc_area_stiffness()
-        if (self.area is None and self.mom2 is None):
+        if self.area is None and self.mom2 is None:
             area, mom2, _mom3, _polar = self.calc_area_stiffness()
-        elif (self.area is not None and self.mom2 is not None):
+        elif self.area is not None and self.mom2 is not None:
             area = self.area
             mom2 = self.mom2
         else:
-            raise ValueError('Either all relevant material parameters are set '
-                + 'by the user, or a circular cross-section will be assumed. '
-                + 'A combination is not possible')
-        string = 'MAT {} {} YOUNG {} DENS {} CROSSAREA {} MOMIN {}'
+            raise ValueError(
+                "Either all relevant material parameters are set "
+                + "by the user, or a circular cross-section will be assumed. "
+                + "A combination is not possible"
+            )
+        string = "MAT {} {} YOUNG {} DENS {} CROSSAREA {} MOMIN {}"
         return string.format(
             self.n_global,
             self.material_string,
             self.youngs_modulus,
             self.density,
             area,
-            mom2
-            )
+            mom2,
+        )

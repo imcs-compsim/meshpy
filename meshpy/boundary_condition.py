@@ -78,23 +78,30 @@ class BoundaryConditionBase(BaseMeshItem):
         # Split up the input line.
         split = line.split()
 
-        if (bc_key is mpy.bc.dirichlet
-                or bc_key is mpy.bc.neumann
-                or bc_key is mpy.bc.beam_to_solid_surface_meshtying
-                or bc_key is mpy.bc.beam_to_solid_surface_contact
-                or bc_key is mpy.bc.beam_to_solid_volume_meshtying):
+        if (
+            bc_key is mpy.bc.dirichlet
+            or bc_key is mpy.bc.neumann
+            or bc_key is mpy.bc.beam_to_solid_surface_meshtying
+            or bc_key is mpy.bc.beam_to_solid_surface_contact
+            or bc_key is mpy.bc.beam_to_solid_volume_meshtying
+        ):
             # Normal boundary condition (including beam-to-solid conditions).
             return BoundaryCondition(
-                int(split[1]) - 1, ' '.join(split[3:]),
-                bc_type=bc_key, is_dat=True, **kwargs
-                )
+                int(split[1]) - 1,
+                " ".join(split[3:]),
+                bc_type=bc_key,
+                is_dat=True,
+                **kwargs
+            )
         elif bc_key is mpy.bc.point_coupling:
             # Coupling condition.
             from .coupling import Coupling
-            return Coupling(int(split[1]) - 1, bc_key, ' '.join(split[3:]),
-                is_dat=True, **kwargs)
+
+            return Coupling(
+                int(split[1]) - 1, bc_key, " ".join(split[3:]), is_dat=True, **kwargs
+            )
         else:
-            raise ValueError('Got unexpected boundary condition!')
+            raise ValueError("Got unexpected boundary condition!")
 
 
 class BoundaryCondition(BoundaryConditionBase):
@@ -103,8 +110,15 @@ class BoundaryCondition(BoundaryConditionBase):
     condition.
     """
 
-    def __init__(self, geometry_set, bc_string, format_replacement=None,
-            bc_type=None, double_nodes=None, **kwargs):
+    def __init__(
+        self,
+        geometry_set,
+        bc_string,
+        format_replacement=None,
+        bc_type=None,
+        double_nodes=None,
+        **kwargs
+    ):
         """
         Initialize the object.
 
@@ -124,8 +138,7 @@ class BoundaryCondition(BoundaryConditionBase):
             conditions do contain nodes at the same spatial positions.
         """
 
-        BoundaryConditionBase.__init__(self, geometry_set, bc_type=bc_type,
-            **kwargs)
+        BoundaryConditionBase.__init__(self, geometry_set, bc_type=bc_type, **kwargs)
         self.bc_string = bc_string
         self.format_replacement = format_replacement
         self.double_nodes = double_nodes
@@ -148,10 +161,7 @@ class BoundaryCondition(BoundaryConditionBase):
         else:
             dat_string = self.bc_string
 
-        return 'E {} - {}'.format(
-            self.geometry_set.n_global,
-            dat_string
-            )
+        return "E {} - {}".format(self.geometry_set.n_global, dat_string)
 
     def check(self):
         """
@@ -166,8 +176,10 @@ class BoundaryCondition(BoundaryConditionBase):
         if self.double_nodes is mpy.double_nodes.keep:
             return
 
-        if (self.bc_type == mpy.bc.neumann
-                and self.geometry_set.geometry_type == mpy.geo.point):
+        if (
+            self.bc_type == mpy.bc.neumann
+            and self.geometry_set.geometry_type == mpy.geo.point
+        ):
             partners = find_close_nodes(self.geometry_set.nodes)
             # Create a list with nodes that will not be kept in the set.
             double_node_list = []
@@ -175,12 +187,19 @@ class BoundaryCondition(BoundaryConditionBase):
                 for i, node in enumerate(node_list):
                     if i > 0:
                         double_node_list.append(node)
-            if (len(double_node_list) > 0 and
-                    self.double_nodes is mpy.double_nodes.remove):
+            if (
+                len(double_node_list) > 0
+                and self.double_nodes is mpy.double_nodes.remove
+            ):
                 # Create the nodes again for the set.
-                self.geometry_set.nodes = [node for node in
-                    self.geometry_set.nodes if (node not in double_node_list)]
+                self.geometry_set.nodes = [
+                    node
+                    for node in self.geometry_set.nodes
+                    if (node not in double_node_list)
+                ]
             elif len(double_node_list) > 0:
-                warnings.warn('There are overlapping nodes in this point '
-                    + 'Neumann boundary, and it is not specified on how to '
-                    + 'handle them!')
+                warnings.warn(
+                    "There are overlapping nodes in this point "
+                    + "Neumann boundary, and it is not specified on how to "
+                    + "handle them!"
+                )

@@ -54,12 +54,12 @@ def read_dbc_monitor_file(file_path):
     [node_ids], [time], [force], [moment]
     """
 
-    with open(file_path, 'r') as file:
+    with open(file_path, "r") as file:
         lines = [line.strip() for line in file.readlines()]
 
     # Extract the nodes for this condition.
-    node_line = lines[0].split(' ')
-    counter = node_line.index(':') + 1
+    node_line = lines[0].split(" ")
+    counter = node_line.index(":") + 1
     nodes = []
     is_int = True
     while is_int:
@@ -72,7 +72,7 @@ def read_dbc_monitor_file(file_path):
 
     # Find the start of the data lines.
     for i, line in enumerate(lines):
-        if line.split(' ')[0] == 'step':
+        if line.split(" ")[0] == "step":
             break
     else:
         raise ValueError('Could not find "step" in file!')
@@ -81,7 +81,7 @@ def read_dbc_monitor_file(file_path):
     # Get the monitor data.
     data = []
     for line in lines[start_line:]:
-        data.append(np.fromstring(line, dtype=float, sep=' '))
+        data.append(np.fromstring(line, dtype=float, sep=" "))
     data = np.array(data)
 
     return nodes, data[:, 1], data[:, 4:7], data[:, 7:]
@@ -117,12 +117,14 @@ def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3):
     # Create the BC condition for this set and add it to the input file.
     mesh_nodes = [input_file.nodes[i_node] for i_node in nodes]
     geo = GeometrySet(mpy.geo.point, nodes=mesh_nodes)
-    extra_dof_zero = ' 0' * (n_dof - 3)
-    bc = BoundaryCondition(geo,
-        ('NUMDOF {n_dof} ONOFF 1 1 1{edz} VAL {data[0]} {data[1]} {data[2]}'
-        + '{edz} FUNCT {{0}} {{0}} {{0}}{edz}').format(
-            n_dof=n_dof, data=force[step], edz=extra_dof_zero),
+    extra_dof_zero = " 0" * (n_dof - 3)
+    bc = BoundaryCondition(
+        geo,
+        (
+            "NUMDOF {n_dof} ONOFF 1 1 1{edz} VAL {data[0]} {data[1]} {data[2]}"
+            + "{edz} FUNCT {{0}} {{0}} {{0}}{edz}"
+        ).format(n_dof=n_dof, data=force[step], edz=extra_dof_zero),
         bc_type=mpy.bc.neumann,
-        format_replacement=[function]
-        )
+        format_replacement=[function],
+    )
     input_file.add(bc)
