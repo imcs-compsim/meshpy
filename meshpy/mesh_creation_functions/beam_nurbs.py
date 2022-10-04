@@ -93,7 +93,10 @@ def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, **kwargs):
             return eval_r(curve_end)
         else:
             raise ValueError(
-                "Can not evaluate the curve function outside of the interval (plus tolerances)."
+                (
+                    "Can not evaluate the curve function outside of the interval (plus tolerances)."
+                    "\nAbs diff start: {}\nAbs diff end: {}"
+                ).format(np.abs(curve_start - t), np.abs(t - curve_end))
             )
 
     def jacobian(t):
