@@ -40,7 +40,7 @@ from ..conf import mpy
 from .beam_curve import create_beam_mesh_curve
 
 
-def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, **kwargs):
+def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, tol=None, **kwargs):
     """
     Generate a beam from a nurbs curve.
 
@@ -54,6 +54,9 @@ def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, **kwargs):
         Material for this line.
     curve: geomdl object
         Curve that is used to describe the beam centerline.
+    tol: float
+        Tolerance for checking if point is close to the start or end of the
+        interval.
 
     **kwargs (for all of them look into create_beam_mesh_function)
     ----
@@ -66,6 +69,10 @@ def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, **kwargs):
         Set with the 'start' and 'end' node of the curve. Also a 'line' set
         with all nodes of the curve.
     """
+
+    # Get the tolerance.
+    if tol is None:
+        tol = mpy.eps_pos
 
     # Get start and end values of the curve parameter space.
     curve_start = np.min(curve.knotvector)
@@ -87,9 +94,9 @@ def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, **kwargs):
         # evaluated outside the interval.
         if curve_start <= t and t <= curve_end:
             return eval_r(t)
-        elif np.abs(curve_start - t) < mpy.eps_pos:
+        elif np.abs(curve_start - t) < tol:
             return eval_r(curve_start)
-        elif np.abs(t - curve_end) < mpy.eps_pos:
+        elif np.abs(t - curve_end) < tol:
             return eval_r(curve_end)
         else:
             raise ValueError(
