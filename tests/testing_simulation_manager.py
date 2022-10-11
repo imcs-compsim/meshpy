@@ -39,6 +39,7 @@ import numpy as np
 import subprocess
 
 # User imports.
+from testing_context import meshpy
 from meshpy import (
     mpy,
     InputFile,
@@ -51,7 +52,7 @@ from meshpy import (
 )
 from meshpy.mesh_creation_functions import create_beam_mesh_line
 from meshpy.simulation_manager import Simulation, SimulationManager
-from tests.testing_utility import (
+from testing_utility import (
     testing_temp,
     get_baci_path,
     testing_input,

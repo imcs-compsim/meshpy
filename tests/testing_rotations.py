@@ -37,6 +37,7 @@ import unittest
 import numpy as np
 
 # Meshpy imports.
+from testing_context import meshpy
 from meshpy import mpy, Rotation
 from meshpy.rotation import get_relative_rotation
 

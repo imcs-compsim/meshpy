@@ -37,6 +37,7 @@ import numpy as np
 import os
 
 # Meshpy imports.
+from testing_context import meshpy
 from meshpy import (
     mpy,
     Mesh,
@@ -60,7 +61,7 @@ from meshpy.mesh_creation_functions import (
 )
 
 # Testing imports.
-from tests.testing_utility import testing_input, compare_strings
+from testing_utility import testing_input, compare_strings
 
 
 class TestMeshCreationFunctions(unittest.TestCase):

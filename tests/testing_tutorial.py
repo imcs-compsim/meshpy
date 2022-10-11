@@ -36,10 +36,11 @@ import unittest
 import os
 
 # Import tutorial function.
+from testing_context import tutorial
 from tutorial import meshpy_tutorial
 
 # Import testing utilities.
-from tests.testing_utility import (
+from testing_utility import (
     skip_fail_test,
     testing_temp,
     testing_input,
