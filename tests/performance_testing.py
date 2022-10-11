@@ -41,6 +41,7 @@ import warnings
 import sys
 
 # Meshpy imports.
+from testing_context import meshpy
 from meshpy import (
     mpy,
     InputFile,
@@ -53,7 +54,7 @@ from meshpy import (
 
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 
-from tests.testing_utility import empty_testing_directory, testing_temp
+from testing_utility import empty_testing_directory, testing_temp
 
 # Cubitpy imports.
 from cubitpy import cupy, CubitPy

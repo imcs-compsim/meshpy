@@ -40,14 +40,16 @@ import shutil
 import glob
 
 # Testing imports.
-from tests.testing_utility import (
+from testing_utility import (
     baci_release,
+    compare_strings,
     testing_temp,
     testing_path,
     testing_input,
 )
 
 # Meshpy imports.
+from testing_context import meshpy
 from meshpy import (
     mpy,
     Rotation,
@@ -61,7 +63,6 @@ from meshpy import (
     set_header_static,
 )
 from meshpy.utility_baci import dbc_monitor_to_input
-from testing_utility import compare_strings
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line

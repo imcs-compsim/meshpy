@@ -36,6 +36,7 @@ import unittest
 import os
 
 # Meshpy imports.
+from testing_context import meshpy
 from meshpy import mpy, InputFile
 
 # Header functions.
@@ -47,7 +48,7 @@ from meshpy.header_functions import (
 )
 
 # Testing imports.
-from tests.testing_utility import testing_input, compare_strings
+from testing_utility import testing_input, compare_strings
 
 
 class TestHeaderFunctions(unittest.TestCase):

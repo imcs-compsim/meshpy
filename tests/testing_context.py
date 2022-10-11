@@ -27,3 +27,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
+"""
+This file imports the meshpy module for all testing purposes.
+"""
+
+import os
+import sys
+
+# Add the root directory of the package to the python path.
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
+
+import meshpy
+import tutorial

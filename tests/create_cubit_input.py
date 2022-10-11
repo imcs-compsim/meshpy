@@ -34,7 +34,6 @@ This script creates a solid input files with cubitpy.
 # Python imports.
 import os
 
-
 # Cubitpy imports.
 from cubitpy import CubitPy, cupy
 from cubitpy.mesh_creation_functions import create_brick

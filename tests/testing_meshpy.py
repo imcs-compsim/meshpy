@@ -41,6 +41,7 @@ import warnings
 import vtk
 
 # Meshpy imports.
+from testing_context import meshpy
 from meshpy import (
     mpy,
     Rotation,
@@ -88,7 +89,7 @@ from meshpy.mesh_creation_functions.beam_honeycomb import (
 from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
 
 # Testing imports.
-from tests.testing_utility import (
+from testing_utility import (
     skip_fail_test,
     testing_temp,
     testing_input,
