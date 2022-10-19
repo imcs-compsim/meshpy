@@ -39,7 +39,6 @@ import numpy as np
 import subprocess
 
 # User imports.
-from testing_context import meshpy
 from meshpy import (
     mpy,
     InputFile,

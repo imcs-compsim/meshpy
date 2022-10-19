@@ -22,11 +22,16 @@
 */__pycache__
 
 # ignore build folders for cython
+build/*
 */build
 */cython_build
 meshpy/meshpy
 */find_close_points.c
 */find_close_points.html
+*.so
+
+# packaging folders
+*.egg-info/
 
 # Website stuff
 _site

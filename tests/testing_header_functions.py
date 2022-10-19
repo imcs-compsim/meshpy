@@ -36,7 +36,6 @@ import unittest
 import os
 
 # Meshpy imports.
-from testing_context import meshpy
 from meshpy import mpy, InputFile
 
 # Header functions.

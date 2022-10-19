@@ -17,48 +17,46 @@ The testsuite checks if all files are formated accordingly.
 Meshpy is developed with `python3.8`.
 Other versions of Python might lead to issues.
 It is recommended to use virtual environments with `python`.
-On Debian systems the package `python3-venv` has to be installed.
+On Debian systems the following packages have to be installed
 ```bash
 sudo apt-get install python3-venv python3-dev
 ```
 
-Now a virtual environment can be created (for example in the home directory)
+Now a virtual environment can be created (chose an appropriate directory for this, e.g., `/home/user/opt`)
+
 ```bash
-cd ~
-mkdir opt
-cd opt
 python3 -m venv meshpy-env
 ```
 
 The created virtual environment can be loaded with
 ```bash
-source ~/opt/meshpy-env/bin/activate
+source meshpy-env/bin/activate
 ```
 
 From now on we assume that the virtual enviroment is loaded.
-To install `meshpy` go to the repository directory
+To install `meshpy` go to the repository root directory
 ```bash
 cd path_to_meshpy
 ```
 
-Run the following command to install the required packages
+Install `meshpy` via `pip`
 ```bash
-pip install -r requirements.txt
+pip install .
 ```
 
-As a last step the `cython` code within `meshpy` has to be compiled
+If you intend to actively develop `meshpy`, install it in *editable mode*
+
 ```bash
-cd path_to_meshpy/meshpy
-python3 find_close_points_setup.py
+pip install -e .
 ```
 
-Add the meshpy path to `PYTHONPATH`
+If `cython` code is changed, it has to be recompiled. This can be done by running (in the root directory)
 ```bash
-export PYTHONPATH=path_to_meshpy:$PYTHONPATH
+python3 setup.py build_ext --inplace
 ```
 
 Optional, a path to `baci-release` can be given in order to run some combined
-tests with baci.
+tests with baci
 ```bash
 export BACI_RELEASE=path_to_baci-release
 ```

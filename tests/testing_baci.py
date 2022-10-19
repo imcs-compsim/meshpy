@@ -49,7 +49,6 @@ from testing_utility import (
 )
 
 # Meshpy imports.
-from testing_context import meshpy
 from meshpy import (
     mpy,
     Rotation,

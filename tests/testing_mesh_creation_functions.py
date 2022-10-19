@@ -37,7 +37,6 @@ import numpy as np
 import os
 
 # Meshpy imports.
-from testing_context import meshpy
 from meshpy import (
     mpy,
     Mesh,

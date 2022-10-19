@@ -41,7 +41,6 @@ import warnings
 import vtk
 
 # Meshpy imports.
-from testing_context import meshpy
 from meshpy import (
     mpy,
     Rotation,
@@ -2099,7 +2098,7 @@ class TestMeshpy(unittest.TestCase):
             skip_fail_test(self, "CubitPy could not be loaded!")
 
         # Load the mesh creation functions.
-        from tests.create_cubit_input import create_tube, create_tube_cubit
+        from create_cubit_input import create_tube, create_tube_cubit
 
         # Create the input file and read the file.
         file_path = os.path.join(testing_temp, "test_cubitpy_import.dat")
