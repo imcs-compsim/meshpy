@@ -27,15 +27,43 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This file imports the meshpy module for all testing purposes.
-"""
 
+from setuptools import setup
 import os
-import sys
+import numpy as np
+from Cython.Build import cythonize
 
-# Add the root directory of the package to the python path.
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
-
-import meshpy
-import tutorial
+setup(
+    name="meshpy",
+    version="0.1",
+    author="Ivo Steinbrecher",
+    author_email="ivo.steinbrecher@unibw.de",
+    description="MeshPy: A beam finite element input generator",
+    install_requires=[
+        "autograd",
+        "black",
+        "Cython",
+        "geomdl",
+        "matplotlib",
+        "numpy",
+        "scipy",
+        "vtk",
+    ],
+    extras_require={
+        "CI-CD": ["coverage", "coverage-badge"],
+    },
+    license_files=["LICENSE"],
+    packages=[
+        "meshpy",
+        "meshpy.mesh_creation_functions",
+        "meshpy.simulation_manager",
+        "meshpy.utility_baci",
+    ],
+    package_data={"meshpy.simulation_manager": ["batch_template.sh"]},
+    ext_modules=cythonize(
+        "meshpy/find_close_points_cython.pyx",
+        annotate=True,
+        build_dir=os.path.join("build", "cython_generated_code"),
+    ),
+    include_dirs=[np.get_include()],
+)

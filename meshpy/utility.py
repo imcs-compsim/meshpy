@@ -42,7 +42,10 @@ import warnings
 
 # Meshpy modules.
 from .conf import mpy
-from .meshpy import find_close_points as find_points
+from .find_close_points_cython import (
+    find_close_points as find_close_points_cython,
+    find_close_points_binning as find_close_points_binning_cython,
+)
 
 
 def get_git_data(repo):
@@ -145,11 +148,11 @@ def find_close_points(
 
     # Get list of closest pairs.
     if binning:
-        has_partner, n_partner = find_points.find_close_points_binning(
+        has_partner, n_partner = find_close_points_binning_cython(
             nodes, nx, ny, nz, eps
         )
     else:
-        has_partner, n_partner = find_points.find_close_points(nodes, eps=eps)
+        has_partner, n_partner = find_close_points_cython(nodes, eps=eps)
 
     return point_partners_to_partner_indices(has_partner, n_partner)
 

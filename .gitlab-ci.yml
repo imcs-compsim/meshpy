@@ -13,45 +13,46 @@ variables:
 
     # Some test require baci-release to check if the created input file
     # works with baci.
-    BACI_RELEASE: "/hdd/gitlab-runner/lib/baci-master/release/baci-release"
+    BACI_BUILD: "/hdd/gitlab-runner/lib/baci-master/release"
+    BACI_RELEASE: "$BACI_BUILD/baci-release"
 
-    # Path to the virtual python environment on the testing machine.
-    PYTHON_ENV: "/hdd/gitlab-runner/lib/python-interpreter/meshpy-env"
+    # Python executable and virtual environment name
+    PYTHON_EXE: "python3"
+    PYTHON_VENV: "python-testing-environment"
 
     # Meshpy can interact with cubitpy, to perform the corresponding tests,
-    # the foloowing paths have to be set.
-    CUBITPY_MASTER: "/hdd/gitlab-runner/lib/cubitpy-master"
-    BACI_PRE_EXODUS: "/hdd/gitlab-runner/lib/baci-master/release/pre_exodus"
+    # the following paths have to be set
+    CUBITPY_REPO: "/hdd/gitlab-runner/lib/cubitpy-master"
+    BACI_PRE_EXODUS: "$BACI_BUILD/pre_exodus"
     CUBIT: "/imcs/public/compsim/opt/cubit-13.2"
 
     # For building the website.
     JEKYLL_ENV: production
   
 
-# Test meshpy.
+# Test meshpy
 meshpy-testing:
     stage: test
     script:
         - "whoami"
         - "pwd"
         - MESHPY_PATH=$(pwd)
-        # Update the cubitpy repository.
-        - cd $CUBITPY_MASTER
+        # Create the virtual environment
+        - "${PYTHON_EXE} -m venv ${PYTHON_VENV}"
+        - source "${PYTHON_VENV}/bin/activate"
+        # We have to update pip, otherwise there is a bug in the compilation of the cython code
+        - "pip install --upgrade pip"
+        # Install meshpy
+        - "pip install .[CI-CD]"
+        # Install cubitpy
+        - cd $CUBITPY_REPO
         - git pull
+        - "pip install ."
         - cd $MESHPY_PATH
-        # Source the virtual environment
-        - source "${PYTHON_ENV}/bin/activate"
-        # Print information on the python environment.
+        # Print information on the python environment
         - "python --version"
         - "pip list"
-        # Add python paths.
-        - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-        - export PYTHONPATH="${PYTHONPATH}:${CUBITPY_MASTER}"
-        # Compile cython code.
-        - "cd meshpy"
-        - "python3 find_close_points_setup.py"
-        - "cd .."
-        # Run tests.
+        # Run tests
         - "cd tests"
         - "coverage run --rcfile=coverage.config testing_main.py"
         - "coverage html"
@@ -59,7 +60,7 @@ meshpy-testing:
         - coverage-badge -o htmlcov/coverage.svg
         # Check codestyle
         - "cd $MESHPY_PATH"
-        - "black . --check && exit 0"
+        - 'black . --check --exclude="${PYTHON_VENV}" && exit 0'
         # If we did not exit earlier, raise an error here
         - "exit 1"
     artifacts:
@@ -77,19 +78,22 @@ meshpy-performance-testing:
         - "whoami"
         - "pwd"
         - MESHPY_PATH=$(pwd)
-        # Source the virtual environment
-        - source "${PYTHON_ENV}/bin/activate"
-        # Print information on the python environment.
+        # Create the virtual environment
+        - "${PYTHON_EXE} -m venv ${PYTHON_VENV}"
+        - source "${PYTHON_VENV}/bin/activate"
+        # We have to update pip, otherwise there is a bug in the compilation of the cython code
+        - "pip install --upgrade pip"
+        # Install meshpy
+        - "pip install ."
+        # Install cubitpy
+        - cd $CUBITPY_REPO
+        - git pull
+        - "pip install ."
+        - cd $MESHPY_PATH
+        # Print information on the python environment
         - "python --version"
         - "pip list"
-        # Add python paths.
-        - export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-        - export PYTHONPATH="${PYTHONPATH}:${CUBITPY_MASTER}"
-        # Compile cython code.
-        - "cd meshpy"
-        - "python3 find_close_points_setup.py"
-        - "cd .."
-        # Run performance tests.
+        # Run performance tests
         - "cd tests"
         - "python3 performance_testing.py"
     tags:
@@ -97,7 +101,7 @@ meshpy-performance-testing:
     allow_failure: true
 
 
-# For non master branches test the website. The build can be viewed under GitLab CI/CD artifacts.
+# For non master branches test the website. The build can be viewed under GitLab CI/CD artifacts
 website-test:
     stage: test
     script:
@@ -115,7 +119,7 @@ website-test:
             - master
 
 
-# For the master branch add the coverage report and the website.
+# For the master branch add the coverage report and the website
 pages:
     stage: deploy
     dependencies:

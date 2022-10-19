@@ -41,7 +41,6 @@ import warnings
 import sys
 
 # Meshpy imports.
-from testing_context import meshpy
 from meshpy import (
     mpy,
     InputFile,

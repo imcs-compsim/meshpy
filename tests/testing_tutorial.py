@@ -34,19 +34,16 @@ This script is used to test the tutorial.
 # Import python modules.
 import unittest
 import os
+import sys
 
 # Import tutorial function.
-from testing_context import tutorial
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tutorial"))
+)
 from tutorial import meshpy_tutorial
 
 # Import testing utilities.
-from testing_utility import (
-    skip_fail_test,
-    testing_temp,
-    testing_input,
-    compare_strings,
-    compare_vtk,
-)
+from testing_utility import testing_temp, testing_input, compare_strings
 
 
 class Testtutorial(unittest.TestCase):
