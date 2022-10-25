@@ -208,7 +208,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
         input_file.translate([0, 0, 1])
         create_fibers_in_rectangle(input_file, Beam3eb, mat, 4, 1, 235, 0.45, 0.35)
         input_file.translate([0, 0, 1])
-        create_fibers_in_rectangle(input_file, Beam3eb, mat, 1, 4, 30, 0.45, 5)
+        create_fibers_in_rectangle(
+            input_file, Beam3eb, mat, 1, 4, 30, 0.45, 5, fiber_element_length_min=0.2
+        )
         input_file.translate([0, 0, 1])
         create_fibers_in_rectangle(input_file, Beam3eb, mat, 4, 1, 30, 0.45, 0.9)
         input_file.translate([0, 0, 1])
@@ -224,9 +226,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
             input_file.get_string(header=False),
         )
 
-    def test_fibers_in_rectangle_offset(self):
+    def test_fibers_in_rectangle_reference_point(self):
         """
-        Test the create_fibers_in_rectangle function with using the offset
+        Test the create_fibers_in_rectangle function with using the reference_point
         option.
         """
 
@@ -239,17 +241,28 @@ class TestMeshCreationFunctions(unittest.TestCase):
         # Create mesh.
         mat = MaterialEulerBernoulli()
         create_fibers_in_rectangle(input_file, Beam3eb, mat, 4, 1, 45, 0.45, 0.35)
+        reference_point = 0.5 * np.array([4.0, 1.0]) + 0.1 * np.array(
+            [-1.0, 1.0]
+        ) / np.sqrt(2.0)
         create_fibers_in_rectangle(
-            input_file, Beam3eb, mat, 4, 1, 45, 0.45, 0.35, offset=0.1
+            input_file,
+            Beam3eb,
+            mat,
+            4,
+            1,
+            45,
+            0.45,
+            0.35,
+            reference_point=reference_point,
         )
 
         # Check the output.
         ref_file = os.path.join(
-            testing_input, "test_mesh_fiber_rectangle_offset_reference.dat"
+            testing_input, "test_mesh_fiber_rectangle_reference_point_reference.dat"
         )
         compare_strings(
             self,
-            "test_mesh_fiber_rectangle_offset",
+            "test_mesh_fiber_rectangle_reference_point",
             ref_file,
             input_file.get_string(header=False),
         )
