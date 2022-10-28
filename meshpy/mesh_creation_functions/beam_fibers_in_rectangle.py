@@ -126,10 +126,11 @@ def create_fibers_in_rectangle(
     length,
     width,
     angle,
-    fiber_distance,
+    fiber_normal_distance,
     fiber_element_length,
     *,
-    offset=0.0
+    reference_point=None,
+    fiber_element_length_min=None
 ):
     """
     Create multiple fibers in a rectangle.
@@ -148,89 +149,86 @@ def create_fibers_in_rectangle(
         Width of the rectangle in y direction (starting at y=0)
     angle: float
         Angle of the fibers in degree.
-    fiber_distance: float
-        Perpendicular distance between the fibers.
+    fiber_normal_distance: float
+        Normal distance between the parallel fibers.
     fiber_element_length: float
         Length of a single beam element. In general it will not be possible to
-        exactly achieve this length. If a line at a corner is shorter than this
-        value, it will not be meshed.
-    offset: double
-        Fibers will be offset by this value from the symmetric layout.
+        exactly achieve this length.
+    reference_point: [float, float]
+        Specify a single point inside the rectangle that one of the fibers will pass through.
+        Per default the reference point is in the middle of the rectangle.
+    fiber_element_length_min: float
+        Minimum fiber length. If a fiber is shorter than this value, it will not be created.
+        The default value is half of fiber_element_length.
     """
 
-    if offset < 0:
-        raise ValueError("The offset has to be positive!")
-    if np.abs(offset) >= fiber_distance:
-        raise ValueError("The offset has to smaller than the fiber distance!")
+    if reference_point is None:
+        reference_point = 0.5 * np.array([length, width])
+    else:
+        if (
+            reference_point[0] < 0.0
+            or reference_point[0] > length
+            or reference_point[1] < 0.0
+            or reference_point[1] > width
+        ):
+            raise ValueError("The reference point has to lie within the rectangle")
+
+    if fiber_element_length_min is None:
+        fiber_element_length_min = 0.5 * fiber_element_length
+    elif fiber_element_length_min < 0.0:
+        raise ValueError("fiber_element_length_min must be positive!")
 
     # Get the fiber angle in rad.
     fiber_angle = angle * np.pi / 180.0
     sin = np.sin(fiber_angle)
     cos = np.cos(fiber_angle)
 
-    # The cosinus has to be positive for the algorithm to work.
-    if cos < 0:
-        cos = -cos
-        sin = -sin
-
     # Direction and normal vector of the fibers.
     fiber_direction = np.array([cos, sin])
     fiber_normal = np.array([-sin, cos])
 
-    # Get starting point for the creation of the fibers.
-    if sin >= 0:
-        fiber_start_point = np.array([length, 0])
-        plate_diagonal = np.array([-length, width])
-    else:
-        fiber_start_point = np.array([0, 0])
-        plate_diagonal = np.array([length, width])
+    # Get an upper bound of the number of fibers in this layer.
+    diagonal = np.sqrt(length**2 + width**2)
+    fiber_n_max = int(np.ceil(diagonal / fiber_normal_distance)) + 1
 
-    # Get the number of fibers in this layer.
-    fiber_diagonal_distance = np.dot(fiber_normal, plate_diagonal)
-    fiber_n = int(fiber_diagonal_distance // fiber_distance)
+    # Go in both directions from the start point.
+    for direction_sign, n_start in [[-1, 1], [1, 0]]:
 
-    # Calculate the offset, so the fibers are placed in the 'middle' of the
-    # diagonal.
-    fiber_offset = (
-        (fiber_diagonal_distance / fiber_distance - fiber_n)
-        * fiber_distance
-        * 0.5
-        * fiber_normal
-    )
+        # Create a fiber as long as an intersection is found.
+        for i_fiber in range(n_start, fiber_n_max):
 
-    # Loop over each fiber and create the beam element.
-    for n in range(-1, fiber_n + 1):
+            # Get the start and end point of the line.
+            start, end, projection_found = _intersect_line_with_rectangle(
+                length,
+                width,
+                reference_point
+                + fiber_normal * i_fiber * fiber_normal_distance * direction_sign,
+                fiber_direction,
+                fail_if_no_intersection=False,
+            )
 
-        # Get the start and end point of the line.
-        start, end, projection_found = _intersect_line_with_rectangle(
-            length,
-            width,
-            fiber_offset
-            + fiber_start_point
-            + (n * fiber_distance + offset) * fiber_normal,
-            fiber_direction,
-            fail_if_no_intersection=False,
-        )
+            if projection_found:
+                # Calculate the length of the line.
+                fiber_length = np.linalg.norm(end - start)
 
-        if projection_found:
-            # Calculate the length of the line.
-            fiber_length = np.linalg.norm(end - start)
+                # Create the beams if the length is not smaller than the fiber
+                # distance.
+                if fiber_length >= fiber_element_length_min:
 
-            # Create the beams if the length is not smaller than the fiber
-            # distance.
-            if fiber_length > fiber_distance:
-
-                # Calculate the number of elements in this fiber.
-                fiber_nel = int(fiber_length // fiber_element_length)
-                fiber_nel = np.max([fiber_nel, 1])
-                create_beam_mesh_line(
-                    mesh,
-                    beam_object,
-                    material,
-                    np.append(start, 0.0),
-                    np.append(end, 0.0),
-                    n_el=fiber_nel,
-                )
+                    # Calculate the number of elements in this fiber.
+                    fiber_nel = int(np.round(fiber_length / fiber_element_length))
+                    fiber_nel = np.max([fiber_nel, 1])
+                    create_beam_mesh_line(
+                        mesh,
+                        beam_object,
+                        material,
+                        np.append(start, 0.0),
+                        np.append(end, 0.0),
+                        n_el=fiber_nel,
+                    )
+            else:
+                # The current search position is already outside of the rectangle, no need to continue.
+                break
 
     return_set = GeometryName()
     return_set["north"] = GeometrySet(
