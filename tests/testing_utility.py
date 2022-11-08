@@ -154,10 +154,16 @@ def compare_strings(self, name, reference, compare):
             with open(compare_file, "w") as input_file:
                 input_file.write(compare_string)
 
-        child = subprocess.Popen(
-            ["meld", reference_file, compare_file], stderr=subprocess.PIPE
-        )
-        child.communicate()
+        if shutil.which("meld") is not None:
+            child = subprocess.Popen(
+                ["meld", reference_file, compare_file], stderr=subprocess.PIPE
+            )
+            child.communicate()
+        else:
+            result = subprocess.run(
+                ["diff", reference_file, compare_file], stdout=subprocess.PIPE
+            )
+            name += "\n\nDiff:\n" + result.stdout.decode("utf-8")
 
     # Check the results.
     self.assertTrue(is_equal, name)
