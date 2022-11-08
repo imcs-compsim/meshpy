@@ -33,7 +33,7 @@ TOLDISP                         1.0E-11
 NAME                            Structure_Solver
 SOLVER                          Superlu
 -----------------------------------------------------------------FUNCT1
-COMPONENT 0 FUNCTION t
+COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t
 --------------------------------------------------------------MATERIALS
 MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0 NUE 0.3 DENS 0.0
 

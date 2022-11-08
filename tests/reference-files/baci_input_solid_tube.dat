@@ -51,9 +51,9 @@ SOLVER                          UMFPACK
 ------------------------------------------------------------------MATERIALS
 MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0e+09 NUE 0.0 DENS 7.80E-6 THEXPANS 0.0
 ---------------------------------------------------------------------FUNCT1
-COMPONENT 0 FUNCTION cos(2*pi*t)
+COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME cos(2*pi*t)
 -----------------------------------------------------------------FUNCT2
-COMPONENT 0 FUNCTION sin(2*pi*t)
+COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME sin(2*pi*t)
 
 
 ------------------------------------------------DESIGN DESCRIPTION

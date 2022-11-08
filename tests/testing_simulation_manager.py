@@ -88,7 +88,7 @@ def create_cantilever(convergence_base_dir, subpath, n_el):
             bc_type=mpy.bc.dirichlet,
         )
     )
-    fun = Function("COMPONENT 0 FUNCTION t")
+    fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
     input_file.add(
         fun,
         BoundaryCondition(

@@ -975,7 +975,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Add material and function.
         mat = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
-        ft = Function("COMPONENT 0 FUNCTION t")
+        ft = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
         input_file.add(ft)
 
         # Create a line with a parametric curve (and a transformed parameter).
@@ -1124,7 +1124,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file and add function and material.
         input_file = InputFile()
-        fun = Function("COMPONENT 0 FUNCTION t")
+        fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
         input_file.add(fun)
         mat = MaterialEulerBernoulli(youngs_modulus=1.0, density=1.3e9)
 
@@ -1722,7 +1722,7 @@ class TestMeshpy(unittest.TestCase):
                 option_overwrite=True,
             )
         )
-        fun = Function("COMPONENT 0 FUNCTION t")
+        fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
         input_file.add(fun)
 
         # Create the beam material.
@@ -2134,7 +2134,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Create material and function object.
         mat = MaterialReissner(youngs_modulus=1, radius=1)
-        fun = Function("COMPONENT 0 FUNCTION t")
+        fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
 
         def create_mesh(mesh):
             """Add material and function to the mesh and create a beam."""
