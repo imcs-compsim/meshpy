@@ -236,7 +236,7 @@ def meshpy_tutorial(base_dir, preview=False):
     # We add a line load in y-direction to all beam elements. The line load
     # is controlled by the function fun_t.
     line_load_val = 0.00000001
-    fun_t = Function("COMPONENT 0 FUNCTION t")
+    fun_t = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
     mesh.add(fun_t)
     geometry_set_all_lines = GeometrySet(mpy.geo.line, mesh.nodes)
     mesh.add(

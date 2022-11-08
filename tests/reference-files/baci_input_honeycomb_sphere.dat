@@ -98,7 +98,7 @@ NODE            1    COORD   0.0 37.0  35.0
 ------------------------------------------------STRUCTURE ELEMENTS
 1 RIGIDSPHERE POINT1      1  RADIUS 10.0 DENSITY 1.0
 -------------------------------------------------------------FUNCT1
-COMPONENT 0 FUNCTION a
+COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME a
 VARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 3 TIMES 0.0 0.2 1.0 VALUES 0.0 0.0 1.0
 --------------------------------------------------------------RESULT DESCRIPTION
 STRUCTURE DIS structure NODE 268 QUANTITY dispx VALUE 1. TOLERANCE 1e-10

@@ -53,7 +53,7 @@ XML File                            = dbc_to_nbc_initial.xml
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_BeamReissnerElastHyper YOUNG 100.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.031415926535897934 SHEARCORR 1 MOMINPOL 0.00015707963267948968 MOMIN2 7.853981633974484e-05 MOMIN3 7.853981633974484e-05
 --------------------------------------------------------------------------FUNCT1
-COMPONENT 0 FUNCTION t
+COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t
 --------------------------------------------------------------DESIGN DESCRIPTION
 NDPOINT 2
 NDLINE 0

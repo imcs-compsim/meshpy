@@ -8,7 +8,7 @@
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_BeamKirchhoffTorsionFreeElastHyper YOUNG 1.0 DENS 1300000000.0 CROSSAREA 1 MOMIN 0.0001
 --------------------------------------------------------------------------FUNCT1
-COMPONENT 0 FUNCTION t
+COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t
 --------------------------------------------------------------DESIGN DESCRIPTION
 NDPOINT 2
 NDLINE 0

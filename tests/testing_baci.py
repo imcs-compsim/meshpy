@@ -237,7 +237,7 @@ class TestFullBaci(unittest.TestCase):
 
         # Functions for the boundary conditions
         ft = Function(
-            "COMPONENT 0 FUNCTION a\n"
+            "COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME a\n"
             + "VARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 3 TIMES 0.0 0.2 1.0 VALUES 0.0 1.0 1.0"
         )
         mesh_honeycomb.add(ft)
@@ -303,8 +303,8 @@ class TestFullBaci(unittest.TestCase):
         )
 
         # Add functions for boundary conditions and material.
-        sin = Function("COMPONENT 0 FUNCTION sin(t*2*pi)")
-        cos = Function("COMPONENT 0 FUNCTION cos(t*2*pi)")
+        sin = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME sin(t*2*pi)")
+        cos = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME cos(t*2*pi)")
         material = MaterialReissner(
             youngs_modulus=1e9, radius=0.25, shear_correction=0.75
         )
@@ -446,10 +446,10 @@ class TestFullBaci(unittest.TestCase):
             youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1
         )
         ft = []
-        ft.append(Function("COMPONENT 0 FUNCTION t"))
-        ft.append(Function("COMPONENT 0 FUNCTION t"))
-        ft.append(Function("COMPONENT 0 FUNCTION t"))
-        ft.append(Function("COMPONENT 0 FUNCTION t"))
+        ft.append(Function("SYMBOLIC_FUNCTION_OF_TIME t"))
+        ft.append(Function("SYMBOLIC_FUNCTION_OF_TIME t"))
+        ft.append(Function("SYMBOLIC_FUNCTION_OF_TIME t"))
+        ft.append(Function("SYMBOLIC_FUNCTION_OF_TIME t"))
         mesh.add(ft)
 
         counter = 0
@@ -534,7 +534,7 @@ class TestFullBaci(unittest.TestCase):
         set_header_static(input_file, time_step=0.05, n_steps=20)
 
         # Define linear function over time.
-        ft = Function("COMPONENT 0 FUNCTION t")
+        ft = Function("SYMBOLIC_FUNCTION_OF_TIME t")
         input_file.add(ft)
 
         # Set beam material.
@@ -636,7 +636,7 @@ class TestFullBaci(unittest.TestCase):
             input_file.add(
                 "--IO\nOUTPUT_BIN yes\nSTRUCT_DISP yes", option_overwrite=True
             )
-            ft = Function("COMPONENT 0 FUNCTION t")
+            ft = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
             input_file.add(ft)
             mat = MaterialReissner(youngs_modulus=100.0, radius=0.1)
             beam_set = create_beam_mesh_line(
@@ -683,7 +683,7 @@ class TestFullBaci(unittest.TestCase):
             )
         )
         function_nbc = Function(
-            """FUNCTION nbc_value
+            """SYMBOLIC_FUNCTION_OF_TIME nbc_value
             VARIABLE 0 NAME nbc_value TYPE linearinterpolation NUMPOINTS 2 """
             + "TIMES 1.0 11.0 VALUES 1.0 0.0"
         )
