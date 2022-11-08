@@ -237,6 +237,8 @@ class Simulation:
             job_name = rel_path + "/" + simulation_name
         else:
             job_name = self.job_name
+        # Slurm does not accept job names with "/" so we replace them with a dash here
+        job_name = job_name.replace("/", "-")
 
         batch_string = batch_string.format(
             self=self,

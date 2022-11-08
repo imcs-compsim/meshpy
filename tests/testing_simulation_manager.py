@@ -37,6 +37,7 @@ import unittest
 import shutil
 import numpy as np
 import subprocess
+import socket
 
 # User imports.
 from meshpy import (
@@ -57,6 +58,13 @@ from testing_utility import (
     testing_input,
     compare_strings,
 )
+
+
+def is_cluster_test():
+    """
+    Check if the test is executed on the cluster
+    """
+    return socket.gethostname() == "login.cluster"
 
 
 def create_cantilever(convergence_base_dir, subpath, n_el):
@@ -178,17 +186,14 @@ class TestSimulationManager(unittest.TestCase):
         convergence_base_dir = os.path.join(testing_temp, "simulation_manager")
         manager = self.create_simulations(convergence_base_dir)
 
-        if shutil.which(command) is not None:
-            if command == "mpirun":
-                manager.run_simulations_and_wait_for_finish(
-                    baci_build_dir=os.path.dirname(get_baci_path()), status=False
-                )
-            else:
-                manager.submit_batch_files_and_wait_for_finish(
-                    baci_build_dir=os.path.dirname(get_baci_path()), check_interval=1
-                )
+        if command == "mpirun":
+            manager.run_simulations_and_wait_for_finish(
+                baci_build_dir=os.path.dirname(get_baci_path()), status=False
+            )
         else:
-            self.skipTest("{} was not found".format(command))
+            manager.submit_batch_files_and_wait_for_finish(
+                baci_build_dir=os.path.dirname(get_baci_path()), check_interval=1
+            )
 
         # Check the results.
         self.check_convergence_results(convergence_base_dir)
@@ -198,13 +203,19 @@ class TestSimulationManager(unittest.TestCase):
         Create a convergence study and check the results. The simulations are
         run with mpirun.
         """
-        self.xtest_simulation_manager("mpirun")
+        if not is_cluster_test():
+            self.xtest_simulation_manager("mpirun")
+        else:
+            self.skipTest("Tests with mpirun are not executed on the cluster")
 
     def test_simulation_manager_cluster(self):
         """
         Create a convergence study on the cluster and check the results.
         """
-        self.xtest_simulation_manager("sbatch")
+        if is_cluster_test():
+            self.xtest_simulation_manager("sbatch")
+        else:
+            self.skipTest("Tests with slurm are not executed on a workstation")
 
     def test_batch_file(self):
         """
@@ -221,7 +232,7 @@ class TestSimulationManager(unittest.TestCase):
             restart_step=17,
             restart_dir="../old_sim",
             restart_from_prefix="xxx_old",
-            job_name="awsome_job",
+            job_name="awesome_job",
             feature="skylake",
         )
 
