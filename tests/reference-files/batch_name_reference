@@ -51,6 +51,7 @@ source /etc/profile.d/modules.sh
 source /home/opt/cluster_tools/core/load_baci_environment.sh
 
 module list
+
 ##########################################
 #                                        #
 #  Specify the paths                     #
@@ -65,6 +66,8 @@ INPUT="$SIMULATIONS_DIR/dummy.dat"
 BACI_OUTPUT_DIR="$SIMULATIONS_DIR"
 OUTPUT_PREFIX="xxxXXXxxx"
 
+# Start everything from the simulation directory
+cd $SIMULATIONS_DIR
 
 ##########################################
 #                                        #
