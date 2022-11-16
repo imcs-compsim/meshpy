@@ -9,8 +9,8 @@ Whenever you use or mention MeshPy in some sort of scientific document/publicati
 
 ## Code formating
 
-MeshPy uses the python code formater [black](https://github.com/psf/black).
-The testsuite checks if all files are formated accordingly.
+MeshPy uses the python code formatter [black](https://github.com/psf/black).
+The testsuite checks if all files are formatted accordingly.
 
 ## Installation
 
