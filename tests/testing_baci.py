@@ -339,7 +339,7 @@ class TestFullBaci(unittest.TestCase):
             [0.921450108160878, 1.41113401669104e-15, 0.0178350143764099],
         ]
 
-        nodes = [35, 69]
+        nodes = [32, 69]
         for j, node in enumerate(nodes):
             for i, direction in enumerate(["x", "y", "z"]):
                 input_file.add(
