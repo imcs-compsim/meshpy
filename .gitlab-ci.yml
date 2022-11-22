@@ -46,6 +46,7 @@ meshpy-testing:
         - "pip install .[CI-CD]"
         # Install cubitpy
         - cd $CUBITPY_REPO
+        - git checkout master
         - git pull
         - "pip install ."
         - cd $MESHPY_PATH
