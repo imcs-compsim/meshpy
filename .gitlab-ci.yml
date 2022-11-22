@@ -24,7 +24,7 @@ variables:
     # the following paths have to be set
     CUBITPY_REPO: "/hdd/gitlab-runner/lib/cubitpy-master"
     BACI_PRE_EXODUS: "$BACI_BUILD/pre_exodus"
-    CUBIT: "/imcs/public/compsim/opt/cubit-13.2"
+    CUBIT: "/imcs/public/compsim/opt/cubit-15.2"
 
     # For building the website.
     JEKYLL_ENV: production
