@@ -498,12 +498,10 @@ class Mesh(object):
             pos -= origin
 
         # Get the reflection matrix A.
-        A = np.eye(3) - 2.0 * np.dot(
-            np.transpose(np.asmatrix(normal_vector)), np.asmatrix(normal_vector)
-        )
+        A = np.eye(3) - 2.0 * np.outer(normal_vector, normal_vector)
 
         # Calculate the new positions.
-        pos_new = np.array(pos * A)
+        pos_new = np.dot(pos, A)
 
         # Move back from the origin.
         if origin is not None:
