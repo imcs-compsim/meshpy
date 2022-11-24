@@ -48,7 +48,7 @@ FLOAT = np.float64
 ctypedef np.float64_t FLOAT_t
 
 # Define integer type
-INT = np.int
+INT = np.int64
 ctypedef np.int_t INT_t
 
 

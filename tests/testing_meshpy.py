@@ -605,7 +605,7 @@ class TestMeshpy(unittest.TestCase):
             coords, binning=True, nx=4, ny=4, nz=4, eps=eps_medium
         )
         partner_indices_brute = find_close_points(coords, binning=False, eps=eps_medium)
-        self.assertTrue(np.array_equal(partner_indices, partner_indices_brute))
+        self.assertEqual(partner_indices, partner_indices_brute)
         self.assertEqual(len(partner_indices), 146)
 
         # Also compare to the reference solution.
@@ -708,7 +708,7 @@ class TestMeshpy(unittest.TestCase):
             create_flat_mesh().get_global_coordinates(middle_nodes=False)[0],
             binning=False,
         )
-        self.assertTrue(np.array_equal(reference_partners, partners_no_binning))
+        self.assertEqual(reference_partners, partners_no_binning)
 
         # Apply different rotations and compare the partner results.
         rotations = [
@@ -726,7 +726,7 @@ class TestMeshpy(unittest.TestCase):
             )
 
             # Compare the partners with the reference.
-            self.assertTrue(np.array_equal(partners_binning, partners_no_binning))
+            self.assertEqual(partners_binning, partners_no_binning)
 
     def test_find_close_points_dimension(self):
         """
