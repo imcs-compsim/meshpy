@@ -192,7 +192,7 @@ class TestPerformance(object):
         "meshpy_write_vtk": 19,
     }
     expected_times["ares.bauv.unibw-muenchen.de"] = {
-        "cubitpy_create_solid": 3.2,
+        "cubitpy_create_solid": 4.0,
         "meshpy_load_solid": 0.9,
         "meshpy_load_solid_full": 3.0,
         "meshpy_create_beams": 7.2,
