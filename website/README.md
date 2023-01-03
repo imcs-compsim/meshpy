@@ -11,7 +11,7 @@ apt install ruby-dev ruby-bundler
 
 ## How to test changes to the website?
 
-After making changes to the website, wo to the website folder and run
+After making changes to the website, go to the website folder and run
 ```bash
 bundle exec jekyll serve
 ```
