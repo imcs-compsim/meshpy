@@ -37,6 +37,7 @@ import numpy as np
 # Meshpy modules.
 from ..conf import mpy
 from ..rotation import Rotation
+from ..utility import get_node
 
 
 def create_beam_mesh_line(
@@ -107,7 +108,7 @@ def create_beam_mesh_line(
         material=material,
         function_generator=get_beam_geometry,
         interval=[0.0, 1.0],
-        **kwargs
+        **kwargs,
     )
 
 
@@ -128,8 +129,10 @@ def create_beam_mesh_arc_segment(
     center: np.array, list
         Center of the arc.
     axis_rotation: Rotation
+        This rotation defines the spatial orientation of the arc.
         The 3rd base vector of this rotation is the rotation axis of the arc
-        segment. The segment starts on the 2nd basis vector.
+        segment. The segment starts in the direction of the 1st basis vector
+        and the starting point is along the 2nd basis vector.
     radius: float
         The radius of the segment.
     angle: float
@@ -171,7 +174,7 @@ def create_beam_mesh_arc_segment(
         material=material,
         function_generator=get_beam_geometry,
         interval=[0.0, angle],
-        **kwargs
+        **kwargs,
     )
 
 
@@ -238,5 +241,129 @@ def create_beam_mesh_arc_segment_2d(
         axis_rotation,
         radius,
         np.abs(angle),
-        **kwargs
+        **kwargs,
+    )
+
+
+def create_beam_mesh_line_at_node(
+    mesh, beam_object, material, start_node, length, **kwargs
+):
+    """
+    Generate a straight line at a given node. The tangent will be the same as at that node.
+
+    Args
+    ----
+    mesh: Mesh
+        Mesh that the arc segment will be added to.
+    beam_object: Beam
+        Class of beam that will be used for this line.
+    material: Material
+        Material for this segment.
+    start_node: np.array, list
+        Point where the arc will continue.
+    length: float
+        Length of the line.
+
+    **kwargs (for all of them look into Mesh().create_beam_mesh_function)
+    ----
+    n_el: int
+        Number of equally spaces beam elements along the segment.
+
+    Return
+    ----
+    return_set: GeometryName
+        Set with the 'start' and 'end' node of the line. Also a 'line' set
+        with all nodes of the line.
+    """
+
+    if length < 0:
+        raise ValueError("Length has to be positive!")
+
+    # Create the line starting from the given node
+    start_node = get_node(start_node)
+    tangent = start_node.rotation * [1, 0, 0]
+    start_position = start_node.coordinates
+    end_position = start_position + tangent * length
+
+    return create_beam_mesh_line(
+        mesh,
+        beam_object,
+        material,
+        start_position,
+        end_position,
+        start_node=start_node,
+        **kwargs,
+    )
+
+
+def create_beam_mesh_arc_at_node(
+    mesh, beam_object, material, start_node, arc_axis_normal, radius, angle, **kwargs
+):
+    """
+    Generate a circular segment starting at a given node. The arc will be tangent to
+    the given node.
+
+    Args
+    ----
+    mesh: Mesh
+        Mesh that the arc segment will be added to.
+    beam_object: Beam
+        Class of beam that will be used for this line.
+    material: Material
+        Material for this segment.
+    start_node: np.array, list
+        Point where the arc will continue.
+    arc_axis_normal: 3d-vector
+        Rotation axis for the created arc.
+    radius: float
+        The radius of the arc segment.
+    angle: float
+        Angle of the arc. If the angle is negative, the arc will point in the
+        opposite direction, i.e., as if the arc_axis_normal would change sign.
+
+    **kwargs (for all of them look into Mesh().create_beam_mesh_function)
+    ----
+    n_el: int
+        Number of equally spaces beam elements along the segment.
+
+    Return
+    ----
+    return_set: GeometryName
+        Set with the 'start' and 'end' node of the line. Also a 'line' set
+        with all nodes of the line.
+    """
+
+    # If the angle is negative, the normal is switched
+    arc_axis_normal = np.array(arc_axis_normal)
+    if angle < 0:
+        arc_axis_normal = -1.0 * arc_axis_normal
+
+    # The normal has to be perpendicular to the start point tangent
+    start_node = get_node(start_node)
+    tangent = start_node.rotation * [1, 0, 0]
+    if np.abs(np.dot(tangent, arc_axis_normal)) > mpy.eps_pos:
+        raise ValueError(
+            "The normal has to be perpendicular to the tangent in the start node!"
+        )
+
+    # Get the center of the arc
+    center_direction = np.cross(tangent, arc_axis_normal)
+    center_direction *= 1.0 / np.linalg.norm(center_direction)
+    center = start_node.coordinates - center_direction * radius
+
+    # Create rotation for the general arc segment function
+    axis_rotation = Rotation.from_rotation_matrix(
+        np.transpose(np.array([tangent, -center_direction, arc_axis_normal]))
+    )
+
+    return create_beam_mesh_arc_segment(
+        mesh,
+        beam_object,
+        material,
+        center,
+        axis_rotation,
+        radius,
+        np.abs(angle),
+        start_node=start_node,
+        **kwargs,
     )

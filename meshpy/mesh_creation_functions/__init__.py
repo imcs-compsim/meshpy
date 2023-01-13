@@ -37,6 +37,8 @@ from .beam_basic_geometry import (
     create_beam_mesh_line,
     create_beam_mesh_arc_segment,
     create_beam_mesh_arc_segment_2d,
+    create_beam_mesh_line_at_node,
+    create_beam_mesh_arc_at_node,
 )
 
 # Parametric curve.
@@ -62,6 +64,8 @@ __all__ = [
     "create_beam_mesh_line",
     "create_beam_mesh_arc_segment",
     "create_beam_mesh_arc_segment_2d",
+    "create_beam_mesh_line_at_node",
+    "create_beam_mesh_arc_at_node",
     # Parametric curve.
     "create_beam_mesh_curve",
     # Honeycomb.
