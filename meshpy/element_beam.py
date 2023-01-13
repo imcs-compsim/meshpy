@@ -103,7 +103,11 @@ class Beam(Element):
 
             # Check position.
             if np.linalg.norm(pos - node.coordinates) > mpy.eps_pos:
-                raise ValueError("{} does not match with function!".format(name))
+                raise ValueError(
+                    "{} does not match with function! Got {} from function but given node value is {}".format(
+                        name, pos, node.coordinates
+                    )
+                )
 
             # Check rotation.
             if not node.rotation == rot:
