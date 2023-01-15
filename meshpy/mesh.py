@@ -1003,9 +1003,16 @@ class Mesh(object):
         elements = []
         nodes = []
 
+        def check_given_node(node):
+            """Check that the given node is already in the mesh."""
+            if node not in self.nodes:
+                raise ValueError("The given node is not in the current mesh")
+
         # If a start node is given, set this as the first node for this beam.
         if start_node is not None:
-            nodes = [get_node(start_node)]
+            start_node = get_node(start_node)
+            nodes = [start_node]
+            check_given_node(start_node)
 
         # If an end node is given, check what behavior is wanted.
         close_beam = False
@@ -1013,6 +1020,7 @@ class Mesh(object):
             close_beam = True
         elif end_node is not None:
             end_node = get_node(end_node)
+            check_given_node(end_node)
 
         # Create the beams.
         for i in range(n_el):
