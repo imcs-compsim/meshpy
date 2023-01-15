@@ -1249,7 +1249,7 @@ class TestMeshpy(unittest.TestCase):
                     start_node=input_file.nodes[0],
                     end_node=True,
                     add_sets=True,
-                    **(argument_list)
+                    **(argument_list),
                 )
             else:
                 function(input_file, end_node=True, add_sets=True, **(argument_list))
@@ -1276,7 +1276,7 @@ class TestMeshpy(unittest.TestCase):
                 input_file,
                 start_node=set_1["end"],
                 end_node=set_1["start"],
-                **(argument_list[1])
+                **(argument_list[1]),
             )
 
             # Add sets.
@@ -2324,6 +2324,26 @@ class TestMeshpy(unittest.TestCase):
         """
         self.perform_test_check_overlapping_coupling_nodes(True)
         self.perform_test_check_overlapping_coupling_nodes(False)
+
+    def test_check_start_end_node_error(self):
+        """
+        Check that an error is raised if wrong start and end nodes are given to a mesh
+        creation function.
+        """
+
+        # Create mesh object.
+        mesh = Mesh()
+        mat = MaterialReissner()
+        mesh.add(mat)
+
+        # Try to create a line with a starting node that is not in the mesh.
+        node = Node([0, 0, 0], Rotation())
+        args = [mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0]]
+        kwargs = {"start_node": node}
+        self.assertRaises(ValueError, create_beam_mesh_line, *args, **kwargs)
+        node.coordinates = [1, 0, 0]
+        kwargs = {"end_node": node}
+        self.assertRaises(ValueError, create_beam_mesh_line, *args, **kwargs)
 
 
 if __name__ == "__main__":
