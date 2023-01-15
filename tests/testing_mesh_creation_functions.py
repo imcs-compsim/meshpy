@@ -54,6 +54,8 @@ from meshpy.mesh_creation_functions import (
     create_beam_mesh_arc_segment,
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_stent,
+    create_beam_mesh_line_at_node,
+    create_beam_mesh_arc_at_node,
     create_fibers_in_rectangle,
     create_wire_fibers,
     create_beam_mesh_from_nurbs,
@@ -348,6 +350,65 @@ class TestMeshCreationFunctions(unittest.TestCase):
         ref_file = os.path.join(testing_input, "test_mesh_nurbs_reference.dat")
         compare_strings(
             self, "test_mesh_nurbs", ref_file, input_file.get_string(header=False)
+        )
+
+    def test_node_continuation(self):
+        """Test that the node continuation function work as expected."""
+
+        from meshpy.node import Node
+
+        mesh = Mesh()
+        mat = MaterialReissner(radius=0.1)
+        mesh.add(mat)
+
+        start_node = Node([1, 2, 3], Rotation([0, 0, 0], 0))
+        mesh.add(start_node)
+        beam_set = create_beam_mesh_line_at_node(
+            mesh, Beam3rHerm2Line3, mat, start_node, 1.2, n_el=1
+        )
+        beam_set = create_beam_mesh_arc_at_node(
+            mesh,
+            Beam3rHerm2Line3,
+            mat,
+            beam_set["end"],
+            [0, 1, 0],
+            1.0,
+            np.pi * 0.5,
+            n_el=1,
+        )
+        beam_set = create_beam_mesh_arc_at_node(
+            mesh,
+            Beam3rHerm2Line3,
+            mat,
+            beam_set["end"],
+            [0, 1, 0],
+            1.0,
+            -np.pi * 0.5,
+            n_el=2,
+        )
+        beam_set = create_beam_mesh_arc_at_node(
+            mesh,
+            Beam3rHerm2Line3,
+            mat,
+            beam_set["end"],
+            [0, 0, 1],
+            1.0,
+            -np.pi * 3.0 / 4.0,
+            n_el=1,
+        )
+        create_beam_mesh_line_at_node(
+            mesh, Beam3rHerm2Line3, mat, beam_set["end"], 2.3, n_el=3
+        )
+
+        # Check the geometry
+        input_file = InputFile()
+        input_file.add(mesh)
+        ref_file = os.path.join(testing_input, "test_node_continuation_reference.dat")
+        compare_strings(
+            self,
+            "test_node_continuation",
+            ref_file,
+            input_file.get_string(header=False),
         )
 
 

@@ -42,6 +42,8 @@ import warnings
 
 # Meshpy modules.
 from .conf import mpy
+from .node import Node
+from .geometry_set import GeometrySet
 from .find_close_points_cython import (
     find_close_points as find_close_points_cython,
     find_close_points_binning as find_close_points_binning_cython,
@@ -248,3 +250,22 @@ def clean_simulation_directory(sim_dir):
                 raise ValueError("Directory is not deleted!")
     else:
         Path(sim_dir).mkdir(parents=True, exist_ok=True)
+
+
+def get_node(item):
+    """
+    Function to get a node from the input variable. This function
+    accepts a Node object as well as a GeometrySet object.
+    """
+    if isinstance(item, Node):
+        return item
+    elif isinstance(item, GeometrySet):
+        # Check if there is only one node in the set
+        if len(item.nodes) == 1:
+            return item.nodes[0]
+        else:
+            raise ValueError("GeometrySet does not have one node!")
+    else:
+        raise TypeError(
+            'The given object can be node or GeometrySet got "{}"!'.format(type(item))
+        )

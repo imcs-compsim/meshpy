@@ -54,6 +54,7 @@ from .utility import (
     find_close_points,
     find_close_nodes,
     partner_indices_to_point_partners,
+    get_node,
 )
 
 
@@ -1002,34 +1003,24 @@ class Mesh(object):
         elements = []
         nodes = []
 
-        def get_node(item, name):
-            """
-            Function to get a node from the input variable. This function
-            accepts a Node object as well as a GeometrySet object.
-            """
-            if isinstance(item, Node):
-                return item
-            elif isinstance(item, GeometrySet):
-                # Check if there is only one node in the set
-                if len(item.nodes) == 1:
-                    return item.nodes[0]
-                else:
-                    raise ValueError("GeometrySet does not have one node!")
-            else:
-                raise TypeError(
-                    '{} can be node or GeometrySet got "{}"!'.format(name, type(item))
-                )
+        def check_given_node(node):
+            """Check that the given node is already in the mesh."""
+            if node not in self.nodes:
+                raise ValueError("The given node is not in the current mesh")
 
         # If a start node is given, set this as the first node for this beam.
         if start_node is not None:
-            nodes = [get_node(start_node, "start_node")]
+            start_node = get_node(start_node)
+            nodes = [start_node]
+            check_given_node(start_node)
 
         # If an end node is given, check what behavior is wanted.
         close_beam = False
         if end_node is True:
             close_beam = True
         elif end_node is not None:
-            end_node = get_node(end_node, "end_node")
+            end_node = get_node(end_node)
+            check_given_node(end_node)
 
         # Create the beams.
         for i in range(n_el):
