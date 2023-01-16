@@ -333,11 +333,14 @@ class TestMeshCreationFunctions(unittest.TestCase):
 
         # Setup the nurbs curve.
         from geomdl import NURBS
+        from geomdl import utilities
 
         curve = NURBS.Curve()
         curve.degree = 2
         curve.ctrlpts = [[0, 0, 0], [1, 2, -1], [2, 0, 0]]
-        curve.knotvector = [0, 0, 0, 1, 1, 1]
+        curve.knotvector = utilities.generate_knot_vector(
+            curve.degree, len(curve.ctrlpts)
+        )
 
         # Create beam elements.
         mat = MaterialReissner(radius=0.05)
