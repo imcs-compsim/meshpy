@@ -41,7 +41,7 @@ setup(
     description="MeshPy: A beam finite element input generator",
     install_requires=[
         "autograd",
-        "black",
+        "black==22.12.0",
         "Cython",
         "geomdl",
         "matplotlib",
