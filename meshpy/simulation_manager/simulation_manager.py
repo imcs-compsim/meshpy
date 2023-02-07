@@ -172,7 +172,9 @@ class Simulation:
             raise ValueError(
                 "The options n_proc and (n_nodes + n_proc_per_node) are mutually exclusive"
             )
-        elif self.n_nodes is None or self.n_proc_per_node is None:
+        elif (self.n_nodes is None and self.n_proc_per_node is not None) or (
+            self.n_nodes is not None and self.n_proc_per_node is None
+        ):
             raise ValueError("Both options n_nodes and n_proc_per_node are required")
 
         # Restart options
