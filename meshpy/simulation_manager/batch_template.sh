@@ -19,7 +19,7 @@
 #SBATCH --error=slurm-%j-%x.err
 #
 # Standard case: specify only number of cpus
-# #SBATCH --ntasks=8
+#{is_not_node}SBATCH --ntasks={self.n_proc}
 #
 # Walltime: (days-hours:minutes:seconds)
 #SBATCH --time={self.wall_time}
@@ -31,10 +31,10 @@
 ##########################################
 #
 # If you want to specify a certain number of nodes:
-#SBATCH --nodes={self.n_nodes}
+#{is_node}SBATCH --nodes={self.n_nodes}
 #
 # and exactly 'ntasks-per-node' cpus on each node:
-#SBATCH --ntasks-per-node={self.n_proc}
+#{is_node}SBATCH --ntasks-per-node={self.n_proc_per_node}
 #
 # Allocate full node and block for other jobs:
 #{is_exclusive}SBATCH --exclusive

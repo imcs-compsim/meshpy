@@ -110,8 +110,9 @@ class Simulation:
         self,
         input_file_path,
         *,
-        n_proc=1,
-        n_nodes=1,
+        n_proc=None,
+        n_nodes=None,
+        n_proc_per_node=None,
         exclusive=False,
         output_prefix="xxx",
         wall_time="08:00:00",
@@ -153,16 +154,26 @@ class Simulation:
             feature.
         """
 
-        # Class variables.
+        # Class variables
         self.file_path = input_file_path
-        self.n_nodes = 1
         self.n_proc = n_proc
         self.n_nodes = n_nodes
+        self.n_proc_per_node = n_proc_per_node
         self.exclusive = exclusive
         self.output_prefix = output_prefix
         self.wall_time = wall_time
         self.job_name = job_name
         self.feature = feature
+
+        # Consistency check
+        if self.n_proc is not None and (
+            self.n_nodes is not None or self.n_proc_per_node is not None
+        ):
+            raise ValueError(
+                "The options n_proc and (n_nodes + n_proc_per_node) are mutually exclusive"
+            )
+        elif self.n_nodes is None or self.n_proc_per_node is None:
+            raise ValueError("Both options n_nodes and n_proc_per_node are required")
 
         # Restart options
         self.restart_step = restart_step
@@ -246,6 +257,8 @@ class Simulation:
             input_file_name=os.path.basename(self.file_path),
             is_exclusive=is_true_batch(self.exclusive),
             is_feature=is_true_batch(self.feature is not None),
+            is_node=is_true_batch(self.n_nodes is not None),
+            is_not_node=is_true_batch(self.n_nodes is None),
         )
         batch_script_path = os.path.join(os.path.dirname(self.file_path), batch_name)
         with open(batch_script_path, "w") as file:
