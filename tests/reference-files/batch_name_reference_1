@@ -10,7 +10,7 @@
 #SBATCH --mail-type=NONE
 #
 # Job name:
-#SBATCH --job-name={job_name}
+#SBATCH --job-name=awesome_job
 #
 # Output file:
 #SBATCH --output=slurm-%j-%x.out
@@ -19,10 +19,10 @@
 #SBATCH --error=slurm-%j-%x.err
 #
 # Standard case: specify only number of cpus
-#{is_not_node}SBATCH --ntasks={self.n_proc}
+# #SBATCH --ntasks=None
 #
 # Walltime: (days-hours:minutes:seconds)
-#SBATCH --time={self.wall_time}
+#SBATCH --time=66:66:66
 #
 ##########################################
 #                                        #
@@ -31,16 +31,16 @@
 ##########################################
 #
 # If you want to specify a certain number of nodes:
-#{is_node}SBATCH --nodes={self.n_nodes}
+#SBATCH --nodes=69
 #
 # and exactly 'ntasks-per-node' cpus on each node:
-#{is_node}SBATCH --ntasks-per-node={self.n_proc_per_node}
+#SBATCH --ntasks-per-node=37
 #
 # Allocate full node and block for other jobs:
-#{is_exclusive}SBATCH --exclusive
+#SBATCH --exclusive
 #
 # Request specific hardware features:
-#{is_feature}SBATCH --constraint={self.feature}
+#SBATCH --constraint=skylake
 #
 ###########################################
 
@@ -62,9 +62,9 @@ RUN_BACI="ON"
 BACI_BUILD_DIR="$BACI_BUILD_DIR"
 EXE=$BACI_BUILD_DIR/baci-release
 
-INPUT="$SIMULATIONS_DIR/{input_file_name}"
+INPUT="$SIMULATIONS_DIR/dummy.dat"
 BACI_OUTPUT_DIR="$SIMULATIONS_DIR"
-OUTPUT_PREFIX="{self.output_prefix}"
+OUTPUT_PREFIX="xxxXXXxxx"
 
 # Start everything from the simulation directory
 cd $SIMULATIONS_DIR
@@ -86,9 +86,9 @@ ENSIGHT_OPTIONS=""
 #                                        #
 ##########################################
 
-RESTART_FROM_STEP={self.restart_step}            # specify the restart step here and in .datfile
-RESTART_FROM_DIR="{self.restart_dir}"            # same as output
-RESTART_FROM_PREFIX="{self.restart_from_prefix}" # prefix typically xxx
+RESTART_FROM_STEP=17            # specify the restart step here and in .datfile
+RESTART_FROM_DIR="../old_sim"            # same as output
+RESTART_FROM_PREFIX="xxx_old" # prefix typically xxx
 
 #################################################################
 # BEGIN ############### DO NOT TOUCH ME #########################
