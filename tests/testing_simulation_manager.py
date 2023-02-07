@@ -224,7 +224,7 @@ class TestSimulationManager(unittest.TestCase):
 
         sim = Simulation(
             os.path.join(testing_temp, "dummy.dat"),
-            n_proc=37,
+            n_proc_per_node=37,
             n_nodes=69,
             exclusive=True,
             output_prefix="xxxXXXxxx",
@@ -235,14 +235,29 @@ class TestSimulationManager(unittest.TestCase):
             job_name="awesome_job",
             feature="skylake",
         )
-
         sim.create_batch_file(testing_temp, "batch_name")
-
         compare_strings(
             self,
             "test_batch_file",
             os.path.join(testing_temp, "batch_name"),
-            os.path.join(testing_input, "batch_name_reference"),
+            os.path.join(testing_input, "batch_name_reference_1"),
+        )
+
+        sim = Simulation(
+            os.path.join(testing_temp, "dummy.dat"),
+            n_proc=8,
+            exclusive=False,
+            output_prefix="xxxXXXxxx",
+            wall_time="66:66:66",
+            job_name="awesome_job",
+            feature="skylake",
+        )
+        sim.create_batch_file(testing_temp, "batch_name")
+        compare_strings(
+            self,
+            "test_batch_file",
+            os.path.join(testing_temp, "batch_name"),
+            os.path.join(testing_input, "batch_name_reference_2"),
         )
 
 
