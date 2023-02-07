@@ -177,6 +177,14 @@ class Simulation:
         ):
             raise ValueError("Both options n_nodes and n_proc_per_node are required")
 
+        # Set default value for n_proc
+        if (
+            self.n_proc is None
+            and self.n_nodes is None
+            and self.n_proc_per_node is None
+        ):
+            self.n_proc = 1
+
         # Restart options
         self.restart_step = restart_step
         self.restart_dir = restart_dir
