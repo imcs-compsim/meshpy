@@ -125,19 +125,17 @@ class Mesh(object):
         self.add(mesh.elements)
         self.add(mesh.materials)
         self.add(mesh.functions)
-        for key in self.geometry_sets.keys():
-            self.add(mesh.geometry_sets[key])
-        for key in self.boundary_conditions.keys():
-            self.add(mesh.boundary_conditions[key])
+        for item in mesh.geometry_sets.values():
+            self.add(item)
+        for item in mesh.boundary_conditions.values():
+            self.add(item)
 
     def add_bc(self, bc):
         """Add a boundary condition to this mesh."""
         bc_key = bc.bc_type
         geom_key = bc.geometry_set.geometry_type
         bc.geometry_set.check_replaced_nodes()
-        if bc in self.boundary_conditions[bc_key, geom_key]:
-            raise ValueError("The boundary condition is already in this mesh!")
-        self.boundary_conditions[bc_key, geom_key].append(bc)
+        self.boundary_conditions.append(bc_key, geom_key, bc)
 
     def add_function(self, function):
         """
@@ -268,16 +266,17 @@ class Mesh(object):
         # Add a link to the couplings. For now the implementation only allows
         # one coupling per node.
         for coupling_type in [mpy.bc.point_coupling, mpy.bc.point_coupling_penalty]:
-            for coupling in self.boundary_conditions[coupling_type, mpy.geo.point]:
-                if not coupling.is_dat:
-                    for node in coupling.geometry_set.nodes:
-                        if node.coupling_link is None:
-                            node.coupling_link = coupling
-                        else:
-                            raise ValueError(
-                                "It is currently not possible to "
-                                + "add more than one coupling to a node."
-                            )
+            if (coupling_type, mpy.geo.point) in self.boundary_conditions.keys():
+                for coupling in self.boundary_conditions[coupling_type, mpy.geo.point]:
+                    if not coupling.is_dat:
+                        for node in coupling.geometry_set.nodes:
+                            if node.coupling_link is None:
+                                node.coupling_link = coupling
+                            else:
+                                raise ValueError(
+                                    "It is currently not possible to "
+                                    + "add more than one coupling to a node."
+                                )
 
     def get_global_nodes(
         self, *, nodes=None, include_solid_nodes=False, middle_nodes=True

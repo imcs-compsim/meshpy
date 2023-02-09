@@ -70,11 +70,34 @@ class BoundaryConditionContainer(OrderedDict):
     """
 
     def __init__(self, *args, **kwargs):
+        """Initialize the container and create the default keys in the map."""
         super().__init__(*args, **kwargs)
 
         for bc_key in mpy.bc:
             for geometry_key in mpy.geo:
                 self[(bc_key, geometry_key)] = []
+
+    def append(self, bc_key, geometry_key, bc):
+        """
+        Append boundary condition to the container.
+
+        Args
+        ----
+        bc_key:
+            Boundary specific key for the boundary condition.
+        geometry_key: mpy.geo
+            Geometry type of the boundary condition.
+        bc: BoundaryCondition
+            The boundary condition to be added to this container.
+            If the condition is already in this container, an error
+            will be raised.
+        """
+        if (bc_key, geometry_key) not in self.keys():
+            self[(bc_key, geometry_key)] = []
+        else:
+            if bc in self[(bc_key, geometry_key)]:
+                raise ValueError("The boundary condition is already in this mesh!")
+        self[(bc_key, geometry_key)].append(bc)
 
 
 class GeometrySetContainer(OrderedDict):
@@ -84,6 +107,7 @@ class GeometrySetContainer(OrderedDict):
     """
 
     def __init__(self, *args, **kwargs):
+        """Initialize the container and create the default keys in the map."""
         super().__init__(*args, **kwargs)
 
         for geometry_key in mpy.geo:
