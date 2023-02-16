@@ -362,3 +362,33 @@ def add_rotations(rotation_21, rotation_10):
     )
 
     return rotnew.transpose()
+
+
+def smallest_rotation(q: Rotation, t):
+    """
+    Get the triad that results from the smallest rotation (rotation without twist) from
+    the triad q such that the rotated first basis vector aligns with t. For more details
+    see Christoph Meier's dissertation chapter 2.1.2.
+
+    Args
+    ----
+    q: Rotation
+        Starting triad.
+    t: Vector in R3
+        Direction of the first basis of the rotated triad.
+    Return
+    ----
+    q_sr: Rotation
+        The triad that results from a smallest rotation.
+    """
+
+    R_old = q.get_rotation_matrix()
+    g1_old = R_old[:, 0]
+    g2_old = R_old[:, 1]
+    g3_old = R_old[:, 2]
+
+    g1 = np.array(t) / np.linalg.norm(t)
+    g2 = g2_old - np.dot(g2_old, g1) / (1 + np.dot(g1_old, g1)) * (g1 + g1_old)
+    g3 = g3_old - np.dot(g3_old, g1) / (1 + np.dot(g1_old, g1)) * (g1 + g1_old)
+
+    return Rotation.from_rotation_matrix(np.transpose([g1, g2, g3]))
