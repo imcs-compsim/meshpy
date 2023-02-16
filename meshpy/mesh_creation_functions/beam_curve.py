@@ -36,7 +36,7 @@ import numpy as np
 
 # Meshpy modules.
 from ..conf import mpy
-from ..rotation import Rotation
+from ..rotation import Rotation, smallest_rotation
 
 
 def create_beam_mesh_curve(
@@ -53,7 +53,7 @@ def create_beam_mesh_curve(
     """
     Generate a beam from a parametric curve. Integration along the beam is
     performed with scipy, and if the gradient is not explicitly provided, it is
-    calculated with autograd.
+    calculated with the numpy wrapper autograd.
 
     Args
     ----
@@ -70,12 +70,16 @@ def create_beam_mesh_curve(
         autograd.numpy.
     interval: [start end]
         Start and end values for the parameter of the curve.
-    function_derivative: function:
+    function_derivative: function -> R3
         Explicitly provide the jacobian of the centerline position.
-    function_rotation: function
+    function_rotation: function -> Rotation
         If this argument is given, the triads are computed with this
         function, on the same interval as the position function. Must
         return a Rotation object.
+        If no function_rotation is given, the rotation of the first node
+        is calculated automatically and all subsequent nodal rotations
+        are calculated based on a smallest rotation mapping onto the curve
+        tangent vector.
 
     **kwargs (for all of them look into create_beam_mesh_function)
     ----
@@ -170,14 +174,15 @@ def create_beam_mesh_curve(
             Initialize the object.
             """
             self.t_start_element = interval[0]
+            self.last_triad = None
 
-            # The first t2 basis is the one with the larger projection on rp.
             if is_3d_curve:
-                rprime = rp(float(interval[0]))
-                if abs(np.dot(rprime, [0, 0, 1])) < abs(np.dot(rprime, [0, 1, 0])):
-                    self.t2_temp = [0, 0, 1]
+                r_prime = rp(float(interval[0]))
+                if abs(np.dot(r_prime, [0, 0, 1])) < abs(np.dot(r_prime, [0, 1, 0])):
+                    t2_temp = [0, 0, 1]
                 else:
-                    self.t2_temp = [0, 1, 0]
+                    t2_temp = [0, 1, 0]
+                self.last_triad = Rotation.from_basis(r_prime, t2_temp)
 
         def __call__(self, length_a, length_b):
             """
@@ -212,17 +217,19 @@ def create_beam_mesh_curve(
                 if is_rot_funct:
                     rot = function_rotation(t)
                 else:
+                    r_prime = rp(t)
                     if is_3d_curve:
-                        rot = Rotation.from_basis(rp(t), self.t2_temp)
+                        # Create the next triad via the smallest rotation mapping based
+                        # on the last triad.
+                        rot = smallest_rotation(self.last_triad, r_prime)
+                        self.last_triad = rot.copy()
                     else:
                         # The rotation simplifies in the 2d case.
-                        rprime = rp(t)
-                        rot = Rotation([0, 0, 1], np.arctan2(rprime[1], rprime[0]))
+                        rot = Rotation([0, 0, 1], np.arctan2(r_prime[1], r_prime[0]))
 
                 if np.abs(xi - 1) < mpy.eps_pos:
                     # Set start values for the next element.
                     self.t_start_element = t
-                    self.t2_temp = rot.get_rotation_matrix()[:, 1]
 
                 # Return the needed values for beam creation.
                 return (pos, rot)
