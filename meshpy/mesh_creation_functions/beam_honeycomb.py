@@ -220,9 +220,9 @@ def create_beam_mesh_honeycomb(
     Return
     ----
     return_set: GeometryName
-        Set with nodes on the north, south, east and west boundaries. Those
-        sets only contains end nodes of lines, not the middle ones. The set
-        'all' contains all nodes.
+        Set with nodes on the top and bottom boundaries. Those sets only
+        contains end nodes of lines, not the middle ones. The set "all"
+        contains all nodes.
     """
 
     # Calculate the input values for the flat honeycomb mesh.
@@ -236,9 +236,8 @@ def create_beam_mesh_honeycomb(
     else:
         if not n_circumference % 2 == 0:
             raise ValueError(
-                "There has to be an even number of "
-                + "elements along the diameter in horizontal mode."
-                + " Given {}!".format(n_circumference)
+                "There has to be an even number of elements along the diameter in horizontal mode. "
+                "Given: {}!".format(n_circumference)
             )
         H = diameter * np.pi / n_circumference
         r = H / (1 + np.sin(np.pi / 6))
