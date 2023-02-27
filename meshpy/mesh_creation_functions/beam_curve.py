@@ -36,7 +36,7 @@ import numpy as np
 
 # Meshpy modules.
 from ..conf import mpy
-from ..rotation import Rotation
+from ..rotation import Rotation, smallest_rotation
 
 
 def create_beam_mesh_curve(
@@ -53,7 +53,7 @@ def create_beam_mesh_curve(
     """
     Generate a beam from a parametric curve. Integration along the beam is
     performed with scipy, and if the gradient is not explicitly provided, it is
-    calculated with autograd.
+    calculated with the numpy wrapper autograd.
 
     Args
     ----
@@ -70,12 +70,16 @@ def create_beam_mesh_curve(
         autograd.numpy.
     interval: [start end]
         Start and end values for the parameter of the curve.
-    function_derivative: function:
+    function_derivative: function -> R3
         Explicitly provide the jacobian of the centerline position.
-    function_rotation: function
+    function_rotation: function -> Rotation
         If this argument is given, the triads are computed with this
         function, on the same interval as the position function. Must
         return a Rotation object.
+        If no function_rotation is given, the rotation of the first node
+        is calculated automatically and all subsequent nodal rotations
+        are calculated based on a smallest rotation mapping onto the curve
+        tangent vector.
 
     **kwargs (for all of them look into create_beam_mesh_function)
     ----
@@ -158,83 +162,89 @@ def create_beam_mesh_curve(
         t_root = optimize.newton(lambda t: S(t, **kwargs) - arc_length, t0, fprime=ds)
         return t_root
 
-    def get_beam_functions(length_a, length_b):
+    class BeamFunctions:
         """
-        Return a function for the position and rotation along the beam
-        axis.
+        This object manages the creation of functions which are used to create the
+        beam nodes. By wrapping this in this object, we can store some data and speed
+        up the numerical integration along the curve.
         """
 
-        # Length of the beam element in physical space.
-        L = length_b - length_a
-
-        def beam_function(xi):
+        def __init__(self):
             """
-            Return position and rotation along the beam in the parameter
-            coordinate xi.
+            Initialize the object.
             """
+            self.t_start_element = interval[0]
+            self.last_triad = None
 
-            # Global values for the start of the element.
-            global t_temp, t_start_element, t2_temp
-
-            # Parameter for xi.
-            t = get_t_along_curve(
-                length_a + 0.5 * (xi + 1) * L,
-                t_start_element,
-                start_t=t_start_element,
-                start_S=length_a,
-            )
-            t_temp = t
-
-            # Position at xi.
             if is_3d_curve:
-                pos = function(t)
-            else:
-                pos = np.zeros(3)
-                pos[:2] = function(t)
-
-            # Rotation at xi.
-            if is_rot_funct:
-                rot = function_rotation(t)
-            else:
-                if is_3d_curve:
-                    rot = Rotation.from_basis(rp(t), t2_temp)
+                r_prime = rp(float(interval[0]))
+                if abs(np.dot(r_prime, [0, 0, 1])) < abs(np.dot(r_prime, [0, 1, 0])):
+                    t2_temp = [0, 0, 1]
                 else:
-                    # The rotation simplifies in the 2d case.
-                    rprime = rp(t)
-                    rot = Rotation([0, 0, 1], np.arctan2(rprime[1], rprime[0]))
+                    t2_temp = [0, 1, 0]
+                self.last_triad = Rotation.from_basis(r_prime, t2_temp)
 
-            if np.abs(xi - 1) < mpy.eps_pos:
-                # Set start values for the next element.
-                t_start_element = t_temp
-                t2_temp = rot.get_rotation_matrix()[:, 1]
+        def __call__(self, length_a, length_b):
+            """
+            This object is called with the interval limits. This method returns a
+            function that evaluates the position and rotation within this interval.
+            """
 
-            # Return the needed values for beam creation.
-            return (pos, rot)
+            # Length of the beam element in physical space.
+            L = length_b - length_a
 
-        return beam_function
+            def get_beam_position_and_rotation_at_xi(xi):
+                """
+                Evaluate the beam position and rotation at xi. xi is the beam element
+                parameter coordinate, i.e., xi = [-1, 1].
+                """
+                # Parameter for xi.
+                t = get_t_along_curve(
+                    length_a + 0.5 * (xi + 1) * L,
+                    self.t_start_element,
+                    start_t=self.t_start_element,
+                    start_S=length_a,
+                )
+
+                # Position at xi.
+                if is_3d_curve:
+                    pos = function(t)
+                else:
+                    pos = np.zeros(3)
+                    pos[:2] = function(t)
+
+                # Rotation at xi.
+                if is_rot_funct:
+                    rot = function_rotation(t)
+                else:
+                    r_prime = rp(t)
+                    if is_3d_curve:
+                        # Create the next triad via the smallest rotation mapping based
+                        # on the last triad.
+                        rot = smallest_rotation(self.last_triad, r_prime)
+                        self.last_triad = rot.copy()
+                    else:
+                        # The rotation simplifies in the 2d case.
+                        rot = Rotation([0, 0, 1], np.arctan2(r_prime[1], r_prime[0]))
+
+                if np.abs(xi - 1) < mpy.eps_pos:
+                    # Set start values for the next element.
+                    self.t_start_element = t
+
+                # Return the needed values for beam creation.
+                return (pos, rot)
+
+            return get_beam_position_and_rotation_at_xi
 
     # Now create the beam.
     # Get the length of the whole segment.
     length = S(interval[1])
 
-    # Create the beams.
-    global t_temp, t_start_element, t2_temp
-    t_temp = interval[0]
-    t_start_element = interval[0]
-
-    # The first t2 basis is the one with the larger projection on rp.
-    if is_3d_curve:
-        rprime = rp(float(interval[0]))
-        if abs(np.dot(rprime, [0, 0, 1])) < abs(np.dot(rprime, [0, 1, 0])):
-            t2_temp = [0, 0, 1]
-        else:
-            t2_temp = [0, 1, 0]
-
     # Create the beam in the mesh
     return mesh.create_beam_mesh_function(
         beam_object=beam_object,
         material=material,
-        function_generator=get_beam_functions,
+        function_generator=BeamFunctions(),
         interval=[0.0, length],
         **kwargs
     )

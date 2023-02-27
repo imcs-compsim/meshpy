@@ -38,7 +38,7 @@ import numpy as np
 
 # Meshpy imports.
 from meshpy import mpy, Rotation
-from meshpy.rotation import get_relative_rotation
+from meshpy.rotation import get_relative_rotation, smallest_rotation
 
 
 class TestRotation(unittest.TestCase):
@@ -272,6 +272,27 @@ class TestRotation(unittest.TestCase):
                 mpy.eps_quaternion,
                 "test_rotation_matrix: compare t2",
             )
+
+    def test_smallest_rotation_triad(self):
+        """
+        Test that the smallest rotation triad is calculated correctly.
+        """
+
+        # Get the triad obtained by a smallest rotation from an arbitrary triad
+        # onto an arbitrary tangent vector.
+        rot = Rotation([1, 2, 3], 0.431 * np.pi)
+        tan = [2.0, 3.0, -1.0]
+        rot_smallest = smallest_rotation(rot, tan)
+
+        rot_smallest_ref = [
+            0.853329730651268,
+            0.19771093216880734,
+            0.25192421451158936,
+            0.4114279380770031,
+        ]
+        self.assertLess(
+            np.linalg.norm(rot_smallest.q - rot_smallest_ref), mpy.eps_quaternion
+        )
 
 
 if __name__ == "__main__":
