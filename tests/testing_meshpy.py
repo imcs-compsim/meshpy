@@ -2345,6 +2345,28 @@ class TestMeshpy(unittest.TestCase):
         kwargs = {"end_node": node}
         self.assertRaises(ValueError, create_beam_mesh_line, *args, **kwargs)
 
+    def test_userdefined_boundary_condition(self):
+        """
+        Check if an user defined boundary condition can be added.
+        """
+
+        mesh = InputFile()
+
+        mat = BaseMeshItem("material")
+        sets = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 2, 3])
+        mesh.add(BoundaryCondition(sets["line"], "test", bc_type="USER SECTION FOR BC"))
+
+        # Compare the output of the mesh.
+        ref_file = os.path.join(
+            testing_input, "test_meshpy_userdefined_boundary_condition_reference.dat"
+        )
+        compare_strings(
+            self,
+            "test_userdefined_boundary_condition",
+            ref_file,
+            mesh.get_string(header=False).strip(),
+        )
+
 
 if __name__ == "__main__":
     # Execution part of script.

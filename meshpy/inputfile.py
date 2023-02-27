@@ -502,7 +502,7 @@ class InputFile(Mesh):
                         else:
                             bc = BaseMeshItem(item, comments=comments)
 
-                        self.boundary_conditions[bc_key, geometry_key].append(bc)
+                        self.boundary_conditions.append(bc_key, geometry_key, bc)
 
             def add_set(section_header, section_data_comment):
                 """
@@ -797,17 +797,29 @@ class InputFile(Mesh):
         # If there are couplings in the mesh, set the link between the nodes
         # and elements, so the couplings can decide which DOFs they couple,
         # depending on the type of the connected beam element.
-        n_coupling = len(
-            self.boundary_conditions[mpy.bc.point_coupling, mpy.geo.point]
-        ) + len(self.boundary_conditions[mpy.bc.point_coupling_penalty, mpy.geo.point])
-        if n_coupling > 0:
+        def get_number_of_coupling_conditions(key):
+            if (key, mpy.geo.point) in self.boundary_conditions.keys():
+                return len(self.boundary_conditions[key, mpy.geo.point])
+            else:
+                return 0
+
+        if (
+            get_number_of_coupling_conditions(mpy.bc.point_coupling)
+            + get_number_of_coupling_conditions(mpy.bc.point_coupling)
+            > 0
+        ):
             self.set_node_links()
 
         # Add the boundary conditions.
         for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
             if len(bc_list) > 0:
+                section_name = (
+                    bc_key
+                    if isinstance(bc_key, str)
+                    else self.boundary_condition_names[bc_key, geom_key]
+                )
                 get_section_dat(
-                    self.boundary_condition_names[bc_key, geom_key],
+                    section_name,
                     bc_list,
                     header_lines="{} {}".format(
                         self.geometry_counter[geom_key],
