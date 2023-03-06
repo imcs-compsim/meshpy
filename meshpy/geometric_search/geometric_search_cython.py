@@ -28,15 +28,16 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This module defines geometric search functionality.
+This file defines the interface to the Cython geometric search functionality.
 """
 
-# Functions that should be used from the outside
-from .find_close_points import (
-    find_close_points,
-    find_close_nodes,
-    partner_indices_to_point_partners,
-    point_partners_to_partner_indices,
-    cython_available,
-    arborx_available,
-)
+# Import the Cython modules
+try:
+    from .geometric_search_cython_lib import (
+        find_close_points,
+        find_close_points_binning,
+    )
+
+    cython_available = True
+except:
+    cython_available = False

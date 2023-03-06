@@ -714,7 +714,9 @@ class Mesh(object):
                 # Abuse the find close nodes function to find nodes with the
                 # same rotation.
                 rot_partner_indices = find_close_points(
-                    rotation_vectors, binning=False, eps=mpy.eps_quaternion
+                    rotation_vectors,
+                    algorithm=mpy.geometric_search_algorithm.brute_force_cython,
+                    tol=mpy.eps_quaternion,
                 )
                 has_partner, n_partners = partner_indices_to_point_partners(
                     rot_partner_indices, len(node_list)

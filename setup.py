@@ -35,12 +35,8 @@ from Cython.Build import cythonize
 
 extensions = [
     Extension(
-        "meshpy.geometric_search.find_close_points_cython_lib",
-        [
-            os.path.join(
-                "meshpy", "geometric_search", "find_close_points_cython_lib.pyx"
-            )
-        ],
+        "meshpy.geometric_search.geometric_search_cython_lib",
+        [os.path.join("meshpy", "geometric_search", "geometric_search_cython_lib.pyx")],
         include_dirs=[np.get_include()],
     )
 ]

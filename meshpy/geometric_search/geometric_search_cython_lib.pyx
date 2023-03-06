@@ -70,7 +70,7 @@ def find_close_points(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
         An array with integers, marking the set a node is part of. -1 means the
         node does not have a partner.
     partner: int
-        Number of pairs found.
+        Number of clusters found.
     """
 
     # Define types of variables for this function.

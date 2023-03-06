@@ -28,15 +28,46 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This module defines geometric search functionality.
+This file defines the interface to the ArborX geometric search functionality.
 """
 
-# Functions that should be used from the outside
-from .find_close_points import (
-    find_close_points,
-    find_close_nodes,
-    partner_indices_to_point_partners,
-    point_partners_to_partner_indices,
-    cython_available,
-    arborx_available,
-)
+# Python modules
+import sys
+import os
+
+# Set path so ArborX binary will be found
+sys.path.append(os.path.dirname(__file__))
+
+# Import the ArborX wrapper
+try:
+    from .geometric_search_arborx_lib import (
+        kokkos_initialize,
+        kokkos_finalize,
+        find_close_points as find_close_points_arborx,
+    )
+
+    arborx_available = True
+except:
+    arborx_available = False
+
+
+class KokkosScopeGuardWrapper:
+    """
+    Wrap the initialize and finalize calls to Kokkos.
+    """
+
+    def __init__(self):
+        """Call initialize when this object is created."""
+        kokkos_initialize()
+
+    def __del__(self):
+        """
+        Finalize Kokkos after this object goes out of scope,
+        i.e., at the end of this modules lifetime.
+        """
+        kokkos_finalize()
+
+
+if arborx_available:
+    # Create the scope guard
+    kokkos_scope_guard_wrapper = KokkosScopeGuardWrapper()
