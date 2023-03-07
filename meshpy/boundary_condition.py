@@ -37,7 +37,7 @@ import warnings
 # Meshpy modules.
 from .conf import mpy
 from .base_mesh_item import BaseMeshItem
-from .utility import find_close_nodes
+from .geometric_search import find_close_nodes
 
 
 class BoundaryConditionBase(BaseMeshItem):

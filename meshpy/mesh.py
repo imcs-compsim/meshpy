@@ -50,11 +50,11 @@ from .container import GeometryName, GeometrySetContainer, BoundaryConditionCont
 from .boundary_condition import BoundaryConditionBase
 from .coupling import Coupling
 from .vtk_writer import VTKWriter
-from .utility import (
+from .utility import get_node
+from .geometric_search import (
     find_close_points,
     find_close_nodes,
     partner_indices_to_point_partners,
-    get_node,
 )
 
 

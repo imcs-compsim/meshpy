@@ -69,11 +69,13 @@ from meshpy.geometry_set import GeometrySet
 from meshpy.container import GeometryName
 from meshpy.element_beam import Beam
 from meshpy.utility import (
-    find_close_points,
     flatten,
     get_min_max_coordinates,
+)
+from meshpy.geometric_search import (
     partner_indices_to_point_partners,
     point_partners_to_partner_indices,
+    find_close_points,
 )
 
 # Geometry functions.
