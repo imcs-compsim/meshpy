@@ -27,8 +27,9 @@
 // SOFTWARE.
 // -----------------------------------------------------------------------------
 
-#include <ArborX.hpp>
-#include <type_traits>
+#include <ArborX_LinearBVH.hpp>
+#include <ArborX_HyperPoint.hpp>
+#include <ArborX_HyperSphere.hpp>
 
 #include "find_close_points.h"
 
@@ -66,10 +67,10 @@ namespace ArborX
             const GeometricSearch::CoordinatesClosestPoints<n_dim>& coordinates, std::size_t i)
         {
             // Return an ArborX point representing the point from the numpy array.
-            // TODO: Use a hyper point for arrays with other than 3 dimensions.
-            return ArborX::Point{(float)coordinates.coordinates_->operator()(i, 0),
-                (float)coordinates.coordinates_->operator()(i, 1),
-                (float)coordinates.coordinates_->operator()(i, 2)};
+            ArborX::ExperimentalHyperGeometry::Point<n_dim> point;
+            for (int d = 0; d < n_dim; ++d)
+                point[d] = (float)coordinates.coordinates_->operator()(i, d);
+            return point;
         }
     };
 
@@ -88,12 +89,12 @@ namespace ArborX
         {
             // Create an ArborX sphere at the coordinates of the point here. The radius is the
             // tolerance for the closes point search.
-            // TODO: Use a hyper sphere for arrays with other than 3 dimensions.
-            return attach(
-                intersects(ArborX::Sphere{{(float)coordinates.coordinates_->operator()(i, 0),
-                                              (float)coordinates.coordinates_->operator()(i, 1),
-                                              (float)coordinates.coordinates_->operator()(i, 2)},
-                    (float)coordinates.tol_}),
+            // TODO: Use double as datatype.
+            ArborX::ExperimentalHyperGeometry::Point<n_dim> point;
+            for (int d = 0; d < n_dim; ++d)
+                point[d] = (float)coordinates.coordinates_->operator()(i, d);
+            return attach(intersects(ArborX::ExperimentalHyperGeometry::Sphere<n_dim>{
+                              point, (float)coordinates.tol_}),
                 (int)i);
         }
     };
@@ -102,7 +103,7 @@ namespace ArborX
 
 namespace GeometricSearch
 {
-    struct ExcludeSelfCollision
+    struct EnsureUniquePairs
     {
         template <class Predicate, class OutputFunctor>
         KOKKOS_FUNCTION void operator()(
@@ -128,14 +129,15 @@ namespace GeometricSearch
         const CoordinatesClosestPoints<n_dim> coordinates_with_tol{&coordinates_unchecked, tol};
 
         // Build tree structure containing all points
-        ArborX::BoundingVolumeHierarchy<memory_space> bounding_volume_hierarchy(
+        using hyper_box = ArborX::ExperimentalHyperGeometry::Box<n_dim>;
+        ArborX::BasicBoundingVolumeHierarchy<memory_space, hyper_box> bounding_volume_hierarchy(
             Kokkos::DefaultExecutionSpace{}, coordinates_with_tol);
 
         // Perform the collision check
         Kokkos::View<int*, Kokkos::HostSpace> indices_arborx("indices_arborx", 0);
         Kokkos::View<int*, Kokkos::HostSpace> offset_arborx("offset_arborx", 0);
         bounding_volume_hierarchy.query(Kokkos::DefaultExecutionSpace{}, coordinates_with_tol,
-            ExcludeSelfCollision{}, indices_arborx, offset_arborx);
+            EnsureUniquePairs{}, indices_arborx, offset_arborx);
 
         // Copy everything into numpy arrays
         auto copy_kokkos_array = [&](const Kokkos::View<int*, Kokkos::HostSpace>& vec)
@@ -162,6 +164,8 @@ namespace GeometricSearch
         {
             case 3:
                 return find_close_points_template<3>(coordinates, tol);
+            case 6:
+                return find_close_points_template<6>(coordinates, tol);
             default:
                 throw std::out_of_range("Got unexpected number of spatial dimensions");
         }
@@ -216,8 +220,8 @@ namespace GeometricSearch
             }
             else if (has_cluster)
             {
-                // The point is part of a cluster and the cluster ID is already set. Check that all
-                // partners match the ID.
+                // The point is part of a cluster and the cluster ID is already set. Check
+                // that all partners match the ID.
                 for (int j = start; j < end; j++)
                 {
                     int j_point = indices_unchecked(j);

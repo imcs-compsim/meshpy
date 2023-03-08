@@ -72,11 +72,6 @@ if arborx_available:
 def find_close_points_arborx(point_coordinates, tol):
     """Call the ArborX implementation of find close_points."""
     if arborx_available:
-        n_dim = point_coordinates.shape[1]
-        if not n_dim == 3:
-            raise ValueError(
-                "ArborX geometric search is currently only implemented for 3 dimensions"
-            )
         return geometric_search_arborx_lib.find_close_points(point_coordinates, tol)
     else:
         raise ModuleNotFoundError("ArborX functionality is not available")

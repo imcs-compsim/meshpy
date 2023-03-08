@@ -157,13 +157,12 @@ def find_close_points(point_coordinates, *, algorithm=None, tol=1e-5, **kwargs):
     """
 
     n_points = len(point_coordinates)
-    n_dim = point_coordinates.shape[1]
 
     if algorithm is None:
         # Decide which algorithm to use
         if n_points < 200:
             algorithm = FindClosePointAlgorithm.brute_force_cython
-        elif arborx_available and n_dim == 3:
+        elif arborx_available:
             algorithm = FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
         else:
             algorithm = FindClosePointAlgorithm.binning_cython

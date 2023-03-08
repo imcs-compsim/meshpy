@@ -509,6 +509,14 @@ class TestGeometricSearch(unittest.TestCase):
         else:
             self.skipTest("Cython not available")
 
+    def test_find_close_points_dimension_boundary_volume_hierarchy_arborx(self):
+        if arborx_available:
+            self.xtest_find_close_points_dimension(
+                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
+            )
+        else:
+            self.skipTest("Cython not available")
+
     def xtest_find_close_points_dimension(self, algorithm, **kwargs):
         """
         Test that the find_close_points function also works properly with
