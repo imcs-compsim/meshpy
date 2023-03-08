@@ -33,10 +33,8 @@ This module defines geometric search functionality.
 
 # Functions that should be used from the outside
 from .find_close_points import (
+    FindClosePointAlgorithm,
     find_close_points,
-    find_close_nodes,
     partner_indices_to_point_partners,
     point_partners_to_partner_indices,
-    cython_available,
-    arborx_available,
 )

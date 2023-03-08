@@ -43,6 +43,10 @@ import numpy as np
 from .conf import mpy
 from .node import Node
 from .geometry_set import GeometrySet
+from .geometric_search.find_close_points import (
+    find_close_points,
+    point_partners_to_partner_indices,
+)
 
 
 def get_git_data(repo):
@@ -80,6 +84,35 @@ def flatten(data):
         return flatten_list
     else:
         return [data]
+
+
+def find_close_nodes(nodes, **kwargs):
+    """
+    Find nodes in a point cloud that are within a certain tolerance
+    of each other.
+
+    Args
+    ----
+    nodes: list(Node)
+        Nodes who are part ot eh point cloud.
+    **kwargs:
+        Arguments passed on to geometric_search.find_close_points
+
+    Return
+    ----
+    partner_nodes: list(list(Node))
+        A list of lists of nodes that are close to each other, i.e.,
+        each element in the returned list contains nodes that are close
+        to each other.
+    """
+
+    coords = np.zeros([len(nodes), 3])
+    for i, node in enumerate(nodes):
+        coords[i, :] = node.coordinates
+    partner_indices = point_partners_to_partner_indices(
+        *find_close_points(coords, **kwargs)
+    )
+    return [[nodes[i] for i in partners] for partners in partner_indices]
 
 
 def check_node_by_coordinate(node, axis, value, eps=1e-10):

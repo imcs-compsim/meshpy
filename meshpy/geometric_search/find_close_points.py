@@ -28,15 +28,13 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-Find points in a point cloud that are at the same position (within a certain tolerance).
+Find unique points in a point cloud, i.e., points that are within a certain tolerance
+of each other will be considered as unique.
 """
 
 # Python modules
-import numpy as np
-import warnings
+from enum import Enum, auto
 
-# Meshpy modules
-from ..conf import mpy
 
 # Geometric search modules
 # Cython modules
@@ -44,8 +42,8 @@ from .geometric_search_cython import cython_available
 
 if cython_available:
     from .geometric_search_cython import (
-        find_close_points as find_close_points_cython,
-        find_close_points_binning as find_close_points_binning_cython,
+        find_close_points_brute_force_cython,
+        find_close_points_binning_cython,
     )
 
 # ArborX
@@ -53,6 +51,14 @@ from .geometric_search_arborx import arborx_available
 
 if arborx_available:
     from .geometric_search_arborx import find_close_points_arborx
+
+
+class FindClosePointAlgorithm(Enum):
+    """Enum for different find_close_point algorithms."""
+
+    brute_force_cython = auto()
+    binning_cython = auto()
+    boundary_volume_hierarchy_arborx = auto()
 
 
 def point_partners_to_partner_indices(point_partners, n_partners):
@@ -79,107 +85,62 @@ def partner_indices_to_point_partners(partner_indices, n_points):
     return point_partners, len(partner_indices)
 
 
-def find_close_points(
-    point_coordinates,
-    algorithm=mpy.geometric_search_algorithm.automatic,
-    n_bins=[mpy.geometric_search_binning_n_bin] * 3,
-    tol=mpy.eps_pos,
-):
+def find_close_points(point_coordinates, *, algorithm=None, tol=1e-5, **kwargs):
     """
-    Find n-dimensional points that are close to each other.
+    Find unique points in a point cloud, i.e., points that are within a certain tolerance
+    of each other will be considered as unique.
 
     Args
     ----
     point_coordinates: np.array(n_points x n_dim)
-        Point coordinates that are checked for partners.
-    algorithm: mpy.GeometricSearchAlgorithm
+        Point coordinates that are checked for partners. The number of spatial dimensions
+        does not have to be equal to 3.
+    algorithm: FindClosePointAlgorithm
         Type of geometric search algorithm that should be used.
     n_bins: list(int)
         Number of bins in the first three dimensions.
-    tol: double
-        Hypersphere radius value that the coordinates have to be within, to be
-        identified as overlapping. Be careful when using an arborx search
-        algorithm, das the tolerance there is of type float, not double.
+    tol: float
+        If the absolute distance between two points is smaller than tol, they
+        are considered to be equal, i.e., tol is the hyper sphere radius that
+        the point coordinates have to be within, to be identified as overlapping.
+        Be careful when using an arborx search algorithm, das the tolerance
+        there is of type float, not double.
 
     Return
     ----
-    partner_indices: list(list(int))
-        A list of lists of point indices that are close to each other.
+    has_partner: array(int)
+        An array with integers, marking the partner index of each point. A partner
+        index of -1 means the node does not have a partner.
+    partner: int
+        Largest partner index.
     """
 
     n_points = len(point_coordinates)
     n_dim = point_coordinates.shape[1]
 
-    if algorithm is mpy.geometric_search_algorithm.automatic:
+    if algorithm is None:
         # Decide which algorithm to use
-        if n_points < 100:
-            algorithm = mpy.geometric_search_algorithm.brute_force_cython
+        if n_points < 200:
+            algorithm = FindClosePointAlgorithm.brute_force_cython
         elif arborx_available and n_dim == 3:
-            algorithm = mpy.geometric_search_algorithm.boundary_volume_hierarchy_arborx
+            algorithm = FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
         else:
-            algorithm = mpy.geometric_search_algorithm.binning_cython
-
-    if (
-        algorithm is mpy.geometric_search_algorithm.brute_force_cython
-        and n_points > mpy.geometric_search_max_nodes_brute_force
-    ):
-        warnings.warn(
-            "The function find_close_points is called with the brute force algorithm "
-            + f"with {n_points} points, for performance reasons other algorithms should be used!"
-        )
-
-    if (
-        algorithm is mpy.geometric_search_algorithm.boundary_volume_hierarchy_arborx
-        and not n_dim == 3
-    ):
-        raise ValueError(
-            "ArborX geometric search is currently only implemented for 3 dimensions"
-        )
-    elif (
-        algorithm is mpy.geometric_search_algorithm.boundary_volume_hierarchy_arborx
-        and not arborx_available
-    ):
-        raise ValueError("ArborX geometric search is not available")
-    elif (
-        algorithm is mpy.geometric_search_algorithm.brute_force_cython
-        or algorithm is mpy.geometric_search_algorithm.brute_force_cython
-    ) and not cython_available:
-        raise ValueError("Cython geometric search is not available")
+            algorithm = FindClosePointAlgorithm.binning_cython
 
     # Get list of closest pairs
-    if algorithm is mpy.geometric_search_algorithm.brute_force_cython:
-        has_partner, n_partner = find_close_points_cython(point_coordinates, tol)
-    elif algorithm is mpy.geometric_search_algorithm.binning_cython:
-        has_partner, n_partner = find_close_points_binning_cython(
-            point_coordinates, *n_bins, tol
+    if algorithm is FindClosePointAlgorithm.brute_force_cython:
+        has_partner, n_partner = find_close_points_brute_force_cython(
+            point_coordinates, tol, **kwargs
         )
-    elif algorithm is mpy.geometric_search_algorithm.boundary_volume_hierarchy_arborx:
-        has_partner, n_partner = find_close_points_arborx(point_coordinates, tol)
+    elif algorithm is FindClosePointAlgorithm.binning_cython:
+        has_partner, n_partner = find_close_points_binning_cython(
+            point_coordinates, tol, **kwargs
+        )
+    elif algorithm is FindClosePointAlgorithm.boundary_volume_hierarchy_arborx:
+        has_partner, n_partner = find_close_points_arborx(
+            point_coordinates, tol, **kwargs
+        )
     else:
-        raise TypeError("Got unexpected algorithm")
+        raise TypeError(f"Got unexpected algorithm {algorithm}")
 
-    return point_partners_to_partner_indices(has_partner, n_partner)
-
-
-def find_close_nodes(nodes, **kwargs):
-    """
-    Find nodes that are close to each other.
-
-    Args
-    ----
-    nodes: list(Node)
-        Nodes that are checked for partners.
-    **kwargs:
-        Arguments passed on to find_close_points
-
-    Return
-    ----
-    partner_nodes: list(list(Node))
-        A list of lists of nodes that are close to each other.
-    """
-
-    coords = np.zeros([len(nodes), 3])
-    for i, node in enumerate(nodes):
-        coords[i, :] = node.coordinates
-    partner_indices = find_close_points(coords, **kwargs)
-    return [[nodes[i] for i in partners] for partners in partner_indices]
+    return has_partner, n_partner

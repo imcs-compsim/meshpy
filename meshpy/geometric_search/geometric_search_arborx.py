@@ -40,11 +40,7 @@ sys.path.append(os.path.dirname(__file__))
 
 # Import the ArborX wrapper
 try:
-    from .geometric_search_arborx_lib import (
-        kokkos_initialize,
-        kokkos_finalize,
-        find_close_points as find_close_points_arborx,
-    )
+    import geometric_search_arborx_lib
 
     arborx_available = True
 except:
@@ -58,16 +54,29 @@ class KokkosScopeGuardWrapper:
 
     def __init__(self):
         """Call initialize when this object is created."""
-        kokkos_initialize()
+        geometric_search_arborx_lib.kokkos_initialize()
 
     def __del__(self):
         """
         Finalize Kokkos after this object goes out of scope,
         i.e., at the end of this modules lifetime.
         """
-        kokkos_finalize()
+        geometric_search_arborx_lib.kokkos_finalize()
 
 
 if arborx_available:
     # Create the scope guard
     kokkos_scope_guard_wrapper = KokkosScopeGuardWrapper()
+
+
+def find_close_points_arborx(point_coordinates, tol):
+    """Call the ArborX implementation of find close_points."""
+    if arborx_available:
+        n_dim = point_coordinates.shape[1]
+        if not n_dim == 3:
+            raise ValueError(
+                "ArborX geometric search is currently only implemented for 3 dimensions"
+            )
+        return geometric_search_arborx_lib.find_close_points(point_coordinates, tol)
+    else:
+        raise ModuleNotFoundError("ArborX functionality is not available")

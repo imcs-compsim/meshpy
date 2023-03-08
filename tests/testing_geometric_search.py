@@ -42,42 +42,22 @@ from meshpy.mesh_creation_functions.beam_honeycomb import (
     create_beam_mesh_honeycomb_flat,
 )
 from meshpy.geometric_search import (
+    FindClosePointAlgorithm,
+    find_close_points,
     partner_indices_to_point_partners,
     point_partners_to_partner_indices,
-    find_close_points,
-    cython_available,
-    arborx_available,
 )
-
-
-# Testing imports
-# from testing_utility import (
-#     skip_fail_test,
-#     testing_temp,
-#     testing_input,
-#     compare_strings,
-#     compare_vtk,
-# )
+from meshpy.geometric_search.geometric_search_arborx import arborx_available
+from meshpy.geometric_search.geometric_search_cython import cython_available
 
 
 class TestGeometricSearch(unittest.TestCase):
     """Test various stuff from the meshpy.geometric_search module."""
 
-    def setUp(self):
-        """
-        This method is called before each test and sets the default meshpy
-        values for each test. The values can be changed in the individual
-        tests.
-        """
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
-        mpy.geometric_search_max_nodes_brute_force = 1010
-
     def test_find_close_points_between_bins_brute_force_cython(self):
         if cython_available:
             self.xtest_find_close_points_between_bins(
-                mpy.geometric_search_algorithm.brute_force_cython
+                FindClosePointAlgorithm.brute_force_cython
             )
         else:
             self.skipTest("Cython not available")
@@ -85,7 +65,7 @@ class TestGeometricSearch(unittest.TestCase):
     def test_find_close_points_between_bins_binning_cython(self):
         if cython_available:
             self.xtest_find_close_points_between_bins(
-                mpy.geometric_search_algorithm.binning_cython, n_bins=[4, 4, 4]
+                FindClosePointAlgorithm.binning_cython, n_bins=[4, 4, 4]
             )
         else:
             self.skipTest("Cython not available")
@@ -93,7 +73,7 @@ class TestGeometricSearch(unittest.TestCase):
     def test_find_close_points_between_bins_boundary_volume_hierarchy_arborx(self):
         if arborx_available:
             self.xtest_find_close_points_between_bins(
-                mpy.geometric_search_algorithm.boundary_volume_hierarchy_arborx
+                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
             )
         else:
             self.skipTest("ArborX not available")
@@ -155,9 +135,10 @@ class TestGeometricSearch(unittest.TestCase):
         coords[-16, :] = [0.0, 0.0, 0.0 - eps_medium_factor]
 
         # Test the number of partners and list of partners
-        partner_indices = find_close_points(
+        point_partners, n_partners = find_close_points(
             coords, algorithm=algorithm, tol=eps_medium, **kwargs
         )
+        partner_indices = point_partners_to_partner_indices(point_partners, n_partners)
 
         # Compare to the reference solution.
         point_partners_reference = -1 * np.ones([n_nodes_total], dtype=int)
@@ -214,16 +195,13 @@ class TestGeometricSearch(unittest.TestCase):
             142, 142, 143, 143, 144, 144, 145, 145, 142, 142]
         # fmt: on
         point_partners_reference[index_vector] = val_vector
-        point_partners, _n_partners = partner_indices_to_point_partners(
-            partner_indices, len(coords)
-        )
         self.assertEqual(len(partner_indices), 146)
         self.assertTrue(np.array_equal(point_partners, point_partners_reference))
 
     def test_find_close_points_binning_flat_brute_force_cython(self):
         if cython_available:
             self.xtest_find_close_points_binning_flat(
-                mpy.geometric_search_algorithm.brute_force_cython
+                FindClosePointAlgorithm.brute_force_cython
             )
         else:
             self.skipTest("Cython not available")
@@ -231,7 +209,7 @@ class TestGeometricSearch(unittest.TestCase):
     def test_find_close_points_binning_flat_binning_cython(self):
         if cython_available:
             self.xtest_find_close_points_binning_flat(
-                mpy.geometric_search_algorithm.binning_cython
+                FindClosePointAlgorithm.binning_cython
             )
         else:
             self.skipTest("Cython not available")
@@ -239,7 +217,7 @@ class TestGeometricSearch(unittest.TestCase):
     def test_find_close_points_binning_flat_boundary_volume_hierarchy_arborx(self):
         if arborx_available:
             self.xtest_find_close_points_binning_flat(
-                mpy.geometric_search_algorithm.boundary_volume_hierarchy_arborx
+                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
             )
         else:
             self.skipTest("ArborX not available")
@@ -280,13 +258,6 @@ class TestGeometricSearch(unittest.TestCase):
             reference_partners_list, 66
         )
 
-        partners = find_close_points(
-            create_flat_mesh().get_global_coordinates(middle_nodes=False)[0],
-            algorithm=algorithm,
-            **kwargs
-        )
-        self.assertEqual(reference_partners, partners)
-
         # Apply different rotations and compare the partner results.
         rotations = [
             Rotation([1, 0, 0], 0.0),
@@ -308,13 +279,28 @@ class TestGeometricSearch(unittest.TestCase):
                 **kwargs
             )
 
-            # Compare the partners with the reference.
+            has_partners, n_partner = find_close_points(
+                create_flat_mesh().get_global_coordinates(middle_nodes=False)[0],
+                algorithm=algorithm,
+                **kwargs
+            )
+
+            # Apply the result conversion, so we check this functionality too.
+            n_points = len(has_partners)
+            partners = point_partners_to_partner_indices(has_partners, n_partner)
+            has_partners, n_partner = partner_indices_to_point_partners(
+                partners, n_points
+            )
+
+            # Compare results with the reference.
             self.assertEqual(partners, reference_partners)
+            self.assertEqual(list(has_partners), reference_partners_list)
+            self.assertEqual(n_partner, 66)
 
     def test_find_close_points_dimension_brute_force_cython(self):
         if cython_available:
             self.xtest_find_close_points_dimension(
-                mpy.geometric_search_algorithm.brute_force_cython
+                FindClosePointAlgorithm.brute_force_cython
             )
         else:
             self.skipTest("Cython not available")
@@ -322,7 +308,7 @@ class TestGeometricSearch(unittest.TestCase):
     def test_find_close_points_dimension_binning_cython(self):
         if cython_available:
             self.xtest_find_close_points_dimension(
-                mpy.geometric_search_algorithm.binning_cython
+                FindClosePointAlgorithm.binning_cython
             )
         else:
             self.skipTest("Cython not available")
@@ -367,10 +353,8 @@ class TestGeometricSearch(unittest.TestCase):
         partner_expected = 5
 
         # Get results
-        partner_indices = find_close_points(coords, algorithm=algorithm, **kwargs)
-        has_partner, partner = partner_indices_to_point_partners(
-            partner_indices, len(coords)
-        )
+        has_partner, partner = find_close_points(coords, algorithm=algorithm, **kwargs)
+        partner_indices = point_partners_to_partner_indices(has_partner, partner)
 
         # Check the results
         self.assertTrue(has_partner_expected, has_partner)

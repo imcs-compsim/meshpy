@@ -31,13 +31,50 @@
 This file defines the interface to the Cython geometric search functionality.
 """
 
-# Import the Cython modules
+# Import python module
+import os
+import sys
+import warnings
+
+# Set path so the Cython binary will be found
+sys.path.append(os.path.dirname(__file__))
+
+# Import the Cython module
 try:
-    from .geometric_search_cython_lib import (
-        find_close_points,
-        find_close_points_binning,
-    )
+    import geometric_search_cython_lib
 
     cython_available = True
 except:
     cython_available = False
+
+
+def find_close_points_brute_force_cython(
+    point_coordinates, tol, *, n_points_performance_warning=5000
+):
+    """Call the Cython brute force implementation of find close_points."""
+    if cython_available:
+        n_points = len(point_coordinates)
+        if n_points > n_points_performance_warning:
+            warnings.warn(
+                "The function find_close_points is called with the brute force algorithm "
+                + f"with {n_points} points, for performance reasons other algorithms should be used!"
+            )
+        return geometric_search_cython_lib.find_close_points(point_coordinates, tol)
+    else:
+        raise ModuleNotFoundError(
+            "Cython geometric search functionality is not available"
+        )
+
+
+def find_close_points_binning_cython(point_coordinates, tol, *, n_bins=None):
+    """Call the Cython binning implementation of find close_points."""
+    if cython_available:
+        if n_bins is None:
+            n_bins = [10, 10, 10]
+        return geometric_search_cython_lib.find_close_points_binning(
+            point_coordinates, tol, *n_bins
+        )
+    else:
+        raise ModuleNotFoundError(
+            "Cython geometric search functionality is not available"
+        )
