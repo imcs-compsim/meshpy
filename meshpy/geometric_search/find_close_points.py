@@ -61,6 +61,47 @@ class FindClosePointAlgorithm(Enum):
     boundary_volume_hierarchy_arborx = auto()
 
 
+def point_partners_to_unique_indices(point_partners, n_partners):
+    """
+    Convert the partner indices to lists that can be used for converting
+    between the full and unique coordinates.
+
+    Returns
+    ----
+    unique_indices: list(int)
+        Indices that result in the unique point coordinate array.
+    inverse_indices: list(int)
+        Indices of the unique array that can be used to reconstruct of the original points coordinates.
+    """
+
+    unique_indices = []
+    inverse_indices = [-1 for i in range(len(point_partners))]
+    partner_id_to_unique_map = {}
+    i_partner = 0
+    for i_point, partner_index in enumerate(point_partners):
+        if partner_index == -1:
+            # This point does not have any partners, i.e., it is already a unique point.
+            unique_indices.append(i_point)
+            my_inverse_index = len(unique_indices) - 1
+        elif partner_index == i_partner:
+            # This point has partners and this is the first time that this partner index
+            # appears in the input list.
+            unique_indices.append(i_point)
+            my_inverse_index = len(unique_indices) - 1
+            partner_id_to_unique_map[partner_index] = my_inverse_index
+            i_partner += 1
+        elif partner_index < i_partner:
+            # This point has partners and the partner index has been previously found.
+            my_inverse_index = partner_id_to_unique_map[partner_index]
+        else:
+            raise ValueError(
+                "This should not happen, as the partners should be provided in order"
+            )
+        inverse_indices[i_point] = my_inverse_index
+
+    return unique_indices, inverse_indices
+
+
 def point_partners_to_partner_indices(point_partners, n_partners):
     """
     Convert the partner indices for each point to a list of lists with the

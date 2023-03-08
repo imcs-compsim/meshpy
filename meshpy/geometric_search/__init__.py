@@ -37,4 +37,5 @@ from .find_close_points import (
     find_close_points,
     partner_indices_to_point_partners,
     point_partners_to_partner_indices,
+    point_partners_to_unique_indices,
 )
