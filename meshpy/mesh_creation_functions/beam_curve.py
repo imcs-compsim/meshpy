@@ -37,6 +37,7 @@ import numpy as np
 # Meshpy modules.
 from ..conf import mpy
 from ..rotation import Rotation, smallest_rotation
+from .beam_generic import create_beam_mesh_function
 
 
 def create_beam_mesh_curve(
@@ -241,7 +242,8 @@ def create_beam_mesh_curve(
     length = S(interval[1])
 
     # Create the beam in the mesh
-    return mesh.create_beam_mesh_function(
+    return create_beam_mesh_function(
+        mesh,
         beam_object=beam_object,
         material=material,
         function_generator=BeamFunctions(),

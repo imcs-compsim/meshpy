@@ -28,7 +28,7 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-Create a beam filament from a nurbs curve represented with NURBS-Python
+Create a beam filament from a NURBS curve represented with NURBS-Python
 (geomdl).
 """
 
@@ -42,7 +42,7 @@ from .beam_curve import create_beam_mesh_curve
 
 def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, tol=None, **kwargs):
     """
-    Generate a beam from a nurbs curve.
+    Generate a beam from a NURBS curve.
 
     Args
     ----

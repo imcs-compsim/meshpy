@@ -227,3 +227,37 @@ class MaterialEulerBernoulli(MaterialBeam):
             area,
             mom2,
         )
+
+
+class MaterialSolid(Material):
+    """Base class for a material for solids"""
+
+    def __init__(
+        self, material_string=None, youngs_modulus=-1.0, nu=0.0, density=0.0, **kwargs
+    ):
+        """Set the material values for a solid."""
+        super().__init__(**kwargs)
+
+        self.material_string = material_string
+        self.youngs_modulus = youngs_modulus
+        self.nu = nu
+        self.density = density
+
+
+class MaterialStVenantKirchhoff(MaterialSolid):
+    """Holds material definition for StVenant Kirchhoff solids."""
+
+    def __init__(self, **kwargs):
+        super().__init__(material_string="MAT_Struct_StVenantKirchhoff", **kwargs)
+
+    def _get_dat(self):
+        """Return the line for this material."""
+
+        string = "MAT {} {} YOUNG {} NUE {} DENS {}"
+        return string.format(
+            self.n_global,
+            self.material_string,
+            self.youngs_modulus,
+            self.nu,
+            self.density,
+        )

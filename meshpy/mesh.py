@@ -43,8 +43,8 @@ from .conf import mpy
 from .rotation import Rotation, add_rotations
 from .function import Function
 from .material import Material
-from .node import Node
-from .element_beam import Beam
+from .node import Node, NodeCosserat
+from .element import Element
 from .geometry_set import GeometrySet
 from .container import GeometryName, GeometrySetContainer, BoundaryConditionContainer
 from .boundary_condition import BoundaryConditionBase
@@ -54,7 +54,6 @@ from .utility import (
     find_close_points,
     find_close_nodes,
     partner_indices_to_point_partners,
-    get_node,
 )
 
 
@@ -97,7 +96,7 @@ class Mesh(object):
                 self.add_material(add_item, **kwargs)
             elif isinstance(add_item, Node):
                 self.add_node(add_item, **kwargs)
-            elif isinstance(add_item, Beam):
+            elif isinstance(add_item, Element):
                 self.add_element(add_item, **kwargs)
             elif isinstance(add_item, GeometrySet):
                 self.add_geometry_set(add_item, **kwargs)
@@ -351,16 +350,16 @@ class Mesh(object):
             List of the nodes corresponding to the rows in the rot array. If
             the input argument nodes was given, it will be returned as is.
         """
-        beam_nodes = self.get_global_nodes(**kwargs)
-        rot = np.zeros([len(beam_nodes), 4])
-        for i, node in enumerate(beam_nodes):
-            if node.rotation is not None:
+        nodes = self.get_global_nodes(**kwargs)
+        rot = np.zeros([len(nodes), 4])
+        for i, node in enumerate(nodes):
+            if isinstance(node, NodeCosserat):
                 rot[i, :] = node.rotation.get_quaternion()
             else:
-                raise ValueError(
-                    "Got a node without rotation, this should not happen here!"
-                )
-        return rot, beam_nodes
+                # For the case of nodes that belong to solid elements,
+                # we define the following default value:
+                rot[i, :] = [2.0, 0.0, 0.0, 0.0]
+        return rot, nodes
 
     def translate(self, vector):
         """
@@ -451,7 +450,7 @@ class Mesh(object):
                 posnew += origin
 
         for i, node in enumerate(beam_nodes):
-            if node.rotation is not None:
+            if isinstance(node, NodeCosserat):
                 node.rotation.q = rotnew[i, :]
             if not only_rotate_triads:
                 node.coordinates = posnew[i, :]
@@ -709,7 +708,12 @@ class Mesh(object):
                 # Get array with rotation vectors.
                 rotation_vectors = np.zeros([len(node_list), 3])
                 for i, node in enumerate(node_list):
-                    rotation_vectors[i, :] = node.rotation.get_rotation_vector()
+                    if isinstance(node, NodeCosserat):
+                        rotation_vectors[i, :] = node.rotation.get_rotation_vector()
+                    else:
+                        # For the case of nodes that belong to solid elements,
+                        # we define the following default value:
+                        rotation_vectors[i, :] = [4 * np.pi, 0, 0]
 
                 # Abuse the find close nodes function to find nodes with the
                 # same rotation.
@@ -933,161 +937,6 @@ class Mesh(object):
         if vtkwriter_solid.points.GetNumberOfPoints() > 0:
             filepath = os.path.join(output_directory, output_name + "_solid.vtu")
             vtkwriter_solid.write_vtk(filepath, **kwargs)
-
-    def create_beam_mesh_function(
-        self,
-        *,
-        beam_object=None,
-        material=None,
-        function_generator=None,
-        interval=None,
-        n_el=1,
-        add_sets=False,
-        start_node=None,
-        end_node=None,
-        vtk_cell_data=None
-    ):
-        """
-        Generic beam creation function.
-
-        Args
-        ----
-        beam_object: Beam
-            Class of beam that will be used for this line.
-        material: Material
-            Material for this line.
-        function_generator: function that returns function
-            The function_generator has to take two variables, point_a and
-            point_b (both within the interval) and return a function(xi) that
-            calculates the position and rotation along the beam, where
-            point_a -> xi = -1 and point_b -> xi = 1.
-        interval: [start end]
-            Start and end values for interval that will be used to create the
-            beam.
-        n_el: int
-            Number of equally spaces beam elements along the line.
-        add_sets: bool
-            If this is true the sets are added to the mesh and then displayed
-            in eventual VTK output, even if they are not used for a boundary
-            condition or coupling.
-        start_node: Node, GeometrySet
-            Node to use as the first node for this line. Use this if the line
-            is connected to other lines (angles have to be the same, otherwise
-            connections should be used). If a geometry set is given, it can
-            contain one, and one node only. If the rotation does not match, but
-            the tangent vector is the same, the created beams triads are
-            rotated so the physical problem stays the same (for axi-symmetric
-            beam cross-sections) but the same nodes can be used.
-        end_node: Node, GeometrySet, bool
-            If this is a Node or GeometrySet, the last node of the created beam
-            is set to that node.
-            If it is True the created beam is closed within itself.
-        vtk_cell_data: {cell_data_name (str): cell_data_value (float)}
-            With this argument, a vtk cell data can be set for the elements
-            created within this function. This can be used to check which
-            elements are created by which function.
-
-        Return
-        ----
-        return_set: GeometryName
-            Set with the 'start' and 'end' node of the curve. Also a 'line' set
-            with all nodes of the curve.
-        """
-
-        # Make sure the material is in the mesh.
-        self.add_material(material)
-
-        # List with nodes and elements that will be added in the creation of
-        # this beam.
-        elements = []
-        nodes = []
-
-        def check_given_node(node):
-            """Check that the given node is already in the mesh."""
-            if node not in self.nodes:
-                raise ValueError("The given node is not in the current mesh")
-
-        # If a start node is given, set this as the first node for this beam.
-        if start_node is not None:
-            start_node = get_node(start_node)
-            nodes = [start_node]
-            check_given_node(start_node)
-
-        # If an end node is given, check what behavior is wanted.
-        close_beam = False
-        if end_node is True:
-            close_beam = True
-        elif end_node is not None:
-            end_node = get_node(end_node)
-            check_given_node(end_node)
-
-        # Create the beams.
-        for i in range(n_el):
-
-            # If the beam is closed with itself, set the end node to be the
-            # first node of the beam. This is done when the second element is
-            # created, as the first node already exists here.
-            if i == 1 and close_beam:
-                end_node = nodes[0]
-
-            # Get the function to create this beam element.
-            function = function_generator(
-                interval[0] + i * (interval[1] - interval[0]) / n_el,
-                interval[0] + (i + 1) * (interval[1] - interval[0]) / n_el,
-            )
-
-            # Set the start node for the created beam.
-            if start_node is not None or i > 0:
-                first_node = nodes[-1]
-            else:
-                first_node = None
-
-            # If an end node is given, set this one for the last element.
-            if end_node is not None and i == n_el - 1:
-                last_node = end_node
-            else:
-                last_node = None
-
-            element = beam_object(material=material)
-            elements.append(element)
-            nodes.extend(
-                element.create_beam(function, start_node=first_node, end_node=last_node)
-            )
-
-        # Set vtk cell data on created elements.
-        if vtk_cell_data is not None:
-            for data_name, data_value in vtk_cell_data.items():
-                for element in elements:
-                    if data_name in element.vtk_cell_data.keys():
-                        raise KeyError(
-                            'The cell data "{}" already exists!'.format(data_name)
-                        )
-                    element.vtk_cell_data[data_name] = data_value
-
-        # Add items to the mesh
-        self.elements.extend(elements)
-        if start_node is None:
-            self.nodes.extend(nodes)
-        else:
-            self.nodes.extend(nodes[1:])
-
-        # Set the last node of the beam.
-        if end_node is None:
-            end_node = nodes[-1]
-
-        # Set the nodes that are at the beginning and end of line (for search
-        # of overlapping points)
-        nodes[0].is_end_node = True
-        end_node.is_end_node = True
-
-        # Create geometry sets that will be returned.
-        return_set = GeometryName()
-        return_set["start"] = GeometrySet(mpy.geo.point, nodes=nodes[0])
-        return_set["end"] = GeometrySet(mpy.geo.point, nodes=end_node)
-        return_set["line"] = GeometrySet(mpy.geo.line, nodes=nodes)
-        if add_sets:
-            self.add(return_set)
-        return return_set
 
     def copy(self):
         """
