@@ -62,8 +62,9 @@ from meshpy import (
     set_beam_to_solid_meshtying,
     set_runtime_output,
     Beam3rLine2Line2,
+    MaterialStVenantKirchhoff,
 )
-from meshpy.node import Node
+from meshpy.node import Node, NodeCosserat
 from meshpy.vtk_writer import VTKWriter
 from meshpy.geometry_set import GeometrySet
 from meshpy.container import GeometryName
@@ -104,9 +105,9 @@ def create_test_mesh(mesh):
     # Add three test nodes and add them to a beam element
     for _j in range(3):
         mesh.add(
-            Node(
+            NodeCosserat(
                 [100 * random.uniform(-1, 1) for _i in range(3)],
-                rotation=Rotation(
+                Rotation(
                     [100 * random.uniform(-1, 1) for _i in range(3)],
                     100 * random.uniform(-1, 1),
                 ),
@@ -970,7 +971,7 @@ class TestMeshpy(unittest.TestCase):
             for i in range(4 * n_el):
                 basis = start_rotation * Rotation([0, 0, 1], np.pi * 0.5)
                 r = [R, 0, 0]
-                node = Node(r, basis)
+                node = NodeCosserat(r, basis)
                 rotation = Rotation([0, 0, 1], 0.5 * i * np.pi / n_el)
                 node.rotate(rotation, [0, 0, 0])
                 input_file.nodes.append(node)
@@ -1002,7 +1003,7 @@ class TestMeshpy(unittest.TestCase):
 
             if additional_rotation is not None:
                 start_rotation = additional_rotation * Rotation([0, 0, 1], np.pi * 0.5)
-                input_file.add(Node([R, 0, 0], rotation=start_rotation))
+                input_file.add(NodeCosserat([R, 0, 0], start_rotation))
                 function(
                     input_file,
                     start_node=input_file.nodes[0],
@@ -1024,7 +1025,7 @@ class TestMeshpy(unittest.TestCase):
 
             if additional_rotation is not None:
                 start_rotation = additional_rotation * Rotation([0, 0, 1], np.pi * 0.5)
-                input_file.add(Node([R, 0, 0], rotation=start_rotation))
+                input_file.add(NodeCosserat([R, 0, 0], start_rotation))
                 set_1 = function(
                     input_file, start_node=input_file.nodes[0], **(argument_list[0])
                 )
@@ -1437,7 +1438,7 @@ class TestMeshpy(unittest.TestCase):
 
     def test_nurbs_import(self):
         """
-        Test if the import of a nurbs mesh works as expected.
+        Test if the import of a NURBS mesh works as expected.
         This script generates the baci test case:
         beam3r_herm2line3_static_beam_to_solid_volume_meshtying_nurbs27_mortar_penalty_line4
         """
@@ -1562,6 +1563,36 @@ class TestMeshpy(unittest.TestCase):
             "test_meshpy_nurbs_import",
             ref_file,
             input_file.get_string(header=False, check_nox=False),
+        )
+
+    def test_stvenantkirchhoff_solid(self):
+        """
+        Test that the input file for a solid with St. Venant Kirchhoff material properties is generated
+        correctly
+        """
+
+        # Create materials
+        material_1 = MaterialStVenantKirchhoff(
+            youngs_modulus=157, nu=0.17, density=6.1e-7
+        )
+
+        material_2 = MaterialStVenantKirchhoff(
+            youngs_modulus=370, nu=0.20, density=5.2e-7
+        )
+
+        # Create input file
+        input_file = InputFile()
+        input_file.add(material_1)
+        input_file.add(material_2)
+
+        # Compare with the reference file
+        compare_strings(
+            self,
+            "test_meshpy_stvenantkirchhoff_solid",
+            os.path.join(
+                testing_input, "test_meshpy_stvenantkirchhoff_solid_reference.dat"
+            ),
+            input_file.get_string(header=False),
         )
 
     def test_point_couplings(self):
@@ -2096,7 +2127,7 @@ class TestMeshpy(unittest.TestCase):
         mesh.add(mat)
 
         # Try to create a line with a starting node that is not in the mesh.
-        node = Node([0, 0, 0], Rotation())
+        node = NodeCosserat([0, 0, 0], Rotation())
         args = [mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0]]
         kwargs = {"start_node": node}
         self.assertRaises(ValueError, create_beam_mesh_line, *args, **kwargs)

@@ -41,7 +41,7 @@ import numpy as np
 
 # Meshpy modules.
 from .conf import mpy
-from .node import Node
+from .node import Node, NodeCosserat
 from .geometry_set import GeometrySet
 from .geometric_search.find_close_points import (
     find_close_points,
@@ -184,20 +184,32 @@ def clean_simulation_directory(sim_dir):
         Path(sim_dir).mkdir(parents=True, exist_ok=True)
 
 
-def get_node(item):
+def get_node(item, *, check_cosserat_node=False):
     """
     Function to get a node from the input variable. This function
     accepts a Node object as well as a GeometrySet object.
+
+    Args
+    ----
+    item:
+        This can be a GeometrySet with exactly one node or a single node object.
+    check_cosserat: bool
+        If a check should be performed, that the given node is a CosseratNode.
     """
     if isinstance(item, Node):
-        return item
+        node = item
     elif isinstance(item, GeometrySet):
         # Check if there is only one node in the set
         if len(item.nodes) == 1:
-            return item.nodes[0]
+            node = item.nodes[0]
         else:
-            raise ValueError("GeometrySet does not have one node!")
+            raise ValueError("GeometrySet does not have exactly one node!")
     else:
         raise TypeError(
             'The given object can be node or GeometrySet got "{}"!'.format(type(item))
         )
+
+    if check_cosserat_node and not isinstance(node, NodeCosserat):
+        raise TypeError("Expected a NodeCosserat object.")
+
+    return node

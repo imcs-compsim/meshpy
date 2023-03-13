@@ -50,13 +50,24 @@ from .beam_fibers_in_rectangle import create_fibers_in_rectangle
 # Honeycomb.
 from .beam_honeycomb import create_beam_mesh_honeycomb_flat, create_beam_mesh_honeycomb
 
+# Create a beam mesh along a NURBS curve.
 from .beam_nurbs import create_beam_mesh_from_nurbs
 
 # Honeycomb.
-from .beam_stent import create_beam_mesh_stent, create_beam_mesh_stent_flat
+from .beam_stent import create_beam_mesh_stent
 
 # Wire.
 from .beam_wire import create_wire_fibers
+
+# Generic NURBS mesh creation function
+from .nurbs_generic import add_geomdl_nurbs_to_mesh
+
+# NURBS geometry functions
+from .nurbs_geometries import (
+    create_nurbs_hollow_cylinder_segment_2d,
+    create_nurbs_flat_plate_2d,
+    create_nurbs_brick,
+)
 
 # Define the items that will be exported by default.
 __all__ = [
@@ -79,4 +90,10 @@ __all__ = [
     "create_fibers_in_rectangle",
     # Wire
     "create_wire_fibers",
+    # Generic NURBS mesh creation function
+    "add_geomdl_nurbs_to_mesh",
+    # NURBS geometry functions
+    "create_nurbs_hollow_cylinder_segment_2d",
+    "create_nurbs_flat_plate_2d",
+    "create_nurbs_brick",
 ]

@@ -47,6 +47,7 @@ from .element import Element
 from .boundary_condition import BoundaryConditionBase
 from .geometry_set import GeometrySet
 from .utility import get_git_data
+from .nurbs_patch import NURBSPatch
 
 
 def get_section_string(section_name):
@@ -749,13 +750,35 @@ class InputFile(Mesh):
             for i, item in enumerate(data_list):
                 item.n_global = i + 1
 
+        def set_n_global_elements(element_list):
+            """Set n_global in every item of element_list"""
+
+            # A check is performed that every entry in data_list is unique.
+            if len(element_list) != len(set(element_list)):
+                raise ValueError("Elements in data_list are not unique!")
+
+            # Set the values for n_global.
+            i = 0
+            i_nurbs_patch = 0
+            for item in element_list:
+                # As a NURBS patch can be defined with more elements, an offset is applied to the
+                # rest of the items
+                item.n_global = i + 1
+                if isinstance(item, NURBSPatch):
+                    item.n_nurbs_patch = i_nurbs_patch + 1
+                    offset = item.get_number_elements()
+                    i += offset
+                    i_nurbs_patch += 1
+                else:
+                    i += 1
+
         # Add sets from couplings and boundary conditions to a temp container.
         self.unlink_nodes()
         mesh_sets = self.get_unique_geometry_sets()
 
         # Assign global indices to all entries.
         set_n_global(self.nodes)
-        set_n_global(self.elements_fluid + self.elements)
+        set_n_global_elements(self.elements_fluid + self.elements)
         set_n_global(self.materials)
         set_n_global(self.functions)
         for key in self.boundary_conditions.keys():
@@ -826,6 +849,14 @@ class InputFile(Mesh):
                         len(self.boundary_conditions[bc_key, geom_key]),
                     ),
                 )
+
+        # Add additional element sections (e.g. STRUCTURE KNOTVECTORS)
+        element_sections = OrderedDict()
+        for element in self.elements_fluid + self.elements:
+            element.add_element_specific_section(element_sections)
+
+        for section in element_sections.values():
+            lines.extend(section.get_dat_lines())
 
         # Add the geometry sets.
         for geom_key, item in mesh_sets.items():

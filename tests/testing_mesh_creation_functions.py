@@ -331,7 +331,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         Test the create_beam_mesh_from_nurbs function.
         """
 
-        # Setup the nurbs curve.
+        # Setup the NURBS curve.
         from geomdl import NURBS
         from geomdl import utilities
 
@@ -358,13 +358,13 @@ class TestMeshCreationFunctions(unittest.TestCase):
     def test_node_continuation(self):
         """Test that the node continuation function work as expected."""
 
-        from meshpy.node import Node
+        from meshpy.node import NodeCosserat
 
         mesh = Mesh()
         mat = MaterialReissner(radius=0.1)
         mesh.add(mat)
 
-        start_node = Node([1, 2, 3], Rotation([0, 0, 0], 0))
+        start_node = NodeCosserat([1, 2, 3], Rotation([0, 0, 0], 0))
         mesh.add(start_node)
         beam_set = create_beam_mesh_line_at_node(
             mesh, Beam3rHerm2Line3, mat, start_node, 1.2, n_el=1
