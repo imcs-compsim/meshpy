@@ -1,0 +1,19 @@
+// -----------------------------------------------------------------------------
+// This input file was created with MeshPy.
+// Copyright (c) 2021 Ivo Steinbrecher
+//            Institute for Mathematics and Computer-Based Simulation
+//            Universitaet der Bundeswehr Muenchen
+//            https://www.unibw.de/imcs-en
+// -----------------------------------------------------------------------------
+-----------------------------------------------------------------------MATERIALS
+MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 157 NUE 0.17 DENS 6.1e-07
+MAT 2 MAT_Struct_StVenantKirchhoff YOUNG 370 NUE 0.2 DENS 5.2e-07
+--------------------------------------------------------------DESIGN DESCRIPTION
+NDPOINT 0
+NDLINE 0
+NDSURF 0
+NDVOL 0
+---------------------------------------------------------------------NODE COORDS
+--------------------------------------------------------------STRUCTURE ELEMENTS
+------------------------------------------------------------------FLUID ELEMENTS
+-----------------------------------------------------------------------------END

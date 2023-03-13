@@ -41,21 +41,14 @@ from .base_mesh_item import BaseMeshItem
 
 class Node(BaseMeshItem):
     """
-    This object represents one node in the mesh. The node can have a rotation
-    and can be rotated moved and so on.
+    This object represents one node in the mesh
     """
 
-    def __init__(
-        self, coordinates, rotation=None, is_middle_node=False, is_dat=False, **kwargs
-    ):
+    def __init__(self, coordinates, *, is_middle_node=False, is_dat=False, **kwargs):
         super().__init__(data=None, is_dat=is_dat, **kwargs)
 
-        # Coordinates and rotation of this node.
+        # Coordinates of this node.
         self.coordinates = np.array(coordinates)
-        if rotation is None:
-            self.rotation = None
-        else:
-            self.rotation = rotation.copy()
 
         # If this node is at the end of a line or curve (by default only those
         # nodes are checked for overlapping nodes).
@@ -102,6 +95,13 @@ class Node(BaseMeshItem):
     def replace_with(self, master_node):
         """Replace this node with another node object."""
 
+        # Check that the two nodes have the same type.
+        if not type(self) == type(master_node):
+            raise TypeError(
+                "A node can only be replaced by a node with the same type. "
+                "Got {} and {}".format(type(self), type(master_node))
+            )
+
         # Replace the links to this node in the referenced objects.
         self.mesh.replace_node(self, master_node)
         for element in self.element_link:
@@ -120,26 +120,11 @@ class Node(BaseMeshItem):
         self.mesh = None
         self.n_global = None
 
-    def rotate(self, rotation, origin=None, only_rotate_triads=False):
+    def rotate(self, *args, **kwargs):
         """
-        Rotate this node. By default the node is rotated around the origin
-        (0,0,0), if the keyword argument origin is given, it is rotated around
-        that point.
-        If only_rotate_triads is True, then only the rotation is affected,
-        the position of the node stays the same.
+        Don't do anything for a standard node, as this node can not be rotated.
         """
-
-        # If the node has a rotation, rotate it.
-        if self.rotation is not None:
-            self.rotation = rotation * self.rotation
-
-            # Rotate the positions (around origin).
-            if not only_rotate_triads:
-                if origin is not None:
-                    self.coordinates = self.coordinates - origin
-                self.coordinates = rotation * self.coordinates
-                if origin is not None:
-                    self.coordinates = self.coordinates + origin
+        pass
 
     def _get_dat(self):
         """
@@ -155,3 +140,62 @@ class Node(BaseMeshItem):
             ]
         )
         return "NODE {} COORD {}".format(self.n_global, coordinate_string)
+
+
+class NodeCosserat(Node):
+    """
+    This object represents a Cosserat node in the mesh, i.e., it contains three
+    positions and three rotations.
+    """
+
+    def __init__(self, coordinates, rotation, **kwargs):
+        super().__init__(coordinates, **kwargs)
+
+        # Rotation of this node.
+        self.rotation = rotation.copy()
+
+    def rotate(self, rotation, origin=None, only_rotate_triads=False):
+        """
+        Rotate this node. By default the node is rotated around the origin
+        (0,0,0), if the keyword argument origin is given, it is rotated around
+        that point.
+        If only_rotate_triads is True, then only the rotation is affected,
+        the position of the node stays the same.
+        """
+
+        self.rotation = rotation * self.rotation
+
+        # Rotate the positions (around origin).
+        if not only_rotate_triads:
+            if origin is not None:
+                self.coordinates = self.coordinates - origin
+            self.coordinates = rotation * self.coordinates
+            if origin is not None:
+                self.coordinates = self.coordinates + origin
+
+
+class ControlPoint(Node):
+    """
+    This object represents a control point with a weight in the mesh.
+    """
+
+    def __init__(self, coordinates, weight, **kwargs):
+        super().__init__(coordinates, **kwargs)
+
+        # Weight of this node
+        self.weight = weight
+
+    def _get_dat(self):
+        """
+        Return the line that represents this node in the input file.
+        """
+
+        coordinate_string = " ".join(
+            [
+                mpy.dat_precision.format(component + 0)
+                if np.abs(component) >= mpy.eps_pos
+                else "0"
+                for component in self.coordinates
+            ]
+        )
+        return "CP {} COORD {} {}".format(self.n_global, coordinate_string, self.weight)
