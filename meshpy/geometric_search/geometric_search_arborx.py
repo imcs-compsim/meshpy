@@ -27,51 +27,51 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
+"""
+This file defines the interface to the ArborX geometric search functionality.
+"""
 
-from setuptools import setup, Extension
+# Python modules
+import sys
 import os
-import numpy as np
-from Cython.Build import cythonize
 
-extensions = [
-    Extension(
-        "meshpy.geometric_search.geometric_search_cython_lib",
-        [os.path.join("meshpy", "geometric_search", "geometric_search_cython_lib.pyx")],
-        include_dirs=[np.get_include()],
-    )
-]
+# Set path so ArborX binary will be found
+sys.path.append(os.path.dirname(__file__))
 
-setup(
-    name="meshpy",
-    version="0.1",
-    author="Ivo Steinbrecher",
-    author_email="ivo.steinbrecher@unibw.de",
-    description="MeshPy: A beam finite element input generator",
-    install_requires=[
-        "autograd",
-        "black==22.12.0",
-        "Cython",
-        "geomdl",
-        "matplotlib",
-        "numpy",
-        "scipy",
-        "vtk",
-    ],
-    extras_require={
-        "CI-CD": ["coverage", "coverage-badge"],
-    },
-    license_files=["LICENSE"],
-    packages=[
-        "meshpy",
-        "meshpy.geometric_search",
-        "meshpy.mesh_creation_functions",
-        "meshpy.simulation_manager",
-        "meshpy.utility_baci",
-    ],
-    package_data={"meshpy.simulation_manager": ["batch_template.sh"]},
-    ext_modules=cythonize(
-        extensions,
-        build_dir=os.path.join("build", "cython_generated_code"),
-        annotate=True,
-    ),
-)
+# Import the ArborX wrapper
+try:
+    import geometric_search_arborx_lib
+
+    arborx_available = True
+except:
+    arborx_available = False
+
+
+class KokkosScopeGuardWrapper:
+    """
+    Wrap the initialize and finalize calls to Kokkos.
+    """
+
+    def __init__(self):
+        """Call initialize when this object is created."""
+        geometric_search_arborx_lib.kokkos_initialize()
+
+    def __del__(self):
+        """
+        Finalize Kokkos after this object goes out of scope,
+        i.e., at the end of this modules lifetime.
+        """
+        geometric_search_arborx_lib.kokkos_finalize()
+
+
+if arborx_available:
+    # Create the scope guard
+    kokkos_scope_guard_wrapper = KokkosScopeGuardWrapper()
+
+
+def find_close_points_arborx(point_coordinates, tol):
+    """Call the ArborX implementation of find close_points."""
+    if arborx_available:
+        return geometric_search_arborx_lib.find_close_points(point_coordinates, tol)
+    else:
+        raise ModuleNotFoundError("ArborX functionality is not available")

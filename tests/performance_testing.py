@@ -48,9 +48,8 @@ from meshpy import (
     MaterialReissner,
     Beam3rHerm2Line3,
     Rotation,
-    find_close_nodes,
 )
-
+from meshpy.utility import find_close_nodes
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 
 from testing_utility import empty_testing_directory, testing_temp

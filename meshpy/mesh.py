@@ -50,11 +50,8 @@ from .container import GeometryName, GeometrySetContainer, BoundaryConditionCont
 from .boundary_condition import BoundaryConditionBase
 from .coupling import Coupling
 from .vtk_writer import VTKWriter
-from .utility import (
-    find_close_points,
-    find_close_nodes,
-    partner_indices_to_point_partners,
-)
+from .utility import find_close_nodes, get_node
+from .geometric_search import find_close_points, point_partners_to_partner_indices
 
 
 class Mesh(object):
@@ -715,17 +712,14 @@ class Mesh(object):
                         # we define the following default value:
                         rotation_vectors[i, :] = [4 * np.pi, 0, 0]
 
-                # Abuse the find close nodes function to find nodes with the
+                # Use find close points function to find nodes with the
                 # same rotation.
-                rot_partner_indices = find_close_points(
-                    rotation_vectors, binning=False, eps=mpy.eps_quaternion
-                )
-                has_partner, n_partners = partner_indices_to_point_partners(
-                    rot_partner_indices, len(node_list)
+                partners, n_partners = find_close_points(
+                    rotation_vectors, tol=mpy.eps_quaternion
                 )
 
                 # Check if nodes with the same rotations were found.
-                if len(rot_partner_indices) == 0:
+                if n_partners == 0:
                     self.add(Coupling(node_list, coupling_type, coupling_dof_type))
                 else:
                     # There are nodes that need to be combined.
@@ -735,7 +729,7 @@ class Mesh(object):
 
                     # Add the nodes that need to be combined and add the nodes
                     # that will be coupled.
-                    for i, partner in enumerate(has_partner):
+                    for i, partner in enumerate(partners):
 
                         if partner == -1:
                             # This node does not have a partner with the same
@@ -848,8 +842,9 @@ class Mesh(object):
             coordinates[i, :] = node.coordinates
 
         # Check if there are double entries in the coordinates.
-        partner_indices = find_close_points(coordinates)
-        if len(partner_indices) > 0:
+        has_partner, partner = find_close_points(coordinates)
+        partner_indices = point_partners_to_partner_indices(has_partner, partner)
+        if partner > 0:
             if raise_error:
                 raise ValueError(
                     "There are multiple middle nodes with the "

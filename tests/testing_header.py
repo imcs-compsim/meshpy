@@ -72,9 +72,9 @@ def get_all_source_files():
     out, _err = process.communicate()
     files = out.decode("UTF-8").strip().split("\n")
 
-    source_line_endings = [".py", ".pyx"]
-    source_ending_types = {".py": "py", ".pyx": "py"}
-    source_files = {"py": []}
+    source_line_endings = [".py", ".pyx", ".cpp", ".h"]
+    source_ending_types = {".py": "py", ".pyx": "py", ".cpp": "c++", ".h": "c++"}
+    source_files = {"py": [], "c++": []}
     for file in files:
         extension = os.path.splitext(file)[1]
         if extension not in source_line_endings:
@@ -96,6 +96,8 @@ def license_to_source(license_text, source_type):
     if source_type == "py":
         header = "# -*- coding: utf-8 -*-"
         comment = "#"
+    elif source_type == "c++":
+        comment = "//"
     else:
         raise ValueError("Wrong extension!")
 

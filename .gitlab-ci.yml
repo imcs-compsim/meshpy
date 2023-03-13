@@ -26,6 +26,11 @@ variables:
     BACI_PRE_EXODUS: "$BACI_BUILD/pre_exodus"
     CUBIT: "/imcs/public/compsim/opt/cubit-15.2"
 
+    # Meshpy allows to perform geometric search functions with ArborX,
+    # for this functionality we need Kokkos. On IMCS Ares this is provided
+    # with the spack installation under the following path.
+    SPACK_ACTIVATION_SCRIPT: "/hdd/gitlab-runner/lib/spack/share/spack/setup-env.sh"
+
     # For building the website.
     JEKYLL_ENV: production
   
@@ -71,6 +76,40 @@ meshpy-testing:
     tags:
         - "imcs-all"
 
+# Addiotionally test the geometric search module with ArborX
+geometric-search-testing:
+    stage: test
+    script:
+        - "whoami"
+        - "pwd"
+        - MESHPY_PATH=$(pwd)
+        # Load the external modules
+        - git submodule update --init
+        # Load the Kokkos module via spack
+        - ". ${SPACK_ACTIVATION_SCRIPT}"
+        - spack load kokkos@3.7.01
+        # Build the binaries
+        - mkdir -p build/arborx
+        - cd build/arborx
+        - cmake ../../meshpy/geometric_search/src
+        - make
+        - cd $MESHPY_PATH
+        # Create the virtual environment
+        - "${PYTHON_EXE} -m venv ${PYTHON_VENV}"
+        - source "${PYTHON_VENV}/bin/activate"
+        # We have to update pip, otherwise there is a bug in the compilation of the cython code
+        - "pip install --upgrade pip"
+        # Install meshpy, it is not yet possible to globally install the ArborX binaries, so we
+        # use the developement mode here.
+        - "pip install -e ."
+        # Print information on the python environment
+        - "python --version"
+        - "pip list"
+        # Run tests
+        - "cd tests"
+        - "python3 testing_geometric_search.py"
+    tags:
+        - "imcs-all"
 
 # Performance tests.
 meshpy-performance-testing:

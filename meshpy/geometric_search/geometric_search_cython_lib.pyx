@@ -70,7 +70,7 @@ def find_close_points(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
         An array with integers, marking the set a node is part of. -1 means the
         node does not have a partner.
     partner: int
-        Number of pairs found.
+        Number of clusters found.
     """
 
     # Define types of variables for this function.
@@ -118,7 +118,7 @@ def find_close_points(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
 @cython.wraparound(False)   # Deactivate negative indexing.
 @cython.cdivision(True)     # Modulo
 def find_close_points_binning(np.ndarray[FLOAT_t, ndim=2] coords,
-        INT_t nx, INT_t ny, INT_t nz, FLOAT_t eps):
+        FLOAT_t eps, INT_t nx, INT_t ny, INT_t nz):
     """
     Finds coordinates that are within an tolerance of each other. Create
     nx * ny * nz bins and look for neighbors in the bins. This speeds up the
@@ -129,10 +129,10 @@ def find_close_points_binning(np.ndarray[FLOAT_t, ndim=2] coords,
     ----
     coords: numpy array
         Array with the coordinates of the nodes.
-    nx, ny, nz: int
-        Number of bins in the directions.
     eps: float
         Tolerance to look for neighbors.
+    nx, ny, nz: int
+        Number of bins in the directions.
 
     Return
     ----
