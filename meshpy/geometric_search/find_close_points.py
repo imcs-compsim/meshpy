@@ -37,6 +37,9 @@ from enum import Enum, auto
 
 
 # Geometric search modules
+# SciPy
+from .geometric_search_scipy import find_close_points_scipy
+
 # Cython modules
 from .geometric_search_cython import cython_available
 
@@ -56,6 +59,7 @@ if arborx_available:
 class FindClosePointAlgorithm(Enum):
     """Enum for different find_close_point algorithms."""
 
+    kd_tree_scipy = auto()
     brute_force_cython = auto()
     binning_cython = auto()
     boundary_volume_hierarchy_arborx = auto()
@@ -160,15 +164,23 @@ def find_close_points(point_coordinates, *, algorithm=None, tol=1e-5, **kwargs):
 
     if algorithm is None:
         # Decide which algorithm to use
-        if n_points < 200:
+        if n_points < 200 and cython_available:
+            # For around 200 points the brute force cython algorithm is the fastest one
             algorithm = FindClosePointAlgorithm.brute_force_cython
         elif arborx_available:
+            # For general problems with n_points > 200 the ArborX implementation is the fastest one
             algorithm = FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
         else:
-            algorithm = FindClosePointAlgorithm.binning_cython
+            # The scipy implementation is slower than ArborX by a factor of about 2, but is scales
+            # the same
+            algorithm = FindClosePointAlgorithm.kd_tree_scipy
 
     # Get list of closest pairs
-    if algorithm is FindClosePointAlgorithm.brute_force_cython:
+    if algorithm is FindClosePointAlgorithm.kd_tree_scipy:
+        has_partner, n_partner = find_close_points_scipy(
+            point_coordinates, tol, **kwargs
+        )
+    elif algorithm is FindClosePointAlgorithm.brute_force_cython:
         has_partner, n_partner = find_close_points_brute_force_cython(
             point_coordinates, tol, **kwargs
         )
