@@ -92,6 +92,9 @@ class TestGeometricSearch(unittest.TestCase):
         self.assertEqual(unique_indices, unique_indices_ref)
         self.assertEqual(inverse_indices, inverse_indices_ref)
 
+    def test_find_close_points_between_bins_scipy(self):
+        self.xtest_find_close_points_between_bins(FindClosePointAlgorithm.kd_tree_scipy)
+
     def test_find_close_points_between_bins_brute_force_cython(self):
         if cython_available:
             self.xtest_find_close_points_between_bins(
@@ -369,7 +372,10 @@ class TestGeometricSearch(unittest.TestCase):
             inverse_indices_ref,
         )
 
-    def test_find_close_points_binning_flat_brute_force_cython(self):
+    def test_find_close_points_flat_brute_force_scipy(self):
+        self.xtest_find_close_points_binning_flat(FindClosePointAlgorithm.kd_tree_scipy)
+
+    def test_find_close_points_flat_brute_force_cython(self):
         if cython_available:
             self.xtest_find_close_points_binning_flat(
                 FindClosePointAlgorithm.brute_force_cython
@@ -377,7 +383,7 @@ class TestGeometricSearch(unittest.TestCase):
         else:
             self.skipTest("Cython not available")
 
-    def test_find_close_points_binning_flat_binning_cython(self):
+    def test_find_close_points_flat_binning_cython(self):
         if cython_available:
             self.xtest_find_close_points_binning_flat(
                 FindClosePointAlgorithm.binning_cython
@@ -385,7 +391,7 @@ class TestGeometricSearch(unittest.TestCase):
         else:
             self.skipTest("Cython not available")
 
-    def test_find_close_points_binning_flat_boundary_volume_hierarchy_arborx(self):
+    def test_find_close_points_flat_boundary_volume_hierarchy_arborx(self):
         if arborx_available:
             self.xtest_find_close_points_binning_flat(
                 FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
@@ -492,6 +498,9 @@ class TestGeometricSearch(unittest.TestCase):
                 unique_indices_ref,
                 inverse_indices_ref,
             )
+
+    def test_find_close_points_dimension_scipy(self):
+        self.xtest_find_close_points_dimension(FindClosePointAlgorithm.kd_tree_scipy)
 
     def test_find_close_points_dimension_brute_force_cython(self):
         if cython_available:
