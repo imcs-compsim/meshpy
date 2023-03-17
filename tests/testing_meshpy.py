@@ -2057,7 +2057,7 @@ class TestMeshpy(unittest.TestCase):
         self.assertRaises(
             ValueError,
             mesh.write_input_file,
-            "/tmp/temp.dat",
+            os.path.join(testing_temp, "temp.dat"),
             add_script_to_header=False,
         )
 

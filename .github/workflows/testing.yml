@@ -1,0 +1,149 @@
+# Workflow for testing meshpy
+name: Test meshpy
+
+on: 
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+    type: choice
+
+env:
+  # Indicated the testing script, that it is performed on GitLab. In this
+  # case all test have to pass.
+  TESTING_GITHUB: 1
+  # Some test require baci-release to check if the created input file
+  # works with baci.
+  BACI_BUILD: /hdd/gitlab-runner/lib/baci-master/release
+  BACI_RELEASE: /hdd/gitlab-runner/lib/baci-master/release/baci-release
+  # Python executable and virtual environment name
+  PYTHON_EXE: python3
+  PYTHON_VENV: python-testing-environment
+  # Meshpy can interact with cubitpy, to perform the corresponding tests,
+  # the following paths have to be set
+  CUBITPY_REPO: /hdd/github-runner/lib/cubitpy-main
+  BACI_PRE_EXODUS: /hdd/gitlab-runner/lib/baci-master/release/pre_exodus
+  CUBIT: /imcs/public/compsim/opt/cubit-15.2
+  # Meshpy allows to perform geometric search functions with ArborX,
+  # for this functionality we need Kokkos. On IMCS Ares this is provided
+  # with the spack installation under the following path.
+  SPACK_ACTIVATION_SCRIPT: /hdd/gitlab-runner/lib/spack/share/spack/setup-env.sh
+
+jobs:
+  meshpy-testing:
+    name: meshpy-testing
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Test meshpy
+        run: |
+          whoami
+          pwd
+          MESHPY_PATH=$(pwd)
+          echo $BACI_RELEASE
+          # Create the virtual environment
+          ${PYTHON_EXE} -m venv ${PYTHON_VENV}
+          source ${PYTHON_VENV}/bin/activate
+          # We have to update pip, otherwise there is a bug in the compilation of the cython code
+          pip install --upgrade pip
+          # Install meshpy
+          pip install .[CI-CD]
+          # Check git configuration
+          git config --list
+          # Install cubitpy
+          cd $CUBITPY_REPO
+          git checkout main
+          git pull
+          pip install .
+          cd $MESHPY_PATH
+          # Print information on the python environment
+          python --version
+          pip list
+          # Run tests
+          cd tests
+          coverage run --rcfile=coverage.config testing_main.py
+          coverage html
+          coverage report
+          coverage-badge -o htmlcov/coverage.svg
+          # Check codestyle
+          cd $MESHPY_PATH
+          black . --check --exclude="${PYTHON_VENV}" && exit 0
+          # If we did not exit earlier, raise an error here
+          exit 1
+          ls
+          
+  geometric-search-testing:
+    name: geometric-search-testing
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Additionally test the geometric search module with ArborX
+        run: |
+          whoami
+          pwd
+          MESHPY_PATH=$(pwd)
+          # Load the external modules
+          git submodule update --init
+          # Load the Kokkos module via spack
+          . ${SPACK_ACTIVATION_SCRIPT}
+          spack load kokkos@3.7.01
+          # Build the binaries
+          mkdir -p build/arborx
+          cd build/arborx
+          cmake ../../meshpy/geometric_search/src
+          make
+          cd $MESHPY_PATH
+          # Create the virtual environment
+          ${PYTHON_EXE} -m venv ${PYTHON_VENV}
+          source ${PYTHON_VENV}/bin/activate
+          # We have to update pip, otherwise there is a bug in the compilation of the cython code
+          pip install --upgrade pip
+          # Install meshpy, it is not yet possible to globally install the ArborX binaries, so we
+          # use the developement mode here.
+          pip install -e .
+          # Print information on the python environment
+          python --version
+          pip list
+          # Run tests
+          cd tests
+          python3 testing_geometric_search.py
+
+  performance-test:
+    name: meshpy-performance-testing
+    runs-on: self-hosted
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - name: Performace test
+        run: |
+          whoami
+          pwd
+          MESHPY_PATH=$(pwd)
+          # Create the virtual environment
+          ${PYTHON_EXE} -m venv ${PYTHON_VENV}
+          source ${PYTHON_VENV}/bin/activate
+          # We have to update pip, otherwise there is a bug in the compilation of the cython code
+          pip install --upgrade pip
+          # Install meshpy
+          pip install .
+          # Install cubitpy
+          cd $CUBITPY_REPO
+          git pull
+          pip install .
+          cd $MESHPY_PATH
+          # Print information on the python environment
+          python --version
+          pip list
+          # Run performance tests
+          cd tests
+          python3 performance_testing.py
