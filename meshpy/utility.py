@@ -115,7 +115,7 @@ def find_close_nodes(nodes, **kwargs):
     return [[nodes[i] for i in partners] for partners in partner_indices]
 
 
-def check_node_by_coordinate(node, axis, value, eps=1e-10):
+def check_node_by_coordinate(node, axis, value, eps=mpy.eps_pos):
     """
     Check if the node is at a certain coordinate value.
 
