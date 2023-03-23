@@ -40,7 +40,7 @@ import copy
 
 # Meshpy modules.
 from .conf import mpy
-from .rotation import Rotation, add_rotations
+from .rotation import Rotation, add_rotations, rotate_coordinates
 from .function import Function
 from .material import Material
 from .node import Node, NodeCosserat
@@ -391,66 +391,18 @@ class Mesh(object):
         rot1, beam_nodes = self.get_global_quaternions()
 
         # Additional rotation.
-        rotnew = add_rotations(rotation, rot1)
+        rot_new = add_rotations(rotation, rot1)
 
         if not only_rotate_triads:
-            if isinstance(rotation, Rotation):
-                rot2 = rotation.get_quaternion().transpose()
-            else:
-                rot2 = rotation
-
             # Get array with all positions for the nodes.
             pos, _beam_nodes = self.get_global_coordinates(nodes=beam_nodes)
-
-            # Check if origin has to be added.
-            if origin is not None:
-                pos -= origin
-
-            # New position array.
-            posnew = np.zeros_like(pos)
-
-            # Evaluate the new positions using the numpy data structure.
-            # (code is taken from /utility/rotation.nb)
-            rot2 = rot2.transpose()
-
-            q0_q0 = np.square(rot2[0])
-            q0_q1_2 = 2.0 * rot2[0] * rot2[1]
-            q0_q2_2 = 2.0 * rot2[0] * rot2[2]
-            q0_q3_2 = 2.0 * rot2[0] * rot2[3]
-
-            q1_q1 = np.square(rot2[1])
-            q1_q2_2 = 2.0 * rot2[1] * rot2[2]
-            q1_q3_2 = 2.0 * rot2[1] * rot2[3]
-
-            q2_q2 = np.square(rot2[2])
-            q2_q3_2 = 2.0 * rot2[2] * rot2[3]
-
-            q3_q3 = np.square(rot2[3])
-
-            posnew[:, 0] = (
-                (q0_q0 + q1_q1 - q2_q2 - q3_q3) * pos[:, 0]
-                + (q1_q2_2 - q0_q3_2) * pos[:, 1]
-                + (q0_q2_2 + q1_q3_2) * pos[:, 2]
-            )
-            posnew[:, 1] = (
-                (q1_q2_2 + q0_q3_2) * pos[:, 0]
-                + (q0_q0 - q1_q1 + q2_q2 - q3_q3) * pos[:, 1]
-                + (-q0_q1_2 + q2_q3_2) * pos[:, 2]
-            )
-            posnew[:, 2] = (
-                (-q0_q2_2 + q1_q3_2) * pos[:, 0]
-                + (q0_q1_2 + q2_q3_2) * pos[:, 1]
-                + (q0_q0 - q1_q1 - q2_q2 + q3_q3) * pos[:, 2]
-            )
-
-            if origin is not None:
-                posnew += origin
+            pos_new = rotate_coordinates(pos, rotation, origin)
 
         for i, node in enumerate(beam_nodes):
             if isinstance(node, NodeCosserat):
-                node.rotation.q = rotnew[i, :]
+                node.rotation.q = rot_new[i, :]
             if not only_rotate_triads:
-                node.coordinates = posnew[i, :]
+                node.coordinates = pos_new[i, :]
 
     def reflect(self, normal_vector, origin=None, flip=False):
         """
