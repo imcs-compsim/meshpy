@@ -378,7 +378,7 @@ class Mesh(object):
         Args
         ----
         rotation: Rotation, list(quaternions) (nx4)
-            The rotation that will be applies to the nodes. Can also be an
+            The rotation that will be applied to the nodes. Can also be an
             array with a quaternion for each node.
         origin: 3D vector
             If this is given, the mesh is rotated about this point. Default is
@@ -390,13 +390,13 @@ class Mesh(object):
         # Get array with all quaternions for the nodes.
         rot1, beam_nodes = self.get_global_quaternions()
 
-        # Additional rotation.
+        # Apply the rotation to the rotation of all nodes.
         rot_new = add_rotations(rotation, rot1)
 
         if not only_rotate_triads:
             # Get array with all positions for the nodes.
             pos, _beam_nodes = self.get_global_coordinates(nodes=beam_nodes)
-            pos_new = rotate_coordinates(pos, rotation, origin)
+            pos_new = rotate_coordinates(pos, rotation, origin=origin)
 
         for i, node in enumerate(beam_nodes):
             if isinstance(node, NodeCosserat):

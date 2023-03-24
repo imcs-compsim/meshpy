@@ -364,14 +364,16 @@ def add_rotations(rotation_21, rotation_10):
     return rotnew.transpose()
 
 
-def rotate_coordinates(coordinates, rotation, origin=None):
+def rotate_coordinates(coordinates, rotation, *, origin=None):
     """
-    Rotate all coordinates with the rotation around origin.
+    Rotate all given coordinates
 
     Args
     ----
+    coordinates: np.array
+        Array of 3D coordinates to be rotated
     rotation: Rotation, list(quaternions) (nx4)
-        The rotation that will be applies to the nodes. Can also be an
+        The rotation that will be applied to the coordinates. Can also be an
         array with a quaternion for each coordinate.
     origin: 3D vector
         If this is given, the mesh is rotated about this point. Default is
@@ -381,14 +383,14 @@ def rotate_coordinates(coordinates, rotation, origin=None):
     if isinstance(rotation, Rotation):
         rotation = rotation.get_quaternion().transpose()
 
-    # Check if origin has to be added.
+    # Check if origin has to be added
     if origin is None:
         origin = [0.0, 0.0, 0.0]
 
-    # New position array.
+    # New position array
     coordinates_new = np.zeros_like(coordinates)
 
-    # Evaluate the new positions using the numpy data structure.
+    # Evaluate the new positions using the numpy data structure
     # (code is taken from /utility/rotation.nb)
     rotation = rotation.transpose()
 
