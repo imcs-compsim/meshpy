@@ -364,6 +364,72 @@ def add_rotations(rotation_21, rotation_10):
     return rotnew.transpose()
 
 
+def rotate_coordinates(coordinates, rotation, *, origin=None):
+    """
+    Rotate all given coordinates
+
+    Args
+    ----
+    coordinates: np.array
+        Array of 3D coordinates to be rotated
+    rotation: Rotation, list(quaternions) (nx4)
+        The rotation that will be applied to the coordinates. Can also be an
+        array with a quaternion for each coordinate.
+    origin: 3D vector
+        If this is given, the mesh is rotated about this point. Default is
+        (0,0,0)
+    """
+
+    if isinstance(rotation, Rotation):
+        rotation = rotation.get_quaternion().transpose()
+
+    # Check if origin has to be added
+    if origin is None:
+        origin = [0.0, 0.0, 0.0]
+
+    # New position array
+    coordinates_new = np.zeros_like(coordinates)
+
+    # Evaluate the new positions using the numpy data structure
+    # (code is taken from /utility/rotation.nb)
+    rotation = rotation.transpose()
+
+    q0_q0 = np.square(rotation[0])
+    q0_q1_2 = 2.0 * rotation[0] * rotation[1]
+    q0_q2_2 = 2.0 * rotation[0] * rotation[2]
+    q0_q3_2 = 2.0 * rotation[0] * rotation[3]
+
+    q1_q1 = np.square(rotation[1])
+    q1_q2_2 = 2.0 * rotation[1] * rotation[2]
+    q1_q3_2 = 2.0 * rotation[1] * rotation[3]
+
+    q2_q2 = np.square(rotation[2])
+    q2_q3_2 = 2.0 * rotation[2] * rotation[3]
+
+    q3_q3 = np.square(rotation[3])
+
+    coordinates_new[:, 0] = (
+        (q0_q0 + q1_q1 - q2_q2 - q3_q3) * (coordinates[:, 0] - origin[0])
+        + (q1_q2_2 - q0_q3_2) * (coordinates[:, 1] - origin[1])
+        + (q0_q2_2 + q1_q3_2) * (coordinates[:, 2] - origin[2])
+    )
+    coordinates_new[:, 1] = (
+        (q1_q2_2 + q0_q3_2) * (coordinates[:, 0] - origin[0])
+        + (q0_q0 - q1_q1 + q2_q2 - q3_q3) * (coordinates[:, 1] - origin[1])
+        + (-q0_q1_2 + q2_q3_2) * (coordinates[:, 2] - origin[2])
+    )
+    coordinates_new[:, 2] = (
+        (-q0_q2_2 + q1_q3_2) * (coordinates[:, 0] - origin[0])
+        + (q0_q1_2 + q2_q3_2) * (coordinates[:, 1] - origin[1])
+        + (q0_q0 - q1_q1 - q2_q2 + q3_q3) * (coordinates[:, 2] - origin[2])
+    )
+
+    if origin is not None:
+        coordinates_new += origin
+
+    return coordinates_new
+
+
 def smallest_rotation(q: Rotation, t):
     """
     Get the triad that results from the smallest rotation (rotation without twist) from
