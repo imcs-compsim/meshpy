@@ -48,6 +48,7 @@ from .material import (
     MaterialEulerBernoulli,
     MaterialKirchhoff,
     MaterialReissner,
+    MaterialReissnerElastoplastic,
     MaterialStVenantKirchhoff,
 )
 from .element_beam import Beam3eb, Beam3k, Beam3rHerm2Line3, Beam3rLine2Line2
@@ -79,6 +80,7 @@ __all__ = [
     "BaseMeshItem",
     "Function",
     "MaterialReissner",
+    "MaterialReissnerElastoplastic",
     "MaterialKirchhoff",
     "MaterialBeam",
     "GeometrySet",

@@ -45,6 +45,7 @@ from .material import (
     MaterialReissner,
     MaterialKirchhoff,
     MaterialEulerBernoulli,
+    MaterialReissnerElastoplastic,
     BaseMeshItem,
 )
 
@@ -286,7 +287,7 @@ class Beam3rHerm2Line3(Beam):
 
     nodes_create = [[-1, False], [0, True], [1, False]]
     beam_type = mpy.beam.reissner
-    valid_material = [MaterialReissner, BaseMeshItem]
+    valid_material = [MaterialReissner, MaterialReissnerElastoplastic, BaseMeshItem]
 
     coupling_fix_string = "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0"
     coupling_joint_string = "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0"
