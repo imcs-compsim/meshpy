@@ -38,7 +38,9 @@ import numpy as np
 from .function import Function
 
 
-def create_linear_interpolation_string(t, values, variable_name):
+def create_linear_interpolation_string(
+    t, values, *, variable_name="var", variable_index=0
+):
     """Create a string that describes a variable that is linear interpolated over time
 
     Args
@@ -47,6 +49,8 @@ def create_linear_interpolation_string(t, values, variable_name):
         Time and values that will be interpolated with piecewise linear functions
     variable_name: str
         Name of the created variable
+    variable_index: int
+        Index of this created variable
     """
 
     if not len(t) == len(values):
@@ -65,8 +69,8 @@ def create_linear_interpolation_string(t, values, variable_name):
     f = np.append(f, f[-1])
     times = " ".join(map(str, t))
     values = " ".join(map(str, f))
-    return "VARIABLE 0 NAME {} TYPE linearinterpolation NUMPOINTS {} TIMES {} VALUES {}".format(
-        variable_name, len(t), times, values
+    return "VARIABLE {} NAME {} TYPE linearinterpolation NUMPOINTS {} TIMES {} VALUES {}".format(
+        variable_index, variable_name, len(t), times, values
     )
 
 
@@ -74,5 +78,5 @@ def create_linear_interpolation_function(t, values):
     """Create a function that describes a linear interpolation between the given time points and values.
     Before and after it will be constant."""
 
-    variable_string = create_linear_interpolation_string(t, values, "var")
+    variable_string = create_linear_interpolation_string(t, values, variable_name="var")
     return Function("SYMBOLIC_FUNCTION_OF_SPACE_TIME var\n" + variable_string)

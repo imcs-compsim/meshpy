@@ -35,7 +35,10 @@ This script is used to test the functionality of the meshpy.function_utility mod
 import unittest
 
 # Meshpy imports
-from meshpy.function_utility import create_linear_interpolation_function
+from meshpy.function_utility import (
+    create_linear_interpolation_function,
+    create_linear_interpolation_string,
+)
 
 
 class TestFunctionUtilitiesGeometricSearch(unittest.TestCase):
@@ -48,12 +51,19 @@ class TestFunctionUtilitiesGeometricSearch(unittest.TestCase):
         values = [1.0, -1.0, 3.5, -10.3]
 
         fun = create_linear_interpolation_function(t, values)
-
         self.assertEqual(
             [
                 "SYMBOLIC_FUNCTION_OF_SPACE_TIME var\nVARIABLE 0 NAME var TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3"
             ],
             fun.get_dat_lines(),
+        )
+
+        fun_string = create_linear_interpolation_string(
+            t, values, variable_name="test", variable_index=12
+        )
+        self.assertEqual(
+            "VARIABLE 12 NAME test TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3",
+            fun_string,
         )
 
 
