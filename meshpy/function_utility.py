@@ -28,38 +28,51 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This module implements a basic class to manage functions in the baci input file.
+This module implements utility functions to create BACI space time function
 """
 
-# Meshpy modules.
-from .base_mesh_item import BaseMeshItem
+# Python modules
+import numpy as np
+
+# Meshpy modules
+from .function import Function
 
 
-class Function(BaseMeshItem):
-    """Holds information for a function."""
+def create_linear_interpolation_string(t, values, variable_name):
+    """Create a string that describes a variable that is linear interpolated over time
 
-    def __init__(self, data):
-        super().__init__(data=data, is_dat=False)
+    Args
+    ----
+    t, values: list(float)
+        Time and values that will be interpolated with piecewise linear functions
+    variable_name: str
+        Name of the created variable
+    """
 
-    def __deepcopy__(self, memo):
-        """
-        When deepcopy is called on a mesh, we do not want the same functions to
-        be copied, as this will result in multiple equal functions in the input
-        file.
-        """
+    if not len(t) == len(values):
+        raise ValueError(
+            "The dimensions of time ({}) and values ({}) do not match".format(
+                len(t), len(values)
+            )
+        )
 
-        # Add this object to the memo dictionary.
-        memo[id(self)] = self
+    t = t.copy()
+    f = values.copy()
+    t_max = np.max(t)
+    t = np.insert(t, 0, -1000.0, axis=0)
+    t = np.append(t, [t_max + 1000.0])
+    f = np.insert(f, 0, f[0], axis=0)
+    f = np.append(f, f[-1])
+    times = " ".join(map(str, t))
+    values = " ".join(map(str, f))
+    return "VARIABLE 0 NAME {} TYPE linearinterpolation NUMPOINTS {} TIMES {} VALUES {}".format(
+        variable_name, len(t), times, values
+    )
 
-        # Return this object again, as no copy should be created.
-        return self
 
-    def __str__(self):
-        """
-        Return the global index for this function. This is usually used then
-        the function is called with the str.format() function.
-        """
-        if self.n_global:
-            return str(self.n_global)
-        else:
-            raise IndexError("The function does not have a global index!")
+def create_linear_interpolation_function(t, values):
+    """Create a function that describes a linear interpolation between the given time points and values.
+    Before and after it will be constant."""
+
+    variable_string = create_linear_interpolation_string(t, values, "var")
+    return Function("SYMBOLIC_FUNCTION_OF_SPACE_TIME var\n" + variable_string)
