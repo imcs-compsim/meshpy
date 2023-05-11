@@ -28,38 +28,35 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This module implements a basic class to manage functions in the baci input file.
+This script is used to test the functionality of the meshpy.function_utility module.
 """
 
-# Meshpy modules.
-from .base_mesh_item import BaseMeshItem
+# Python imports
+import unittest
+
+# Meshpy imports
+from meshpy.function_utility import create_linear_interpolation_function
 
 
-class Function(BaseMeshItem):
-    """Holds information for a function."""
+class TestFunctionUtilitiesGeometricSearch(unittest.TestCase):
+    """Test various stuff from the meshpy.function_utility module."""
 
-    def __init__(self, data):
-        super().__init__(data=data, is_dat=False)
+    def test_linear_interpolation_function(self):
+        """Test that linear interpolation functions are created correctly"""
 
-    def __deepcopy__(self, memo):
-        """
-        When deepcopy is called on a mesh, we do not want the same functions to
-        be copied, as this will result in multiple equal functions in the input
-        file.
-        """
+        t = [1.5, 2.5, 3.5, 10.0]
+        values = [1.0, -1.0, 3.5, -10.3]
 
-        # Add this object to the memo dictionary.
-        memo[id(self)] = self
+        fun = create_linear_interpolation_function(t, values)
 
-        # Return this object again, as no copy should be created.
-        return self
+        self.assertEqual(
+            [
+                "SYMBOLIC_FUNCTION_OF_SPACE_TIME var\nVARIABLE 0 NAME var TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3"
+            ],
+            fun.get_dat_lines(),
+        )
 
-    def __str__(self):
-        """
-        Return the global index for this function. This is usually used then
-        the function is called with the str.format() function.
-        """
-        if self.n_global:
-            return str(self.n_global)
-        else:
-            raise IndexError("The function does not have a global index!")
+
+if __name__ == "__main__":
+    # Execution part of script.
+    unittest.main()
