@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     12130,        359]
-NotebookOptionsPosition[     11132,        336]
-NotebookOutlinePosition[     11496,        352]
-CellTagsIndexPosition[     11453,        349]
+NotebookDataLength[     12664,        374]
+NotebookOptionsPosition[     11610,        350]
+NotebookOutlinePosition[     12030,        367]
+CellTagsIndexPosition[     11987,        364]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -30,7 +30,7 @@ Cell[BoxData[
  RowBox[{"$Assumptions", "=", 
   RowBox[{"{", 
    RowBox[{"t", "\[Element]", "Reals"}], "}"}]}]], "Input",
- CellLabel->"In[1]:=",ExpressionUUID->"2306497f-7144-49ff-9fff-7fe800379eb8"],
+ CellLabel->"In[39]:=",ExpressionUUID->"2306497f-7144-49ff-9fff-7fe800379eb8"],
 
 Cell["2D Example", "Text",ExpressionUUID->"8c19716b-f1ff-45c0-86e9-63413f8d5fb2"],
 
@@ -181,10 +181,10 @@ Cell[BoxData[
     "pltCurve", ",", "pltPoint", ",", "pltp", ",", "pltpp", ",", "pltn", ",", 
      "pltCircle", ",", 
      RowBox[{"AspectRatio", "\[Rule]", "Automatic"}]}], "]"}]}]}]], "Input",
- CellLabel->"In[2]:=",ExpressionUUID->"b714f169-5ff8-4380-b13f-c5186bf15221"],
+ CellLabel->"In[40]:=",ExpressionUUID->"b714f169-5ff8-4380-b13f-c5186bf15221"],
 
 Cell[BoxData[""], "Input",
- CellLabel->"In[17]:=",ExpressionUUID->"bdc22bf4-e667-4424-aeaf-4ec6758cde73"],
+ CellLabel->"In[55]:=",ExpressionUUID->"bdc22bf4-e667-4424-aeaf-4ec6758cde73"],
 
 Cell[TextData[{
  "Example 3D\nCurvature \
@@ -241,6 +241,20 @@ Cell[BoxData[
        RowBox[{"(", 
         RowBox[{"rp", "\[Cross]", "rpp"}], ")"}], "\[Cross]", "rp"}], "]"}]}],
      ";"}], "\[IndentingNewLine]", "\[IndentingNewLine]", 
+   RowBox[{"(*", "Curvature", "*)"}], "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"\[Kappa]", "=", 
+     RowBox[{
+      RowBox[{"Norm", "[", 
+       RowBox[{"Cross", "[", 
+        RowBox[{"rp", ",", "rpp"}], "]"}], "]"}], "/", 
+      RowBox[{
+       RowBox[{"Norm", "[", "rp", "]"}], "^", "3"}]}]}], ";"}], 
+   "\[IndentingNewLine]", 
+   RowBox[{
+    RowBox[{"\[Rho]", "=", 
+     RowBox[{"1", "/", "\[Kappa]"}]}], ";"}], "\[IndentingNewLine]", 
+   "\[IndentingNewLine]", 
    RowBox[{"(*", 
     RowBox[{"Normalize", " ", "tangent"}], "*)"}], "\[IndentingNewLine]", 
    RowBox[{
@@ -331,14 +345,15 @@ Cell[BoxData[
      "pltCircle", ",", 
      RowBox[{"PlotRange", "\[Rule]", "All"}], ",", 
      RowBox[{"AspectRatio", "\[Rule]", "Automatic"}]}], "]"}]}]}]], "Input",
- CellLabel->"In[18]:=",ExpressionUUID->"eec512da-ba19-470f-801e-f48fa99eeb9e"]
+ CellLabel->"In[56]:=",ExpressionUUID->"eec512da-ba19-470f-801e-f48fa99eeb9e"]
 }, Open  ]]
 },
-WindowSize->{1248, 1388},
-WindowMargins->{{0, Automatic}, {0, Automatic}},
+WindowSize->{1866, 1032},
+WindowMargins->{{Automatic, 0}, {0, Automatic}},
 Magnification:>1.5 Inherited,
-FrontEndVersion->"11.3 for Linux x86 (64-bit) (March 6, 2018)",
-StyleDefinitions->"Default.nb"
+FrontEndVersion->"13.1 for Linux x86 (64-bit) (June 16, 2022)",
+StyleDefinitions->"Default.nb",
+ExpressionUUID->"7999ae21-89c4-4347-992b-109acd51fb02"
 ]
 (* End of Notebook Content *)
 
@@ -352,14 +367,14 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 81, 0, 147, "Title",ExpressionUUID->"bd9878b4-9851-46b2-86ce-4b5819a3e08f"],
-Cell[664, 24, 144, 2, 54, "Text",ExpressionUUID->"8c093d21-e1cf-4e16-b319-9e5957c0f9a9"],
-Cell[811, 28, 198, 4, 47, "Input",ExpressionUUID->"2306497f-7144-49ff-9fff-7fe800379eb8"],
-Cell[1012, 34, 81, 0, 54, "Text",ExpressionUUID->"8c19716b-f1ff-45c0-86e9-63413f8d5fb2"],
-Cell[1096, 36, 5001, 147, 830, "Input",ExpressionUUID->"b714f169-5ff8-4380-b13f-c5186bf15221"],
-Cell[6100, 185, 105, 1, 47, "Input",ExpressionUUID->"bdc22bf4-e667-4424-aeaf-4ec6758cde73"],
-Cell[6208, 188, 519, 15, 143, "Text",ExpressionUUID->"33e40666-1906-4d79-801b-abececdc65f2"],
-Cell[6730, 205, 4386, 128, 762, "Input",ExpressionUUID->"eec512da-ba19-470f-801e-f48fa99eeb9e"]
+Cell[580, 22, 81, 0, 146, "Title",ExpressionUUID->"bd9878b4-9851-46b2-86ce-4b5819a3e08f"],
+Cell[664, 24, 144, 2, 52, "Text",ExpressionUUID->"8c093d21-e1cf-4e16-b319-9e5957c0f9a9"],
+Cell[811, 28, 199, 4, 45, "Input",ExpressionUUID->"2306497f-7144-49ff-9fff-7fe800379eb8"],
+Cell[1013, 34, 81, 0, 52, "Text",ExpressionUUID->"8c19716b-f1ff-45c0-86e9-63413f8d5fb2"],
+Cell[1097, 36, 5002, 147, 798, "Input",ExpressionUUID->"b714f169-5ff8-4380-b13f-c5186bf15221"],
+Cell[6102, 185, 105, 1, 45, "Input",ExpressionUUID->"bdc22bf4-e667-4424-aeaf-4ec6758cde73"],
+Cell[6210, 188, 519, 15, 128, "Text",ExpressionUUID->"33e40666-1906-4d79-801b-abececdc65f2"],
+Cell[6732, 205, 4862, 142, 798, "Input",ExpressionUUID->"eec512da-ba19-470f-801e-f48fa99eeb9e"]
 }, Open  ]]
 }
 ]
