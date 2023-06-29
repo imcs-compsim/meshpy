@@ -4,7 +4,7 @@ Meshpy is a general purpose 3D beam input generator.
 
 ## How to cite MeshPy?
 
-Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as described on the [MeshPy website](https://compsim.gitlab.io/codes/meshpy/index.html).
+Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as described on the [MeshPy website](https://imcs-compsim.github.io/meshpy).
 
 
 ## Code formating
