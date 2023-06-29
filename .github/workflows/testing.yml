@@ -14,7 +14,7 @@ on:
     type: choice
 
 env:
-  # Indicated the testing script, that it is performed on GitLab. In this
+  # Indicated the testing script, that it is performed on GitHub. In this
   # case all test have to pass.
   TESTING_GITHUB: 1
   # Some test require baci-release to check if the created input file
