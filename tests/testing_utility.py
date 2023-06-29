@@ -42,7 +42,7 @@ import vtk
 from vtk.util import numpy_support as vtk_numpy
 
 
-# Global variable if this test is run by GitLab.
+# Global variable if this test is run by GitHub.
 if "TESTING_GITHUB" in os.environ.keys() and os.environ["TESTING_GITHUB"] == "1":
     TESTING_GITHUB = True
 else:
@@ -51,7 +51,7 @@ else:
 
 def skip_fail_test(self, message):
     """
-    Skip or fail the test depending if the test are run in GitLab or not.
+    Skip or fail the test depending if the test are run in GitHub or not.
     """
     if TESTING_GITHUB:
         self.skipTest(message)
@@ -72,7 +72,7 @@ def get_baci_path():
         return path
     else:
         # In the case that no path was found, check if the script is performed
-        # by a GitLab runner.
+        # by a GitHub runner.
         if TESTING_GITHUB:
             raise ValueError("Path to baci-release not found!")
         else:

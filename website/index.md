@@ -15,7 +15,7 @@ MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulat
 
 ## Download MeshPy
 
-A clone of the current MeshPy `master` branch is hosted on [GitHub](https://github.com/imcs-compsim/meshpy).
+The current MeshPy `main` branch is hosted on [GitHub](https://github.com/imcs-compsim/meshpy).
 
 
 ## How to cite MeshPy?
@@ -23,7 +23,7 @@ A clone of the current MeshPy `master` branch is hosted on [GitHub](https://gith
 Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as follows:
 
 ```
-Steinbrecher, I., Popp, A.: MeshPy -- A general purpose 3D beam finite element input generator, https://compsim.gitlab.io/codes/meshpy
+Steinbrecher, I., Popp, A.: MeshPy -- A general purpose 3D beam finite element input generator, https://imcs-compsim.github.io/meshpy
 ```
 
 With the following BiBTeX entry:
@@ -31,11 +31,11 @@ With the following BiBTeX entry:
 ```TeX
 @Misc{MeshPyWebsite,
   author       = {Steinbrecher, I. and Popp, A.},
-  howpublished = {\url{https://compsim.gitlab.io/codes/meshpy}},
+  howpublished = {\url{https://imcs-compsim.github.io/meshpy}},
   title        = {{M}esh{P}y -- {A} general purpose {3D} beam finite element input generator},
   year         = {2021},
   key          = {MeshPyWebsite},
-  url          = {https://compsim.gitlab.io/codes/meshpy},
+  url          = {https://imcs-compsim.github.io/meshpy},
 }
 ```
 {% endraw %}

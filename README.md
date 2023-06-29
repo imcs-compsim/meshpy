@@ -84,7 +84,7 @@ git submodule update --init
 To setup meshpy with ArborX, `cmake` and Kokkos are available on your system (the preferred variant is via [Spack](https://spack.io/)).
 Create a build directory
 ```bash
-mkdir -p <path_to_meshpy>/build/geometric_search_pybind11
+mkdir -p <path_to_meshpy>/build/geometric_search
 ```
 Configure cmake and build the extension
 ```bash
