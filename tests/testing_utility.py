@@ -43,17 +43,17 @@ from vtk.util import numpy_support as vtk_numpy
 
 
 # Global variable if this test is run by GitLab.
-if "TESTING_GITLAB" in os.environ.keys() and os.environ["TESTING_GITLAB"] == "1":
-    TESTING_GITLAB = True
+if "TESTING_GITHUB" in os.environ.keys() and os.environ["TESTING_GITHUB"] == "1":
+    TESTING_GITHUB = True
 else:
-    TESTING_GITLAB = False
+    TESTING_GITHUB = False
 
 
 def skip_fail_test(self, message):
     """
     Skip or fail the test depending if the test are run in GitLab or not.
     """
-    if TESTING_GITLAB:
+    if TESTING_GITHUB:
         self.skipTest(message)
     else:
         self.skipTest(message)
@@ -73,7 +73,7 @@ def get_baci_path():
     else:
         # In the case that no path was found, check if the script is performed
         # by a GitLab runner.
-        if TESTING_GITLAB:
+        if TESTING_GITHUB:
             raise ValueError("Path to baci-release not found!")
         else:
             warnings.warn(
@@ -133,7 +133,7 @@ def compare_strings(self, name, reference, compare):
     # Check if the strings are equal, if not compare the differences and
     # fail the test.
     is_equal = reference_string.strip() == compare_string.strip()
-    if not is_equal and not TESTING_GITLAB:
+    if not is_equal and not TESTING_GITHUB:
 
         # Check if temporary directory exists, and creates it if necessary.
         os.makedirs(testing_temp, exist_ok=True)

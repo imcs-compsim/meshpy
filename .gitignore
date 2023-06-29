@@ -37,3 +37,6 @@ _site
 .jekyll-metadata
 *.lock
 website/public/
+
+# Don't ignore directory of Github workflows
+!.github
