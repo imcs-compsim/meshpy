@@ -248,5 +248,6 @@ def create_beam_mesh_curve(
         material=material,
         function_generator=BeamFunctions(),
         interval=[0.0, length],
-        **kwargs
+        interval_length=length,
+        **kwargs,
     )
