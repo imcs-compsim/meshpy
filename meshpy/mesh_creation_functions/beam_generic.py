@@ -77,7 +77,9 @@ def create_beam_mesh_function(
         Mutually exclusive with l_el
     l_el: float
         Desired length of beam elements. This requires the option interval_length
-        to be set. Mutually exclusive with n_el
+        to be set. Mutually exclusive with n_el. Be aware, that this length
+        might not be achieved, if the elements are warped after they are
+        created.
     interval_length:
         Total length of the interval. Is required when the option l_el is given.
     add_sets: bool
