@@ -81,7 +81,8 @@ def create_beam_mesh_line(
 
     # Get geometrical values for this line.
     direction = np.array(end_point) - np.array(start_point)
-    t1 = direction / np.linalg.norm(direction)
+    line_length = np.linalg.norm(direction)
+    t1 = direction / line_length
 
     # Check if the z or y axis are larger projected onto the direction.
     if abs(np.dot(t1, [0, 0, 1])) < abs(np.dot(t1, [0, 1, 0])):
@@ -110,6 +111,7 @@ def create_beam_mesh_line(
         material=material,
         function_generator=get_beam_geometry,
         interval=[0.0, 1.0],
+        interval_length=line_length,
         **kwargs,
     )
 
@@ -177,6 +179,7 @@ def create_beam_mesh_arc_segment(
         material=material,
         function_generator=get_beam_geometry,
         interval=[0.0, angle],
+        interval_length=angle * radius,
         **kwargs,
     )
 

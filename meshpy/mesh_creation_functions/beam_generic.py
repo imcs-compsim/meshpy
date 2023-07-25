@@ -45,7 +45,9 @@ def create_beam_mesh_function(
     material=None,
     function_generator=None,
     interval=None,
-    n_el=1,
+    n_el=None,
+    l_el=None,
+    interval_length=None,
     add_sets=False,
     start_node=None,
     end_node=None,
@@ -71,7 +73,13 @@ def create_beam_mesh_function(
         Start and end values for interval that will be used to create the
         beam.
     n_el: int
-        Number of equally spaces beam elements along the line.
+        Number of equally spaced beam elements along the line. Defaults to 1.
+        Mutually exclusive with l_el
+    l_el: float
+        Desired length of beam elements. This requires the option interval_length
+        to be set. Mutually exclusive with n_el
+    interval_length:
+        Total length of the interval. Is required when the option l_el is given.
     add_sets: bool
         If this is true the sets are added to the mesh and then displayed
         in eventual VTK output, even if they are not used for a boundary
@@ -99,6 +107,18 @@ def create_beam_mesh_function(
         Set with the 'start' and 'end' node of the curve. Also a 'line' set
         with all nodes of the curve.
     """
+
+    # Get the number of elements
+    if n_el is None and l_el is None:
+        n_el = 1
+    elif n_el is not None and l_el is None:
+        pass
+    elif n_el is None and l_el is not None:
+        if interval_length is None:
+            raise ValueError("The parameters l_el requires interval_length to be set")
+        n_el = max([1, round(interval_length / l_el)])
+    else:
+        raise ValueError("The parameters n_el and l_el are mutually exclusive")
 
     # Make sure the material is in the mesh.
     mesh.add_material(material)

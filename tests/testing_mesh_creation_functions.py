@@ -34,6 +34,7 @@ This script is used to test the mesh creation functions.
 # Python imports.
 import unittest
 import numpy as np
+import autograd.numpy as npAD
 import os
 
 # Meshpy imports.
@@ -50,7 +51,10 @@ from meshpy import (
 )
 
 # Geometry functions.
+from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_function
 from meshpy.mesh_creation_functions import (
+    create_beam_mesh_line,
+    create_beam_mesh_curve,
     create_beam_mesh_arc_segment,
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_stent,
@@ -413,6 +417,100 @@ class TestMeshCreationFunctions(unittest.TestCase):
             ref_file,
             input_file.get_string(header=False),
         )
+
+    def test_element_length_option(self):
+        """Test that the element length can be specified in the beam creation functions"""
+
+        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        mat = MaterialReissner(radius=0.1)
+
+        l_el = 1.5
+
+        mesh_line = Mesh()
+        create_beam_mesh_line(
+            mesh_line,
+            Beam3rHerm2Line3,
+            mat,
+            [1.0, 2.0, 0.0],
+            [3.0, 4.0, 6.0],
+            l_el=l_el,
+        )
+
+        mesh_line_long = Mesh()
+        create_beam_mesh_line(
+            mesh_line_long,
+            Beam3rHerm2Line3,
+            mat,
+            [1.0, 2.0, 2.0],
+            [3.0, 4.0, 8.0],
+            l_el=100,
+        )
+
+        mesh_arc = Mesh()
+        create_beam_mesh_arc_segment(
+            mesh_arc,
+            Beam3rHerm2Line3,
+            mat,
+            [1.0, 2.0, 3.0],
+            Rotation([1, 3, 4], np.pi / 3.0),
+            2.0,
+            np.pi * 2.0 / 3.0,
+            l_el=l_el,
+        )
+
+        # Set parameters for the helix.
+        R = 2.0
+        tz = 4.0  # incline
+        n = 0.5  # number of turns
+
+        def helix(t):
+            factor = 2
+            t_trans = npAD.exp(factor * t / (2.0 * np.pi * n)) * t / npAD.exp(factor)
+            return npAD.array(
+                [
+                    R * npAD.cos(t_trans),
+                    R * npAD.sin(t_trans),
+                    t_trans * tz / (2 * np.pi),
+                ]
+            )
+
+        mesh_curve = Mesh()
+        create_beam_mesh_curve(
+            mesh_curve,
+            Beam3rHerm2Line3,
+            mat,
+            helix,
+            [0.0, 2.0 * np.pi * n],
+            l_el=l_el,
+        )
+
+        # Check the output
+        input_file.add(mesh_line, mesh_line_long, mesh_arc, mesh_curve)
+        ref_file = os.path.join(
+            testing_input, "test_mesh_element_length_option_reference.dat"
+        )
+        compare_strings(
+            self,
+            "test_mesh_element_length_option",
+            ref_file,
+            input_file.get_string(header=False),
+        )
+
+        # Check error messages for input parameters
+        with self.assertRaises(ValueError):
+            mesh = Mesh()
+            create_beam_mesh_line(
+                mesh,
+                Beam3rHerm2Line3,
+                mat,
+                [1.0, 2.0, 0.0],
+                [3.0, 4.0, 6.0],
+                n_el=1,
+                l_el=l_el,
+            )
+        with self.assertRaises(ValueError):
+            mesh = Mesh()
+            return create_beam_mesh_function(mesh, interval=[0.0, 1.0], l_el=2.0)
 
 
 if __name__ == "__main__":
