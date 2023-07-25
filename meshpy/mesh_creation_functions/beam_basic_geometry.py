@@ -58,10 +58,16 @@ def create_beam_mesh_line(
     start_point, end_point: np.array, list
         3D-coordinates for the start and end point of the line.
 
-    **kwargs (for all of them look into Mesh().create_beam_mesh_function)
+    **kwargs (for all of them look into create_beam_mesh_function)
     ----
     n_el: int
-        Number of equally spaces beam elements along the line.
+        Number of equally spaced beam elements along the line. Defaults to 1.
+        Mutually exclusive with l_el.
+    l_el: float
+        Desired length of beam elements. This requires the option interval_length
+        to be set. Mutually exclusive with n_el. Be aware, that this length
+        might not be achieved, if the elements are warped after they are
+        created.
     start_node: Node, GeometrySet
         Node to use as the first node for this line. Use this if the line
         is connected to other lines (angles have to be the same, otherwise
@@ -142,10 +148,16 @@ def create_beam_mesh_arc_segment(
     angle: float
         The central angle of this segment in radians.
 
-    **kwargs (for all of them look into Mesh().create_beam_mesh_function)
+    **kwargs (for all of them look into create_beam_mesh_function)
     ----
     n_el: int
-        Number of equally spaces beam elements along the segment.
+        Number of equally spaced beam elements along the line. Defaults to 1.
+        Mutually exclusive with l_el.
+    l_el: float
+        Desired length of beam elements. This requires the option interval_length
+        to be set. Mutually exclusive with n_el. Be aware, that this length
+        might not be achieved, if the elements are warped after they are
+        created.
 
     Return
     ----
@@ -209,10 +221,16 @@ def create_beam_mesh_arc_segment_2d(
         direction, and if the start angle is smaller than the end angle, the
         beam faces in clockwise direction.
 
-    **kwargs (for all of them look into Mesh().create_beam_mesh_function)
+    **kwargs (for all of them look into create_beam_mesh_function)
     ----
     n_el: int
-        Number of equally spaces beam elements along the segment.
+        Number of equally spaced beam elements along the line. Defaults to 1.
+        Mutually exclusive with l_el.
+    l_el: float
+        Desired length of beam elements. This requires the option interval_length
+        to be set. Mutually exclusive with n_el. Be aware, that this length
+        might not be achieved, if the elements are warped after they are
+        created.
 
     Return
     ----
@@ -270,10 +288,16 @@ def create_beam_mesh_line_at_node(
     length: float
         Length of the line.
 
-    **kwargs (for all of them look into Mesh().create_beam_mesh_function)
+    **kwargs (for all of them look into create_beam_mesh_function)
     ----
     n_el: int
-        Number of equally spaces beam elements along the segment.
+        Number of equally spaced beam elements along the line. Defaults to 1.
+        Mutually exclusive with l_el.
+    l_el: float
+        Desired length of beam elements. This requires the option interval_length
+        to be set. Mutually exclusive with n_el. Be aware, that this length
+        might not be achieved, if the elements are warped after they are
+        created.
 
     Return
     ----
@@ -327,10 +351,16 @@ def create_beam_mesh_arc_at_node(
         Angle of the arc. If the angle is negative, the arc will point in the
         opposite direction, i.e., as if the arc_axis_normal would change sign.
 
-    **kwargs (for all of them look into Mesh().create_beam_mesh_function)
+    **kwargs (for all of them look into create_beam_mesh_function)
     ----
     n_el: int
-        Number of equally spaces beam elements along the segment.
+        Number of equally spaced beam elements along the line. Defaults to 1.
+        Mutually exclusive with l_el.
+    l_el: float
+        Desired length of beam elements. This requires the option interval_length
+        to be set. Mutually exclusive with n_el. Be aware, that this length
+        might not be achieved, if the elements are warped after they are
+        created.
 
     Return
     ----

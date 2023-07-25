@@ -61,7 +61,13 @@ def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, tol=None, **
     **kwargs (for all of them look into create_beam_mesh_function)
     ----
     n_el: int
-        Number of equally spaces beam elements along the line.
+        Number of equally spaced beam elements along the line. Defaults to 1.
+        Mutually exclusive with l_el.
+    l_el: float
+        Desired length of beam elements. This requires the option interval_length
+        to be set. Mutually exclusive with n_el. Be aware, that this length
+        might not be achieved, if the elements are warped after they are
+        created.
 
     Return
     ----
