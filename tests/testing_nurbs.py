@@ -300,3 +300,8 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
             ),
             input_file.get_string(header=False),
         )
+
+
+if __name__ == "__main__":
+    # Execution part of script.
+    unittest.main()
