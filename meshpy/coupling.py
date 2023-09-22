@@ -36,7 +36,7 @@ import numpy as np
 
 # Meshpy modules.
 from .conf import mpy
-from .geometry_set import GeometrySet
+from .geometry_set import GeometrySetBase, GeometrySet
 from .boundary_condition import BoundaryConditionBase
 
 
@@ -56,7 +56,7 @@ class Coupling(BoundaryConditionBase):
 
         Args
         ----
-        geometry_set: GeometrySet, [Nodes]
+        geometry_set: GeometrySet, [Nodes], int
             Geometry that this boundary condition acts on.
         coupling_type: mpy.bc
             Type of point coupling.
@@ -68,8 +68,27 @@ class Coupling(BoundaryConditionBase):
             physical position.
         """
 
-        if isinstance(geometry_set, list):
-            geometry_set = GeometrySet(mpy.geo.point, geometry_set)
+        if isinstance(geometry_set, int):
+            # This is the case if the boundary condition is read from an existing dat file.
+            pass
+        elif isinstance(geometry_set, GeometrySetBase):
+            pass
+        elif isinstance(geometry_set, list):
+            geometry_set = GeometrySet(geometry_set)
+        else:
+            raise TypeError(
+                "Coupling expects a GeometrySetBase item, got {}".format(
+                    type(geometry_set)
+                )
+            )
+
+        # Couplings only work for point sets
+        if (
+            isinstance(geometry_set, GeometrySetBase)
+            and geometry_set.geometry_type is not mpy.geo.point
+        ):
+            raise TypeError("Couplings are only implemented for point sets.")
+
         super().__init__(geometry_set, bc_type=coupling_type, **kwargs)
         self.coupling_dof_type = coupling_dof_type
         self.check_overlapping_nodes = check_overlapping_nodes
@@ -87,10 +106,11 @@ class Coupling(BoundaryConditionBase):
         if self.is_dat or (not self.check_overlapping_nodes):
             return
         else:
-            pos = np.zeros([len(self.geometry_set.nodes), 3])
-            for i, node in enumerate(self.geometry_set.nodes):
+            nodes = self.geometry_set.get_points()
+            pos = np.zeros([len(nodes), 3])
+            for i, node in enumerate(nodes):
                 # Get the difference to the first node.
-                pos[i, :] = node.coordinates - self.geometry_set.nodes[0].coordinates
+                pos[i, :] = node.coordinates - nodes[0].coordinates
             if np.linalg.norm(pos) > mpy.eps_pos:
                 raise ValueError(
                     "The nodes given to Coupling do not have the same position."
@@ -105,12 +125,12 @@ class Coupling(BoundaryConditionBase):
         if isinstance(self.coupling_dof_type, str):
             string = self.coupling_dof_type
         else:
-            # In this case we have to check which beams are connected to the
-            # node.
-            # TODO: Coupling also makes sense for different beam types, this
-            # can be implemented at some point.
-            beam_type = self.geometry_set.nodes[0].element_link[0].beam_type
-            for node in self.geometry_set.nodes:
+            # In this case we have to check which beams are connected to the node.
+            # TODO: Coupling also makes sense for different beam types, this can
+            # be implemented at some point.
+            nodes = self.geometry_set.get_points()
+            beam_type = nodes[0].element_link[0].beam_type
+            for node in nodes:
                 for element in node.element_link:
                     if beam_type is not element.beam_type:
                         raise ValueError(
@@ -131,8 +151,8 @@ class Coupling(BoundaryConditionBase):
             # exactly the same type and discretization.
             # TODO: Remove this check once it is possible to couple beams, but
             # then also the syntax in the next few lines has to be adapted.
-            beam_baci_type = type(self.geometry_set.nodes[0].element_link[0])
-            for node in self.geometry_set.nodes:
+            beam_baci_type = type(nodes[0].element_link[0])
+            for node in nodes:
                 for element in node.element_link:
                     if not beam_baci_type == type(element):
                         raise ValueError(

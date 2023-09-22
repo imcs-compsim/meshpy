@@ -61,7 +61,6 @@ class Node(BaseMeshItem):
         self.element_link = []
         self.node_sets_link = []
         self.element_partner_index = None
-        self.coupling_link = None
         self.mesh = None
 
         # If this node is replaced, store a link to the remaining node.
@@ -116,7 +115,6 @@ class Node(BaseMeshItem):
         """Reset the links to elements, node sets and global indices."""
         self.element_link = []
         self.node_sets_link = []
-        self.coupling_link = None
         self.mesh = None
         self.n_global = None
 

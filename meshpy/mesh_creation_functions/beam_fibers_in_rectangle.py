@@ -193,10 +193,8 @@ def create_fibers_in_rectangle(
 
     # Go in both directions from the start point.
     for direction_sign, n_start in [[-1, 1], [1, 0]]:
-
         # Create a fiber as long as an intersection is found.
         for i_fiber in range(n_start, fiber_n_max):
-
             # Get the start and end point of the line.
             start, end, projection_found = _intersect_line_with_rectangle(
                 length,
@@ -214,7 +212,6 @@ def create_fibers_in_rectangle(
                 # Create the beams if the length is not smaller than the fiber
                 # distance.
                 if fiber_length >= fiber_element_length_min:
-
                     # Calculate the number of elements in this fiber.
                     fiber_nel = int(np.round(fiber_length / fiber_element_length))
                     fiber_nel = np.max([fiber_nel, 1])
@@ -232,18 +229,16 @@ def create_fibers_in_rectangle(
 
     return_set = GeometryName()
     return_set["north"] = GeometrySet(
-        mpy.geo.point,
-        nodes=mesh.get_nodes_by_function(check_node_by_coordinate, 1, width),
+        mesh.get_nodes_by_function(check_node_by_coordinate, 1, width),
     )
     return_set["east"] = GeometrySet(
-        mpy.geo.point,
-        nodes=mesh.get_nodes_by_function(check_node_by_coordinate, 0, length),
+        mesh.get_nodes_by_function(check_node_by_coordinate, 0, length),
     )
     return_set["south"] = GeometrySet(
-        mpy.geo.point, nodes=mesh.get_nodes_by_function(check_node_by_coordinate, 1, 0)
+        mesh.get_nodes_by_function(check_node_by_coordinate, 1, 0)
     )
     return_set["west"] = GeometrySet(
-        mpy.geo.point, nodes=mesh.get_nodes_by_function(check_node_by_coordinate, 0, 0)
+        mesh.get_nodes_by_function(check_node_by_coordinate, 0, 0)
     )
-    return_set["all"] = GeometrySet(mpy.geo.line, nodes=mesh.get_global_nodes())
+    return_set["all"] = GeometrySet(mesh.elements)
     return return_set

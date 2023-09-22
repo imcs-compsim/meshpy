@@ -52,7 +52,7 @@ from .material import (
     MaterialStVenantKirchhoff,
 )
 from .element_beam import Beam3eb, Beam3k, Beam3rHerm2Line3, Beam3rLine2Line2
-from .geometry_set import GeometrySet
+from .geometry_set import GeometrySet, GeometrySetNodes
 
 # Boundary conditions and couplings for geometry in the mesh.
 from .boundary_condition import BoundaryCondition
@@ -84,6 +84,7 @@ __all__ = [
     "MaterialKirchhoff",
     "MaterialBeam",
     "GeometrySet",
+    "GeometrySetNodes",
     "BoundaryCondition",
     "Coupling",
     "MaterialEulerBernoulli",

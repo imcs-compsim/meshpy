@@ -31,14 +31,18 @@
 This module implements a basic class to manage geometry in the input file.
 """
 
+# Python modules.
+import numpy as np
+
 # Meshpy modules.
 from .conf import mpy
 from .base_mesh_item import BaseMeshItem
 from .node import Node
+from .element_beam import Beam
 
 
-class GeometrySet(BaseMeshItem):
-    """This object represents a geometry set. The set is defined by nodes."""
+class GeometrySetBase(BaseMeshItem):
+    """Base class for a geometry set."""
 
     # Node set names for the input file file.
     geometry_set_names = {
@@ -48,7 +52,180 @@ class GeometrySet(BaseMeshItem):
         mpy.geo.volume: "DVOL",
     }
 
-    def __init__(self, geometry_type, nodes=None, fail_on_double_nodes=True, **kwargs):
+    def __init__(self, geometry_type, name=None, **kwargs):
+        """
+        Initialize the geometry set.
+
+        Args
+        ----
+        geometry_type: mpy.geo
+            Type of geometry. MeshPy only supports geometry sets of a single
+            specified geometry type.
+        name: str
+            Optional name to identify this geometry set.
+        """
+        super().__init__(**kwargs)
+
+        self.geometry_type = geometry_type
+        self.name = name
+
+    def link_to_nodes(self):
+        """Set a link to this object in the all contained nodes of this geometry set.
+        This will also set a link to nodes connected to an edge in a node based line
+        set.
+        """
+        for node in self.get_all_nodes():
+            node.node_sets_link.append(self)
+
+    def check_replaced_nodes(self):
+        """
+        Check if nodes in this set have to be replaced.
+        We need to do this for all nodes to correctly represent node-based sets.
+        """
+        for node in self.get_all_nodes():
+            if node.master_node is not None:
+                self.replace_node(node, node.get_master_node())
+
+    def replace_node(self, old_node, new_node):
+        """Replace old_node with new_node. This is only done for point sets."""
+
+        # Check if the new node is in the set.
+        my_nodes = self.get_all_nodes()
+        has_new_node = new_node in my_nodes
+
+        for i, node in enumerate(my_nodes):
+            if node == old_node:
+                if has_new_node:
+                    del my_nodes[i]
+                else:
+                    my_nodes[i] = new_node
+                break
+        else:
+            raise ValueError(
+                "The node that should be replaced is not in the current node set"
+            )
+
+    def _get_dat(self):
+        """Get the lines for the input file."""
+
+        # Sort the nodes based on the node GID.
+        nodes = self.get_all_nodes()
+        if len(nodes) == 0:
+            raise ValueError("Writing empty geometry sets is not supported")
+        nodes_id = [node.n_global for node in nodes]
+        sort_indices = np.argsort(nodes_id)
+        nodes = [nodes[i] for i in sort_indices]
+
+        return [
+            "NODE {} {} {}".format(
+                node.n_global,
+                self.geometry_set_names[self.geometry_type],
+                self.n_global,
+            )
+            for node in nodes
+        ]
+
+
+class GeometrySet(GeometrySetBase):
+    """Geometry set which is defined by geometric entries."""
+
+    def __init__(self, geometry, **kwargs):
+        """
+        Initialize the geometry set.
+
+        Args
+        ----
+        geometry: List or single Geometry/GeometrySet
+            Geometries associated with this set. Empty geometries (i.e., no given)
+            are not supported.
+        """
+
+        # This is ok, we check every single type in the add method
+        if isinstance(geometry, list):
+            geometry_type = self._get_geometry_type(geometry[0])
+        else:
+            geometry_type = self._get_geometry_type(geometry)
+
+        super().__init__(geometry_type, is_dat=False, **kwargs)
+
+        self.geometry_objects = {}
+        for geo in mpy.geo:
+            self.geometry_objects[geo] = []
+        self.add(geometry)
+
+    @staticmethod
+    def _get_geometry_type(item):
+        """Return the geometry type of a given item."""
+
+        if isinstance(item, Node):
+            return mpy.geo.point
+        elif isinstance(item, Beam):
+            return mpy.geo.line
+        elif isinstance(item, GeometrySet):
+            return item.geometry_type
+        else:
+            raise TypeError("Got unexpected type {}".format(type(item)))
+
+    def add(self, item):
+        """
+        Add a geometry item to this object.
+        """
+
+        if isinstance(item, list):
+            for sub_item in item:
+                self.add(sub_item)
+        elif isinstance(item, GeometrySet):
+            if item.geometry_type is self.geometry_type:
+                for geometry in item.geometry_objects[self.geometry_type]:
+                    self.add(geometry)
+            else:
+                raise TypeError(
+                    "You tried to add a {} set to a {} set. This is not possible".format(
+                        item.geometry_type, self.geometry_type
+                    )
+                )
+        elif self._get_geometry_type(item) is self.geometry_type:
+            if item not in self.geometry_objects[self.geometry_type]:
+                self.geometry_objects[self.geometry_type].append(item)
+        else:
+            raise TypeError("Got unexpected geometry type {}".format(type(item)))
+
+    def get_points(self):
+        """
+        Return nodes explicitly associated with this set. Only in case this is a
+        point set something is returned here.
+        """
+        if self.geometry_type is mpy.geo.point:
+            return self.geometry_objects[mpy.geo.point]
+        else:
+            raise TypeError(
+                "The function get_points can only be called for point sets."
+                " The present type is {}".format(self.geometry_type)
+            )
+
+    def get_all_nodes(self):
+        """
+        Return all nodes associated with this set. This includes nodes contained within
+        the geometry added to this set.
+        """
+
+        if self.geometry_type is mpy.geo.point:
+            return self.geometry_objects[mpy.geo.point]
+        elif self.geometry_type is mpy.geo.line:
+            nodes = []
+            for element in self.geometry_objects[mpy.geo.line]:
+                nodes.extend(element.nodes)
+            return list(set(nodes))
+        else:
+            raise TypeError(
+                "Currently GeometrySet are only implemented for points and lines"
+            )
+
+
+class GeometrySetNodes(GeometrySetBase):
+    """Geometry set which is defined by nodes and not explicit geometry."""
+
+    def __init__(self, geometry_type, nodes=[], **kwargs):
         """
         Initialize the geometry set.
 
@@ -57,19 +234,15 @@ class GeometrySet(BaseMeshItem):
         geometry_type: mpy.geo
             Type of geometry. This is  necessary, as the boundary conditions
             and input file depend on that type.
-        nodes: Node, list(Nodes)
+        nodes: Node, GeometrySetNodes, list(Nodes), list(GeometrySetNodes)
             Node(s) or list of nodes to be added to this geometry set.
-        fail_on_double_nodes: bool
-            If True, an error will be thrown if the same node is added twice.
-            If False, the node will only be added once.
         """
-        super().__init__(is_dat=None, **kwargs)
 
-        self.geometry_type = geometry_type
+        # TODO: Check if the is_dat is ever taken into account, since it is also used for
+        # imported node sets from an external input file.
+        super().__init__(geometry_type, is_dat=False, **kwargs)
         self.nodes = []
-
-        if nodes is not None:
-            self._add(nodes, fail_on_double_nodes)
+        self.add(nodes)
 
     @classmethod
     def from_dat(cls, geometry_key, lines, comments=None):
@@ -78,26 +251,25 @@ class GeometrySet(BaseMeshItem):
         is passed as integer (0 based index) and will be connected after the
         whole input file is parsed.
         """
-
-        # Split up the input line.
         nodes = []
         for line in lines:
             nodes.append(int(line.split()[1]) - 1)
+        return cls(geometry_key, nodes, comments=comments)
 
-        # Set up class with values for solid mesh import
-        return cls(geometry_key, nodes=nodes, comments=comments)
+    def replace_indices_with_nodes(self, nodes):
+        """After the set is imported from a dat file, replace the node indices
+        with the corresponding nodes objects."""
+        for i in range(len(self.nodes)):
+            self.nodes[i] = nodes[self.nodes[i]]
 
-    def _add(self, value, fail_on_double_nodes):
+    def add(self, value):
         """
         Add nodes to this object.
 
         Args
         ----
-        value: Node, list(Nodes)
+        nodes: Node, GeometrySetNodes, list(Nodes), list(GeometrySetNodes)
             Node(s) or list of nodes to be added to this geometry set.
-        fail_on_double_nodes: bool
-            If True, an error will be thrown if the same node is added twice.
-            If False, the node will only be added once.
         """
 
         if isinstance(value, list):
@@ -105,55 +277,34 @@ class GeometrySet(BaseMeshItem):
             # This improves the performance considerably when large list of
             # Nodes are added.
             for item in value:
-                self._add(item, fail_on_double_nodes)
+                self.add(item)
         elif isinstance(value, Node) or isinstance(value, int):
             if value not in self.nodes:
                 self.nodes.append(value)
-            elif fail_on_double_nodes:
-                raise ValueError("The node already exists in this set!")
-        elif isinstance(value, GeometrySet):
+        elif isinstance(value, GeometrySetNodes):
             # Add all nodes from this geometry set.
-            for node in value.nodes:
-                self._add(node, fail_on_double_nodes)
+            if self.geometry_type == value.geometry_type:
+                for node in value.nodes:
+                    self.add(node)
+            else:
+                raise TypeError(
+                    "You tried to add a {} set to a {} set. This is not possible".format(
+                        value.geometry_type, self.geometry_type
+                    )
+                )
         else:
             raise TypeError("Expected Node or list, but got {}".format(type(value)))
 
-    def check_replaced_nodes(self):
-        """Check if nodes in this set have been replaced."""
-
-        for node in self.nodes:
-            if node.master_node is not None:
-                self.replace_node(node, node.get_master_node())
-
-    def replace_node(self, old_node, new_node):
-        """Replace old_node with new_node."""
-
-        # Check if the new node is in the set.
-        has_new_node = new_node in self.nodes
-
-        for i, node in enumerate(self.nodes):
-            if node == old_node:
-                if has_new_node:
-                    del self.nodes[i]
-                else:
-                    self.nodes[i] = new_node
-                break
+    def get_points(self):
+        """Return nodes explicitly associated with this set."""
+        if self.geometry_type is mpy.geo.point:
+            return self.nodes
         else:
-            raise ValueError(
-                "The node that should be replaced is not in the current node set"
+            raise TypeError(
+                "The function get_points can only be called for point sets."
+                " The present type is {}".format(self.geometry_type)
             )
 
-    def __iter__(self):
-        for node in self.nodes:
-            yield node
-
-    def _get_dat(self):
-        """Get the lines for the input file."""
-        return [
-            "NODE {} {} {}".format(
-                node.n_global,
-                self.geometry_set_names[self.geometry_type],
-                self.n_global,
-            )
-            for node in self.nodes
-        ]
+    def get_all_nodes(self):
+        """Return all nodes associated with this set."""
+        return self.nodes

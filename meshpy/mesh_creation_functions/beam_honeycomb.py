@@ -99,7 +99,7 @@ def create_beam_mesh_honeycomb_flat(
     def add_line(pointa, pointb):
         """Shortcut to add line."""
         return create_beam_mesh_line(
-            mesh, beam_object, material, pointa, pointb, n_el=n_el
+            mesh_honeycomb, beam_object, material, pointa, pointb, n_el=n_el
         )
 
     # Geometrical shortcuts.
@@ -112,8 +112,8 @@ def create_beam_mesh_honeycomb_flat(
     zig_zag_y = ny * a * sin30 * 0.5
 
     # Create the honeycomb structure
+    mesh_honeycomb = Mesh()
     origin = np.array([0, a * 0.5 * sin30, 0])
-    i_node_start = len(mesh.nodes)
     for i_height in range(n_height + 1):
 
         # Start point for this zig-zag line.
@@ -152,15 +152,14 @@ def create_beam_mesh_honeycomb_flat(
                     add_line(base_vert, base_vert + ny * a)
 
     # List of nodes from the honeycomb that are candidates for connections.
-    honeycomb_nodes_all = [mesh.nodes[i] for i in range(i_node_start, len(mesh.nodes))]
-    honeycomb_nodes = [node for node in honeycomb_nodes_all if node.is_end_node]
+    honeycomb_nodes = [node for node in mesh_honeycomb.nodes if node.is_end_node]
 
     # Add connections for the nodes with same positions.
     if create_couplings:
-        mesh.couple_nodes(nodes=honeycomb_nodes)
+        mesh_honeycomb.couple_nodes(nodes=honeycomb_nodes)
 
     # Get min and max nodes of the honeycomb.
-    min_max_nodes = mesh.get_min_max_nodes(nodes=honeycomb_nodes)
+    min_max_nodes = mesh_honeycomb.get_min_max_nodes(nodes=honeycomb_nodes)
 
     # Return the geometry set.
     return_set = GeometryName()
@@ -168,7 +167,9 @@ def create_beam_mesh_honeycomb_flat(
     return_set["east"] = min_max_nodes["x_max"]
     return_set["south"] = min_max_nodes["y_min"]
     return_set["west"] = min_max_nodes["x_min"]
-    return_set["all"] = GeometrySet(mpy.geo.line, honeycomb_nodes_all)
+    return_set["all"] = GeometrySet(mesh_honeycomb.elements)
+
+    mesh.add(mesh_honeycomb)
     if add_sets:
         mesh.add(return_set)
     return return_set

@@ -50,6 +50,7 @@ from meshpy import (
     GeometrySet,
     InputFile,
 )
+from meshpy.utility import get_single_node
 from meshpy.mesh_creation_functions import (
     create_beam_mesh_line,
     create_beam_mesh_arc_segment_2d,
@@ -139,7 +140,8 @@ def meshpy_tutorial(base_dir, preview=False):
 
     # Now the arc is moved, so it coincides with the end point of the last
     # line. Therefore, we get the positions of the two nodes.
-    arc_start_point = beam_set_arc["start"].nodes[0].coordinates
+    # This can be done with the utility function get_node.
+    arc_start_point = get_single_node(beam_set_arc["start"]).coordinates
     line_end_point = mesh.nodes[-1].coordinates
     distance = line_end_point - arc_start_point
     mesh_arc.translate(distance)
@@ -170,7 +172,7 @@ def meshpy_tutorial(base_dir, preview=False):
 
     # The sinus is not also moved to the end of the initially created line and
     # rotated.
-    sin_start_point = beam_set_sin["start"].nodes[0].coordinates
+    sin_start_point = get_single_node(beam_set_sin["start"]).coordinates
     distance = line_end_point - sin_start_point
     mesh_sin.translate(distance)
     mesh_sin.rotate(Rotation([0, 0, 1], np.pi / 6.0), origin=line_end_point)
@@ -181,7 +183,7 @@ def meshpy_tutorial(base_dir, preview=False):
 
     # In a next step, a straight vertical load is added directly to the end of
     # the arc.
-    start = beam_set_arc["end"].nodes[0].coordinates
+    start = get_single_node(beam_set_arc["end"]).coordinates
     create_beam_mesh_line(
         mesh_honeycomb, beam_object, mat, start, start + [0, 1, 0], n_el=1
     )
@@ -194,7 +196,7 @@ def meshpy_tutorial(base_dir, preview=False):
     mesh_honeycomb_copy = mesh_honeycomb.copy()
     mesh_honeycomb_copy.reflect(
         [np.sin(np.pi / 6.0), np.cos(np.pi / 6.0), 0],
-        beam_set_sin["end"].nodes[0].coordinates,
+        get_single_node(beam_set_sin["end"]).coordinates,
     )
     mesh_honeycomb_copy.write_vtk("step_8", base_dir)
 
@@ -238,7 +240,7 @@ def meshpy_tutorial(base_dir, preview=False):
     line_load_val = 0.00000001
     fun_t = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
     mesh.add(fun_t)
-    geometry_set_all_lines = GeometrySet(mpy.geo.line, mesh.nodes)
+    geometry_set_all_lines = GeometrySet(mesh.elements)
     mesh.add(
         BoundaryCondition(
             geometry_set_all_lines,

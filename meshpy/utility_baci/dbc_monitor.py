@@ -116,7 +116,7 @@ def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3):
 
     # Create the BC condition for this set and add it to the input file.
     mesh_nodes = [input_file.nodes[i_node] for i_node in nodes]
-    geo = GeometrySet(mpy.geo.point, nodes=mesh_nodes)
+    geo = GeometrySet(mesh_nodes)
     extra_dof_zero = " 0" * (n_dof - 3)
     bc = BoundaryCondition(
         geo,
