@@ -699,15 +699,9 @@ class InputFile(Mesh):
 
         # Add header to the input file.
         end_text = None
-        lines.append("// " + "-" * 77)
-        lines.append("// This input file was created with MeshPy.")
-        lines.append("// Copyright (c) 2021 Ivo Steinbrecher")
-        lines.append(
-            "//            Institute for Mathematics and Computer-Based Simulation"
-        )
-        lines.append("//            Universitaet der Bundeswehr Muenchen")
-        lines.append("//            https://www.unibw.de/imcs-en")
-        lines.append("// " + "-" * 77)
+
+        mpy.input_file_meshpy_header
+        lines.extend(["// " + line for line in mpy.input_file_meshpy_header])
         if header:
             header_text, end_text = self._get_header(add_script_to_header)
             lines.append(header_text)

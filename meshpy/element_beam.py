@@ -112,7 +112,6 @@ class Beam(Element):
 
             # Check rotation.
             if not node.rotation == rot:
-
                 if np.abs(xi - 1) < mpy.eps_pos:
                     # In the case of end node check if the beam is rotated.
                     if relative_rotation is not None:
@@ -148,7 +147,6 @@ class Beam(Element):
 
         # Loop over local nodes.
         for i, [xi, middle_node] in enumerate(self.nodes_create):
-
             # Get the position and rotation at xi.
             if i == 0 and has_start_node:
                 pos, rot, relative_rotation = check_node(start_node, xi, "start_node")
@@ -164,7 +162,6 @@ class Beam(Element):
             if (i > 0 or not has_start_node) and (
                 i < len(self.nodes_create) - 1 or not has_end_node
             ):
-
                 self.nodes.append(
                     NodeCosserat(
                         pos, rot * relative_rotation, is_middle_node=middle_node

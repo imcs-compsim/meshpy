@@ -192,5 +192,16 @@ class MeshPy(object):
         # Check for overlapping elements when creating a dat file.
         self.check_overlapping_elements = True
 
+        # Lines to be added to each created input file
+        self.input_file_meshpy_header = [
+            "-" * 77,
+            "This input file was created with MeshPy.",
+            "Copyright (c) 2021 Ivo Steinbrecher",
+            "           Institute for Mathematics and Computer-Based Simulation",
+            "           Universitaet der Bundeswehr Muenchen",
+            "           https://www.unibw.de/imcs-en",
+            "-" * 77,
+        ]
+
 
 mpy = MeshPy()

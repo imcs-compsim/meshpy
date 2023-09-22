@@ -27,54 +27,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
+"""
+This module defines classes and functions to create an Abaqus beam input file.
+"""
 
-from setuptools import setup, Extension
-import os
-import numpy as np
-from Cython.Build import cythonize
+from .beam import generate_abaqus_beam, AbaqusBeamMaterial
+from .input_file import AbaqusBeamNormalDefinition, AbaqusInputFile
 
-extensions = [
-    Extension(
-        "meshpy.geometric_search.geometric_search_cython_lib",
-        [os.path.join("meshpy", "geometric_search", "geometric_search_cython_lib.pyx")],
-        include_dirs=[np.get_include()],
-    )
+# Define the items that will be exported by default.
+__all__ = [
+    "generate_abaqus_beam",
+    "AbaqusBeamMaterial",
+    "AbaqusBeamNormalDefinition",
+    "AbaqusInputFile",
 ]
-
-setup(
-    name="meshpy",
-    version="0.1",
-    author="Ivo Steinbrecher",
-    author_email="ivo.steinbrecher@unibw.de",
-    description="MeshPy: A beam finite element input generator",
-    install_requires=[
-        "autograd",
-        "black==22.12.0",
-        "Cython",
-        "geomdl",
-        "matplotlib",
-        "numpy",
-        "pyvista",
-        "pyvista_utils@git+ssh://git@github.com/isteinbrecher/pyvista_utils",
-        "scipy",
-        "vtk",
-    ],
-    extras_require={
-        "CI-CD": ["coverage", "coverage-badge"],
-    },
-    license_files=["LICENSE"],
-    packages=[
-        "meshpy",
-        "meshpy.abaqus",
-        "meshpy.geometric_search",
-        "meshpy.mesh_creation_functions",
-        "meshpy.simulation_manager",
-        "meshpy.utility_baci",
-    ],
-    package_data={"meshpy.simulation_manager": ["batch_template.sh"]},
-    ext_modules=cythonize(
-        extensions,
-        build_dir=os.path.join("build", "cython_generated_code"),
-        annotate=True,
-    ),
-)

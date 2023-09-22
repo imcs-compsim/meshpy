@@ -71,7 +71,7 @@ from .header_functions import (
     set_runtime_output,
 )
 
-# Define the itCouplingems that will be exported by default.
+# Define the items that will be exported by default.
 __all__ = [
     # Option object.
     "mpy",
