@@ -814,7 +814,7 @@ class Mesh(object):
                 for i_node in partners:
                     middle_nodes[i_node].element_partner_index = i_partner
 
-    def preview_python(self):
+    def display_python(self):
         """Display the elements in this mesh in matplotlib."""
 
         # Import the relevant matplotlib modules.
@@ -828,7 +828,7 @@ class Mesh(object):
         # Loop over elements.
         for element in self.elements:
             if not element.is_dat:
-                element.preview_python(ax)
+                element.display_python(ax)
 
         # Finish plot.
         ax.set_aspect("auto")

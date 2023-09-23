@@ -223,7 +223,7 @@ class Beam(Element):
                 )
             )
 
-    def preview_python(self, ax):
+    def display_python(self, ax):
         """Plot the beam in matplotlib, by connecting the nodes."""
 
         coordinates = np.array([node.coordinates for node in self.nodes])
