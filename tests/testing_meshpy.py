@@ -1384,7 +1384,7 @@ class TestMeshpy(unittest.TestCase):
 
     def create_beam_to_solid_conditions_model(self):
         """
-        Create the inpuf file for the beam-to-solid input conditions tests.
+        Create the input file for the beam-to-solid input conditions tests.
         """
 
         # Create input file.
@@ -2185,6 +2185,15 @@ class TestMeshpy(unittest.TestCase):
             ref_file,
             mesh.get_string(header=False).strip(),
         )
+
+    def test_display_pyvista(self):
+        """Test that the display in pyvista function does not lead to errors
+
+        TODO: Add a check for the created visualziation"""
+
+        mpy.import_mesh_full = True
+        mesh = self.create_beam_to_solid_conditions_model()
+        _plotter = mesh.display_pyvista(is_testing=True, resolution=3)
 
 
 if __name__ == "__main__":
