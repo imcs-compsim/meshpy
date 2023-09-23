@@ -837,13 +837,40 @@ class Mesh(object):
         ax.set_zlabel("Z")
         plt.show()
 
+    def get_vtk_representation(self, *, overlapping_elements=True, coupling_sets=False):
+        """Return a vtk representation of the beams and solid in this mesh
+
+        Args
+        ----
+        overlapping_elements: bool
+            I elements should be checked for overlapping. If they overlap, the
+            output will mark them.
+        coupling_sets: bool
+            If coupling sets should also be displayed.
+        """
+
+        # Object to store VKT data (and write it to file)
+        vtk_writer_beam = VTKWriter()
+        vtk_writer_solid = VTKWriter()
+
+        # Get the set numbers of the mesh
+        self.get_unique_geometry_sets(coupling_sets=coupling_sets, link_nodes=True)
+
+        if overlapping_elements:
+            # Check for overlapping elements.
+            self.check_overlapping_elements(raise_error=False)
+
+        # Get representation of elements.
+        for element in self.elements:
+            element.get_vtk(vtk_writer_beam, vtk_writer_solid)
+
+        # Finish and return the writers
+        vtk_writer_beam.complete_data()
+        vtk_writer_solid.complete_data()
+        return vtk_writer_beam, vtk_writer_solid
+
     def write_vtk(
-        self,
-        output_name="meshpy",
-        output_directory="",
-        overlapping_elements=True,
-        coupling_sets=False,
-        **kwargs
+        self, output_name="meshpy", output_directory="", ascii=False, **kwargs
     ):
         """
         Write the contents of this mesh to VTK files.
@@ -855,35 +882,21 @@ class Mesh(object):
             {}_solid.vtu file.
         output_directory: path
             Directory where the output files will be written.
-        overlapping_elements: bool
-            I elements should be checked for overlapping. If they overlap, the
-            output will mark them.
-        coupling_sets: bool
-            If coupling sets should also be displayed.
+        ascii: bool
+            If the data should be written in human readable text
+        **kwargs:
+            Have a look at Mesh().get_vtk_representation
         """
 
-        # Object to store VKT data and write it to file.
-        vtkwriter_beam = VTKWriter()
-        vtkwriter_solid = VTKWriter()
-
-        # Get the set numbers of the mesh
-        self.get_unique_geometry_sets(coupling_sets=coupling_sets, link_nodes=True)
-
-        if overlapping_elements:
-            # Check for overlapping elements.
-            self.check_overlapping_elements(raise_error=False)
-
-        # Get representation of elements.
-        for element in self.elements:
-            element.get_vtk(vtkwriter_beam, vtkwriter_solid)
+        vtk_writer_beam, vtk_writer_solid = self.get_vtk_representation(**kwargs)
 
         # Write to file, only if there is at least one point in the writer.
-        if vtkwriter_beam.points.GetNumberOfPoints() > 0:
+        if vtk_writer_beam.points.GetNumberOfPoints() > 0:
             filepath = os.path.join(output_directory, output_name + "_beam.vtu")
-            vtkwriter_beam.write_vtk(filepath, **kwargs)
-        if vtkwriter_solid.points.GetNumberOfPoints() > 0:
+            vtk_writer_beam.write_vtk(filepath, ascii=ascii)
+        if vtk_writer_solid.points.GetNumberOfPoints() > 0:
             filepath = os.path.join(output_directory, output_name + "_solid.vtu")
-            vtkwriter_solid.write_vtk(filepath, **kwargs)
+            vtk_writer_solid.write_vtk(filepath, ascii=ascii)
 
     def copy(self):
         """

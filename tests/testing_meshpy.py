@@ -1738,6 +1738,10 @@ class TestMeshpy(unittest.TestCase):
             point_data=point_data,
         )
 
+        # Before we can write the data to file we have to store the cell and
+        # point data in the grid
+        writer.complete_data()
+
         # Write to file.
         ref_file = os.path.join(testing_input, "test_meshpy_vtk_writer_reference.vtu")
         vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_writer.vtu")
