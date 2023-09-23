@@ -1,2 +1,46 @@
 [build-system]
 requires = ["setuptools", "Cython", "numpy", "wheel"]
+
+
+[tool.setuptools]
+packages = [
+  "meshpy",
+  "meshpy.geometric_search",
+  "meshpy.mesh_creation_functions",
+  "meshpy.simulation_manager",
+  "meshpy.utility_baci",
+]
+
+
+[tool.setuptools.package-data]
+"meshpy.simulation_manager" = ["batch_template.sh"]
+
+
+[project]
+name = "MeshPy"
+authors = [
+  {name = "Ivo Steinbrecher", email = "ivo.steinbrecher@unibw.de"},
+]
+description = "MeshPy: A beam finite element input generator"
+readme = "README.md"
+license = {file = "LICENSE"}
+dependencies = [
+  "autograd",
+  "black==22.12.0",
+  "Cython",
+  "geomdl",
+  "matplotlib",
+  "numpy",
+  "pyvista",
+  "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git",
+  "scipy",
+  "vtk"
+]
+dynamic = ["version"]
+
+
+[project.optional-dependencies]
+CI-CD = [
+  "coverage",
+  "coverage-badge"
+]
