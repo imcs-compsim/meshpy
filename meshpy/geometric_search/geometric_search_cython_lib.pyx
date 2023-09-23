@@ -55,7 +55,7 @@ ctypedef np.int_t INT_t
 @cython.wraparound(False)   # Deactivate negative indexing.
 def find_close_points(np.ndarray[FLOAT_t, ndim=2] coords, FLOAT_t eps):
     """
-    Finds coordinates that are within an tolerance of each other.
+    Finds coordinates that are within a tolerance of each other.
 
     Args
     ----
