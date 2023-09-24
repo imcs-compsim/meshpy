@@ -1384,7 +1384,7 @@ class TestMeshpy(unittest.TestCase):
 
     def create_beam_to_solid_conditions_model(self):
         """
-        Create the inpuf file for the beam-to-solid input conditions tests.
+        Create the input file for the beam-to-solid input conditions tests.
         """
 
         # Create input file.
@@ -1737,6 +1737,10 @@ class TestMeshpy(unittest.TestCase):
             cell_data=cell_data,
             point_data=point_data,
         )
+
+        # Before we can write the data to file we have to store the cell and
+        # point data in the grid
+        writer.complete_data()
 
         # Write to file.
         ref_file = os.path.join(testing_input, "test_meshpy_vtk_writer_reference.vtu")
@@ -2181,6 +2185,15 @@ class TestMeshpy(unittest.TestCase):
             ref_file,
             mesh.get_string(header=False).strip(),
         )
+
+    def test_display_pyvista(self):
+        """Test that the display in pyvista function does not lead to errors
+
+        TODO: Add a check for the created visualziation"""
+
+        mpy.import_mesh_full = True
+        mesh = self.create_beam_to_solid_conditions_model()
+        _plotter = mesh.display_pyvista(is_testing=True, resolution=3)
 
 
 if __name__ == "__main__":

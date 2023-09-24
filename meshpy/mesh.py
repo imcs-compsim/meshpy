@@ -37,6 +37,7 @@ import numpy as np
 import os
 import warnings
 import copy
+import pyvista as pv
 
 # Meshpy modules.
 from .conf import mpy
@@ -602,7 +603,7 @@ class Mesh(object):
         nodes=None,
         reuse_matching_nodes=False,
         coupling_type=mpy.bc.point_coupling,
-        coupling_dof_type=mpy.coupling_dof.fix
+        coupling_dof_type=mpy.coupling_dof.fix,
     ):
         """
         Search through nodes and connect all nodes with the same coordinates.
@@ -814,7 +815,7 @@ class Mesh(object):
                 for i_node in partners:
                     middle_nodes[i_node].element_partner_index = i_partner
 
-    def preview_python(self):
+    def display_python(self):
         """Display the elements in this mesh in matplotlib."""
 
         # Import the relevant matplotlib modules.
@@ -828,7 +829,7 @@ class Mesh(object):
         # Loop over elements.
         for element in self.elements:
             if not element.is_dat:
-                element.preview_python(ax)
+                element.display_python(ax)
 
         # Finish plot.
         ax.set_aspect("auto")
@@ -837,13 +838,40 @@ class Mesh(object):
         ax.set_zlabel("Z")
         plt.show()
 
+    def get_vtk_representation(self, *, overlapping_elements=True, coupling_sets=False):
+        """Return a vtk representation of the beams and solid in this mesh
+
+        Args
+        ----
+        overlapping_elements: bool
+            I elements should be checked for overlapping. If they overlap, the
+            output will mark them.
+        coupling_sets: bool
+            If coupling sets should also be displayed.
+        """
+
+        # Object to store VKT data (and write it to file)
+        vtk_writer_beam = VTKWriter()
+        vtk_writer_solid = VTKWriter()
+
+        # Get the set numbers of the mesh
+        self.get_unique_geometry_sets(coupling_sets=coupling_sets, link_nodes=True)
+
+        if overlapping_elements:
+            # Check for overlapping elements.
+            self.check_overlapping_elements(raise_error=False)
+
+        # Get representation of elements.
+        for element in self.elements:
+            element.get_vtk(vtk_writer_beam, vtk_writer_solid)
+
+        # Finish and return the writers
+        vtk_writer_beam.complete_data()
+        vtk_writer_solid.complete_data()
+        return vtk_writer_beam, vtk_writer_solid
+
     def write_vtk(
-        self,
-        output_name="meshpy",
-        output_directory="",
-        overlapping_elements=True,
-        coupling_sets=False,
-        **kwargs
+        self, output_name="meshpy", output_directory="", ascii=False, **kwargs
     ):
         """
         Write the contents of this mesh to VTK files.
@@ -855,35 +883,166 @@ class Mesh(object):
             {}_solid.vtu file.
         output_directory: path
             Directory where the output files will be written.
-        overlapping_elements: bool
-            I elements should be checked for overlapping. If they overlap, the
-            output will mark them.
-        coupling_sets: bool
-            If coupling sets should also be displayed.
+        ascii: bool
+            If the data should be written in human readable text
+        **kwargs:
+            Have a look at Mesh().get_vtk_representation
         """
 
-        # Object to store VKT data and write it to file.
-        vtkwriter_beam = VTKWriter()
-        vtkwriter_solid = VTKWriter()
-
-        # Get the set numbers of the mesh
-        self.get_unique_geometry_sets(coupling_sets=coupling_sets, link_nodes=True)
-
-        if overlapping_elements:
-            # Check for overlapping elements.
-            self.check_overlapping_elements(raise_error=False)
-
-        # Get representation of elements.
-        for element in self.elements:
-            element.get_vtk(vtkwriter_beam, vtkwriter_solid)
+        vtk_writer_beam, vtk_writer_solid = self.get_vtk_representation(**kwargs)
 
         # Write to file, only if there is at least one point in the writer.
-        if vtkwriter_beam.points.GetNumberOfPoints() > 0:
+        if vtk_writer_beam.points.GetNumberOfPoints() > 0:
             filepath = os.path.join(output_directory, output_name + "_beam.vtu")
-            vtkwriter_beam.write_vtk(filepath, **kwargs)
-        if vtkwriter_solid.points.GetNumberOfPoints() > 0:
+            vtk_writer_beam.write_vtk(filepath, ascii=ascii)
+        if vtk_writer_solid.points.GetNumberOfPoints() > 0:
             filepath = os.path.join(output_directory, output_name + "_solid.vtu")
-            vtkwriter_solid.write_vtk(filepath, **kwargs)
+            vtk_writer_solid.write_vtk(filepath, ascii=ascii)
+
+    def display_pyvista(
+        self,
+        *,
+        beam_nodes=True,
+        beam_tube=True,
+        beam_cross_section_directors=True,
+        beam_radius_for_display=0.1,
+        resolution=20,
+        is_testing=False,
+        **kwargs,
+    ):
+        """Display the mesh in pyvista
+
+        Args
+        ----
+        beam_nodes: bool
+            If the beam nodes should be displayed. The start and end nodes of each
+            beam will be shown in green, possible middle nodes inside the element
+            are shown in cyan.
+        beam_tube: bool
+            If the beam should be rendered as a tube
+        beam_cross_section_directors: bool
+            If the cross section directors should be displayed (at each node)
+        beam_radius_for_display: float
+            If not all beams have an explicitly given radius (in the material
+            definition) this value will be used to approximate the beams radius
+            for visualization
+        resolution: int
+            Indicates how many triangulations will be performed to visualize arrows,
+            tubes and spheres.
+        is_testing: bool
+            Flag if the function is used for testing. If true, the pv.plotter object
+            will be returned.
+        **kwargs:
+            Have a look at Mesh().get_vtk_representation
+        """
+
+        plotter = pv.Plotter()
+        vtk_writer_beam, vtk_writer_solid = self.get_vtk_representation(**kwargs)
+
+        if vtk_writer_beam.points.GetNumberOfPoints() > 0:
+            beam_grid = pv.UnstructuredGrid(vtk_writer_beam.grid)
+
+            # Check if all beams have a given cross-section radius
+            all_beams_have_cross_section_radius = (
+                min(beam_grid.cell_data["cross_section_radius"]) > 0
+            )
+
+            beam_grid = beam_grid.cell_data_to_point_data()
+
+            # Plot the nodes
+            node_radius_scaling_factor = 1.5
+            if beam_nodes:
+
+                sphere = pv.Sphere(
+                    radius=1.0,
+                    theta_resolution=resolution,
+                    phi_resolution=resolution,
+                )
+
+                if all_beams_have_cross_section_radius:
+                    nodes = beam_grid.glyph(
+                        geom=sphere,
+                        scale="cross_section_radius",
+                        factor=node_radius_scaling_factor,
+                        orient=False,
+                    )
+                else:
+                    nodes = beam_grid.glyph(
+                        geom=sphere,
+                        scale=False,
+                        orient=False,
+                        factor=node_radius_scaling_factor * beam_radius_for_display,
+                    )
+
+                start_end_nodes = nodes.threshold(
+                    scalars="node_value", value=(0.9, 1.1)
+                )
+                plotter.add_mesh(start_end_nodes, color="green")
+
+                middle_nodes = nodes.threshold(scalars="node_value", value=(0.4, 0.6))
+                if len(middle_nodes.points) > 0:
+                    plotter.add_mesh(middle_nodes, color="cyan")
+
+            # Plot the beams
+            beam_color = [0.5, 0.5, 0.5]
+            if beam_tube:
+                surface = beam_grid.extract_surface()
+                if all_beams_have_cross_section_radius:
+                    tube = surface.tube(
+                        scalars="cross_section_radius",
+                        absolute=True,
+                        n_sides=resolution,
+                    )
+                else:
+                    tube = surface.tube(
+                        radius=beam_radius_for_display, n_sides=resolution
+                    )
+                plotter.add_mesh(tube, color=beam_color)
+            else:
+                plotter.add_mesh(beam_grid, color=beam_color, line_width=4)
+
+            # Plot the directors of the beam cross-section
+            director_radius_scaling_factor = 3.5
+            if beam_cross_section_directors:
+
+                arrow = pv.Arrow(tip_resolution=resolution, shaft_resolution=resolution)
+
+                if all_beams_have_cross_section_radius:
+                    directors = [
+                        beam_grid.glyph(
+                            geom=arrow,
+                            orient=f"base_vector_{i+1}",
+                            scale="cross_section_radius",
+                            factor=director_radius_scaling_factor,
+                        )
+                        for i in range(3)
+                    ]
+                else:
+                    directors = [
+                        beam_grid.glyph(
+                            geom=arrow,
+                            orient=f"base_vector_{i+1}",
+                            factor=director_radius_scaling_factor
+                            * beam_radius_for_display,
+                            scale=False,
+                        )
+                        for i in range(3)
+                    ]
+                colors = ["white", "blue", "red"]
+                for i, arrow in enumerate(directors):
+                    plotter.add_mesh(arrow, color=colors[i])
+
+        if vtk_writer_solid.points.GetNumberOfPoints() > 0:
+            from pyvista_utils import clean_to_grid
+
+            solid_grid = pv.UnstructuredGrid(vtk_writer_solid.grid)
+            solid_grid = clean_to_grid(solid_grid)
+            plotter.add_mesh(solid_grid, color="white", show_edges=True, opacity=0.5)
+
+        if not is_testing:
+            plotter.show()
+        else:
+            return plotter
 
     def copy(self):
         """

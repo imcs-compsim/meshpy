@@ -327,16 +327,24 @@ class VTKWriter(object):
                     non_zero_data[0], non_zero_data[1], non_zero_data[2]
                 )
 
-    def write_vtk(self, filepath, ascii=False):
-        """
-        Write the VTK geometry and data to a file.
+    def complete_data(self):
+        """Add the stored data to the vtk grid"""
+        for (key_geom, _key_data), value in self.data.items():
+            for vtk_data in value.values():
+                if key_geom == mpy.vtk_geo.cell:
+                    self.grid.GetCellData().AddArray(vtk_data)
+                else:
+                    self.grid.GetPointData().AddArray(vtk_data)
+
+    def write_vtk(self, filepath, *, ascii=False):
+        """Write the VTK geometry and data to a file.
 
         Args
         ----
         filepath: str
             Path to output file. The file extension should be vtu.
         ascii: bool
-            If the data should be compressed or written in human readable text.
+            If the data should be written in human readable text.
         """
 
         # Check if directory for file exits.
@@ -344,14 +352,6 @@ class VTKWriter(object):
             raise ValueError(
                 "Directory {} does not exist!".format(os.path.dirname(filepath))
             )
-
-        # Add data to grid.
-        for (key_geom, _key_data), value in self.data.items():
-            for vtk_data in value.values():
-                if key_geom == mpy.vtk_geo.cell:
-                    self.grid.GetCellData().AddArray(vtk_data)
-                else:
-                    self.grid.GetPointData().AddArray(vtk_data)
 
         # Initialize VTK writer.
         writer = vtk.vtkXMLUnstructuredGridWriter()

@@ -108,7 +108,7 @@ def meshpy_tutorial(base_dir, preview=False):
 
     # We can also look at the created mesh, either in python or in ParaView.
     if preview:
-        mesh.preview_python()
+        mesh.display_python()
     mesh.write_vtk("step_1", base_dir)
 
     # We want to fix all positions and rotations of the first node.

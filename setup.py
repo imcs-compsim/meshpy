@@ -54,6 +54,8 @@ setup(
         "geomdl",
         "matplotlib",
         "numpy",
+        "pyvista",
+        "pyvista_utils@git+ssh://git@github.com/isteinbrecher/pyvista_utils",
         "scipy",
         "vtk",
     ],
