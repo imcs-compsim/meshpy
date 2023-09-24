@@ -148,7 +148,7 @@ def find_close_points(point_coordinates, *, algorithm=None, tol=1e-5, **kwargs):
         If the absolute distance between two points is smaller than tol, they
         are considered to be equal, i.e., tol is the hyper sphere radius that
         the point coordinates have to be within, to be identified as overlapping.
-        Be careful when using an arborx search algorithm, das the tolerance
+        Be careful when using an arborx search algorithm, as the tolerance
         there is of type float, not double.
 
     Return

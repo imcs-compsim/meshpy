@@ -119,7 +119,7 @@ namespace GeometricSearch
 
     template <int n_dim>
     std::tuple<pybind11::array_t<int>, pybind11::array_t<int>> find_close_points_template(
-        pybind11::array_t<double> coordinates, double tol)
+        const pybind11::array_t<double>& coordinates, double tol)
     {
         using memory_space = Kokkos::HostSpace;
 
@@ -158,7 +158,7 @@ namespace GeometricSearch
 
 
     std::tuple<pybind11::array_t<int>, pybind11::array_t<int>> find_close_points_factory(
-        pybind11::array_t<double> coordinates, double tol)
+        const pybind11::array_t<double>& coordinates, double tol)
     {
         switch (coordinates.shape(1))
         {
@@ -173,12 +173,11 @@ namespace GeometricSearch
 
 
     std::tuple<pybind11::array_t<int>, int> find_close_points(
-        pybind11::array_t<double> coordinates, double tol)
+        const pybind11::array_t<double>& coordinates, const double tol)
     {
         const auto& [indices, offsets] = find_close_points_factory(coordinates, tol);
         const auto& indices_unchecked = indices.unchecked<1>();
         const auto& offsets_unchecked = offsets.unchecked<1>();
-
 
         // Create empty data array.
         const auto n_points = coordinates.shape(0);

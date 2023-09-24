@@ -38,7 +38,7 @@
 namespace GeometricSearch
 {
     std::tuple<pybind11::array_t<int>, int> find_close_points(
-        pybind11::array_t<double> coordinates, double tol);
+        const pybind11::array_t<double>& coordinates, double tol);
 }  // namespace GeometricSearch
 
 #endif
