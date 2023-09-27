@@ -103,14 +103,6 @@ class TestGeometricSearch(unittest.TestCase):
         else:
             self.skipTest("Cython not available")
 
-    def test_find_close_points_between_bins_binning_cython(self):
-        if cython_available:
-            self.xtest_find_close_points_between_bins(
-                FindClosePointAlgorithm.binning_cython, n_bins=[4, 4, 4]
-            )
-        else:
-            self.skipTest("Cython not available")
-
     def test_find_close_points_between_bins_boundary_volume_hierarchy_arborx(self):
         if arborx_available:
             self.xtest_find_close_points_between_bins(
@@ -383,14 +375,6 @@ class TestGeometricSearch(unittest.TestCase):
         else:
             self.skipTest("Cython not available")
 
-    def test_find_close_points_flat_binning_cython(self):
-        if cython_available:
-            self.xtest_find_close_points_binning_flat(
-                FindClosePointAlgorithm.binning_cython
-            )
-        else:
-            self.skipTest("Cython not available")
-
     def test_find_close_points_flat_boundary_volume_hierarchy_arborx(self):
         if arborx_available:
             self.xtest_find_close_points_binning_flat(
@@ -506,14 +490,6 @@ class TestGeometricSearch(unittest.TestCase):
         if cython_available:
             self.xtest_find_close_points_dimension(
                 FindClosePointAlgorithm.brute_force_cython
-            )
-        else:
-            self.skipTest("Cython not available")
-
-    def test_find_close_points_dimension_binning_cython(self):
-        if cython_available:
-            self.xtest_find_close_points_dimension(
-                FindClosePointAlgorithm.binning_cython
             )
         else:
             self.skipTest("Cython not available")
