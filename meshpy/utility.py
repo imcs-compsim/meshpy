@@ -42,7 +42,7 @@ import numpy as np
 # Meshpy modules.
 from .conf import mpy
 from .node import Node, NodeCosserat
-from .geometry_set import GeometrySet
+from .geometry_set import GeometrySetBase
 from .geometric_search.find_close_points import (
     find_close_points,
     point_partners_to_partner_indices,
@@ -184,9 +184,9 @@ def clean_simulation_directory(sim_dir):
         Path(sim_dir).mkdir(parents=True, exist_ok=True)
 
 
-def get_node(item, *, check_cosserat_node=False):
+def get_single_node(item, *, check_cosserat_node=False):
     """
-    Function to get a node from the input variable. This function
+    Function to get a single node from the input variable. This function
     accepts a Node object as well as a GeometrySet object.
 
     Args
@@ -198,10 +198,11 @@ def get_node(item, *, check_cosserat_node=False):
     """
     if isinstance(item, Node):
         node = item
-    elif isinstance(item, GeometrySet):
+    elif isinstance(item, GeometrySetBase):
         # Check if there is only one node in the set
-        if len(item.nodes) == 1:
-            node = item.nodes[0]
+        nodes = item.get_points()
+        if len(nodes) == 1:
+            node = nodes[0]
         else:
             raise ValueError("GeometrySet does not have exactly one node!")
     else:

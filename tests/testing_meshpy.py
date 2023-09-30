@@ -67,11 +67,11 @@ from meshpy import (
 )
 from meshpy.node import Node, NodeCosserat
 from meshpy.vtk_writer import VTKWriter
-from meshpy.geometry_set import GeometrySet
+from meshpy.geometry_set import GeometrySet, GeometrySetNodes
 from meshpy.container import GeometryName
 from meshpy.element_beam import Beam
 from meshpy.utility import (
-    flatten,
+    get_single_node,
     get_min_max_coordinates,
 )
 
@@ -667,6 +667,37 @@ class TestMeshpy(unittest.TestCase):
             input_file.get_string(header=False),
         )
 
+    def test_geometry_sets(self):
+        """Test functionality of the GeometrySet objects"""
+
+        mesh = InputFile()
+        for i in range(6):
+            mesh.add(NodeCosserat([i, 2 * i, 3 * i], Rotation([i, 2 * i, 3 * i], i)))
+
+        set_1 = GeometrySetNodes(
+            mpy.geo.point, [mesh.nodes[0], mesh.nodes[1], mesh.nodes[2]]
+        )
+        set_2 = GeometrySetNodes(
+            mpy.geo.point, [mesh.nodes[2], mesh.nodes[3], mesh.nodes[4]]
+        )
+        set_12 = GeometrySetNodes(mpy.geo.point)
+        set_12.add(set_1)
+        set_12.add(set_2)
+        set_3 = GeometrySet(set_1.get_points())
+
+        mesh.add(set_1, set_2, set_12, set_3)
+
+        # Check the output.
+        ref_file = os.path.join(
+            testing_input, "test_meshpy_geometry_sets_reference.dat"
+        )
+        compare_strings(
+            self,
+            "test_geometry_sets",
+            ref_file,
+            mesh.get_string(header=False),
+        )
+
     def test_curve_3d_curve_rotation(self):
         """Create a line from a parametric curve and prescribe the rotation."""
 
@@ -885,9 +916,10 @@ class TestMeshpy(unittest.TestCase):
                         # Couple the nodes.
                         if rotvec:
                             input_file.couple_nodes(
-                                nodes=flatten(
-                                    [set_1["end"].nodes, set_2["start"].nodes]
-                                )
+                                nodes=[
+                                    get_single_node(set_1["end"]),
+                                    get_single_node(set_2["start"]),
+                                ]
                             )
 
                         # Move the mesh away from the next created beam.
@@ -1015,9 +1047,9 @@ class TestMeshpy(unittest.TestCase):
 
             # Add sets.
             geom_set = GeometryName()
-            geom_set["start"] = GeometrySet(mpy.geo.point, nodes=input_file.nodes[0])
-            geom_set["end"] = GeometrySet(mpy.geo.point, nodes=input_file.nodes[0])
-            geom_set["line"] = GeometrySet(mpy.geo.line, nodes=input_file.nodes)
+            geom_set["start"] = GeometrySet(input_file.nodes[0])
+            geom_set["end"] = GeometrySet(input_file.nodes[0])
+            geom_set["line"] = GeometrySet(input_file.elements)
             input_file.add(geom_set)
             return input_file
 
@@ -1066,13 +1098,9 @@ class TestMeshpy(unittest.TestCase):
 
             # Add sets.
             geom_set = GeometryName()
-            geom_set["start"] = GeometrySet(mpy.geo.point, nodes=set_1["start"])
-            geom_set["end"] = GeometrySet(mpy.geo.point, nodes=set_2["end"])
-            geom_set["line"] = GeometrySet(
-                mpy.geo.line,
-                nodes=[set_1["line"], set_2["line"]],
-                fail_on_double_nodes=False,
-            )
+            geom_set["start"] = GeometrySet(set_1["start"])
+            geom_set["end"] = GeometrySet(set_2["end"])
+            geom_set["line"] = GeometrySet([set_1["line"], set_2["line"]])
             input_file.add(geom_set)
 
             return input_file
@@ -1225,7 +1253,21 @@ class TestMeshpy(unittest.TestCase):
             ).get_string(header=False),
         )
 
-    def test_replace_nodes(self):
+    def test_replace_nodes_geometry_set(self):
+        """
+        Test case for coupling of nodes, and reusing the identical nodes.
+        This test case uses geometry-based sets.
+        """
+        self.x_test_replace_nodes(False)
+
+    def test_replace_nodes_geometry_set_nodes(self):
+        """
+        Test case for coupling of nodes, and reusing the identical nodes.
+        This test case uses node-based sets.
+        """
+        self.x_test_replace_nodes(True)
+
+    def x_test_replace_nodes(self, use_nodal_geometry_sets=False):
         """Test case for coupling of nodes, and reusing the identical nodes."""
 
         mpy.check_overlapping_elements = False
@@ -1252,28 +1294,40 @@ class TestMeshpy(unittest.TestCase):
         ref_nodes = list(mesh_ref.nodes)
         coupling_nodes = list(mesh_couple.nodes)
 
-        # Add a line set with all nodes, to check that the nodes in the
+        # Add a set with all nodes, to check that the nodes in the
         # boundary condition are replaced correctly.
-        mesh_ref.add(GeometrySet(mpy.geo.line, nodes=ref_nodes))
-        mesh_couple.add(GeometrySet(mpy.geo.line, nodes=coupling_nodes))
+        if use_nodal_geometry_sets:
+            mesh_ref.add(GeometrySetNodes(mpy.geo.point, ref_nodes))
+            mesh_couple.add(GeometrySetNodes(mpy.geo.point, coupling_nodes))
+        else:
+            mesh_ref.add(GeometrySet(ref_nodes))
+            mesh_couple.add(GeometrySet(coupling_nodes))
 
-        # Add another line set with all nodes, this time only the coupling node
+        # Add another set with all nodes, this time only the coupling node
         # that will be kept is in this set.
-        mesh_ref.add(GeometrySet(mpy.geo.line, nodes=ref_nodes))
         coupling_nodes_without_replace_node = list(coupling_nodes)
         del coupling_nodes_without_replace_node[3]
-        mesh_couple.add(
-            GeometrySet(mpy.geo.line, nodes=coupling_nodes_without_replace_node)
-        )
+        if use_nodal_geometry_sets:
+            mesh_ref.add(GeometrySetNodes(mpy.geo.point, ref_nodes))
+            mesh_couple.add(
+                GeometrySetNodes(mpy.geo.point, coupling_nodes_without_replace_node)
+            )
+        else:
+            mesh_ref.add(GeometrySet(ref_nodes))
+            mesh_couple.add(GeometrySet(coupling_nodes_without_replace_node))
 
-        # Add another line set with all nodes, this time only the coupling node
+        # Add another set with all nodes, this time only the coupling node
         # that will be replaced is in this set.
-        mesh_ref.add(GeometrySet(mpy.geo.line, nodes=ref_nodes))
         coupling_nodes_without_replace_node = list(coupling_nodes)
         del coupling_nodes_without_replace_node[2]
-        mesh_couple.add(
-            GeometrySet(mpy.geo.line, nodes=coupling_nodes_without_replace_node)
-        )
+        if use_nodal_geometry_sets:
+            mesh_ref.add(GeometrySetNodes(mpy.geo.point, ref_nodes))
+            mesh_couple.add(
+                GeometrySetNodes(mpy.geo.point, coupling_nodes_without_replace_node)
+            )
+        else:
+            mesh_ref.add(GeometrySet(ref_nodes))
+            mesh_couple.add(GeometrySet(coupling_nodes_without_replace_node))
 
         # Rotate both meshes
         mesh_ref.rotate(rot)
@@ -1341,10 +1395,16 @@ class TestMeshpy(unittest.TestCase):
         create_beam_mesh_line(mesh_couple, Beam3rHerm2Line3, mat, [1, 0, 0], [2, 0, 0])
 
         # Create set with all the beam nodes.
-        node_set_1_ref = GeometrySet(mpy.geo.line, nodes=mesh_ref.nodes)
-        node_set_2_ref = GeometrySet(mpy.geo.line, nodes=mesh_ref.nodes)
-        node_set_1_couple = GeometrySet(mpy.geo.line, nodes=mesh_couple.nodes)
-        node_set_2_couple = GeometrySet(mpy.geo.line, nodes=mesh_couple.nodes)
+        if use_nodal_geometry_sets:
+            node_set_1_ref = GeometrySetNodes(mpy.geo.line, mesh_ref.nodes)
+            node_set_2_ref = GeometrySetNodes(mpy.geo.line, mesh_ref.nodes)
+            node_set_1_couple = GeometrySetNodes(mpy.geo.line, mesh_couple.nodes)
+            node_set_2_couple = GeometrySetNodes(mpy.geo.line, mesh_couple.nodes)
+        else:
+            node_set_1_ref = GeometrySet(mesh_ref.elements)
+            node_set_2_ref = GeometrySet(mesh_ref.elements)
+            node_set_1_couple = GeometrySet(mesh_couple.elements)
+            node_set_2_couple = GeometrySet(mesh_couple.elements)
 
         # Create connecting beams.
         create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat, [1, 0, 0], [2, 2, 2])
@@ -1406,7 +1466,7 @@ class TestMeshpy(unittest.TestCase):
         )
 
         # Set beam-to-solid coupling conditions.
-        line_set = GeometrySet(mpy.geo.line, beam_mesh.nodes)
+        line_set = GeometrySet(beam_mesh.elements)
         beam_mesh.add(
             BoundaryCondition(
                 line_set,
@@ -2012,18 +2072,18 @@ class TestMeshpy(unittest.TestCase):
         # Mesh instance for this test.
         mesh = Mesh()
 
-        # Create objects that will be added to the mesh.
+        # Create basic objects that will be added to the mesh.
         node = Node([0, 1.0, 2.0])
         element = Beam()
+        mesh.add(node)
+        mesh.add(element)
+
+        # Create objects based on basic mesh items.
         coupling = Coupling(mesh.nodes, mpy.bc.point_coupling, mpy.coupling_dof.fix)
         coupling_penalty = Coupling(
             mesh.nodes, mpy.bc.point_coupling_penalty, mpy.coupling_dof.fix
         )
-        geometry_set = GeometrySet(mpy.geo.point)
-
-        # Add each object once.
-        mesh.add(node)
-        mesh.add(element)
+        geometry_set = GeometrySet(mesh.elements)
         mesh.add(coupling)
         mesh.add(coupling_penalty)
         mesh.add(geometry_set)
@@ -2037,8 +2097,8 @@ class TestMeshpy(unittest.TestCase):
 
     def test_check_two_couplings(self):
         """
-        The current implementation can not handle more than one coupling on a
-        node correctly, therefore we need to throw an error.
+        The current implementation can handle more than one coupling on a
+        node correctly, therefore we check this here.
         """
 
         # Create mesh object.
@@ -2058,11 +2118,12 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file. This will cause an error, as there are two
         # couplings for one node.
-        self.assertRaises(
-            ValueError,
-            mesh.write_input_file,
-            os.path.join(testing_temp, "temp.dat"),
-            add_script_to_header=False,
+        ref_file = os.path.join(testing_input, "test_check_two_couplings_reference.dat")
+        compare_strings(
+            self,
+            "test_check_two_couplings",
+            ref_file,
+            mesh.get_string(header=False),
         )
 
     def test_check_double_elements(self):
@@ -2127,7 +2188,7 @@ class TestMeshpy(unittest.TestCase):
         # Create the input file. This will cause an error, as there are two
         # couplings for one node.
         args = [
-            [set_1["start"].nodes[0], set_2["end"].nodes[0]],
+            [set_1["start"], set_2["end"]],
             mpy.bc.point_coupling,
             "coupling_type_string",
         ]

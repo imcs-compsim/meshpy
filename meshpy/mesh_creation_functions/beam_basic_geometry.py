@@ -37,7 +37,7 @@ import numpy as np
 # Meshpy modules.
 from ..conf import mpy
 from ..rotation import Rotation
-from ..utility import get_node
+from ..utility import get_single_node
 from .beam_generic import create_beam_mesh_function
 
 
@@ -310,7 +310,7 @@ def create_beam_mesh_line_at_node(
         raise ValueError("Length has to be positive!")
 
     # Create the line starting from the given node
-    start_node = get_node(start_node, check_cosserat_node=True)
+    start_node = get_single_node(start_node, check_cosserat_node=True)
     tangent = start_node.rotation * [1, 0, 0]
     start_position = start_node.coordinates
     end_position = start_position + tangent * length
@@ -375,7 +375,7 @@ def create_beam_mesh_arc_at_node(
         arc_axis_normal = -1.0 * arc_axis_normal
 
     # The normal has to be perpendicular to the start point tangent
-    start_node = get_node(start_node, check_cosserat_node=True)
+    start_node = get_single_node(start_node, check_cosserat_node=True)
     tangent = start_node.rotation * [1, 0, 0]
     if np.abs(np.dot(tangent, arc_axis_normal)) > mpy.eps_pos:
         raise ValueError(

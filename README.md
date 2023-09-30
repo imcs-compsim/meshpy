@@ -1,20 +1,43 @@
-# Meshpy
+# MeshPy
 
-Meshpy is a general purpose 3D beam input generator.
+MeshPy is a general purpose 3D beam finite element input generator written in `python3`.
+It contains basic geometry creation and manipulation functions to create complex beam geometries, including rotational degrees of freedom for the beam nodes.
+It can be used to create input files for the following finite element solvers:
+- [BACI](https://baci.pages.gitlab.lrz.de/website/) (academic finite element solver)
+- [Abaqus](https://en.wikipedia.org/wiki/Abaqus) (commercial software package)
+
+MeshPy can easily be adapted to create input files for other solvers.
+MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulation (IMCS)](https://www.unibw.de/imcs-en) at the Universität der Bundeswehr München.
 
 ## How to cite MeshPy?
 
 Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as described on the [MeshPy website](https://imcs-compsim.github.io/meshpy).
 
+Feel free to leave a :star: on [GitHub](https://github.com/imcs-compsim/meshpy).
 
-## Code formating
+## How to use MeshPy?
 
-MeshPy uses the python code formatter [black](https://github.com/psf/black).
-The testsuite checks if all files are formatted accordingly.
+Basic tutorials can be found in the directory `tutorial/`.
+
+
+## Contributing
+
+If you are interested in contributing to MeshPy, we welcome your collaboration.
+For general questions, feature request and bug reports please open an [issue](https://github.com/imcs-compsim/meshpy/issues).
+
+If you contribute actual code, fork the repository and make the changes in a feature branch.
+Depending on the topic and amount of changes you also might want to open an [issue](https://github.com/imcs-compsim/meshpy/issues).
+To merge your changes into the MeshPy repository, create a pull request to the `main` branch.
+A few things to keep in mind:
+- It is highly encouraged to add tests covering the functionality of your changes, see the test suite in `tests/`.
+- MeshPy uses `black` to format python code.
+  Make sure to apply `black` to the changed source files.
+- Feel free to add yourself to the [CONTRIBUTORS](CONTRIBUTORS) file.
+
 
 ## Installation
 
-Meshpy is developed with `python3.8`.
+MeshPy is developed with `python3.8`.
 Other versions of Python might lead to issues.
 It is recommended to use virtual environments with `python`.
 On Debian systems the following packages have to be installed
@@ -75,7 +98,7 @@ python3 performance_testing.py
 
 ### Optional dependency on [ArborX](https://github.com/arborx/ArborX)
 
-MeshPy can execute its geometric search functions using the C++ library [ArborX](https://github.com/arborx/ArborX).
+MeshPy can optionally execute its geometric search functions using the C++ library [ArborX](https://github.com/arborx/ArborX).
 First make sure the `pybind11` submodule is loaded
 ```bash
 cd <path_to_meshpy>

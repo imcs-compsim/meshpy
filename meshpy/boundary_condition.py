@@ -37,6 +37,7 @@ import warnings
 # Meshpy modules.
 from .conf import mpy
 from .base_mesh_item import BaseMeshItem
+from .geometry_set import GeometrySet
 from .utility import find_close_nodes
 
 
@@ -180,7 +181,8 @@ class BoundaryCondition(BoundaryConditionBase):
             self.bc_type == mpy.bc.neumann
             and self.geometry_set.geometry_type == mpy.geo.point
         ):
-            partners = find_close_nodes(self.geometry_set.nodes)
+            my_nodes = self.geometry_set.get_points()
+            partners = find_close_nodes(my_nodes)
             # Create a list with nodes that will not be kept in the set.
             double_node_list = []
             for node_list in partners:
@@ -191,12 +193,10 @@ class BoundaryCondition(BoundaryConditionBase):
                 len(double_node_list) > 0
                 and self.double_nodes is mpy.double_nodes.remove
             ):
-                # Create the nodes again for the set.
-                self.geometry_set.nodes = [
-                    node
-                    for node in self.geometry_set.nodes
-                    if (node not in double_node_list)
-                ]
+                # Create the a new geometry set with the unique nodes.
+                self.geometry_set = GeometrySet(
+                    [node for node in my_nodes if (node not in double_node_list)]
+                )
             elif len(double_node_list) > 0:
                 warnings.warn(
                     "There are overlapping nodes in this point "

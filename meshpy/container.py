@@ -37,7 +37,7 @@ from _collections import OrderedDict
 
 # Meshpy modules.
 from .conf import mpy
-from .geometry_set import GeometrySet
+from .geometry_set import GeometrySetBase
 
 
 class GeometryName(OrderedDict):
@@ -52,15 +52,14 @@ class GeometryName(OrderedDict):
     """
 
     def __setitem__(self, key, value):
-        """Set an geometry set in this container."""
+        """Set a geometry set in this container."""
 
         if not isinstance(key, str):
             raise TypeError("Expected string, got {}!".format(type(key)))
-        elif isinstance(value, GeometrySet):
+        elif isinstance(value, GeometrySetBase):
             super().__setitem__(key, value)
         else:
-            raise NotImplementedError("TODO: This case needs to be implemented")
-            super().__setitem__(key, GeometrySet(nodes=value))
+            raise NotImplementedError("GeometryName can only store GeometrySets")
 
 
 class BoundaryConditionContainer(OrderedDict):

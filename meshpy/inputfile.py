@@ -45,7 +45,7 @@ from .base_mesh_item import BaseMeshItem
 from .node import Node
 from .element import Element
 from .boundary_condition import BoundaryConditionBase
-from .geometry_set import GeometrySet
+from .geometry_set import GeometrySetNodes
 from .utility import get_git_data
 from .nurbs_patch import NURBSPatch
 
@@ -164,7 +164,6 @@ class InputSection(object):
     """Represent a single section in the input file."""
 
     def __init__(self, name, *args, **kwargs):
-
         # Section title.
         self.name = name
 
@@ -242,7 +241,7 @@ class InputSectionMultiKey(InputSection):
 
 
 class InputFile(Mesh):
-    """A item that represents a complete Baci input file."""
+    """An item that represents a complete Baci input file."""
 
     # Define the names of sections and boundary conditions in the input file.
     geometry_set_names = {
@@ -407,8 +406,7 @@ class InputFile(Mesh):
                     element.nodes[i] = self.nodes[element.nodes[i]]
             for geometry_type_list in self.geometry_sets.values():
                 for geometry_set in geometry_type_list:
-                    for i in range(len(geometry_set.nodes)):
-                        geometry_set.nodes[i] = self.nodes[geometry_set.nodes[i]]
+                    geometry_set.replace_indices_with_nodes(self.nodes)
 
             # Link the boundary conditions.
             for bc_key, bc_list in self.boundary_conditions.items():
@@ -489,7 +487,6 @@ class InputFile(Mesh):
                 for i, [item, comments] in enumerate(section_data_comment):
                     # The first line is the number of BCs and will be skipped.
                     if i > 0:
-
                         # TODO: move this outside the loop.
                         for key, value in self.boundary_condition_names.items():
                             if value == section_header:
@@ -522,7 +519,7 @@ class InputFile(Mesh):
                             break
 
                     if mpy.import_mesh_full:
-                        geometry_set = GeometrySet.from_dat(
+                        geometry_set = GeometrySetNodes.from_dat(
                             geometry_key, dat_list, comments=comments
                         )
                     else:
@@ -702,15 +699,9 @@ class InputFile(Mesh):
 
         # Add header to the input file.
         end_text = None
-        lines.append("// " + "-" * 77)
-        lines.append("// This input file was created with MeshPy.")
-        lines.append("// Copyright (c) 2021 Ivo Steinbrecher")
-        lines.append(
-            "//            Institute for Mathematics and Computer-Based Simulation"
-        )
-        lines.append("//            Universitaet der Bundeswehr Muenchen")
-        lines.append("//            https://www.unibw.de/imcs-en")
-        lines.append("// " + "-" * 77)
+
+        mpy.input_file_meshpy_header
+        lines.extend(["// " + line for line in mpy.input_file_meshpy_header])
         if header:
             header_text, end_text = self._get_header(add_script_to_header)
             lines.append(header_text)
@@ -920,7 +911,6 @@ class InputFile(Mesh):
 
         # Check if cubitpy is loaded.
         if "cubitpy.cubitpy" in sys.modules.keys():
-
             # Load cubitpy.
             import cubitpy
 

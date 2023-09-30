@@ -35,7 +35,7 @@ Generic function used to create all beams within meshpy.
 from ..conf import mpy
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
-from ..utility import get_node
+from ..utility import get_single_node
 
 
 def create_beam_mesh_function(
@@ -137,7 +137,7 @@ def create_beam_mesh_function(
 
     # If a start node is given, set this as the first node for this beam.
     if start_node is not None:
-        start_node = get_node(start_node, check_cosserat_node=True)
+        start_node = get_single_node(start_node, check_cosserat_node=True)
         nodes = [start_node]
         check_given_node(start_node)
 
@@ -146,7 +146,7 @@ def create_beam_mesh_function(
     if end_node is True:
         close_beam = True
     elif end_node is not None:
-        end_node = get_node(end_node, check_cosserat_node=True)
+        end_node = get_single_node(end_node, check_cosserat_node=True)
         check_given_node(end_node)
 
     # Create the beams.
@@ -210,9 +210,9 @@ def create_beam_mesh_function(
 
     # Create geometry sets that will be returned.
     return_set = GeometryName()
-    return_set["start"] = GeometrySet(mpy.geo.point, nodes=nodes[0])
-    return_set["end"] = GeometrySet(mpy.geo.point, nodes=end_node)
-    return_set["line"] = GeometrySet(mpy.geo.line, nodes=nodes)
+    return_set["start"] = GeometrySet(nodes[0])
+    return_set["end"] = GeometrySet(end_node)
+    return_set["line"] = GeometrySet(elements)
     if add_sets:
         mesh.add(return_set)
     return return_set

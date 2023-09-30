@@ -351,23 +351,23 @@ def create_beam_mesh_stent(
     mesh_stent.rotate(Rotation([0, 0, 1], np.pi / 2))
     mesh_stent.translate([diameter / 2, 0, 0])
     mesh_stent.wrap_around_cylinder()
-    mesh.add_mesh(mesh_stent)
 
     # List of nodes from the stent that are candidates for connections.
-    stent_nodes_all = [mesh.nodes[i] for i in range(i_node_start, len(mesh.nodes))]
-    stent_nodes = [node for node in stent_nodes_all if node.is_end_node]
+    stent_nodes = [node for node in mesh_stent.nodes if node.is_end_node]
 
     # Add connections for the nodes with same positions.
-    mesh.couple_nodes(nodes=stent_nodes)
+    mesh_stent.couple_nodes(nodes=stent_nodes)
 
     # Get min and max nodes of the honeycomb.
-    min_max_nodes = mesh.get_min_max_nodes(nodes=stent_nodes)
+    min_max_nodes = mesh_stent.get_min_max_nodes(nodes=stent_nodes)
 
     # Return the geometry set.
     return_set = GeometryName()
     return_set["top"] = min_max_nodes["z_max"]
     return_set["bottom"] = min_max_nodes["z_min"]
-    return_set["all"] = GeometrySet(mpy.geo.line, stent_nodes_all)
+    return_set["all"] = GeometrySet(mesh_stent.elements)
+
+    mesh.add_mesh(mesh_stent)
 
     if add_sets:
         mesh.add(return_set)
