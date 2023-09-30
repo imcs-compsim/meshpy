@@ -107,7 +107,41 @@ def empty_testing_directory():
                 print(e)
 
 
-def compare_strings(self, name, reference, compare):
+def compare_string_tolerance(reference, compare, tol):
+    """Compare two strings, all floating point values will be compared with an
+    absolute tolerance."""
+
+    lines_reference = reference.strip().split("\n")
+    lines_compare = compare.strip().split("\n")
+    n_reference = len(lines_reference)
+    n_compare = len(lines_compare)
+    if n_reference == n_compare:
+        # Loop over each line in the file
+        for i in range(n_reference):
+            line_reference = lines_reference[i].strip().split(" ")
+            line_compare = lines_compare[i].strip().split(" ")
+            n_items_reference = len(line_reference)
+            n_items_compare = len(line_compare)
+            if n_items_reference == n_items_compare:
+                # Loop over each entry in the line
+                for j in range(n_items_reference):
+                    try:
+                        reference_number = float(line_reference[j].strip())
+                        compare_number = float(line_compare[j].strip())
+                        if np.abs(reference_number - compare_number) < tol:
+                            pass
+                    except ValueError:
+                        if line_reference[j].strip() != line_compare[j].strip():
+                            return False
+            else:
+                return False
+    else:
+        return False
+
+    return True
+
+
+def compare_strings(self, name, reference, compare, *, tol=None):
     """
     Compare two stings. If they are not identical open kompare and show
     differences.
@@ -130,9 +164,12 @@ def compare_strings(self, name, reference, compare):
     else:
         compare_string = compare
 
-    # Check if the strings are equal, if not compare the differences and
-    # fail the test.
-    is_equal = reference_string.strip() == compare_string.strip()
+    if tol is None:
+        # Check if the strings are equal, if not compare the differences and
+        # fail the test.
+        is_equal = reference_string.strip() == compare_string.strip()
+    else:
+        is_equal = compare_string_tolerance(reference_string, compare_string, tol)
     if not is_equal and not TESTING_GITHUB:
 
         # Check if temporary directory exists, and creates it if necessary.
@@ -169,142 +206,6 @@ def compare_strings(self, name, reference, compare):
     self.assertTrue(is_equal, name)
 
 
-def xml_to_dict(xml, tol_float):
-    """Convert a XML to a nested dictionary."""
-
-    def item_with_tol(item):
-        """
-        Check if item is a number and if so, format it to match the given
-        tolerance.
-        """
-
-        if tol_float is None:
-            return item
-        else:
-            try:
-                number = float(item)
-                if np.abs(float(number)) < tol_float:
-                    return "0.0"
-                else:
-                    # We check the numbers to a precision of 13.
-                    number_float = float(number)
-                    return "{:.13e}".format(number_float)
-            except ValueError:
-                return item
-
-    # Get and sort keys.
-    keys = xml.keys()
-    keys.sort()
-
-    # Get string for this XML element.
-    string = "<" + xml.tag
-    if "Name" in keys:
-        # If there is a key "Name" put this one first.
-        index = keys.index("Name")
-        if index == 0:
-            pass
-        else:
-            keys[0], keys[index] = keys[index], keys[0]
-    for key in keys:
-        string += " "
-        string += key
-        string += '="'
-        string += item_with_tol(xml.get(key))
-        string += '"'
-    string += ">"
-
-    # Get data for this item.
-    xml_dict = {}
-    n_childs = len(list(xml))
-    is_text = not xml.text.strip() == ""
-    if n_childs > 0:
-        # Add a child xml construct.
-        for child in list(xml):
-            key, value = xml_to_dict(child, tol_float)
-            xml_dict[key] = value
-
-    if is_text:
-        # Add data.
-        data = xml.text.split("\n")
-        if tol_float is None:
-            data_new = [line.strip() for line in data if not line.strip() == ""]
-        else:
-            data_new = []
-            for line in data:
-                if line.strip() == "":
-                    continue
-                for number in line.strip().split(" "):
-                    data_new.append(item_with_tol(number))
-        data_string = "\n".join(data_new)
-        xml_dict[""] = data_string
-
-    # Return key for this item and all child items.
-    return string, xml_dict
-
-
-def xml_dict_to_string(item):
-    """The nested XML dictionary to a string."""
-
-    # Sort the keys.
-    keys = list(item.keys())
-    keys.sort()
-
-    # Return the keys and the values.
-    string = ""
-    for key in keys:
-        if key == "":
-            string += item[key]
-        else:
-            # Add content.
-            string += key
-            string += "\n"
-            string += xml_dict_to_string(item[key])
-            string += "\n"
-
-            # Get the name of the section from the key.
-            section = key[1:].split(" ")[0]
-            if section[-1] == ">":
-                section = section[:-1]
-            string += "</{}>\n".format(section)
-
-    # Return the value.
-    return string.strip()
-
-
-def compare_xml(path1, path2, tol_float=None):
-    """
-    Compare the xml files at path1 and path2, by checking the xml data of the
-    files.
-
-    Args
-    ----
-    tol_float: None / float
-        If it is None, the numbers are not changed.
-        If it is a number, the numbers in the xml file are set to 0 when the
-        absolute value is smaller that tol_float.
-    """
-
-    # Check that both arguments are paths and exist.
-    if not (os.path.isfile(path1) and os.path.isfile(path2)):
-        raise ValueError("The paths given are not OK!")
-
-    tree1 = ET.parse(path1)
-    tree2 = ET.parse(path2)
-
-    key, value = xml_to_dict(tree1.getroot(), tol_float)
-    string1 = xml_dict_to_string({key: value})
-    hash1 = hash(string1)
-
-    key, value = xml_to_dict(tree2.getroot(), tol_float)
-    string2 = xml_dict_to_string({key: value})
-    hash2 = hash(string2)
-
-    if hash1 == hash2:
-        return True, None, None
-    else:
-        return False, string1, string2
-
-
 def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
     """
     Compare the vtk files at path1 and path2, by compairing the stored data.
@@ -325,7 +226,7 @@ def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
 
     # Default value for the numerical tolerance.
     if tol_float is None:
-        tol_float = 1e-16
+        raise ValueError("Tolerance in compare_vtk_data has to be given!")
 
     def get_vtk(path):
         """
@@ -403,22 +304,6 @@ def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
     return True
 
 
-def compare_vtk(self, name, ref_file, vtk_file, tol_float=None):
-    """
-    Compare two vtk files. Two different methods are used. Once the xml
-    structure is compared and once the vtk data is compared.
-    """
-
-    # Compare the xml structure.
-    is_equal_xml, _string_ref, _string_vtk = compare_xml(
-        ref_file, vtk_file, tol_float=tol_float
-    )
-
-    # Compare the raw data.
-    is_equal_data = compare_vtk_data(ref_file, vtk_file, tol_float=tol_float)
-
-    # Check that both comparisons yield true.
-    error_string = name + "\ncompare results: is_equal_xml={}, is_equal_data={}".format(
-        is_equal_xml, is_equal_data
-    )
-    self.assertTrue(is_equal_xml and is_equal_data, error_string)
+def compare_vtk(self, name, ref_file, vtk_file, *, tol_float=1e-14):
+    """Compare two vtk files and raise an error if they are not equal."""
+    self.assertTrue(compare_vtk_data(ref_file, vtk_file, tol_float=tol_float), name)

@@ -44,10 +44,7 @@ from .geometric_search_scipy import find_close_points_scipy
 from .geometric_search_cython import cython_available
 
 if cython_available:
-    from .geometric_search_cython import (
-        find_close_points_brute_force_cython,
-        find_close_points_binning_cython,
-    )
+    from .geometric_search_cython import find_close_points_brute_force_cython
 
 # ArborX
 from .geometric_search_arborx import arborx_available
@@ -61,7 +58,6 @@ class FindClosePointAlgorithm(Enum):
 
     kd_tree_scipy = auto()
     brute_force_cython = auto()
-    binning_cython = auto()
     boundary_volume_hierarchy_arborx = auto()
 
 
@@ -182,10 +178,6 @@ def find_close_points(point_coordinates, *, algorithm=None, tol=1e-5, **kwargs):
         )
     elif algorithm is FindClosePointAlgorithm.brute_force_cython:
         has_partner, n_partner = find_close_points_brute_force_cython(
-            point_coordinates, tol, **kwargs
-        )
-    elif algorithm is FindClosePointAlgorithm.binning_cython:
-        has_partner, n_partner = find_close_points_binning_cython(
             point_coordinates, tol, **kwargs
         )
     elif algorithm is FindClosePointAlgorithm.boundary_volume_hierarchy_arborx:

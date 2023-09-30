@@ -64,17 +64,3 @@ def find_close_points_brute_force_cython(
         raise ModuleNotFoundError(
             "Cython geometric search functionality is not available"
         )
-
-
-def find_close_points_binning_cython(point_coordinates, tol, *, n_bins=None):
-    """Call the Cython binning implementation of find close_points."""
-    if cython_available:
-        if n_bins is None:
-            n_bins = [10, 10, 10]
-        return geometric_search_cython_lib.find_close_points_binning(
-            point_coordinates, tol, *n_bins
-        )
-    else:
-        raise ModuleNotFoundError(
-            "Cython geometric search functionality is not available"
-        )

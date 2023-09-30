@@ -1,5 +1,6 @@
 # general filetypes to ignorer
 *.pyc
+*.pyd
 .*
 
 # test file in root folder

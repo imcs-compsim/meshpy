@@ -55,7 +55,7 @@ setup(
         "matplotlib",
         "numpy",
         "pyvista",
-        "pyvista_utils@git+ssh://git@github.com/isteinbrecher/pyvista_utils",
+        "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git",
         "scipy",
         "vtk",
     ],

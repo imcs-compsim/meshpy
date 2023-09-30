@@ -203,7 +203,7 @@ class TestSimulationManager(unittest.TestCase):
         Create a convergence study and check the results. The simulations are
         run with mpirun.
         """
-        if not is_cluster_test():
+        if not is_cluster_test() and get_baci_path() is not None:
             self.xtest_simulation_manager("mpirun")
         else:
             self.skipTest("Tests with mpirun are not executed on the cluster")
@@ -212,7 +212,7 @@ class TestSimulationManager(unittest.TestCase):
         """
         Create a convergence study on the cluster and check the results.
         """
-        if is_cluster_test():
+        if is_cluster_test() and get_baci_path() is not None:
             self.xtest_simulation_manager("sbatch")
         else:
             self.skipTest("Tests with slurm are not executed on a workstation")
