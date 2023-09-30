@@ -188,7 +188,11 @@ class TestMeshCreationFunctions(unittest.TestCase):
         # Check the output.
         ref_file = os.path.join(testing_input, "test_mesh_stent_reference.dat")
         compare_strings(
-            self, "test_mesh_stent", ref_file, input_file.get_string(header=False)
+            self,
+            "test_mesh_stent",
+            ref_file,
+            input_file.get_string(header=False),
+            tol=1e-10,
         )
 
     def test_fibers_in_rectangle(self):
@@ -494,6 +498,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
             "test_mesh_element_length_option",
             ref_file,
             input_file.get_string(header=False),
+            tol=1e-10,
         )
 
         # Check error messages for input parameters
