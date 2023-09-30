@@ -50,6 +50,7 @@ from meshpy import (
     Rotation,
 )
 from meshpy.utility import find_close_nodes
+from meshpy.geometric_search import FindClosePointAlgorithm, find_close_points
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 
 from testing_utility import empty_testing_directory, testing_temp
@@ -189,6 +190,7 @@ class TestPerformance(object):
         "meshpy_find_close_nodes": 2.0,
         "meshpy_write_dat": 12.5,
         "meshpy_write_vtk": 19,
+        "geometric_search_find_nodes_brute_force": 0.05,
     }
     expected_times["ares.bauv.unibw-muenchen.de"] = {
         "cubitpy_create_solid": 4.0,
@@ -203,6 +205,7 @@ class TestPerformance(object):
         "meshpy_find_close_nodes": 2.0,
         "meshpy_write_dat": 13.0,
         "meshpy_write_vtk": 24.0,
+        "geometric_search_find_nodes_brute_force": 0.05,
     }
     expected_times["sisyphos.bauv.unibw-muenchen.de"] = {
         "cubitpy_create_solid": 3.0,
@@ -217,6 +220,7 @@ class TestPerformance(object):
         "meshpy_find_close_nodes": 1.6,
         "meshpy_write_dat": 10.5,
         "meshpy_write_vtk": 17.0,
+        "geometric_search_find_nodes_brute_force": 0.05,
     }
 
     def __init__(self):
@@ -270,6 +274,18 @@ class TestPerformance(object):
 
         # Return what the function would have given.
         return return_val
+
+
+def get_geometric_search_time(algorithm, n_points, n_runs):
+    """Return the time needed to perform geometric search functions"""
+
+    np.random.seed(seed=1)
+    points = np.random.rand(n_points, 3)
+
+    start = time.time()
+    for i in range(n_runs):
+        find_close_points(points, algorithm=algorithm)
+    return time.time() - start
 
 
 if __name__ == "__main__":
@@ -343,6 +359,12 @@ if __name__ == "__main__":
             "output_name": "performance_testing_beam",
             "output_directory": testing_temp,
         },
+    )
+
+    test_performance.time_function(
+        "geometric_search_find_nodes_brute_force",
+        get_geometric_search_time,
+        args=[FindClosePointAlgorithm.brute_force_cython, 100, 1000],
     )
 
     if test_performance.failed_tests > 0:
