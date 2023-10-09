@@ -353,7 +353,7 @@ class TestFullBaci(unittest.TestCase):
 
         # Call get_unique_geometry_sets to check that this does not affect the
         # mesh creation.
-        input_file.get_unique_geometry_sets(link_nodes=True)
+        input_file.get_unique_geometry_sets(link_nodes="all_nodes")
 
         # Run the input file in Baci.
         self.run_baci_test(name, input_file)

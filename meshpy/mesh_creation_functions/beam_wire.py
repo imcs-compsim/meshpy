@@ -123,7 +123,7 @@ def create_wire_fibers(
     return_set = GeometryName()
     start_nodes = mesh.get_nodes_by_function(check_node_by_coordinate, 0, 0.0)
     end_nodes = mesh.get_nodes_by_function(check_node_by_coordinate, 0, length)
-    return_set["start"] = GeometrySet(mpy.geo.point, nodes=start_nodes)
-    return_set["end"] = GeometrySet(mpy.geo.point, nodes=end_nodes)
-    return_set["all"] = GeometrySet(mpy.geo.line, nodes=mesh.get_global_nodes())
+    return_set["start"] = GeometrySet(start_nodes)
+    return_set["end"] = GeometrySet(end_nodes)
+    return_set["all"] = GeometrySet(mesh.elements)
     return return_set

@@ -46,12 +46,12 @@ from .function import Function
 from .material import Material
 from .node import Node, NodeCosserat
 from .element import Element
-from .geometry_set import GeometrySet
+from .geometry_set import GeometrySetBase, GeometrySet
 from .container import GeometryName, GeometrySetContainer, BoundaryConditionContainer
 from .boundary_condition import BoundaryConditionBase
 from .coupling import Coupling
 from .vtk_writer import VTKWriter
-from .utility import find_close_nodes, get_node
+from .utility import find_close_nodes, get_single_node
 from .geometric_search import find_close_points, point_partners_to_partner_indices
 
 
@@ -96,7 +96,7 @@ class Mesh(object):
                 self.add_node(add_item, **kwargs)
             elif isinstance(add_item, Element):
                 self.add_element(add_item, **kwargs)
-            elif isinstance(add_item, GeometrySet):
+            elif isinstance(add_item, GeometrySetBase):
                 self.add_geometry_set(add_item, **kwargs)
             elif isinstance(add_item, GeometryName):
                 self.add_geometry_name(add_item, **kwargs)
@@ -198,8 +198,7 @@ class Mesh(object):
         coupling_sets: bool
             If this is true, also sets for couplings will be added.
         link_nodes: bool
-            If a link to the geometry sets should be added to each connected
-            node (this option is mainly for vtk output).
+            If a link to the geometry sets should be added to each connected node
         """
 
         if link_nodes:
@@ -232,12 +231,10 @@ class Mesh(object):
                 geometry_set.n_global = i + 1
 
                 if link_nodes and not geometry_set.is_dat:
-                    for node in geometry_set:
-                        node.node_sets_link.append(geometry_set)
+                    geometry_set.link_to_nodes()
 
         # Set the global value for digits in the VTK output.
         if link_nodes:
-
             # Get highest number of node_sets.
             max_sets = max([len(geometry_list) for geometry_list in mesh_sets.values()])
 
@@ -259,21 +256,6 @@ class Mesh(object):
         for node in self.nodes:
             if not node.is_dat:
                 node.mesh = self
-
-        # Add a link to the couplings. For now the implementation only allows
-        # one coupling per node.
-        for coupling_type in [mpy.bc.point_coupling, mpy.bc.point_coupling_penalty]:
-            if (coupling_type, mpy.geo.point) in self.boundary_conditions.keys():
-                for coupling in self.boundary_conditions[coupling_type, mpy.geo.point]:
-                    if not coupling.is_dat:
-                        for node in coupling.geometry_set.nodes:
-                            if node.coupling_link is None:
-                                node.coupling_link = coupling
-                            else:
-                                raise ValueError(
-                                    "It is currently not possible to "
-                                    + "add more than one coupling to a node."
-                                )
 
     def get_global_nodes(
         self, *, nodes=None, include_solid_nodes=False, middle_nodes=True
@@ -648,9 +630,11 @@ class Mesh(object):
             # Check if there are nodes with the same rotation. If there are the
             # nodes are reused, and no coupling is inserted.
 
-            # Set the links to all nodes in the mesh.
+            # Set the links to all nodes in the mesh. In this case we have to use
+            # "all_nodes" since we also have to replace nodes that are in existing
+            # GeometrySetNodes.
             self.unlink_nodes()
-            self.get_unique_geometry_sets(link_nodes=True)
+            self.get_unique_geometry_sets(link_nodes="all_nodes")
             self.set_node_links()
 
             # Go through partner nodes.
@@ -683,7 +667,6 @@ class Mesh(object):
                     # Add the nodes that need to be combined and add the nodes
                     # that will be coupled.
                     for i, partner in enumerate(partners):
-
                         if partner == -1:
                             # This node does not have a partner with the same
                             # rotation.
@@ -769,7 +752,7 @@ class Mesh(object):
                         if value:
                             min_max_nodes.append(beam_nodes[index])
                     geometry["{}_{}".format(direction, text)] = GeometrySet(
-                        mpy.geo.point, min_max_nodes
+                        min_max_nodes
                     )
         return geometry
 
@@ -855,7 +838,9 @@ class Mesh(object):
         vtk_writer_solid = VTKWriter()
 
         # Get the set numbers of the mesh
-        self.get_unique_geometry_sets(coupling_sets=coupling_sets, link_nodes=True)
+        self.get_unique_geometry_sets(
+            coupling_sets=coupling_sets, link_nodes="all_nodes"
+        )
 
         if overlapping_elements:
             # Check for overlapping elements.
