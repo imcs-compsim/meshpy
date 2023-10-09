@@ -1,9 +1,10 @@
 // -----------------------------------------------------------------------------
 // This input file was created with MeshPy.
-// Copyright (c) 2021 Ivo Steinbrecher
-//            Institute for Mathematics and Computer-Based Simulation
-//            Universitaet der Bundeswehr Muenchen
-//            https://www.unibw.de/imcs-en
+// Copyright (c) 2018-2023
+//     Ivo Steinbrecher
+//     Institute for Mathematics and Computer-Based Simulation
+//     Universitaet der Bundeswehr Muenchen
+//     https://www.unibw.de/imcs-en
 // -----------------------------------------------------------------------------
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_BeamKirchhoffTorsionFreeElastHyper YOUNG 100000000.0 DENS 10 CROSSAREA 3.141592653589793e-06 MOMIN 7.853981633974485e-13

@@ -1,9 +1,10 @@
 // -----------------------------------------------------------------------------
 // This input file was created with MeshPy.
-// Copyright (c) 2021 Ivo Steinbrecher
-//            Institute for Mathematics and Computer-Based Simulation
-//            Universitaet der Bundeswehr Muenchen
-//            https://www.unibw.de/imcs-en
+// Copyright (c) 2018-2023
+//     Ivo Steinbrecher
+//     Institute for Mathematics and Computer-Based Simulation
+//     Universitaet der Bundeswehr Muenchen
+//     https://www.unibw.de/imcs-en
 // -----------------------------------------------------------------------------
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_BeamReissnerElastHyper YOUNG 207.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.031415926535897934 SHEARCORR 1.1 MOMINPOL 0.00015707963267948968 MOMIN2 7.853981633974484e-05 MOMIN3 7.853981633974484e-05

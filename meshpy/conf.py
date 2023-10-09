@@ -4,10 +4,11 @@
 #
 # MIT License
 #
-# Copyright (c) 2021 Ivo Steinbrecher
-#                    Institute for Mathematics and Computer-Based Simulation
-#                    Universitaet der Bundeswehr Muenchen
-#                    https://www.unibw.de/imcs-en
+# Copyright (c) 2018-2023
+#     Ivo Steinbrecher
+#     Institute for Mathematics and Computer-Based Simulation
+#     Universitaet der Bundeswehr Muenchen
+#     https://www.unibw.de/imcs-en
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -196,10 +197,11 @@ class MeshPy(object):
         self.input_file_meshpy_header = [
             "-" * 77,
             "This input file was created with MeshPy.",
-            "Copyright (c) 2021 Ivo Steinbrecher",
-            "           Institute for Mathematics and Computer-Based Simulation",
-            "           Universitaet der Bundeswehr Muenchen",
-            "           https://www.unibw.de/imcs-en",
+            "Copyright (c) 2018-2023",
+            "    Ivo Steinbrecher",
+            "    Institute for Mathematics and Computer-Based Simulation",
+            "    Universitaet der Bundeswehr Muenchen",
+            "    https://www.unibw.de/imcs-en",
             "-" * 77,
         ]
 
