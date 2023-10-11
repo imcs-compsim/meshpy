@@ -288,6 +288,10 @@ class InputFile(Mesh):
             mpy.bc.beam_to_solid_surface_contact,
             mpy.geo.surface,
         ): "BEAM INTERACTION/BEAM TO SOLID SURFACE CONTACT SURFACE",
+        (
+            mpy.bc.beam_to_beam_contact,
+            mpy.geo.line,
+        ): "BEAM INTERACTION/BEAM TO BEAM CONTACT CONDITIONS",
         (mpy.bc.point_coupling, mpy.geo.point): "DESIGN POINT COUPLING CONDITIONS",
         (
             mpy.bc.point_coupling_penalty,

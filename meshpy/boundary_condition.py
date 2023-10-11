@@ -86,6 +86,7 @@ class BoundaryConditionBase(BaseMeshItem):
             or bc_key is mpy.bc.beam_to_solid_surface_meshtying
             or bc_key is mpy.bc.beam_to_solid_surface_contact
             or bc_key is mpy.bc.beam_to_solid_volume_meshtying
+            or bc_key is mpy.bc.beam_to_beam_contact
         ):
             # Normal boundary condition (including beam-to-solid conditions).
             return BoundaryCondition(
