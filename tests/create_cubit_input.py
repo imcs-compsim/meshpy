@@ -148,7 +148,7 @@ def create_tube_cubit():
         NAME                            Structure_Solver
         SOLVER                          UMFPACK
         ------------------------------------------------------------------MATERIALS
-        MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0e+09 NUE 0.0 DENS 7.80E-6 THEXPANS 0.0
+        MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0e+09 NUE 0.0 DENS 7.80E-6
         ---------------------------------------------------------------------FUNCT1
         COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME cos(2*pi*t)
         -----------------------------------------------------------------FUNCT2
@@ -196,7 +196,7 @@ def create_tube_tutorial(file_path):
     # Set header.
     cubit.head = """
         ------------------------------------------------------------------MATERIALS
-        MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0 NUE 0 DENS 0 THEXPANS 0
+        MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0 NUE 0 DENS 0
         """
 
     # Export mesh.

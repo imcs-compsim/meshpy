@@ -49,7 +49,7 @@ USE_ABSOLUTE_POSITIONS                yes
 TRIAD_VISUALIZATIONPOINT              yes
 STRAINS_GAUSSPOINT                    yes
 -----------------------------------------------------------------------MATERIALS
-MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0 NUE 0 DENS 0 THEXPANS 0
+MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0 NUE 0 DENS 0
 MAT 2 MAT_BeamReissnerElastHyper YOUNG 1.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.0012566370614359172 SHEARCORR 1 MOMINPOL 2.5132741228718345e-07 MOMIN2 1.2566370614359172e-07 MOMIN3 1.2566370614359172e-07
 --------------------------------------------------------------------------FUNCT1
 COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t
