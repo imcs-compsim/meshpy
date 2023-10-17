@@ -56,11 +56,6 @@ COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME cos(2*pi*t)
 COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME sin(2*pi*t)
 
 
-------------------------------------------------DESIGN DESCRIPTION
-NDPOINT 0
-NDLINE  0
-NDSURF  2
-NDVOL   0
 -------------------------------------DESIGN SURF DIRICH CONDITIONS
 DSURF  2
 // fix

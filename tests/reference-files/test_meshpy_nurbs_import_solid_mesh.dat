@@ -17,11 +17,6 @@ DLINE                           0
 DLINE                           0
 -----------------------------------------------DESIGN VOL NEUMANN CONDITIONS
 DVOL                            0
---------------------------------------------------------DESIGN DESCRIPTION
-NDPOINT                           24
-NDLINE                            36
-NDSURF                            18
-NDVOL                             3
 -------------------------------------------------------DNODE-NODE TOPOLOGY
 NODE            1   DNODE   1
 NODE            3   DNODE   2

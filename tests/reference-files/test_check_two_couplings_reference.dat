@@ -8,11 +8,6 @@
 // -----------------------------------------------------------------------------
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_BeamReissnerElastHyper YOUNG -1.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 3.141592653589793 SHEARCORR 1 MOMINPOL 1.5707963267948966 MOMIN2 0.7853981633974483 MOMIN3 0.7853981633974483
---------------------------------------------------------------DESIGN DESCRIPTION
-NDPOINT 2
-NDLINE 0
-NDSURF 0
-NDVOL 0
 ------------------------------------------------DESIGN POINT COUPLING CONDITIONS
 DPOINT 2
 E 1 - NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0

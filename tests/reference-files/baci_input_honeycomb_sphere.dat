@@ -83,11 +83,6 @@ DOMAINBOUNDINGBOX               -100 -100 -100 100 100 100
 Outer Iteration                 = Yes
 Inner Iteration                 = No
 Outer Iteration StatusTest      = No
--------------------------------------------------DESIGN DESCRIPTION
-NDPOINT 1
-NDLINE  0
-NDSURF  0
-NDVOL   0
 ------------------------------------DESIGN POINT DIRICH CONDITIONS
 DPOINT 1
 E 1 - NUMDOF 3 ONOFF 1 1 1 VAL 0.0 -10.0 0.0 FUNCT 0 1 0

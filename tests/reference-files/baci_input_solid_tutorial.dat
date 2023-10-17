@@ -12,11 +12,6 @@ DIM           3
 MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0 NUE 0 DENS 0 THEXPANS 0
 
 
-------------------------------------------------DESIGN DESCRIPTION
-NDPOINT 0
-NDLINE  0
-NDSURF  2
-NDVOL   0
 -------------------------------------DESIGN SURF DIRICH CONDITIONS
 DSURF  2
 // fix
