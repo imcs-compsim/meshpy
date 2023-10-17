@@ -57,13 +57,8 @@ NAME                                  Structure_Solver
 SOLVER                                UMFPACK
 -----------------------------------------------------------------------MATERIALS
 // mat comment to keep
-MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0e+09 NUE 0.0 DENS 7.80E-6 THEXPANS 0.0
+MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0e+09 NUE 0.0 DENS 7.80E-6
 material
---------------------------------------------------------------DESIGN DESCRIPTION
-NDPOINT 2
-NDLINE 0
-NDSURF 2
-NDVOL 0
 --------------------------------------------------DESIGN POINT DIRICH CONDITIONS
 DPOINT 1
 E 1 - test

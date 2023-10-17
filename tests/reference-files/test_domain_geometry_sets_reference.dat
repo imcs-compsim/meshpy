@@ -13,11 +13,6 @@ INTERVALS       48 16 16
 ELEMENTS        FLUID HEX8 MAT 1 NA Euler
 PARTITION                             structured
 -----------------------------------------------------------------------MATERIALS
---------------------------------------------------------------DESIGN DESCRIPTION
-NDPOINT 0
-NDLINE 1
-NDSURF 1
-NDVOL 0
 -------------------------------------------------------------DLINE-NODE TOPOLOGY
 EDGE fluid y+ z+ DLINE 1
 -------------------------------------------------------------DSURF-NODE TOPOLOGY

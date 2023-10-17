@@ -673,7 +673,12 @@ class InputFile(Mesh):
                 input_file.write("\n")
 
     def get_dat_lines(
-        self, header=True, dat_header=True, add_script_to_header=True, check_nox=True
+        self,
+        header=True,
+        dat_header=True,
+        add_script_to_header=True,
+        check_nox=True,
+        design_description=False,
     ):
         """
         Return the lines for the input file for the whole object.
@@ -689,6 +694,10 @@ class InputFile(Mesh):
             file. This is only in affect when dat_header==True.
         check_nox: bool
             If this is true, an error will be thrown if no nox file is set.
+        design_description: bool
+            If the design description should be output. This option exists for
+            backwards compatibility. The design description field in BACI was made
+            obsolete in October 2023.
         """
 
         # Perform some checks on the mesh.
@@ -803,11 +812,12 @@ class InputFile(Mesh):
             lines.extend(funct.get_dat_lines())
 
         # Add the design description.
-        lines.append(get_section_string("DESIGN DESCRIPTION"))
-        lines.append("NDPOINT {}".format(len(mesh_sets[mpy.geo.point])))
-        lines.append("NDLINE {}".format(len(mesh_sets[mpy.geo.line])))
-        lines.append("NDSURF {}".format(len(mesh_sets[mpy.geo.surface])))
-        lines.append("NDVOL {}".format(len(mesh_sets[mpy.geo.volume])))
+        if design_description:
+            lines.append(get_section_string("DESIGN DESCRIPTION"))
+            lines.append("NDPOINT {}".format(len(mesh_sets[mpy.geo.point])))
+            lines.append("NDLINE {}".format(len(mesh_sets[mpy.geo.line])))
+            lines.append("NDSURF {}".format(len(mesh_sets[mpy.geo.surface])))
+            lines.append("NDVOL {}".format(len(mesh_sets[mpy.geo.volume])))
 
         # If there are couplings in the mesh, set the link between the nodes
         # and elements, so the couplings can decide which DOFs they couple,

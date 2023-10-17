@@ -1503,6 +1503,25 @@ class TestMeshpy(unittest.TestCase):
             input_file.get_string(header=False),
         )
 
+    def test_beam_to_solid_conditions_with_design_description(self):
+        """
+        Create beam-to-solid input conditions with the old design description section in BACI
+        """
+
+        # Create input file.
+        input_file = self.create_beam_to_solid_conditions_model()
+
+        # Compare with the reference file.
+        compare_strings(
+            self,
+            "test_meshpy_btsvm_coupling",
+            os.path.join(
+                testing_input,
+                "test_meshpy_btsvm_coupling_design_description_reference.dat",
+            ),
+            input_file.get_string(header=False, design_description=True),
+        )
+
     def test_beam_to_solid_conditions_full(self):
         """
         Create beam-to-solid input conditions with full import.

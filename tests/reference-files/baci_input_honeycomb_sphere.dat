@@ -52,10 +52,10 @@ SOLVER                          UMFPACK
 REPARTITIONSTRATEGY             Everydt
 ----------------------------------------------------------------BEAM INTERACTION/BEAM TO SPHERE CONTACT
 STRATEGY                        penalty
+PENALTY_PARAMETER               1e1
 ----------------------------------------------------------------BEAM CONTACT
 MODELEVALUATOR                  Standard
 BEAMS_STRATEGY                  Penalty
-BEAMS_BTSPH_PENALTYPARAM        1e1
 
 // needed only for beam-to-beam contact
 BEAMS_BTBPENALTYPARAM           0.0
@@ -75,7 +75,6 @@ BEAMS_MAXDELTADISSCALEFAC       -1   //10000
 BEAMS_OCTREE                    none //octree_spherical
 BEAMS_ADDITEXT                  Yes
 BEAMS_EXTVAL                    0.01
-BEAMS_BTSPH                     Yes
 --------------------------------------------------------------------BINNING STRATEGY
 BIN_SIZE_LOWER_BOUND            20
 DOMAINBOUNDINGBOX               -100 -100 -100 100 100 100
@@ -83,11 +82,6 @@ DOMAINBOUNDINGBOX               -100 -100 -100 100 100 100
 Outer Iteration                 = Yes
 Inner Iteration                 = No
 Outer Iteration StatusTest      = No
--------------------------------------------------DESIGN DESCRIPTION
-NDPOINT 1
-NDLINE  0
-NDSURF  0
-NDVOL   0
 ------------------------------------DESIGN POINT DIRICH CONDITIONS
 DPOINT 1
 E 1 - NUMDOF 3 ONOFF 1 1 1 VAL 0.0 -10.0 0.0 FUNCT 0 1 0

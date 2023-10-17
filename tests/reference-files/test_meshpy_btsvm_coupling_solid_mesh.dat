@@ -9,11 +9,6 @@ created by pre_exodus
 DIM           3
 
 
-------------------------------------------------DESIGN DESCRIPTION
-NDPOINT 1
-NDLINE  0
-NDSURF  1
-NDVOL   1
 ----------------------------------DESIGN POINT COUPLING CONDITIONS
 DPOINT 1
 E 1 - NUMDOF 3 ONOFF 1 2 3
