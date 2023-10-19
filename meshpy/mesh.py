@@ -76,7 +76,7 @@ class Mesh(object):
         """
         Add an item to this mesh, depending on its type. If an list is given
         each list element is added with this function. If multiple arguments
-        are given, each one is individually added with this funciton.Keyword
+        are given, each one is individually added with this function. Keyword
         arguments are passed through to the adding function.
         """
 
@@ -615,7 +615,7 @@ class Mesh(object):
             or coupling_type == mpy.bc.point_coupling_penalty
         ):
             raise ValueError(
-                "Only coupling conditions can be applied in " '"couple_nodes"!'
+                "Only coupling conditions can be applied in 'couple_nodes'!"
             )
 
         # Get the nodes that should be checked for coupling. Middle nodes are
