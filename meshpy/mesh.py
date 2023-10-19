@@ -67,7 +67,6 @@ class Mesh(object):
 
         self.nodes = []
         self.elements = []
-        self.elements_fluid = []
         self.materials = []
         self.functions = []
         self.geometry_sets = GeometrySetContainer()

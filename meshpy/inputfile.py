@@ -341,6 +341,9 @@ class InputFile(Mesh):
         self.description = description
         self.dat_header = []
 
+        # BACI also supports fluid elements, we keep them in a separated list here
+        self.elements_fluid = []
+
         # Contents of NOX xml file.
         self.nox_xml = None
         self._nox_xml_file = None
