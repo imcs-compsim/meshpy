@@ -99,8 +99,8 @@ jobs:
           # Build the binaries
           mkdir -p build/arborx
           cd build/arborx
-          cmake ../../meshpy/geometric_search/src
-          make
+          cmake ../../meshpy/geometric_search/src -G Ninja
+          ninja
           cd $MESHPY_PATH
           # Create the virtual environment
           ${PYTHON_EXE} -m venv ${PYTHON_VENV}
