@@ -225,8 +225,7 @@ class Mesh(object):
             for i, geometry_set in enumerate(mesh_sets[key]):
                 # Add global indices to the geometry set.
                 geometry_set.n_global = i + 1
-
-                if link_nodes and not geometry_set.is_dat:
+                if link_nodes:
                     geometry_set.link_to_nodes()
 
         # Set the global value for digits in the VTK output.

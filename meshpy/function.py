@@ -33,14 +33,14 @@ This module implements a basic class to manage functions in the baci input file.
 """
 
 # Meshpy modules.
-from .base_mesh_item import BaseMeshItem
+from .base_mesh_item import BaseMeshItemFull
 
 
-class Function(BaseMeshItem):
+class Function(BaseMeshItemFull):
     """Holds information for a function."""
 
     def __init__(self, data):
-        super().__init__(data=data, is_dat=False)
+        super().__init__(data=data)
 
     def __deepcopy__(self, memo):
         """

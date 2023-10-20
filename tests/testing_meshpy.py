@@ -59,7 +59,6 @@ from meshpy import (
     Beam3eb,
     InputSection,
     Beam3k,
-    BaseMeshItem,
     set_header_static,
     set_beam_to_solid_meshtying,
     set_runtime_output,

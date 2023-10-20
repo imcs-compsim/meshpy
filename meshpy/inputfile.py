@@ -43,7 +43,7 @@ from _collections import OrderedDict
 from .conf import mpy
 from .container import GeometrySetContainer, BoundaryConditionContainer
 from .mesh import Mesh
-from .base_mesh_item import BaseMeshItem
+from .base_mesh_item import BaseMeshItem, BaseMeshItemFull
 from .node import Node
 from .element import Element
 from .boundary_condition import BoundaryConditionBase
@@ -607,7 +607,7 @@ class InputFile(Mesh):
                     else:
                         add_line(self.dat_elements_fluid, line)
             elif section_name.startswith("FUNCT"):
-                self.functions.append(BaseMeshItem(section_data))
+                self.functions.append(BaseMeshItemFull(section_data))
             elif section_name in self.boundary_condition_names.values():
                 add_bc(section_name, section_data_comment)
             elif section_name.endswith("TOPOLOGY"):
