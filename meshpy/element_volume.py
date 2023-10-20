@@ -50,7 +50,7 @@ class VolumeElement(Element):
     vtk_topology = None
 
     def __init__(self, nodes=None, dat_pre_nodes="", dat_post_nodes="", **kwargs):
-        super().__init__(nodes=nodes, material=None, is_dat=True, **kwargs)
+        super().__init__(nodes=nodes, material=None, **kwargs)
         self.dat_pre_nodes = dat_pre_nodes
         self.dat_post_nodes = dat_post_nodes
 

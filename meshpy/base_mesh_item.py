@@ -135,12 +135,6 @@ class BaseMeshItem(object):
         return_list.extend(data)
         return return_list
 
-    def add_element_specific_section(self, sections):
-        """Add element specific section (e.g. STRUCTURE KNOTVECTORS for
-        NURBS elements) to the sections dictionary"""
-
-        pass
-
     def _get_dat(self, **kwargs):
         """Return the content of this object as either a list or a str."""
         return self.data

@@ -247,9 +247,8 @@ class Mesh(object):
         a link to this mesh.
         """
         for element in self.elements:
-            if not element.is_dat:
-                for node in element.nodes:
-                    node.element_link.append(element)
+            for node in element.nodes:
+                node.element_link.append(element)
         for node in self.nodes:
             node.mesh = self
 
@@ -494,9 +493,7 @@ class Mesh(object):
                     # To be exactly sure, we could check the rotations here,
                     # i.e. if they are also in plane.
                     element_warning = []
-                    for i_element, element in enumerate(
-                        [e for e in self.elements if not e.is_dat]
-                    ):
+                    for i_element, element in enumerate(self.elements):
                         element_coordinates = np.zeros([len(element.nodes), 3])
                         for i_node, node in enumerate(element.nodes):
                             element_coordinates[i_node, :] = node.coordinates

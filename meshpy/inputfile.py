@@ -908,8 +908,10 @@ class InputFile(Mesh):
                 )
 
         # Add additional element sections (e.g. STRUCTURE KNOTVECTORS)
+        # We only need to to this on the "real" elements as the imported ones already have their
+        # dat sections.
         element_sections = OrderedDict()
-        for element in all_elements:
+        for element in self.elements:
             element.add_element_specific_section(element_sections)
 
         for section in element_sections.values():
