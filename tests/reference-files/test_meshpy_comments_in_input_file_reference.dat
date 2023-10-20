@@ -58,7 +58,7 @@ SOLVER                                UMFPACK
 -----------------------------------------------------------------------MATERIALS
 // mat comment to keep
 MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0e+09 NUE 0.0 DENS 7.80E-6
-material
+MAT 2 MAT_BeamReissnerElastHyper YOUNG -1.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 3.141592653589793 SHEARCORR 1 MOMINPOL 1.5707963267948966 MOMIN2 0.7853981633974483 MOMIN3 0.7853981633974483
 --------------------------------------------------DESIGN POINT DIRICH CONDITIONS
 DPOINT 1
 E 1 - test

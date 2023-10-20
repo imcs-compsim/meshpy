@@ -329,7 +329,7 @@ class TestMeshpy(unittest.TestCase):
         mesh = InputFile(dat_file=solid_file)
 
         # Add one element with BCs.
-        mat = BaseMeshItem("material")
+        mat = MaterialReissner()
         sets = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 2, 3])
         mesh.add(BoundaryCondition(sets["start"], "test", bc_type=mpy.bc.dirichlet))
         mesh.add(BoundaryCondition(sets["end"], "test", bc_type=mpy.bc.neumann))
@@ -558,7 +558,7 @@ class TestMeshpy(unittest.TestCase):
         input_file = InputFile()
 
         # Add material and functions.
-        mat = BaseMeshItem("material")
+        mat = MaterialReissner()
 
         # Set parameters for the helix.
         R = 2.0
@@ -621,7 +621,7 @@ class TestMeshpy(unittest.TestCase):
         input_file = InputFile()
 
         # Add material and functions.
-        mat = BaseMeshItem("material")
+        mat = MaterialReissner()
 
         # Set parameters for the sin.
         n_el = 8
@@ -703,7 +703,7 @@ class TestMeshpy(unittest.TestCase):
         input_file = InputFile()
 
         # Add material and functions.
-        mat = BaseMeshItem("material")
+        mat = MaterialReissner()
 
         # Set parameters for the line.
         L = 1.1
@@ -2238,7 +2238,7 @@ class TestMeshpy(unittest.TestCase):
 
         mesh = InputFile()
 
-        mat = BaseMeshItem("material")
+        mat = MaterialReissner()
         sets = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 2, 3])
         mesh.add(BoundaryCondition(sets["line"], "test", bc_type="USER SECTION FOR BC"))
 
