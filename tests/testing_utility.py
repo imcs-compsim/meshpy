@@ -160,7 +160,9 @@ def compare_test_result(
     reference_file_name = self._testMethodName
     if additional_identifier is not None:
         reference_file_name += f"_{additional_identifier}"
-    reference_file_name += "_reference." + extension
+    reference_file_name += "_reference"
+    if extension is not None:
+        reference_file_name += "." + extension
     reference_file_path = os.path.join(testing_input, reference_file_name)
 
     # Compare the results

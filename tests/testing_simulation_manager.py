@@ -57,7 +57,7 @@ from testing_utility import (
     testing_temp,
     get_baci_path,
     testing_input,
-    compare_strings,
+    compare_test_result,
 )
 
 
@@ -218,7 +218,7 @@ class TestSimulationManager(unittest.TestCase):
         else:
             self.skipTest("Tests with slurm are not executed on a workstation")
 
-    def test_batch_file(self):
+    def test_simulation_manager_batch_file(self):
         """
         Test that the created batch file is correct.
         """
@@ -237,11 +237,11 @@ class TestSimulationManager(unittest.TestCase):
             feature="skylake",
         )
         sim.create_batch_file(testing_temp, "batch_name")
-        compare_strings(
+        compare_test_result(
             self,
-            "test_batch_file",
             os.path.join(testing_temp, "batch_name"),
-            os.path.join(testing_input, "batch_name_reference_1"),
+            extension=None,
+            additional_identifier=1,
         )
 
         sim = Simulation(
@@ -254,11 +254,11 @@ class TestSimulationManager(unittest.TestCase):
             feature="skylake",
         )
         sim.create_batch_file(testing_temp, "batch_name")
-        compare_strings(
+        compare_test_result(
             self,
-            "test_batch_file",
             os.path.join(testing_temp, "batch_name"),
-            os.path.join(testing_input, "batch_name_reference_2"),
+            extension=None,
+            additional_identifier=2,
         )
 
 
