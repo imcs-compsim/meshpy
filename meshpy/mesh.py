@@ -694,8 +694,7 @@ class Mesh(object):
 
         # Loop over elements.
         for element in self.elements:
-            if not element.is_dat:
-                element.display_python(ax)
+            element.display_python(ax)
 
         # Finish plot.
         ax.set_aspect("auto")
