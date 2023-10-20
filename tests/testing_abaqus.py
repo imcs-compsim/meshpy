@@ -52,7 +52,7 @@ from meshpy.abaqus import (
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 
 # Testing imports
-from testing_utility import testing_input, compare_strings
+from testing_utility import compare_test_result
 
 
 class TestAbaqusMeshpy(unittest.TestCase):
@@ -100,14 +100,12 @@ class TestAbaqusMeshpy(unittest.TestCase):
         mesh.add(end_set)
 
         input_file = AbaqusInputFile(mesh)
-        ref_file = os.path.join(testing_input, "test_abaqus_helix_reference.inp")
-        compare_strings(
+        compare_test_result(
             self,
-            "test_abaqus_helix",
-            ref_file,
             input_file.get_input_file_string(
                 AbaqusBeamNormalDefinition.smallest_rotation_of_triad_at_first_node
             ),
+            extension="inp",
         )
 
     def test_abaqus_frame(self):
@@ -133,14 +131,12 @@ class TestAbaqusMeshpy(unittest.TestCase):
         mesh.add(fix_set, load_set)
 
         input_file = AbaqusInputFile(mesh)
-        ref_file = os.path.join(testing_input, "test_abaqus_frame_reference.inp")
-        compare_strings(
+        compare_test_result(
             self,
-            "test_abaqus_frame",
-            ref_file,
             input_file.get_input_file_string(
                 AbaqusBeamNormalDefinition.smallest_rotation_of_triad_at_first_node
             ),
+            extension="inp",
         )
 
 
