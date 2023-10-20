@@ -344,8 +344,6 @@ class InputFile(Mesh):
         self.dat_nodes = []
         self.dat_elements = []
         self.dat_elements_fluid = []
-        self.dat_materials = []
-        self.dat_functions = []
         self.dat_geometry_sets = GeometrySetContainer()
         self.dat_boundary_conditions = BoundaryConditionContainer()
 
