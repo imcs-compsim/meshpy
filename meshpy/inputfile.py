@@ -316,14 +316,12 @@ class InputFile(Mesh):
         "END",
     ]
 
-    def __init__(self, maintainer="", description=None, dat_file=None, cubit=None):
+    def __init__(self, description=None, dat_file=None, cubit=None):
         """
         Initialize the input file.
 
         Args
         ----
-        maintainer: str
-            Name of person to maintain this input file.
         description: srt
             Will be shown in the input file as description of the system.
         dat_file: str
@@ -337,7 +335,6 @@ class InputFile(Mesh):
 
         super().__init__()
 
-        self.maintainer = maintainer
         self.description = description
         self.dat_header = []
 
@@ -921,8 +918,8 @@ class InputFile(Mesh):
         end_text = None
 
         # Header containing model information.
-        model_header = "// Maintainer: {}\n// Date:       {}\n".format(
-            self.maintainer, datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        model_header = "// Date:       {}\n".format(
+            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         )
         if self.description:
             model_header += "// Description: {}\n".format(self.description)
