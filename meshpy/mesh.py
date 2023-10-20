@@ -209,18 +209,17 @@ class Mesh(object):
         # Add sets from boundary conditions.
         for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
             for bc in bc_list:
-                if not bc.is_dat:
-                    # Check if sets from couplings should be added.
-                    is_coupling = (
-                        bc_key == mpy.bc.point_coupling
-                        or bc_key == mpy.bc.point_coupling_penalty
-                    )
-                    if (is_coupling and coupling_sets) or (not is_coupling):
-                        # Only add set if it is not already in the container.
-                        # For example if multiple Neumann boundary conditions
-                        # are applied on the same node set.
-                        if bc.geometry_set not in mesh_sets[geom_key]:
-                            mesh_sets[geom_key].append(bc.geometry_set)
+                # Check if sets from couplings should be added.
+                is_coupling = (
+                    bc_key == mpy.bc.point_coupling
+                    or bc_key == mpy.bc.point_coupling_penalty
+                )
+                if (is_coupling and coupling_sets) or (not is_coupling):
+                    # Only add set if it is not already in the container.
+                    # For example if multiple Neumann boundary conditions
+                    # are applied on the same node set.
+                    if bc.geometry_set not in mesh_sets[geom_key]:
+                        mesh_sets[geom_key].append(bc.geometry_set)
 
         for key in mesh_sets.keys():
             for i, geometry_set in enumerate(mesh_sets[key]):

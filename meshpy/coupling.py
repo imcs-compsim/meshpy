@@ -50,7 +50,8 @@ class Coupling(BoundaryConditionBase):
         coupling_type,
         coupling_dof_type,
         check_overlapping_nodes=True,
-        **kwargs
+        check_at_init=True,
+        **kwargs,
     ):
         """
         Initialize this object.
@@ -67,6 +68,10 @@ class Coupling(BoundaryConditionBase):
         check_overlapping_nodes: bool
             If all nodes of this coupling condition have to be at the same
             physical position.
+        check_at_init: bool
+            If the previous check should be performed at initialization. This is required
+            when importing a coupling from a dat file as the nodes themselves are not build
+            up when the coupling is read.
         """
 
         if isinstance(geometry_set, int):
@@ -94,8 +99,9 @@ class Coupling(BoundaryConditionBase):
         self.coupling_dof_type = coupling_dof_type
         self.check_overlapping_nodes = check_overlapping_nodes
 
-        # Perform the checks on this boundary condition.
-        self.check()
+        if check_at_init:
+            # Perform the checks on this boundary condition.
+            self.check()
 
     def check(self):
         """
@@ -104,7 +110,7 @@ class Coupling(BoundaryConditionBase):
         come from a dat file).
         """
 
-        if self.is_dat or (not self.check_overlapping_nodes):
+        if not self.check_overlapping_nodes:
             return
         else:
             nodes = self.geometry_set.get_points()
