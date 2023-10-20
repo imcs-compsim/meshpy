@@ -44,7 +44,7 @@ sys.path.insert(
 from tutorial import meshpy_tutorial
 
 # Import testing utilities.
-from testing_utility import testing_temp, testing_input, compare_strings
+from testing_utility import testing_temp, compare_test_result
 
 
 class Testtutorial(unittest.TestCase):
@@ -56,13 +56,9 @@ class Testtutorial(unittest.TestCase):
         """
 
         input_file = meshpy_tutorial(testing_temp)
-        input_file.write_input_file(
-            os.path.join(testing_temp, "tutorial.dat"), header=False, dat_header=False
-        )
-
         tutorial_file = os.path.join(testing_temp, "tutorial.dat")
-        ref_file = os.path.join(testing_input, "test_tutorial_reference.dat")
-        compare_strings(self, "test_tutorial", ref_file, tutorial_file)
+        input_file.write_input_file(tutorial_file, header=False, dat_header=False)
+        compare_test_result(self, tutorial_file)
 
 
 if __name__ == "__main__":
