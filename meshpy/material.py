@@ -37,14 +37,14 @@ file.
 import numpy as np
 
 # Meshpy modules.
-from .base_mesh_item import BaseMeshItem
+from .base_mesh_item import BaseMeshItemFull
 
 
-class Material(BaseMeshItem):
+class Material(BaseMeshItemFull):
     """Base class for all materials."""
 
-    def __init__(self, data=None, is_dat=False, **kwargs):
-        super().__init__(data=data, is_dat=is_dat, **kwargs)
+    def __init__(self, data=None, **kwargs):
+        super().__init__(data=data, **kwargs)
 
     def __deepcopy__(self, memo):
         """

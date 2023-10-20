@@ -37,18 +37,18 @@ import warnings
 
 # Meshpy modules.
 from .conf import mpy
-from .base_mesh_item import BaseMeshItem
+from .base_mesh_item import BaseMeshItemFull
 from .geometry_set import GeometrySet
 from .utility import find_close_nodes
 
 
-class BoundaryConditionBase(BaseMeshItem):
+class BoundaryConditionBase(BaseMeshItemFull):
     """
     This is a base object, which represents one boundary condition in the input
     file, e.g. Dirichlet, Neumann, coupling or beam-to-solid.
     """
 
-    def __init__(self, geometry_set, bc_type=None, is_dat=False, **kwargs):
+    def __init__(self, geometry_set, bc_type=None, **kwargs):
         """
         Initialize the object.
 
@@ -60,11 +60,9 @@ class BoundaryConditionBase(BaseMeshItem):
             temporary and will be replaced with the GeometrySet object.
         bc_type: mpy.bc
             Type of the boundary condition.
-        is_dat: bool
-            If this object stems from an dat file.
         """
 
-        super().__init__(is_dat=is_dat, **kwargs)
+        super().__init__(**kwargs)
         self.bc_type = bc_type
         self.geometry_set = geometry_set
 
@@ -89,18 +87,19 @@ class BoundaryConditionBase(BaseMeshItem):
         ):
             # Normal boundary condition (including beam-to-solid conditions).
             return BoundaryCondition(
-                int(split[1]) - 1,
-                " ".join(split[3:]),
-                bc_type=bc_key,
-                is_dat=True,
-                **kwargs
+                int(split[1]) - 1, " ".join(split[3:]), bc_type=bc_key, **kwargs
             )
         elif bc_key is mpy.bc.point_coupling:
             # Coupling condition.
             from .coupling import Coupling
 
             return Coupling(
-                int(split[1]) - 1, bc_key, " ".join(split[3:]), is_dat=True, **kwargs
+                int(split[1]) - 1,
+                bc_key,
+                " ".join(split[3:]),
+                check_overlapping_nodes=False,
+                check_at_init=False,
+                **kwargs
             )
         else:
             raise ValueError("Got unexpected boundary condition!")

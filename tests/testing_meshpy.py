@@ -59,7 +59,6 @@ from meshpy import (
     Beam3eb,
     InputSection,
     Beam3k,
-    BaseMeshItem,
     set_header_static,
     set_beam_to_solid_meshtying,
     set_runtime_output,
@@ -74,6 +73,7 @@ from meshpy.element_beam import Beam
 from meshpy.utility import (
     get_single_node,
     get_min_max_coordinates,
+    get_nodal_coordinates,
 )
 
 # Geometry functions.
@@ -283,9 +283,9 @@ class TestMeshpy(unittest.TestCase):
                 r = [1, 2.455, -1.2324]
                 mesh_ref.translate(r)
                 mesh.translate(r)
-                mesh.reflect(2 * (rot_2 * [1, 0, 0]), origin=r, flip=flip)
+                mesh.reflect(2 * (rot_2 * [1, 0, 0]), origin=r, flip_beams=flip)
             else:
-                mesh.reflect(2 * (rot_2 * [1, 0, 0]), flip=flip)
+                mesh.reflect(2 * (rot_2 * [1, 0, 0]), flip_beams=flip)
 
             # Compare the dat files.
             compare_strings(
@@ -343,10 +343,12 @@ class TestMeshpy(unittest.TestCase):
             self, full_name, ref_file, mesh.get_string(header=False).strip()
         )
 
-    def test_mesh_translations_with_solid(self):
-        """Create a line that will be wrapped to a helix."""
+    def test_meshpy_mesh_transformations_with_solid(self):
+        """Test the different mesh transformation methods in combination with solid elements."""
 
-        def base_test_mesh_translations(*, import_full=False, radius=None):
+        def base_test_mesh_translations(
+            *, import_full=False, radius=None, reflect=True
+        ):
             """
             Create the line and wrap it with passing radius to the wrap
             function.
@@ -378,28 +380,45 @@ class TestMeshpy(unittest.TestCase):
             mesh.wrap_around_cylinder(radius=radius)
             mesh.translate([1, 2, 3])
             mesh.rotate(Rotation([1, 2, 3], np.pi * 17.0 / 27.0))
-            mesh.reflect([0.1, -2, 1])
+            if reflect:
+                mesh.reflect([0.1, -2, 1])
 
             # Check the output.
             ref_file = os.path.join(
-                testing_input, "test_meshpy_mesh_translations_with_solid_reference.dat"
+                testing_input,
+                "test_meshpy_mesh_transformations_with_solid_"
+                + ("full" if import_full else "dat")
+                + "_reference.dat",
             )
             compare_strings(
                 self,
-                "test_meshpy_mesh_translations_with_solid",
+                "test_meshpy_mesh_transformations_with_solid",
                 ref_file,
                 mesh.get_string(header=False),
             )
 
         base_test_mesh_translations(import_full=False, radius=None)
         base_test_mesh_translations(import_full=False, radius=0.2)
+        base_test_mesh_translations(import_full=True, radius=0.2, reflect=False)
+
+        # Not specifying or specifying the wrong radius should raise an error
+        # In this case because everything is on one plane ("no" solid nodes in this case)
+        # and we specify the radius
         self.assertRaises(
-            ValueError, base_test_mesh_translations, import_full=False, radius=666
+            ValueError,
+            base_test_mesh_translations,
+            import_full=False,
+            radius=666,
+            reflect=False,
         )
-        base_test_mesh_translations(import_full=True, radius=None)
-        base_test_mesh_translations(import_full=True, radius=0.2)
+        # In this case because we need to specify a radius because with the solid nodes there
+        # is no clear radius
         self.assertRaises(
-            ValueError, base_test_mesh_translations, import_full=True, radius=666
+            ValueError,
+            base_test_mesh_translations,
+            import_full=True,
+            radius=None,
+            reflect=False,
         )
 
     def test_using_fluid_element_section(self):
@@ -519,9 +538,6 @@ class TestMeshpy(unittest.TestCase):
             mesh, Beam3rHerm2Line3, mat, [0, 1, 0], [10, 1, 0], n_el=10
         )
 
-        # Add a dummy node to check that dat file nodes are skipped.
-        mesh.add_node(BaseMeshItem())
-
         nodes = mesh.get_nodes_by_function(get_nodes_at_x, 1.0)
         self.assertTrue(2 == len(nodes))
         for node in nodes:
@@ -589,7 +605,7 @@ class TestMeshpy(unittest.TestCase):
         )
         self.assertLess(
             np.linalg.norm(
-                coordinates_mathematica - input_file.get_global_coordinates()[0]
+                coordinates_mathematica - get_nodal_coordinates(input_file.nodes)
             ),
             mpy.eps_pos,
             "test_meshpy_curve_3d_helix",
@@ -641,7 +657,7 @@ class TestMeshpy(unittest.TestCase):
         )
         self.assertLess(
             np.linalg.norm(
-                coordinates_mathematica - input_file.get_global_coordinates()[0]
+                coordinates_mathematica - get_nodal_coordinates(input_file.nodes)
             ),
             mpy.eps_pos,
             "test_meshpy_curve_2d_sin",

@@ -41,6 +41,7 @@ from ..rotation import Rotation
 from ..mesh import Mesh
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
+from ..utility import get_min_max_nodes
 from .beam_basic_geometry import create_beam_mesh_arc_segment, create_beam_mesh_line
 
 
@@ -360,7 +361,7 @@ def create_beam_mesh_stent(
     mesh_stent.couple_nodes(nodes=stent_nodes)
 
     # Get min and max nodes of the honeycomb.
-    min_max_nodes = mesh_stent.get_min_max_nodes(nodes=stent_nodes)
+    min_max_nodes = get_min_max_nodes(stent_nodes)
 
     # Return the geometry set.
     return_set = GeometryName()

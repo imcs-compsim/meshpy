@@ -42,7 +42,7 @@ from .utility import clean_simulation_directory, flatten
 from .rotation import Rotation
 
 # Mesh items.
-from .base_mesh_item import BaseMeshItem
+from .base_mesh_item import BaseMeshItemString
 from .function import Function
 from .material import (
     MaterialBeam,

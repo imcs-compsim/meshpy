@@ -37,7 +37,7 @@ that are in a mesh.
 class BaseMeshItem(object):
     """Base class for all objects that are related to a mesh."""
 
-    def __init__(self, data=None, is_dat=True, comments=None):
+    def __init__(self, data=None, comments=None):
         """
         Create the object
 
@@ -45,12 +45,10 @@ class BaseMeshItem(object):
         ----
         data: str, list(str)
             Data for this object.
-        is_dat: bool
-            If the object is imported from a *.dat file
+        TODO: comments
         """
 
         self.data = data
-        self.is_dat = is_dat
 
         # Overall index of this item in the mesh.
         self.n_global = None
@@ -83,12 +81,19 @@ class BaseMeshItem(object):
         return_list.extend(data)
         return return_list
 
-    def add_element_specific_section(self, sections):
-        """Add element specific section (e.g. STRUCTURE KNOTVECTORS for
-        NURBS elements) to the sections dictionary"""
-
-        pass
-
     def _get_dat(self, **kwargs):
         """Return the content of this object as either a list or a str."""
         return self.data
+
+
+class BaseMeshItemFull(BaseMeshItem):
+    """Base class for all objects that are related to a mesh and are fully created
+    in MeshPy."""
+
+    pass
+
+
+class BaseMeshItemString(BaseMeshItem):
+    """Base class for all objects that are imported from a dat file as a plain string."""
+
+    pass

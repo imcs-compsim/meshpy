@@ -47,7 +47,6 @@ from .material import (
     MaterialKirchhoff,
     MaterialEulerBernoulli,
     MaterialReissnerElastoplastic,
-    BaseMeshItem,
 )
 
 
@@ -285,7 +284,7 @@ class Beam3rHerm2Line3(Beam):
 
     nodes_create = [[-1, False], [0, True], [1, False]]
     beam_type = mpy.beam.reissner
-    valid_material = [MaterialReissner, MaterialReissnerElastoplastic, BaseMeshItem]
+    valid_material = [MaterialReissner, MaterialReissnerElastoplastic]
 
     coupling_fix_string = "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0"
     coupling_joint_string = "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0"
@@ -316,7 +315,7 @@ class Beam3rLine2Line2(Beam):
 
     nodes_create = [[-1, False], [1, False]]
     beam_type = mpy.beam.reissner
-    valid_material = [MaterialReissner, BaseMeshItem]
+    valid_material = [MaterialReissner]
 
     coupling_fix_string = "NUMDOF 6 ONOFF 1 1 1 1 1 1"
     coupling_joint_string = "NUMDOF 6 ONOFF 1 1 1 0 0 0"
@@ -344,7 +343,7 @@ class Beam3kClass(Beam):
 
     nodes_create = [[-1, False], [0, True], [1, False]]
     beam_type = mpy.beam.kirchhoff
-    valid_material = [MaterialKirchhoff, BaseMeshItem]
+    valid_material = [MaterialKirchhoff]
 
     coupling_fix_string = "NUMDOF 7 ONOFF 1 1 1 1 1 1 0"
     coupling_joint_string = "NUMDOF 7 ONOFF 1 1 1 0 0 0 0"
@@ -411,7 +410,7 @@ class Beam3eb(Beam):
 
     nodes_create = [[-1, False], [1, False]]
     beam_type = mpy.beam.euler_bernoulli
-    valid_material = [MaterialEulerBernoulli, BaseMeshItem]
+    valid_material = [MaterialEulerBernoulli]
 
     def _get_dat(self):
         """Return the line for the input file."""

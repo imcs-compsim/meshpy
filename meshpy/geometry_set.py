@@ -37,12 +37,12 @@ import numpy as np
 
 # Meshpy modules.
 from .conf import mpy
-from .base_mesh_item import BaseMeshItem
+from .base_mesh_item import BaseMeshItemFull
 from .node import Node
 from .element_beam import Beam
 
 
-class GeometrySetBase(BaseMeshItem):
+class GeometrySetBase(BaseMeshItemFull):
     """Base class for a geometry set."""
 
     # Node set names for the input file file.
@@ -147,7 +147,7 @@ class GeometrySet(GeometrySetBase):
         else:
             geometry_type = self._get_geometry_type(geometry)
 
-        super().__init__(geometry_type, is_dat=False, **kwargs)
+        super().__init__(geometry_type, **kwargs)
 
         self.geometry_objects = {}
         for geo in mpy.geo:
@@ -239,9 +239,7 @@ class GeometrySetNodes(GeometrySetBase):
             Node(s) or list of nodes to be added to this geometry set.
         """
 
-        # TODO: Check if the is_dat is ever taken into account, since it is also used for
-        # imported node sets from an external input file.
-        super().__init__(geometry_type, is_dat=False, **kwargs)
+        super().__init__(geometry_type, **kwargs)
         self.nodes = []
         self.add(nodes)
 

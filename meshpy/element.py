@@ -33,14 +33,14 @@ This module implements the class that represents one element in the Mesh.
 """
 
 # Meshpy modules.
-from .base_mesh_item import BaseMeshItem
+from .base_mesh_item import BaseMeshItemFull
 
 
-class Element(BaseMeshItem):
+class Element(BaseMeshItemFull):
     """A base class for an FEM element in the mesh."""
 
-    def __init__(self, nodes=None, material=None, is_dat=False, **kwargs):
-        super().__init__(data=None, is_dat=is_dat, **kwargs)
+    def __init__(self, nodes=None, material=None, **kwargs):
+        super().__init__(data=None, **kwargs)
 
         # List of nodes that are connected to the element.
         if nodes is None:
@@ -144,6 +144,14 @@ class Element(BaseMeshItem):
                 )
             )
 
+    def flip(self):
+        """
+        Reverse the nodes of this element. This is usually used when reflected.
+        """
+        raise NotImplementedError(
+            "The flip method is not implemented for {}".format(self.__class__)
+        )
+
     def replace_node(self, old_node, new_node):
         """Replace old_node with new_node."""
 
@@ -156,6 +164,12 @@ class Element(BaseMeshItem):
             raise ValueError(
                 "The node that should be replaced is not in the current element"
             )
+
+    def add_element_specific_section(self, sections):
+        """Add element specific section (e.g. STRUCTURE KNOTVECTORS for
+        NURBS elements) to the sections dictionary"""
+
+        pass
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
         """
