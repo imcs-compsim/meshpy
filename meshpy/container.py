@@ -39,7 +39,7 @@ from _collections import OrderedDict
 # Meshpy modules.
 from .conf import mpy
 from .geometry_set import GeometrySetBase
-from .base_mesh_item import BaseMeshItem
+from .base_mesh_item import BaseMeshItemString
 from .boundary_condition import BoundaryConditionBase
 
 
@@ -114,7 +114,7 @@ class BoundaryConditionContainer(ContainerBase):
         """Initialize the container and create the default keys in the map."""
         super().__init__(*args, **kwargs)
 
-        self.item_types = [BaseMeshItem, BoundaryConditionBase]
+        self.item_types = [BaseMeshItemString, BoundaryConditionBase]
 
         for bc_key in mpy.bc:
             for geometry_key in mpy.geo:
@@ -131,7 +131,7 @@ class GeometrySetContainer(ContainerBase):
         """Initialize the container and create the default keys in the map."""
         super().__init__(*args, **kwargs)
 
-        self.item_types = [BaseMeshItem, GeometrySetBase]
+        self.item_types = [BaseMeshItemString, GeometrySetBase]
 
         for geometry_key in mpy.geo:
             self[geometry_key] = []

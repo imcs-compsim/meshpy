@@ -43,7 +43,7 @@ from _collections import OrderedDict
 from .conf import mpy
 from .container import GeometrySetContainer, BoundaryConditionContainer
 from .mesh import Mesh
-from .base_mesh_item import BaseMeshItem, BaseMeshItemFull
+from .base_mesh_item import BaseMeshItemString, BaseMeshItemFull
 from .node import Node
 from .element import Element
 from .boundary_condition import BoundaryConditionBase
@@ -512,7 +512,7 @@ class InputFile(Mesh):
                     else:
                         self.dat_boundary_conditions.append(
                             (bc_key, geometry_key),
-                            BaseMeshItem(item, comments=comments),
+                            BaseMeshItemString(item, comments=comments),
                         )
 
             def add_set(section_header, section_data_comment):
@@ -539,7 +539,7 @@ class InputFile(Mesh):
                         )
                     else:
                         self.dat_geometry_sets[geometry_key].append(
-                            BaseMeshItem(dat_list, comments=comments)
+                            BaseMeshItemString(dat_list, comments=comments)
                         )
 
                 if len(section_data_comment) > 0:
@@ -576,7 +576,7 @@ class InputFile(Mesh):
 
             def add_line(self_list, line):
                 """Add the line to self_list, and handle comments."""
-                self_list.append(BaseMeshItem(line[0], comments=line[1]))
+                self_list.append(BaseMeshItemString(line[0], comments=line[1]))
 
             # Check if the section contains mesh data that has to be added to
             # specific lists.
@@ -799,7 +799,7 @@ class InputFile(Mesh):
             # Get the maximum material index in materials imported from a string
             max_material_id = 0
             for material in material_list:
-                if type(material) is BaseMeshItem:
+                if type(material) is BaseMeshItemString:
                     for dat_line in material.get_dat_lines():
                         if dat_line.startswith("MAT "):
                             max_material_id = max(
@@ -809,7 +809,7 @@ class InputFile(Mesh):
             # Set the material id in all MeshPy materials
             i_material = max_material_id + 1
             for material in material_list:
-                if not type(material) is BaseMeshItem:
+                if not type(material) is BaseMeshItemString:
                     material.n_global = i_material
                     i_material += 1
 
