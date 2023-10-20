@@ -73,6 +73,7 @@ from meshpy.element_beam import Beam
 from meshpy.utility import (
     get_single_node,
     get_min_max_coordinates,
+    get_nodal_coordinates,
 )
 
 # Geometry functions.
@@ -604,7 +605,7 @@ class TestMeshpy(unittest.TestCase):
         )
         self.assertLess(
             np.linalg.norm(
-                coordinates_mathematica - input_file.get_global_coordinates()[0]
+                coordinates_mathematica - get_nodal_coordinates(input_file.nodes)
             ),
             mpy.eps_pos,
             "test_meshpy_curve_3d_helix",
@@ -656,7 +657,7 @@ class TestMeshpy(unittest.TestCase):
         )
         self.assertLess(
             np.linalg.norm(
-                coordinates_mathematica - input_file.get_global_coordinates()[0]
+                coordinates_mathematica - get_nodal_coordinates(input_file.nodes)
             ),
             mpy.eps_pos,
             "test_meshpy_curve_2d_sin",

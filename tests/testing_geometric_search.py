@@ -49,6 +49,7 @@ from meshpy.geometric_search import (
     point_partners_to_partner_indices,
     point_partners_to_unique_indices,
 )
+from meshpy.utility import get_nodal_coordinates, filter_nodes
 from meshpy.geometric_search.geometric_search_arborx import arborx_available
 from meshpy.geometric_search.geometric_search_cython import cython_available
 
@@ -452,11 +453,13 @@ class TestGeometricSearch(unittest.TestCase):
 
             # The reference data was created for the nodes without the middle
             # nodes, therefore we filter the middle nodes here
-            coords = mesh.get_global_coordinates(middle_nodes=False)[0]
+            coords = get_nodal_coordinates(filter_nodes(mesh.nodes, middle_nodes=False))
             partners = find_close_points(coords, algorithm=algorithm, **kwargs)
 
             has_partners, n_partner = find_close_points(
-                create_flat_mesh().get_global_coordinates(middle_nodes=False)[0],
+                get_nodal_coordinates(
+                    filter_nodes(create_flat_mesh().nodes, middle_nodes=False)
+                ),
                 algorithm=algorithm,
                 **kwargs
             )

@@ -43,7 +43,7 @@ import numpy as np
 # Meshpy modules.
 from .conf import mpy
 from .node import Node, NodeCosserat
-from .geometry_set import GeometrySetBase
+from .geometry_set import GeometrySetBase, GeometrySet
 from .geometric_search.find_close_points import (
     find_close_points,
     point_partners_to_partner_indices,
@@ -215,3 +215,119 @@ def get_single_node(item, *, check_cosserat_node=False):
         raise TypeError("Expected a NodeCosserat object.")
 
     return node
+
+
+def filter_nodes(nodes, *, middle_nodes=True):
+    """
+    Filter the list of the given nodes.
+    Be aware that if no filters are enabled the original list will be returned.
+
+    Args
+    ----
+    nodes: list(Nodes)
+        If this list is given it will be returned as is.
+    middle_nodes: bool
+        If middle nodes should be returned or not.
+    """
+
+    if not middle_nodes:
+        return [node for node in nodes if middle_nodes or not node.is_middle_node]
+    else:
+        return nodes
+
+
+def get_nodal_coordinates(nodes, **kwargs):
+    """
+    Return an array with the coordinates of the given nodes.
+
+    Args
+    ----
+    kwargs:
+        Will be passed to self.get_global_nodes.
+
+    Return
+    ----
+    pos: np.array
+        Numpy array with all the positions of the nodes.
+    """
+    coordinates = np.zeros([len(nodes), 3])
+    for i, node in enumerate(nodes):
+        coordinates[i, :] = node.coordinates
+    return coordinates
+
+
+def get_nodal_quaternions(nodes, **kwargs):
+    """
+    Return an array with the quaternions of the given nodes.
+
+    Args
+    ----
+    kwargs:
+        Will be passed to self.get_global_nodes.
+
+    Return
+    ----
+    pos: np.array
+        Numpy array with all the positions of the nodes.
+    """
+    quaternions = np.zeros([len(nodes), 4])
+    for i, node in enumerate(nodes):
+        if isinstance(node, NodeCosserat):
+            quaternions[i, :] = node.rotation.get_quaternion()
+        else:
+            # For the case of nodes that belong to solid elements,
+            # we define the following default value:
+            quaternions[i, :] = [2.0, 0.0, 0.0, 0.0]
+    return quaternions
+
+
+def get_nodes_by_function(nodes, function, *args, middle_nodes=False, **kwargs):
+    """
+    Return all nodes for which the function evaluates to true.
+
+    Args
+    ----
+    nodes: [Node]
+        Nodes that should be filtered.
+    function: function(node, *args, **kwargs)
+        Nodes for which this function is true are returned.
+    middle_nodes: bool
+        If this is true, middle nodes of a beam are also returned.
+    """
+    node_list = filter_nodes(nodes, middle_nodes=middle_nodes)
+    return [node for node in node_list if function(node, *args, **kwargs)]
+
+
+def get_min_max_nodes(nodes, *, middle_nodes=False):
+    """
+    Return a geometry set with the max and min nodes in all directions.
+
+    Args
+    ----
+    nodes: list(Nodes)
+        If this one is given return an array with the coordinates of the
+        nodes in list, otherwise of all nodes in the mesh.
+    middle_nodes: bool
+        If this is true, middle nodes of a beam are also returned.
+    """
+
+    from .container import GeometryName
+
+    node_list = filter_nodes(nodes, middle_nodes=middle_nodes)
+    geometry = GeometryName()
+
+    pos = get_nodal_coordinates(node_list)
+    for i, direction in enumerate(["x", "y", "z"]):
+        # Check if there is more than one value in dimension.
+        min_max = [np.min(pos[:, i]), np.max(pos[:, i])]
+        if np.abs(min_max[1] - min_max[0]) >= mpy.eps_pos:
+            for j, text in enumerate(["min", "max"]):
+                # get all nodes with the min / max coordinate
+                min_max_nodes = []
+                for index, value in enumerate(
+                    np.abs(pos[:, i] - min_max[j]) < mpy.eps_pos
+                ):
+                    if value:
+                        min_max_nodes.append(node_list[index])
+                geometry["{}_{}".format(direction, text)] = GeometrySet(min_max_nodes)
+    return geometry

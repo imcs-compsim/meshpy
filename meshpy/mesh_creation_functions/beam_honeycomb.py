@@ -41,6 +41,7 @@ from ..rotation import Rotation
 from ..mesh import Mesh
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
+from ..utility import get_min_max_nodes
 from .beam_basic_geometry import create_beam_mesh_line
 
 
@@ -160,7 +161,7 @@ def create_beam_mesh_honeycomb_flat(
         mesh_honeycomb.couple_nodes(nodes=honeycomb_nodes)
 
     # Get min and max nodes of the honeycomb.
-    min_max_nodes = mesh_honeycomb.get_min_max_nodes(nodes=honeycomb_nodes)
+    min_max_nodes = get_min_max_nodes(honeycomb_nodes)
 
     # Return the geometry set.
     return_set = GeometryName()
