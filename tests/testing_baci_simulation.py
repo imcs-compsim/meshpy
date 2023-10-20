@@ -43,7 +43,7 @@ import glob
 # Testing imports.
 from testing_utility import (
     baci_release,
-    compare_strings,
+    compare_test_result,
     testing_temp,
     testing_path,
     testing_input,
@@ -157,7 +157,7 @@ class TestFullBaci(unittest.TestCase):
                 else:
                     os.remove(item)
 
-    def test_honeycomb_sphere_as_input(self):
+    def test_baci_simulation_honeycomb_sphere_as_input(self):
         """
         Test the honeycomb sphere model with different types of mesh import.
         """
@@ -267,7 +267,7 @@ class TestFullBaci(unittest.TestCase):
         # Run the input file in Baci.
         self.run_baci_test(name, input_file)
 
-    def test_beam_and_solid_tube(self):
+    def test_baci_simulation_beam_and_solid_tube(self):
         """
         Test the honeycomb sphere model with different types of mesh import.
         """
@@ -356,7 +356,7 @@ class TestFullBaci(unittest.TestCase):
         # Run the input file in Baci.
         self.run_baci_test(name, input_file)
 
-    def test_honeycomb_variants(self):
+    def test_baci_simulation_honeycomb_variants(self):
         """
         Create a few different honeycomb structures.
         """
@@ -507,7 +507,7 @@ class TestFullBaci(unittest.TestCase):
         # Run the input file in Baci.
         self.run_baci_test("honeycomb_variants", input_file)
 
-    def test_rotated_beam_axis(self):
+    def test_baci_simulation_rotated_beam_axis(self):
         """
         Create three beams that consist of two connected lines.
         - The first case uses the same nodes for the connection of the lines,
@@ -615,7 +615,7 @@ class TestFullBaci(unittest.TestCase):
         self.run_baci_test("rotated_beam_axis", input_file)
         self.run_baci_test("rotated_beam_axis", input_file, nox_xml_file="xml_name")
 
-    def test_dirichlet_boundary_to_neumann_boundary(self):
+    def test_baci_simulation_dirichlet_boundary_to_neumann_boundary(self):
         """
         First simulate a cantilever beam with Dirichlet boundary conditions and
         then apply those as Neumann boundaries.
@@ -707,23 +707,15 @@ class TestFullBaci(unittest.TestCase):
         )
 
         # Check the input files.
-        compare_strings(
+        compare_test_result(
             self,
-            "test_dirichlet_boundary_to_neumann_boundary_initial",
-            os.path.join(
-                testing_input,
-                "test_dirichlet_boundary_to_neumann_boundary_initial_reference.dat",
-            ),
             initial_simulation.get_string(header=False),
+            additional_identifier="initial",
         )
-        compare_strings(
+        compare_test_result(
             self,
-            "test_dirichlet_boundary_to_neumann_boundary_restart",
-            os.path.join(
-                testing_input,
-                "test_dirichlet_boundary_to_neumann_boundary_restart_reference.dat",
-            ),
             restart_simulation.get_string(header=False),
+            additional_identifier="restart",
         )
 
         # Delete all files from this test.
