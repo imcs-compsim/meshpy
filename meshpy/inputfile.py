@@ -757,9 +757,9 @@ class InputFile(Mesh):
         def set_n_global_elements(element_list):
             """Set n_global in every item of element_list"""
 
-            # A check is performed that every entry in data_list is unique.
+            # A check is performed that every entry in element_list is unique.
             if len(element_list) != len(set(element_list)):
-                raise ValueError("Elements in data_list are not unique!")
+                raise ValueError("Elements in element_list are not unique!")
 
             # Set the values for n_global.
             i = 0
@@ -776,6 +776,31 @@ class InputFile(Mesh):
                 else:
                     i += 1
 
+        def set_n_global_materials(material_list):
+            """Set n_global in every item of the materials list.
+            We have to account for materials imported from dat files that have a random numbering."""
+
+            # A check is performed that every entry in material_list is unique.
+            if len(material_list) != len(set(material_list)):
+                raise ValueError("Elements in material_list are not unique!")
+
+            # Get the maximum material index in materials imported from a string
+            max_material_id = 0
+            for material in material_list:
+                if type(material) is BaseMeshItem:
+                    for dat_line in material.get_dat_lines():
+                        if dat_line.startswith("MAT "):
+                            max_material_id = max(
+                                max_material_id, int(dat_line.split(" ")[1])
+                            )
+
+            # Set the material id in all MeshPy materials
+            i_material = max_material_id + 1
+            for material in material_list:
+                if not type(material) is BaseMeshItem:
+                    material.n_global = i_material
+                    i_material += 1
+
         # Add sets from couplings and boundary conditions to a temp container.
         self.unlink_nodes()
         mesh_sets = self.get_unique_geometry_sets()
@@ -783,7 +808,7 @@ class InputFile(Mesh):
         # Assign global indices to all entries.
         set_n_global(self.nodes)
         set_n_global_elements(self.elements_fluid + self.elements)
-        set_n_global(self.materials)
+        set_n_global_materials(self.materials)
         set_n_global(self.functions)
         for key in self.boundary_conditions.keys():
             set_n_global(self.boundary_conditions[key])
