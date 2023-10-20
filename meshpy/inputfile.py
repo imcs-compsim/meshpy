@@ -41,6 +41,7 @@ from _collections import OrderedDict
 
 # Meshpy modules.
 from .conf import mpy
+from .container import GeometrySetContainer, BoundaryConditionContainer
 from .mesh import Mesh
 from .base_mesh_item import BaseMeshItem
 from .node import Node
@@ -338,8 +339,15 @@ class InputFile(Mesh):
         self.description = description
         self.dat_header = []
 
-        # BACI also supports fluid elements, we keep them in a separated list here
-        self.elements_fluid = []
+        # In case we import a BACI dat file with plain string data, we store them in these lists,
+        # they do not interfere with other operations.
+        self.dat_nodes = []
+        self.dat_elements = []
+        self.dat_elements_fluid = []
+        self.dat_materials = []
+        self.dat_functions = []
+        self.dat_geometry_sets = GeometrySetContainer()
+        self.dat_boundary_conditions = BoundaryConditionContainer()
 
         # Contents of NOX xml file.
         self.nox_xml = None
@@ -485,23 +493,27 @@ class InputFile(Mesh):
 
             def add_bc(section_header, section_data_comment):
                 """Add boundary conditions to the object."""
-                for i, [item, comments] in enumerate(section_data_comment):
-                    # The first line is the number of BCs and will be skipped.
-                    if i > 0:
-                        # TODO: move this outside the loop.
-                        for key, value in self.boundary_condition_names.items():
-                            if value == section_header:
-                                (bc_key, geometry_key) = key
-                                break
 
-                        if mpy.import_mesh_full:
-                            bc = BoundaryConditionBase.from_dat(
+                # Get the bc and geometry key
+                for key, value in self.boundary_condition_names.items():
+                    if value == section_header:
+                        (bc_key, geometry_key) = key
+                        break
+
+                # The first line is the number of BCs and will be skipped.
+                for item, comments in section_data_comment[1:]:
+                    if mpy.import_mesh_full:
+                        self.boundary_conditions.append(
+                            (bc_key, geometry_key),
+                            BoundaryConditionBase.from_dat(
                                 bc_key, item, comments=comments
-                            )
-                        else:
-                            bc = BaseMeshItem(item, comments=comments)
-
-                        self.boundary_conditions.append((bc_key, geometry_key), bc)
+                            ),
+                        )
+                    else:
+                        self.dat_boundary_conditions.append(
+                            (bc_key, geometry_key),
+                            BaseMeshItem(item, comments=comments),
+                        )
 
             def add_set(section_header, section_data_comment):
                 """
@@ -520,12 +532,15 @@ class InputFile(Mesh):
                             break
 
                     if mpy.import_mesh_full:
-                        geometry_set = GeometrySetNodes.from_dat(
-                            geometry_key, dat_list, comments=comments
+                        self.geometry_sets[geometry_key].append(
+                            GeometrySetNodes.from_dat(
+                                geometry_key, dat_list, comments=comments
+                            )
                         )
                     else:
-                        geometry_set = BaseMeshItem(dat_list, comments=comments)
-                    self.geometry_sets[geometry_key].append(geometry_set)
+                        self.dat_geometry_sets[geometry_key].append(
+                            BaseMeshItem(dat_list, comments=comments)
+                        )
 
                 if len(section_data_comment) > 0:
                     # Add the individual sets to the object. For that loop
@@ -574,13 +589,13 @@ class InputFile(Mesh):
                     if mpy.import_mesh_full:
                         self.nodes.append(Node.from_dat(line))
                     else:
-                        add_line(self.nodes, line)
+                        add_line(self.dat_nodes, line)
             elif section_name == "STRUCTURE ELEMENTS":
                 for line in section_data_comment:
                     if mpy.import_mesh_full:
                         self.elements.append(Element.from_dat(line))
                     else:
-                        add_line(self.elements, line)
+                        add_line(self.dat_elements, line)
             elif section_name == "FLUID ELEMENTS":
                 for line in section_data_comment:
                     if mpy.import_mesh_full:
@@ -590,7 +605,7 @@ class InputFile(Mesh):
                             + "implemented!"
                         )
                     else:
-                        add_line(self.elements_fluid, line)
+                        add_line(self.dat_elements_fluid, line)
             elif section_name.startswith("FUNCT"):
                 self.functions.append(BaseMeshItem(section_data))
             elif section_name in self.boundary_condition_names.values():
@@ -802,13 +817,28 @@ class InputFile(Mesh):
         self.unlink_nodes()
         mesh_sets = self.get_unique_geometry_sets()
 
+        # Combined lists for string type items and "real" mesh type items
+        all_nodes = self.dat_nodes + self.nodes
+        all_elements_structure = self.dat_elements + self.elements
+        all_elements = self.dat_elements_fluid + all_elements_structure
+        all_geometry_sets = GeometrySetContainer()
+        all_geometry_sets.extend(self.dat_geometry_sets)
+        all_geometry_sets.extend(mesh_sets)
+        all_boundary_conditions = BoundaryConditionContainer()
+        all_boundary_conditions.extend(self.dat_boundary_conditions)
+        all_boundary_conditions.extend(self.boundary_conditions)
+
         # Assign global indices to all entries.
-        set_n_global(self.nodes)
-        set_n_global_elements(self.elements_fluid + self.elements)
+        set_n_global(all_nodes)
+        set_n_global_elements(all_elements)
         set_n_global_materials(self.materials)
         set_n_global(self.functions)
-        for key in self.boundary_conditions.keys():
-            set_n_global(self.boundary_conditions[key])
+        for key in all_geometry_sets.keys():
+            # We reset the geometry set index here since in self.get_unique_geometry_sets the geometry sets
+            # from the dat file are not included.
+            set_n_global(all_geometry_sets[key])
+        for key in all_boundary_conditions.keys():
+            set_n_global(all_boundary_conditions[key])
 
         def get_section_dat(section_name, data_list, header_lines=None):
             """
@@ -839,17 +869,17 @@ class InputFile(Mesh):
         # Add the design description.
         if design_description:
             lines.append(get_section_string("DESIGN DESCRIPTION"))
-            lines.append("NDPOINT {}".format(len(mesh_sets[mpy.geo.point])))
-            lines.append("NDLINE {}".format(len(mesh_sets[mpy.geo.line])))
-            lines.append("NDSURF {}".format(len(mesh_sets[mpy.geo.surface])))
-            lines.append("NDVOL {}".format(len(mesh_sets[mpy.geo.volume])))
+            lines.append("NDPOINT {}".format(len(all_geometry_sets[mpy.geo.point])))
+            lines.append("NDLINE {}".format(len(all_geometry_sets[mpy.geo.line])))
+            lines.append("NDSURF {}".format(len(all_geometry_sets[mpy.geo.surface])))
+            lines.append("NDVOL {}".format(len(all_geometry_sets[mpy.geo.volume])))
 
         # If there are couplings in the mesh, set the link between the nodes
         # and elements, so the couplings can decide which DOFs they couple,
         # depending on the type of the connected beam element.
         def get_number_of_coupling_conditions(key):
-            if (key, mpy.geo.point) in self.boundary_conditions.keys():
-                return len(self.boundary_conditions[key, mpy.geo.point])
+            if (key, mpy.geo.point) in all_boundary_conditions.keys():
+                return len(all_boundary_conditions[key, mpy.geo.point])
             else:
                 return 0
 
@@ -861,7 +891,7 @@ class InputFile(Mesh):
             self.set_node_links()
 
         # Add the boundary conditions.
-        for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
+        for (bc_key, geom_key), bc_list in all_boundary_conditions.items():
             if len(bc_list) > 0:
                 section_name = (
                     bc_key
@@ -873,27 +903,27 @@ class InputFile(Mesh):
                     bc_list,
                     header_lines="{} {}".format(
                         self.geometry_counter[geom_key],
-                        len(self.boundary_conditions[bc_key, geom_key]),
+                        len(all_boundary_conditions[bc_key, geom_key]),
                     ),
                 )
 
         # Add additional element sections (e.g. STRUCTURE KNOTVECTORS)
         element_sections = OrderedDict()
-        for element in self.elements_fluid + self.elements:
+        for element in all_elements:
             element.add_element_specific_section(element_sections)
 
         for section in element_sections.values():
             lines.extend(section.get_dat_lines())
 
         # Add the geometry sets.
-        for geom_key, item in mesh_sets.items():
+        for geom_key, item in all_geometry_sets.items():
             if len(item) > 0:
                 get_section_dat(self.geometry_set_names[geom_key], item)
 
         # Add the nodes and elements.
-        get_section_dat("NODE COORDS", self.nodes)
-        get_section_dat("STRUCTURE ELEMENTS", self.elements)
-        get_section_dat("FLUID ELEMENTS", self.elements_fluid)
+        get_section_dat("NODE COORDS", all_nodes)
+        get_section_dat("STRUCTURE ELEMENTS", all_elements_structure)
+        get_section_dat("FLUID ELEMENTS", self.dat_elements_fluid)
 
         # The last section is END
         lines.extend(InputSection("END").get_dat_lines())
