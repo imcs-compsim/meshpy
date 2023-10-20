@@ -65,7 +65,7 @@ class TestHeaderFunctions(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Set the header.
         set_header_static(input_file, time_step=0.1, n_steps=17, load_lin=True)
@@ -119,7 +119,7 @@ class TestHeaderFunctions(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Set the header.
         set_header_static(
@@ -168,7 +168,7 @@ class TestHeaderFunctions(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Set the header.
         set_header_static(
