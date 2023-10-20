@@ -554,9 +554,6 @@ class TestMeshpy(unittest.TestCase):
         the parameter.
         """
 
-        # Ignore some strange warnings.
-        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
-
         # Create input file.
         input_file = InputFile()
 
@@ -619,9 +616,6 @@ class TestMeshpy(unittest.TestCase):
 
     def test_curve_2d_sin(self):
         """Create a sin from a parametric curve."""
-
-        # Ignore some strange warnings.
-        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
         # Create input file.
         input_file = InputFile()
@@ -704,9 +698,6 @@ class TestMeshpy(unittest.TestCase):
 
         # AD.
         from autograd import jacobian
-
-        # Ignore some strange warnings.
-        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
         # Create input file.
         input_file = InputFile()
@@ -1008,9 +999,6 @@ class TestMeshpy(unittest.TestCase):
         All of those methods should give the exact same mesh.
         Both variants are also tried with different rotations at the beginning.
         """
-
-        # Ignore some strange warnings.
-        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
 
         # Parameters for this test case.
         n_el = 3
