@@ -39,6 +39,8 @@ from _collections import OrderedDict
 # Meshpy modules.
 from .conf import mpy
 from .geometry_set import GeometrySetBase
+from .base_mesh_item import BaseMeshItem
+from .boundary_condition import BoundaryConditionBase
 
 
 class GeometryName(OrderedDict):
@@ -63,7 +65,46 @@ class GeometryName(OrderedDict):
             raise NotImplementedError("GeometryName can only store GeometrySets")
 
 
-class BoundaryConditionContainer(OrderedDict):
+class ContainerBase(OrderedDict):
+    """A base class for containers to be used in MeshPy"""
+
+    def append(self, key, item):
+        """Append item to this container and check if the item is already in the list
+        corresponding to key."""
+
+        type_ok = False
+        for item_type in self.item_types:
+            if isinstance(item, item_type):
+                type_ok = True
+                break
+        if not type_ok:
+            raise TypeError(
+                "You tried to add an item of type {}, but only types derived from {} can be added".format(
+                    type(item), self.item_types
+                )
+            )
+        if key not in self.keys():
+            self[key] = []
+        else:
+            if item in self[key]:
+                raise ValueError("The item is already in this container!")
+        self[key].append(item)
+
+    def extend(self, container):
+        """Add all items of another container to this container"""
+
+        if not isinstance(container, self.__class__):
+            raise TypeError(
+                "Only containers of type {} can be merged here, you tried add {}".format(
+                    self.__class__, type(container)
+                )
+            )
+        for key, items in container.items():
+            for item in items:
+                self.append(key, item)
+
+
+class BoundaryConditionContainer(ContainerBase):
     """
     A class to group boundary conditions together. The key of the dictionary
     are (bc_type, geometry_type).
@@ -73,34 +114,14 @@ class BoundaryConditionContainer(OrderedDict):
         """Initialize the container and create the default keys in the map."""
         super().__init__(*args, **kwargs)
 
+        self.item_types = [BaseMeshItem, BoundaryConditionBase]
+
         for bc_key in mpy.bc:
             for geometry_key in mpy.geo:
                 self[(bc_key, geometry_key)] = []
 
-    def append(self, bc_key, geometry_key, bc):
-        """
-        Append boundary condition to the container.
 
-        Args
-        ----
-        bc_key:
-            Boundary specific key for the boundary condition.
-        geometry_key: mpy.geo
-            Geometry type of the boundary condition.
-        bc: BoundaryCondition
-            The boundary condition to be added to this container.
-            If the condition is already in this container, an error
-            will be raised.
-        """
-        if (bc_key, geometry_key) not in self.keys():
-            self[(bc_key, geometry_key)] = []
-        else:
-            if bc in self[(bc_key, geometry_key)]:
-                raise ValueError("The boundary condition is already in this mesh!")
-        self[(bc_key, geometry_key)].append(bc)
-
-
-class GeometrySetContainer(OrderedDict):
+class GeometrySetContainer(ContainerBase):
     """
     A class to group geometry sets together with the key being the geometry
     type.
@@ -109,6 +130,8 @@ class GeometrySetContainer(OrderedDict):
     def __init__(self, *args, **kwargs):
         """Initialize the container and create the default keys in the map."""
         super().__init__(*args, **kwargs)
+
+        self.item_types = [BaseMeshItem, GeometrySetBase]
 
         for geometry_key in mpy.geo:
             self[geometry_key] = []

@@ -122,17 +122,15 @@ class Mesh(object):
         self.add(mesh.elements)
         self.add(mesh.materials)
         self.add(mesh.functions)
-        for item in mesh.geometry_sets.values():
-            self.add(item)
-        for item in mesh.boundary_conditions.values():
-            self.add(item)
+        self.geometry_sets.extend(mesh.geometry_sets)
+        self.boundary_conditions.extend(mesh.boundary_conditions)
 
     def add_bc(self, bc):
         """Add a boundary condition to this mesh."""
         bc_key = bc.bc_type
         geom_key = bc.geometry_set.geometry_type
         bc.geometry_set.check_replaced_nodes()
-        self.boundary_conditions.append(bc_key, geom_key, bc)
+        self.boundary_conditions.append((bc_key, geom_key), bc)
 
     def add_function(self, function):
         """
@@ -164,10 +162,8 @@ class Mesh(object):
 
     def add_geometry_set(self, geometry_set):
         """Add a geometry set to this mesh."""
-        if geometry_set in self.geometry_sets[geometry_set.geometry_type]:
-            raise ValueError("The geometry set is already in this mesh")
         geometry_set.check_replaced_nodes()
-        self.geometry_sets[geometry_set.geometry_type].append(geometry_set)
+        self.geometry_sets.append(geometry_set.geometry_type, geometry_set)
 
     def add_geometry_name(self, geometry_name):
         """Add a set of geometry sets to this mesh."""

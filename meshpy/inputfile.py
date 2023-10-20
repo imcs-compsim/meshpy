@@ -501,7 +501,7 @@ class InputFile(Mesh):
                         else:
                             bc = BaseMeshItem(item, comments=comments)
 
-                        self.boundary_conditions.append(bc_key, geometry_key, bc)
+                        self.boundary_conditions.append((bc_key, geometry_key), bc)
 
             def add_set(section_header, section_data_comment):
                 """
