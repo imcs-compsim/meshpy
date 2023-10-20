@@ -224,8 +224,8 @@ class TestMeshpy(unittest.TestCase):
             rot_1 = Rotation([0, 1, 1], np.pi / 6)
             rot_2 = Rotation([1, 2.455, -1.2324], 1.2342352)
 
-            mesh_ref = InputFile(maintainer="Ivo Steinbrecher")
-            mesh = InputFile(maintainer="Ivo Steinbrecher")
+            mesh_ref = InputFile()
+            mesh = InputFile()
             mat = MaterialReissner(radius=0.1)
 
             # Create the reference mesh.
@@ -554,11 +554,8 @@ class TestMeshpy(unittest.TestCase):
         the parameter.
         """
 
-        # Ignore some strange warnings.
-        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
-
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Add material and functions.
         mat = BaseMeshItem("material")
@@ -620,11 +617,8 @@ class TestMeshpy(unittest.TestCase):
     def test_curve_2d_sin(self):
         """Create a sin from a parametric curve."""
 
-        # Ignore some strange warnings.
-        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
-
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Add material and functions.
         mat = BaseMeshItem("material")
@@ -705,11 +699,8 @@ class TestMeshpy(unittest.TestCase):
         # AD.
         from autograd import jacobian
 
-        # Ignore some strange warnings.
-        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
-
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Add material and functions.
         mat = BaseMeshItem("material")
@@ -764,7 +755,7 @@ class TestMeshpy(unittest.TestCase):
         """
 
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Add material and function.
         mat = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
@@ -1009,9 +1000,6 @@ class TestMeshpy(unittest.TestCase):
         Both variants are also tried with different rotations at the beginning.
         """
 
-        # Ignore some strange warnings.
-        warnings.filterwarnings("ignore", message="numpy.dtype size changed")
-
         # Parameters for this test case.
         n_el = 3
         R = 1.235
@@ -1022,7 +1010,7 @@ class TestMeshpy(unittest.TestCase):
 
         def create_mesh_manually(start_rotation):
             """Create the full circle manually."""
-            input_file = InputFile(maintainer="Ivo Steinbrecher")
+            input_file = InputFile()
             input_file.add(mat)
 
             # Add nodes.
@@ -1057,7 +1045,7 @@ class TestMeshpy(unittest.TestCase):
         def one_full_circle_closed(function, argument_list, additional_rotation=None):
             """Create one full circle and connect it to itself."""
 
-            input_file = InputFile(maintainer="Ivo Steinbrecher")
+            input_file = InputFile()
 
             if additional_rotation is not None:
                 start_rotation = additional_rotation * Rotation([0, 0, 1], np.pi * 0.5)
@@ -1079,7 +1067,7 @@ class TestMeshpy(unittest.TestCase):
             nodes.
             """
 
-            input_file = InputFile(maintainer="Ivo Steinbrecher")
+            input_file = InputFile()
 
             if additional_rotation is not None:
                 start_rotation = additional_rotation * Rotation([0, 0, 1], np.pi * 0.5)
@@ -1278,8 +1266,7 @@ class TestMeshpy(unittest.TestCase):
 
         def create_mesh():
             """Create two empty meshes."""
-            name = "Ivo Steinbrecher"
-            return InputFile(maintainer=name), InputFile(maintainer=name)
+            return InputFile(), InputFile()
 
         # Create a beam with two elements. Once immediately and once as two
         # beams with couplings.
@@ -1450,7 +1437,6 @@ class TestMeshpy(unittest.TestCase):
 
         # Create input file.
         input_file = InputFile(
-            maintainer="Ivo Steinbrecher",
             dat_file=os.path.join(
                 testing_input, "test_meshpy_btsvm_coupling_solid_mesh.dat"
             ),

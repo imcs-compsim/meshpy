@@ -182,7 +182,6 @@ class TestFullBaci(unittest.TestCase):
 
         # Read input file with information of the sphere and simulation.
         input_file = InputFile(
-            maintainer="Ivo Steinbrecher",
             description="honeycomb beam in contact with sphere",
             dat_file=os.path.join(testing_input, "baci_input_honeycomb_sphere.dat"),
         )
@@ -284,9 +283,7 @@ class TestFullBaci(unittest.TestCase):
         """Merge a solid tube with a beam tube and simulate them together."""
 
         # Create the input file and read solid mesh data.
-        input_file = InputFile(
-            maintainer="Ivo Steinbrecher", description="Solid tube with beam tube"
-        )
+        input_file = InputFile(description="Solid tube with beam tube")
         input_file.read_dat(os.path.join(testing_input, "baci_input_solid_tube.dat"))
 
         # Add options for beam_output.
@@ -368,9 +365,7 @@ class TestFullBaci(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(
-            maintainer="Ivo Steinbrecher", description="Varieties of honeycomb"
-        )
+        input_file = InputFile(description="Varieties of honeycomb")
 
         # Set options with different syntaxes.
         input_file.add(InputSection("PROBLEM SIZE", "DIM 3"))
@@ -527,9 +522,7 @@ class TestFullBaci(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(
-            maintainer="Ivo Steinbrecher", description="Rotation of beam along axis"
-        )
+        input_file = InputFile(description="Rotation of beam along axis")
 
         # Set header
         set_header_static(input_file, time_step=0.05, n_steps=20)

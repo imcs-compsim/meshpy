@@ -79,7 +79,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         """Create a circular segment and compare it with the reference file."""
 
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Add material and function.
         mat = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
@@ -112,7 +112,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         """
 
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Add material and function.
         mat = MaterialReissner(radius=0.1)
@@ -165,7 +165,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Add material and function.
         mat = MaterialReissner()
@@ -205,7 +205,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Create mesh.
         mat = MaterialEulerBernoulli()
@@ -247,7 +247,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Create mesh.
         mat = MaterialEulerBernoulli()
@@ -287,7 +287,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Create mesh.
         mat = MaterialEulerBernoulli()
@@ -316,7 +316,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         mpy.set_default_values()
 
         # Create input file.
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
 
         # Create two wires with different parameters.
         mat = MaterialEulerBernoulli(radius=0.05)
@@ -426,7 +426,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
     def test_element_length_option(self):
         """Test that the element length can be specified in the beam creation functions"""
 
-        input_file = InputFile(maintainer="Ivo Steinbrecher")
+        input_file = InputFile()
         mat = MaterialReissner(radius=0.1)
 
         l_el = 1.5
