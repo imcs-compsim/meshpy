@@ -37,16 +37,16 @@ import numpy as np
 
 # Meshpy modules.
 from .conf import mpy
-from .base_mesh_item import BaseMeshItem
+from .base_mesh_item import BaseMeshItemFull
 
 
-class Node(BaseMeshItem):
+class Node(BaseMeshItemFull):
     """
     This object represents one node in the mesh
     """
 
-    def __init__(self, coordinates, *, is_middle_node=False, is_dat=False, **kwargs):
-        super().__init__(data=None, is_dat=is_dat, **kwargs)
+    def __init__(self, coordinates, *, is_middle_node=False, **kwargs):
+        super().__init__(data=None, **kwargs)
 
         # Coordinates of this node.
         self.coordinates = np.array(coordinates)
@@ -75,11 +75,7 @@ class Node(BaseMeshItem):
         line_split = input_line[0].split()
 
         # Convert the node coordinates into a Node object.
-        return cls(
-            [float(line_split[i]) for i in range(3, 6)],
-            is_dat=True,
-            comments=input_line[1],
-        )
+        return cls([float(line_split[i]) for i in range(3, 6)], comments=input_line[1])
 
     def get_master_node(self):
         """

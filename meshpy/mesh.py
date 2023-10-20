@@ -47,6 +47,7 @@ from .function import Function
 from .material import Material
 from .node import Node, NodeCosserat
 from .element import Element
+from .element_beam import Beam
 from .geometry_set import GeometrySetBase, GeometrySet
 from .container import GeometryName, GeometrySetContainer, BoundaryConditionContainer
 from .boundary_condition import BoundaryConditionBase
@@ -250,25 +251,16 @@ class Mesh(object):
                 for node in element.nodes:
                     node.element_link.append(element)
         for node in self.nodes:
-            if not node.is_dat:
-                node.mesh = self
+            node.mesh = self
 
-    def get_global_nodes(
-        self, *, nodes=None, include_solid_nodes=False, middle_nodes=True
-    ):
+    def get_global_nodes(self, *, nodes=None, middle_nodes=True):
         """
-        Return a list with the global beam nodes. If in the future we also want
-        to perform translate / rotate / cylinder wrapping / ... on solid
-        elements this can be implemented here.
+        Return a list with the global beam nodes.
 
         Args
         ----
         nodes: list(Nodes)
             If this list is given it will be returned as is.
-        include_solid_nodes: bool
-            If solid nodes should be included. This only works if the solid
-            mesh is imported as a full mesh and not just the lines in the input
-            file.
         middle_nodes: bool
             If middle nodes should be returned or not.
         """
@@ -277,12 +269,7 @@ class Mesh(object):
             node_list = self.nodes
         else:
             node_list = nodes
-        return [
-            node
-            for node in node_list
-            if (include_solid_nodes or not node.is_dat)
-            and (middle_nodes or not node.is_middle_node)
-        ]
+        return [node for node in node_list if middle_nodes or not node.is_middle_node]
 
     def get_global_coordinates(self, **kwargs):
         """
@@ -383,7 +370,7 @@ class Mesh(object):
             if not only_rotate_triads:
                 node.coordinates = pos_new[i, :]
 
-    def reflect(self, normal_vector, origin=None, flip=False):
+    def reflect(self, normal_vector, origin=None, flip_beams=False):
         """
         Reflect all nodes of the mesh with respect to a plane defined by its
         normal_vector. Per default the plane goes through the origin, if not
@@ -408,7 +395,7 @@ class Mesh(object):
         origin: 3D vector
             Per default the reflection plane goes through the origin. If this
             parameter is given, the point is on the plane.
-        flip: bool
+        flip_beams: bool
             When True, the beams are flipped, so that the direction along the
             beam is reversed.
         """
@@ -448,20 +435,26 @@ class Mesh(object):
         # Add to the existing rotations.
         rot_new = add_rotations(rot2, rot1)
 
-        if flip:
+        if flip_beams:
             # To achieve the flip, the triads are rotated with the angle pi
             # around the e2 axis.
             rot_flip = Rotation([0, 1, 0], np.pi)
             rot_new = add_rotations(rot_new, rot_flip)
 
-            # Each element has to switch its nodes internally.
-            for element in self.elements:
+        # For solid elements we need to adapt the connectivity to avoid negative Jacobians.
+        # For beam elements this is optional.
+        for element in self.elements:
+            if isinstance(element, Beam):
+                if flip_beams:
+                    element.flip()
+            else:
                 element.flip()
 
         # Set the new positions and rotations.
         for i, node in enumerate(beam_nodes):
             node.coordinates = pos_new[i, :]
-            node.rotation.q = rot_new[i, :]
+            if isinstance(node, NodeCosserat):
+                node.rotation.q = rot_new[i, :]
 
     def wrap_around_cylinder(self, radius=None, advanced_warning=True):
         """
@@ -704,8 +697,7 @@ class Mesh(object):
     def unlink_nodes(self):
         """Delete the linked arrays and global indices in all nodes."""
         for node in self.nodes:
-            if not node.is_dat:
-                node.unlink()
+            node.unlink()
 
     def get_nodes_by_function(self, function, *args, middle_nodes=False, **kwargs):
         """
@@ -760,9 +752,7 @@ class Mesh(object):
         """
 
         # Number of middle nodes.
-        middle_nodes = [
-            node for node in self.nodes if (not node.is_dat) and node.is_middle_node
-        ]
+        middle_nodes = [node for node in self.nodes if node.is_middle_node]
 
         # Only check if there are middle nodes.
         if len(middle_nodes) == 0:

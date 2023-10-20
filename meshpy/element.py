@@ -144,6 +144,14 @@ class Element(BaseMeshItem):
                 )
             )
 
+    def flip(self):
+        """
+        Reverse the nodes of this element. This is usually used when reflected.
+        """
+        raise NotImplementedError(
+            "The flip method is not implemented for {}".format(self.__class__)
+        )
+
     def replace_node(self, old_node, new_node):
         """Replace old_node with new_node."""
 
