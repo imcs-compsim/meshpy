@@ -568,6 +568,48 @@ class TestGeometricSearch(unittest.TestCase):
             inverse_indices_ref,
         )
 
+    def test_find_close_points_tolerance_precision_scipy(self):
+        self.xtest_find_close_points_tolerance_precision(
+            FindClosePointAlgorithm.kd_tree_scipy
+        )
+
+    def test_find_close_points_tolerance_precision_brute_force_cython(self):
+        if cython_available:
+            self.xtest_find_close_points_tolerance_precision(
+                FindClosePointAlgorithm.brute_force_cython
+            )
+        else:
+            self.skipTest("Cython not available")
+
+    def test_find_close_points_tolerance_precision_boundary_volume_hierarchy_arborx(
+        self,
+    ):
+        if arborx_available:
+            self.xtest_find_close_points_tolerance_precision(
+                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
+            )
+        else:
+            self.skipTest("Cython not available")
+
+    def xtest_find_close_points_tolerance_precision(self, algorithm, **kwargs):
+        """
+        Test that the find_close_points tolerance works with a precision of at least 12.
+        """
+
+        n_points = 4
+        delta = 1e-12
+        coords = np.ones([n_points, 3])
+        coords[1, 0] += delta
+        coords[2, 0] += 4 * delta
+        coords[3, 0] += 5 * delta
+
+        has_partner, _ = find_close_points(
+            coords,
+            algorithm=FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
+            tol=1.1 * delta,
+        )
+        self.assertTrue(np.array_equal(has_partner, [0, 0, 1, 1]))
+
 
 if __name__ == "__main__":
     # Execution part of script.
