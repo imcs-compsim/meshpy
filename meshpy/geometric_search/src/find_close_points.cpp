@@ -131,8 +131,9 @@ namespace GeometricSearch
 
         // Build tree structure containing all points
         using hyper_box = ArborX::ExperimentalHyperGeometry::Box<n_dim>;
-        ArborX::BasicBoundingVolumeHierarchy<memory_space, hyper_box> bounding_volume_hierarchy(
-            Kokkos::DefaultExecutionSpace{}, coordinates_with_tol);
+        ArborX::BasicBoundingVolumeHierarchy<memory_space,
+            ArborX::Details::PairIndexVolume<hyper_box>>
+            bounding_volume_hierarchy(Kokkos::DefaultExecutionSpace{}, coordinates_with_tol);
 
         // Perform the collision check
         Kokkos::View<int*, Kokkos::HostSpace> indices_arborx("indices_arborx", 0);

@@ -18,7 +18,7 @@ include(FetchContent)
 fetchcontent_declare(
   arborx
   GIT_REPOSITORY https://github.com/arborx/ArborX.git
-  GIT_TAG aefe78fd6e8126a17e3b73998377aa8c205a13dd #v1.3
+  GIT_TAG 4c015c70f3927b55e730515ce8db235e68c13480
   )
 fetchcontent_makeavailable(arborx)
 
