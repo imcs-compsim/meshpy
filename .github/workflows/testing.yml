@@ -95,7 +95,9 @@ jobs:
           git submodule update --init
           # Load the Kokkos module via spack
           . ${SPACK_ACTIVATION_SCRIPT}
-          spack load kokkos@3.7.01
+          spack load ninja@1.11.1
+          spack load cmake@3.25.2
+          spack load kokkos@4.1.00
           # Build the binaries
           mkdir -p build/arborx
           cd build/arborx
