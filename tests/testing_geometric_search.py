@@ -54,6 +54,44 @@ from meshpy.geometric_search.geometric_search_arborx import arborx_available
 from meshpy.geometric_search.geometric_search_cython import cython_available
 
 
+class geometric_search_add_tests:
+    """A decorator to add test cases with different variants to the test suite"""
+
+    def __init__(self, func):
+        self.func = func
+
+    def __set_name__(self, owner, name):
+        """Add the function name in all geometric search variants"""
+
+        if not name.startswith("xtest_"):
+            raise NameError('The function name has to start with "xtest_"')
+
+        base_name = name[1:]
+        for flag, algorithm_name, algorithm in [
+            [True, "scipy", FindClosePointAlgorithm.kd_tree_scipy],
+            [cython_available, "cython", FindClosePointAlgorithm.brute_force_cython],
+            [
+                arborx_available,
+                "arborx",
+                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
+            ],
+        ]:
+
+            if flag:
+                # If the algorithm is available add the test case
+
+                def function_with_algorithm(self_inner, **kwargs):
+                    self.func(self_inner, algorithm, **kwargs)
+
+            else:
+                # Skip the test case if the algorithm is not available
+
+                def function_with_algorithm(self_inner, **kwargs):
+                    self_inner.skipTest(f"{algorithm_name} not available")
+
+            setattr(owner, base_name + "_" + algorithm_name, function_with_algorithm)
+
+
 class TestGeometricSearch(unittest.TestCase):
     """Test various stuff from the meshpy.geometric_search module."""
 
@@ -94,25 +132,7 @@ class TestGeometricSearch(unittest.TestCase):
         self.assertEqual(unique_indices, unique_indices_ref)
         self.assertEqual(inverse_indices, inverse_indices_ref)
 
-    def test_find_close_points_between_bins_scipy(self):
-        self.xtest_find_close_points_between_bins(FindClosePointAlgorithm.kd_tree_scipy)
-
-    def test_find_close_points_between_bins_brute_force_cython(self):
-        if cython_available:
-            self.xtest_find_close_points_between_bins(
-                FindClosePointAlgorithm.brute_force_cython
-            )
-        else:
-            self.skipTest("Cython not available")
-
-    def test_find_close_points_between_bins_boundary_volume_hierarchy_arborx(self):
-        if arborx_available:
-            self.xtest_find_close_points_between_bins(
-                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-            )
-        else:
-            self.skipTest("ArborX not available")
-
+    @geometric_search_add_tests
     def xtest_find_close_points_between_bins(self, algorithm, **kwargs):
         """
         Test if the find_close_points function returns the expected results.
@@ -366,25 +386,7 @@ class TestGeometricSearch(unittest.TestCase):
             inverse_indices_ref,
         )
 
-    def test_find_close_points_flat_brute_force_scipy(self):
-        self.xtest_find_close_points_binning_flat(FindClosePointAlgorithm.kd_tree_scipy)
-
-    def test_find_close_points_flat_brute_force_cython(self):
-        if cython_available:
-            self.xtest_find_close_points_binning_flat(
-                FindClosePointAlgorithm.brute_force_cython
-            )
-        else:
-            self.skipTest("Cython not available")
-
-    def test_find_close_points_flat_boundary_volume_hierarchy_arborx(self):
-        if arborx_available:
-            self.xtest_find_close_points_binning_flat(
-                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-            )
-        else:
-            self.skipTest("ArborX not available")
-
+    @geometric_search_add_tests
     def xtest_find_close_points_binning_flat(self, algorithm, **kwargs):
         """
         Test case for coupling of points, when the nodes are all on a plane. This is
@@ -461,7 +463,7 @@ class TestGeometricSearch(unittest.TestCase):
                     filter_nodes(create_flat_mesh().nodes, middle_nodes=False)
                 ),
                 algorithm=algorithm,
-                **kwargs
+                **kwargs,
             )
 
             # Apply the result conversion, so we check this functionality too.
@@ -487,25 +489,7 @@ class TestGeometricSearch(unittest.TestCase):
                 inverse_indices_ref,
             )
 
-    def test_find_close_points_dimension_scipy(self):
-        self.xtest_find_close_points_dimension(FindClosePointAlgorithm.kd_tree_scipy)
-
-    def test_find_close_points_dimension_brute_force_cython(self):
-        if cython_available:
-            self.xtest_find_close_points_dimension(
-                FindClosePointAlgorithm.brute_force_cython
-            )
-        else:
-            self.skipTest("Cython not available")
-
-    def test_find_close_points_dimension_boundary_volume_hierarchy_arborx(self):
-        if arborx_available:
-            self.xtest_find_close_points_dimension(
-                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-            )
-        else:
-            self.skipTest("Cython not available")
-
+    @geometric_search_add_tests
     def xtest_find_close_points_dimension(self, algorithm, **kwargs):
         """
         Test that the find_close_points function also works properly with
@@ -568,29 +552,7 @@ class TestGeometricSearch(unittest.TestCase):
             inverse_indices_ref,
         )
 
-    def test_find_close_points_tolerance_precision_scipy(self):
-        self.xtest_find_close_points_tolerance_precision(
-            FindClosePointAlgorithm.kd_tree_scipy
-        )
-
-    def test_find_close_points_tolerance_precision_brute_force_cython(self):
-        if cython_available:
-            self.xtest_find_close_points_tolerance_precision(
-                FindClosePointAlgorithm.brute_force_cython
-            )
-        else:
-            self.skipTest("Cython not available")
-
-    def test_find_close_points_tolerance_precision_boundary_volume_hierarchy_arborx(
-        self,
-    ):
-        if arborx_available:
-            self.xtest_find_close_points_tolerance_precision(
-                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-            )
-        else:
-            self.skipTest("Cython not available")
-
+    @geometric_search_add_tests
     def xtest_find_close_points_tolerance_precision(self, algorithm, **kwargs):
         """
         Test that the find_close_points tolerance works with a precision of at least 12.
@@ -604,9 +566,7 @@ class TestGeometricSearch(unittest.TestCase):
         coords[3, 0] += 5 * delta
 
         has_partner, _ = find_close_points(
-            coords,
-            algorithm=FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
-            tol=1.1 * delta,
+            coords, algorithm=algorithm, tol=1.1 * delta, **kwargs
         )
         self.assertTrue(np.array_equal(has_partner, [0, 0, 1, 1]))
 
