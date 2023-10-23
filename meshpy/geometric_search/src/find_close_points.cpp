@@ -68,9 +68,8 @@ namespace ArborX
             const GeometricSearch::CoordinatesClosestPoints<n_dim>& coordinates, std::size_t i)
         {
             // Return an ArborX point representing the point from the numpy array.
-            ArborX::ExperimentalHyperGeometry::Point<n_dim> point;
-            for (int d = 0; d < n_dim; ++d)
-                point[d] = (float)coordinates.coordinates_->operator()(i, d);
+            ArborX::ExperimentalHyperGeometry::Point<n_dim, double> point;
+            for (int d = 0; d < n_dim; ++d) point[d] = coordinates.coordinates_->operator()(i, d);
             return point;
         }
     };
@@ -90,12 +89,10 @@ namespace ArborX
         {
             // Create an ArborX sphere at the coordinates of the point here. The radius is the
             // tolerance for the closes point search.
-            // TODO: Use double as datatype.
-            ArborX::ExperimentalHyperGeometry::Point<n_dim> point;
-            for (int d = 0; d < n_dim; ++d)
-                point[d] = (float)coordinates.coordinates_->operator()(i, d);
-            return attach(intersects(ArborX::ExperimentalHyperGeometry::Sphere<n_dim>{
-                              point, (float)coordinates.tol_}),
+            ArborX::ExperimentalHyperGeometry::Point<n_dim, double> point;
+            for (int d = 0; d < n_dim; ++d) point[d] = coordinates.coordinates_->operator()(i, d);
+            return attach(intersects(ArborX::ExperimentalHyperGeometry::Sphere<n_dim, double>{
+                              point, coordinates.tol_}),
                 (int)i);
         }
     };
@@ -130,9 +127,10 @@ namespace GeometricSearch
         const CoordinatesClosestPoints<n_dim> coordinates_with_tol{&coordinates_unchecked, tol};
 
         // Build tree structure containing all points
-        using hyper_box = ArborX::ExperimentalHyperGeometry::Box<n_dim>;
-        ArborX::BasicBoundingVolumeHierarchy<memory_space, hyper_box> bounding_volume_hierarchy(
-            Kokkos::DefaultExecutionSpace{}, coordinates_with_tol);
+        using hyper_box = ArborX::ExperimentalHyperGeometry::Box<n_dim, double>;
+        ArborX::BasicBoundingVolumeHierarchy<memory_space,
+            ArborX::Details::PairIndexVolume<hyper_box>>
+            bounding_volume_hierarchy(Kokkos::DefaultExecutionSpace{}, coordinates_with_tol);
 
         // Perform the collision check
         Kokkos::View<int*, Kokkos::HostSpace> indices_arborx("indices_arborx", 0);

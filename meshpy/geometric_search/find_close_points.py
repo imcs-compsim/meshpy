@@ -127,7 +127,7 @@ def partner_indices_to_point_partners(partner_indices, n_points):
     return point_partners, len(partner_indices)
 
 
-def find_close_points(point_coordinates, *, algorithm=None, tol=1e-5, **kwargs):
+def find_close_points(point_coordinates, *, algorithm=None, tol=1e-8, **kwargs):
     """
     Find unique points in a point cloud, i.e., points that are within a certain tolerance
     of each other will be considered as unique.
@@ -145,8 +145,6 @@ def find_close_points(point_coordinates, *, algorithm=None, tol=1e-5, **kwargs):
         If the absolute distance between two points is smaller than tol, they
         are considered to be equal, i.e., tol is the hyper sphere radius that
         the point coordinates have to be within, to be identified as overlapping.
-        Be careful when using an arborx search algorithm, as the tolerance
-        there is of type float, not double.
 
     Return
     ----
