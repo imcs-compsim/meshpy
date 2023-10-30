@@ -883,7 +883,7 @@ class InputFile(Mesh):
 
         if (
             get_number_of_coupling_conditions(mpy.bc.point_coupling)
-            + get_number_of_coupling_conditions(mpy.bc.point_coupling)
+            + get_number_of_coupling_conditions(mpy.bc.point_coupling_penalty)
             > 0
         ):
             self.set_node_links()
