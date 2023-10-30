@@ -46,19 +46,18 @@ class Coupling(BoundaryConditionBase):
 
     def __init__(
         self,
-        geometry_set,
+        geometry,
         coupling_type,
         coupling_dof_type,
         check_overlapping_nodes=True,
         check_at_init=True,
         **kwargs,
     ):
-        """
-        Initialize this object.
+        """Initialize this object.
 
         Args
         ----
-        geometry_set: GeometrySet, [Nodes], int
+        geometry: GeometrySet, [Nodes], int
             Geometry that this boundary condition acts on.
         coupling_type: mpy.bc
             Type of point coupling.
@@ -74,40 +73,36 @@ class Coupling(BoundaryConditionBase):
             up when the coupling is read.
         """
 
-        if isinstance(geometry_set, int):
-            # This is the case if the boundary condition is read from an existing dat file.
+        if isinstance(geometry, int):
+            # This is the case if the boundary condition is read from an existing dat file
             pass
-        elif isinstance(geometry_set, GeometrySetBase):
+        elif isinstance(geometry, GeometrySetBase):
             pass
-        elif isinstance(geometry_set, list):
-            geometry_set = GeometrySet(geometry_set)
+        elif isinstance(geometry, list):
+            geometry = GeometrySet(geometry)
         else:
             raise TypeError(
-                "Coupling expects a GeometrySetBase item, got {}".format(
-                    type(geometry_set)
-                )
+                "Coupling expects a GeometrySetBase item, got {}".format(type(geometry))
             )
 
         # Couplings only work for point sets
         if (
-            isinstance(geometry_set, GeometrySetBase)
-            and geometry_set.geometry_type is not mpy.geo.point
+            isinstance(geometry, GeometrySetBase)
+            and geometry.geometry_type is not mpy.geo.point
         ):
             raise TypeError("Couplings are only implemented for point sets.")
 
-        super().__init__(geometry_set, bc_type=coupling_type, **kwargs)
+        super().__init__(geometry, bc_type=coupling_type, **kwargs)
         self.coupling_dof_type = coupling_dof_type
         self.check_overlapping_nodes = check_overlapping_nodes
 
         if check_at_init:
-            # Perform the checks on this boundary condition.
+            # Perform the checks on this boundary condition
             self.check()
 
     def check(self):
-        """
-        Check that all nodes that are coupled have the same position (depending
-        on the check_overlapping_nodes parameter and if the object does not
-        come from a dat file).
+        """Check that all nodes that are coupled have the same position (depending
+        on the check_overlapping_nodes parameter).
         """
 
         if not self.check_overlapping_nodes:
@@ -116,7 +111,7 @@ class Coupling(BoundaryConditionBase):
             nodes = self.geometry_set.get_points()
             pos = np.zeros([len(nodes), 3])
             for i, node in enumerate(nodes):
-                # Get the difference to the first node.
+                # Get the difference to the first node
                 pos[i, :] = node.coordinates - nodes[0].coordinates
             if np.linalg.norm(pos) > mpy.eps_pos:
                 raise ValueError(
@@ -124,8 +119,7 @@ class Coupling(BoundaryConditionBase):
                 )
 
     def _get_dat(self):
-        """
-        Return the dat line for this object. If no explicit string was given,
+        """Return the dat line for this object. If no explicit string was given,
         it depends on the coupling type as well as the beam type.
         """
 
@@ -169,3 +163,21 @@ class Coupling(BoundaryConditionBase):
             string = beam_baci_type.get_coupling_string(self.coupling_dof_type)
 
         return "E {} - {}".format(self.geometry_set.n_global, string)
+
+
+def coupling_factory(geometry, coupling_type, coupling_dof_type, **kwargs):
+    """Create coupling conditions for the nodes in geometry. Some solvers only allow
+    coupling conditions containing two points at once, in that case we have to create
+    multiple coupling conditions between the individual points to ensure the correct
+    representation of the coupling."""
+
+    if coupling_type is mpy.bc.point_coupling_penalty:
+        # Penalty point couplings in BACI can only contain two nodes. In this case
+        # we expect the given geometry to be a list of nodes.
+        main_node = geometry[0]
+        return [
+            Coupling([main_node, node], coupling_type, coupling_dof_type, **kwargs)
+            for node in geometry[1:]
+        ]
+    else:
+        return [Coupling(geometry, coupling_type, coupling_dof_type, **kwargs)]

@@ -51,7 +51,7 @@ from .element_beam import Beam
 from .geometry_set import GeometrySetBase, GeometrySet
 from .container import GeometryName, GeometrySetContainer, BoundaryConditionContainer
 from .boundary_condition import BoundaryConditionBase
-from .coupling import Coupling
+from .coupling import coupling_factory
 from .vtk_writer import VTKWriter
 from .utility import (
     find_close_nodes,
@@ -580,7 +580,9 @@ class Mesh(object):
 
                 # Check if nodes with the same rotations were found.
                 if n_partners == 0:
-                    self.add(Coupling(node_list, coupling_type, coupling_dof_type))
+                    self.add(
+                        coupling_factory(node_list, coupling_type, coupling_dof_type)
+                    )
                 else:
                     # There are nodes that need to be combined.
                     combining_nodes = []
@@ -614,7 +616,9 @@ class Mesh(object):
                     # Add the coupling nodes.
                     if len(coupling_nodes) > 1:
                         self.add(
-                            Coupling(coupling_nodes, coupling_type, coupling_dof_type)
+                            coupling_factory(
+                                coupling_nodes, coupling_type, coupling_dof_type
+                            )
                         )
 
                     # Replace the identical nodes.
@@ -626,7 +630,7 @@ class Mesh(object):
         else:
             # Connect close nodes with a coupling.
             for node_list in partner_nodes:
-                self.add(Coupling(node_list, coupling_type, coupling_dof_type))
+                self.add(coupling_factory(node_list, coupling_type, coupling_dof_type))
 
     def unlink_nodes(self):
         """Delete the linked arrays and global indices in all nodes."""
