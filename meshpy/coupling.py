@@ -53,8 +53,7 @@ class Coupling(BoundaryConditionBase):
         check_at_init=True,
         **kwargs,
     ):
-        """
-        Initialize this object.
+        """Initialize this object.
 
         Args
         ----
@@ -75,7 +74,7 @@ class Coupling(BoundaryConditionBase):
         """
 
         if isinstance(geometry, int):
-            # This is the case if the boundary condition is read from an existing dat file.
+            # This is the case if the boundary condition is read from an existing dat file
             pass
         elif isinstance(geometry, GeometrySetBase):
             pass
@@ -98,13 +97,12 @@ class Coupling(BoundaryConditionBase):
         self.check_overlapping_nodes = check_overlapping_nodes
 
         if check_at_init:
-            # Perform the checks on this boundary condition.
+            # Perform the checks on this boundary condition
             self.check()
 
     def check(self):
-        """
-        Check that all nodes that are coupled have the same position (depending
-        on the check_overlapping_nodes parameter.
+        """Check that all nodes that are coupled have the same position (depending
+        on the check_overlapping_nodes parameter).
         """
 
         if not self.check_overlapping_nodes:
@@ -113,7 +111,7 @@ class Coupling(BoundaryConditionBase):
             nodes = self.geometry_set.get_points()
             pos = np.zeros([len(nodes), 3])
             for i, node in enumerate(nodes):
-                # Get the difference to the first node.
+                # Get the difference to the first node
                 pos[i, :] = node.coordinates - nodes[0].coordinates
             if np.linalg.norm(pos) > mpy.eps_pos:
                 raise ValueError(
@@ -121,8 +119,7 @@ class Coupling(BoundaryConditionBase):
                 )
 
     def _get_dat(self):
-        """
-        Return the dat line for this object. If no explicit string was given,
+        """Return the dat line for this object. If no explicit string was given,
         it depends on the coupling type as well as the beam type.
         """
 
