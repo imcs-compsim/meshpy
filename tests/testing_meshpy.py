@@ -2123,27 +2123,79 @@ class TestMeshpy(unittest.TestCase):
         node correctly, therefore we check this here.
         """
 
-        # Create mesh object.
+        # Create mesh object
         mesh = InputFile()
         mat = MaterialReissner()
         mesh.add(mat)
 
         # Add two beams to create an elbow structure. The beams each have a
-        # node at the intersection.
+        # node at the intersection
         create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0])
         create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [1, 0, 0], [1, 1, 0])
 
         # Call coupling twice -> this will create two coupling objects for the
-        # corner node.
+        # corner node
         mesh.couple_nodes()
         mesh.couple_nodes()
 
-        # Create the input file. This will cause an error, as there are two
-        # couplings for one node.
+        # Create the input file
         ref_file = os.path.join(testing_input, "test_check_two_couplings_reference.dat")
         compare_strings(
             self,
             "test_check_two_couplings",
+            ref_file,
+            mesh.get_string(header=False),
+        )
+
+    def xtest_meshpy_check_multiple_node_penalty_coupling(self, reuse_nodes=True):
+        """For point penalty coupling constraints, we add multiple coupling conditions.
+        This is checked in this test case. This method creates the flag reuse_nodes
+        decides if equal nodes are unified to a single node."""
+
+        # Create mesh object
+        mesh = InputFile()
+        mat = MaterialReissner()
+        mesh.add(mat)
+
+        # Add three beams that have one common point
+        create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0])
+        create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [1, 0, 0], [2, 0, 0])
+        create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [1, 0, 0], [2, -1, 0])
+
+        mesh.couple_nodes(
+            reuse_matching_nodes=reuse_nodes,
+            coupling_type=mpy.bc.point_coupling_penalty,
+        )
+        return mesh
+
+    def test_meshpy_check_multiple_node_penalty_coupling_reuse(self):
+        """Test the xtest_meshpy_check_multiple_node_penalty_coupling test and replace
+        equal nodes."""
+
+        mesh = self.xtest_meshpy_check_multiple_node_penalty_coupling(reuse_nodes=True)
+        ref_file = os.path.join(
+            testing_input,
+            "test_meshpy_check_multiple_node_penalty_coupling_reuse_reference.dat",
+        )
+        compare_strings(
+            self,
+            "test_meshpy_check_multiple_node_penalty_coupling_reuse",
+            ref_file,
+            mesh.get_string(header=False),
+        )
+
+    def test_meshpy_check_multiple_node_penalty_coupling(self):
+        """Test the xtest_meshpy_check_multiple_node_penalty_coupling test and do not
+        replace equal nodes."""
+
+        mesh = self.xtest_meshpy_check_multiple_node_penalty_coupling(reuse_nodes=False)
+        ref_file = os.path.join(
+            testing_input,
+            "test_meshpy_check_multiple_node_penalty_coupling_reference.dat",
+        )
+        compare_strings(
+            self,
+            "test_meshpy_check_multiple_node_penalty_coupling",
             ref_file,
             mesh.get_string(header=False),
         )
