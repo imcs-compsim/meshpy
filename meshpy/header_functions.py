@@ -355,7 +355,7 @@ def set_beam_to_solid_meshtying(
     bts.add(
         """
         GEOMETRY_PAIR_STRATEGY {}
-        GEOMETRY_PAIR_SEARCH_POINTS {}
+        GEOMETRY_PAIR_SEGMENTATION_SEARCH_POINTS {}
         """.format(
             segmentation_strategy, segmentation_search_points
         ),

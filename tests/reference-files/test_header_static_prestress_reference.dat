@@ -57,7 +57,7 @@ GAUSS_POINTS                          6
 CONTACT_DISCRETIZATION                mortar
 MORTAR_SHAPE_FUNCTION                 None
 GEOMETRY_PAIR_STRATEGY                segmentation
-GEOMETRY_PAIR_SEARCH_POINTS           2
+GEOMETRY_PAIR_SEGMENTATION_SEARCH_POINTS   2
 COUPLE_RESTART_STATE                  yes
 --------------------------------BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING
 CONSTRAINT_STRATEGY                   penalty
@@ -65,7 +65,7 @@ PENALTY_PARAMETER                     None
 GAUSS_POINTS                          6
 CONTACT_DISCRETIZATION                gauss_point_to_segment
 GEOMETRY_PAIR_STRATEGY                gauss_point_projection_without_boundary_segmentation
-GEOMETRY_PAIR_SEARCH_POINTS           2
+GEOMETRY_PAIR_SEGMENTATION_SEARCH_POINTS   2
 ----------------------------------------------------------STRUCT NOX/Status Test
 XML File                            = NOT_DEFINED
 -----------------------------------------------------------------------MATERIALS
