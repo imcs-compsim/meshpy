@@ -53,10 +53,7 @@ from meshpy.mesh_creation_functions import (
 )
 
 # Testing imports
-from testing_utility import (
-    testing_input,
-    compare_strings,
-)
+from testing_utility import testing_input, compare_test_result
 
 
 class TestNurbsMeshCreationFunction(unittest.TestCase):
@@ -64,7 +61,7 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
     Test the Nurbs Mesh creation functions
     """
 
-    def test_hollow_cylinder_segment_2d(self):
+    def test_nurbs_hollow_cylinder_segment_2d(self):
         """Test the creation of a two dimensional hollow cylinder segment"""
 
         # Create the surface of a quarter of a hollow cylinder
@@ -93,17 +90,9 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         input_file.add(patch_set)
 
         # Compare with the reference file
-        compare_strings(
-            self,
-            "test_meshpy_create_nurbs_hollow_cylinder_segment_2d",
-            os.path.join(
-                testing_input,
-                "test_meshpy_create_nurbs_hollow_cylinder_segment_2d_reference.dat",
-            ),
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_create_nurbs_flat_plate_2d(self):
+    def test_nurbs_flat_plate_2d(self):
         """Test the creation of a two dimensional flat plate"""
 
         # Create the surface of a flat plate
@@ -130,16 +119,9 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         input_file.add(patch_set)
 
         # Compare with the reference file
-        compare_strings(
-            self,
-            "test_meshpy_create_nurbs_flat_plate_2d",
-            os.path.join(
-                testing_input, "test_meshpy_create_nurbs_flat_plate_2d_reference.dat"
-            ),
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_create_nurbs_brick(self):
+    def test_nurbs_brick(self):
         """Test the creation of a brick"""
 
         # Create the surface of a flat plate
@@ -164,14 +146,9 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         input_file.add(patch_set)
 
         # Compare with the reference file
-        compare_strings(
-            self,
-            "test_meshpy_create_nurbs_brick",
-            os.path.join(testing_input, "test_meshpy_create_nurbs_brick_reference.dat"),
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_rotation_nurbs_surface_mesh(self):
+    def test_nurbs_rotation_nurbs_surface(self):
         """Test the rotation of a NURBS mesh"""
 
         # Create the surface
@@ -201,16 +178,9 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         input_file.rotate(Rotation([1, 2, 3], np.pi * 7 / 6))
 
         # Compare with the reference file
-        compare_strings(
-            self,
-            "test_meshpy_rotation_nurbs_surface_mesh",
-            os.path.join(
-                testing_input, "test_meshpy_rotation_nurbs_surface_mesh_reference.dat"
-            ),
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_translate_nurbs_surface_mesh(self):
+    def test_nurbs_translate_nurbs_surface(self):
         """Test the translation of a NURBS surface mesh"""
 
         # Create the surface
@@ -238,16 +208,9 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         input_file.translate([-1.6, -2.3, 3.7])
 
         # Compare with the reference file
-        compare_strings(
-            self,
-            "test_meshpy_translate_nurbs_surface_mesh",
-            os.path.join(
-                testing_input, "test_meshpy_translate_nurbs_surface_mesh_reference.dat"
-            ),
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_couple_nurbs_meshes(self):
+    def test_nurbs_couple_nurbs_meshes(self):
         """Test the coupling of NURBS surface meshes"""
 
         # Create input file
@@ -293,14 +256,7 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         input_file.couple_nodes(reuse_matching_nodes=True)
 
         # Compare with the reference file
-        compare_strings(
-            self,
-            "test_meshpy_couple_nurbs_meshes",
-            os.path.join(
-                testing_input, "test_meshpy_couple_nurbs_meshes_reference.dat"
-            ),
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
 
 if __name__ == "__main__":

@@ -142,30 +142,34 @@ def compare_string_tolerance(reference, compare, tol):
     return True
 
 
-def compare_test_result(self, result_string, *, extension="dat", index=None, **kwargs):
+def compare_test_result(
+    self, result_string, *, extension="dat", additional_identifier=None, **kwargs
+):
     """
     Compare a created string in a test with the reference results. The reference results
     are stored in a file made up of the test name.
 
     Args
     ----
-    index: int
+    additional_identifier: str
         This can be set if there are more than 1 reference files for a single test
     extension: str
         File extension of the reference file
     """
 
     reference_file_name = self._testMethodName
-    if index is not None:
-        reference_file_name + f"_{index}"
-    reference_file_name += "_reference." + extension
+    if additional_identifier is not None:
+        reference_file_name += f"_{additional_identifier}"
+    reference_file_name += "_reference"
+    if extension is not None:
+        reference_file_name += "." + extension
     reference_file_path = os.path.join(testing_input, reference_file_name)
 
     # Compare the results
-    compare_strings(self, None, reference_file_path, result_string, **kwargs)
+    compare_strings(self, reference_file_path, result_string, **kwargs)
 
 
-def compare_strings(self, name, reference, compare, *, tol=None):
+def compare_strings(self, reference, compare, *, tol=None):
     """
     Compare two stings. If they are not identical open meld and show the
     differences.
@@ -206,14 +210,18 @@ def compare_strings(self, name, reference, compare, *, tol=None):
         if reference_is_file:
             reference_file = reference
         else:
-            reference_file = os.path.join(testing_temp, "{}_reference.dat".format(name))
+            reference_file = os.path.join(
+                testing_temp, "{}_reference.dat".format(self._testMethodName)
+            )
             with open(reference_file, "w") as input_file:
                 input_file.write(reference_string)
 
         if compare_is_file:
             compare_file = compare
         else:
-            compare_file = os.path.join(testing_temp, "{}_compare.dat".format(name))
+            compare_file = os.path.join(
+                testing_temp, "{}_compare.dat".format(self._testMethodName)
+            )
             with open(compare_file, "w") as input_file:
                 input_file.write(compare_string)
 
@@ -226,10 +234,10 @@ def compare_strings(self, name, reference, compare, *, tol=None):
             result = subprocess.run(
                 ["diff", reference_file, compare_file], stdout=subprocess.PIPE
             )
-            name += "\n\nDiff:\n" + result.stdout.decode("utf-8")
+            self._testMethodName += "\n\nDiff:\n" + result.stdout.decode("utf-8")
 
     # Check the results.
-    self.assertTrue(is_equal, name)
+    self.assertTrue(is_equal, self._testMethodName)
 
 
 def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
