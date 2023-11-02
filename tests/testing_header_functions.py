@@ -48,7 +48,7 @@ from meshpy.header_functions import (
 )
 
 # Testing imports.
-from testing_utility import testing_input, compare_strings
+from testing_utility import compare_test_result
 
 
 class TestHeaderFunctions(unittest.TestCase):
@@ -56,7 +56,7 @@ class TestHeaderFunctions(unittest.TestCase):
     Test the header functions.
     """
 
-    def test_static(self):
+    def test_header_functions_static(self):
         """
         Test the default static header function.
         """
@@ -101,15 +101,9 @@ class TestHeaderFunctions(unittest.TestCase):
         )
 
         # Check the output.
-        ref_file = os.path.join(testing_input, "test_header_static_reference.dat")
-        compare_strings(
-            self,
-            "test_header_static",
-            ref_file,
-            input_file.get_string(header=False, check_nox=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False, check_nox=False))
 
-    def test_static_prestress(self):
+    def test_header_functions_static_prestress(self):
         """
         Test the static header function with non default prestressing
         parameter.
@@ -148,17 +142,9 @@ class TestHeaderFunctions(unittest.TestCase):
         )
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, "test_header_static_prestress_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_header_static_prestress",
-            ref_file,
-            input_file.get_string(header=False, check_nox=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False, check_nox=False))
 
-    def test_stress_output(self):
+    def test_header_functions_stress_output(self):
         """
         Test the static header function with non default stress output
         parameter.
@@ -182,15 +168,7 @@ class TestHeaderFunctions(unittest.TestCase):
         set_runtime_output(input_file, output_stress_strain=True)
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, "test_header_stress_output_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_header_stress_output",
-            ref_file,
-            input_file.get_string(header=False, check_nox=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False, check_nox=False))
 
 
 if __name__ == "__main__":

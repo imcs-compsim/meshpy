@@ -67,7 +67,7 @@ from meshpy.mesh_creation_functions import (
 )
 
 # Testing imports.
-from testing_utility import testing_input, compare_strings
+from testing_utility import testing_input, compare_test_result
 
 
 class TestMeshCreationFunctions(unittest.TestCase):
@@ -75,7 +75,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
     Test the mesh creation functions.
     """
 
-    def test_arc_segment(self):
+    def test_mesh_creation_functions_arc_segment(self):
         """Create a circular segment and compare it with the reference file."""
 
         # Create input file.
@@ -101,12 +101,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
         input_file.add(BoundaryCondition(mesh["end"], "rb", bc_type=mpy.bc.neumann))
 
         # Check the output.
-        ref_file = os.path.join(testing_input, "test_meshpy_segment_reference.dat")
-        compare_strings(
-            self, "test_meshpy_segment", ref_file, input_file.get_string(header=False)
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_arc_segment_2d(self):
+    def test_mesh_creation_functions_arc_segment_2d(self):
         """
         Create a circular segments in 2D.
         """
@@ -151,12 +148,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
         input_file.add(BoundaryCondition(mesh2["end"], "rb4", bc_type=mpy.bc.neumann))
 
         # Check the output.
-        ref_file = os.path.join(testing_input, "test_meshpy_segment_2d_reference.dat")
-        compare_strings(
-            self, "test_meshpy_segment", ref_file, input_file.get_string(header=False)
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_stent(self):
+    def test_mesh_creation_functions_stent(self):
         """
         Test the stent creation function.
         """
@@ -187,16 +181,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
         )
 
         # Check the output.
-        ref_file = os.path.join(testing_input, "test_mesh_stent_reference.dat")
-        compare_strings(
-            self,
-            "test_mesh_stent",
-            ref_file,
-            input_file.get_string(header=False),
-            tol=1e-10,
-        )
+        compare_test_result(self, input_file.get_string(header=False), tol=1e-10)
 
-    def test_fibers_in_rectangle(self):
+    def test_mesh_creation_functions_fibers_in_rectangle(self):
         """
         Test the create_fibers_in_rectangle function.
         """
@@ -227,17 +214,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
         input_file.translate([0, 0, 1])
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, "test_mesh_fiber_rectangle_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_mesh_fiber_rectangle",
-            ref_file,
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_fibers_in_rectangle_reference_point(self):
+    def test_mesh_creation_functions_fibers_in_rectangle_reference_point(self):
         """
         Test the create_fibers_in_rectangle function with using the reference_point
         option.
@@ -268,17 +247,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
         )
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, "test_mesh_fiber_rectangle_reference_point_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_mesh_fiber_rectangle_reference_point",
-            ref_file,
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_fibers_in_rectangle_return_set(self):
+    def test_mesh_creation_functions_fibers_in_rectangle_return_set(self):
         """
         Test the set returned by the create_fibers_in_rectangle function.
         """
@@ -297,17 +268,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
         input_file.add(beam_set)
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, "test_mesh_fiber_rectangle_return_sets_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_mesh_fiber_return_sets_rectangle",
-            ref_file,
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_wire(self):
+    def test_mesh_creation_functions_wire(self):
         """
         Test the create_wire_fibers function
         """
@@ -330,12 +293,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
         input_file.add(mesh_1, mesh_2, set_1, set_2)
 
         # Check the output.
-        ref_file = os.path.join(testing_input, "test_mesh_wire_reference.dat")
-        compare_strings(
-            self, "test_mesh_wire", ref_file, input_file.get_string(header=False)
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_nurbs(self):
+    def test_mesh_creation_functions_nurbs(self):
         """
         Test the create_beam_mesh_from_nurbs function.
         """
@@ -359,12 +319,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
         # Check the output.
         input_file = InputFile()
         input_file.add(mesh)
-        ref_file = os.path.join(testing_input, "test_mesh_nurbs_reference.dat")
-        compare_strings(
-            self, "test_mesh_nurbs", ref_file, input_file.get_string(header=False)
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_node_continuation(self):
+    def test_mesh_creation_functions_node_continuation(self):
         """Test that the node continuation function work as expected."""
 
         from meshpy.node import NodeCosserat
@@ -415,15 +372,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
         # Check the geometry
         input_file = InputFile()
         input_file.add(mesh)
-        ref_file = os.path.join(testing_input, "test_node_continuation_reference.dat")
-        compare_strings(
-            self,
-            "test_node_continuation",
-            ref_file,
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_element_length_option(self):
+    def test_mesh_creation_functions_element_length_option(self):
         """Test that the element length can be specified in the beam creation functions"""
 
         input_file = InputFile()
@@ -491,16 +442,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
 
         # Check the output
         input_file.add(mesh_line, mesh_line_long, mesh_arc, mesh_curve)
-        ref_file = os.path.join(
-            testing_input, "test_mesh_element_length_option_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_mesh_element_length_option",
-            ref_file,
-            input_file.get_string(header=False),
-            tol=1e-10,
-        )
+        compare_test_result(self, input_file.get_string(header=False), tol=1e-10)
 
         # Check error messages for input parameters
         with self.assertRaises(ValueError):

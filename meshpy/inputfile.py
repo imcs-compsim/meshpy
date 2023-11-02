@@ -317,7 +317,7 @@ class InputFile(Mesh):
         "END",
     ]
 
-    def __init__(self, description=None, dat_file=None, cubit=None):
+    def __init__(self, *, description=None, dat_file=None, cubit=None):
         """
         Initialize the input file.
 

@@ -90,6 +90,7 @@ from testing_utility import (
     testing_temp,
     testing_input,
     compare_strings,
+    compare_test_result,
     compare_vtk,
 )
 
@@ -142,7 +143,7 @@ class TestMeshpy(unittest.TestCase):
         # Set default values for global parameters.
         mpy.set_default_values()
 
-    def test_mesh_rotations(self):
+    def test_meshpy_rotations(self):
         """
         Check if the Mesh function rotation gives the same results as rotating
         each node it self.
@@ -169,13 +170,10 @@ class TestMeshpy(unittest.TestCase):
 
         # Compare the output for the two meshes.
         compare_strings(
-            self,
-            "test_meshpy_rotate_mesh",
-            mesh_1.get_string(header=False),
-            mesh_2.get_string(header=False),
+            self, mesh_1.get_string(header=False), mesh_2.get_string(header=False)
         )
 
-    def test_mesh_rotations_individual(self):
+    def test_meshpy_mesh_rotations_individual(self):
         """
         Check if the Mesh function rotation gives the same results as rotating
         each node it self, when an array is passed with different rotations.
@@ -205,13 +203,10 @@ class TestMeshpy(unittest.TestCase):
 
         # Compare the output for the two meshes.
         compare_strings(
-            self,
-            "test_meshpy_rotate_mesh_individually",
-            mesh_1.get_string(header=False),
-            mesh_2.get_string(header=False),
+            self, mesh_1.get_string(header=False), mesh_2.get_string(header=False)
         )
 
-    def test_mesh_reflection(self):
+    def test_meshpy_mesh_reflection(self):
         """Check the Mesh().reflect function."""
 
         def compare_reflection(origin=False, flip=False):
@@ -289,10 +284,7 @@ class TestMeshpy(unittest.TestCase):
 
             # Compare the dat files.
             compare_strings(
-                self,
-                "test_meshpy_reflect_origin_{}_flip_{}".format(origin, flip),
-                mesh_ref.get_string(header=False),
-                mesh.get_string(header=False),
+                self, mesh_ref.get_string(header=False), mesh.get_string(header=False)
             )
 
         # Compare all 4 possible variations.
@@ -300,21 +292,7 @@ class TestMeshpy(unittest.TestCase):
             for origin in [True, False]:
                 compare_reflection(origin=origin, flip=flip)
 
-    def test_comments_in_solid(self):
-        """Test case with full classical import."""
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_comments_in_input_file_reference.dat"
-        )
-        self.create_comments_in_solid(ref_file, False)
-
-    def test_comments_in_solid_full(self):
-        """Test case with full solid import."""
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_comments_in_input_file_full_reference.dat"
-        )
-        self.create_comments_in_solid(ref_file, True)
-
-    def create_comments_in_solid(self, ref_file, full_import):
+    def create_comments_in_solid(self, full_import):
         """
         Check if comments in the solid file are handled correctly if they are
         inside a mesh section.
@@ -323,9 +301,7 @@ class TestMeshpy(unittest.TestCase):
         # Convert the solid mesh to meshpy objects.
         mpy.import_mesh_full = full_import
 
-        solid_file = os.path.join(
-            testing_input, "test_meshpy_comments_in_input_file.dat"
-        )
+        solid_file = os.path.join(testing_input, "test_meshpy_comments_in_solid.dat")
         mesh = InputFile(dat_file=solid_file)
 
         # Add one element with BCs.
@@ -335,13 +311,15 @@ class TestMeshpy(unittest.TestCase):
         mesh.add(BoundaryCondition(sets["end"], "test", bc_type=mpy.bc.neumann))
 
         # Compare the output of the mesh.
-        if full_import:
-            full_name = "create_comments_in_solid_full"
-        else:
-            full_name = "create_comments_in_solid"
-        compare_strings(
-            self, full_name, ref_file, mesh.get_string(header=False).strip()
-        )
+        compare_test_result(self, mesh.get_string(header=False).strip())
+
+    def test_meshpy_comments_in_solid(self):
+        """Test case with full classical import."""
+        self.create_comments_in_solid(False)
+
+    def test_meshpy_comments_in_solid_full(self):
+        """Test case with full solid import."""
+        self.create_comments_in_solid(True)
 
     def test_meshpy_mesh_transformations_with_solid(self):
         """Test the different mesh transformation methods in combination with solid elements."""
@@ -390,11 +368,10 @@ class TestMeshpy(unittest.TestCase):
                 + ("full" if import_full else "dat")
                 + "_reference.dat",
             )
-            compare_strings(
+            compare_test_result(
                 self,
-                "test_meshpy_mesh_transformations_with_solid",
-                ref_file,
                 mesh.get_string(header=False),
+                additional_identifier="full" if import_full else "dat",
             )
 
         base_test_mesh_translations(import_full=False, radius=None)
@@ -421,7 +398,7 @@ class TestMeshpy(unittest.TestCase):
             reflect=False,
         )
 
-    def test_using_fluid_element_section(self):
+    def test_meshpy_fluid_element_section(self):
         """Add beam elements to an input file containing fluid elements"""
 
         input_file = InputFile(
@@ -438,17 +415,9 @@ class TestMeshpy(unittest.TestCase):
         input_file.add(beam_mesh)
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_mesh_beam_with_fluid_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_meshpy_mesh_beam_with_fluid",
-            ref_file,
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_domain_geometry_sets(self):
+    def test_meshpy_domain_geometry_sets(self):
         """Add geometry set based on a baci internal domain"""
 
         input_file = InputFile()
@@ -469,14 +438,9 @@ class TestMeshpy(unittest.TestCase):
         )
 
         # Compare the output of the mesh.
-        compare_strings(
-            self,
-            "test_domain_geometry_sets",
-            os.path.join(testing_input, "test_domain_geometry_sets_reference.dat"),
-            input_file.get_string(header=False).strip(),
-        )
+        compare_test_result(self, input_file.get_string(header=False).strip())
 
-    def test_wrap_cylinder_not_on_same_plane(self):
+    def test_meshpy_wrap_cylinder_not_on_same_plane(self):
         """Create a helix that is itself wrapped around a cylinder."""
 
         # Ignore the warnings from wrap around cylinder.
@@ -508,17 +472,9 @@ class TestMeshpy(unittest.TestCase):
         mesh.wrap_around_cylinder(radius=2.0)
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_wrap_cylinder_not_on_same_plane_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_meshpy_wrap_cylinder_not_on_same_plane",
-            ref_file,
-            mesh.get_string(header=False),
-        )
+        compare_test_result(self, mesh.get_string(header=False))
 
-    def test_get_nodes_by_function(self):
+    def test_meshpy_get_nodes_by_function(self):
         """
         Check if the get_nodes_by_function method of Mesh works properly.
         """
@@ -543,7 +499,7 @@ class TestMeshpy(unittest.TestCase):
         for node in nodes:
             self.assertTrue(np.abs(1.0 - node.coordinates[0]) < 1e-10)
 
-    def test_get_min_max_coordinates(self):
+    def test_meshpy_get_min_max_coordinates(self):
         """
         Test if the get_min_max_coordinates function works properly.
         """
@@ -563,7 +519,7 @@ class TestMeshpy(unittest.TestCase):
         ref_solution = [-0.5, -1.0, -1.5, 2.0, 3.0, 4.0]
         self.assertTrue(np.linalg.norm(min_max - ref_solution) < 1e-10)
 
-    def test_curve_3d_helix(self):
+    def test_meshpy_curve_3d_helix(self):
         """
         Create a helix from a parametric curve where the parameter is
         transformed so the arc length along the beam is not proportional to
@@ -620,17 +576,9 @@ class TestMeshpy(unittest.TestCase):
         )
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_curve_3d_helix_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_meshpy_curve_3d_helix",
-            ref_file,
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_curve_2d_sin(self):
+    def test_meshpy_curve_2d_sin(self):
         """Create a sin from a parametric curve."""
 
         # Create input file.
@@ -670,15 +618,9 @@ class TestMeshpy(unittest.TestCase):
         input_file.add(BoundaryCondition(sin_set["end"], "BC2", bc_type=mpy.bc.neumann))
 
         # Check the output.
-        ref_file = os.path.join(testing_input, "test_meshpy_curve_2d_sin_reference.dat")
-        compare_strings(
-            self,
-            "test_meshpy_curve_2d_sin",
-            ref_file,
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_geometry_sets(self):
+    def test_meshpy_geometry_sets(self):
         """Test functionality of the GeometrySet objects"""
 
         mesh = InputFile()
@@ -699,17 +641,9 @@ class TestMeshpy(unittest.TestCase):
         mesh.add(set_1, set_2, set_12, set_3)
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_geometry_sets_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_geometry_sets",
-            ref_file,
-            mesh.get_string(header=False),
-        )
+        compare_test_result(self, mesh.get_string(header=False))
 
-    def test_curve_3d_curve_rotation(self):
+    def test_meshpy_curve_3d_curve_rotation(self):
         """Create a line from a parametric curve and prescribe the rotation."""
 
         # AD.
@@ -753,17 +687,9 @@ class TestMeshpy(unittest.TestCase):
         input_file.add(BoundaryCondition(sin_set["end"], "BC2", bc_type=mpy.bc.neumann))
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_curve_3d_line_rotation_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_meshpy_curve_3d_line_rotation",
-            ref_file,
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_curve_3d_line(self):
+    def test_meshpy_curve_3d_line(self):
         """
         Create a line from a parametric curve. Once the interval is in
         ascending order, once in descending. This tests checks that the
@@ -814,17 +740,9 @@ class TestMeshpy(unittest.TestCase):
             )
 
         # Check the output.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_curve_3d_line_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_meshpy_curve_3d_line",
-            ref_file,
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_reissner_beam(self):
+    def test_meshpy_reissner_beam(self):
         """
         Test that the input file for all types of Reissner beams is generated
         correctly.
@@ -850,14 +768,9 @@ class TestMeshpy(unittest.TestCase):
             )
 
         # Compare with the reference solution.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_reissner_beam_reference.dat"
-        )
-        compare_strings(
-            self, "test_reissner_beam", ref_file, input_file.get_string(header=False)
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_reissner_elasto_plastic(self):
+    def test_meshpy_reissner_elasto_plastic(self):
         """Test the elasto plastic Reissner beam material"""
 
         kwargs = {
@@ -881,7 +794,7 @@ class TestMeshpy(unittest.TestCase):
         mat.n_global = 69
         self.assertEqual(mat.get_dat_lines(), [ref_string + "1"])
 
-    def test_kirchhoff_beam(self):
+    def test_meshpy_kirchhoff_beam(self):
         """
         Test that the input file for all types of Kirchhoff beams is generated
         correctly.
@@ -934,14 +847,9 @@ class TestMeshpy(unittest.TestCase):
                         input_file.translate([0, 0.5, 0])
 
         # Compare with the reference solution.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_kirchhoff_beam_reference.dat"
-        )
-        compare_strings(
-            self, "test_kirchhoff_beam", ref_file, input_file.get_string(header=False)
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_euler_bernoulli_beam(self):
+    def test_meshpy_euler_bernoulli(self):
         """
         Recreate the baci test case beam3eb_static_endmoment_quartercircle.dat
         This tests the implementation for Euler Bernoulli beams.
@@ -980,15 +888,7 @@ class TestMeshpy(unittest.TestCase):
         )
 
         # Compare with the reference solution.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_euler_bernoulli_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_meshpy_euler_bernoulli",
-            ref_file,
-            input_file.get_string(header=False, check_nox=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False, check_nox=False))
 
         # Test consistency checks.
         rot = Rotation([1, 2, 3], 2.3434)
@@ -1005,7 +905,7 @@ class TestMeshpy(unittest.TestCase):
             # director between the nodes.
             input_file.get_string(header=False)
 
-    def test_close_beam(self):
+    def test_meshpy_close_beam(self):
         """
         Create a circle with different methods.
         - Create the mesh manually by creating the nodes and connecting them to
@@ -1164,108 +1064,87 @@ class TestMeshpy(unittest.TestCase):
             }
 
         # Check the meshes without additional rotation.
-        ref_file = os.path.join(testing_input, "test_meshpy_close_beam_reference.dat")
-
-        compare_strings(
-            self,
-            "test_meshpy_close_beam_manual",
-            ref_file,
-            create_mesh_manually(Rotation()).get_string(header=False),
+        compare_test_result(
+            self, create_mesh_manually(Rotation()).get_string(header=False)
         )
-        compare_strings(
+        compare_test_result(
             self,
-            "test_meshpy_close_beam_full_segment",
-            ref_file,
             one_full_circle_closed(
                 create_beam_mesh_arc_segment, get_arguments_arc_segment(0)
             ).get_string(header=False),
         )
-        compare_strings(
+        compare_test_result(
             self,
-            "test_meshpy_close_beam_split_segment",
-            ref_file,
             two_half_circles_closed(
                 create_beam_mesh_arc_segment,
                 [get_arguments_arc_segment(1), get_arguments_arc_segment(2)],
             ).get_string(header=False),
         )
-        compare_strings(
+        compare_test_result(
             self,
-            "test_meshpy_close_beam_full_curve",
-            ref_file,
             one_full_circle_closed(
                 create_beam_mesh_curve, get_arguments_curve(0)
             ).get_string(header=False),
         )
-        compare_strings(
+        compare_test_result(
             self,
-            "test_meshpy_close_beam_split_curve",
-            ref_file,
             two_half_circles_closed(
                 create_beam_mesh_curve, [get_arguments_curve(1), get_arguments_curve(2)]
             ).get_string(header=False),
         )
 
         # Check the meshes with additional rotation.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_close_beam_rotated_reference.dat"
-        )
-
-        compare_strings(
+        additional_identifier = "rotation"
+        compare_test_result(
             self,
-            "test_meshpy_close_beam_manual_rotation",
-            ref_file,
             create_mesh_manually(additional_rotation).get_string(header=False),
+            additional_identifier=additional_identifier,
         )
-        compare_strings(
+        compare_test_result(
             self,
-            "test_meshpy_close_beam_full_segment_rotation",
-            ref_file,
             one_full_circle_closed(
                 create_beam_mesh_arc_segment,
                 get_arguments_arc_segment(0),
                 additional_rotation=additional_rotation,
             ).get_string(header=False),
+            additional_identifier=additional_identifier,
         )
-        compare_strings(
+        compare_test_result(
             self,
-            "test_meshpy_close_beam_split_segment_rotation",
-            ref_file,
             two_half_circles_closed(
                 create_beam_mesh_arc_segment,
                 [get_arguments_arc_segment(1), get_arguments_arc_segment(2)],
                 additional_rotation=additional_rotation,
             ).get_string(header=False),
+            additional_identifier=additional_identifier,
         )
-        compare_strings(
+        compare_test_result(
             self,
-            "test_meshpy_close_beam_full_curve_rotation",
-            ref_file,
             one_full_circle_closed(
                 create_beam_mesh_curve,
                 get_arguments_curve(0),
                 additional_rotation=additional_rotation,
             ).get_string(header=False),
+            additional_identifier=additional_identifier,
         )
-        compare_strings(
+        compare_test_result(
             self,
-            "test_meshpy_close_beam_split_curve_rotation",
-            ref_file,
             two_half_circles_closed(
                 create_beam_mesh_curve,
                 [get_arguments_curve(1), get_arguments_curve(2)],
                 additional_rotation=additional_rotation,
             ).get_string(header=False),
+            additional_identifier=additional_identifier,
         )
 
-    def test_replace_nodes_geometry_set(self):
+    def test_meshpy_replace_nodes_geometry_set(self):
         """
         Test case for coupling of nodes, and reusing the identical nodes.
         This test case uses geometry-based sets.
         """
         self.x_test_replace_nodes(False)
 
-    def test_replace_nodes_geometry_set_nodes(self):
+    def test_meshpy_replace_nodes_geometry_set_nodes(self):
         """
         Test case for coupling of nodes, and reusing the identical nodes.
         This test case uses node-based sets.
@@ -1345,7 +1224,6 @@ class TestMeshpy(unittest.TestCase):
         # Compare the meshes.
         compare_strings(
             self,
-            "test_replace_nodes_case_1",
             mesh_ref.get_string(header=False),
             mesh_couple.get_string(header=False),
         )
@@ -1382,7 +1260,6 @@ class TestMeshpy(unittest.TestCase):
         # Compare the meshes.
         compare_strings(
             self,
-            "test_replace_nodes_case_2",
             mesh_ref.get_string(header=False),
             mesh_couple.get_string(header=False),
         )
@@ -1441,7 +1318,6 @@ class TestMeshpy(unittest.TestCase):
         # Compare the meshes.
         compare_strings(
             self,
-            "test_replace_nodes_case_3",
             mesh_ref.get_string(header=False),
             mesh_couple.get_string(header=False),
         )
@@ -1489,7 +1365,7 @@ class TestMeshpy(unittest.TestCase):
         input_file.add(beam_mesh)
         return input_file
 
-    def test_beam_to_solid_conditions(self):
+    def test_meshpy_beam_to_solid_conditions(self):
         """
         Create beam-to-solid input conditions.
         """
@@ -1498,14 +1374,9 @@ class TestMeshpy(unittest.TestCase):
         input_file = self.create_beam_to_solid_conditions_model()
 
         # Compare with the reference file.
-        compare_strings(
-            self,
-            "test_meshpy_btsvm_coupling",
-            os.path.join(testing_input, "test_meshpy_btsvm_coupling_reference.dat"),
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_beam_to_solid_conditions_with_design_description(self):
+    def test_meshpy_beam_to_solid_conditions_with_design_description(self):
         """
         Create beam-to-solid input conditions with the old design description section in BACI
         """
@@ -1514,17 +1385,11 @@ class TestMeshpy(unittest.TestCase):
         input_file = self.create_beam_to_solid_conditions_model()
 
         # Compare with the reference file.
-        compare_strings(
-            self,
-            "test_meshpy_btsvm_coupling",
-            os.path.join(
-                testing_input,
-                "test_meshpy_btsvm_coupling_design_description_reference.dat",
-            ),
-            input_file.get_string(header=False, design_description=True),
+        compare_test_result(
+            self, input_file.get_string(header=False, design_description=True)
         )
 
-    def test_beam_to_solid_conditions_full(self):
+    def test_meshpy_beam_to_solid_conditions_full(self):
         """
         Create beam-to-solid input conditions with full import.
         """
@@ -1534,16 +1399,9 @@ class TestMeshpy(unittest.TestCase):
         input_file = self.create_beam_to_solid_conditions_model()
 
         # Compare with the reference file.
-        compare_strings(
-            self,
-            "test_meshpy_btsvm_coupling_full",
-            os.path.join(
-                testing_input, "test_meshpy_btsvm_coupling_full_reference.dat"
-            ),
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_nurbs_import(self):
+    def test_meshpy_nurbs_import(self):
         """
         Test if the import of a NURBS mesh works as expected.
         This script generates the baci test case:
@@ -1552,7 +1410,6 @@ class TestMeshpy(unittest.TestCase):
 
         # Create beam mesh and load solid file.
         input_file = InputFile(
-            "Ivo Steinbrecher",
             dat_file=os.path.join(
                 testing_input, "test_meshpy_nurbs_import_solid_mesh.dat"
             ),
@@ -1664,15 +1521,9 @@ class TestMeshpy(unittest.TestCase):
                 )
 
         # Compare with the reference solution.
-        ref_file = os.path.join(testing_input, "test_meshpy_nurbs_import_reference.dat")
-        compare_strings(
-            self,
-            "test_meshpy_nurbs_import",
-            ref_file,
-            input_file.get_string(header=False, check_nox=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False, check_nox=False))
 
-    def test_stvenantkirchhoff_solid(self):
+    def test_meshpy_stvenantkirchhoff_solid(self):
         """
         Test that the input file for a solid with St. Venant Kirchhoff material properties is generated
         correctly
@@ -1693,16 +1544,9 @@ class TestMeshpy(unittest.TestCase):
         input_file.add(material_2)
 
         # Compare with the reference file
-        compare_strings(
-            self,
-            "test_meshpy_stvenantkirchhoff_solid",
-            os.path.join(
-                testing_input, "test_meshpy_stvenantkirchhoff_solid_reference.dat"
-            ),
-            input_file.get_string(header=False),
-        )
+        compare_test_result(self, input_file.get_string(header=False))
 
-    def test_point_couplings(self):
+    def test_meshpy_point_couplings(self):
         """
         Test that the different point coupling types can be created.
         """
@@ -1711,28 +1555,16 @@ class TestMeshpy(unittest.TestCase):
         input_file = self.x_test_point_couplings(
             mpy.bc.point_coupling, mpy.coupling_dof.fix
         )
-        ref_file = os.path.join(
-            testing_input, "test_point_couplings_exact_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_point_couplings_exact",
-            ref_file,
-            input_file.get_string(header=False),
+        compare_test_result(
+            self, input_file.get_string(header=False), additional_identifier="exact"
         )
 
         # The "new" way of coupling points.
         input_file = self.x_test_point_couplings(
             mpy.bc.point_coupling_penalty, "PENALTY_VALUE"
         )
-        ref_file = os.path.join(
-            testing_input, "test_point_couplings_penalty_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_point_couplings_penalty",
-            ref_file,
-            input_file.get_string(header=False),
+        compare_test_result(
+            self, input_file.get_string(header=False), additional_identifier="penalty"
         )
 
     def x_test_point_couplings(self, coupling_type, coupling_dof_type):
@@ -1765,7 +1597,7 @@ class TestMeshpy(unittest.TestCase):
 
         return input_file
 
-    def test_vtk_writer(self):
+    def test_meshpy_vtk_writer(self):
         """Test the output created by the VTK writer."""
 
         # Initialize writer.
@@ -1832,7 +1664,7 @@ class TestMeshpy(unittest.TestCase):
         # Compare the vtk files.
         compare_vtk(self, "test_meshpy_vtk_writer", ref_file, vtk_file)
 
-    def test_vtk_writer_beam(self):
+    def test_meshpy_vtk_writer_beam(self):
         """Create a sample mesh and check the VTK output."""
 
         # Create the mesh.
@@ -1878,7 +1710,7 @@ class TestMeshpy(unittest.TestCase):
             tol_float=mpy.eps_pos,
         )
 
-    def test_vtk_writer_solid(self):
+    def test_meshpy_vtk_writer_solid(self):
         """Import a solid mesh and check the VTK output."""
 
         # Convert the solid mesh to meshpy objects. Without this parameter no
@@ -1901,7 +1733,7 @@ class TestMeshpy(unittest.TestCase):
         # Compare the vtk files.
         compare_vtk(self, "test_meshpy_vtk_solid", ref_file, vtk_file)
 
-    def test_vtk_writer_solid_elements(self):
+    def test_meshpy_vtk_writer_solid_elements(self):
         """
         Import a solid mesh with all solid types and check the VTK output.
         """
@@ -1932,7 +1764,7 @@ class TestMeshpy(unittest.TestCase):
         # Compare the vtk files.
         compare_vtk(self, "test_meshpy_vtk_elements_solid", ref_file, vtk_file)
 
-    def test_vtk_curve_cell_data(self):
+    def test_meshpy_vtk_curve_cell_data(self):
         """
         Test that when creating a beam, cell data can be given.
         This test also checks, that the nan values in vtk can be explicitly
@@ -1984,7 +1816,7 @@ class TestMeshpy(unittest.TestCase):
         # Compare the vtk files.
         compare_vtk(self, "test_meshpy_vtk_curve_cell_data", ref_file, vtk_file)
 
-    def test_cubitpy_import(self):
+    def test_meshpy_cubitpy_import(self):
         """
         Check that a import from a cubitpy object is the same as importing the
         dat file.
@@ -2016,18 +1848,16 @@ class TestMeshpy(unittest.TestCase):
         # Compare the input files.
         compare_strings(
             self,
-            "test_cubitpy_import",
             input_file.get_string(header=False),
             input_file_cubit.get_string(header=False),
         )
         compare_strings(
             self,
-            "test_cubitpy_import_reference",
             input_file.get_string(header=False),
             input_file_ref.get_string(header=False),
         )
 
-    def test_deep_copy(self):
+    def test_meshpy_deep_copy(self):
         """
         Thist test checks that the deep copy function on a mesh does not copy
         the materials or functions.
@@ -2076,7 +1906,6 @@ class TestMeshpy(unittest.TestCase):
         # Check that the input files are the same.
         compare_strings(
             self,
-            "test_deep_copy",
             input_file_ref.get_string(
                 header=False, dat_header=False, add_script_to_header=False
             ),
@@ -2085,7 +1914,7 @@ class TestMeshpy(unittest.TestCase):
             ),
         )
 
-    def test_mesh_add_checks(self):
+    def test_meshpy_mesh_add_checks(self):
         """
         This test checks that Mesh raises an error when double objects are
         added to the mesh.
@@ -2117,7 +1946,7 @@ class TestMeshpy(unittest.TestCase):
         self.assertRaises(ValueError, mesh.add, coupling_penalty)
         self.assertRaises(ValueError, mesh.add, geometry_set)
 
-    def test_check_two_couplings(self):
+    def test_meshpy_check_two_couplings(self):
         """
         The current implementation can handle more than one coupling on a
         node correctly, therefore we check this here.
@@ -2139,13 +1968,7 @@ class TestMeshpy(unittest.TestCase):
         mesh.couple_nodes()
 
         # Create the input file
-        ref_file = os.path.join(testing_input, "test_check_two_couplings_reference.dat")
-        compare_strings(
-            self,
-            "test_check_two_couplings",
-            ref_file,
-            mesh.get_string(header=False),
-        )
+        compare_test_result(self, mesh.get_string(header=False))
 
     def xtest_meshpy_check_multiple_node_penalty_coupling(self, reuse_nodes=True):
         """For point penalty coupling constraints, we add multiple coupling conditions.
@@ -2173,34 +1996,16 @@ class TestMeshpy(unittest.TestCase):
         equal nodes."""
 
         mesh = self.xtest_meshpy_check_multiple_node_penalty_coupling(reuse_nodes=True)
-        ref_file = os.path.join(
-            testing_input,
-            "test_meshpy_check_multiple_node_penalty_coupling_reuse_reference.dat",
-        )
-        compare_strings(
-            self,
-            "test_meshpy_check_multiple_node_penalty_coupling_reuse",
-            ref_file,
-            mesh.get_string(header=False),
-        )
+        compare_test_result(self, mesh.get_string(header=False))
 
     def test_meshpy_check_multiple_node_penalty_coupling(self):
         """Test the xtest_meshpy_check_multiple_node_penalty_coupling test and do not
         replace equal nodes."""
 
         mesh = self.xtest_meshpy_check_multiple_node_penalty_coupling(reuse_nodes=False)
-        ref_file = os.path.join(
-            testing_input,
-            "test_meshpy_check_multiple_node_penalty_coupling_reference.dat",
-        )
-        compare_strings(
-            self,
-            "test_meshpy_check_multiple_node_penalty_coupling",
-            ref_file,
-            mesh.get_string(header=False),
-        )
+        compare_test_result(self, mesh.get_string(header=False))
 
-    def test_check_double_elements(self):
+    def test_meshpy_check_double_elements(self):
         """
         Check if there are overlapping elements in a mesh.
         """
@@ -2271,7 +2076,7 @@ class TestMeshpy(unittest.TestCase):
         else:
             Coupling(*args, check_overlapping_nodes=False)
 
-    def test_check_overlapping_coupling_nodes(self):
+    def test_meshpy_check_overlapping_coupling_nodes(self):
         """
         Perform the test that the coupling nodes can be tested if they are at
         the same position.
@@ -2279,7 +2084,7 @@ class TestMeshpy(unittest.TestCase):
         self.perform_test_check_overlapping_coupling_nodes(True)
         self.perform_test_check_overlapping_coupling_nodes(False)
 
-    def test_check_start_end_node_error(self):
+    def test_meshpy_check_start_end_node_error(self):
         """
         Check that an error is raised if wrong start and end nodes are given to a mesh
         creation function.
@@ -2299,7 +2104,7 @@ class TestMeshpy(unittest.TestCase):
         kwargs = {"end_node": node}
         self.assertRaises(ValueError, create_beam_mesh_line, *args, **kwargs)
 
-    def test_userdefined_boundary_condition(self):
+    def test_meshpy_userdefined_boundary_condition(self):
         """
         Check if an user defined boundary condition can be added.
         """
@@ -2311,17 +2116,9 @@ class TestMeshpy(unittest.TestCase):
         mesh.add(BoundaryCondition(sets["line"], "test", bc_type="USER SECTION FOR BC"))
 
         # Compare the output of the mesh.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_userdefined_boundary_condition_reference.dat"
-        )
-        compare_strings(
-            self,
-            "test_userdefined_boundary_condition",
-            ref_file,
-            mesh.get_string(header=False).strip(),
-        )
+        compare_test_result(self, mesh.get_string(header=False).strip())
 
-    def test_display_pyvista(self):
+    def test_meshpy_display_pyvista(self):
         """Test that the display in pyvista function does not lead to errors
 
         TODO: Add a check for the created visualziation"""
