@@ -41,6 +41,7 @@ import warnings
 import xml.etree.ElementTree as ET
 import vtk
 from vtk.util import numpy_support as vtk_numpy
+from pyvista_utils.compare_grids import compare_grids
 
 
 # Global variable if this test is run by GitHub.
@@ -240,27 +241,8 @@ def compare_strings(self, reference, compare, *, tol=None):
     self.assertTrue(is_equal, self._testMethodName)
 
 
-def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
-    """
-    Compare the vtk files at path1 and path2, by compairing the stored data.
-
-    Args
-    ----
-    raise_error: bool
-        If true, then an error will be raised in case the files do not match.
-        Otherwise False will be returned.
-    tol_float: None / float
-        If given, numbers will be considered equal if the difference between
-        them is smaller than tol_float.
-    """
-
-    # Check that both arguments are paths and exist.
-    if not (os.path.isfile(path1) and os.path.isfile(path2)):
-        raise ValueError("The paths given are not OK!")
-
-    # Default value for the numerical tolerance.
-    if tol_float is None:
-        raise ValueError("Tolerance in compare_vtk_data has to be given!")
+def compare_vtk(self, path_1, path_2, *, tol_float=1e-14):
+    """Compare two vtk files and raise an error if they are not equal."""
 
     def get_vtk(path):
         """
@@ -271,73 +253,7 @@ def compare_vtk_data(path1, path2, *, raise_error=False, tol_float=None):
         reader.Update()
         return reader.GetOutput()
 
-    def compare_arrays(array1, array2, name=None):
-        """
-        Compare two vtk arrays.
-        """
-
-        diff = vtk_numpy.vtk_to_numpy(array1) - vtk_numpy.vtk_to_numpy(array2)
-        if not np.max(np.abs(diff)) < tol_float:
-            error_string = "VTK array comparison failed!"
-            if name is not None:
-                error_string += " Name of the array: {}".format(name)
-            raise ValueError(error_string)
-
-    def compare_data_sets(data1, data2):
-        """
-        Compare data sets obtained from vtk objects.
-        """
-
-        # Both data sets need to have the same number of arrays.
-        if not data1.GetNumberOfArrays() == data2.GetNumberOfArrays():
-            raise ValueError("Length of vtk data objects do not match!")
-
-        # Compare each array.
-        for i in range(data1.GetNumberOfArrays()):
-
-            # Get the arrays with the same name.
-            name = data1.GetArrayName(i)
-            array1 = data1.GetArray(name)
-            array2 = data2.GetArray(name)
-            compare_arrays(array1, array2, name=name)
-
-    # Perform all checks, catch errors.
-    try:
-        # Load the vtk files.
-        data1 = get_vtk(path1)
-        data2 = get_vtk(path2)
-
-        # Compare the point positions.
-        compare_arrays(
-            data1.GetPoints().GetData(),
-            data2.GetPoints().GetData(),
-            name="point_positions",
-        )
-
-        # Compare the cell and point data of the array.
-        compare_data_sets(data1.GetCellData(), data2.GetCellData())
-        compare_data_sets(data1.GetPointData(), data2.GetPointData())
-
-        # Compare the cell connectivity.
-        compare_arrays(
-            data1.GetCells().GetData(),
-            data2.GetCells().GetData(),
-            name="cell_connectivity",
-        )
-
-        # Compare the cell types.
-        compare_arrays(
-            data1.GetCellTypesArray(), data2.GetCellTypesArray(), name="cell_type"
-        )
-
-    except Exception as error:
-        if raise_error:
-            raise error
-        return False
-
-    return True
-
-
-def compare_vtk(self, name, ref_file, vtk_file, *, tol_float=1e-14):
-    """Compare two vtk files and raise an error if they are not equal."""
-    self.assertTrue(compare_vtk_data(ref_file, vtk_file, tol_float=tol_float), name)
+    compare = compare_grids(
+        get_vtk(path_1), get_vtk(path_2), output=True, tol=tol_float
+    )
+    self.assertTrue(compare[0], msg="\n".join(compare[1]))
