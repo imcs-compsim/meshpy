@@ -33,7 +33,7 @@ dependencies = [
   "matplotlib",
   "numpy",
   "pyvista",
-  "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git",
+  "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@86210ab",
   "scipy",
   "vtk"
 ]
