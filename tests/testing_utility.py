@@ -109,7 +109,7 @@ def empty_testing_directory():
                 print(e)
 
 
-def compare_string_tolerance(reference, compare, tol):
+def compare_string_tolerance(reference, compare, tol, *, split_string=" "):
     """Compare two strings, all floating point values will be compared with an
     absolute tolerance."""
 
@@ -120,8 +120,8 @@ def compare_string_tolerance(reference, compare, tol):
     if n_reference == n_compare:
         # Loop over each line in the file
         for i in range(n_reference):
-            line_reference = lines_reference[i].strip().split(" ")
-            line_compare = lines_compare[i].strip().split(" ")
+            line_reference = lines_reference[i].strip().split(split_string)
+            line_compare = lines_compare[i].strip().split(split_string)
             n_items_reference = len(line_reference)
             n_items_compare = len(line_compare)
             if n_items_reference == n_items_compare:
@@ -132,6 +132,8 @@ def compare_string_tolerance(reference, compare, tol):
                         compare_number = float(line_compare[j].strip())
                         if np.abs(reference_number - compare_number) < tol:
                             pass
+                        else:
+                            return False
                     except ValueError:
                         if line_reference[j].strip() != line_compare[j].strip():
                             return False
@@ -170,7 +172,7 @@ def compare_test_result(
     compare_strings(self, reference_file_path, result_string, **kwargs)
 
 
-def compare_strings(self, reference, compare, *, tol=None):
+def compare_strings(self, reference, compare, *, tol=None, **kwargs):
     """
     Compare two stings. If they are not identical open meld and show the
     differences.
@@ -200,7 +202,9 @@ def compare_strings(self, reference, compare, *, tol=None):
         # fail the test.
         is_equal = reference_string.strip() == compare_string.strip()
     else:
-        is_equal = compare_string_tolerance(reference_string, compare_string, tol)
+        is_equal = compare_string_tolerance(
+            reference_string, compare_string, tol, **kwargs
+        )
     if not is_equal and not TESTING_GITHUB:
 
         # Check if temporary directory exists, and creates it if necessary.
