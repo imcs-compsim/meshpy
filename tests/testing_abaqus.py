@@ -139,6 +139,8 @@ class TestAbaqusMeshpy(unittest.TestCase):
                 AbaqusBeamNormalDefinition.smallest_rotation_of_triad_at_first_node
             ),
             extension="inp",
+            split_string=",",
+            atol=1e-15,
         )
 
 
