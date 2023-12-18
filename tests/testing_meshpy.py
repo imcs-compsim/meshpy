@@ -1849,7 +1849,7 @@ class TestMeshpy(unittest.TestCase):
             self,
             input_file.get_string(header=False),
             input_file_ref.get_string(header=False),
-            tol=1e-14,
+            rtol=1e-14,
         )
 
     def test_meshpy_deep_copy(self):

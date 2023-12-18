@@ -107,7 +107,7 @@ class TestAbaqusMeshpy(unittest.TestCase):
             ),
             extension="inp",
             split_string=",",
-            tol=1e-14,
+            atol=1e-15,
         )
 
     def test_abaqus_frame(self):
