@@ -181,7 +181,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         )
 
         # Check the output.
-        compare_test_result(self, input_file.get_string(header=False), tol=1e-10)
+        compare_test_result(self, input_file.get_string(header=False), rtol=1e-10)
 
     def test_mesh_creation_functions_fibers_in_rectangle(self):
         """
@@ -442,7 +442,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
 
         # Check the output
         input_file.add(mesh_line, mesh_line_long, mesh_arc, mesh_curve)
-        compare_test_result(self, input_file.get_string(header=False), tol=1e-10)
+        compare_test_result(self, input_file.get_string(header=False), rtol=1e-10)
 
         # Check error messages for input parameters
         with self.assertRaises(ValueError):

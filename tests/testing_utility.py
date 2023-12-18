@@ -109,9 +109,20 @@ def empty_testing_directory():
                 print(e)
 
 
-def compare_string_tolerance(reference, compare, tol, *, split_string=" "):
+def compare_string_tolerance(
+    reference, compare, *, rtol=None, atol=None, split_string=" "
+):
     """Compare two strings, all floating point values will be compared with an
     absolute tolerance."""
+
+    def set_tol(tol):
+        if tol is None:
+            return 0.0
+        else:
+            return tol
+
+    rtol = set_tol(rtol)
+    atol = set_tol(atol)
 
     lines_reference = reference.strip().split("\n")
     lines_compare = compare.strip().split("\n")
@@ -130,7 +141,9 @@ def compare_string_tolerance(reference, compare, tol, *, split_string=" "):
                     try:
                         reference_number = float(line_reference[j].strip())
                         compare_number = float(line_compare[j].strip())
-                        if np.abs(reference_number - compare_number) < tol:
+                        if np.isclose(
+                            reference_number, compare_number, rtol=rtol, atol=atol
+                        ):
                             pass
                         else:
                             return False
@@ -172,7 +185,7 @@ def compare_test_result(
     compare_strings(self, reference_file_path, result_string, **kwargs)
 
 
-def compare_strings(self, reference, compare, *, tol=None, **kwargs):
+def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs):
     """
     Compare two stings. If they are not identical open meld and show the
     differences.
@@ -197,16 +210,15 @@ def compare_strings(self, reference, compare, *, tol=None, **kwargs):
     else:
         compare_string = compare
 
-    if tol is None:
+    if rtol is None and atol is None:
         # Check if the strings are equal, if not compare the differences and
         # fail the test.
         is_equal = reference_string.strip() == compare_string.strip()
     else:
         is_equal = compare_string_tolerance(
-            reference_string, compare_string, tol, **kwargs
+            reference_string, compare_string, rtol=rtol, atol=atol, **kwargs
         )
     if not is_equal and not TESTING_GITHUB:
-
         # Check if temporary directory exists, and creates it if necessary.
         os.makedirs(testing_temp, exist_ok=True)
 
