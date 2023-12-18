@@ -50,7 +50,7 @@ def create_beam_mesh_curve(
     *,
     function_derivative=None,
     function_rotation=None,
-    **kwargs
+    **kwargs,
 ):
     """
     Generate a beam from a parametric curve. Integration along the beam is
@@ -181,7 +181,7 @@ def create_beam_mesh_curve(
             """
             Initialize the object.
             """
-            self.t_start_element = interval[0]
+            self._reset_start_values()
             self.last_triad = None
 
             if is_3d_curve:
@@ -192,11 +192,21 @@ def create_beam_mesh_curve(
                     t2_temp = [0, 1, 0]
                 self.last_triad = Rotation.from_basis(r_prime, t2_temp)
 
+        def _reset_start_values(self):
+            """Reset the stored start values for the next Newton iteration"""
+            self.t_start_newton = interval[0]
+            self.S_start_newton = 0.0
+
         def __call__(self, length_a, length_b):
             """
             This object is called with the interval limits. This method returns a
             function that evaluates the position and rotation within this interval.
             """
+
+            # In case the interval is not continuous with the last one, we reset the start
+            # values for the Newton iteration here
+            if length_a < self.S_start_newton - mpy.eps_pos:
+                self._reset_start_values()
 
             # Length of the beam element in physical space.
             L = length_b - length_a
@@ -207,11 +217,12 @@ def create_beam_mesh_curve(
                 parameter coordinate, i.e., xi = [-1, 1].
                 """
                 # Parameter for xi.
+                S = length_a + 0.5 * (xi + 1) * L
                 t = get_t_along_curve(
-                    length_a + 0.5 * (xi + 1) * L,
-                    self.t_start_element,
-                    start_t=self.t_start_element,
-                    start_S=length_a,
+                    S,
+                    self.t_start_newton,
+                    start_t=self.t_start_newton,
+                    start_S=self.S_start_newton,
                 )
 
                 # Position at xi.
@@ -235,9 +246,9 @@ def create_beam_mesh_curve(
                         # The rotation simplifies in the 2d case.
                         rot = Rotation([0, 0, 1], np.arctan2(r_prime[1], r_prime[0]))
 
-                if np.abs(xi - 1) < mpy.eps_pos:
-                    # Set start values for the next element.
-                    self.t_start_element = t
+                # Set start values for the next iteration
+                self.t_start_newton = t
+                self.S_start_newton = S
 
                 # Return the needed values for beam creation.
                 return (pos, rot)
