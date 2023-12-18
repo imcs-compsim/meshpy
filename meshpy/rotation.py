@@ -87,40 +87,29 @@ class Rotation(object):
     def from_rotation_matrix(cls, R):
         """
         Create the object from a rotation matrix.
-        The code is base on:
-            https://en.wikipedia.org/wiki/Rotation_matrix#Quaternion
+        The code is base on Spurriers algorithm:
+            R. A. Spurrier (1978): “Comment on “Singularity-free extraction of a quaternion from a direction-cosine matrix”
         """
 
         q = np.zeros(4)
         trace = np.trace(R)
-        if trace > 0:
-            r = np.sqrt(1 + trace)
-            s = 0.5 / r
-            q[0] = 0.5 * r
-            q[1] = (R[2, 1] - R[1, 2]) * s
-            q[2] = (R[0, 2] - R[2, 0]) * s
-            q[3] = (R[1, 0] - R[0, 1]) * s
-        elif R[0, 0] > R[1, 1] and R[0, 0] > R[2, 2]:
-            r = np.sqrt(1 + R[0, 0] - R[1, 1] - R[2, 2])
-            s = 0.5 / r
-            q[0] = (R[2, 1] - R[1, 2]) * s
-            q[1] = 0.5 * r
-            q[2] = (R[0, 1] + R[1, 0]) * s
-            q[3] = (R[0, 2] + R[2, 0]) * s
-        elif R[1, 1] > R[2, 2]:
-            r = np.sqrt(1 - R[0, 0] + R[1, 1] - R[2, 2])
-            s = 0.5 / r
-            q[0] = (R[0, 2] - R[2, 0]) * s
-            q[1] = (R[0, 1] + R[1, 0]) * s
-            q[2] = 0.5 * r
-            q[3] = (R[1, 2] + R[2, 1]) * s
+        values = [R[i, i] for i in range(3)]
+        values.append(trace)
+        arg_max = np.argmax(values)
+        if arg_max == 3:
+            q[0] = np.sqrt(trace + 1) * 0.5
+            q[1] = (R[2, 1] - R[1, 2]) / (4 * q[0])
+            q[2] = (R[0, 2] - R[2, 0]) / (4 * q[0])
+            q[3] = (R[1, 0] - R[0, 1]) / (4 * q[0])
         else:
-            r = np.sqrt(1 - R[0, 0] - R[1, 1] + R[2, 2])
-            s = 0.5 / r
-            q[0] = (R[1, 0] - R[0, 1]) * s
-            q[1] = (R[0, 2] + R[2, 0]) * s
-            q[2] = (R[1, 2] + R[2, 1]) * s
-            q[3] = 0.5 * r
+            i_index = arg_max
+            j_index = (i_index + 1) % 3
+            k_index = (i_index + 2) % 3
+            q_i = np.sqrt(R[i_index, i_index] * 0.5 + (1 - trace) * 0.25)
+            q[0] = (R[k_index, j_index] - R[j_index, k_index]) / (4 * q_i)
+            q[i_index + 1] = q_i
+            q[j_index + 1] = (R[j_index, i_index] + R[i_index, j_index]) / (4 * q_i)
+            q[k_index + 1] = (R[k_index, i_index] + R[i_index, k_index]) / (4 * q_i)
 
         return cls(q)
 
