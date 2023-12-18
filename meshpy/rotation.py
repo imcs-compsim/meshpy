@@ -66,8 +66,10 @@ class Rotation(object):
             # Identity element.
             self.q[0] = 1
         elif len(args) == 1 and len(args[0]) == 4:
-            # Set from quaternion.
-            self.q[:] = np.array(args[0])
+            # Set directly from quaternion
+            # To avoid error accumulation, normalize the quaternion here
+            q = np.array(args[0])
+            self.q[:] = q / np.linalg.norm(q)
         elif len(args) == 2:
             # Set from vector and rotation angle.
             vector = args[0]
