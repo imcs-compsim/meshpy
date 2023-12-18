@@ -10,8 +10,11 @@ packages = [
   "meshpy.mesh_creation_functions",
   "meshpy.simulation_manager",
   "meshpy.utility_baci",
+  "meshpy_testing"
 ]
 
+[tool.setuptools.package-dir]
+meshpy_testing = "tests"
 
 [tool.setuptools.package-data]
 "meshpy.simulation_manager" = ["batch_template.sh"]
