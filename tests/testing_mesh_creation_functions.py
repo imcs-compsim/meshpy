@@ -50,6 +50,7 @@ from meshpy import (
     Rotation,
     BoundaryCondition,
 )
+from meshpy.node import NodeCosserat
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_function
@@ -324,8 +325,6 @@ class TestMeshCreationFunctions(unittest.TestCase):
     def test_mesh_creation_functions_node_continuation(self):
         """Test that the node continuation function work as expected."""
 
-        from meshpy.node import NodeCosserat
-
         mesh = Mesh()
         mat = MaterialReissner(radius=0.1)
         mesh.add(mat)
@@ -373,6 +372,42 @@ class TestMeshCreationFunctions(unittest.TestCase):
         input_file = InputFile()
         input_file.add(mesh)
         compare_test_result(self, input_file.get_string(header=False))
+
+    def test_mesh_creation_functions_node_continuation_accumulated(self):
+        """Test that the arc node continuation function can be applied multiple times in a row.
+        This function can lead to accumulated errors in the rotations if not implemented
+        carefully."""
+
+        mesh = Mesh()
+        mat = MaterialReissner(radius=0.1)
+        mesh.add(mat)
+
+        n_segments = 100
+
+        rotation_ref = Rotation([1, 0, 0], 0.5 * np.pi) * Rotation(
+            [0, 0, 1], 0.5 * np.pi
+        )
+        start_node = NodeCosserat([1, 2, 3], rotation_ref)
+        mesh.add(start_node)
+        beam_set = {"end": start_node}
+        angle = np.pi
+        angle_increment = angle / n_segments
+        axis = [1, 0, 0]
+        for i in range(n_segments):
+            beam_set = create_beam_mesh_arc_at_node(
+                mesh,
+                Beam3rHerm2Line3,
+                mat,
+                beam_set["end"],
+                axis,
+                1.0,
+                angle_increment,
+                n_el=2,
+            )
+
+        rotation_expected = Rotation(axis, angle) * rotation_ref
+        rotation_actual = beam_set["end"].get_points()[0].rotation
+        self.assertTrue(rotation_actual == rotation_expected)
 
     def test_mesh_creation_functions_element_length_option(self):
         """Test that the element length can be specified in the beam creation functions"""
