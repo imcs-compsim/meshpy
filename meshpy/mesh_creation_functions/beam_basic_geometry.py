@@ -123,11 +123,17 @@ def create_beam_mesh_line(
     )
 
 
-def create_beam_mesh_arc_segment(
+def create_beam_mesh_arc_segment_via_rotation(
     mesh, beam_object, material, center, axis_rotation, radius, angle, **kwargs
 ):
     """
     Generate a circular segment of beam elements.
+
+    The circular segment is defined via a rotation, specifying the "initial"
+    triad of the beam at the beginning of the arc.
+
+    This function exists for compatibility reasons with older MeshPy implementations.
+    The user is encouraged to use the newer implementation create_beam_mesh_arc_segment_via_axis
 
     Args
     ----
@@ -167,20 +173,99 @@ def create_beam_mesh_arc_segment(
         with all nodes of the line.
     """
 
+    # Convert the input to the one for create_beam_mesh_arc_segment_via_axis
+    axis = axis_rotation * [0, 0, 1]
+    start_point = center + radius * (axis_rotation * np.array([0, -1, 0]))
+    return create_beam_mesh_arc_segment_via_axis(
+        mesh, beam_object, material, axis, center, start_point, angle, **kwargs
+    )
+
+
+def create_beam_mesh_arc_segment_via_axis(
+    mesh,
+    beam_object,
+    material,
+    axis,
+    axis_point,
+    start_point,
+    angle,
+    *,
+    start_node=None,
+    **kwargs
+):
+    """
+    Generate a circular segment of beam elements.
+
+    The arc is defined via a rotation axis, a point on the rotation axis a starting
+    point, as well as the angle of the arc segment.
+
+    Args
+    ----
+    mesh: Mesh
+        Mesh that the arc segment will be added to.
+    beam_object: Beam
+        Class of beam that will be used for this line.
+    material: Material
+        Material for this segment.
+    axis: np.array, list
+        Rotation axis of the arc.
+    axis_point: np.array, list
+        Point lying on the rotation axis. Does not have to be the center of the arc.
+    start_point: np.array, list
+        Start point of the arc.
+    angle: float
+        The central angle of this segment in radians.
+
+    **kwargs (for all of them look into create_beam_mesh_function)
+    ----
+    n_el: int
+        Number of equally spaced beam elements along the line. Defaults to 1.
+        Mutually exclusive with l_el.
+    l_el: float
+        Desired length of beam elements. This requires the option interval_length
+        to be set. Mutually exclusive with n_el. Be aware, that this length
+        might not be achieved, if the elements are warped after they are
+        created.
+
+    Return
+    ----
+    return_set: GeometryName
+        Set with the 'start' and 'end' node of the line. Also a 'line' set
+        with all nodes of the line.
+    """
+
     # The angle can not be negative with the current implementation.
     if angle <= 0.0:
-        raise ValueError("The angle for a beam segment has to be a positive number!")
+        raise ValueError(
+            "The angle for a beam arc segment has to be a positive number!"
+        )
+
+    # Shortest distance from the given point to the axis of rotation gives
+    # the "center" of the arc
+    axis = np.array(axis) / np.linalg.norm(axis)
+    diff = start_point - axis_point
+    distance = diff - np.dot(np.dot(diff, axis), axis)
+    radius = np.linalg.norm(distance)
+    center = start_point - distance
+
+    # Get the rotation at the start
+    if start_node is None:
+        tangent = np.cross(axis, distance)
+        tangent /= np.linalg.norm(tangent)
+        start_rotation = Rotation.from_rotation_matrix(
+            np.transpose(np.array([tangent, -distance / radius, axis]))
+        )
+    else:
+        start_rotation = get_single_node(start_node).rotation
 
     def get_beam_geometry(alpha, beta):
-        """
-        Return a function for the position and rotation along the beam
-        axis.
-        """
+        """Return a function for the position and rotation along the beam axis"""
 
         def beam_function(xi):
             phi = 0.5 * (xi + 1) * (beta - alpha) + alpha
-            rot = axis_rotation * Rotation([0, 0, 1], phi)
-            pos = center + radius * (rot * [0, -1, 0])
+            arc_rotation = Rotation(axis, phi)
+            rot = arc_rotation * start_rotation
+            pos = center + arc_rotation * distance
             return (pos, rot)
 
         return beam_function
@@ -193,6 +278,7 @@ def create_beam_mesh_arc_segment(
         function_generator=get_beam_geometry,
         interval=[0.0, angle],
         interval_length=angle * radius,
+        start_node=start_node,
         **kwargs,
     )
 
@@ -246,25 +332,22 @@ def create_beam_mesh_arc_segment_2d(
 
     # Check if the beam is in clockwise or counter clockwise direction.
     angle = phi_end - phi_start
-    clockwise = not np.sign(angle) == 1
+    axis = np.array([0, 0, 1])
+    start_point = center + radius * (Rotation(axis, phi_start) * [1, 0, 0])
 
-    # Create rotation for the general arc segment function.
-    axis_rotation = Rotation([0, 0, 1], np.pi * 0.5 + phi_start)
-    if clockwise:
-        # If the beam is in counter clockwise direction, we have to rotate the
-        # rotation axis around its first basis vector - this will result in the
-        # arc facing in the other direction. Additionally we have to rotate
-        # around the z-axis for the angles to fit.
-        t1 = [-np.sin(phi_start), np.cos(phi_start), 0.0]
-        axis_rotation = Rotation([0, 0, 1], np.pi) * Rotation(t1, np.pi) * axis_rotation
+    counter_clockwise = np.sign(angle) == 1
+    if not counter_clockwise:
+        # If the beam is not in counter clockwise direction, we have to flip
+        # the rotation axis.
+        axis = -1.0 * axis
 
-    return create_beam_mesh_arc_segment(
+    return create_beam_mesh_arc_segment_via_axis(
         mesh,
         beam_object,
         material,
+        axis,
         center,
-        axis_rotation,
-        radius,
+        start_point,
         np.abs(angle),
         **kwargs,
     )
@@ -388,18 +471,13 @@ def create_beam_mesh_arc_at_node(
     center_direction *= 1.0 / np.linalg.norm(center_direction)
     center = start_node.coordinates - center_direction * radius
 
-    # Create rotation for the general arc segment function
-    axis_rotation = Rotation.from_rotation_matrix(
-        np.transpose(np.array([tangent, -center_direction, arc_axis_normal]))
-    )
-
-    return create_beam_mesh_arc_segment(
+    return create_beam_mesh_arc_segment_via_axis(
         mesh,
         beam_object,
         material,
+        arc_axis_normal,
         center,
-        axis_rotation,
-        radius,
+        start_node.coordinates,
         np.abs(angle),
         start_node=start_node,
         **kwargs,

@@ -42,7 +42,10 @@ from ..mesh import Mesh
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
 from ..utility import get_min_max_nodes
-from .beam_basic_geometry import create_beam_mesh_arc_segment, create_beam_mesh_line
+from .beam_basic_geometry import (
+    create_beam_mesh_arc_segment_via_rotation,
+    create_beam_mesh_line,
+)
 
 
 def create_stent_cell(
@@ -103,7 +106,7 @@ def create_stent_cell(
 
     def add_segment(center, axis_rotation, radius, angle, n_el_segment):
         """Shortcut to add arc segment."""
-        return create_beam_mesh_arc_segment(
+        return create_beam_mesh_arc_segment_via_rotation(
             mesh,
             beam_object,
             material,

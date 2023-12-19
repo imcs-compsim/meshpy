@@ -36,7 +36,8 @@ complex stent craft structures.
 # Basic geometry functions
 from .beam_basic_geometry import (
     create_beam_mesh_line,
-    create_beam_mesh_arc_segment,
+    create_beam_mesh_arc_segment_via_axis,
+    create_beam_mesh_arc_segment_via_rotation,
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_line_at_node,
     create_beam_mesh_arc_at_node,
@@ -74,7 +75,8 @@ from .nurbs_geometries import (
 __all__ = [
     # Base geometry.
     "create_beam_mesh_line",
-    "create_beam_mesh_arc_segment",
+    "create_beam_mesh_arc_segment_via_axis",
+    "create_beam_mesh_arc_segment_via_rotation",
     "create_beam_mesh_arc_segment_2d",
     "create_beam_mesh_line_at_node",
     "create_beam_mesh_arc_at_node",
