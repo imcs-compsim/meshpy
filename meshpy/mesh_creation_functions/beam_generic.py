@@ -32,7 +32,10 @@
 Generic function used to create all beams within meshpy.
 """
 
-# Meshpy modules.
+# Python modules
+import numpy as np
+
+# Meshpy modules
 from ..conf import mpy
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
@@ -56,6 +59,12 @@ def create_beam_mesh_function(
 ):
     """
     Generic beam creation function.
+
+    Remark for given start and/or end nodes:
+        If the rotation does not match, but the tangent vector is the same,
+        the created beams triads are rotated so the physical problem stays
+        the same (for axi-symmetric beam cross-sections) but the nodes can
+        be reused.
 
     Args
     ----
@@ -91,10 +100,7 @@ def create_beam_mesh_function(
         Node to use as the first node for this line. Use this if the line
         is connected to other lines (angles have to be the same, otherwise
         connections should be used). If a geometry set is given, it can
-        contain one, and one node only. If the rotation does not match, but
-        the tangent vector is the same, the created beams triads are
-        rotated so the physical problem stays the same (for axi-symmetric
-        beam cross-sections) but the same nodes can be used.
+        contain one, and one node only.
     end_node: Node, GeometrySet, bool
         If this is a Node or GeometrySet, the last node of the created beam
         is set to that node.
@@ -136,11 +142,44 @@ def create_beam_mesh_function(
         if node not in mesh.nodes:
             raise ValueError("The given node is not in the current mesh")
 
+    def get_relative_twist(rotation_node, rotation_function):
+        """Check if the rotation at a node and the one returned by the function match.
+        If not, check if the first basis vector of the triads is the same. If that is the
+        case, a simple relative twist can be applied to ensure that the triad field is
+        continuous. This relative twist can lead to issues if the beam cross-section is
+        not double symmetric."""
+
+        if rotation_node == rotation_function:
+            return None
+        elif not mpy.allow_beam_rotation:
+            # The settings do not allow for a rotation of the beam
+            raise ValueError(
+                "Given nodal rotation does not match with given rotation function!"
+            )
+        else:
+            # Evaluate the relative rotation
+            # First check if the first basis vector is the same
+            relative_basis_1 = rotation_node.inv() * rotation_function * [1, 0, 0]
+            if np.linalg.norm(relative_basis_1 - [1, 0, 0]) < mpy.eps_quaternion:
+                # Calculate the relative rotation
+                return rotation_function.inv() * rotation_node
+            else:
+                raise ValueError(
+                    "The tangent of the start node does not match with the given function!"
+                )
+
+    # Position and rotation at the start and end of the interval
+    function_over_whole_interval = function_generator(*interval)
+    relative_twist_start = None
+    relative_twist_end = None
+
     # If a start node is given, set this as the first node for this beam.
     if start_node is not None:
         start_node = get_single_node(start_node, check_cosserat_node=True)
         nodes = [start_node]
         check_given_node(start_node)
+        _, start_rotation = function_over_whole_interval(-1.0)
+        relative_twist_start = get_relative_twist(start_node.rotation, start_rotation)
 
     # If an end node is given, check what behavior is wanted.
     close_beam = False
@@ -149,10 +188,26 @@ def create_beam_mesh_function(
     elif end_node is not None:
         end_node = get_single_node(end_node, check_cosserat_node=True)
         check_given_node(end_node)
+        _, end_rotation = function_over_whole_interval(1.0)
+        relative_twist_end = get_relative_twist(end_node.rotation, end_rotation)
+
+    # Check if a relative twist has to be applied
+    if relative_twist_start is not None and relative_twist_end is not None:
+        if relative_twist_start == relative_twist_end:
+            relative_twist = relative_twist_start
+        else:
+            raise ValueError(
+                "The relative twist required for the start and end node do not match"
+            )
+    elif relative_twist_start is not None:
+        relative_twist = relative_twist_start
+    elif relative_twist_end is not None:
+        relative_twist = relative_twist_end
+    else:
+        relative_twist = None
 
     # Create the beams.
     for i in range(n_el):
-
         # If the beam is closed with itself, set the end node to be the
         # first node of the beam. This is done when the second element is
         # created, as the first node already exists here.
@@ -180,7 +235,12 @@ def create_beam_mesh_function(
         element = beam_object(material=material)
         elements.append(element)
         nodes.extend(
-            element.create_beam(function, start_node=first_node, end_node=last_node)
+            element.create_beam(
+                function,
+                start_node=first_node,
+                end_node=last_node,
+                relative_twist=relative_twist,
+            )
         )
 
     # Set vtk cell data on created elements.

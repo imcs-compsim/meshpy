@@ -70,10 +70,15 @@ class Beam(Element):
     def __init__(self, material=None, nodes=None):
         super().__init__(nodes=nodes, material=material)
 
-    def create_beam(self, beam_function, start_node=None, end_node=None):
+    def create_beam(
+        self, beam_function, *, start_node=None, end_node=None, relative_twist=None
+    ):
         """
         Create the nodes for this beam element. The function returns a list
         with the created nodes.
+
+        In the case of start_node and end_node, it is checked, that the
+        function and the node have the same coordinates and rotations.
 
         Args
         ----
@@ -84,89 +89,51 @@ class Beam(Element):
             If this argument is given, this is the node of the beam at xi=-1.
         end_node: Node
             If this argument is given, this is the node of the beam at xi=1.
-        In the case of start_node and end_node, it is checked, that the
-        function and the node have the same coordinates / rotations. If the
-        start node has a different rotation, but the same tangent vector, the
-        beam is rotated to match the start node rotation.
+        relative_twist: Rotation
+            Apply this relative rotation to all created nodes. This can be used to
+            "twist" the created beam to match the rotation of given nodes.
         """
 
         if len(self.nodes) > 0:
             raise ValueError("The beam should not have any local nodes yet!")
 
-        def check_node(node, xi, name, relative_rotation=None):
-            """
-            Check if the given node matches with the function at value xi.
-            The return value is the relative rotation.
-            """
+        def check_node(node, pos, rot, name):
+            """Check if the given node matches with the position and rotation"""
 
-            # Get position and rotation of beam at xi.
-            pos, rot = beam_function(xi)
-
-            # Check position.
             if np.linalg.norm(pos - node.coordinates) > mpy.eps_pos:
                 raise ValueError(
-                    "{} does not match with function! Got {} from function but given node value is {}".format(
+                    "{} position does not match with function! Got {} from function but given node value is {}".format(
                         name, pos, node.coordinates
                     )
                 )
-
-            # Check rotation.
             if not node.rotation == rot:
-                if np.abs(xi - 1) < mpy.eps_pos:
-                    # In the case of end node check if the beam is rotated.
-                    if relative_rotation is not None:
-                        if node.rotation == rot * relative_rotation:
-                            return pos, rot, relative_rotation
-                    # Otherwise, throw error, as the rotation has to match
-                    # exactly with the given node.
-                    raise ValueError("End rotation does not match with given function!")
+                raise ValueError(
+                    "{} rotation does not match with function!".format(name)
+                )
 
-                elif not mpy.allow_beam_rotation:
-                    # The settings do not allow for a rotation of the beam.
-                    raise ValueError(
-                        "Start rotation does not match with given function!"
-                    )
-
-                # Now check if the first basis vector is in the same direction.
-                relative_basis_1 = node.rotation.inv() * rot * [1, 0, 0]
-                if np.linalg.norm(relative_basis_1 - [1, 0, 0]) < mpy.eps_quaternion:
-                    # Calculate the relative rotation.
-                    relative_rotation = rot.inv() * node.rotation
-                else:
-                    raise ValueError(
-                        "The tangent of the start node does not match with the given function!"
-                    )
-
-            # The default value for the relative rotation is None.
-            return pos, rot, relative_rotation
-
-        # Check start and end nodes.
+        # Flags if nodes are given
         has_start_node = start_node is not None
         has_end_node = end_node is not None
-        relative_rotation = None
 
         # Loop over local nodes.
         for i, [xi, middle_node] in enumerate(self.nodes_create):
-            # Get the position and rotation at xi.
+            # Get the position and rotation at xi
+            pos, rot = beam_function(xi)
+            if relative_twist is not None:
+                rot = rot * relative_twist
+
+            # Check if the position and rotation match existing nodes
             if i == 0 and has_start_node:
-                pos, rot, relative_rotation = check_node(start_node, xi, "start_node")
+                check_node(start_node, pos, rot, "start_node")
                 self.nodes = [start_node]
             elif (i == len(self.nodes_create) - 1) and has_end_node:
-                pos, rot, _relative_rotation = check_node(
-                    end_node, xi, "end_node", relative_rotation=relative_rotation
-                )
-            else:
-                pos, rot = beam_function(xi)
+                check_node(end_node, pos, rot, "end_node")
 
-            # Create the node.
+            # Create the node
             if (i > 0 or not has_start_node) and (
                 i < len(self.nodes_create) - 1 or not has_end_node
             ):
-                self.nodes.append(
-                    NodeCosserat(
-                        pos, rot * relative_rotation, is_middle_node=middle_node
-                    )
-                )
+                self.nodes.append(NodeCosserat(pos, rot, is_middle_node=middle_node))
 
         # Get a list with the created nodes.
         if has_start_node:
