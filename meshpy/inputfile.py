@@ -294,6 +294,10 @@ class InputFile(Mesh):
             mpy.bc.point_coupling_penalty,
             mpy.geo.point,
         ): "DESIGN POINT PENALTY COUPLING CONDITIONS",
+        (
+            "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
+            mpy.geo.surface,
+        ): "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
     }
     geometry_counter = {
         mpy.geo.point: "DPOINT",
@@ -788,7 +792,8 @@ class InputFile(Mesh):
 
         def set_n_global_materials(material_list):
             """Set n_global in every item of the materials list.
-            We have to account for materials imported from dat files that have a random numbering."""
+            We have to account for materials imported from dat files that have a random numbering.
+            """
 
             # A check is performed that every entry in material_list is unique.
             if len(material_list) != len(set(material_list)):
