@@ -57,7 +57,7 @@ from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_functio
 from meshpy.mesh_creation_functions import (
     create_beam_mesh_line,
     create_beam_mesh_curve,
-    create_beam_mesh_arc_segment,
+    create_beam_mesh_arc_segment_via_rotation,
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_stent,
     create_beam_mesh_line_at_node,
@@ -86,7 +86,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         mat = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
 
         # Create mesh.
-        mesh = create_beam_mesh_arc_segment(
+        mesh = create_beam_mesh_arc_segment_via_rotation(
             input_file,
             Beam3rHerm2Line3,
             mat,
@@ -438,7 +438,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         )
 
         mesh_arc = Mesh()
-        create_beam_mesh_arc_segment(
+        create_beam_mesh_arc_segment_via_rotation(
             mesh_arc,
             Beam3rHerm2Line3,
             mat,

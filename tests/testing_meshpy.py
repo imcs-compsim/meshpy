@@ -79,7 +79,7 @@ from meshpy.utility import (
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_line,
-    create_beam_mesh_arc_segment,
+    create_beam_mesh_arc_segment_via_rotation,
 )
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
 from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
@@ -756,7 +756,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Create a beam arc with the different Reissner beam types.
         for i, beam_type in enumerate([Beam3rHerm2Line3, Beam3rLine2Line2]):
-            create_beam_mesh_arc_segment(
+            create_beam_mesh_arc_segment_via_rotation(
                 input_file,
                 beam_type,
                 material,
@@ -1070,13 +1070,13 @@ class TestMeshpy(unittest.TestCase):
         compare_test_result(
             self,
             one_full_circle_closed(
-                create_beam_mesh_arc_segment, get_arguments_arc_segment(0)
+                create_beam_mesh_arc_segment_via_rotation, get_arguments_arc_segment(0)
             ).get_string(header=False),
         )
         compare_test_result(
             self,
             two_half_circles_closed(
-                create_beam_mesh_arc_segment,
+                create_beam_mesh_arc_segment_via_rotation,
                 [get_arguments_arc_segment(1), get_arguments_arc_segment(2)],
             ).get_string(header=False),
         )
@@ -1103,7 +1103,7 @@ class TestMeshpy(unittest.TestCase):
         compare_test_result(
             self,
             one_full_circle_closed(
-                create_beam_mesh_arc_segment,
+                create_beam_mesh_arc_segment_via_rotation,
                 get_arguments_arc_segment(0),
                 additional_rotation=additional_rotation,
             ).get_string(header=False),
@@ -1112,7 +1112,7 @@ class TestMeshpy(unittest.TestCase):
         compare_test_result(
             self,
             two_half_circles_closed(
-                create_beam_mesh_arc_segment,
+                create_beam_mesh_arc_segment_via_rotation,
                 [get_arguments_arc_segment(1), get_arguments_arc_segment(2)],
                 additional_rotation=additional_rotation,
             ).get_string(header=False),
@@ -1782,7 +1782,7 @@ class TestMeshpy(unittest.TestCase):
             n_el=2,
             vtk_cell_data={"cell_data": (1, mpy.vtk_type.int)},
         )
-        create_beam_mesh_arc_segment(
+        create_beam_mesh_arc_segment_via_rotation(
             mesh,
             Beam3rHerm2Line3,
             mat,
