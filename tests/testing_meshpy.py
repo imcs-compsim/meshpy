@@ -1401,6 +1401,20 @@ class TestMeshpy(unittest.TestCase):
         # Compare with the reference file.
         compare_test_result(self, input_file.get_string(header=False))
 
+    def test_meshpy_surface_to_surface_contact_import(self):
+        """Test that surface-to-surface contact problems can be imported as expected"""
+
+        # Create input file.
+        mpy.import_mesh_full = True
+        input_file = InputFile(
+            dat_file=os.path.join(
+                testing_input, self._testMethodName + "_solid_mesh.dat"
+            )
+        )
+
+        # Compare with the reference file.
+        compare_test_result(self, input_file.get_string(header=False))
+
     def test_meshpy_nurbs_import(self):
         """
         Test if the import of a NURBS mesh works as expected.
