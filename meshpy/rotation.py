@@ -161,7 +161,7 @@ class Rotation(object):
         if np.abs(1 - np.linalg.norm(self.q)) > mpy.eps_quaternion:
             raise ValueError(
                 "The rotation object is corrupted. q.q does not "
-                + "equal 1!\n{}".format(self)
+                + "equal 1! q={}".format(self.q)
             )
 
     def get_rotation_matrix(self):
