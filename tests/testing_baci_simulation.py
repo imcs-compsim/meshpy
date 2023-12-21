@@ -42,8 +42,8 @@ import glob
 
 # Testing imports.
 from testing_utility import (
-    baci_release,
     compare_test_result,
+    get_baci_path,
     testing_temp,
     testing_path,
     testing_input,
@@ -67,6 +67,10 @@ from meshpy.utility_baci import dbc_monitor_to_input
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
+
+
+# Get path to baci
+baci_release = get_baci_path()
 
 
 class TestFullBaci(unittest.TestCase):

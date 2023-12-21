@@ -85,11 +85,10 @@ def get_baci_path():
             return None
 
 
-# Define the testing paths.
+# Define the testing paths
 testing_path = os.path.abspath(os.path.dirname(__file__))
 testing_input = os.path.join(testing_path, "reference-files")
 testing_temp = os.path.join(testing_path, "testing-tmp")
-baci_release = get_baci_path()
 
 # Check and clean the temporary directory.
 os.makedirs(testing_temp, exist_ok=True)
