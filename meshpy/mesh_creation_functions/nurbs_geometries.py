@@ -218,6 +218,128 @@ def create_nurbs_flat_plate_2d(width, length, *, n_ele_u=1, n_ele_v=1):
     return surf
 
 
+def create_nurbs_sphere_surface(radius, n_ele_u=1, n_ele_v=1):
+    """
+    Generates a patch of a sphere as a NURBS surface.
+    This function constructs a segment of a spherical
+    surface using Non-Uniform Rational B-Splines (NURBS)
+    based on the specified radius and the number of elements
+    in the parametric u and v directions.
+
+    Args
+    ---
+    radius: double
+        radius of the sphere
+    n_ele_u: int
+        number of elements in the parametric u-direction
+    n_ele_v: int
+        number of elements in the parametric v-direction
+
+    Return
+    ----
+    surf: geomdl object
+        geomdl object that contains the surface information
+    """
+
+    # Create a NURBS surface instance
+    surf = NURBS.Surface()
+
+    # Set degrees
+    surf.degree_u = 2
+    surf.degree_v = 2
+
+    # Control points and set them to the surface
+    p_size_u = 3
+    p_size_v = 3
+
+    dummy = 6.0 * (
+        5.0 / 12.0
+        + 0.5 * np.sqrt(2.0 / 3.0)
+        - 0.25 / np.sqrt(3.0)
+        - 0.5 * np.sqrt(2.0 / 3.0) * np.sqrt(3.0) / 2.0
+    )
+
+    ctrlpts = [
+        [
+            2.0 * radius / np.sqrt(6.0) * -np.sin(1.0 / 4.0 * np.pi),
+            -radius / np.sqrt(3.0),
+            2.0 * radius / np.sqrt(6.0) * np.cos(1.0 / 4.0 * np.pi),
+        ],
+        [
+            radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.cos(1.0 / 4.0 * np.pi)
+            + radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * -np.sin(1.0 / 4.0 * np.pi),
+            -np.sqrt(3.0) / 2 * radius,
+            radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.cos(1.0 / 4.0 * np.pi)
+            + radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.sin(1.0 / 4.0 * np.pi),
+        ],
+        [
+            2.0 * radius / np.sqrt(6.0) * np.cos(1.0 / 4.0 * np.pi),
+            -radius / np.sqrt(3.0),
+            2.0 * radius / np.sqrt(6.0) * np.sin(1.0 / 4.0 * np.pi),
+        ],
+        [
+            radius * np.sqrt(6.0) / 2.0 * -np.sin(1.0 / 4.0 * np.pi),
+            0.0,
+            radius * np.sqrt(6.0) / 2.0 * np.cos(1.0 / 4.0 * np.pi),
+        ],
+        [
+            radius * dummy * np.sqrt(2.0) / 2.0 * np.cos(1.0 / 4.0 * np.pi)
+            + radius * dummy * np.sqrt(2.0) / 2.0 * -np.sin(1.0 / 4.0 * np.pi),
+            0.0,
+            radius * dummy * np.sqrt(2.0) / 2.0 * np.cos(1.0 / 4.0 * np.pi)
+            + radius * dummy * np.sqrt(2.0) / 2.0 * np.sin(1.0 / 4.0 * np.pi),
+        ],
+        [
+            radius * np.sqrt(6.0) / 2.0 * np.cos(1.0 / 4.0 * np.pi),
+            0.0,
+            radius * np.sqrt(6.0) / 2.0 * np.sin(1.0 / 4.0 * np.pi),
+        ],
+        [
+            2.0 * radius / np.sqrt(6.0) * -np.sin(1.0 / 4.0 * np.pi),
+            2.0 * radius / np.sqrt(6.0) * np.cos(1.0 / 4.0 * np.pi),
+            radius / np.sqrt(3.0),
+        ],
+        [
+            radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.cos(1.0 / 4.0 * np.pi)
+            + radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * -np.sin(1.0 / 4.0 * np.pi),
+            np.sqrt(3.0) / 2 * radius,
+            radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.cos(1.0 / 4.0 * np.pi)
+            + radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.sin(1.0 / 4.0 * np.pi),
+        ],
+        [
+            2.0 * radius / np.sqrt(6.0) * np.cos(1.0 / 4.0 * np.pi),
+            radius / np.sqrt(3.0),
+            2.0 * radius / np.sqrt(6.0) * np.sin(1.0 / 4.0 * np.pi),
+        ],
+    ]
+
+    weights = [
+        1.0,
+        2.0 / np.sqrt(6.0),
+        1.0,
+        2.0 / np.sqrt(6.0),
+        2.0 / 3.0,
+        2.0 / np.sqrt(6.0),
+        1.0,
+        2.0 / np.sqrt(6.0),
+        1.0,
+    ]
+
+    t_ctrlptsw = compat.combine_ctrlpts_weights(ctrlpts, weights)
+    n_ctrlptsw = compat.flip_ctrlpts_u(t_ctrlptsw, p_size_u, p_size_v)
+
+    surf.ctrlpts_size_u = p_size_u
+    surf.ctrlpts_size_v = p_size_v
+    surf.ctrlptsw = n_ctrlptsw
+
+    surf.knotvector_u = [0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+    surf.knotvector_v = [0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+
+    do_uniform_knot_refinement_surface(surf, n_ele_u, n_ele_v)
+
+    return surf
+
+
 def create_nurbs_brick(width, length, height, *, n_ele_u=1, n_ele_v=1, n_ele_w=1):
     """
     Creates a patch of a 3 dimensional brick.

@@ -69,6 +69,7 @@ from .nurbs_geometries import (
     create_nurbs_hollow_cylinder_segment_2d,
     create_nurbs_flat_plate_2d,
     create_nurbs_brick,
+    create_nurbs_sphere_surface,
 )
 
 # Define the items that will be exported by default.
@@ -99,4 +100,5 @@ __all__ = [
     "create_nurbs_hollow_cylinder_segment_2d",
     "create_nurbs_flat_plate_2d",
     "create_nurbs_brick",
+    "create_nurbs_sphere_surface",
 ]
