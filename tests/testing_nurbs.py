@@ -50,6 +50,7 @@ from meshpy.mesh_creation_functions import (
     create_nurbs_hollow_cylinder_segment_2d,
     create_nurbs_flat_plate_2d,
     create_nurbs_brick,
+    create_nurbs_sphere_surface,
 )
 
 # Testing imports
@@ -254,6 +255,34 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         input_file.add(patch_set_2)
 
         input_file.couple_nodes(reuse_matching_nodes=True)
+
+        # Compare with the reference file
+        compare_test_result(self, input_file.get_string(header=False))
+
+    def test_nurbs_sphere_surface(self):
+        """Test the creating of the base patch of the surface of a sphere."""
+
+        # Create input file
+        input_file = InputFile()
+
+        # Create the base of a sphere
+        surf_obj = create_nurbs_sphere_surface(1, n_ele_u=3, n_ele_v=2)
+
+        # Create first patch set
+        mat = MaterialStVenantKirchhoff()
+
+        element_description = (
+            "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
+        )
+
+        patch_set = add_geomdl_nurbs_to_mesh(
+            input_file,
+            surf_obj,
+            material=mat,
+            element_description=element_description,
+        )
+
+        input_file.add(patch_set)
 
         # Compare with the reference file
         compare_test_result(self, input_file.get_string(header=False))
