@@ -52,6 +52,7 @@ from meshpy.mesh_creation_functions import (
     create_nurbs_flat_plate_2d,
     create_nurbs_brick,
     create_nurbs_sphere_surface,
+    create_nurbs_hemisphere_surface,
 )
 
 # Testing imports
@@ -315,6 +316,36 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         # Compare with the reference file
         compare_test_result(self, input_file.get_string(header=False))
 
+    def test_nurbs_hemisphere_surface(self):
+        """Test the creation of the surface of a hemisphere."""
+
+        # Create input file
+        input_file = InputFile()
+
+        # Create the base of a sphere
+        surfs = create_nurbs_hemisphere_surface(2.5, n_ele_uv=3)
+
+        # Create first patch set
+        mat = MaterialStVenantKirchhoff()
+
+        element_description = (
+            "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
+        )
+
+        # Add the patch sets of every surface section of the hemisphere to the input file
+        for surf in surfs:
+            patch_set = add_geomdl_nurbs_to_mesh(
+            input_file,
+            surf,
+            material=mat,
+            element_description=element_description,
+            )
+
+            input_file.add(patch_set)
+
+        # Compare with the reference file
+        compare_test_result(self, input_file.get_string(header=False))
+        
 
 if __name__ == "__main__":
     # Execution part of script.
