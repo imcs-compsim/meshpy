@@ -655,7 +655,7 @@ class InputFile(Mesh):
         else:
             raise Warning("Section {} does not exist!".format(section_name))
 
-    def write_input_file(self, file_path, nox_xml_file=None, **kwargs):
+    def write_input_file(self, file_path, *, nox_xml_file=None, **kwargs):
         """
         Write the input to a file.
 
@@ -691,6 +691,7 @@ class InputFile(Mesh):
 
     def get_dat_lines(
         self,
+        *,
         header=True,
         dat_header=True,
         add_script_to_header=True,
