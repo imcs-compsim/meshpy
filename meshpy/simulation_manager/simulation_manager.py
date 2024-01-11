@@ -4,7 +4,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2023
+# Copyright (c) 2018-2024
 #     Ivo Steinbrecher
 #     Institute for Mathematics and Computer-Based Simulation
 #     Universitaet der Bundeswehr Muenchen
@@ -70,7 +70,6 @@ def wait_for_jobs_to_finish(job_ids, *, check_interval=10, status=False):
 
     # Wait for the jobs to finish.
     while True:
-
         # Get the currently running jobs.
         job_out = (
             subprocess.check_output(["squeue"], stderr=subprocess.STDOUT)

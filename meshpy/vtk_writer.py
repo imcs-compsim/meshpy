@@ -4,7 +4,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2023
+# Copyright (c) 2018-2024
 #     Ivo Steinbrecher
 #     Institute for Mathematics and Computer-Based Simulation
 #     Universitaet der Bundeswehr Muenchen
@@ -59,7 +59,6 @@ def add_point_data_node_sets(point_data, nodes):
 
     # Loop over the geometry sets.
     for geometry_set in geometry_set_list:
-
         # Check which nodes are connected to a geometry set.
         data_vector = np.zeros(len(nodes))
         for i, node in enumerate(nodes):
@@ -115,7 +114,6 @@ class VTKWriter(object):
     """A class that manages VTK cells and data and can also create them."""
 
     def __init__(self):
-
         # Initialize VTK objects.
         self.points = vtk.vtkPoints()
         self.grid = vtk.vtkUnstructuredGrid()
@@ -188,10 +186,8 @@ class VTKWriter(object):
             ]
             if input_data is not None
         ]:
-
             # Loop through output fields.
             for key, item_value in data_container.items():
-
                 # Get the data and the value type (int or float).
                 value, data_type = _get_data_value_and_type(item_value)
 
@@ -204,7 +200,6 @@ class VTKWriter(object):
 
                 # Check if key already exists.
                 if key not in self.data[vtk_geom_type, vtk_tensor_type].keys():
-
                     # Set up the VTK data array.
                     if data_type is mpy.vtk_type.float:
                         data = vtk.vtkDoubleArray()
@@ -245,7 +240,6 @@ class VTKWriter(object):
         # Create the connection between the coordinates.
         n_grid_points = self.points.GetNumberOfPoints()
         for i, coord in enumerate(coordinates):
-
             # Add the coordinate to the global list of coordinates.
             self.points.InsertNextPoint(coord[0], coord[1], coord[2])
 
@@ -260,7 +254,6 @@ class VTKWriter(object):
         # Add to global data. Loop over data items and check if there is
         # something to be added in this cell. If not an empty value is added.
         for [key_geom, key_data], data in self.data.items():
-
             # Get input data container.
             if key_geom == mpy.vtk_geo.cell:
                 data_container = cell_data
@@ -270,10 +263,8 @@ class VTKWriter(object):
                 data_container = {}
 
             for key, value in data.items():
-
                 # Check if an existing field is also given for this function.
                 if key in data_container.keys():
-
                     # Get the data and the value type (int or float).
                     data_values, _ = _get_data_value_and_type(data_container[key])
 

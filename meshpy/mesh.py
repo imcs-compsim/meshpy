@@ -4,7 +4,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2023
+# Copyright (c) 2018-2024
 #     Ivo Steinbrecher
 #     Institute for Mathematics and Computer-Based Simulation
 #     Universitaet der Bundeswehr Muenchen
@@ -823,7 +823,6 @@ class Mesh(object):
             # Plot the nodes
             node_radius_scaling_factor = 1.5
             if beam_nodes:
-
                 sphere = pv.Sphere(
                     radius=1.0,
                     theta_resolution=resolution,
@@ -875,7 +874,6 @@ class Mesh(object):
             # Plot the directors of the beam cross-section
             director_radius_scaling_factor = 3.5
             if beam_cross_section_directors:
-
                 arrow = pv.Arrow(tip_resolution=resolution, shaft_resolution=resolution)
 
                 if all_beams_have_cross_section_radius:
