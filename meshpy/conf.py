@@ -4,7 +4,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2023
+# Copyright (c) 2018-2024
 #     Ivo Steinbrecher
 #     Institute for Mathematics and Computer-Based Simulation
 #     Universitaet der Bundeswehr Muenchen
@@ -156,7 +156,6 @@ class MeshPy(object):
         self.vtk_type = VTKType
 
     def set_default_values(self):
-
         # Version information.
         self.git_sha = None
         self.git_date = None
@@ -197,7 +196,7 @@ class MeshPy(object):
         self.input_file_meshpy_header = [
             "-" * 77,
             "This input file was created with MeshPy.",
-            "Copyright (c) 2018-2023",
+            "Copyright (c) 2018-2024",
             "    Ivo Steinbrecher",
             "    Institute for Mathematics and Computer-Based Simulation",
             "    Universitaet der Bundeswehr Muenchen",

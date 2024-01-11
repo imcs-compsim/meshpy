@@ -4,7 +4,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2023
+# Copyright (c) 2018-2024
 #     Ivo Steinbrecher
 #     Institute for Mathematics and Computer-Based Simulation
 #     Universitaet der Bundeswehr Muenchen

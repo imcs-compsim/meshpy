@@ -4,7 +4,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2023
+# Copyright (c) 2018-2024
 #     Ivo Steinbrecher
 #     Institute for Mathematics and Computer-Based Simulation
 #     Universitaet der Bundeswehr Muenchen
@@ -117,7 +117,6 @@ def create_beam_mesh_honeycomb_flat(
     mesh_honeycomb = Mesh()
     origin = np.array([0, a * 0.5 * sin30, 0])
     for i_height in range(n_height + 1):
-
         # Start point for this zig-zag line.
         base_row = origin + (2 * zig_zag_y + a * ny) * i_height
 

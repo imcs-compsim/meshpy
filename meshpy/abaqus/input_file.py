@@ -4,7 +4,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2023
+# Copyright (c) 2018-2024
 #     Ivo Steinbrecher
 #     Institute for Mathematics and Computer-Based Simulation
 #     Universitaet der Bundeswehr Muenchen
@@ -278,7 +278,6 @@ class AbaqusInputFile(object):
         element_lines = []
         normal_lines = ["*Normal, type=element"]
         for element_type, elements in element_types.items():
-
             # Number the elements of this type
             set_n_global(elements, start_index=element_count)
 

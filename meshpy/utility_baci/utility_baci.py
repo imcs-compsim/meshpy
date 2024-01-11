@@ -4,7 +4,7 @@
 #
 # MIT License
 #
-# Copyright (c) 2018-2023
+# Copyright (c) 2018-2024
 #     Ivo Steinbrecher
 #     Institute for Mathematics and Computer-Based Simulation
 #     Universitaet der Bundeswehr Muenchen
@@ -67,7 +67,6 @@ def get_unit_test_code(mesh, function_name):
     for i, element in enumerate(
         [element for element in mesh.elements if isinstance(element, Beam)]
     ):
-
         if i == 0:
             # At the first element, initialize vectors.
             list_variables_definition.append(
@@ -132,7 +131,6 @@ def get_unit_test_code(mesh, function_name):
     for i, element in enumerate(
         [element for element in mesh.elements if isinstance(element, VolumeElement)]
     ):
-
         # Number of nodes for this element.
         n_nodes = len(element.nodes)
 
