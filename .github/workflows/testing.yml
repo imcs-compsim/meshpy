@@ -19,20 +19,20 @@ env:
   TESTING_GITHUB: 1
   # Some test require baci-release to check if the created input file
   # works with baci.
-  BACI_BUILD: /hdd/gitlab-runner/lib/baci-master/release
-  BACI_RELEASE: /hdd/gitlab-runner/lib/baci-master/release/baci-release
+  BACI_BUILD: /home_local/github-runner/testing_lib/baci_master/release
+  BACI_RELEASE: /home_local/github-runner/testing_lib/baci_master/release/baci-release
   # Python executable and virtual environment name
   PYTHON_EXE: python3
   PYTHON_VENV: python-testing-environment
   # Meshpy can interact with cubitpy, to perform the corresponding tests,
   # the following paths have to be set
-  CUBITPY_REPO: /hdd/github-runner/lib/cubitpy-main
-  BACI_PRE_EXODUS: /hdd/gitlab-runner/lib/baci-master/release/pre_exodus
+  CUBITPY_REPO: /home_local/github-runner/testing_lib/cubitpy_main
+  BACI_PRE_EXODUS: /home_local/github-runner/testing_lib/baci_master/release/pre_exodus
   CUBIT: /imcs/public/compsim/opt/cubit-15.2
   # Meshpy allows to perform geometric search functions with ArborX,
   # for this functionality we need Kokkos. On IMCS Ares this is provided
   # with the spack installation under the following path.
-  SPACK_ACTIVATION_SCRIPT: /hdd/gitlab-runner/lib/spack/share/spack/setup-env.sh
+  SPACK_ACTIVATION_SCRIPT: /home_local/github-runner/testing_lib/spack/share/spack/setup-env.sh
 
 jobs:
   meshpy-testing:

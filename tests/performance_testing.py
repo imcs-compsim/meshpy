@@ -178,7 +178,7 @@ class TestPerformance(object):
 
     # Set expected test times.
     expected_times = {}
-    expected_times["ares.bauv.unibw-muenchen.de"] = {
+    expected_times["sisyphos2.bauv.unibw-muenchen.de"] = {
         "cubitpy_create_solid": 4.0,
         "meshpy_load_solid": 0.9,
         "meshpy_load_solid_full": 3.0,
