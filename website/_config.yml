@@ -11,4 +11,4 @@ baseurl: "/public" # the subpath of your site, e.g. /blog
 url: "http://imcs-compsim.github.io/meshpy" # the base hostname & protocol for your site
   
 # Build settings
-exclude: ["README.md"]
+exclude: ["README.md", "vendor"]
