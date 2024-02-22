@@ -46,5 +46,6 @@ dynamic = ["version"]
 [project.optional-dependencies]
 CI-CD = [
   "coverage",
-  "coverage-badge"
+  "coverage-badge",
+  "setuptools" # Needed for coverage-badge
 ]

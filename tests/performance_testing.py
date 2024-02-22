@@ -178,19 +178,19 @@ class TestPerformance(object):
 
     # Set expected test times.
     expected_times = {}
-    expected_times["ares.bauv.unibw-muenchen.de"] = {
-        "cubitpy_create_solid": 4.0,
+    expected_times["sisyphos2.bauv.unibw-muenchen.de"] = {
+        "cubitpy_create_solid": 8.0,
         "meshpy_load_solid": 0.9,
-        "meshpy_load_solid_full": 3.0,
+        "meshpy_load_solid_full": 4.5,
         "meshpy_create_beams": 9.0,
         "meshpy_rotate": 0.6,
         "meshpy_translate": 0.5,
         "meshpy_reflect": 0.7,
-        "meshpy_wrap_around_cylinder": 3.0,
+        "meshpy_wrap_around_cylinder": 2.0,
         "meshpy_wrap_around_cylinder_without_check": 0.7,
-        "meshpy_find_close_nodes": 2.0,
-        "meshpy_write_dat": 13.0,
-        "meshpy_write_vtk": 24.0,
+        "meshpy_find_close_nodes": 0.5,
+        "meshpy_write_dat": 9.0,
+        "meshpy_write_vtk": 15.0,
         "geometric_search_find_nodes_brute_force": 0.05,
     }
 
