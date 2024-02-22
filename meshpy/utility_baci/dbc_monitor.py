@@ -59,17 +59,17 @@ def read_dbc_monitor_file(file_path):
         lines = [line.strip() for line in file.readlines()]
 
     # Extract the nodes for this condition.
-    node_line = lines[0].split(" ")
-    counter = node_line.index(":") + 1
+    condition_nodes_prefix = "Nodes of this condition:"
+    if not lines[1].startswith(condition_nodes_prefix):
+        raise ValueError(
+            f'The second line in the monitor file is supposed to start with "{condition_nodes_prefix}" but the line reads "{lines[1]}"'
+        )
+    node_line = lines[1].split(":")[1]
+    node_ids_str = node_line.split()
     nodes = []
-    is_int = True
-    while is_int:
-        try:
-            node_id = int(node_line[counter])
-            nodes.append(node_id)
-        except ValueError:
-            is_int = False
-        counter += 1
+    for node_id_str in node_ids_str:
+        node_id = int(node_id_str)
+        nodes.append(node_id)
 
     # Find the start of the data lines.
     for i, line in enumerate(lines):
@@ -97,7 +97,7 @@ def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3):
     ----
     input_file: InputFile
         The input file where the created Neumann boundary condition is added
-        to. The nodes refered to in the log file have to match with the ones
+        to. The nodes referred to in the log file have to match with the ones
         in the input section. It is advisable to only call this function once
         all nodes have been added to the input file.
     file_path: str
