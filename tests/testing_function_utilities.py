@@ -59,6 +59,14 @@ class TestFunctionUtilitiesGeometricSearch(unittest.TestCase):
             fun.get_dat_lines(),
         )
 
+        fun = create_linear_interpolation_function(t, values, function_type="My type")
+        self.assertEqual(
+            [
+                "My type var\nVARIABLE 0 NAME var TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3"
+            ],
+            fun.get_dat_lines(),
+        )
+
         fun_string = create_linear_interpolation_string(
             t, values, variable_name="test", variable_index=12
         )
