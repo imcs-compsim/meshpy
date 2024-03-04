@@ -75,9 +75,17 @@ def create_linear_interpolation_string(
     )
 
 
-def create_linear_interpolation_function(t, values):
+def create_linear_interpolation_function(
+    t, values, *, function_type="SYMBOLIC_FUNCTION_OF_SPACE_TIME"
+):
     """Create a function that describes a linear interpolation between the given time points and values.
-    Before and after it will be constant."""
+    Before and after it will be constant.
+
+    Args
+    ----
+    t, values: list(float)
+        Time and values that will be interpolated with piecewise linear functions
+    """
 
     variable_string = create_linear_interpolation_string(t, values, variable_name="var")
-    return Function("SYMBOLIC_FUNCTION_OF_SPACE_TIME var\n" + variable_string)
+    return Function(f"{function_type} var\n" + variable_string)
