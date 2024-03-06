@@ -29,4 +29,4 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 
-from tutorial.tutorial import meshpy_tutorial
+from .tutorial import meshpy_tutorial

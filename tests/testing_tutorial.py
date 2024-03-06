@@ -37,17 +37,14 @@ import unittest
 import os
 import sys
 
-# Import tutorial function.
-sys.path.insert(
-    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tutorial"))
-)
-from tutorial import meshpy_tutorial
+# Import tutorial
+import meshpy_tutorial
 
 # Import testing utilities.
 from testing_utility import testing_temp, compare_test_result
 
 
-class Testtutorial(unittest.TestCase):
+class TestTutorial(unittest.TestCase):
     """This class tests the headers in the repository."""
 
     def test_tutorial(self):
@@ -55,7 +52,7 @@ class Testtutorial(unittest.TestCase):
         Test that the tutorial works.
         """
 
-        input_file = meshpy_tutorial(testing_temp)
+        input_file = meshpy_tutorial.meshpy_tutorial(testing_temp)
         tutorial_file = os.path.join(testing_temp, "tutorial.dat")
         input_file.write_input_file(tutorial_file, header=False, dat_header=False)
         compare_test_result(self, tutorial_file)

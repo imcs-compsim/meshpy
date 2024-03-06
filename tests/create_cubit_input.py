@@ -262,5 +262,7 @@ if __name__ == "__main__":
     create_block(file_path)
 
     # Create the tube for the tutorial.
-    file_path = os.path.join(dir_path, "reference-files/baci_input_solid_tutorial.dat")
+    file_path = os.path.join(
+        os.path.dirname(dir_path), "tutorial/baci_input_solid_tutorial.dat"
+    )
     create_tube_tutorial(file_path)
