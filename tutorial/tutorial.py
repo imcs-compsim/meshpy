@@ -263,10 +263,7 @@ def meshpy_tutorial(base_dir, preview=False):
     # Everything from the volume input file will be included in the combined
     # input file, e.g. BC, loads, materials, solver parameters, ... .
     solid_dat_path = os.path.join(
-        os.path.dirname(os.path.dirname(__file__)),
-        "tests",
-        "reference-files",
-        "baci_input_solid_tutorial.dat",
+        os.path.dirname(__file__), "baci_input_solid_tutorial.dat"
     )
     input_file = InputFile(dat_file=solid_dat_path)
 
