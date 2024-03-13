@@ -902,10 +902,7 @@ class Mesh(object):
                     plotter.add_mesh(arrow, color=colors[i])
 
         if vtk_writer_solid.points.GetNumberOfPoints() > 0:
-            from pyvista_utils import clean_to_grid
-
-            solid_grid = pv.UnstructuredGrid(vtk_writer_solid.grid)
-            solid_grid = clean_to_grid(solid_grid)
+            solid_grid = pv.UnstructuredGrid(vtk_writer_solid.grid).clean()
             plotter.add_mesh(solid_grid, color="white", show_edges=True, opacity=0.5)
 
         if not is_testing:
