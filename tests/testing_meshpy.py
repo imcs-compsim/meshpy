@@ -578,6 +578,50 @@ class TestMeshpy(unittest.TestCase):
         # Check the output.
         compare_test_result(self, input_file.get_string(header=False))
 
+    def test_meshpy_curve_3d_helix_length(self):
+        """Create a helix from a parametric curve where and check that the
+        correct length is returned.
+        """
+
+        input_file_1 = InputFile()
+        input_file_2 = InputFile()
+        mat = MaterialReissner()
+
+        R = 2.0
+        tz = 4.0  # incline
+        n = 1  # number of turns
+        n_el = 3
+
+        def helix(t):
+            return npAD.array(
+                [
+                    R * npAD.cos(t),
+                    R * npAD.sin(t),
+                    t * tz / (2 * np.pi),
+                ]
+            )
+
+        args = [Beam3rHerm2Line3, mat, helix, [0.0, 2.0 * np.pi * n]]
+        kwargs = {"n_el": n_el}
+
+        helix_set_1 = create_beam_mesh_curve(input_file_1, *args, **kwargs)
+        input_file_1.add(helix_set_1)
+
+        helix_set_2, length = create_beam_mesh_curve(
+            input_file_2, *args, output_length=True, **kwargs
+        )
+        input_file_2.add(helix_set_2)
+
+        # Check the computed length
+        self.assertAlmostEqual(length, 13.18763323790246, delta=1e-12)
+
+        # Check that both meshes are equal
+        compare_strings(
+            self,
+            input_file_1.get_string(header=False),
+            input_file_2.get_string(header=False),
+        )
+
     def test_meshpy_curve_2d_sin(self):
         """Create a sin from a parametric curve."""
 
@@ -659,7 +703,6 @@ class TestMeshpy(unittest.TestCase):
         L = 1.1
         n_el = 4
 
-        # Create a helix with a parametric curve.
         def curve(t):
             return npAD.array([L * t, t * t * L * L, 0.0])
 

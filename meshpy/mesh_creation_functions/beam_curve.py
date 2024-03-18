@@ -48,6 +48,7 @@ def create_beam_mesh_curve(
     function,
     interval,
     *,
+    output_length=False,
     function_derivative=None,
     function_rotation=None,
     **kwargs,
@@ -72,6 +73,9 @@ def create_beam_mesh_curve(
         autograd.numpy.
     interval: [start end]
         Start and end values for the parameter of the curve.
+    output_length: bool
+        If this is true, the function returns a tuple containing the created
+        sets and the total arc length along the integrated function.
     function_derivative: function -> R3
         Explicitly provide the jacobian of the centerline position.
     function_rotation: function -> Rotation
@@ -260,7 +264,7 @@ def create_beam_mesh_curve(
     length = S(interval[1])
 
     # Create the beam in the mesh
-    return create_beam_mesh_function(
+    created_sets = create_beam_mesh_function(
         mesh,
         beam_object=beam_object,
         material=material,
@@ -269,3 +273,8 @@ def create_beam_mesh_curve(
         interval_length=length,
         **kwargs,
     )
+
+    if output_length:
+        return (created_sets, length)
+    else:
+        return created_sets
