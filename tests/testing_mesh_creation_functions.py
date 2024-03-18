@@ -51,6 +51,7 @@ from meshpy import (
     BoundaryCondition,
 )
 from meshpy.node import NodeCosserat
+from meshpy.utility import get_nodal_coordinates
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_function
@@ -68,7 +69,7 @@ from meshpy.mesh_creation_functions import (
 )
 
 # Testing imports.
-from testing_utility import testing_input, compare_test_result
+from testing_utility import testing_input, compare_test_result, compare_strings
 
 
 class TestMeshCreationFunctions(unittest.TestCase):
@@ -494,6 +495,215 @@ class TestMeshCreationFunctions(unittest.TestCase):
         with self.assertRaises(ValueError):
             mesh = Mesh()
             return create_beam_mesh_function(mesh, interval=[0.0, 1.0], l_el=2.0)
+
+    def test_mesh_creation_functions_curve_3d_helix(self):
+        """
+        Create a helix from a parametric curve where the parameter is
+        transformed so the arc length along the beam is not proportional to
+        the parameter.
+        """
+
+        # Create input file.
+        input_file = InputFile()
+
+        # Add material and functions.
+        mat = MaterialReissner()
+
+        # Set parameters for the helix.
+        R = 2.0
+        tz = 4.0  # incline
+        n = 1  # number of turns
+        n_el = 5
+
+        # Create a helix with a parametric curve.
+        def helix(t):
+            factor = 2
+            t_trans = npAD.exp(factor * t / (2.0 * np.pi * n)) * t / npAD.exp(factor)
+            return npAD.array(
+                [
+                    R * npAD.cos(t_trans),
+                    R * npAD.sin(t_trans),
+                    t_trans * tz / (2 * np.pi),
+                ]
+            )
+
+        helix_set = create_beam_mesh_curve(
+            input_file, Beam3rHerm2Line3, mat, helix, [0.0, 2.0 * np.pi * n], n_el=n_el
+        )
+        input_file.add(helix_set)
+
+        # Compare the coordinates with the ones from Mathematica.
+        coordinates_mathematica = np.loadtxt(
+            os.path.join(
+                testing_input,
+                "test_mesh_creation_functions_curve_3d_helix_mathematica.csv",
+            ),
+            delimiter=",",
+        )
+        self.assertLess(
+            np.linalg.norm(
+                coordinates_mathematica - get_nodal_coordinates(input_file.nodes)
+            ),
+            mpy.eps_pos,
+        )
+
+        # Check the output.
+        compare_test_result(self, input_file.get_string(header=False))
+
+    def test_mesh_creation_functions_curve_3d_helix_length(self):
+        """Create a helix from a parametric curve where and check that the
+        correct length is returned.
+        """
+
+        input_file_1 = InputFile()
+        input_file_2 = InputFile()
+        mat = MaterialReissner()
+
+        R = 2.0
+        tz = 4.0  # incline
+        n = 1  # number of turns
+        n_el = 3
+
+        def helix(t):
+            return npAD.array(
+                [
+                    R * npAD.cos(t),
+                    R * npAD.sin(t),
+                    t * tz / (2 * np.pi),
+                ]
+            )
+
+        args = [Beam3rHerm2Line3, mat, helix, [0.0, 2.0 * np.pi * n]]
+        kwargs = {"n_el": n_el}
+
+        helix_set_1 = create_beam_mesh_curve(input_file_1, *args, **kwargs)
+        input_file_1.add(helix_set_1)
+
+        helix_set_2, length = create_beam_mesh_curve(
+            input_file_2, *args, output_length=True, **kwargs
+        )
+        input_file_2.add(helix_set_2)
+
+        # Check the computed length
+        self.assertAlmostEqual(length, 13.18763323790246, delta=1e-12)
+
+        # Check that both meshes are equal
+        compare_strings(
+            self,
+            input_file_1.get_string(header=False),
+            input_file_2.get_string(header=False),
+        )
+
+    def test_mesh_creation_functions_curve_2d_sin(self):
+        """Create a sin from a parametric curve."""
+
+        # Create input file.
+        input_file = InputFile()
+
+        # Add material and functions.
+        mat = MaterialReissner()
+
+        # Set parameters for the sin.
+        n_el = 8
+
+        # Create a helix with a parametric curve.
+        def sin(t):
+            return npAD.array([t, npAD.sin(t)])
+
+        sin_set = create_beam_mesh_curve(
+            input_file, Beam3rHerm2Line3, mat, sin, [0.0, 2.0 * np.pi], n_el=n_el
+        )
+        input_file.add(sin_set)
+
+        # Compare the coordinates with the ones from Mathematica.
+        coordinates_mathematica = np.loadtxt(
+            os.path.join(
+                testing_input,
+                "test_mesh_creation_functions_curve_2d_sin_mathematica.csv",
+            ),
+            delimiter=",",
+        )
+        self.assertLess(
+            np.linalg.norm(
+                coordinates_mathematica - get_nodal_coordinates(input_file.nodes)
+            ),
+            mpy.eps_pos,
+        )
+
+        # Check the output.
+        compare_test_result(self, input_file.get_string(header=False))
+
+    def test_mesh_creation_functions_curve_3d_curve_rotation(self):
+        """Create a line from a parametric curve and prescribe the rotation."""
+
+        # AD.
+        from autograd import jacobian
+
+        # Create input file.
+        input_file = InputFile()
+
+        # Add material and functions.
+        mat = MaterialReissner()
+
+        # Set parameters for the line.
+        L = 1.1
+        n_el = 4
+
+        def curve(t):
+            return npAD.array([L * t, t * t * L * L, 0.0])
+
+        def rotation(t):
+            rp2 = jacobian(curve)(t)
+            rp = [rp2[0], rp2[1], 0]
+            R1 = Rotation([1, 0, 0], t * 2 * np.pi)
+            R2 = Rotation.from_basis(rp, [0, 0, 1])
+            return R2 * R1
+
+        sin_set = create_beam_mesh_curve(
+            input_file,
+            Beam3rHerm2Line3,
+            mat,
+            curve,
+            [0.0, 1.0],
+            n_el=n_el,
+            function_rotation=rotation,
+        )
+        input_file.add(sin_set)
+
+        # Check the output.
+        compare_test_result(self, input_file.get_string(header=False))
+
+    def test_mesh_creation_functions_curve_3d_line(self):
+        """
+        Create a line from a parametric curve. Once the interval is in
+        ascending order, once in descending. This tests checks that the
+        elements are created with the correct tangent vectors.
+        """
+
+        # Create input file.
+        input_file = InputFile()
+
+        # Add material and function.
+        mat = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
+
+        # Create a line with a parametric curve (and a transformed parameter).
+        def line(t):
+            factor = 2
+            t_trans = npAD.exp(factor * t / (2.0 * np.pi)) * t / npAD.exp(factor)
+            return npAD.array([t_trans, 0, 0])
+
+        # Create mesh.
+        set_1 = create_beam_mesh_curve(
+            input_file, Beam3rHerm2Line3, mat, line, [0.0, 5.0], n_el=3
+        )
+        input_file.translate([0, 1, 0])
+        set_2 = create_beam_mesh_curve(
+            input_file, Beam3rHerm2Line3, mat, line, [5.0, 0.0], n_el=3
+        )
+        input_file.add(set_1, set_2)
+
+        # Check the output.
+        compare_test_result(self, input_file.get_string(header=False))
 
 
 if __name__ == "__main__":
