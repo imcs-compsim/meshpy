@@ -28,7 +28,7 @@ env:
   # the following paths have to be set
   CUBITPY_REPO: /home_local/github-runner/testing_lib/cubitpy_main
   BACI_PRE_EXODUS: /home_local/github-runner/testing_lib/baci_master/release/pre_exodus
-  CUBIT: /imcs/public/compsim/opt/cubit-15.2
+  CUBIT_ROOT: /imcs/public/compsim/opt/cubit-15.2
   # Meshpy allows to perform geometric search functions with ArborX,
   # for this functionality we need Kokkos. On IMCS Ares this is provided
   # with the spack installation under the following path.
