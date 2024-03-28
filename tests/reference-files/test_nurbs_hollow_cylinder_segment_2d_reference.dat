@@ -9,6 +9,7 @@
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 50 NUE 0.19 DENS 5.3e-07
 -----------------------------------------------------------STRUCTURE KNOTVECTORS
+NURBS_DIMENSION                       2
 BEGIN                                 NURBSPATCH
 ID                                    1
 NUMKNOTS                              7

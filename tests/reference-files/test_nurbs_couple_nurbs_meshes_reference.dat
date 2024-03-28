@@ -9,6 +9,7 @@
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 430 NUE 0.1 DENS 4.2e-07
 -----------------------------------------------------------STRUCTURE KNOTVECTORS
+NURBS_DIMENSION                       2
 BEGIN                                 NURBSPATCH
 ID                                    1
 NUMKNOTS                              8
@@ -33,6 +34,7 @@ TYPE                                  Interpolated
 1.0
 1.0
 END                                   NURBSPATCH
+NURBS_DIMENSION                       2
 BEGIN                                 NURBSPATCH
 ID                                    2
 NUMKNOTS                              8
