@@ -74,6 +74,18 @@ class NURBSPatch(Element):
         # Set the element description
         self.element_description = element_description
 
+    def get_nurbs_dimension(self):
+        """Return the number of dimensions of the NURBS structure"""
+        n_knots = len(self.knot_vectors)
+        n_polynomial = len(self.polynomial_orders)
+        if n_knots == n_polynomial:
+            return n_knots
+        else:
+            raise ValueError(
+                "The variables n_knots and polynomial_orders should have "
+                f"the same length. Got {n_knots} and {n_polynomial}"
+            )
+
     def add_element_specific_section(self, sections):
         """Return additional information of the NURBS patch"""
 
@@ -85,6 +97,7 @@ class NURBSPatch(Element):
             sections[knotvectors_section] = InputSectionMultiKey(knotvectors_section)
 
         section = sections[knotvectors_section]
+        section.add(f"NURBS_DIMENSION {self.get_nurbs_dimension()}")
         section.add("BEGIN NURBSPATCH")
         section.add("ID {}".format(self.n_nurbs_patch))
 
