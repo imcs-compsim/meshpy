@@ -50,6 +50,7 @@ from .material import (
     MaterialKirchhoff,
     MaterialReissner,
     MaterialReissnerElastoplastic,
+    MaterialString,
     MaterialStVenantKirchhoff,
 )
 from .element_beam import Beam3eb, Beam3k, Beam3rHerm2Line3, Beam3rLine2Line2
@@ -90,6 +91,7 @@ __all__ = [
     "BoundaryCondition",
     "Coupling",
     "MaterialEulerBernoulli",
+    "MaterialString",
     "MaterialStVenantKirchhoff",
     "Node",
     "NodeCosserat"

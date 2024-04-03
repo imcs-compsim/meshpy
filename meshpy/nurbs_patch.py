@@ -39,9 +39,7 @@ import numpy as np
 from .conf import mpy
 from .element import Element
 
-from .material import (
-    MaterialStVenantKirchhoff,
-)
+from .material import MaterialString, MaterialStVenantKirchhoff
 
 
 class NURBSPatch(Element):
@@ -50,7 +48,7 @@ class NURBSPatch(Element):
     """
 
     # A list of valid material types for this element
-    valid_material = [MaterialStVenantKirchhoff]
+    valid_material = [MaterialString, MaterialStVenantKirchhoff]
 
     def __init__(
         self,
