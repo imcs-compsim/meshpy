@@ -9,6 +9,7 @@
 -----------------------------------------------------------------------MATERIALS
 MAT 1 STRING_MATERIAL
 -----------------------------------------------------------STRUCTURE KNOTVECTORS
+NURBS_DIMENSION                       2
 BEGIN                                 NURBSPATCH
 ID                                    1
 NUMKNOTS                              8
