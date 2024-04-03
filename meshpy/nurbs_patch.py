@@ -39,9 +39,7 @@ import numpy as np
 from .conf import mpy
 from .element import Element
 
-from .material import (
-    MaterialStVenantKirchhoff,
-)
+from .material import MaterialString, MaterialStVenantKirchhoff
 
 
 class NURBSPatch(Element):
@@ -50,12 +48,13 @@ class NURBSPatch(Element):
     """
 
     # A list of valid material types for this element
-    valid_material = [MaterialStVenantKirchhoff]
+    valid_material = [MaterialString, MaterialStVenantKirchhoff]
 
     def __init__(
         self,
         knot_vectors,
         polynomial_orders,
+        element_string,
         material=None,
         nodes=None,
         element_description=None,
@@ -71,7 +70,8 @@ class NURBSPatch(Element):
         # Set numbers for elements
         self.n_nurbs_patch = None
 
-        # Set the element description
+        # Set the element definitions
+        self.element_string = element_string
         self.element_description = element_description
 
     def get_nurbs_dimension(self):
@@ -171,6 +171,11 @@ class NURBSSurface(NURBSPatch):
     A patch of a NURBS surface
     """
 
+    def __init__(self, *args, element_string=None, **kwargs):
+        if element_string is None:
+            element_string = "WALLNURBS"
+        super().__init__(*args, element_string, **kwargs)
+
     def _get_dat(self):
         """Return the lines with elements for the input file"""
 
@@ -219,8 +224,9 @@ class NURBSSurface(NURBSPatch):
                     string_cps += "{} ".format(cp.n_global)
 
                 patch_elements.append(
-                    "{} WALLNURBS NURBS{} {} MAT {} {}".format(
+                    "{} {} NURBS{} {} MAT {} {}".format(
                         self.n_global + j,
+                        self.element_string,
                         (self.polynomial_orders[0] + 1)
                         * (self.polynomial_orders[1] + 1),
                         string_cps,
@@ -237,6 +243,11 @@ class NURBSVolume(NURBSPatch):
     """
     A patch of a NURBS volume
     """
+
+    def __init__(self, *args, element_string=None, **kwargs):
+        if element_string is not None:
+            raise ValueError("element_string is not yet implemented for NURBS volumes")
+        super().__init__(*args, element_string, **kwargs)
 
     def _get_dat(self):
         """Return the lines with elements for the input file"""

@@ -41,6 +41,7 @@ import os
 from meshpy import (
     InputFile,
     MaterialStVenantKirchhoff,
+    MaterialString,
     Rotation,
 )
 
@@ -280,6 +281,33 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
             surf_obj,
             material=mat,
             element_description=element_description,
+        )
+
+        input_file.add(patch_set)
+
+        # Compare with the reference file
+        compare_test_result(self, input_file.get_string(header=False))
+
+    def test_nurbs_string_types(self):
+        """Test the creating of a NURBS with strings for the element and material definition."""
+
+        # Create input file
+        input_file = InputFile()
+
+        # Create the base of a sphere
+        surf_obj = create_nurbs_flat_plate_2d(1, 3, n_ele_u=3, n_ele_v=2)
+
+        # Create first patch set
+        mat = MaterialString("STRING_MATERIAL")
+
+        element_description = ()
+
+        patch_set = add_geomdl_nurbs_to_mesh(
+            input_file,
+            surf_obj,
+            material=mat,
+            element_string="STRING_TYPE",
+            element_description="STRING_DESCRIPTION",
         )
 
         input_file.add(patch_set)

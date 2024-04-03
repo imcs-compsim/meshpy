@@ -48,6 +48,7 @@ def add_geomdl_nurbs_to_mesh(
     geomdl_obj,
     *,
     material=None,
+    element_string=None,
     element_description=None,
 ):
     """
@@ -119,6 +120,7 @@ def add_geomdl_nurbs_to_mesh(
         geomdl_obj.degree,
         nodes=control_points,
         material=material,
+        element_string=element_string,
         element_description=element_description,
     )
 

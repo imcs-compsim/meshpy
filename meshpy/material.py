@@ -264,6 +264,19 @@ class MaterialEulerBernoulli(MaterialBeam):
         )
 
 
+class MaterialString(Material):
+    """Holds material definition that is defined by a string."""
+
+    def __init__(self, material_string, **kwargs):
+        super().__init__(**kwargs)
+        self.material_string = material_string
+
+    def _get_dat(self):
+        """Return the line for this material."""
+        string = "MAT {} {}"
+        return string.format(self.n_global, self.material_string)
+
+
 class MaterialSolid(Material):
     """Base class for a material for solids"""
 

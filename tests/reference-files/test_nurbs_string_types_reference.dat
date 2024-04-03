@@ -1,0 +1,111 @@
+// -----------------------------------------------------------------------------
+// This input file was created with MeshPy.
+// Copyright (c) 2018-2024
+//     Ivo Steinbrecher
+//     Institute for Mathematics and Computer-Based Simulation
+//     Universitaet der Bundeswehr Muenchen
+//     https://www.unibw.de/imcs-en
+// -----------------------------------------------------------------------------
+-----------------------------------------------------------------------MATERIALS
+MAT 1 STRING_MATERIAL
+-----------------------------------------------------------STRUCTURE KNOTVECTORS
+NURBS_DIMENSION                       2
+BEGIN                                 NURBSPATCH
+ID                                    1
+NUMKNOTS                              8
+DEGREE                                2
+TYPE                                  Interpolated
+0.0
+0.0
+0.0
+0.3333333333333333
+0.6666666666666666
+1.0
+1.0
+1.0
+NUMKNOTS                              7
+DEGREE                                2
+TYPE                                  Interpolated
+0.0
+0.0
+0.0
+0.5
+1.0
+1.0
+1.0
+END                                   NURBSPATCH
+-------------------------------------------------------------DNODE-NODE TOPOLOGY
+NODE 1 DNODE 1
+NODE 5 DNODE 2
+NODE 16 DNODE 3
+NODE 20 DNODE 4
+-------------------------------------------------------------DLINE-NODE TOPOLOGY
+NODE 1 DLINE 1
+NODE 2 DLINE 1
+NODE 3 DLINE 1
+NODE 4 DLINE 1
+NODE 5 DLINE 1
+NODE 5 DLINE 2
+NODE 10 DLINE 2
+NODE 15 DLINE 2
+NODE 20 DLINE 2
+NODE 16 DLINE 3
+NODE 17 DLINE 3
+NODE 18 DLINE 3
+NODE 19 DLINE 3
+NODE 20 DLINE 3
+NODE 1 DLINE 4
+NODE 6 DLINE 4
+NODE 11 DLINE 4
+NODE 16 DLINE 4
+-------------------------------------------------------------DSURF-NODE TOPOLOGY
+NODE 1 DSURFACE 1
+NODE 2 DSURFACE 1
+NODE 3 DSURFACE 1
+NODE 4 DSURFACE 1
+NODE 5 DSURFACE 1
+NODE 6 DSURFACE 1
+NODE 7 DSURFACE 1
+NODE 8 DSURFACE 1
+NODE 9 DSURFACE 1
+NODE 10 DSURFACE 1
+NODE 11 DSURFACE 1
+NODE 12 DSURFACE 1
+NODE 13 DSURFACE 1
+NODE 14 DSURFACE 1
+NODE 15 DSURFACE 1
+NODE 16 DSURFACE 1
+NODE 17 DSURFACE 1
+NODE 18 DSURFACE 1
+NODE 19 DSURFACE 1
+NODE 20 DSURFACE 1
+---------------------------------------------------------------------NODE COORDS
+CP 1 COORD -0.5 -1.5 0 1.0
+CP 2 COORD -0.333333333333 -1.5 0 1.0
+CP 3 COORD 0 -1.5 0 1.0
+CP 4 COORD 0.333333333333 -1.5 0 1.0
+CP 5 COORD 0.5 -1.5 0 1.0
+CP 6 COORD -0.5 -0.75 0 1.0
+CP 7 COORD -0.333333333333 -0.75 0 1.0
+CP 8 COORD 0 -0.75 0 1.0
+CP 9 COORD 0.333333333333 -0.75 0 1.0
+CP 10 COORD 0.5 -0.75 0 1.0
+CP 11 COORD -0.5 0.75 0 1.0
+CP 12 COORD -0.333333333333 0.75 0 1.0
+CP 13 COORD 0 0.75 0 1.0
+CP 14 COORD 0.333333333333 0.75 0 1.0
+CP 15 COORD 0.5 0.75 0 1.0
+CP 16 COORD -0.5 1.5 0 1.0
+CP 17 COORD -0.333333333333 1.5 0 1.0
+CP 18 COORD 0 1.5 0 1.0
+CP 19 COORD 0.333333333333 1.5 0 1.0
+CP 20 COORD 0.5 1.5 0 1.0
+--------------------------------------------------------------STRUCTURE ELEMENTS
+1 STRING_TYPE NURBS9 1 2 3 6 7 8 11 12 13  MAT 1 STRING_DESCRIPTION
+2 STRING_TYPE NURBS9 2 3 4 7 8 9 12 13 14  MAT 1 STRING_DESCRIPTION
+3 STRING_TYPE NURBS9 3 4 5 8 9 10 13 14 15  MAT 1 STRING_DESCRIPTION
+4 STRING_TYPE NURBS9 6 7 8 11 12 13 16 17 18  MAT 1 STRING_DESCRIPTION
+5 STRING_TYPE NURBS9 7 8 9 12 13 14 17 18 19  MAT 1 STRING_DESCRIPTION
+6 STRING_TYPE NURBS9 8 9 10 13 14 15 18 19 20  MAT 1 STRING_DESCRIPTION
+------------------------------------------------------------------FLUID ELEMENTS
+-----------------------------------------------------------------------------END
