@@ -120,7 +120,7 @@ def meshpy_tutorial(base_dir, preview=False):
             beam_set_1["start"],
             (
                 "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 "
-                + "FUNCT 0 0 0 0 0 0 0 0 0"
+                "FUNCT 0 0 0 0 0 0 0 0 0"
             ),
             bc_type=mpy.bc.dirichlet,
         )
@@ -247,7 +247,7 @@ def meshpy_tutorial(base_dir, preview=False):
             geometry_set_all_lines,
             (
                 "NUMDOF 9 ONOFF 0 1 0 0 0 0 0 0 0 VAL 0 {} 0 0 0 0 0 0 0 "
-                + "FUNCT 0 {} 0 0 0 0 0 0 0"
+                "FUNCT 0 {} 0 0 0 0 0 0 0"
             ),
             format_replacement=[line_load_val, fun_t],
             bc_type=mpy.bc.neumann,

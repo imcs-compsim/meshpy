@@ -123,7 +123,7 @@ def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3):
         geo,
         (
             "NUMDOF {n_dof} ONOFF 1 1 1{edz} VAL {data[0]} {data[1]} {data[2]}"
-            + "{edz} FUNCT {{0}} {{0}} {{0}}{edz}"
+            "{edz} FUNCT {{0}} {{0}} {{0}}{edz}"
         ).format(n_dof=n_dof, data=force[step], edz=extra_dof_zero),
         bc_type=mpy.bc.neumann,
         format_replacement=[function],

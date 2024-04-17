@@ -77,7 +77,7 @@ def set_runtime_output(
     element_gid=True,
     output_energy=False,
     output_strains=True,
-    option_overwrite=False
+    option_overwrite=False,
 ):
     """
     Set the basic runtime output options.
@@ -120,12 +120,10 @@ def set_runtime_output(
     input_file.add(
         InputSection(
             "IO/RUNTIME VTK OUTPUT",
-            """
+            f"""
         OUTPUT_DATA_FORMAT        binary
         INTERVAL_STEPS            1
-        EVERY_ITERATION           {}""".format(
-                get_yes_no(every_iteration)
-            ),
+        EVERY_ITERATION           {get_yes_no(every_iteration)}""",
             option_overwrite=option_overwrite,
         )
     )
@@ -134,17 +132,12 @@ def set_runtime_output(
     input_file.add(
         InputSection(
             "IO/RUNTIME VTK OUTPUT/STRUCTURE",
-            """
-        OUTPUT_STRUCTURE                {}
+            f"""
+        OUTPUT_STRUCTURE                {get_yes_no(output_solid)}
         DISPLACEMENT                    yes
-        STRESS_STRAIN                   {}
-        ELEMENT_OWNER                   {}
-        ELEMENT_GID                     {}""".format(
-                get_yes_no(output_solid),
-                get_yes_no(output_stress_strain),
-                get_yes_no(element_owner),
-                get_yes_no(element_gid),
-            ),
+        STRESS_STRAIN                   {get_yes_no(output_stress_strain)}
+        ELEMENT_OWNER                   {get_yes_no(element_owner)}
+        ELEMENT_GID                     {get_yes_no(element_gid)}""",
             option_overwrite=option_overwrite,
         )
     )
@@ -153,18 +146,13 @@ def set_runtime_output(
     input_file.add(
         InputSection(
             "IO/RUNTIME VTK OUTPUT/BEAMS",
-            """
+            f"""
         OUTPUT_BEAMS                    yes
         DISPLACEMENT                    yes
-        USE_ABSOLUTE_POSITIONS          {}
-        TRIAD_VISUALIZATIONPOINT        {}
-        STRAINS_GAUSSPOINT              {}
-        ELEMENT_GID                     {}""".format(
-                get_yes_no(absolute_beam_positons),
-                get_yes_no(output_triad),
-                get_yes_no(output_strains),
-                get_yes_no(element_gid),
-            ),
+        USE_ABSOLUTE_POSITIONS          {get_yes_no(absolute_beam_positons)}
+        TRIAD_VISUALIZATIONPOINT        {get_yes_no(output_triad)}
+        STRAINS_GAUSSPOINT              {get_yes_no(output_strains)}
+        ELEMENT_GID                     {get_yes_no(element_gid)}""",
             option_overwrite=option_overwrite,
         )
     )
@@ -175,7 +163,7 @@ def set_runtime_output(
             InputSection(
                 (
                     "BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/"
-                    + "RUNTIME VTK OUTPUT"
+                    "RUNTIME VTK OUTPUT"
                 ),
                 """
             WRITE_OUTPUT                          yes
@@ -226,7 +214,7 @@ def set_beam_to_solid_meshtying(
     coupling_type=None,
     binning_bounding_box=None,
     binning_cutoff_radius=None,
-    option_overwrite=False
+    option_overwrite=False,
 ):
     """
     Set the beam to solid meshtying options.
@@ -281,21 +269,19 @@ def set_beam_to_solid_meshtying(
         input_file.add(
             InputSection(
                 "BINNING STRATEGY",
-                """
-            BIN_SIZE_LOWER_BOUND {1}
-            DOMAINBOUNDINGBOX {0}
-            """.format(
-                    bounding_box_string, binning_cutoff_radius
-                ),
+                f"""
+            BIN_SIZE_LOWER_BOUND {binning_cutoff_radius}
+            DOMAINBOUNDINGBOX {bounding_box_string}
+            """,
                 option_overwrite=True,
             )
         )
     elif (binning_bounding_box is not None) or binning_cutoff_radius is not None:
         raise ValueError(
             (
-                "Binning bounding box ({}) and binning cutoff radius"
-                + " both have to be set or none of them."
-            ).format(binning_bounding_box, binning_cutoff_radius)
+                f"Binning bounding box ({binning_bounding_box}) and binning cutoff radius "
+                f"({binning_cutoff_radius}) both have to be set or none of them."
+            )
         )
 
     # Add the beam to solid volume mesh tying options.
@@ -304,30 +290,26 @@ def set_beam_to_solid_meshtying(
     elif interaction_type == mpy.beam_to_solid.surface_meshtying:
         bts = InputSection("BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING")
         if coupling_type is not None:
-            bts.add("COUPLING_TYPE {}".format(coupling_type))
+            bts.add(f"COUPLING_TYPE {coupling_type}")
     else:
         raise ValueError(
             "Got wrong beam-to-solid mesh tying type. "
-            + "Got {} of type {}.".format(interaction_type, type(interaction_type))
+            f"Got {interaction_type} of type {type(interaction_type)}."
         )
     bts.add(
-        """
+        f"""
         CONSTRAINT_STRATEGY penalty
-        PENALTY_PARAMETER {}
-        GAUSS_POINTS {}
-        """.format(
-            penalty_parameter, n_gauss_points
-        ),
+        PENALTY_PARAMETER {penalty_parameter}
+        GAUSS_POINTS {n_gauss_points}
+        """,
         option_overwrite=option_overwrite,
     )
     if contact_discretization == "mortar":
         bts.add(
-            """
+            f"""
             CONTACT_DISCRETIZATION mortar
-            MORTAR_SHAPE_FUNCTION {}
-            """.format(
-                mortar_shape
-            ),
+            MORTAR_SHAPE_FUNCTION {mortar_shape}
+            """,
             option_overwrite=option_overwrite,
         )
         segmentation_strategy = _get_segmentation_strategy(segmentation)
@@ -339,26 +321,22 @@ def set_beam_to_solid_meshtying(
         segmentation_strategy = _get_segmentation_strategy(segmentation)
     elif contact_discretization == "circ":
         bts.add(
-            """
+            f"""
         CONTACT_DISCRETIZATION gauss_point_cross_section
-        INTEGRATION_POINTS_CIRCUMFERENCE {}""".format(
-                n_integration_points_circ
-            ),
+        INTEGRATION_POINTS_CIRCUMFERENCE {n_integration_points_circ}""",
             option_overwrite=option_overwrite,
         )
         segmentation_strategy = "gauss_point_projection_cross_section"
     else:
         raise ValueError(
-            'Wrong contact_discretization "{}" given!'.format(contact_discretization)
+            f'Wrong contact_discretization "{contact_discretization}" given!'
         )
 
     bts.add(
-        """
-        GEOMETRY_PAIR_STRATEGY {}
-        GEOMETRY_PAIR_SEGMENTATION_SEARCH_POINTS {}
-        """.format(
-            segmentation_strategy, segmentation_search_points
-        ),
+        f"""
+        GEOMETRY_PAIR_STRATEGY {segmentation_strategy}
+        GEOMETRY_PAIR_SEGMENTATION_SEARCH_POINTS {segmentation_search_points}
+        """,
         option_overwrite=option_overwrite,
     )
     if couple_restart:
@@ -381,7 +359,7 @@ def set_header_static(
     write_strain="no",
     prestress="none",
     prestress_time=0,
-    option_overwrite=False
+    option_overwrite=False,
 ):
     """
     Set the default parameters for a static structure analysis.
@@ -431,16 +409,14 @@ def set_header_static(
     input_file.add(
         InputSection(
             "IO",
-            """
-        OUTPUT_BIN     {0}
+            f"""
+        OUTPUT_BIN     {get_yes_no(write_bin)}
         STRUCT_DISP    No
-        STRUCT_STRESS  {1}
-        STRUCT_STRAIN  {2}
+        STRUCT_STRESS  {write_stress}
+        STRUCT_STRAIN  {write_strain}
         FILESTEPS      1000
         VERBOSITY      Standard
-        """.format(
-                get_yes_no(write_bin), write_stress, write_strain
-            ),
+        """,
             option_overwrite=option_overwrite,
         )
     )
@@ -448,27 +424,20 @@ def set_header_static(
     input_file.add(
         InputSection(
             "STRUCTURAL DYNAMIC",
-            """
+            f"""
         LINEAR_SOLVER     1
         INT_STRATEGY      Standard
         DYNAMICTYP        Statics
         RESULTSEVRY       1
         NLNSOL            fullnewton
         PREDICT           TangDis
-        PRESTRESS         {0}
-        PRESTRESSTIME     {1}
-        TIMESTEP          {2}
-        NUMSTEP           {3}
-        MAXTIME           {4}
-        LOADLIN           {5}
-        """.format(
-                prestress,
-                prestress_time,
-                time_step,
-                n_steps,
-                time_step * n_steps,
-                get_yes_no(load_lin),
-            ),
+        PRESTRESS         {prestress}
+        PRESTRESSTIME     {prestress_time}
+        TIMESTEP          {time_step}
+        NUMSTEP           {n_steps}
+        MAXTIME           {time_step * n_steps}
+        LOADLIN           {get_yes_no(load_lin)}
+        """,
             option_overwrite=option_overwrite,
         )
     )
@@ -484,7 +453,7 @@ def set_header_static(
     )
 
     # Set the contents of the NOX xml file.
-    nox_xml = """
+    nox_xml = f"""
         <ParameterList name="Status Test">
         <!-- Outer Status Test: This test is an OR combination of the structural convergence and the maximum number of iterations -->
         <ParameterList name="Outer Status Test">
@@ -501,7 +470,7 @@ def set_header_static(
                 <ParameterList name="Quantity 0">
                   <Parameter name="Quantity Type"  type="string" value="Structure" />
                   <Parameter name="Tolerance Type" type="string" value="Absolute" />
-                  <Parameter name="Tolerance"      type="double" value="{0}" />
+                  <Parameter name="Tolerance"      type="double" value="{tol_residuum}" />
                   <Parameter name="Norm Type"      type="string" value="Two Norm" />
                   <Parameter name="Scale Type"     type="string" value="Scaled" />
                 </ParameterList>
@@ -514,7 +483,7 @@ def set_header_static(
                 <ParameterList name="Quantity 0">
                   <Parameter name="Quantity Type"  type="string" value="Structure" />
                   <Parameter name="Tolerance Type" type="string" value="Absolute" />
-                  <Parameter name="Tolerance"      type="double" value="{1}" />
+                  <Parameter name="Tolerance"      type="double" value="{tol_increment}" />
                   <Parameter name="Norm Type"      type="string" value="Two Norm" />
                   <Parameter name="Scale Type"     type="string" value="Scaled" />
                 </ParameterList>
@@ -525,13 +494,11 @@ def set_header_static(
           <!-- BEGIN: Combo OR - Test 1: "MaxIters" -->
           <ParameterList name="Test 1">
             <Parameter name="Test Type"          type="string" value="MaxIters" />
-            <Parameter name="Maximum Iterations" type="int"    value="{2}" />
+            <Parameter name="Maximum Iterations" type="int"    value="{max_iter}" />
           </ParameterList> <!--END: "MaxIters" -->
         </ParameterList>
         </ParameterList>
-        """.format(
-        tol_residuum, tol_increment, max_iter
-    )
+        """
 
     input_file.add(
         InputSection(

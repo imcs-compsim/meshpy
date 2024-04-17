@@ -78,14 +78,13 @@ class BoundaryConditionBase(BaseMeshItemFull):
         # Split up the input line.
         split = line.split()
 
-        if (
-            bc_key is mpy.bc.dirichlet
-            or bc_key is mpy.bc.neumann
-            or bc_key is mpy.bc.beam_to_solid_surface_meshtying
-            or bc_key is mpy.bc.beam_to_solid_surface_contact
-            or bc_key is mpy.bc.beam_to_solid_volume_meshtying
-            or isinstance(bc_key, str)
-        ):
+        if bc_key in (
+            mpy.bc.dirichlet,
+            mpy.bc.neumann,
+            mpy.bc.beam_to_solid_surface_meshtying,
+            mpy.bc.beam_to_solid_surface_contact,
+            mpy.bc.beam_to_solid_volume_meshtying,
+        ) or isinstance(bc_key, str):
             # Normal boundary condition (including beam-to-solid conditions).
             return BoundaryCondition(
                 int(split[1]) - 1, " ".join(split[3:]), bc_type=bc_key, **kwargs
@@ -100,10 +99,9 @@ class BoundaryConditionBase(BaseMeshItemFull):
                 " ".join(split[3:]),
                 check_overlapping_nodes=False,
                 check_at_init=False,
-                **kwargs
+                **kwargs,
             )
-        else:
-            raise ValueError("Got unexpected boundary condition!")
+        raise ValueError("Got unexpected boundary condition!")
 
 
 class BoundaryCondition(BoundaryConditionBase):
@@ -116,10 +114,11 @@ class BoundaryCondition(BoundaryConditionBase):
         self,
         geometry_set,
         bc_string,
+        *,
         format_replacement=None,
         bc_type=None,
         double_nodes=None,
-        **kwargs
+        **kwargs,
     ):
         """
         Initialize the object.
@@ -163,7 +162,7 @@ class BoundaryCondition(BoundaryConditionBase):
         else:
             dat_string = self.bc_string
 
-        return "E {} - {}".format(self.geometry_set.n_global, dat_string)
+        return f"E {self.geometry_set.n_global} - {dat_string}"
 
     def check(self):
         """
@@ -200,7 +199,6 @@ class BoundaryCondition(BoundaryConditionBase):
                 )
             elif len(double_node_list) > 0:
                 warnings.warn(
-                    "There are overlapping nodes in this point "
-                    + "Neumann boundary, and it is not specified on how to "
-                    + "handle them!"
+                    "There are overlapping nodes in this point Neumann boundary, and it is not "
+                    "specified on how to handle them!"
                 )

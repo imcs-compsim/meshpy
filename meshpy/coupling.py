@@ -49,6 +49,7 @@ class Coupling(BoundaryConditionBase):
         geometry,
         coupling_type,
         coupling_dof_type,
+        *,
         check_overlapping_nodes=True,
         check_at_init=True,
         **kwargs,
@@ -82,7 +83,7 @@ class Coupling(BoundaryConditionBase):
             geometry = GeometrySet(geometry)
         else:
             raise TypeError(
-                "Coupling expects a GeometrySetBase item, got {}".format(type(geometry))
+                f"Coupling expects a GeometrySetBase item, got {type(geometry)}"
             )
 
         # Couplings only work for point sets
@@ -107,16 +108,16 @@ class Coupling(BoundaryConditionBase):
 
         if not self.check_overlapping_nodes:
             return
-        else:
-            nodes = self.geometry_set.get_points()
-            pos = np.zeros([len(nodes), 3])
-            for i, node in enumerate(nodes):
-                # Get the difference to the first node
-                pos[i, :] = node.coordinates - nodes[0].coordinates
-            if np.linalg.norm(pos) > mpy.eps_pos:
-                raise ValueError(
-                    "The nodes given to Coupling do not have the same position."
-                )
+
+        nodes = self.geometry_set.get_points()
+        pos = np.zeros([len(nodes), 3])
+        for i, node in enumerate(nodes):
+            # Get the difference to the first node
+            pos[i, :] = node.coordinates - nodes[0].coordinates
+        if np.linalg.norm(pos) > mpy.eps_pos:
+            raise ValueError(
+                "The nodes given to Coupling do not have the same position."
+            )
 
     def _get_dat(self):
         """Return the dat line for this object. If no explicit string was given,
@@ -135,13 +136,11 @@ class Coupling(BoundaryConditionBase):
                 for element in node.element_link:
                     if beam_type is not element.beam_type:
                         raise ValueError(
-                            (
-                                'The first element in this coupling is of the type "{}" another one is of type "{}"! They have to be of the same kind.'.format(
-                                    beam_type, element.beam_type
-                                )
-                            )
+                            f'The first element in this coupling is of the type "{beam_type}" '
+                            f'another one is of type "{element.beam_type}"! They have to be '
+                            "of the same kind."
                         )
-                    elif beam_type is mpy.beam.kirchhoff and element.rotvec is False:
+                    if beam_type is mpy.beam.kirchhoff and element.rotvec is False:
                         raise ValueError(
                             "Couplings for Kirchhoff beams and rotvec==False not yet implemented."
                         )
@@ -162,7 +161,7 @@ class Coupling(BoundaryConditionBase):
 
             string = beam_baci_type.get_coupling_string(self.coupling_dof_type)
 
-        return "E {} - {}".format(self.geometry_set.n_global, string)
+        return f"E {self.geometry_set.n_global} - {string}"
 
 
 def coupling_factory(geometry, coupling_type, coupling_dof_type, **kwargs):

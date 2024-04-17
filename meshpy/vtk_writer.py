@@ -33,11 +33,11 @@ This module provides a class that is used to write VTK files.
 """
 
 # Python modules.
+import os
+import numbers
+import warnings
 import vtk
 import numpy as np
-import numbers
-import os
-import warnings
 
 # Meshpy modules.
 from .conf import mpy
@@ -80,9 +80,7 @@ def add_point_data_node_sets(point_data, nodes):
             raise TypeError("The geometry type is wrong!")
 
         # Add the data vector.
-        set_name = "{}_set_{}".format(
-            geometry_name, mpy.vtk_node_set_format.format(geometry_set.n_global)
-        )
+        set_name = f"{geometry_name}_set_{mpy.vtk_node_set_format.format(geometry_set.n_global)}"
         point_data[set_name] = (data_vector, mpy.vtk_type.int)
 
 
@@ -91,7 +89,7 @@ def _get_data_value_and_type(data):
     Return the data and its type if one was given.
     The default type, if none was given is float.
     """
-    if type(data) is tuple:
+    if isinstance(data, tuple):
         return data[0], data[1]
     else:
         return data, mpy.vtk_type.float
@@ -106,11 +104,10 @@ def _get_vtk_array_type(data):
         return mpy.vtk_type.int
     elif data_type == "double":
         return mpy.vtk_type.float
-    else:
-        raise ValueError('Got unexpected type ""!'.format(data_type))
+    raise ValueError(f'Got unexpected type "{data_type}"!')
 
 
-class VTKWriter(object):
+class VTKWriter:
     """A class that manages VTK cells and data and can also create them."""
 
     def __init__(self):
@@ -159,9 +156,8 @@ class VTKWriter(object):
         else:
             if not n_points == len(topology):
                 raise ValueError(
-                    "Coordinates is of size {}, while topology is of size {}!".format(
-                        n_points, len(topology)
-                    )
+                    f"Coordinates is of size {n_points}, while topology is of "
+                    f"size {len(topology)}!"
                 )
 
         # Check if point data containers are of the correct size.
@@ -170,10 +166,8 @@ class VTKWriter(object):
                 value, _data_type = _get_data_value_and_type(item_value)
                 if not len(value) == n_points:
                     raise IndexError(
-                        (
-                            "The length of coordinates is {},"
-                            + "the length of {} is {}, does not match!"
-                        ).format(n_points, key, len(value))
+                        f"The length of coordinates is {n_points},"
+                        f"the length of {key} is {len(value)}, does not match!"
                     )
 
         # Check if data container already exists. If not, add it and also add
@@ -285,18 +279,16 @@ class VTKWriter(object):
     def _get_vtk_data_type(self, data):
         """Return the type of data. Check if data matches an expected case."""
 
-        if isinstance(data, list) or isinstance(data, np.ndarray):
+        if isinstance(data, (list, np.ndarray)):
             if len(data) == 3:
                 return mpy.vtk_tensor.vector
-            else:
-                raise IndexError(
-                    "Only 3d vectors are implemented yet! Got "
-                    + "len(data) = {}".format(len(data))
-                )
+            raise IndexError(
+                f"Only 3d vectors are implemented yet! Got len(data) = {len(data)}"
+            )
         elif isinstance(data, numbers.Number):
             return mpy.vtk_tensor.scalar
 
-        raise ValueError("Data {} did not match any expected case!".format(data))
+        raise ValueError(f"Data {data} did not match any expected case!")
 
     def _add_data(self, data, vtk_tensor_type, non_zero_data=None):
         """Add data to a VTK data array."""
@@ -328,36 +320,33 @@ class VTKWriter(object):
                 else:
                     self.grid.GetPointData().AddArray(vtk_data)
 
-    def write_vtk(self, filepath, *, ascii=False):
+    def write_vtk(self, filepath, *, binary=True):
         """Write the VTK geometry and data to a file.
 
         Args
         ----
         filepath: str
             Path to output file. The file extension should be vtu.
-        ascii: bool
-            If the data should be written in human readable text.
+        binary: bool
+            If the data should be written encoded in binary or in human readable text.
         """
 
         # Check if directory for file exits.
-        if not os.path.isdir(os.path.dirname(filepath)):
-            raise ValueError(
-                "Directory {} does not exist!".format(os.path.dirname(filepath))
-            )
+        file_directory = os.path.dirname(filepath)
+        if not os.path.isdir(file_directory):
+            raise ValueError(f"Directory {file_directory} does not exist!".format())
 
         # Initialize VTK writer.
         writer = vtk.vtkXMLUnstructuredGridWriter()
 
         # Set the ascii flag.
-        if ascii:
+        if not binary:
             writer.SetDataModeToAscii()
 
         # Check the file extension.
         _filename, file_extension = os.path.splitext(filepath)
         if not file_extension.lower() == ".vtu":
-            warnings.warn(
-                'The extension should be "vtu", got {}!'.format(file_extension)
-            )
+            warnings.warn(f'The extension should be "vtu", got {file_extension}!')
 
         # Write geometry and data to file.
         writer.SetFileName(filepath)

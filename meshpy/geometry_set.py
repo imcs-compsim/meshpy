@@ -106,6 +106,15 @@ class GeometrySetBase(BaseMeshItemFull):
                 "The node that should be replaced is not in the current node set"
             )
 
+    def get_all_nodes(self):
+        """
+        Return all nodes associated with this set. This includes nodes contained within
+        the geometry added to this set.
+        """
+        raise NotImplementedError(
+            'The "get_all_nodes" method has to be overwritten in the derived class'
+        )
+
     def _get_dat(self):
         """Get the lines for the input file."""
 
@@ -118,11 +127,7 @@ class GeometrySetBase(BaseMeshItemFull):
         nodes = [nodes[i] for i in sort_indices]
 
         return [
-            "NODE {} {} {}".format(
-                node.n_global,
-                self.geometry_set_names[self.geometry_type],
-                self.n_global,
-            )
+            f"NODE {node.n_global} {self.geometry_set_names[self.geometry_type]} {self.n_global}"
             for node in nodes
         ]
 
@@ -164,8 +169,7 @@ class GeometrySet(GeometrySetBase):
             return mpy.geo.line
         elif isinstance(item, GeometrySet):
             return item.geometry_type
-        else:
-            raise TypeError("Got unexpected type {}".format(type(item)))
+        raise TypeError(f"Got unexpected type {type(item)}")
 
     def add(self, item):
         """
@@ -181,15 +185,14 @@ class GeometrySet(GeometrySetBase):
                     self.add(geometry)
             else:
                 raise TypeError(
-                    "You tried to add a {} set to a {} set. This is not possible".format(
-                        item.geometry_type, self.geometry_type
-                    )
+                    "You tried to add a {item.geometry_type} set to a {self.geometry_type} set. "
+                    "This is not possible"
                 )
         elif self._get_geometry_type(item) is self.geometry_type:
             if item not in self.geometry_objects[self.geometry_type]:
                 self.geometry_objects[self.geometry_type].append(item)
         else:
-            raise TypeError("Got unexpected geometry type {}".format(type(item)))
+            raise TypeError(f"Got unexpected geometry type {type(item)}")
 
     def get_points(self):
         """
@@ -201,7 +204,7 @@ class GeometrySet(GeometrySetBase):
         else:
             raise TypeError(
                 "The function get_points can only be called for point sets."
-                " The present type is {}".format(self.geometry_type)
+                f" The present type is {self.geometry_type}"
             )
 
     def get_all_nodes(self):
@@ -226,7 +229,7 @@ class GeometrySet(GeometrySetBase):
 class GeometrySetNodes(GeometrySetBase):
     """Geometry set which is defined by nodes and not explicit geometry."""
 
-    def __init__(self, geometry_type, nodes=[], **kwargs):
+    def __init__(self, geometry_type, nodes=None, **kwargs):
         """
         Initialize the geometry set.
 
@@ -241,7 +244,8 @@ class GeometrySetNodes(GeometrySetBase):
 
         super().__init__(geometry_type, **kwargs)
         self.nodes = []
-        self.add(nodes)
+        if nodes is not None:
+            self.add(nodes)
 
     @classmethod
     def from_dat(cls, geometry_key, lines, comments=None):
@@ -258,8 +262,8 @@ class GeometrySetNodes(GeometrySetBase):
     def replace_indices_with_nodes(self, nodes):
         """After the set is imported from a dat file, replace the node indices
         with the corresponding nodes objects."""
-        for i in range(len(self.nodes)):
-            self.nodes[i] = nodes[self.nodes[i]]
+        for i, node in enumerate(self.nodes):
+            self.nodes[i] = nodes[node]
 
     def add(self, value):
         """
@@ -277,7 +281,7 @@ class GeometrySetNodes(GeometrySetBase):
             # Nodes are added.
             for item in value:
                 self.add(item)
-        elif isinstance(value, Node) or isinstance(value, int):
+        elif isinstance(value, (int, Node)):
             if value not in self.nodes:
                 self.nodes.append(value)
         elif isinstance(value, GeometrySetNodes):
@@ -287,12 +291,11 @@ class GeometrySetNodes(GeometrySetBase):
                     self.add(node)
             else:
                 raise TypeError(
-                    "You tried to add a {} set to a {} set. This is not possible".format(
-                        value.geometry_type, self.geometry_type
-                    )
+                    f"You tried to add a {value.geometry_type} set to a {self.geometry_type} set. "
+                    "This is not possible"
                 )
         else:
-            raise TypeError("Expected Node or list, but got {}".format(type(value)))
+            raise TypeError(f"Expected Node or list, but got {type(value)}")
 
     def get_points(self):
         """Return nodes explicitly associated with this set."""
@@ -301,7 +304,7 @@ class GeometrySetNodes(GeometrySetBase):
         else:
             raise TypeError(
                 "The function get_points can only be called for point sets."
-                " The present type is {}".format(self.geometry_type)
+                f" The present type is {self.geometry_type}"
             )
 
     def get_all_nodes(self):

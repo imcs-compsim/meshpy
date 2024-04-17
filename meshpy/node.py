@@ -92,10 +92,10 @@ class Node(BaseMeshItemFull):
         """Replace this node with another node object."""
 
         # Check that the two nodes have the same type.
-        if not type(self) == type(master_node):
+        if not isinstance(self, type(master_node)):
             raise TypeError(
                 "A node can only be replaced by a node with the same type. "
-                "Got {} and {}".format(type(self), type(master_node))
+                + f"Got {type(self)} and {type(master_node)}"
             )
 
         # Replace the links to this node in the referenced objects.
@@ -119,7 +119,6 @@ class Node(BaseMeshItemFull):
         """
         Don't do anything for a standard node, as this node can not be rotated.
         """
-        pass
 
     def _get_dat(self):
         """
@@ -128,13 +127,15 @@ class Node(BaseMeshItemFull):
 
         coordinate_string = " ".join(
             [
-                mpy.dat_precision.format(component + 0)
-                if np.abs(component) >= mpy.eps_pos
-                else "0"
+                (
+                    mpy.dat_precision.format(component + 0)
+                    if np.abs(component) >= mpy.eps_pos
+                    else "0"
+                )
                 for component in self.coordinates
             ]
         )
-        return "NODE {} COORD {}".format(self.n_global, coordinate_string)
+        return f"NODE {self.n_global} COORD {coordinate_string}"
 
 
 class NodeCosserat(Node):
@@ -149,7 +150,7 @@ class NodeCosserat(Node):
         # Rotation of this node.
         self.rotation = rotation.copy()
 
-    def rotate(self, rotation, origin=None, only_rotate_triads=False):
+    def rotate(self, rotation, *, origin=None, only_rotate_triads=False):
         """
         Rotate this node. By default the node is rotated around the origin
         (0,0,0), if the keyword argument origin is given, it is rotated around
@@ -187,10 +188,12 @@ class ControlPoint(Node):
 
         coordinate_string = " ".join(
             [
-                mpy.dat_precision.format(component + 0)
-                if np.abs(component) >= mpy.eps_pos
-                else "0"
+                (
+                    mpy.dat_precision.format(component + 0)
+                    if np.abs(component) >= mpy.eps_pos
+                    else "0"
+                )
                 for component in self.coordinates
             ]
         )
-        return "CP {} COORD {} {}".format(self.n_global, coordinate_string, self.weight)
+        return f"CP {self.n_global} COORD {coordinate_string} {self.weight}"

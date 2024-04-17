@@ -60,7 +60,6 @@ class Function(BaseMeshItemFull):
         Return the global index for this function. This is usually used then
         the function is called with the str.format() function.
         """
-        if self.n_global:
-            return str(self.n_global)
-        else:
+        if self.n_global is None:
             raise IndexError("The function does not have a global index!")
+        return str(self.n_global)

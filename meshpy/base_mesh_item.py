@@ -34,7 +34,7 @@ that are in a mesh.
 """
 
 
-class BaseMeshItem(object):
+class BaseMeshItem:
     """Base class for all objects that are related to a mesh."""
 
     def __init__(self, data=None, comments=None):
@@ -59,18 +59,16 @@ class BaseMeshItem(object):
         else:
             self.comments = comments
 
-    def get_dat_lines(self, **kwargs):
+    def get_dat_lines(self):
         """
         Return the content of this object as a list. If comments exist, also
         add those.
         """
 
         # Get data of object.
-        data = self._get_dat(**kwargs)
+        data = self._get_dat()
         if isinstance(data, str):
             data = [data]
-        else:
-            data = data
 
         # Get comments if given.
         return_list = []
@@ -81,7 +79,7 @@ class BaseMeshItem(object):
         return_list.extend(data)
         return return_list
 
-    def _get_dat(self, **kwargs):
+    def _get_dat(self):
         """Return the content of this object as either a list or a str."""
         return self.data
 
@@ -90,10 +88,6 @@ class BaseMeshItemFull(BaseMeshItem):
     """Base class for all objects that are related to a mesh and are fully created
     in MeshPy."""
 
-    pass
-
 
 class BaseMeshItemString(BaseMeshItem):
     """Base class for all objects that are imported from a dat file as a plain string."""
-
-    pass

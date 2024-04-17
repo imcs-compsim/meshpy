@@ -78,13 +78,12 @@ class NURBSPatch(Element):
         """Return the number of dimensions of the NURBS structure"""
         n_knots = len(self.knot_vectors)
         n_polynomial = len(self.polynomial_orders)
-        if n_knots == n_polynomial:
-            return n_knots
-        else:
+        if not n_knots == n_polynomial:
             raise ValueError(
                 "The variables n_knots and polynomial_orders should have "
                 f"the same length. Got {n_knots} and {n_polynomial}"
             )
+        return n_knots
 
     def add_element_specific_section(self, sections):
         """Return additional information of the NURBS patch"""
@@ -99,12 +98,12 @@ class NURBSPatch(Element):
         section = sections[knotvectors_section]
         section.add(f"NURBS_DIMENSION {self.get_nurbs_dimension()}")
         section.add("BEGIN NURBSPATCH")
-        section.add("ID {}".format(self.n_nurbs_patch))
+        section.add(f"ID {self.n_nurbs_patch}")
 
         for dir_manifold in range(len(self.knot_vectors)):
             num_knotvectors = len(self.knot_vectors[dir_manifold])
-            section.add("NUMKNOTS {}".format(num_knotvectors))
-            section.add("DEGREE {}".format(self.polynomial_orders[dir_manifold]))
+            section.add(f"NUMKNOTS {num_knotvectors}")
+            section.add(f"DEGREE {self.polynomial_orders[dir_manifold]}")
 
             # Check the type of knot vector, in case that the multiplicity of the first and last
             # knot vectors is not p + 1, then it is a closed (periodic) knot vector, otherwise it
@@ -128,10 +127,10 @@ class NURBSPatch(Element):
                     knotvector_type = "Periodic"
                     break
 
-            section.add("TYPE {}".format(knotvector_type))
+            section.add(f"TYPE {knotvector_type}")
 
             for knot_vector_val in self.knot_vectors[dir_manifold]:
-                section.add("{}".format(knot_vector_val))
+                section.add(f"{knot_vector_val}")
 
         section.add("END NURBSPATCH")
 
@@ -141,13 +140,16 @@ class NURBSPatch(Element):
 
         num_elements_dir = np.zeros(len(self.knot_vectors), dtype=int)
 
-        for dir in range(len(self.knot_vectors)):
-            for i in range(len(self.knot_vectors[dir]) - 1):
+        for i_dir in range(len(self.knot_vectors)):
+            for i_knot in range(len(self.knot_vectors[i_dir]) - 1):
                 if (
-                    abs(self.knot_vectors[dir][i] - self.knot_vectors[dir][i + 1])
+                    abs(
+                        self.knot_vectors[i_dir][i_knot]
+                        - self.knot_vectors[i_dir][i_knot + 1]
+                    )
                     > mpy.eps_knot_vector
                 ):
-                    num_elements_dir[dir] += 1
+                    num_elements_dir[i_dir] += 1
 
         total_num_elements = np.prod(num_elements_dir)
 
@@ -156,14 +158,12 @@ class NURBSPatch(Element):
     def _check_material(self):
         """Check if the linked material is valid for this type of NURBS solid element"""
         for material_type in self.valid_material:
-            if type(self.material) is material_type:
-                break
-        else:
-            raise TypeError(
-                "NURBS solid of type {} can not have a material of type {}!".format(
-                    type(self), type(self.material)
-                )
-            )
+            if isinstance(self.material, material_type):
+                return
+        raise TypeError(
+            f"NURBS solid of type {type(self)} can not have a material of t"
+            f"ype {type(self.material)}!"
+        )
 
 
 class NURBSSurface(NURBSPatch):
@@ -196,7 +196,8 @@ class NURBSSurface(NURBSPatch):
             for j in range(self.polynomial_orders[1] + 1):
                 for i in range(self.polynomial_orders[0] + 1):
                     # Calculating the global index of the control point, based on the book
-                    # "Isogeometric Analysis: toward Integration of CAD and FEA" of J. Austin Cottrell, p. 314.
+                    # "Isogeometric Analysis: toward Integration of CAD and FEA" of J. Austin
+                    # Cottrell, p. 314.
                     index_global = ctrlpts_size_u * (id_v + j) + id_u + i
                     element_ctrlpts_ids.append(index_global)
 
@@ -221,7 +222,7 @@ class NURBSSurface(NURBSPatch):
                 string_cps = ""
                 for i in element_cps_ids:
                     cp = self.nodes[i]
-                    string_cps += "{} ".format(cp.n_global)
+                    string_cps += f"{cp.n_global} "
 
                 patch_elements.append(
                     "{} {} NURBS{} {} MAT {} {}".format(
@@ -273,7 +274,8 @@ class NURBSVolume(NURBSPatch):
                 for j in range(self.polynomial_orders[1] + 1):
                     for i in range(self.polynomial_orders[0] + 1):
                         # Calculating the global index of the control point, based on the paper
-                        # "Isogeometric analysis: an overview and computer implementation aspects" of Vinh-Phu Nguyen, Mathematics and Computers in Simulation, Jun-2015.
+                        # "Isogeometric analysis: an overview and computer implementation aspects"
+                        # of Vinh-Phu Nguyen, Mathematics and Computers in Simulation, Jun-2015.
                         index_global = (
                             ctrlpts_size_u * ctrlpts_size_v * (id_w + k)
                             + ctrlpts_size_u * (id_v + j)
@@ -309,7 +311,7 @@ class NURBSVolume(NURBSPatch):
                     string_cps = ""
                     for i in element_cps_ids:
                         cp = self.nodes[i]
-                        string_cps += "{} ".format(cp.n_global)
+                        string_cps += f"{cp.n_global} "
 
                     num_cp_in_element = (
                         (self.polynomial_orders[0] + 1)

@@ -79,7 +79,7 @@ mpy.git_sha, mpy.git_date = get_git_data(os.path.dirname(os.path.realpath(__file
 def flatten(data):
     """Flatten out all list items in data."""
     flatten_list = []
-    if type(data) == list:
+    if isinstance(data, list):
         for item in data:
             flatten_list.extend(flatten(item))
         return flatten_list
@@ -132,10 +132,7 @@ def check_node_by_coordinate(node, axis, value, eps=mpy.eps_pos):
     eps: float
         Tolerance to check for equality.
     """
-    if np.abs(node.coordinates[axis] - value) < eps:
-        return True
-    else:
-        return False
+    return np.abs(node.coordinates[axis] - value) < eps
 
 
 def get_min_max_coordinates(nodes):
@@ -165,7 +162,7 @@ def clean_simulation_directory(sim_dir):
 
     # Check if simulation directory exists.
     if os.path.exists(sim_dir):
-        print('Path "{}" already exists'.format(sim_dir))
+        print(f'Path "{sim_dir}" already exists')
         while True:
             answer = input("DELETE all contents? (y/n): ")
             if answer.lower() == "y":
@@ -177,7 +174,7 @@ def clean_simulation_directory(sim_dir):
                         elif os.path.isdir(file_path):
                             shutil.rmtree(file_path)
                     except Exception as e:
-                        ValueError("Failed to delete %s. Reason: %s" % (file_path, e))
+                        raise ValueError(f"Failed to delete {file_path}. Reason: {e}")
                 return
             elif answer.lower() == "n":
                 raise ValueError("Directory is not deleted!")
@@ -208,7 +205,7 @@ def get_single_node(item, *, check_cosserat_node=False):
             raise ValueError("GeometrySet does not have exactly one node!")
     else:
         raise TypeError(
-            'The given object can be node or GeometrySet got "{}"!'.format(type(item))
+            f'The given object can be node or GeometrySet got "{type(item)}"!'
         )
 
     if check_cosserat_node and not isinstance(node, NodeCosserat):
@@ -236,7 +233,7 @@ def filter_nodes(nodes, *, middle_nodes=True):
         return nodes
 
 
-def get_nodal_coordinates(nodes, **kwargs):
+def get_nodal_coordinates(nodes):
     """
     Return an array with the coordinates of the given nodes.
 
@@ -256,7 +253,7 @@ def get_nodal_coordinates(nodes, **kwargs):
     return coordinates
 
 
-def get_nodal_quaternions(nodes, **kwargs):
+def get_nodal_quaternions(nodes):
     """
     Return an array with the quaternions of the given nodes.
 
@@ -329,5 +326,5 @@ def get_min_max_nodes(nodes, *, middle_nodes=False):
                 ):
                     if value:
                         min_max_nodes.append(node_list[index])
-                geometry["{}_{}".format(direction, text)] = GeometrySet(min_max_nodes)
+                geometry[f"{direction}_{text}"] = GeometrySet(min_max_nodes)
     return geometry

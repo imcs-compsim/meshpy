@@ -85,9 +85,7 @@ class Element(BaseMeshItemFull):
                 break
         else:
             raise ValueError(
-                (
-                    'The input line:\n"{}"\ncould not be converted to a solid element!'
-                ).format(input_line)
+                f'The input line:\n"{input_line}"\ncould not be converted to a solid element!'
             )
 
         # Get the post node string
@@ -95,61 +93,60 @@ class Element(BaseMeshItemFull):
 
         # Depending on the number of nodes chose which solid element to return.
         n_nodes = len(element_nodes)
-        if n_nodes == 8:
-            return VolumeHEX8(
-                nodes=element_nodes,
-                dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes,
-                comments=input_line[1],
-            )
-        elif len(element_nodes) == 4:
-            return VolumeTET4(
-                nodes=element_nodes,
-                dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes,
-                comments=input_line[1],
-            )
-        elif len(element_nodes) == 10:
-            return VolumeTET10(
-                nodes=element_nodes,
-                dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes,
-                comments=input_line[1],
-            )
-        elif len(element_nodes) == 20:
-            return VolumeHEX20(
-                nodes=element_nodes,
-                dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes,
-                comments=input_line[1],
-            )
-        elif len(element_nodes) == 27:
-            return VolumeHEX27(
-                nodes=element_nodes,
-                dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes,
-                comments=input_line[1],
-            )
-        elif len(element_nodes) == 1:
-            return SolidRigidSphere(
-                nodes=element_nodes,
-                dat_pre_nodes=dat_pre_nodes,
-                dat_post_nodes=dat_post_nodes,
-                comments=input_line[1],
-            )
-        else:
-            raise TypeError(
-                "Could not find a element type for {}, with {} nodes".format(
-                    dat_pre_nodes, n_nodes
+        match n_nodes:
+            case 8:
+                return VolumeHEX8(
+                    nodes=element_nodes,
+                    dat_pre_nodes=dat_pre_nodes,
+                    dat_post_nodes=dat_post_nodes,
+                    comments=input_line[1],
                 )
-            )
+            case 4:
+                return VolumeTET4(
+                    nodes=element_nodes,
+                    dat_pre_nodes=dat_pre_nodes,
+                    dat_post_nodes=dat_post_nodes,
+                    comments=input_line[1],
+                )
+            case 10:
+                return VolumeTET10(
+                    nodes=element_nodes,
+                    dat_pre_nodes=dat_pre_nodes,
+                    dat_post_nodes=dat_post_nodes,
+                    comments=input_line[1],
+                )
+            case 20:
+                return VolumeHEX20(
+                    nodes=element_nodes,
+                    dat_pre_nodes=dat_pre_nodes,
+                    dat_post_nodes=dat_post_nodes,
+                    comments=input_line[1],
+                )
+            case 27:
+                return VolumeHEX27(
+                    nodes=element_nodes,
+                    dat_pre_nodes=dat_pre_nodes,
+                    dat_post_nodes=dat_post_nodes,
+                    comments=input_line[1],
+                )
+            case 1:
+                return SolidRigidSphere(
+                    nodes=element_nodes,
+                    dat_pre_nodes=dat_pre_nodes,
+                    dat_post_nodes=dat_post_nodes,
+                    comments=input_line[1],
+                )
+            case _:
+                raise TypeError(
+                    f"Could not find a element type for {dat_pre_nodes}, with {n_nodes} nodes"
+                )
 
     def flip(self):
         """
         Reverse the nodes of this element. This is usually used when reflected.
         """
         raise NotImplementedError(
-            "The flip method is not implemented for {}".format(self.__class__)
+            f"The flip method is not implemented for {self.__class__}"
         )
 
     def replace_node(self, old_node, new_node):
@@ -168,8 +165,6 @@ class Element(BaseMeshItemFull):
     def add_element_specific_section(self, sections):
         """Add element specific section (e.g. STRUCTURE KNOTVECTORS for
         NURBS elements) to the sections dictionary"""
-
-        pass
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
         """

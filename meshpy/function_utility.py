@@ -56,9 +56,7 @@ def create_linear_interpolation_string(
 
     if not len(t) == len(values):
         raise ValueError(
-            "The dimensions of time ({}) and values ({}) do not match".format(
-                len(t), len(values)
-            )
+            f"The dimensions of time ({len(t)}) and values ({len(values)}) do not match"
         )
 
     t = t.copy()
@@ -70,16 +68,17 @@ def create_linear_interpolation_string(
     f = np.append(f, f[-1])
     times = " ".join(map(str, t))
     values = " ".join(map(str, f))
-    return "VARIABLE {} NAME {} TYPE linearinterpolation NUMPOINTS {} TIMES {} VALUES {}".format(
-        variable_index, variable_name, len(t), times, values
+    return (
+        f"VARIABLE {variable_index} NAME {variable_name} TYPE linearinterpolation "
+        + f"NUMPOINTS {len(t)} TIMES {times} VALUES {values}"
     )
 
 
 def create_linear_interpolation_function(
     t, values, *, function_type="SYMBOLIC_FUNCTION_OF_SPACE_TIME"
 ):
-    """Create a function that describes a linear interpolation between the given time points and values.
-    Before and after it will be constant.
+    """Create a function that describes a linear interpolation between the given time points and
+    values. Before and after it will be constant.
 
     Args
     ----

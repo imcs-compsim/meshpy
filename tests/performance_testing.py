@@ -231,9 +231,9 @@ class TestPerformance(object):
         # Check the elapsed time.
         elapsed_time = time.time() - start_time
         print(
-            "Times for {}:\n".format(name)
-            + "    Expected: {:.3g}sec\n".format(expected_time)
-            + "    Actual:   {:.3g}sec".format(elapsed_time)
+            f"Times for {name}:\n"
+            f"    Expected: {expected_time:.3g}sec\n"
+            f"    Actual:   {elapsed_time:.3g}sec"
         )
         if expected_time > elapsed_time:
             self.passed_tests += 1

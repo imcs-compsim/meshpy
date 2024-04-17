@@ -54,27 +54,27 @@ class VolumeElement(Element):
         self.dat_pre_nodes = dat_pre_nodes
         self.dat_post_nodes = dat_post_nodes
 
-    def _get_dat(self, **kwargs):
+    def _get_dat(self):
         """Return the dat line for this element."""
 
         # String with the node ids.
         nodes_string = ""
         for node in self.nodes:
-            nodes_string += "{} ".format(node.n_global)
+            nodes_string += f"{node.n_global} "
 
         # Return the dat line.
-        return "{} {} {} {}".format(
-            self.n_global, self.dat_pre_nodes, nodes_string, self.dat_post_nodes
+        return (
+            f"{self.n_global} {self.dat_pre_nodes} {nodes_string} {self.dat_post_nodes}"
         )
 
-    def get_vtk(self, vtkwriter_beam, vtkwriter_solid):
+    def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
         """
         Add the representation of this element to the VTK writer as a quad.
         """
 
         # Check that the element has a valid vtk cell type.
         if self.vtk_cell_type is None:
-            raise TypeError("vtk_cell_type for {} not set!".format(type(self)))
+            raise TypeError(f"vtk_cell_type for {type(self)} not set!")
 
         # Dictionary with cell data.
         cell_data = {}
@@ -91,7 +91,7 @@ class VolumeElement(Element):
         add_point_data_node_sets(point_data, self.nodes)
 
         # Add hex8 line to writer.
-        vtkwriter_solid.add_cell(
+        vtk_writer_solid.add_cell(
             self.vtk_cell_type,
             coordinates,
             self.vtk_topology,
@@ -193,6 +193,6 @@ class SolidRigidSphere(VolumeElement):
         if not arg_name == "RADIUS":
             raise ValueError(
                 "The first argument after the node should be "
-                + 'RADIUS, but it is "{}"!'.format(arg_name)
+                f'RADIUS, but it is "{arg_name}"!'
             )
         self.radius = float(self.dat_post_nodes.split()[1])
