@@ -80,7 +80,7 @@ def get_baci_path():
         else:
             warnings.warn(
                 "Path to baci-release not found. Did you set the "
-                + "environment variable BACI_RELEASE?"
+                "environment variable BACI_RELEASE?"
             )
             return None
 

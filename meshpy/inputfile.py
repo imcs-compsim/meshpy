@@ -60,7 +60,7 @@ def get_section_string(section_name):
     )
 
 
-class InputLine(object):
+class InputLine:
     """This class is a single option in a Baci input file."""
 
     def __init__(self, *args, option_comment=None, option_overwrite=False):
@@ -117,9 +117,9 @@ class InputLine(object):
 
         if option_comment is not None:
             if self.option_comment == "":
-                self.option_comment = "// {}".format(option_comment)
+                self.option_comment = f"// {option_comment}"
             else:
-                self.option_comment += " // {}".format(option_comment)
+                self.option_comment += f" // {option_comment}"
 
         # Check if the string_split array has a suitable size.
         if len(string_split) == 2:
@@ -128,9 +128,7 @@ class InputLine(object):
         else:
             raise ValueError(
                 "Could not process the input parameters:"
-                + "\nargs:\n    {}\noption_comment:\n    {}".format(
-                    args, option_comment
-                )
+                f"\nargs:\n    {args}\noption_comment:\n    {option_comment}"
             )
 
     def get_key(self):
@@ -151,18 +149,18 @@ class InputLine(object):
     def __str__(self):
         """Return the string for this line of the input file."""
         string = ""
-        if not self.option_name == "":
+        if self.option_name != "":
             string += "{:<35} {}{}".format(
                 self.option_name, self.option_value_pad, self.option_value
             )
-        if not self.option_comment == "":
-            if not self.option_name == "":
+        if self.option_comment != "":
+            if self.option_name != "":
                 string += " "
-            string += "{}".format(self.option_comment)
+            string += f"{self.option_comment}"
         return string
 
 
-class InputSection(object):
+class InputSection:
     """Represent a single section in the input file."""
 
     def __init__(self, name, *args, **kwargs):
@@ -209,7 +207,7 @@ class InputSection(object):
         if (not option.get_key() in self.data.keys()) or option.overwrite:
             self.data[option.get_key()] = option
         else:
-            raise KeyError("Key {} is already set!".format(option.get_key()))
+            raise KeyError(f"Key {option.get_key()} is already set!")
 
     def merge_section(self, section):
         """Merge this section with another. This one is the master."""
@@ -437,7 +435,7 @@ class InputFile(Mesh):
         elif isinstance(data, str):
             lines = data.split("\n")
         else:
-            raise TypeError("Expected list or string but got {}".format(type(data)))
+            raise TypeError(f"Expected list or string but got {type(data)}")
 
         # Loop over lines and add individual sections separately.
         section_line = None
@@ -562,7 +560,7 @@ class InputFile(Mesh):
                             for skip_index in range(last_index + 1, index_line):
                                 add_to_set(
                                     section_header,
-                                    ["// Empty set {}".format(skip_index)],
+                                    [f"// Empty set {skip_index}"],
                                     None,
                                 )
                             last_index = index_line
@@ -570,8 +568,7 @@ class InputFile(Mesh):
                             current_comments = comments
                         else:
                             raise ValueError(
-                                "The node set indices must be "
-                                + "given in ascending order!"
+                                "The node set indices must be given in ascending order!"
                             )
                     # Add the last set.
                     add_to_set(section_header, dat_list, current_comments)
@@ -602,12 +599,10 @@ class InputFile(Mesh):
                 for line in section_data_comment:
                     if mpy.import_mesh_full:
                         raise NotImplementedError(
-                            "Fluid elements in combination with "
-                            + "mpy.import_mesh_full == True is not yet "
-                            + "implemented!"
+                            "Fluid elements in combination with mpy.import_mesh_full == True is "
+                            "not yet implemented!"
                         )
-                    else:
-                        add_line(self.dat_elements_fluid, line)
+                    add_line(self.dat_elements_fluid, line)
             elif section_name.startswith("FUNCT"):
                 self.functions.append(BaseMeshItemFull(section_data))
             elif section_name in self.boundary_condition_names.values():
@@ -618,7 +613,7 @@ class InputFile(Mesh):
                 self.add_section(
                     InputSectionMultiKey(section_name, section_data, **kwargs)
                 )
-            elif section_name == "DESIGN DESCRIPTION" or section_name == "END":
+            elif section_name in ("DESIGN DESCRIPTION", "END"):
                 # Skip those sections as they won't be used!
                 pass
             else:
@@ -653,7 +648,7 @@ class InputFile(Mesh):
         if section_name in self.sections.keys():
             del self.sections[section_name]
         else:
-            raise Warning("Section {} does not exist!".format(section_name))
+            raise Warning(f"Section {section_name} does not exist!")
 
     def write_input_file(self, file_path, *, nox_xml_file=None, **kwargs):
         """
@@ -728,7 +723,6 @@ class InputFile(Mesh):
         # Add header to the input file.
         end_text = None
 
-        mpy.input_file_meshpy_header
         lines.extend(["// " + line for line in mpy.input_file_meshpy_header])
         if header:
             header_text, end_text = self._get_header(add_script_to_header)
@@ -741,14 +735,13 @@ class InputFile(Mesh):
             if self._nox_xml_file is None:
                 if check_nox:
                     raise ValueError("NOX xml content is given, but no file defined!")
-                else:
-                    nox_xml_name = "NOT_DEFINED"
+                nox_xml_name = "NOT_DEFINED"
             else:
                 nox_xml_name = self._nox_xml_file
             self.add(
                 InputSection(
                     "STRUCT NOX/Status Test",
-                    "XML File = {}".format(nox_xml_name),
+                    f"XML File = {nox_xml_name}",
                     option_overwrite=True,
                 )
             )
@@ -803,7 +796,7 @@ class InputFile(Mesh):
             # Get the maximum material index in materials imported from a string
             max_material_id = 0
             for material in material_list:
-                if type(material) is BaseMeshItemString:
+                if isinstance(material, BaseMeshItemString):
                     for dat_line in material.get_dat_lines():
                         if dat_line.startswith("MAT "):
                             max_material_id = max(
@@ -813,7 +806,7 @@ class InputFile(Mesh):
             # Set the material id in all MeshPy materials
             i_material = max_material_id + 1
             for material in material_list:
-                if not type(material) is BaseMeshItemString:
+                if not isinstance(material, BaseMeshItemString):
                     material.n_global = i_material
                     i_material += 1
 
@@ -837,12 +830,12 @@ class InputFile(Mesh):
         set_n_global_elements(all_elements)
         set_n_global_materials(self.materials)
         set_n_global(self.functions)
-        for key in all_geometry_sets.keys():
-            # We reset the geometry set index here since in self.get_unique_geometry_sets the geometry sets
-            # from the dat file are not included.
-            set_n_global(all_geometry_sets[key])
-        for key in all_boundary_conditions.keys():
-            set_n_global(all_boundary_conditions[key])
+        for value in all_geometry_sets.values():
+            # We reset the geometry set index here since in self.get_unique_geometry_sets the
+            # geometry sets from the dat file are not included.
+            set_n_global(value)
+        for value in all_boundary_conditions.values():
+            set_n_global(value)
 
         def get_section_dat(section_name, data_list, header_lines=None):
             """
@@ -857,7 +850,7 @@ class InputFile(Mesh):
                     lines.append(header_lines)
                 else:
                     raise TypeError(
-                        "Expected string or list, got {}".format(type(header_lines))
+                        f"Expected string or list, got {type(header_lines)}"
                     )
             for item in data_list:
                 lines.extend(item.get_dat_lines())
@@ -873,10 +866,10 @@ class InputFile(Mesh):
         # Add the design description.
         if design_description:
             lines.append(get_section_string("DESIGN DESCRIPTION"))
-            lines.append("NDPOINT {}".format(len(all_geometry_sets[mpy.geo.point])))
-            lines.append("NDLINE {}".format(len(all_geometry_sets[mpy.geo.line])))
-            lines.append("NDSURF {}".format(len(all_geometry_sets[mpy.geo.surface])))
-            lines.append("NDVOL {}".format(len(all_geometry_sets[mpy.geo.volume])))
+            lines.append(f"NDPOINT {len(all_geometry_sets[mpy.geo.point])}".format())
+            lines.append(f"NDLINE {len(all_geometry_sets[mpy.geo.line])}")
+            lines.append(f"NDSURF {len(all_geometry_sets[mpy.geo.surface])}")
+            lines.append(f"NDVOL {len(all_geometry_sets[mpy.geo.volume])}")
 
         # If there are couplings in the mesh, set the link between the nodes
         # and elements, so the couplings can decide which DOFs they couple,
@@ -905,9 +898,9 @@ class InputFile(Mesh):
                 get_section_dat(
                     section_name,
                     bc_list,
-                    header_lines="{} {}".format(
-                        self.geometry_counter[geom_key],
-                        len(all_boundary_conditions[bc_key, geom_key]),
+                    header_lines=(
+                        f"{self.geometry_counter[geom_key]} "
+                        f"{len(all_boundary_conditions[bc_key, geom_key])}"
                     ),
                 )
 
@@ -954,31 +947,28 @@ class InputFile(Mesh):
         end_text = None
 
         # Header containing model information.
-        model_header = "// Date:       {}\n".format(
-            datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        )
+        current_time_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        model_header = f"// Date:       {current_time_string}\n"
         if self.description:
-            model_header += "// Description: {}\n".format(self.description)
+            model_header += f"// Description: {self.description}\n"
         headers.append(model_header)
 
         # Get information about the script.
         script_path = os.path.realpath(sys.argv[0])
         script_git_sha, script_git_date = get_git_data(os.path.dirname(script_path))
         script_header = "// Script used to create input file:\n"
-        script_header += "// path:       {}\n".format(script_path)
+        script_header += f"// path:       {script_path}\n"
         if script_git_sha is not None:
-            script_header += "// git sha:    {}\n// git date:   {}\n".format(
-                script_git_sha, script_git_date
+            script_header += (
+                f"// git sha:    {script_git_sha}\n// git date:   {script_git_date}\n"
             )
         headers.append(script_header)
 
         # Header containing meshpy information.
         headers.append(
-            (
-                "// Input file created with meshpy\n"
-                + "// git sha:    {}\n"
-                + "// git date:   {}\n"
-            ).format(mpy.git_sha, mpy.git_date)
+            "// Input file created with meshpy\n"
+            f"// git sha:    {mpy.git_sha}\n"
+            f"// git date:   {mpy.git_date}\n"
         )
 
         # Check if cubitpy is loaded.
@@ -994,11 +984,9 @@ class InputFile(Mesh):
             if cubitpy_git_sha is not None:
                 # Cubitpy_header.
                 headers.append(
-                    (
-                        "// The module cubitpy was loaded\n"
-                        + "// git sha:    {}\n"
-                        + "// git date:   {}\n"
-                    ).format(cubitpy_git_sha, cubitpy_git_date)
+                    "// The module cubitpy was loaded\n"
+                    f"// git sha:    {cubitpy_git_sha}\n"
+                    f"// git date:   {cubitpy_git_date}\n"
                 )
 
         string_line = "// " + "".join(["-" for _i in range(mpy.dat_len_section - 3)])

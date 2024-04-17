@@ -33,9 +33,10 @@ This module implements beam elements for the mesh.
 """
 
 # Python modules.
+import warnings
 import numpy as np
 import vtk
-import warnings
+
 
 # Meshpy modules.
 from .conf import mpy
@@ -102,14 +103,11 @@ class Beam(Element):
 
             if np.linalg.norm(pos - node.coordinates) > mpy.eps_pos:
                 raise ValueError(
-                    "{} position does not match with function! Got {} from function but given node value is {}".format(
-                        name, pos, node.coordinates
-                    )
+                    f"{name} position does not match with function! Got {pos} from function but "
+                    + f"given node value is {node.coordinates}"
                 )
             if not node.rotation == rot:
-                raise ValueError(
-                    "{} rotation does not match with function!".format(name)
-                )
+                raise ValueError(f"{name} rotation does not match with function!")
 
         # Flags if nodes are given
         has_start_node = start_node is not None
@@ -154,18 +152,19 @@ class Beam(Element):
         Return the string to couple this beam to another beam.
         """
 
-        if coupling_dof_type is mpy.coupling_dof.joint:
-            if cls.coupling_joint_string is None:
-                raise ValueError("Joint coupling is not implemented for {}".format(cls))
-            return cls.coupling_joint_string
-        elif coupling_dof_type is mpy.coupling_dof.fix:
-            if cls.coupling_fix_string is None:
-                raise ValueError("Fix coupling is not implemented for {}".format(cls))
-            return cls.coupling_fix_string
-        else:
-            raise ValueError(
-                'Coupling_dof_type "{}" is not implemented!'.format(coupling_dof_type)
-            )
+        match coupling_dof_type:
+            case mpy.coupling_dof.joint:
+                if cls.coupling_joint_string is None:
+                    raise ValueError(f"Joint coupling is not implemented for {cls}")
+                return cls.coupling_joint_string
+            case mpy.coupling_dof.fix:
+                if cls.coupling_fix_string is None:
+                    raise ValueError("Fix coupling is not implemented for {cls}")
+                return cls.coupling_fix_string
+            case _:
+                raise ValueError(
+                    f'Coupling_dof_type "{coupling_dof_type}" is not implemented!'
+                )
 
     def flip(self):
         """
@@ -178,13 +177,11 @@ class Beam(Element):
         Check if the linked material is valid for this type of beam element.
         """
         for material_type in self.valid_material:
-            if type(self.material) is material_type:
+            if isinstance(self.material, material_type):
                 break
         else:
             raise TypeError(
-                "Beam of type {} can not have a material of type {}!".format(
-                    type(self), type(self.material)
-                )
+                f"Beam of type {type(self)} can not have a material of type {type(self.material)}!"
             )
 
     def display_python(self, ax):
@@ -193,7 +190,7 @@ class Beam(Element):
         coordinates = np.array([node.coordinates for node in self.nodes])
         ax.plot(coordinates[:, 0], coordinates[:, 1], coordinates[:, 2], "-x")
 
-    def get_vtk(self, vtkwriter_beam, vtkwriter_solid):
+    def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
         """
         Add the representation of this element to the VTK writer as a poly
         line.
@@ -241,7 +238,7 @@ class Beam(Element):
         add_point_data_node_sets(point_data, self.nodes)
 
         # Add poly line to writer.
-        vtkwriter_beam.add_cell(
+        vtk_writer_beam.add_cell(
             vtk.vtkPolyLine, coordinates, cell_data=cell_data, point_data=point_data
         )
 
@@ -263,14 +260,15 @@ class Beam3rHerm2Line3(Beam):
         string_triads = ""
         for i in [0, 2, 1]:
             node = self.nodes[i]
-            string_nodes += "{} ".format(node.n_global)
+            string_nodes += f"{node.n_global} "
             string_triads += " " + node.rotation.get_dat()
 
         # Check the material.
         self._check_material()
 
-        return "{} BEAM3R HERM2LINE3 {}MAT {} TRIADS{}".format(
-            self.n_global, string_nodes, self.material.n_global, string_triads
+        return (
+            f"{self.n_global} BEAM3R HERM2LINE3 {string_nodes}MAT {self.material.n_global} "
+            f"TRIADS{string_triads}"
         )
 
 
@@ -294,14 +292,15 @@ class Beam3rLine2Line2(Beam):
         string_triads = ""
         for i in [0, 1]:
             node = self.nodes[i]
-            string_nodes += "{} ".format(node.n_global)
+            string_nodes += f"{node.n_global} "
             string_triads += " " + node.rotation.get_dat()
 
         # Check the material.
         self._check_material()
 
-        return "{} BEAM3R LINE2 {}MAT {} TRIADS{}".format(
-            self.n_global, string_nodes, self.material.n_global, string_triads
+        return (
+            f"{self.n_global} BEAM3R LINE2 {string_nodes}MAT {self.material.n_global} "
+            f"TRIADS{string_triads}"
         )
 
 
@@ -315,18 +314,19 @@ class Beam3kClass(Beam):
     coupling_fix_string = "NUMDOF 7 ONOFF 1 1 1 1 1 1 0"
     coupling_joint_string = "NUMDOF 7 ONOFF 1 1 1 0 0 0 0"
 
-    def __init__(self, *, weak=True, rotvec=True, FAD=True, **kwargs):
+    def __init__(self, *, weak=True, rotvec=True, is_fad=True, **kwargs):
         Beam.__init__(self, **kwargs)
 
         # Set the parameters for this beam.
         self.weak = weak
         self.rotvec = rotvec
-        self.FAD = FAD
+        self.is_fad = is_fad
 
         # Show warning when not using rotvec.
         if not rotvec:
             warnings.warn(
-                "Use rotvec=False with caution, especially when applying the boundary conditions and couplings."
+                "Use rotvec=False with caution, especially when applying the boundary conditions "
+                "and couplings."
             )
 
     def _get_dat(self):
@@ -336,7 +336,7 @@ class Beam3kClass(Beam):
         string_triads = ""
         for i in [0, 2, 1]:
             node = self.nodes[i]
-            string_nodes += "{} ".format(node.n_global)
+            string_nodes += f"{node.n_global} "
             string_triads += " " + node.rotation.get_dat()
 
         # Check the material.
@@ -349,7 +349,7 @@ class Beam3kClass(Beam):
             "1" if self.rotvec else "0",
             self.material.n_global,
             string_triads,
-            " FAD" if self.FAD else "",
+            " FAD" if self.is_fad else "",
         )
 
         return string_dat
@@ -386,7 +386,8 @@ class Beam3eb(Beam):
         # the start point to the end point.
         if not self.nodes[0].rotation == self.nodes[1].rotation:
             raise ValueError(
-                "The two nodal rotations in Euler Bernoulli beams must be the same, i.e. the beam has to be straight!"
+                "The two nodal rotations in Euler Bernoulli beams must be the same, i.e. the beam "
+                "has to be straight!"
             )
         direction = self.nodes[1].coordinates - self.nodes[0].coordinates
         t1 = self.nodes[0].rotation * [1, 0, 0]
@@ -399,12 +400,12 @@ class Beam3eb(Beam):
         string_triads = ""
         for i in [0, 1]:
             node = self.nodes[i]
-            string_nodes += "{} ".format(node.n_global)
+            string_nodes += f"{node.n_global} "
             string_triads += " " + node.rotation.get_dat()
 
         # Check the material.
         self._check_material()
 
-        return "{} BEAM3EB LINE2 {}MAT {}".format(
-            self.n_global, string_nodes, self.material.n_global
+        return (
+            f"{self.n_global} BEAM3EB LINE2 {string_nodes}MAT {self.material.n_global}"
         )

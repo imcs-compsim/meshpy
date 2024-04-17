@@ -58,8 +58,8 @@ class GeometryName(OrderedDict):
         """Set a geometry set in this container."""
 
         if not isinstance(key, str):
-            raise TypeError("Expected string, got {}!".format(type(key)))
-        elif isinstance(value, GeometrySetBase):
+            raise TypeError(f"Expected string, got {type(key)}!")
+        if isinstance(value, GeometrySetBase):
             super().__setitem__(key, value)
         else:
             raise NotImplementedError("GeometryName can only store GeometrySets")
@@ -79,9 +79,8 @@ class ContainerBase(OrderedDict):
                 break
         if not type_ok:
             raise TypeError(
-                "You tried to add an item of type {}, but only types derived from {} can be added".format(
-                    type(item), self.item_types
-                )
+                f"You tried to add an item of type {type(item)}, but only types derived "
+                + f"from {self.item_types} can be added"
             )
         if key not in self.keys():
             self[key] = []
@@ -95,9 +94,8 @@ class ContainerBase(OrderedDict):
 
         if not isinstance(container, self.__class__):
             raise TypeError(
-                "Only containers of type {} can be merged here, you tried add {}".format(
-                    self.__class__, type(container)
-                )
+                f"Only containers of type {self.__class__} can be merged here, you tried "
+                + f"add {type(container)}"
             )
         for key, items in container.items():
             for item in items:

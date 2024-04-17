@@ -34,10 +34,10 @@ sets, ...) for a meshed geometry.
 """
 
 # Python modules.
-import numpy as np
 import os
 import warnings
 import copy
+import numpy as np
 import pyvista as pv
 
 # Meshpy modules.
@@ -48,7 +48,7 @@ from .material import Material
 from .node import Node, NodeCosserat
 from .element import Element
 from .element_beam import Beam
-from .geometry_set import GeometrySetBase, GeometrySet
+from .geometry_set import GeometrySetBase
 from .container import GeometryName, GeometrySetContainer, BoundaryConditionContainer
 from .boundary_condition import BoundaryConditionBase
 from .coupling import coupling_factory
@@ -64,7 +64,7 @@ from .utility import (
 from .geometric_search import find_close_points, point_partners_to_partner_indices
 
 
-class Mesh(object):
+class Mesh:
     """
     A class that contains a full mesh, i.e. Nodes, Elements, Boundary
     Conditions, Sets, Couplings, Materials and Functions.
@@ -88,39 +88,39 @@ class Mesh(object):
         arguments are passed through to the adding function.
         """
 
-        if len(args) == 0:
-            raise ValueError("At least one argument is required!")
-        elif len(args) == 1:
-            add_item = args[0]
-            if isinstance(add_item, Mesh):
-                self.add_mesh(add_item, **kwargs)
-            elif isinstance(add_item, Function):
-                self.add_function(add_item, **kwargs)
-            elif isinstance(add_item, BoundaryConditionBase):
-                self.add_bc(add_item, **kwargs)
-            elif isinstance(add_item, Material):
-                self.add_material(add_item, **kwargs)
-            elif isinstance(add_item, Node):
-                self.add_node(add_item, **kwargs)
-            elif isinstance(add_item, Element):
-                self.add_element(add_item, **kwargs)
-            elif isinstance(add_item, GeometrySetBase):
-                self.add_geometry_set(add_item, **kwargs)
-            elif isinstance(add_item, GeometryName):
-                self.add_geometry_name(add_item, **kwargs)
-            elif isinstance(add_item, list):
-                for item in add_item:
-                    self.add(item, **kwargs)
-            else:
-                raise (
-                    TypeError(
-                        "No Mesh.add case implemented for type: "
-                        + "{}!".format(type(add_item))
+        match len(args):
+            case 0:
+                raise ValueError("At least one argument is required!")
+            case 1:
+                add_item = args[0]
+                if isinstance(add_item, Mesh):
+                    self.add_mesh(add_item, **kwargs)
+                elif isinstance(add_item, Function):
+                    self.add_function(add_item, **kwargs)
+                elif isinstance(add_item, BoundaryConditionBase):
+                    self.add_bc(add_item, **kwargs)
+                elif isinstance(add_item, Material):
+                    self.add_material(add_item, **kwargs)
+                elif isinstance(add_item, Node):
+                    self.add_node(add_item, **kwargs)
+                elif isinstance(add_item, Element):
+                    self.add_element(add_item, **kwargs)
+                elif isinstance(add_item, GeometrySetBase):
+                    self.add_geometry_set(add_item, **kwargs)
+                elif isinstance(add_item, GeometryName):
+                    self.add_geometry_name(add_item, **kwargs)
+                elif isinstance(add_item, list):
+                    for item in add_item:
+                        self.add(item, **kwargs)
+                else:
+                    raise (
+                        TypeError(
+                            f'No Mesh.add case implemented for type: "{type(add_item)}"!'
+                        )
                     )
-                )
-        else:
-            for item in args:
-                self.add(item, **kwargs)
+            case _:
+                for item in args:
+                    self.add(item, **kwargs)
 
     def add_mesh(self, mesh):
         """Add the content of another mesh to this mesh."""
@@ -217,9 +217,9 @@ class Mesh(object):
         for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
             for bc in bc_list:
                 # Check if sets from couplings should be added.
-                is_coupling = (
-                    bc_key == mpy.bc.point_coupling
-                    or bc_key == mpy.bc.point_coupling_penalty
+                is_coupling = bc_key in (
+                    mpy.bc.point_coupling,
+                    bc_key == mpy.bc.point_coupling_penalty,
                 )
                 if (is_coupling and coupling_sets) or (not is_coupling):
                     # Only add set if it is not already in the container.
@@ -238,7 +238,7 @@ class Mesh(object):
         # Set the global value for digits in the VTK output.
         if link_nodes:
             # Get highest number of node_sets.
-            max_sets = max([len(geometry_list) for geometry_list in mesh_sets.values()])
+            max_sets = max(len(geometry_list) for geometry_list in mesh_sets.values())
 
             # Set the mpy value.
             digits = len(str(max_sets))
@@ -464,8 +464,8 @@ class Mesh(object):
             else:
                 raise ValueError(
                     "The nodes that should be wrapped around a "
-                    + "cylinder are not on the same y-z plane. This will give "
-                    + "unexpected results. Give a reference radius!"
+                    "cylinder are not on the same y-z plane. This will give "
+                    "unexpected results. Give a reference radius!"
                 )
             radius_phi = radius
             radius_points = points_x
@@ -475,8 +475,8 @@ class Mesh(object):
             raise ValueError(
                 (
                     "The points are all on the same y-z plane with "
-                    + "the x-coordinate {} but the given radius {} is different. "
-                    + "This does not make sense."
+                    "the x-coordinate {} but the given radius {} is different. "
+                    "This does not make sense."
                 ).format(points_x[0], radius)
             )
 
@@ -529,10 +529,7 @@ class Mesh(object):
         """
 
         # Check that a coupling BC is given.
-        if not (
-            coupling_type == mpy.bc.point_coupling
-            or coupling_type == mpy.bc.point_coupling_penalty
-        ):
+        if coupling_type not in (mpy.bc.point_coupling, mpy.bc.point_coupling_penalty):
             raise ValueError(
                 "Only coupling conditions can be applied in 'couple_nodes'!"
             )
@@ -671,9 +668,9 @@ class Mesh(object):
             if raise_error:
                 raise ValueError(
                     "There are multiple middle nodes with the "
-                    + "same coordinates. Per default this raises an error! "
-                    + "This check can be turned of with "
-                    + "mpy.check_overlapping_elements=False"
+                    "same coordinates. Per default this raises an error! "
+                    "This check can be turned of with "
+                    "mpy.check_overlapping_elements=False"
                 )
             else:
                 warnings.warn(
@@ -742,7 +739,7 @@ class Mesh(object):
         return vtk_writer_beam, vtk_writer_solid
 
     def write_vtk(
-        self, output_name="meshpy", output_directory="", ascii=False, **kwargs
+        self, output_name="meshpy", output_directory="", binary=True, **kwargs
     ):
         """
         Write the contents of this mesh to VTK files.
@@ -754,8 +751,8 @@ class Mesh(object):
             {}_solid.vtu file.
         output_directory: path
             Directory where the output files will be written.
-        ascii: bool
-            If the data should be written in human readable text
+        binary: bool
+            If the data should be written encoded in binary or in human readable text
         **kwargs:
             Have a look at Mesh().get_vtk_representation
         """
@@ -765,10 +762,10 @@ class Mesh(object):
         # Write to file, only if there is at least one point in the writer.
         if vtk_writer_beam.points.GetNumberOfPoints() > 0:
             filepath = os.path.join(output_directory, output_name + "_beam.vtu")
-            vtk_writer_beam.write_vtk(filepath, ascii=ascii)
+            vtk_writer_beam.write_vtk(filepath, binary=binary)
         if vtk_writer_solid.points.GetNumberOfPoints() > 0:
             filepath = os.path.join(output_directory, output_name + "_solid.vtu")
-            vtk_writer_solid.write_vtk(filepath, ascii=ascii)
+            vtk_writer_solid.write_vtk(filepath, binary=binary)
 
     def display_pyvista(
         self,

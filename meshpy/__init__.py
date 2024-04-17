@@ -80,7 +80,7 @@ __all__ = [
     "mpy",
     # Basic stuff.
     "Rotation",
-    "BaseMeshItem",
+    "BaseMeshItemString",
     "Function",
     "MaterialReissner",
     "MaterialReissnerElastoplastic",
@@ -94,7 +94,7 @@ __all__ = [
     "MaterialString",
     "MaterialStVenantKirchhoff",
     "Node",
-    "NodeCosserat"
+    "NodeCosserat",
     # Mesh items.
     "Beam3rHerm2Line3",
     "Beam3rLine2Line2",

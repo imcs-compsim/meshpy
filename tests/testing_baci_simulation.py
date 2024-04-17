@@ -242,7 +242,7 @@ class TestFullBaci(unittest.TestCase):
         # Functions for the boundary conditions
         ft = Function(
             "COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME a\n"
-            + "VARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 3 TIMES 0.0 0.2 1.0 VALUES 0.0 1.0 1.0"
+            "VARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 3 TIMES 0.0 0.2 1.0 VALUES 0.0 1.0 1.0"
         )
         mesh_honeycomb.add(ft)
 
@@ -683,7 +683,7 @@ class TestFullBaci(unittest.TestCase):
         function_nbc = Function(
             """SYMBOLIC_FUNCTION_OF_TIME nbc_value
             VARIABLE 0 NAME nbc_value TYPE linearinterpolation NUMPOINTS 2 """
-            + "TIMES 1.0 11.0 VALUES 1.0 0.0"
+            "TIMES 1.0 11.0 VALUES 1.0 0.0"
         )
         restart_simulation.add(function_nbc)
         dbc_monitor_to_input(

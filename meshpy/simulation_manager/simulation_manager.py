@@ -209,15 +209,15 @@ class Simulation:
         if self.restart_step == 0:
             baci_command = (
                 "mpirun -np {self.n_proc} $BACI_WORK_RELEASE "
-                + "{input_file} {self.output_prefix}"
+                "{input_file} {self.output_prefix}"
             )
         else:
             baci_command = (
                 "mpirun -np {self.n_proc} $BACI_WORK_RELEASE "
-                + "{input_file} {self.output_prefix} "
-                + "restart={self.restart_step} "
-                + "restartfrom="
-                + "{self.restart_dir}/{self.restart_from_prefix}"
+                "{input_file} {self.output_prefix} "
+                "restart={self.restart_step} "
+                "restartfrom="
+                "{self.restart_dir}/{self.restart_from_prefix}"
             )
         if quiet:
             run_string = baci_command + " > {self.output_prefix}.log\n"

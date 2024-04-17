@@ -71,7 +71,7 @@ class MaterialBeam(Material):
         nu=0.0,
         density=0.0,
         interaction_radius=None,
-        **kwargs
+        **kwargs,
     ):
         """Set the material values that all beams have."""
         super().__init__(**kwargs)
@@ -130,13 +130,13 @@ class MaterialReissner(MaterialBeam):
         else:
             raise ValueError(
                 "Either all relevant material parameters are set "
-                + "by the user, or a circular cross-section will be assumed. "
-                + "A combination is not possible"
+                "by the user, or a circular cross-section will be assumed. "
+                "A combination is not possible"
             )
         string = "MAT {} {} YOUNG {} POISSONRATIO {} DENS {} CROSSAREA {} "
         string += "SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}"
         if self.interaction_radius is not None:
-            string += " INTERACTIONRADIUS {}".format(self.interaction_radius)
+            string += f" INTERACTIONRADIUS {self.interaction_radius}"
         return string.format(
             self.n_global,
             self.material_string,
@@ -160,14 +160,15 @@ class MaterialReissnerElastoplastic(MaterialReissner):
         yield_moment=None,
         isohardening_modulus_moment=None,
         torsion_plasticity=False,
-        **kwargs
+        **kwargs,
     ):
         super().__init__(**kwargs)
         self.material_string = "MAT_BeamReissnerElastPlastic"
 
         if yield_moment is None or isohardening_modulus_moment is None:
             raise ValueError(
-                "The yield moment and the isohardening modulus for moments must be specified for plasticity."
+                "The yield moment and the isohardening modulus for moments must be specified "
+                "for plasticity."
             )
 
         self.yield_moment = yield_moment
@@ -213,8 +214,8 @@ class MaterialKirchhoff(MaterialBeam):
         else:
             raise ValueError(
                 "Either all relevant material parameters are set "
-                + "by the user, or a circular cross-section will be assumed. "
-                + "A combination is not possible"
+                "by the user, or a circular cross-section will be assumed. "
+                "A combination is not possible"
             )
         string = "MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} "
         string += "MOMINPOL {} MOMIN2 {} MOMIN3 {}"
@@ -250,8 +251,8 @@ class MaterialEulerBernoulli(MaterialBeam):
         else:
             raise ValueError(
                 "Either all relevant material parameters are set "
-                + "by the user, or a circular cross-section will be assumed. "
-                + "A combination is not possible"
+                "by the user, or a circular cross-section will be assumed. "
+                "A combination is not possible"
             )
         string = "MAT {} {} YOUNG {} DENS {} CROSSAREA {} MOMIN {}"
         return string.format(

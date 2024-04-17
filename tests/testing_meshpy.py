@@ -608,12 +608,12 @@ class TestMeshpy(unittest.TestCase):
             warnings.simplefilter("ignore")
 
             # Loop over options.
-            for FAD in [True, False]:
-                for weak in [True, False]:
-                    for rotvec in [True, False]:
+            for is_fad in (True, False):
+                for weak in (True, False):
+                    for rotvec in (True, False):
                         # Define the beam object factory function for the
                         # creation functions.
-                        BeamObject = Beam3k(weak=weak, rotvec=rotvec, FAD=FAD)
+                        BeamObject = Beam3k(weak=weak, rotvec=rotvec, is_fad=is_fad)
 
                         # Create a beam.
                         set_1 = create_beam_mesh_line(
@@ -734,7 +734,7 @@ class TestMeshpy(unittest.TestCase):
                 r = [R, 0, 0]
                 node = NodeCosserat(r, basis)
                 rotation = Rotation([0, 0, 1], 0.5 * i * np.pi / n_el)
-                node.rotate(rotation, [0, 0, 0])
+                node.rotate(rotation, origin=[0, 0, 0])
                 input_file.nodes.append(node)
 
             # Add elements.
@@ -1305,7 +1305,7 @@ class TestMeshpy(unittest.TestCase):
             BoundaryCondition(
                 set_2["end"],
                 "NUMDOF 9 ONOFF 1 0 0 0 0 0 0 0 0 VAL -0.06 0 0 0 0 0 0 0 0 "
-                + "FUNCT {} 0 0 0 0 0 0 0 0",
+                "FUNCT {} 0 0 0 0 0 0 0 0",
                 format_replacement=[fun],
                 bc_type=mpy.bc.neumann,
             )
@@ -1328,7 +1328,7 @@ class TestMeshpy(unittest.TestCase):
                         "RESULT DESCRIPTION",
                         (
                             "STRUCTURE DIS structure NODE {} QUANTITY disp{} "
-                            + "VALUE {} TOLERANCE 1e-10"
+                            "VALUE {} TOLERANCE 1e-10"
                         ).format(node, direction, displacement[j][i]),
                     )
                 )
@@ -1472,7 +1472,7 @@ class TestMeshpy(unittest.TestCase):
         # Write to file.
         ref_file = os.path.join(testing_input, "test_meshpy_vtk_writer_reference.vtu")
         vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_writer.vtu")
-        writer.write_vtk(vtk_file, ascii=True)
+        writer.write_vtk(vtk_file, binary=False)
 
         # Compare the vtk files.
         compare_vtk(self, ref_file, vtk_file)
@@ -1496,7 +1496,7 @@ class TestMeshpy(unittest.TestCase):
             output_name="test_meshpy_vtk",
             coupling_sets=True,
             output_directory=testing_temp,
-            ascii=True,
+            binary=False,
         )
 
         # Compare the vtk files.
@@ -1511,7 +1511,7 @@ class TestMeshpy(unittest.TestCase):
             output_name="test_meshpy_vtk_no_coupling",
             coupling_sets=False,
             output_directory=testing_temp,
-            ascii=True,
+            binary=False,
         )
 
         # Compare the vtk files.
@@ -1534,7 +1534,7 @@ class TestMeshpy(unittest.TestCase):
         if os.path.isfile(vtk_file):
             os.remove(vtk_file)
         input_file.write_vtk(
-            output_name="test_meshpy_vtk", output_directory=testing_temp, ascii=True
+            output_name="test_meshpy_vtk", output_directory=testing_temp, binary=False
         )
 
         # Compare the vtk files.
@@ -1565,7 +1565,7 @@ class TestMeshpy(unittest.TestCase):
         input_file.write_vtk(
             output_name="test_meshpy_vtk_elements",
             output_directory=testing_temp,
-            ascii=True,
+            binary=False,
         )
 
         # Compare the vtk files.
@@ -1617,7 +1617,7 @@ class TestMeshpy(unittest.TestCase):
         mesh.write_vtk(
             output_name="test_meshpy_vtk_curve_cell_data",
             output_directory=testing_temp,
-            ascii=True,
+            binary=False,
         )
 
         # Compare the vtk files.
@@ -1846,7 +1846,7 @@ class TestMeshpy(unittest.TestCase):
         mesh.write_vtk(
             output_name="test_meshpy_vtk_element_overlap",
             output_directory=testing_temp,
-            ascii=True,
+            binary=False,
             overlapping_elements=True,
         )
 
