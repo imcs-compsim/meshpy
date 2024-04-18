@@ -61,15 +61,32 @@ Matthias Mayr
 
 
 ## Publications
+[comment]: <> (ASME style in JabRef)
 
 Journal publications in which MeshPy has been used:
 
-### 2021
-- Steinbrecher, I., Popp, A., Meier, C.: Consistent coupling of positions and rotations for embedding 1D Cosserat beams into 3D solid volumes. Comput Mech (2021). doi: [10.1007/s00466-021-02111-4](https://doi.org/10.1007/s00466-021-02111-4)
-- Hagmeyer, N., Mayr, M., Steinbrecher, I., Popp, A.: Fluid-beam interaction: Capturing the effect of embedded slender bodies on global fluid flow and vice versa (2021), submitted, [arXiv:2104.09844](https://arxiv.org/abs/2104.09844)
+### 2024
+
+-  Firmbach, M., Steinbrecher, I., Popp, A., Mayr, M., 2024, “Physics-based block preconditioning for mixed-dimensional beam-solid interaction“, submitted, [arXiv:2402.18414](https://arxiv.org/abs/2402.18414)
+
+- Hagmeyer, N., Mayr, M., and Popp, A., 2024, “A Fully Coupled Regularized Mortar-Type Finite Element Approach for Embedding One-Dimensional Fibers into Three-Dimensional Fluid Flow,” International Journal for Numerical Methods in Engineering, 125(8), p. e7435, doi: [10.1002/nme.7435](https://doi.org/10.1002/nme.7435)
+
+### 2023
+
+- Hagmeyer, N., 2023, “A Computational Framework for Balloon Angioplasty and Stented Arteries Based on Mixed-Dimensional Modeling,” Universität der Bundeswehr München, PhD thesis, [Available online](https://athene-forschung.rz.unibw-muenchen.de/146359)
+
+### 2022
+
+- Steinbrecher, I., 2022, “Mixed-Dimensional Finite Element Formulations for Beam-to-Solid Interaction,” University of the Bundeswehr Munich, PhD thesis, [Available online](https://athene-forschung.unibw.de/143755)
+
+- Steinbrecher, I., Popp, A., and Meier, C., 2022, “Consistent Coupling of Positions and Rotations for Embedding 1D Cosserat Beams into 3D Solid Volumes,” Computational Mechanics, 69(3), pp. 701–732, doi: [10.1007/s00466-021-02111-4](https://doi.org/10.1007/s00466-021-02111-4)
+
+- Steinbrecher, I., Meier, C., Popp, A.: A consistent mixed-dimensional coupling approach for 1D Cosserat beams and 2D solid surfaces, 2022, submitted, [arXiv.2210.16010](https://doi.org/10.48550/arXiv.2210.16010)
+
+- Hagmeyer, N., Mayr, M., Steinbrecher, I., and Popp, A., 2022, “One-Way Coupled Fluid-Beam Interaction: Capturing the Effect of Embedded Slender Bodies on Global Fluid Flow and Vice Versa,” Advanced Modeling and Simulation in Engineering Sciences, 9(1), p. 9., doi: [10.1186/s40323-022-00222-y](https://doi.org/10.1186/s40323-022-00222-y)
 
 ### 2020
-- Steinbrecher, I., Mayr, M., Grill, M. J., Kremheller, J., Meier, C., Popp, A.: A mortar-type finite element approach for embedding 1D beams into 3D solid volumes, Comput Mech 66 (6) (2020) 1377–1398. doi: [10.1007/s00466-020-01907-0](https://doi.org/10.1007/s00466-020-01907-0)
+- Steinbrecher, I., Mayr, M., Grill, M. J., Kremheller, J., Meier, C., and Popp, A., 2020, “A Mortar-Type Finite Element Approach for Embedding 1D Beams into 3D Solid Volumes,” Computational Mechanics, 66(6), pp. 1377–1398, doi: [10.1007/s00466-020-01907-0](https://doi.org/10.1007/s00466-020-01907-0)
 
 
 ## Examples created using MeshPy
