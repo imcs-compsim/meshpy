@@ -340,6 +340,66 @@ def create_nurbs_sphere_surface(radius, n_ele_u=1, n_ele_v=1):
     return surf
 
 
+def create_nurbs_hemisphere_surface(radius, n_ele_uv=1):
+    """
+    Generates a hemisphere as a NURBS surface. This function constructs five segments that represent
+    the surface of a hemisphere using Non-Uniform Rational B-Splines (NURBS) based on the specified
+    radius and the number of elements in the parametric u and v directions. To secure the connectivity
+    between surfaces, all surfaces must have the same parametric representation in any parametric
+    direction. Therefore, the number of elements in u- and v- directions must be the same.
+
+    This function generates a list of five NURBS geomdl objects.
+
+    Args
+    ---
+    radius: double
+        Radius of the hemisphere
+    n_ele_uv: int
+        Number of elements in the parametric u- and v- directions
+
+    Return
+    ----
+    list: list(geomdl object)
+        A list of geomdl objects that contains the surface information
+    """
+
+    # Create the first section of the hemisphere
+    hemisphere_1 = create_nurbs_sphere_surface(radius, n_ele_u=1, n_ele_v=1)
+
+    # Create a temporary section by rotating and translating the
+    # first section of the hemisphere
+    temp_hemisphere = operations.rotate(hemisphere_1, 90, axis=1)
+    temp_hemisphere = operations.translate(
+        temp_hemisphere,
+        (0, 0, -2.0 * radius / np.sqrt(6.0) * np.sin(1.0 / 4.0 * np.pi) * 2),
+    )
+
+    # To create the hemisphere it is necessary to split the temporary
+    # sphere section in two pieces. This split is done in u = 0.5. After
+    # the split, the second surface is taken as it will be
+    # adjacent to the first section of the sphere
+    cut_section_sphere = operations.split_surface_u(temp_hemisphere, param=0.5)
+    hemisphere_2 = cut_section_sphere[1]
+
+    translation_component = radius * np.sin(1.0 / 4.0 * np.pi) * 2
+    # Create the third section. Rotate and translate it accordingly
+    hemisphere_3 = operations.rotate(hemisphere_2, 90, axis=2)
+    hemisphere_3 = operations.translate(hemisphere_3, (translation_component, 0, 0))
+
+    # Create the forth section. Rotate and translate it accordingly
+    hemisphere_4 = operations.rotate(hemisphere_3, 90, axis=2)
+    hemisphere_4 = operations.translate(hemisphere_4, (0, translation_component, 0))
+
+    # Create the fifth section. Rotate and translate it accordingly
+    hemisphere_5 = operations.rotate(hemisphere_4, 90, axis=2)
+    hemisphere_5 = operations.translate(hemisphere_5, (-translation_component, 0, 0))
+
+    patches = [hemisphere_1, hemisphere_2, hemisphere_3, hemisphere_4, hemisphere_5]
+    for patch in patches:
+        do_uniform_knot_refinement_surface(patch, n_ele_uv, n_ele_uv)
+    return patches
+
+
 def create_nurbs_brick(width, length, height, *, n_ele_u=1, n_ele_v=1, n_ele_w=1):
     """
     Creates a patch of a 3 dimensional brick.
