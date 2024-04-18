@@ -344,9 +344,9 @@ def create_nurbs_hemisphere_surface(radius, n_ele_uv=1):
     """
     Generates a hemisphere as a NURBS surface. This function constructs five segments that represent
     the surface of a hemisphere using Non-Uniform Rational B-Splines (NURBS) based on the specified 
-    radius and the number of elements in the parametric u and v directions. To secure the connectivity between
-    surfaces, all surfaces must have the same parametric representation in any parametric direction.
-    Therefore, the number of elements in u- and v- directions must be the same
+    radius and the number of elements in the parametric u and v directions. To secure the connectivity 
+    between surfaces, all surfaces must have the same parametric representation in any parametric 
+    direction. Therefore, the number of elements in u- and v- directions must be the same.
 
     This function generates a list of five NURBS geomdl objects.
 
