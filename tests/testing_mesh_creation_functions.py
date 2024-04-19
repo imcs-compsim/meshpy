@@ -72,6 +72,60 @@ from meshpy.mesh_creation_functions import (
 from testing_utility import testing_input, compare_test_result, compare_strings
 
 
+def create_helix_function(
+    radius, incline, *, transformation_factor=None, number_of_turns=None
+):
+    """Create and return a parametric function that represents a helix shape.
+    The parameter coordinate can optionally be stretched to make the curve
+    arc-length along the parameter coordinated non-constant and create a more
+    complex curve for testing purposes.
+
+    Args
+    ----
+    radius: float
+        Radius of the helix
+    incline: float
+        Incline of the helix
+    transformation_factor: float
+        Factor to control the coordinate stretching (no direct physical interpretation)
+    number_of_turns: float
+        Number of turns the helix will have to get approximate boundaries for the transformation.
+        This is only used for the transformation, not the actual geometry, as we return the
+        function to create the geometry and not the geometry itself.
+    """
+
+    if transformation_factor is None and number_of_turns is None:
+        # Identity transformation
+        def transformation(t):
+            return 1.0
+
+    elif transformation_factor is not None and number_of_turns is not None:
+        # Transform the parameter coordinate to make the function more complex
+        def transformation(t):
+            return (
+                npAD.exp(transformation_factor * t / (2.0 * np.pi * number_of_turns))
+                * t
+                / npAD.exp(transformation_factor)
+            )
+
+    else:
+        raise ValueError(
+            "You have to set none or both optional parameters: "
+            "transformation_factor and number_of_turns"
+        )
+
+    def helix(t):
+        return npAD.array(
+            [
+                radius * npAD.cos(transformation(t)),
+                radius * npAD.sin(transformation(t)),
+                transformation(t) * incline / (2 * np.pi),
+            ]
+        )
+
+    return helix
+
+
 class TestMeshCreationFunctions(unittest.TestCase):
     """
     Test the mesh creation functions.
@@ -450,21 +504,13 @@ class TestMeshCreationFunctions(unittest.TestCase):
             l_el=l_el,
         )
 
-        # Set parameters for the helix.
+        # Get the helix curve function
         R = 2.0
         tz = 4.0  # incline
         n = 0.5  # number of turns
-
-        def helix(t):
-            factor = 2
-            t_trans = npAD.exp(factor * t / (2.0 * np.pi * n)) * t / npAD.exp(factor)
-            return npAD.array(
-                [
-                    R * npAD.cos(t_trans),
-                    R * npAD.sin(t_trans),
-                    t_trans * tz / (2 * np.pi),
-                ]
-            )
+        helix = create_helix_function(
+            R, tz, transformation_factor=2.0, number_of_turns=n
+        )
 
         mesh_curve = Mesh()
         create_beam_mesh_curve(
@@ -509,23 +555,14 @@ class TestMeshCreationFunctions(unittest.TestCase):
         # Add material and functions.
         mat = MaterialReissner()
 
-        # Set parameters for the helix.
+        # Get the helix curve function
         R = 2.0
         tz = 4.0  # incline
         n = 1  # number of turns
         n_el = 5
-
-        # Create a helix with a parametric curve.
-        def helix(t):
-            factor = 2
-            t_trans = npAD.exp(factor * t / (2.0 * np.pi * n)) * t / npAD.exp(factor)
-            return npAD.array(
-                [
-                    R * npAD.cos(t_trans),
-                    R * npAD.sin(t_trans),
-                    t_trans * tz / (2 * np.pi),
-                ]
-            )
+        helix = create_helix_function(
+            R, tz, transformation_factor=2.0, number_of_turns=n
+        )
 
         helix_set = create_beam_mesh_curve(
             input_file, Beam3rHerm2Line3, mat, helix, [0.0, 2.0 * np.pi * n], n_el=n_el
@@ -559,19 +596,14 @@ class TestMeshCreationFunctions(unittest.TestCase):
         input_file_2 = InputFile()
         mat = MaterialReissner()
 
+        # Get the helix curve function
         R = 2.0
         tz = 4.0  # incline
         n = 1  # number of turns
         n_el = 3
-
-        def helix(t):
-            return npAD.array(
-                [
-                    R * npAD.cos(t),
-                    R * npAD.sin(t),
-                    t * tz / (2 * np.pi),
-                ]
-            )
+        helix = create_helix_function(
+            R, tz, transformation_factor=2.0, number_of_turns=n
+        )
 
         args = [Beam3rHerm2Line3, mat, helix, [0.0, 2.0 * np.pi * n]]
         kwargs = {"n_el": n_el}
