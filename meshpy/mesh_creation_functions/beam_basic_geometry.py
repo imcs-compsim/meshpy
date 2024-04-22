@@ -34,6 +34,7 @@ This file has functions to create basic geometry items with meshpy.
 
 # Python packages.
 import numpy as np
+import warnings
 
 # Meshpy modules.
 from ..conf import mpy
@@ -476,3 +477,171 @@ def create_beam_mesh_arc_at_node(
         start_node=start_node,
         **kwargs,
     )
+
+
+def create_beam_mesh_helix(
+    mesh,
+    beam_object,
+    material,
+    axis,
+    axis_point,
+    start_point,
+    twist_angle,
+    *,
+    height_helix=None,
+    turns=None,
+    **kwargs
+):
+    """
+    Generate a helical segment starting at a given start point around a
+    predefined axis.
+
+    Args
+    ----
+    mesh: Mesh
+        Mesh that the helical segment will be added to.
+    beam_object: Beam
+        Class of beam that will be used for this line.
+    material: Material
+        Material for this segment.
+    axis: np.array, list
+        Rotation axis of the helix.
+    axis_point: np.array, list
+        Point lying on the rotation axis. Does not need to align with
+        bottom plane of helix.
+    start_point: np.array, list
+        Start point of the helix. Defines the radius.
+    twist_angle: float
+        Twist angle / Pitch of helix between 0 and 2pi.
+    height_helix: float
+        Height of helix. Mutually exclusive with number of turns.
+    turns: float
+        Number of turns. Mutually exclusive with height of helix.
+
+    **kwargs (for all of them look into create_beam_mesh_function)
+    ----
+    n_el: int
+        Number of equally spaced beam elements along the line. Defaults to 1.
+        Mutually exclusive with l_el.
+    l_el: float
+        Desired length of beam elements. This requires the option interval_length
+        to be set. Mutually exclusive with n_el. Be aware, that this length
+        might not be achieved, if the elements are warped after they are
+        created.
+
+    Return
+    ----
+    return_set: GeometryName
+        Set with the 'start' and 'end' node of the line. Also a 'line' set
+        with all nodes of the line.
+    """
+
+    if not 0 < twist_angle < 2 * np.pi:
+        raise ValueError("Twist angle of helix must be between 0 and 2pi!")
+
+    if height_helix is None and turns is None:
+        raise ValueError("Either provide height_helix or turns!")
+    elif height_helix is not None and turns is not None:
+        raise ValueError("Only provide height_helix OR turns!")
+
+    # determine radius of helix
+    axis = np.array(axis) / np.linalg.norm(np.array(axis))
+    origin = axis_point + np.dot(
+        np.dot((np.array(start_point) - np.array(axis_point)), axis), axis
+    )
+    start_point_origin_vec = start_point - origin
+    radius = np.linalg.norm(start_point_origin_vec)
+
+    # return line if radius of helix is 0 or twist angle is np.pi/2
+    if np.isclose(radius, 0) or np.isclose(twist_angle, np.pi / 2):
+        if turns:
+            raise ValueError(
+                "Radius of helix is 0 or twist angle is 90 degrees! "
+                + "Height of helix can not be determined through turns! "
+                + "Either switch to height of helix or change radius!"
+            )
+
+        warnings.warn(
+            "Radius of helix is 0 or twist angle is 90 degrees! "
+            + "Simple line geometry is returned!"
+        )
+
+        return create_beam_mesh_line(
+            mesh,
+            beam_object,
+            material,
+            start_point=start_point,
+            end_point=start_point + height_helix * axis,
+            **kwargs,
+        )
+
+    # generate simple helix
+    if height_helix:
+        end_point = np.array([radius, height_helix / np.tan(twist_angle), height_helix])
+    elif turns:
+        end_point = np.array(
+            [
+                radius,
+                2 * np.pi * radius * turns,
+                2 * np.pi * radius * turns * np.tan(twist_angle),
+            ]
+        )
+
+    helix = create_beam_mesh_line(
+        mesh,
+        beam_object,
+        material,
+        start_point=[radius, 0, 0],
+        end_point=end_point,
+        **kwargs,
+    )
+
+    mesh.wrap_around_cylinder()
+
+    # transform simple helix to align with neccessary axis and starting point
+    axis_simple = np.array([0, 0, 1])
+    start_point_origin_vec_simple = np.array([1, 0, 0])
+
+    start_point_origin_vec /= np.linalg.norm(start_point_origin_vec)
+
+    # 1 - get rotation matrix to align axes
+    if np.isclose(np.dot(axis, axis_simple), 1):
+        # axis point in same direction
+        R_axis = np.eye(3)
+    elif np.isclose(np.dot(axis, axis_simple), -1):
+        # axis point in opposite direction
+        R_axis = np.asarray([[1, 0, 0], [0, -1, 0], [0, 0, -1]])
+    else:
+        v = np.cross(axis, axis_simple)
+        c = np.dot(axis, axis_simple)
+        v_x = np.asarray([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+        R_axis = np.eye(3) + v_x + np.matmul(v_x, v_x) / (1 + c)
+
+    start_point_origin_vec_simple_rot = np.dot(R_axis, start_point_origin_vec_simple)
+    start_point_origin_vec_simple_rot /= np.linalg.norm(
+        start_point_origin_vec_simple_rot
+    )
+
+    # 2 - get rotation matrix to align start_point_origin_vec's
+    if np.isclose(np.dot(start_point_origin_vec, start_point_origin_vec_simple_rot), 1):
+        # vectors point in same direction
+        R_start_vec = np.eye(3)
+    elif np.isclose(
+        np.dot(start_point_origin_vec, start_point_origin_vec_simple_rot), -1
+    ):
+        # vectors point in opposite direction
+        R_start_vec = np.asarray([[-1, 0, 0], [0, 1, 0], [0, 0, -1]])
+    else:
+        v = np.cross(start_point_origin_vec, start_point_origin_vec_simple_rot)
+        c = np.dot(start_point_origin_vec, start_point_origin_vec_simple_rot)
+        v_x = np.asarray([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
+        R_start_vec = np.eye(3) + v_x + np.matmul(v_x, v_x) / (1 + c)
+
+    # 3 - rotate mesh
+    rotation = Rotation.from_rotation_matrix(np.matmul(R_start_vec, R_axis))
+    mesh.rotate(rotation)
+
+    # 4 - translate simple helix to align with start point
+    mesh.translate(-mesh.nodes[0].coordinates+start_point)
+
+    return helix
