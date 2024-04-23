@@ -741,9 +741,6 @@ class TestMeshCreationFunctions(unittest.TestCase):
     def test_mesh_creation_functions_helix_no_rotation(self):
         """Create a helix and compare it with the reference file."""
 
-        # Create mesh.
-        mesh = Mesh()
-
         # Create input file.
         input_file = InputFile()
 
@@ -751,20 +748,18 @@ class TestMeshCreationFunctions(unittest.TestCase):
         mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
 
         # Create helix.
-        create_beam_mesh_helix(
-            mesh,
+        helix_set = create_beam_mesh_helix(
+            input_file,
             Beam3rHerm2Line3,
             mat,
             [0.0, 0.0, 1.0],
             [0.0, 0.0, 0.0],
             [2.0, 0.0, 0.0],
             np.pi / 4,
-            height_helix=80.0,
+            height_helix=10.0,
             l_el=5.0,
         )
-
-        # Add mesh.
-        input_file.add_mesh(mesh)
+        input_file.add(helix_set)
 
         # Check the output.
         compare_test_result(self, input_file.get_string(header=False))
@@ -772,9 +767,6 @@ class TestMeshCreationFunctions(unittest.TestCase):
     def test_mesh_creation_functions_helix_rotation_offset(self):
         """Create a helix and compare it with the reference file."""
 
-        # Create mesh.
-        mesh = Mesh()
-
         # Create input file.
         input_file = InputFile()
 
@@ -782,20 +774,18 @@ class TestMeshCreationFunctions(unittest.TestCase):
         mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
 
         # Create helix.
-        create_beam_mesh_helix(
-            mesh,
+        helix_set = create_beam_mesh_helix(
+            input_file,
             Beam3rHerm2Line3,
             mat,
             [1.0, 1.0, 1.0],
             [-1.0, -1.0, -1.0],
             [3.0, 0.0, 0.0],
             np.pi / 6,
-            height_helix=80.0,
+            height_helix=10.0,
             l_el=5.0,
         )
-
-        # Add mesh.
-        input_file.add_mesh(mesh)
+        input_file.add(helix_set)
 
         # Check the output.
         compare_test_result(self, input_file.get_string(header=False))
@@ -803,8 +793,31 @@ class TestMeshCreationFunctions(unittest.TestCase):
     def test_mesh_creation_functions_helix_radius_zero(self):
         """Create a helix and compare it with the reference file."""
 
-        # Create mesh.
-        mesh = Mesh()
+        # Create input file.
+        input_file = InputFile()
+
+        # Add material and function.
+        mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
+
+        # Create helix.
+        helix_set = create_beam_mesh_helix(
+            input_file,
+            Beam3rHerm2Line3,
+            mat,
+            [1.0, 1.0, 1.0],
+            [-1.0, -1.0, -1.0],
+            [1.0, 1.0, 1.0],
+            np.pi / 6,
+            height_helix=80.0,
+            n_el=4,
+        )
+        input_file.add(helix_set)
+
+        # Check the output.
+        compare_test_result(self, input_file.get_string(header=False))
+
+    def test_mesh_creation_functions_helix_twist_angle_right_angle(self):
+        """Create a helix and compare it with the reference file."""
 
         # Create input file.
         input_file = InputFile()
@@ -813,20 +826,18 @@ class TestMeshCreationFunctions(unittest.TestCase):
         mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
 
         # Create helix.
-        create_beam_mesh_helix(
-            mesh,
+        helix_set = create_beam_mesh_helix(
+            input_file,
             Beam3rHerm2Line3,
             mat,
             [1.0, 1.0, 1.0],
             [-1.0, -1.0, -1.0],
-            [1.0, 1.0, 1.0],
-            np.pi / 6,
-            height_helix=80.0,
-            n_el=10,
+            [2.0, 2.0, 1.0],
+            np.pi / 2,
+            height_helix=10.0,
+            l_el=5.0,
         )
-
-        # Add mesh.
-        input_file.add_mesh(mesh)
+        input_file.add(helix_set)
 
         # Check the output.
         compare_test_result(self, input_file.get_string(header=False))

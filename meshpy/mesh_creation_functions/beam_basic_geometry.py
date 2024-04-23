@@ -524,10 +524,9 @@ def create_beam_mesh_helix(
         Number of equally spaced beam elements along the line. Defaults to 1.
         Mutually exclusive with l_el.
     l_el: float
-        Desired length of beam elements. This requires the option interval_length
-        to be set. Mutually exclusive with n_el. Be aware, that this length
-        might not be achieved, if the elements are warped after they are
-        created.
+        Desired length of beam elements. Mutually exclusive with n_el.
+        Be aware, that this length might not be achieved, if the elements are
+        warped after they are created.
 
     Return
     ----
@@ -535,9 +534,6 @@ def create_beam_mesh_helix(
         Set with the 'start' and 'end' node of the line. Also a 'line' set
         with all nodes of the line.
     """
-
-    if not 0 < twist_angle < 2 * np.pi:
-        raise ValueError("Twist angle of helix must be between 0 and 2pi!")
 
     if height_helix is None and turns is None:
         raise ValueError("Either provide height_helix or turns!")
@@ -553,7 +549,7 @@ def create_beam_mesh_helix(
     radius = np.linalg.norm(start_point_origin_vec)
 
     # return line if radius of helix is 0 or twist angle is np.pi/2
-    if np.isclose(radius, 0) or np.isclose(twist_angle, np.pi / 2):
+    if np.isclose(radius, 0) or np.isclose(np.cos(twist_angle), 0.0):
         if turns:
             raise ValueError(
                 "Radius of helix is 0 or twist angle is 90 degrees! "
@@ -571,7 +567,7 @@ def create_beam_mesh_helix(
             beam_object,
             material,
             start_point=start_point,
-            end_point=start_point + height_helix * axis,
+            end_point=start_point + height_helix * axis * np.sign(np.sin(twist_angle)),
             **kwargs,
         )
 
@@ -598,50 +594,11 @@ def create_beam_mesh_helix(
 
     mesh.wrap_around_cylinder()
 
-    # transform simple helix to align with neccessary axis and starting point
-    axis_simple = np.array([0, 0, 1])
-    start_point_origin_vec_simple = np.array([1, 0, 0])
-
-    start_point_origin_vec /= np.linalg.norm(start_point_origin_vec)
-
-    # 1 - get rotation matrix to align axes
-    if np.isclose(np.dot(axis, axis_simple), 1):
-        # axis point in same direction
-        R_axis = np.eye(3)
-    elif np.isclose(np.dot(axis, axis_simple), -1):
-        # axis point in opposite direction
-        R_axis = np.asarray([[1, 0, 0], [0, -1, 0], [0, 0, -1]])
-    else:
-        v = np.cross(axis, axis_simple)
-        c = np.dot(axis, axis_simple)
-        v_x = np.asarray([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
-        R_axis = np.eye(3) + v_x + np.matmul(v_x, v_x) / (1 + c)
-
-    start_point_origin_vec_simple_rot = np.dot(R_axis, start_point_origin_vec_simple)
-    start_point_origin_vec_simple_rot /= np.linalg.norm(
-        start_point_origin_vec_simple_rot
+    # rotate and translate simple helix to align with neccessary axis and starting point
+    mesh.rotate(
+        Rotation.from_basis(start_point_origin_vec, axis)
+        * Rotation([1, 0, 0], -np.pi * 0.5)
     )
-
-    # 2 - get rotation matrix to align start_point_origin_vec's
-    if np.isclose(np.dot(start_point_origin_vec, start_point_origin_vec_simple_rot), 1):
-        # vectors point in same direction
-        R_start_vec = np.eye(3)
-    elif np.isclose(
-        np.dot(start_point_origin_vec, start_point_origin_vec_simple_rot), -1
-    ):
-        # vectors point in opposite direction
-        R_start_vec = np.asarray([[-1, 0, 0], [0, 1, 0], [0, 0, -1]])
-    else:
-        v = np.cross(start_point_origin_vec, start_point_origin_vec_simple_rot)
-        c = np.dot(start_point_origin_vec, start_point_origin_vec_simple_rot)
-        v_x = np.asarray([[0, -v[2], v[1]], [v[2], 0, -v[0]], [-v[1], v[0], 0]])
-        R_start_vec = np.eye(3) + v_x + np.matmul(v_x, v_x) / (1 + c)
-
-    # 3 - rotate mesh
-    rotation = Rotation.from_rotation_matrix(np.matmul(R_start_vec, R_axis))
-    mesh.rotate(rotation)
-
-    # 4 - translate simple helix to align with start point
-    mesh.translate(-mesh.nodes[0].coordinates+start_point)
+    mesh.translate(-mesh.nodes[0].coordinates + start_point)
 
     return helix
