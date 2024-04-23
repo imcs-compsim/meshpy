@@ -65,10 +65,9 @@ def create_beam_mesh_line(
         Number of equally spaced beam elements along the line. Defaults to 1.
         Mutually exclusive with l_el.
     l_el: float
-        Desired length of beam elements. This requires the option interval_length
-        to be set. Mutually exclusive with n_el. Be aware, that this length
-        might not be achieved, if the elements are warped after they are
-        created.
+        Desired length of beam elements. Mutually exclusive with n_el.
+        Be aware, that this length might not be achieved, if the elements are
+        warped after they are created.
     start_node: Node, GeometrySet
         Node to use as the first node for this line. Use this if the line
         is connected to other lines (angles have to be the same, otherwise
@@ -161,10 +160,9 @@ def create_beam_mesh_arc_segment_via_rotation(
         Number of equally spaced beam elements along the line. Defaults to 1.
         Mutually exclusive with l_el.
     l_el: float
-        Desired length of beam elements. This requires the option interval_length
-        to be set. Mutually exclusive with n_el. Be aware, that this length
-        might not be achieved, if the elements are warped after they are
-        created.
+        Desired length of beam elements. Mutually exclusive with n_el.
+        Be aware, that this length might not be achieved, if the elements are
+        warped after they are created.
 
     Return
     ----
@@ -222,10 +220,9 @@ def create_beam_mesh_arc_segment_via_axis(
         Number of equally spaced beam elements along the line. Defaults to 1.
         Mutually exclusive with l_el.
     l_el: float
-        Desired length of beam elements. This requires the option interval_length
-        to be set. Mutually exclusive with n_el. Be aware, that this length
-        might not be achieved, if the elements are warped after they are
-        created.
+        Desired length of beam elements. Mutually exclusive with n_el.
+        Be aware, that this length might not be achieved, if the elements are
+        warped after they are created.
 
     Return
     ----
@@ -314,10 +311,9 @@ def create_beam_mesh_arc_segment_2d(
         Number of equally spaced beam elements along the line. Defaults to 1.
         Mutually exclusive with l_el.
     l_el: float
-        Desired length of beam elements. This requires the option interval_length
-        to be set. Mutually exclusive with n_el. Be aware, that this length
-        might not be achieved, if the elements are warped after they are
-        created.
+        Desired length of beam elements. Mutually exclusive with n_el.
+        Be aware, that this length might not be achieved, if the elements are
+        warped after they are created.
 
     Return
     ----
@@ -378,10 +374,9 @@ def create_beam_mesh_line_at_node(
         Number of equally spaced beam elements along the line. Defaults to 1.
         Mutually exclusive with l_el.
     l_el: float
-        Desired length of beam elements. This requires the option interval_length
-        to be set. Mutually exclusive with n_el. Be aware, that this length
-        might not be achieved, if the elements are warped after they are
-        created.
+        Desired length of beam elements. Mutually exclusive with n_el.
+        Be aware, that this length might not be achieved, if the elements are
+        warped after they are created.
 
     Return
     ----
@@ -441,10 +436,9 @@ def create_beam_mesh_arc_at_node(
         Number of equally spaced beam elements along the line. Defaults to 1.
         Mutually exclusive with l_el.
     l_el: float
-        Desired length of beam elements. This requires the option interval_length
-        to be set. Mutually exclusive with n_el. Be aware, that this length
-        might not be achieved, if the elements are warped after they are
-        created.
+        Desired length of beam elements. Mutually exclusive with n_el.
+        Be aware, that this length might not be achieved, if the elements are
+        warped after they are created.
 
     Return
     ----
