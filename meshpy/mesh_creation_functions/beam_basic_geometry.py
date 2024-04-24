@@ -540,6 +540,12 @@ def create_beam_mesh_helix(
     elif height_helix is not None and turns is not None:
         raise ValueError("Only provide height_helix OR turns!")
 
+    if np.isclose(np.sin(twist_angle), 0.0):
+        raise ValueError(
+            "Twist angle of helix is 0 degrees! "
+            + "Change angle for feasible helix geometry!"
+        )
+
     # determine radius of helix
     axis = np.array(axis) / np.linalg.norm(np.array(axis))
     origin = axis_point + np.dot(
@@ -573,13 +579,24 @@ def create_beam_mesh_helix(
 
     # generate simple helix
     if height_helix:
-        end_point = np.array([radius, height_helix / np.tan(twist_angle), height_helix])
+        end_point = np.array(
+            [
+                radius,
+                np.sign(np.sin(twist_angle)) * height_helix / np.tan(twist_angle),
+                np.sign(np.sin(twist_angle)) * height_helix,
+            ]
+        )
     elif turns:
         end_point = np.array(
             [
                 radius,
-                2 * np.pi * radius * turns,
-                2 * np.pi * radius * turns * np.tan(twist_angle),
+                np.sign(np.cos(twist_angle)) * 2 * np.pi * radius * turns,
+                np.sign(np.cos(twist_angle))
+                * 2
+                * np.pi
+                * radius
+                * turns
+                * np.tan(twist_angle),
             ]
         )
 
