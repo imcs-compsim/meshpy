@@ -92,7 +92,10 @@ def create_beam_mesh_line(
     t1 = direction / line_length
 
     # Check if the z or y axis are larger projected onto the direction.
-    if abs(np.dot(t1, [0, 0, 1])) < abs(np.dot(t1, [0, 1, 0])):
+    # The tolerance is used here to ensure that round-off changes in the last digits of
+    # the floating point values don't switch the case. This increases the robustness in
+    # testing.
+    if abs(np.dot(t1, [0, 0, 1])) < abs(np.dot(t1, [0, 1, 0])) - mpy.eps_quaternion:
         t2 = [0, 0, 1]
     else:
         t2 = [0, 1, 0]
