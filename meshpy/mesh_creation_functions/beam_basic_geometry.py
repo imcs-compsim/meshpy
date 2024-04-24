@@ -490,6 +490,7 @@ def create_beam_mesh_helix(
     *,
     height_helix=None,
     turns=None,
+    warning_straight_line=True,
     **kwargs
 ):
     """
@@ -517,6 +518,9 @@ def create_beam_mesh_helix(
         Height of helix. Mutually exclusive with number of turns.
     turns: float
         Number of turns. Mutually exclusive with height of helix.
+    warning_straight_line: bool
+        Warn if radius of helix is zero or twist angle is 90 degrees and
+        simple line is returned.
 
     **kwargs (for all of them look into create_beam_mesh_function)
     ----
@@ -563,10 +567,11 @@ def create_beam_mesh_helix(
                 + "Either switch to height of helix or change radius!"
             )
 
-        warnings.warn(
-            "Radius of helix is 0 or twist angle is 90 degrees! "
-            + "Simple line geometry is returned!"
-        )
+        if warning_straight_line:
+            warnings.warn(
+                "Radius of helix is 0 or twist angle is 90 degrees! "
+                + "Simple line geometry is returned!"
+            )
 
         return create_beam_mesh_line(
             mesh,

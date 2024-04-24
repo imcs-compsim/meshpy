@@ -810,6 +810,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
             np.pi / 6,
             height_helix=80.0,
             n_el=4,
+            warning_straight_line=False,
         )
         input_file.add(helix_set)
 
@@ -836,6 +837,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
             np.pi / 2,
             height_helix=10.0,
             l_el=5.0,
+            warning_straight_line=False,
         )
         input_file.add(helix_set)
 
