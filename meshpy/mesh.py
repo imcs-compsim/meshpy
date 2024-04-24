@@ -174,9 +174,12 @@ class Mesh:
         self.geometry_sets.append(geometry_set.geometry_type, geometry_set)
 
     def add_geometry_name(self, geometry_name):
-        """Add a set of geometry sets to this mesh."""
-        for _key, value in geometry_name.items():
-            self.add(value)
+        """Add a set of geometry sets to this mesh. Sort by the keys here to create
+        a deterministic ordering, especially for testing purposes"""
+        keys = list(geometry_name.keys())
+        keys.sort()
+        for key in keys:
+            self.add(geometry_name[key])
 
     def replace_node(self, old_node, new_node):
         """Replace the first node with the second node."""

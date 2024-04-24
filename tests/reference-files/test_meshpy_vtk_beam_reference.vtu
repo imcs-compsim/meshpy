@@ -75,7 +75,7 @@
           1 1 1 1 1 1
           1 1 1 1 1 1
         </DataArray>
-        <DataArray type="Int32" Name="geometry_point_set_02" format="ascii" RangeMin="-1" RangeMax="1">
+        <DataArray type="Int32" Name="geometry_point_set_01" format="ascii" RangeMin="-1" RangeMax="1">
           -1 -1 -1 -1 -1 1
           1 -1 -1 -1 -1 -1
           -1 -1 -1 -1 -1 -1
@@ -411,7 +411,7 @@
           1 -1 -1 -1 -1 -1
           -1 -1 -1 -1 -1 -1
         </DataArray>
-        <DataArray type="Int32" Name="geometry_point_set_01" format="ascii" RangeMin="-1" RangeMax="1">
+        <DataArray type="Int32" Name="geometry_point_set_02" format="ascii" RangeMin="-1" RangeMax="1">
           -1 -1 -1 -1 -1 -1
           -1 -1 -1 -1 -1 -1
           -1 -1 -1 -1 -1 -1
