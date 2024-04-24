@@ -9,8 +9,8 @@
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_BeamReissnerElastHyper YOUNG 100000.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.7853981633974483 SHEARCORR 1.0 MOMINPOL 0.09817477042468103 MOMIN2 0.04908738521234052 MOMIN3 0.04908738521234052
 -------------------------------------------------------------DNODE-NODE TOPOLOGY
-NODE 1 DNODE 1
-NODE 5 DNODE 2
+NODE 5 DNODE 1
+NODE 1 DNODE 2
 -------------------------------------------------------------DLINE-NODE TOPOLOGY
 NODE 1 DLINE 1
 NODE 2 DLINE 1
