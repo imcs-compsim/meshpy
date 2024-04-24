@@ -779,6 +779,7 @@ class Mesh:
         beam_radius_for_display=0.1,
         resolution=20,
         is_testing=False,
+        parallel_projection=False,
         **kwargs,
     ):
         """Display the mesh in pyvista
@@ -803,11 +804,18 @@ class Mesh:
         is_testing: bool
             Flag if the function is used for testing. If true, the pv.plotter object
             will be returned.
+        parallel_projection: bool
+            Flag to change camera view to parallel projection.
         **kwargs:
             Have a look at Mesh().get_vtk_representation
         """
 
         plotter = pv.Plotter()
+        plotter.renderer.add_axes()
+
+        if parallel_projection:
+            plotter.enable_parallel_projection()
+
         vtk_writer_beam, vtk_writer_solid = self.get_vtk_representation(**kwargs)
 
         if vtk_writer_beam.points.GetNumberOfPoints() > 0:
