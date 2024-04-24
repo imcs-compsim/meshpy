@@ -59,6 +59,8 @@ Nora Hagmeyer
 
 Matthias Mayr
 
+David Rudlstorfer
+
 
 ## Publications
 [comment]: <> (ASME style in JabRef)

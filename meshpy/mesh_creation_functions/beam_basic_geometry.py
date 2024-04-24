@@ -34,6 +34,7 @@ This file has functions to create basic geometry items with meshpy.
 
 # Python packages.
 import numpy as np
+import warnings
 
 # Meshpy modules.
 from ..conf import mpy
@@ -91,7 +92,10 @@ def create_beam_mesh_line(
     t1 = direction / line_length
 
     # Check if the z or y axis are larger projected onto the direction.
-    if abs(np.dot(t1, [0, 0, 1])) < abs(np.dot(t1, [0, 1, 0])):
+    # The tolerance is used here to ensure that round-off changes in the last digits of
+    # the floating point values don't switch the case. This increases the robustness in
+    # testing.
+    if abs(np.dot(t1, [0, 0, 1])) < abs(np.dot(t1, [0, 1, 0])) - mpy.eps_quaternion:
         t2 = [0, 0, 1]
     else:
         t2 = [0, 1, 0]
@@ -476,3 +480,150 @@ def create_beam_mesh_arc_at_node(
         start_node=start_node,
         **kwargs,
     )
+
+
+def create_beam_mesh_helix(
+    mesh,
+    beam_object,
+    material,
+    axis,
+    axis_point,
+    start_point,
+    twist_angle,
+    *,
+    height_helix=None,
+    turns=None,
+    warning_straight_line=True,
+    **kwargs
+):
+    """
+    Generate a helical segment starting at a given start point around a
+    predefined axis.
+
+    Args
+    ----
+    mesh: Mesh
+        Mesh that the helical segment will be added to.
+    beam_object: Beam
+        Class of beam that will be used for this line.
+    material: Material
+        Material for this segment.
+    axis: np.array, list
+        Rotation axis of the helix.
+    axis_point: np.array, list
+        Point lying on the rotation axis. Does not need to align with
+        bottom plane of helix.
+    start_point: np.array, list
+        Start point of the helix. Defines the radius.
+    twist_angle: float
+        Twist angle / Pitch of helix between 0 and 2pi.
+    height_helix: float
+        Height of helix. Mutually exclusive with number of turns.
+    turns: float
+        Number of turns. Mutually exclusive with height of helix.
+    warning_straight_line: bool
+        Warn if radius of helix is zero or twist angle is 90 degrees and
+        simple line is returned.
+
+    **kwargs (for all of them look into create_beam_mesh_function)
+    ----
+    n_el: int
+        Number of equally spaced beam elements along the line. Defaults to 1.
+        Mutually exclusive with l_el.
+    l_el: float
+        Desired length of beam elements. Mutually exclusive with n_el.
+        Be aware, that this length might not be achieved, if the elements are
+        warped after they are created.
+
+    Return
+    ----
+    return_set: GeometryName
+        Set with the 'start' and 'end' node of the line. Also a 'line' set
+        with all nodes of the line.
+    """
+
+    if height_helix is None and turns is None:
+        raise ValueError("Either provide height_helix or turns!")
+    elif height_helix is not None and turns is not None:
+        raise ValueError("Only provide height_helix OR turns!")
+
+    if np.isclose(np.sin(twist_angle), 0.0):
+        raise ValueError(
+            "Twist angle of helix is 0 degrees! "
+            + "Change angle for feasible helix geometry!"
+        )
+
+    # determine radius of helix
+    axis = np.array(axis) / np.linalg.norm(np.array(axis))
+    origin = axis_point + np.dot(
+        np.dot((np.array(start_point) - np.array(axis_point)), axis), axis
+    )
+    start_point_origin_vec = start_point - origin
+    radius = np.linalg.norm(start_point_origin_vec)
+
+    # return line if radius of helix is 0 or twist angle is np.pi/2
+    if np.isclose(radius, 0) or np.isclose(np.cos(twist_angle), 0.0):
+        if turns:
+            raise ValueError(
+                "Radius of helix is 0 or twist angle is 90 degrees! "
+                + "Height of helix can not be determined through turns! "
+                + "Either switch to height of helix or change radius!"
+            )
+
+        if warning_straight_line:
+            warnings.warn(
+                "Radius of helix is 0 or twist angle is 90 degrees! "
+                + "Simple line geometry is returned!"
+            )
+
+        return create_beam_mesh_line(
+            mesh,
+            beam_object,
+            material,
+            start_point=start_point,
+            end_point=start_point + height_helix * axis * np.sign(np.sin(twist_angle)),
+            **kwargs,
+        )
+
+    # generate simple helix
+    if height_helix:
+        end_point = np.array(
+            [
+                radius,
+                np.sign(np.sin(twist_angle)) * height_helix / np.tan(twist_angle),
+                np.sign(np.sin(twist_angle)) * height_helix,
+            ]
+        )
+    elif turns:
+        end_point = np.array(
+            [
+                radius,
+                np.sign(np.cos(twist_angle)) * 2 * np.pi * radius * turns,
+                np.sign(np.cos(twist_angle))
+                * 2
+                * np.pi
+                * radius
+                * turns
+                * np.tan(twist_angle),
+            ]
+        )
+
+    helix = create_beam_mesh_line(
+        mesh,
+        beam_object,
+        material,
+        start_point=[radius, 0, 0],
+        end_point=end_point,
+        **kwargs,
+    )
+
+    mesh.wrap_around_cylinder()
+
+    # rotate and translate simple helix to align with neccessary axis and starting point
+    mesh.rotate(
+        Rotation.from_basis(start_point_origin_vec, axis)
+        * Rotation([1, 0, 0], -np.pi * 0.5)
+    )
+    mesh.translate(-mesh.nodes[0].coordinates + start_point)
+
+    return helix
