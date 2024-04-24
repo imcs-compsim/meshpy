@@ -37,7 +37,7 @@ A few things to keep in mind:
 
 ## Installation
 
-MeshPy is developed with `python3.8`.
+MeshPy is developed with `python3.12`.
 Other versions of Python might lead to issues.
 It is recommended to use virtual environments with `python`.
 On Debian systems the following packages have to be installed
