@@ -296,48 +296,42 @@ def create_geometry_sets(element):
     def get_patch_lines(return_set, num_cps_uvw, nurbs_dimension, element):
         """Get the control points positioned over the lines of a patch"""
 
-        control_points_line_1 = []
-        control_points_line_2 = []
-        control_points_line_3 = []
-        control_points_line_4 = []
-
         if nurbs_dimension == 2:
-            # Fill line 1 and line 3 with their control points
-            for i in range(num_cps_uvw[0]):
-                # Line 1 has the control points on u = [0,1], v = 0
-                cpgid_l1 = num_cps_uvw[0] * 0 + i
-                control_points_line_1.append(element.nodes[cpgid_l1])
+            name_dir = ["v", "u"]
+            name_other_dir = ["min", "min_next", "max_next", "max"]
 
-                # Line 3 has the control points on u = [0,1], v = 1
-                cpgid_l3 = num_cps_uvw[0] * (num_cps_uvw[1] - 1) + i
-                control_points_line_3.append(element.nodes[cpgid_l3])
+            for i_dir, i_other_dir in ((0, 1), (1, 0)):
+                n_cp_dir = num_cps_uvw[i_dir]
+                n_cp_other_dir = num_cps_uvw[i_other_dir]
+                factor_dir = 1 if i_dir == 0 else n_cp_other_dir
+                factor_other_dir = n_cp_dir if i_dir == 0 else 1
 
-            # Fill line 2 and line 4 with their control points
-            for j in range(num_cps_uvw[1]):
-                # Line 2 has the control points on u = 1, v = [0,1]
-                cpgid_l2 = num_cps_uvw[0] * j + (num_cps_uvw[0] - 1)
-                control_points_line_2.append(element.nodes[cpgid_l2])
-
-                # Line 4 has the control points on u = 0, v = [0,1]
-                cpgid_l4 = num_cps_uvw[0] * j + 0
-                control_points_line_4.append(element.nodes[cpgid_l4])
-
-            # Create geometric sets for lines
-            return_set["line_v_min"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_1
-            )
-            return_set["line_u_max"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_2
-            )
-            return_set["line_v_max"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_3
-            )
-            return_set["line_u_min"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_4
-            )
+                for index, i_along_other_dir in enumerate(
+                    (
+                        0,
+                        1,
+                        n_cp_other_dir - 2,
+                        n_cp_other_dir - 1,
+                    )
+                ):
+                    cp_indices = []
+                    for i_along_dir in range(n_cp_dir):
+                        cp_indices.append(
+                            i_along_other_dir * factor_other_dir
+                            + i_along_dir * factor_dir
+                        )
+                    set_name = f"line_{name_dir[i_dir]}_{name_other_dir[index]}"
+                    return_set[set_name] = GeometrySetNodes(
+                        mpy.geo.line,
+                        nodes=[element.nodes[i_node] for i_node in cp_indices],
+                    )
 
         elif nurbs_dimension == 3:
             # Define the rest of the lines to define a volume
+            control_points_line_1 = []
+            control_points_line_2 = []
+            control_points_line_3 = []
+            control_points_line_4 = []
             control_points_line_5 = []
             control_points_line_6 = []
             control_points_line_7 = []

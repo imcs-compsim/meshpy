@@ -49,9 +49,6 @@ class GeometryName(OrderedDict):
     functions. The sets can be accessed by a unique name. There is no
     distinction between different types of geometry, every name can only be
     used once -> use meaningful names.
-    OrderedDict is used as base class so that the test cases can compare the
-    output string without special implementation (this should not cost much
-    performance).
     """
 
     def __setitem__(self, key, value):
