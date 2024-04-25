@@ -125,5 +125,4 @@ CP 20 COORD 0.57735026919 0.57735026919 0.57735026919 1.0
 4 WALLNURBS NURBS9 6 7 8 11 12 13 16 17 18  MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
 5 WALLNURBS NURBS9 7 8 9 12 13 14 17 18 19  MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
 6 WALLNURBS NURBS9 8 9 10 13 14 15 18 19 20  MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
-------------------------------------------------------------------FLUID ELEMENTS
 -----------------------------------------------------------------------------END

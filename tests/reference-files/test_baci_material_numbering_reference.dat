@@ -22,7 +22,4 @@ MAT 21 ELAST_CoupAnisoExpo K1 0.4e-03 K2 12.0 GAMMA 0.0 K1COMP 0 K2COMP 1 ADAPT_
 MAT 22 ELAST_CoupAnisoExpo K1 50.2e-03 K2 10.0 GAMMA 0.0 K1COMP 0 K2COMP 1 ADAPT_ANGLE No INIT 3 STR_TENS_ID 200 FIBER_ID 2
 MAT 200 ELAST_StructuralTensor STRATEGY Standard
 MAT 201 MAT_BeamReissnerElastHyper YOUNG 1.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 12.566370614359172 SHEARCORR 1 MOMINPOL 25.132741228718345 MOMIN2 12.566370614359172 MOMIN3 12.566370614359172
----------------------------------------------------------------------NODE COORDS
---------------------------------------------------------------STRUCTURE ELEMENTS
-------------------------------------------------------------------FLUID ELEMENTS
 -----------------------------------------------------------------------------END
