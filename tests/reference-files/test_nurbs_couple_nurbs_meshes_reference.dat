@@ -232,5 +232,4 @@ CP 36 COORD 0.423205080757 0.506217782649 0 0.9553418012614796
 10 WALLNURBS NURBS9 25 26 27 29 30 31 33 34 35  MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
 11 WALLNURBS NURBS9 26 27 28 30 31 32 34 35 36  MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
 12 WALLNURBS NURBS9 27 28 6 31 32 11 35 36 16  MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
-------------------------------------------------------------------FLUID ELEMENTS
 -----------------------------------------------------------------------------END

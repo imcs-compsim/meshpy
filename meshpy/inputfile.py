@@ -842,6 +842,11 @@ class InputFile(Mesh):
             Output a section name and apply the get_dat_line for each list
             item.
             """
+
+            # do not write section if no content is available
+            if len(data_list) == 0:
+                return
+
             lines.append(get_section_string(section_name))
             if header_lines:
                 if isinstance(header_lines, list):

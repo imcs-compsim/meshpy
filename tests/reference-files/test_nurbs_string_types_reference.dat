@@ -125,5 +125,4 @@ CP 20 COORD 0.5 1.5 0 1.0
 4 STRING_TYPE NURBS9 6 7 8 11 12 13 16 17 18  MAT 1 STRING_DESCRIPTION
 5 STRING_TYPE NURBS9 7 8 9 12 13 14 17 18 19  MAT 1 STRING_DESCRIPTION
 6 STRING_TYPE NURBS9 8 9 10 13 14 15 18 19 20  MAT 1 STRING_DESCRIPTION
-------------------------------------------------------------------FLUID ELEMENTS
 -----------------------------------------------------------------------------END
