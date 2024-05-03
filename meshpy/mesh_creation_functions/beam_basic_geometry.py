@@ -38,6 +38,7 @@ import warnings
 
 # Meshpy modules.
 from ..conf import mpy
+from ..mesh import Mesh
 from ..rotation import Rotation
 from ..utility import get_single_node
 from .beam_generic import create_beam_mesh_function
@@ -561,6 +562,9 @@ def create_beam_mesh_helix(
     start_point_origin_vec = start_point - origin
     radius = np.linalg.norm(start_point_origin_vec)
 
+    # create temporary mesh to not alter original mesh
+    mesh_temp = Mesh()
+
     # return line if radius of helix is 0 or twist angle is np.pi/2
     if np.isclose(radius, 0) or np.isclose(np.cos(twist_angle), 0.0):
         if turns:
@@ -576,14 +580,19 @@ def create_beam_mesh_helix(
                 + "Simple line geometry is returned!"
             )
 
-        return create_beam_mesh_line(
-            mesh,
+        line_sets = create_beam_mesh_line(
+            mesh_temp,
             beam_object,
             material,
             start_point=start_point,
             end_point=start_point + height_helix * axis * np.sign(np.sin(twist_angle)),
             **kwargs,
         )
+
+        # add line to mesh
+        mesh.add_mesh(mesh_temp)
+
+        return line_sets
 
     # generate simple helix
     if height_helix:
@@ -608,8 +617,8 @@ def create_beam_mesh_helix(
             ]
         )
 
-    helix = create_beam_mesh_line(
-        mesh,
+    helix_sets = create_beam_mesh_line(
+        mesh_temp,
         beam_object,
         material,
         start_point=[radius, 0, 0],
@@ -617,13 +626,16 @@ def create_beam_mesh_helix(
         **kwargs,
     )
 
-    mesh.wrap_around_cylinder()
+    mesh_temp.wrap_around_cylinder()
 
     # rotate and translate simple helix to align with neccessary axis and starting point
-    mesh.rotate(
+    mesh_temp.rotate(
         Rotation.from_basis(start_point_origin_vec, axis)
         * Rotation([1, 0, 0], -np.pi * 0.5)
     )
-    mesh.translate(-mesh.nodes[0].coordinates + start_point)
+    mesh_temp.translate(-mesh_temp.nodes[0].coordinates + start_point)
 
-    return helix
+    # add helix to mesh
+    mesh.add_mesh(mesh_temp)
+
+    return helix_sets
