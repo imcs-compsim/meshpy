@@ -376,7 +376,10 @@ class TestMeshCreationFunctions(unittest.TestCase):
         curve = create_testing_nurbs_curve()
         mat = MaterialReissner(radius=0.05)
         mesh = Mesh()
-        create_beam_mesh_from_nurbs(mesh, Beam3rHerm2Line3, mat, curve, n_el=3)
+        _, length = create_beam_mesh_from_nurbs(
+            mesh, Beam3rHerm2Line3, mat, curve, n_el=3, output_length=True
+        )
+        self.assertAlmostEqual(3.140204411551537, length, delta=mpy.eps_pos)
 
         # Check the output.
         input_file = InputFile()

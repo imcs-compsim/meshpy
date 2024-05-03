@@ -146,11 +146,8 @@ def create_beam_mesh_from_nurbs(
         Be aware, that this length might not be achieved, if the elements are
         warped after they are created.
 
-    Return
-    ----
-    return_set: GeometryName
-        Set with the 'start' and 'end' node of the curve. Also a 'line' set
-        with all nodes of the curve.
+    Return:
+        Return value from create_beam_mesh_function
     """
 
     (
