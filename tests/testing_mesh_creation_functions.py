@@ -747,6 +747,11 @@ class TestMeshCreationFunctions(unittest.TestCase):
         # Add material and function.
         mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
 
+        # Add simple line to verify that the helix creation does not alter additional meshes
+        create_beam_mesh_line(
+            input_file, Beam3rHerm2Line3, mat, [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]
+        )
+
         # Create helix.
         helix_set = create_beam_mesh_helix(
             input_file,
@@ -772,6 +777,11 @@ class TestMeshCreationFunctions(unittest.TestCase):
 
         # Add material and function.
         mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
+
+        # Add simple line to verify that the helix creation does not alter additional meshes
+        create_beam_mesh_line(
+            input_file, Beam3rHerm2Line3, mat, [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]
+        )
 
         # Create helix.
         helix_set = create_beam_mesh_helix(
@@ -799,6 +809,11 @@ class TestMeshCreationFunctions(unittest.TestCase):
         # Add material and function.
         mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
 
+        # Add simple line to verify that the helix creation does not alter additional meshes
+        create_beam_mesh_line(
+            input_file, Beam3rHerm2Line3, mat, [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]
+        )
+
         # Create helix.
         helix_set = create_beam_mesh_helix(
             input_file,
@@ -825,6 +840,11 @@ class TestMeshCreationFunctions(unittest.TestCase):
 
         # Add material and function.
         mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
+
+        # Add simple line to verify that the helix creation does not alter additional meshes
+        create_beam_mesh_line(
+            input_file, Beam3rHerm2Line3, mat, [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]
+        )
 
         # Create helix.
         helix_set = create_beam_mesh_helix(
