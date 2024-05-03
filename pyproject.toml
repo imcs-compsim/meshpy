@@ -40,6 +40,7 @@ dependencies = [
   "pyvista",
   "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@86210ab",
   "scipy",
+  "splinepy",
   "vtk"
 ]
 dynamic = ["version"]

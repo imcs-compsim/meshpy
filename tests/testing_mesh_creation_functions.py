@@ -37,8 +37,7 @@ import unittest
 import numpy as np
 import autograd.numpy as npAD
 import os
-from geomdl import NURBS
-from geomdl import utilities
+import splinepy
 
 # Meshpy imports.
 from meshpy import (
@@ -135,11 +134,12 @@ def create_helix_function(
 def create_testing_nurbs_curve():
     """Create a NURBS curve used for testing"""
 
-    curve = NURBS.Curve()
-    curve.degree = 2
-    curve.ctrlpts = [[0, 0, 0], [1, 2, -1], [2, 0, 0]]
-    curve.knotvector = utilities.generate_knot_vector(curve.degree, len(curve.ctrlpts))
-    return curve
+    return splinepy.NURBS(
+        degrees=[2],
+        knot_vectors=[[0, 0, 0, 1, 1, 1]],
+        control_points=[[0, 0, 0], [1, 2, -1], [2, 0, 0]],
+        weights=[[1.0], [1.0], [1.0]],
+    )
 
 
 class TestMeshCreationFunctions(unittest.TestCase):
@@ -387,10 +387,8 @@ class TestMeshCreationFunctions(unittest.TestCase):
         """Unittest the function and jacobian creation in the create_beam_mesh_from_nurbs function"""
 
         curve = create_testing_nurbs_curve()
-        curve_start = np.min(curve.knotvector)
-        curve_end = np.max(curve.knotvector)
-        r, dr = get_nurbs_curve_function_and_jacobian_for_integration(
-            curve, curve_start, curve_end, tol=10
+        r, dr, _, _ = get_nurbs_curve_function_and_jacobian_for_integration(
+            curve, tol=10
         )
 
         t_values = [5.0 / 7.0, -0.3, 1.2]

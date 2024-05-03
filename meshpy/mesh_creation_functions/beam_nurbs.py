@@ -29,8 +29,7 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-Create a beam filament from a NURBS curve represented with NURBS-Python
-(geomdl).
+Create a beam filament from a NURBS curve represented with splinepy.
 """
 
 # Python packages.
@@ -41,9 +40,7 @@ from ..conf import mpy
 from .beam_curve import create_beam_mesh_curve
 
 
-def get_nurbs_curve_function_and_jacobian_for_integration(
-    curve, curve_start, curve_end, tol=None
-):
+def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
     """Return function objects for evaluating the curve and the derivative. These functions are
     used in the curve integration. It can happen that the integration algorithm has to evaluate
     the curve outside of the defined domain. This usually leads to errors in common NURBS
@@ -52,25 +49,39 @@ def get_nurbs_curve_function_and_jacobian_for_integration(
 
     Args
     ----
-    curve: geomdl object
+    curve: splinepy object
         Curve that is used to describe the beam centerline.
-    curve_start, curve_end: (float)
-        Start and end parameter coordinate for the NURBS curve.
     tol: float
         Tolerance for checking if point is close to the start or end of the
         interval. If None is given, use the default tolerance from mpy.
+
+    Return
+    ----
+    (function, jacobian, curve_start, curve_end):
+        function:
+            Function for evaluating a position on the curve
+        jacobian:
+            Function for evaluating the tangent along the curve
+        curve_start:
+            Parameter coordinate for the start for the NURBS curve
+        curve_end:
+            Parameter coordinate for the end for the NURBS curve
     """
 
     if tol is None:
         tol = mpy.eps_pos
 
+    knot_vector = curve.knot_vectors[0]
+    curve_start = np.min(knot_vector)
+    curve_end = np.max(knot_vector)
+
     def eval_r(t):
         """Evaluate the position along the curve."""
-        return np.array(curve.derivatives(u=t, order=0)[0])
+        return curve.evaluate([[t]])[0]
 
     def eval_rp(t):
         """Evaluate the derivative along the curve."""
-        return np.array(curve.derivatives(u=t, order=1)[1])
+        return curve.derivative([[t]], orders=[1])[0]
 
     def function(t):
         """Convert the curve to a function that can be used for beam
@@ -102,7 +113,7 @@ def get_nurbs_curve_function_and_jacobian_for_integration(
             return eval_rp(curve_end)
         raise ValueError("Should not happen")
 
-    return function, jacobian
+    return function, jacobian, curve_start, curve_end
 
 
 def create_beam_mesh_from_nurbs(
@@ -119,7 +130,7 @@ def create_beam_mesh_from_nurbs(
         Class of beam that will be used for this line.
     material: Material
         Material for this line.
-    curve: geomdl object
+    curve: splinepy object
         Curve that is used to describe the beam centerline.
     tol: float
         Tolerance for checking if point is close to the start or end of the
@@ -142,11 +153,12 @@ def create_beam_mesh_from_nurbs(
         with all nodes of the curve.
     """
 
-    curve_start = np.min(curve.knotvector)
-    curve_end = np.max(curve.knotvector)
-    function, jacobian = get_nurbs_curve_function_and_jacobian_for_integration(
-        curve, curve_start, curve_end, tol=tol
-    )
+    (
+        function,
+        jacobian,
+        curve_start,
+        curve_end,
+    ) = get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=tol)
 
     # Create the beams
     return create_beam_mesh_curve(
