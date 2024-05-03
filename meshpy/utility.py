@@ -328,3 +328,23 @@ def get_min_max_nodes(nodes, *, middle_nodes=False):
                         min_max_nodes.append(node_list[index])
                 geometry[f"{direction}_{text}"] = GeometrySet(min_max_nodes)
     return geometry
+
+
+def find_node_on_plane(node, *, normal=None, origin_distance=None, tol=mpy.eps_pos):
+    """
+    Return the nodes lie on the plane defined by normal and origin_distance.
+
+    Args
+    ----
+    node:
+        Check if this node coincides with the defined plane.
+    normal: np.array, list
+        Normal vector of defined plane.
+    origin_distance: float
+        Distance between origin and defined plane.
+    tol: float
+        Tolerance of evaluation if point coincides with plane
+    """
+    projection = np.dot(node.coordinates, normal) / np.linalg.norm(normal)
+
+    return np.abs(projection - origin_distance) < tol
