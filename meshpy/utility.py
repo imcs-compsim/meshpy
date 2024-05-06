@@ -330,9 +330,11 @@ def get_min_max_nodes(nodes, *, middle_nodes=False):
     return geometry
 
 
-def find_node_on_plane(node, *, normal=None, origin_distance=None, tol=mpy.eps_pos):
+def is_node_on_plane(
+    node, *, normal=None, origin_distance=None, point_on_plane=None, tol=mpy.eps_pos
+):
     """
-    Return the nodes lie on the plane defined by normal and origin_distance.
+    Query if a node lies on a plane defined by a point_on_plane or the origin distance.
 
     Args
     ----
@@ -341,10 +343,29 @@ def find_node_on_plane(node, *, normal=None, origin_distance=None, tol=mpy.eps_p
     normal: np.array, list
         Normal vector of defined plane.
     origin_distance: float
-        Distance between origin and defined plane.
+        Distance between origin and defined plane. Mutually exclusive with
+        point_on_plane.
+    point_on_plane: np.array, list
+        Point on defined plane. Mutually exclusive with origin_distance.
     tol: float
         Tolerance of evaluation if point coincides with plane
-    """
-    projection = np.dot(node.coordinates, normal) / np.linalg.norm(normal)
 
-    return np.abs(projection - origin_distance) < tol
+    Return
+    ----
+    True if the point lies on the plane, False otherwise.
+    """
+
+    if origin_distance is None and point_on_plane is None:
+        raise ValueError("Either provide origin_distance or point_on_plane!")
+    elif origin_distance is not None and point_on_plane is not None:
+        raise ValueError("Only provide origin_distance OR point_on_plane!")
+
+    if origin_distance is not None:
+        projection = np.dot(node.coordinates, normal) / np.linalg.norm(normal)
+        distance = np.abs(projection - origin_distance)
+    elif point_on_plane is not None:
+        distance = np.abs(
+            np.dot(point_on_plane - node.coordinates, normal) / np.linalg.norm(normal)
+        )
+
+    return distance < tol

@@ -29,7 +29,7 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This module defines classes and functions to create a 4C beam input file.
+This module defines classes and functions for the interaction of MeshPy with 4C.
 """
 
 from .beam_potential import BeamPotential

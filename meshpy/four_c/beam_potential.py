@@ -38,12 +38,15 @@ interaction potentials.
 import numpy as np
 
 # MeshPy modules
-from ..inputfile import InputSection
-from ..header_functions import get_yes_no
 from ..boundary_condition import BoundaryCondition
+from ..header_functions import get_yes_no
+from ..inputfile import InputSection
 
 
 class BeamPotential:
+    """Class which provides functions for the usage of beam to beam
+    potential interactions within 4C based on a potential law in form
+    of a power law."""
 
     def __init__(
         self,
@@ -143,7 +146,8 @@ class BeamPotential:
             Number of Gauss points to be used per integration segment.
         potential_reduction_length: float
             Potential is smoothly decreased within this length when using the
-            singlelengthsspecific approach to enable an axial pull off force.
+            single length specific (SBIP) approach to enable an axial pull off
+            force.
         automatic_differentiation: bool
             Use automatic differentiation via FAD.
         choice_master_slave: string
@@ -249,8 +253,9 @@ class BeamPotential:
 
             bc = BoundaryCondition(
                 geometry_set,
-                f"POTLAW {i+1} VAL {line_charge} FUNCT {str(func)}",
+                f"POTLAW {i+1} VAL {line_charge} FUNCT {{}}",
                 bc_type="DESIGN LINE BEAM POTENTIAL CHARGE CONDITIONS",
+                format_replacement=[func],
             )
 
             self.input_file.add(bc)
