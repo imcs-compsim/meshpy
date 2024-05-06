@@ -41,7 +41,7 @@ import sys
 import meshpy_tutorial
 
 # Import testing utilities.
-from testing_utility import testing_temp, compare_test_result
+from utilities import testing_temp, compare_test_result
 
 
 class TestTutorial(unittest.TestCase):

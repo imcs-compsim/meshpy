@@ -53,7 +53,7 @@ from meshpy import (
 )
 from meshpy.mesh_creation_functions import create_beam_mesh_line
 from meshpy.simulation_manager import Simulation, SimulationManager
-from testing_utility import (
+from utilities import (
     testing_temp,
     get_baci_path,
     testing_input,

@@ -41,7 +41,7 @@ import shutil
 import glob
 
 # Testing imports.
-from testing_utility import (
+from utilities import (
     compare_test_result,
     get_baci_path,
     testing_temp,

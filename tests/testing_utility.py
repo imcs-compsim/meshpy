@@ -29,246 +29,53 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-Define utility functions for the testing process.
+Test utilities of MeshPy.
 """
 
-# Python imports.
-import os
-import numpy as np
-import shutil
-import subprocess
-import warnings
-import xml.etree.ElementTree as ET
-import vtk
-from vtk.util import numpy_support as vtk_numpy
-from pyvista_utils.compare_grids import compare_grids
+# Python imports
+import unittest
+
+# Meshpy imports
+from meshpy.utility import is_node_on_plane
+
+from meshpy.node import Node
 
 
-# Global variable if this test is run by GitHub.
-if "TESTING_GITHUB" in os.environ.keys() and os.environ["TESTING_GITHUB"] == "1":
-    TESTING_GITHUB = True
-else:
-    TESTING_GITHUB = False
+class TestUtilities(unittest.TestCase):
+    """Test utilities from the meshpy.utility module."""
 
+    def test_is_node_on_plane(self):
+        """Test if node on plane function works properly."""
 
-def skip_fail_test(self, message):
-    """
-    Skip or fail the test depending if the test are run in GitHub or not.
-    """
-    if TESTING_GITHUB:
-        self.skipTest(message)
-    else:
-        self.skipTest(message)
-
-
-def get_baci_path():
-    """Look for and return a path to baci-release."""
-
-    if "BACI_RELEASE" in os.environ.keys():
-        path = os.environ["BACI_RELEASE"]
-    else:
-        path = ""
-
-    # Check if the path exists.
-    if os.path.isfile(path):
-        return path
-    else:
-        # In the case that no path was found, check if the script is performed
-        # by a GitHub runner.
-        if TESTING_GITHUB:
-            raise ValueError("Path to baci-release not found!")
-        else:
-            warnings.warn(
-                "Path to baci-release not found. Did you set the "
-                "environment variable BACI_RELEASE?"
-            )
-            return None
-
-
-# Define the testing paths
-testing_path = os.path.abspath(os.path.dirname(__file__))
-testing_input = os.path.join(testing_path, "reference-files")
-testing_temp = os.path.join(testing_path, "testing-tmp")
-
-# Check and clean the temporary directory.
-os.makedirs(testing_temp, exist_ok=True)
-
-
-def empty_testing_directory():
-    """Delete all files in the testing directory, if it exists."""
-    if os.path.isdir(testing_temp):
-        for the_file in os.listdir(testing_temp):
-            file_path = os.path.join(testing_temp, the_file)
-            try:
-                if os.path.isfile(file_path):
-                    os.unlink(file_path)
-                elif os.path.isdir(file_path):
-                    shutil.rmtree(file_path)
-            except Exception as e:
-                print(e)
-
-
-def compare_string_tolerance(
-    reference, compare, *, rtol=None, atol=None, split_string=" "
-):
-    """Compare two strings, all floating point values will be compared with an
-    absolute tolerance."""
-
-    def set_tol(tol):
-        if tol is None:
-            return 0.0
-        else:
-            return tol
-
-    rtol = set_tol(rtol)
-    atol = set_tol(atol)
-
-    lines_reference = reference.strip().split("\n")
-    lines_compare = compare.strip().split("\n")
-    n_reference = len(lines_reference)
-    n_compare = len(lines_compare)
-    if n_reference == n_compare:
-        # Loop over each line in the file
-        for i in range(n_reference):
-            line_reference = lines_reference[i].strip().split(split_string)
-            line_compare = lines_compare[i].strip().split(split_string)
-            n_items_reference = len(line_reference)
-            n_items_compare = len(line_compare)
-            if n_items_reference == n_items_compare:
-                # Loop over each entry in the line
-                for j in range(n_items_reference):
-                    try:
-                        reference_number = float(line_reference[j].strip())
-                        compare_number = float(line_compare[j].strip())
-                        if np.isclose(
-                            reference_number, compare_number, rtol=rtol, atol=atol
-                        ):
-                            pass
-                        else:
-                            return False
-                    except ValueError:
-                        if line_reference[j].strip() != line_compare[j].strip():
-                            return False
-            else:
-                return False
-    else:
-        return False
-
-    return True
-
-
-def compare_test_result(
-    self, result_string, *, extension="dat", additional_identifier=None, **kwargs
-):
-    """
-    Compare a created string in a test with the reference results. The reference results
-    are stored in a file made up of the test name.
-
-    Args
-    ----
-    additional_identifier: str
-        This can be set if there are more than 1 reference files for a single test
-    extension: str
-        File extension of the reference file
-    """
-
-    reference_file_name = self._testMethodName
-    if additional_identifier is not None:
-        reference_file_name += f"_{additional_identifier}"
-    reference_file_name += "_reference"
-    if extension is not None:
-        reference_file_name += "." + extension
-    reference_file_path = os.path.join(testing_input, reference_file_name)
-
-    # Compare the results
-    compare_strings(self, reference_file_path, result_string, **kwargs)
-
-
-def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs):
-    """
-    Compare two stings. If they are not identical open meld and show the
-    differences.
-    """
-
-    # TODO: improve the name parameter given to this function, check if it makes sense
-
-    # Check if the input data is a file that exists.
-    reference_is_file = os.path.isfile(reference)
-    compare_is_file = os.path.isfile(compare)
-
-    # Get the correct data
-    if reference_is_file:
-        with open(reference, "r") as myfile:
-            reference_string = myfile.read()
-    else:
-        reference_string = reference
-
-    if compare_is_file:
-        with open(compare, "r") as myfile:
-            compare_string = myfile.read()
-    else:
-        compare_string = compare
-
-    if rtol is None and atol is None:
-        # Check if the strings are equal, if not compare the differences and
-        # fail the test.
-        is_equal = reference_string.strip() == compare_string.strip()
-    else:
-        is_equal = compare_string_tolerance(
-            reference_string, compare_string, rtol=rtol, atol=atol, **kwargs
+        # node on plane with origin_distance
+        node = Node([1.0, 1.0, 1.0])
+        self.assertTrue(
+            is_node_on_plane(node, normal=[0.0, 0.0, 1.0], origin_distance=1.0)
         )
-    if not is_equal and not TESTING_GITHUB:
-        # Check if temporary directory exists, and creates it if necessary.
-        os.makedirs(testing_temp, exist_ok=True)
 
-        # Get the paths of the files to compare. If a string was given
-        # create a file with the string in it.
-        if reference_is_file:
-            reference_file = reference
-        else:
-            reference_file = os.path.join(
-                testing_temp, "{}_reference.dat".format(self._testMethodName)
+        # node on plane with point_on_plane
+        node = Node([1.0, 1.0, 1.0])
+        self.assertTrue(
+            is_node_on_plane(
+                node, normal=[0.0, 0.0, 5.0], point_on_plane=[5.0, 5.0, 1.0]
             )
-            with open(reference_file, "w") as input_file:
-                input_file.write(reference_string)
+        )
 
-        if compare_is_file:
-            compare_file = compare
-        else:
-            compare_file = os.path.join(
-                testing_temp, "{}_compare.dat".format(self._testMethodName)
+        # node not on plane with origin_distance
+        node = Node([13.5, 14.5, 15.5])
+        self.assertFalse(
+            is_node_on_plane(node, normal=[0.0, 0.0, 1.0], origin_distance=5.0)
+        )
+
+        # node not on plane with point_on_plane
+        node = Node([13.5, 14.5, 15.5])
+        self.assertFalse(
+            is_node_on_plane(
+                node, normal=[0.0, 0.0, 5.0], point_on_plane=[5.0, 5.0, 1.0]
             )
-            with open(compare_file, "w") as input_file:
-                input_file.write(compare_string)
-
-        if shutil.which("meld") is not None:
-            child = subprocess.Popen(
-                ["meld", reference_file, compare_file], stderr=subprocess.PIPE
-            )
-            child.communicate()
-        else:
-            result = subprocess.run(
-                ["diff", reference_file, compare_file], stdout=subprocess.PIPE
-            )
-            self._testMethodName += "\n\nDiff:\n" + result.stdout.decode("utf-8")
-
-    # Check the results.
-    self.assertTrue(is_equal, self._testMethodName)
+        )
 
 
-def compare_vtk(self, path_1, path_2, *, tol_float=1e-14):
-    """Compare two vtk files and raise an error if they are not equal."""
-
-    def get_vtk(path):
-        """
-        Return a vtk object for the file at path.
-        """
-        reader = vtk.vtkXMLGenericDataObjectReader()
-        reader.SetFileName(path)
-        reader.Update()
-        return reader.GetOutput()
-
-    compare = compare_grids(
-        get_vtk(path_1), get_vtk(path_2), output=True, tol=tol_float
-    )
-    self.assertTrue(compare[0], msg="\n".join(compare[1]))
+if __name__ == "__main__":
+    # Execution part of script.
+    unittest.main()
