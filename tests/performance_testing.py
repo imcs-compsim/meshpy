@@ -54,7 +54,7 @@ from meshpy.utility import find_close_nodes
 from meshpy.geometric_search import FindClosePointAlgorithm, find_close_points
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 
-from testing_utility import empty_testing_directory, testing_temp
+from utilities import empty_testing_directory, testing_temp
 
 # Cubitpy imports.
 from cubitpy import cupy, CubitPy

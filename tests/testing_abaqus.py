@@ -52,7 +52,7 @@ from meshpy.abaqus import (
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 
 # Testing imports
-from testing_utility import compare_test_result
+from utilities import compare_test_result
 
 
 class TestAbaqusMeshpy(unittest.TestCase):

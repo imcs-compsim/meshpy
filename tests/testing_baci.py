@@ -38,7 +38,7 @@ to this file at some point.
 import unittest
 
 # Testing imports.
-from testing_utility import compare_test_result
+from utilities import compare_test_result
 
 # Meshpy imports.
 from meshpy import (

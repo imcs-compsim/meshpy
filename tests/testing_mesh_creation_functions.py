@@ -70,7 +70,7 @@ from meshpy.mesh_creation_functions import (
 )
 
 # Testing imports.
-from testing_utility import testing_input, compare_test_result, compare_strings
+from utilities import testing_input, compare_test_result, compare_strings
 
 
 def create_helix_function(

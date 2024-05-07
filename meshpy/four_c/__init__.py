@@ -29,53 +29,10 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-Test utilities of MeshPy.
+This module defines classes and functions for the interaction of MeshPy with 4C.
 """
 
-# Python imports
-import unittest
+from .beam_potential import BeamPotential
 
-# Meshpy imports
-from meshpy.utility import is_node_on_plane
-
-from meshpy.node import Node
-
-
-class TestUtilities(unittest.TestCase):
-    """Test utilities from the meshpy.utility module."""
-
-    def test_is_node_on_plane(self):
-        """Test if node on plane function works properly."""
-
-        # node on plane with origin_distance
-        node = Node([1.0, 1.0, 1.0])
-        self.assertTrue(
-            is_node_on_plane(node, normal=[0.0, 0.0, 1.0], origin_distance=1.0)
-        )
-
-        # node on plane with point_on_plane
-        node = Node([1.0, 1.0, 1.0])
-        self.assertTrue(
-            is_node_on_plane(
-                node, normal=[0.0, 0.0, 5.0], point_on_plane=[5.0, 5.0, 1.0]
-            )
-        )
-
-        # node not on plane with origin_distance
-        node = Node([13.5, 14.5, 15.5])
-        self.assertFalse(
-            is_node_on_plane(node, normal=[0.0, 0.0, 1.0], origin_distance=5.0)
-        )
-
-        # node not on plane with point_on_plane
-        node = Node([13.5, 14.5, 15.5])
-        self.assertFalse(
-            is_node_on_plane(
-                node, normal=[0.0, 0.0, 5.0], point_on_plane=[5.0, 5.0, 1.0]
-            )
-        )
-
-
-if __name__ == "__main__":
-    # Execution part of script.
-    unittest.main()
+# Define the items that will be exported by default.
+__all__ = ["BeamPotential"]

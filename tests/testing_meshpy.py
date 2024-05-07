@@ -84,7 +84,7 @@ from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honey
 from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
 
 # Testing imports.
-from testing_utility import (
+from utilities import (
     skip_fail_test,
     testing_temp,
     testing_input,

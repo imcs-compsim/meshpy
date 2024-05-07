@@ -56,7 +56,7 @@ from meshpy.mesh_creation_functions import (
 )
 
 # Testing imports
-from testing_utility import testing_input, compare_test_result
+from utilities import testing_input, compare_test_result
 
 
 class TestNurbsMeshCreationFunction(unittest.TestCase):
