@@ -55,7 +55,7 @@ from meshpy.mesh_creation_functions import create_beam_mesh_line
 from meshpy.simulation_manager import Simulation, SimulationManager
 from utilities import (
     testing_temp,
-    get_baci_path,
+    get_four_c_path,
     testing_input,
     compare_test_result,
 )
@@ -189,11 +189,11 @@ class TestSimulationManager(unittest.TestCase):
 
         if command == "mpirun":
             manager.run_simulations_and_wait_for_finish(
-                baci_build_dir=os.path.dirname(get_baci_path()), status=False
+                four_c_build_dir=os.path.dirname(get_four_c_path()), status=False
             )
         else:
             manager.submit_batch_files_and_wait_for_finish(
-                baci_build_dir=os.path.dirname(get_baci_path()), check_interval=1
+                four_c_build_dir=os.path.dirname(get_four_c_path()), check_interval=1
             )
 
         # Check the results.
@@ -204,7 +204,7 @@ class TestSimulationManager(unittest.TestCase):
         Create a convergence study and check the results. The simulations are
         run with mpirun.
         """
-        if not is_cluster_test() and get_baci_path() is not None:
+        if not is_cluster_test() and get_four_c_path() is not None:
             self.xtest_simulation_manager("mpirun")
         else:
             self.skipTest("Tests with mpirun are not executed on the cluster")
@@ -213,7 +213,7 @@ class TestSimulationManager(unittest.TestCase):
         """
         Create a convergence study on the cluster and check the results.
         """
-        if is_cluster_test() and get_baci_path() is not None:
+        if is_cluster_test() and get_four_c_path() is not None:
             self.xtest_simulation_manager("sbatch")
         else:
             self.skipTest("Tests with slurm are not executed on a workstation")

@@ -252,7 +252,7 @@ if __name__ == "__main__":
     dir_path = os.path.abspath(os.path.dirname(__file__))
 
     # Create the input file for the solid tube.
-    file_path = os.path.join(dir_path, "reference-files/baci_input_solid_tube.dat")
+    file_path = os.path.join(dir_path, "reference-files/4C_input_solid_tube.dat")
     create_tube(file_path)
 
     # Create the input files for the solid cube.
@@ -263,6 +263,6 @@ if __name__ == "__main__":
 
     # Create the tube for the tutorial.
     file_path = os.path.join(
-        os.path.dirname(dir_path), "tutorial/baci_input_solid_tutorial.dat"
+        os.path.dirname(dir_path), "tutorial/4C_input_solid_tutorial.dat"
     )
     create_tube_tutorial(file_path)

@@ -29,7 +29,7 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This module implements utility functions to create BACI space time function
+This module implements utility functions to create 4C space time function
 """
 
 # Python modules

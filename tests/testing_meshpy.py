@@ -339,7 +339,7 @@ class TestMeshpy(unittest.TestCase):
 
             # Create the mesh.
             mesh = InputFile(
-                dat_file=os.path.join(testing_input, "baci_input_solid_cuboid.dat")
+                dat_file=os.path.join(testing_input, "4C_input_solid_cuboid.dat")
             )
             mat = MaterialReissner(radius=0.05)
 
@@ -417,7 +417,7 @@ class TestMeshpy(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_meshpy_domain_geometry_sets(self):
-        """Add geometry set based on a baci internal domain"""
+        """Add geometry set based on a 4C internal domain"""
 
         input_file = InputFile()
 
@@ -506,7 +506,7 @@ class TestMeshpy(unittest.TestCase):
         # Create the mesh.
         mpy.import_mesh_full = True
         mesh = InputFile(
-            dat_file=os.path.join(testing_input, "baci_input_solid_cuboid.dat")
+            dat_file=os.path.join(testing_input, "4C_input_solid_cuboid.dat")
         )
         mat = MaterialReissner(radius=0.05)
         create_beam_mesh_line(
@@ -650,7 +650,7 @@ class TestMeshpy(unittest.TestCase):
 
     def test_meshpy_euler_bernoulli(self):
         """
-        Recreate the baci test case beam3eb_static_endmoment_quartercircle.dat
+        Recreate the 4C test case beam3eb_static_endmoment_quartercircle.dat
         This tests the implementation for Euler Bernoulli beams.
         """
 
@@ -1177,7 +1177,7 @@ class TestMeshpy(unittest.TestCase):
 
     def test_meshpy_beam_to_solid_conditions_with_design_description(self):
         """
-        Create beam-to-solid input conditions with the old design description section in BACI
+        Create beam-to-solid input conditions with the old design description section in 4C
         """
 
         # Create input file.
@@ -1217,7 +1217,7 @@ class TestMeshpy(unittest.TestCase):
     def test_meshpy_nurbs_import(self):
         """
         Test if the import of a NURBS mesh works as expected.
-        This script generates the baci test case:
+        This script generates the 4C test case:
         beam3r_herm2line3_static_beam_to_solid_volume_meshtying_nurbs27_mortar_penalty_line4
         """
 
@@ -1526,7 +1526,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file and read solid mesh data.
         input_file = InputFile()
-        input_file.read_dat(os.path.join(testing_input, "baci_input_solid_tube.dat"))
+        input_file.read_dat(os.path.join(testing_input, "4C_input_solid_tube.dat"))
 
         # Write VTK output.
         ref_file = os.path.join(testing_input, "test_meshpy_vtk_solid_reference.vtu")
@@ -1551,9 +1551,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Create the input file and read solid mesh data.
         input_file = InputFile()
-        input_file.read_dat(
-            os.path.join(testing_input, "baci_input_solid_elements.dat")
-        )
+        input_file.read_dat(os.path.join(testing_input, "4C_input_solid_elements.dat"))
 
         # Write VTK output.
         ref_file = os.path.join(
@@ -1649,7 +1647,7 @@ class TestMeshpy(unittest.TestCase):
         input_file_cubit = InputFile(cubit=create_tube_cubit())
 
         # Load the file from the reference folder.
-        file_path_ref = os.path.join(testing_input, "baci_input_solid_tube.dat")
+        file_path_ref = os.path.join(testing_input, "4C_input_solid_tube.dat")
         input_file_ref = InputFile(dat_file=file_path_ref)
 
         # Compare the input files.

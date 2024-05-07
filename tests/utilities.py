@@ -61,11 +61,11 @@ def skip_fail_test(self, message):
         self.skipTest(message)
 
 
-def get_baci_path():
-    """Look for and return a path to baci-release."""
+def get_four_c_path():
+    """Look for and return a path to the 4C executable."""
 
-    if "BACI_RELEASE" in os.environ.keys():
-        path = os.environ["BACI_RELEASE"]
+    if "FOUR_C_RELEASE" in os.environ.keys():
+        path = os.environ["FOUR_C_RELEASE"]
     else:
         path = ""
 
@@ -76,11 +76,11 @@ def get_baci_path():
         # In the case that no path was found, check if the script is performed
         # by a GitHub runner.
         if TESTING_GITHUB:
-            raise ValueError("Path to baci-release not found!")
+            raise ValueError("Path to 4C executable not found!")
         else:
             warnings.warn(
-                "Path to baci-release not found. Did you set the "
-                "environment variable BACI_RELEASE?"
+                "Path to 4C executable not found. Did you set the "
+                "environment variable FOUR_C_RELEASE?"
             )
             return None
 

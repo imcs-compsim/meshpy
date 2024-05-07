@@ -78,10 +78,10 @@ If `cython` code is changed, it has to be recompiled. This can be done by runnin
 python3 setup.py build_ext --inplace
 ```
 
-Optional, a path to `baci-release` can be given in order to run some combined
-tests with baci
+Optional, a path to the `4C` executable can be given in order to run some combined
+tests with 4C
 ```bash
-export BACI_RELEASE=path_to_baci-release
+export FOUR_C_RELEASE=path_to_4C
 ```
 
 To check if everything worked as expected, run the tests

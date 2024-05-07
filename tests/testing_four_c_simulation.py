@@ -29,7 +29,7 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This script is used to simulate baci input files created with meshpy.
+This script is used to simulate 4C input files created with MeshPy.
 """
 
 # Python imports.
@@ -43,7 +43,7 @@ import glob
 # Testing imports.
 from utilities import (
     compare_test_result,
-    get_baci_path,
+    get_four_c_path,
     testing_temp,
     testing_path,
     testing_input,
@@ -62,38 +62,38 @@ from meshpy import (
     Mesh,
     set_header_static,
 )
-from meshpy.utility_baci import dbc_monitor_to_input
+from meshpy.four_c import dbc_monitor_to_input
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
 
 
-# Get path to baci
-baci_release = get_baci_path()
+# Get path to 4C
+four_c_release = get_four_c_path()
 
 
-class TestFullBaci(unittest.TestCase):
+class TestFullFourC(unittest.TestCase):
     """
-    Create and run input files in Baci. They are test files and Baci should
+    Create and run input files in 4C. They are test files and 4C should
     return 0.
     """
 
     def setUp(self):
         """
-        This method is called before each test. Check if BACI was found.
+        This method is called before each test. Check if 4C was found.
         If not, skip the test.
         """
-        if baci_release is None:
-            self.skipTest("BACI path was not found!")
+        if four_c_release is None:
+            self.skipTest("4C path was not found!")
         if shutil.which("mpirun") is None:
             self.skipTest("mpirun was not found!")
 
-    def run_baci_test(
+    def run_four_c_test(
         self, name, mesh, n_proc=2, delete_files=True, restart=None, **kwargs
     ):
         """
-        Run Baci with a input file and check the output. If the test passes,
+        Run 4C with a input file and check the output. If the test passes,
         the created files are deleted.
 
         Args
@@ -103,7 +103,7 @@ class TestFullBaci(unittest.TestCase):
         mesh: InputFile
             The InputFile object that contains the simulation.
         n_proc: int
-            Number of processors to run Baci on.
+            Number of processors to run 4C on.
         delete_files: bool
             If the created files should be deleted.
         restart: [n_restart, xxx_restart]
@@ -117,14 +117,14 @@ class TestFullBaci(unittest.TestCase):
         input_file = os.path.join(testing_temp, name + ".dat")
         mesh.write_input_file(input_file, add_script_to_header=False, **kwargs)
 
-        # Run Baci with the input file.
+        # Run 4C with the input file.
         if restart is None:
             child = subprocess.Popen(
                 [
                     "mpirun",
                     "-np",
                     str(n_proc),
-                    baci_release,
+                    four_c_release,
                     os.path.join(testing_path, input_file),
                     os.path.join(testing_temp, "xxx_" + name),
                 ],
@@ -137,7 +137,7 @@ class TestFullBaci(unittest.TestCase):
                     "mpirun",
                     "-np",
                     str(n_proc),
-                    baci_release,
+                    four_c_release,
                     os.path.join(testing_path, input_file),
                     os.path.join(testing_temp, "xxx_" + name),
                     "restart={}".format(restart[0]),
@@ -161,7 +161,7 @@ class TestFullBaci(unittest.TestCase):
                 else:
                     os.remove(item)
 
-    def test_baci_simulation_honeycomb_sphere_as_input(self):
+    def test_four_c_simulation_honeycomb_sphere_as_input(self):
         """
         Test the honeycomb sphere model with different types of mesh import.
         """
@@ -187,7 +187,7 @@ class TestFullBaci(unittest.TestCase):
         # Read input file with information of the sphere and simulation.
         input_file = InputFile(
             description="honeycomb beam in contact with sphere",
-            dat_file=os.path.join(testing_input, "baci_input_honeycomb_sphere.dat"),
+            dat_file=os.path.join(testing_input, "4C_input_honeycomb_sphere.dat"),
         )
 
         # Modify the time step options.
@@ -268,10 +268,10 @@ class TestFullBaci(unittest.TestCase):
         # Add the mesh to the imported solid mesh.
         input_file.add(mesh_honeycomb)
 
-        # Run the input file in Baci.
-        self.run_baci_test(name, input_file)
+        # Run the input file in 4C.
+        self.run_four_c_test(name, input_file)
 
-    def test_baci_simulation_beam_and_solid_tube(self):
+    def test_four_c_simulation_beam_and_solid_tube(self):
         """
         Test the honeycomb sphere model with different types of mesh import.
         """
@@ -288,7 +288,7 @@ class TestFullBaci(unittest.TestCase):
 
         # Create the input file and read solid mesh data.
         input_file = InputFile(description="Solid tube with beam tube")
-        input_file.read_dat(os.path.join(testing_input, "baci_input_solid_tube.dat"))
+        input_file.read_dat(os.path.join(testing_input, "4C_input_solid_tube.dat"))
 
         # Add options for beam_output.
         input_file.add(
@@ -357,10 +357,10 @@ class TestFullBaci(unittest.TestCase):
         # mesh creation.
         input_file.get_unique_geometry_sets(link_nodes="all_nodes")
 
-        # Run the input file in Baci.
-        self.run_baci_test(name, input_file)
+        # Run the input file in 4C.
+        self.run_four_c_test(name, input_file)
 
-    def test_baci_simulation_honeycomb_variants(self):
+    def test_four_c_simulation_honeycomb_variants(self):
         """
         Create a few different honeycomb structures.
         """
@@ -508,10 +508,10 @@ class TestFullBaci(unittest.TestCase):
                     )
                 )
 
-        # Run the input file in Baci.
-        self.run_baci_test("honeycomb_variants", input_file)
+        # Run the input file in 4C.
+        self.run_four_c_test("honeycomb_variants", input_file)
 
-    def test_baci_simulation_rotated_beam_axis(self):
+    def test_four_c_simulation_rotated_beam_axis(self):
         """
         Create three beams that consist of two connected lines.
         - The first case uses the same nodes for the connection of the lines,
@@ -615,11 +615,11 @@ class TestFullBaci(unittest.TestCase):
                     )
                 )
 
-        # Run the input file in Baci.
-        self.run_baci_test("rotated_beam_axis", input_file)
-        self.run_baci_test("rotated_beam_axis", input_file, nox_xml_file="xml_name")
+        # Run the input file in 4C.
+        self.run_four_c_test("rotated_beam_axis", input_file)
+        self.run_four_c_test("rotated_beam_axis", input_file, nox_xml_file="xml_name")
 
-    def test_baci_simulation_dirichlet_boundary_to_neumann_boundary(self):
+    def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary(self):
         """
         First simulate a cantilever beam with Dirichlet boundary conditions and
         then apply those as Neumann boundaries.
@@ -669,7 +669,9 @@ class TestFullBaci(unittest.TestCase):
             INTERVAL_STEPS         1
             """
         )
-        self.run_baci_test("dbc_to_nbc_initial", initial_simulation, delete_files=False)
+        self.run_four_c_test(
+            "dbc_to_nbc_initial", initial_simulation, delete_files=False
+        )
 
         # Create and run the second simulation.
         restart_simulation, beam_set = create_model(n_steps=21)
@@ -703,7 +705,7 @@ class TestFullBaci(unittest.TestCase):
             STRUCTURE DIS structure NODE 21 QUANTITY dispz VALUE  6.62050065618549843e-01 TOLERANCE 1e-10
             """
         )
-        self.run_baci_test(
+        self.run_four_c_test(
             "dbc_to_nbc_restart",
             restart_simulation,
             restart=[2, "xxx_dbc_to_nbc_initial"],

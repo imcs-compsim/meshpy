@@ -29,7 +29,7 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This module implements a basic class to manage functions in the baci input file.
+This module implements a basic class to manage functions in the 4C input file.
 """
 
 # Meshpy modules.

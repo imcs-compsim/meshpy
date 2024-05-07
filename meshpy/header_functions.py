@@ -40,7 +40,7 @@ from .inputfile import InputSection
 
 
 def get_yes_no(bool_var):
-    """Convert a bool into a string for the baci input file."""
+    """Convert a bool into a string for the 4C input file."""
     if bool_var:
         return "yes"
     else:
@@ -48,7 +48,7 @@ def get_yes_no(bool_var):
 
 
 def get_comment(bool_var):
-    """Convert a bool into a comment or no comment for the baci input file."""
+    """Convert a bool into a comment or no comment for the 4C input file."""
     if bool_var:
         return ""
     else:
@@ -56,7 +56,7 @@ def get_comment(bool_var):
 
 
 def _get_segmentation_strategy(segmentation):
-    """Get the baci string for a geometry pair strategy."""
+    """Get the 4C string for a geometry pair strategy."""
     if segmentation:
         return "segmentation"
     else:
@@ -103,12 +103,12 @@ def set_runtime_output(
         the reference position.
     element_owner: bool
         If the owing rank of each element should be output (currently
-        only affects the solid elements in BACI, beam element owners are
+        only affects the solid elements in 4C, beam element owners are
         written by default).
     element_gid: bool
-        If the BACI internal GID of each element should be output.
+        If the 4C internal GID of each element should be output.
     output_energy: bool
-        If the energy output from BACI should be activated.
+        If the energy output from 4C should be activated.
     output_strains: bool
         If the strains in the Gauss points should be output.
     option_overwrite: bool

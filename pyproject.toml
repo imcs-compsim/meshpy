@@ -5,12 +5,11 @@ requires = ["setuptools", "Cython", "numpy", "wheel"]
 [tool.setuptools]
 packages = [
   "meshpy",
-  "meshpy.four_c",
   "meshpy.abaqus",
+  "meshpy.four_c",
   "meshpy.geometric_search",
   "meshpy.mesh_creation_functions",
   "meshpy.simulation_manager",
-  "meshpy.utility_baci",
   "meshpy_testing",
   "meshpy_tutorial"
 ]
@@ -21,7 +20,7 @@ meshpy_tutorial = "tutorial"
 
 [tool.setuptools.package-data]
 "meshpy.simulation_manager" = ["batch_template.sh"]
-"meshpy_tutorial" = ["baci_input_solid_tutorial.dat"]
+"meshpy_tutorial" = ["4C_input_solid_tutorial.dat"]
 
 
 [project]
