@@ -53,6 +53,7 @@ from meshpy.mesh_creation_functions import (
     create_nurbs_brick,
     create_nurbs_sphere_surface,
     create_nurbs_hemisphere_surface,
+    create_nurbs_torus_surface,
 )
 
 # Testing imports
@@ -333,6 +334,36 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         )
 
         # Add the patch sets of every surface section of the hemisphere to the input file
+        for surf in surfs:
+            patch_set = add_geomdl_nurbs_to_mesh(
+                input_file,
+                surf,
+                material=mat,
+                element_description=element_description,
+            )
+
+            input_file.add(patch_set)
+
+        # Compare with the reference file
+        compare_test_result(self, input_file.get_string(header=False))
+
+    def test_nurbs_torus_surface(self):
+        """Test the creation of a torus."""
+
+        # Create input file
+        input_file = InputFile()
+
+        # Create the surface of a torus
+        surfs = create_nurbs_torus_surface(1, 0.5, n_ele_u=2, n_ele_v=1)
+
+        # Define material and element description
+        mat = MaterialStVenantKirchhoff()
+
+        element_description = (
+            "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
+        )
+
+        # Add the patch sets of every surface section of the torus to the input file
         for surf in surfs:
             patch_set = add_geomdl_nurbs_to_mesh(
                 input_file,
