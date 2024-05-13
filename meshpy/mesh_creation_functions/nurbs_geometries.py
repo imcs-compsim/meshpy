@@ -444,15 +444,15 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
     dummy_surf2 = radius_torus - radius_circle
 
     ctrlpts_surf1 = [
-        [dummy_surf1, 0.0, 0.0],
-        [dummy_surf1, 0.0, radius_circle],
         [radius_torus, 0.0, radius_circle],
-        [dummy_surf1, dummy_surf1, 0.0],
-        [dummy_surf1, dummy_surf1, radius_circle],
+        [dummy_surf1, 0.0, radius_circle],
+        [dummy_surf1, 0.0, 0.0],
         [radius_torus, radius_torus, radius_circle],
-        [0.0, dummy_surf1, 0.0],
-        [0.0, dummy_surf1, radius_circle],
+        [dummy_surf1, dummy_surf1, radius_circle],
+        [dummy_surf1, dummy_surf1, 0.0],
         [0.0, radius_torus, radius_circle],
+        [0.0, dummy_surf1, radius_circle],
+        [0.0, dummy_surf1, 0.0],
     ]
 
     ctrlpts_surf2 = [
@@ -480,15 +480,15 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
     ]
 
     ctrlpts_surf4 = [
-        [radius_torus, 0.0, radius_circle],
-        [dummy_surf2, 0.0, radius_circle],
         [dummy_surf2, 0.0, 0.0],
-        [radius_torus, radius_torus, radius_circle],
-        [dummy_surf2, dummy_surf2, radius_circle],
+        [dummy_surf2, 0.0, radius_circle],
+        [radius_torus, 0.0, radius_circle],
         [dummy_surf2, dummy_surf2, 0.0],
-        [0.0, radius_torus, radius_circle],
-        [0.0, dummy_surf2, radius_circle],
+        [dummy_surf2, dummy_surf2, radius_circle],
+        [radius_torus, radius_torus, radius_circle],
         [0.0, dummy_surf2, 0.0],
+        [0.0, dummy_surf2, radius_circle],
+        [0.0, radius_torus, radius_circle],
     ]
 
     weights = [
@@ -528,37 +528,49 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
         do_uniform_knot_refinement_surface(surf, n_ele_u, n_ele_v)
 
     # Define the rotations and translations to rotate the base patches and form a complete torus
-    tmp_trans = [radius_torus + radius_circle, radius_torus]
+    tmp_trans = [radius_torus, radius_torus + radius_circle, radius_torus, radius_torus - radius_circle]
 
-    transform_surf1_2 = [
+    transform_surf1 = [
         [(-tmp_trans[0], tmp_trans[0], 0), 90, 2],
         [(-2 * tmp_trans[0], 0, 0), 180, 2],
         [(-tmp_trans[0], -tmp_trans[0], 0), 270, 2],
     ]
 
-    transform_surf3_4 = [
+    transform_surf2 = [
         [(-tmp_trans[1], tmp_trans[1], 0), 90, 2],
         [(-2 * tmp_trans[1], 0, 0), 180, 2],
         [(-tmp_trans[1], -tmp_trans[1], 0), 270, 2],
     ]
 
+    transform_surf3 = [
+        [(-tmp_trans[2], tmp_trans[2], 0), 90, 2],
+        [(-2 * tmp_trans[2], 0, 0), 180, 2],
+        [(-tmp_trans[2], -tmp_trans[2], 0), 270, 2],
+    ]
+
+    transform_surf4 = [
+        [(-tmp_trans[3], tmp_trans[3], 0), 90, 2],
+        [(-2 * tmp_trans[3], 0, 0), 180, 2],
+        [(-tmp_trans[3], -tmp_trans[3], 0), 270, 2],
+    ]
+
     # Rotate base patches and store them
     surfaces_torus = [surf_1, surf_2, surf_3, surf_4]
-    for transform1, transform2 in zip(transform_surf1_2, transform_surf3_4):
+    for transform1, transform2, transform3, transform4 in zip(transform_surf1, transform_surf2, transform_surf3, transform_surf4):
         new_surf1 = operations.translate(surf_1, transform1[0])
         new_surf1 = operations.rotate(new_surf1, transform1[1], axis=transform1[2])
         surfaces_torus.append(new_surf1)
 
-        new_surf2 = operations.translate(surf_2, transform1[0])
-        new_surf2 = operations.rotate(new_surf2, transform1[1], axis=transform1[2])
+        new_surf2 = operations.translate(surf_2, transform2[0])
+        new_surf2 = operations.rotate(new_surf2, transform2[1], axis=transform2[2])
         surfaces_torus.append(new_surf2)
 
-        new_surf3 = operations.translate(surf_3, transform2[0])
-        new_surf3 = operations.rotate(new_surf3, transform2[1], axis=transform2[2])
+        new_surf3 = operations.translate(surf_3, transform3[0])
+        new_surf3 = operations.rotate(new_surf3, transform3[1], axis=transform3[2])
         surfaces_torus.append(new_surf3)
 
-        new_surf4 = operations.translate(surf_4, transform2[0])
-        new_surf4 = operations.rotate(new_surf4, transform2[1], axis=transform2[2])
+        new_surf4 = operations.translate(surf_4, transform4[0])
+        new_surf4 = operations.rotate(new_surf4, transform4[1], axis=transform4[2])
         surfaces_torus.append(new_surf4)
 
     return surfaces_torus
