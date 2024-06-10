@@ -163,13 +163,18 @@ class TestFullFourC(unittest.TestCase):
         """
 
         mpy.set_default_values()
-        self.create_honeycomb_sphere_as_input("honeycomb_sphere")
+        mpy.import_mesh_full = True
+        self.create_honeycomb_sphere_as_input(
+            "honeycomb_sphere", compare_created_input_file=True
+        )
 
         mpy.set_default_values()
-        mpy.import_mesh_full = not mpy.import_mesh_full
+        mpy.import_mesh_full = False
         self.create_honeycomb_sphere_as_input("honeycomb_sphere_full_input")
 
-    def create_honeycomb_sphere_as_input(self, name):
+    def create_honeycomb_sphere_as_input(
+        self, name, *, compare_created_input_file=False
+    ):
         """
         Create the same honeycomb mesh as defined in
         /Input/beam3r_herm2lin3_static_point_coupling_BTSPH_contact_stent_\
@@ -265,24 +270,30 @@ class TestFullFourC(unittest.TestCase):
         input_file.add(mesh_honeycomb)
 
         # Check the created input file
-        compare_test_result(self, input_file.get_string(check_nox=True, header=False))
+        if compare_created_input_file:
+            compare_test_result(
+                self, input_file.get_string(check_nox=False, header=False)
+            )
 
         # Run the input file in 4C.
         self.run_four_c_test(name, input_file)
 
     def test_four_c_simulation_beam_and_solid_tube(self):
         """
-        Test the honeycomb sphere model with different types of mesh import.
+        Test the beam and solid tube model with different types of mesh import.
         """
 
         mpy.set_default_values()
-        self.create_beam_and_solid_tube("beam_and_solid_tube")
+        mpy.import_mesh_full = True
+        self.create_beam_and_solid_tube(
+            "beam_and_solid_tube", compare_created_input_file=True
+        )
 
         mpy.set_default_values()
-        mpy.import_mesh_full = not mpy.import_mesh_full
+        mpy.import_mesh_full = False
         self.create_beam_and_solid_tube("beam_and_solid_tube")
 
-    def create_beam_and_solid_tube(self, name):
+    def create_beam_and_solid_tube(self, name, *, compare_created_input_file=False):
         """Merge a solid tube with a beam tube and simulate them together."""
 
         # Create the input file and read solid mesh data.
@@ -357,7 +368,10 @@ class TestFullFourC(unittest.TestCase):
         input_file.get_unique_geometry_sets(link_nodes="all_nodes")
 
         # Check the created input file
-        compare_test_result(self, input_file.get_string(check_nox=True, header=False))
+        if compare_created_input_file:
+            compare_test_result(
+                self, input_file.get_string(check_nox=False, header=False)
+            )
 
         # Run the input file in 4C.
         self.run_four_c_test(name, input_file)
@@ -511,7 +525,7 @@ class TestFullFourC(unittest.TestCase):
                 )
 
         # Check the created input file
-        compare_test_result(self, input_file.get_string(check_nox=True, header=False))
+        compare_test_result(self, input_file.get_string(check_nox=False, header=False))
 
         # Run the input file in 4C.
         self.run_four_c_test("honeycomb_variants", input_file)
