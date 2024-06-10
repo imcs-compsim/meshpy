@@ -29,7 +29,7 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This module implements a basic class to manage materials in the baci input
+This module implements a basic class to manage materials in the 4C input
 file.
 """
 

@@ -29,7 +29,7 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This module defines the classes that are used to create an input file for Baci.
+This module defines the classes that are used to create an input file for 4C.
 """
 
 # Python modules.
@@ -61,11 +61,11 @@ def get_section_string(section_name):
 
 
 class InputLine:
-    """This class is a single option in a Baci input file."""
+    """This class is a single option in a 4C input file."""
 
     def __init__(self, *args, option_comment=None, option_overwrite=False):
         """
-        Set a line of the baci input file.
+        Set a line of the 4C input file.
 
         Args
         ----
@@ -241,7 +241,7 @@ class InputSectionMultiKey(InputSection):
 
 
 class InputFile(Mesh):
-    """An item that represents a complete Baci input file."""
+    """An item that represents a complete 4C input file."""
 
     # Define the names of sections and boundary conditions in the input file.
     geometry_set_names = {
@@ -341,7 +341,7 @@ class InputFile(Mesh):
         self.description = description
         self.dat_header = []
 
-        # In case we import a BACI dat file with plain string data, we store them in these lists,
+        # In case we import a 4C dat file with plain string data, we store them in these lists,
         # they do not interfere with other operations.
         self.dat_nodes = []
         self.dat_elements = []
@@ -709,7 +709,7 @@ class InputFile(Mesh):
             If this is true, an error will be thrown if no nox file is set.
         design_description: bool
             If the design description should be output. This option exists for
-            backwards compatibility. The design description field in BACI was made
+            backwards compatibility. The design description field in 4C was made
             obsolete in October 2023.
         """
 

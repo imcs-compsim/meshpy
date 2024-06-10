@@ -33,6 +33,7 @@ This module defines classes and functions for the interaction of MeshPy with 4C.
 """
 
 from .beam_potential import BeamPotential
+from .dbc_monitor import dbc_monitor_to_input
 
 # Define the items that will be exported by default.
-__all__ = ["BeamPotential"]
+__all__ = ["BeamPotential", "dbc_monitor_to_input"]

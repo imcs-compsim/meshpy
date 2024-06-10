@@ -42,7 +42,7 @@ from .boundary_condition import BoundaryConditionBase
 
 
 class Coupling(BoundaryConditionBase):
-    """Represents a coupling between geometry in BACI."""
+    """Represents a coupling between geometries in 4C."""
 
     def __init__(
         self,
@@ -145,21 +145,21 @@ class Coupling(BoundaryConditionBase):
                             "Couplings for Kirchhoff beams and rotvec==False not yet implemented."
                         )
 
-            # In BACI it is not possible to couple beams of the same type, but
+            # In 4C it is not possible to couple beams of the same type, but
             # with different centerline discretizations, e.g. Beam3rHerm2Line3
             # and Beam3rLine2Line2, therefore, we check that all beams are
             # exactly the same type and discretization.
             # TODO: Remove this check once it is possible to couple beams, but
             # then also the syntax in the next few lines has to be adapted.
-            beam_baci_type = type(nodes[0].element_link[0])
+            beam_four_c_type = type(nodes[0].element_link[0])
             for node in nodes:
                 for element in node.element_link:
-                    if not beam_baci_type == type(element):
+                    if not beam_four_c_type == type(element):
                         raise ValueError(
                             "Coupling beams of different types is not yet possible!"
                         )
 
-            string = beam_baci_type.get_coupling_string(self.coupling_dof_type)
+            string = beam_four_c_type.get_coupling_string(self.coupling_dof_type)
 
         return f"E {self.geometry_set.n_global} - {string}"
 
@@ -171,7 +171,7 @@ def coupling_factory(geometry, coupling_type, coupling_dof_type, **kwargs):
     representation of the coupling."""
 
     if coupling_type is mpy.bc.point_coupling_penalty:
-        # Penalty point couplings in BACI can only contain two nodes. In this case
+        # Penalty point couplings in 4C can only contain two nodes. In this case
         # we expect the given geometry to be a list of nodes.
         main_node = geometry[0]
         return [

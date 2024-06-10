@@ -257,13 +257,13 @@ def meshpy_tutorial(base_dir, preview=False):
     # The vtk output will also show all node sets for BCs on the mesh.
     mesh.write_vtk("step_13", base_dir)
 
-    # The object InputFile is a mesh, but can also store BACI input parameters.
+    # The object InputFile is a mesh, but can also store 4C input parameters.
     # Additionally we load an existing solid mesh. This shows how solid, or in
     # general, volume elements (fluid, ...) can be combined with beam elements.
     # Everything from the volume input file will be included in the combined
     # input file, e.g. BC, loads, materials, solver parameters, ... .
     solid_dat_path = os.path.join(
-        os.path.dirname(__file__), "baci_input_solid_tutorial.dat"
+        os.path.dirname(__file__), "4C_input_solid_tutorial.dat"
     )
     input_file = InputFile(dat_file=solid_dat_path)
 

@@ -29,7 +29,7 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This module defines classes and functions to create and edit a Baci input file.
+This module defines classes and functions to create and edit a 4C input file.
 """
 
 # Global configuration object.

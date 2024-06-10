@@ -59,7 +59,7 @@ module list
 ##########################################
 
 RUN_BACI="ON"
-BACI_BUILD_DIR="$BACI_BUILD_DIR"
+BACI_BUILD_DIR="$FOUR_C_BUILD_DIR"
 EXE=$BACI_BUILD_DIR/baci-release
 
 INPUT="$SIMULATIONS_DIR/dummy.dat"

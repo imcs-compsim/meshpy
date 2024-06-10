@@ -120,7 +120,7 @@ class Simulation:
         restart_dir="",
         restart_from_prefix="",
         job_name=None,
-        feature=None
+        feature=None,
     ):
         """
         Initialize the simulation object. The input file will be written to
@@ -138,7 +138,7 @@ class Simulation:
             If the job should be run exclusively at a node, i.e. no other jobs
             can be run at the same node during the job execution.
         output_prefix: str
-            Name of the baci simulation.
+            Name of the 4C simulation.
         wall_time: str
             Maximum time for computation.
         job_name: str
@@ -199,7 +199,7 @@ class Simulation:
         base_dir: str
             Directory where the simulation should be performed.
         quiet: bool
-            If the baci output should be redirected to the console.
+            If the 4C output should be redirected to the console.
         """
 
         run_script = "cd $SIMULATIONS_BASE_DIR\n"
@@ -207,26 +207,26 @@ class Simulation:
             os.path.relpath(os.path.dirname(self.file_path), base_dir)
         )
         if self.restart_step == 0:
-            baci_command = (
-                "mpirun -np {self.n_proc} $BACI_WORK_RELEASE "
+            four_c_command = (
+                "mpirun -np {self.n_proc} $FOUR_C_WORK_RELEASE "
                 "{input_file} {self.output_prefix}"
             )
         else:
-            baci_command = (
-                "mpirun -np {self.n_proc} $BACI_WORK_RELEASE "
+            four_c_command = (
+                "mpirun -np {self.n_proc} $FOUR_C_WORK_RELEASE "
                 "{input_file} {self.output_prefix} "
                 "restart={self.restart_step} "
                 "restartfrom="
                 "{self.restart_dir}/{self.restart_from_prefix}"
             )
         if quiet:
-            run_string = baci_command + " > {self.output_prefix}.log\n"
+            run_string = four_c_command + " > {self.output_prefix}.log\n"
         else:
-            run_string = baci_command + " | tee {self.output_prefix}.log\n"
+            run_string = four_c_command + " | tee {self.output_prefix}.log\n"
         run_script += run_string.format(
             self=self,
             input_file=os.path.basename(self.file_path),
-            baci_command=baci_command,
+            four_c_command=four_c_command,
         )
         return run_script
 
@@ -327,21 +327,21 @@ class SimulationManager:
     def create_run_scripts(
         self,
         *,
-        baci_build_dir=None,
+        four_c_build_dir=None,
         status=False,
         status_file=False,
         script_name="run.sh",
-        **kwargs
+        **kwargs,
     ):
         """
         Create the script to run all simulations contained in this manager.
 
         Args
         ----
-        baci_build_dir: str
-            Build directory for baci.
+        FOUR_C_BUILD_DIR: str
+            Build directory for 4C.
         status: bool
-            If the status sould be output during the simulation. This will
+            If the status should be output during the simulation. This will
             set the quiet option for the individual simulations.
         status_file: bool
             If a status file should be created with the current state of the
@@ -351,21 +351,19 @@ class SimulationManager:
         """
 
         run_script = ""
-        if baci_build_dir is None:
-            run_script += "BACI_WORK_RELEASE=<set baci path here>\n"
+        if four_c_build_dir is None:
+            run_script += "FOUR_C_WORK_RELEASE=<set 4C path here>\n"
         else:
-            run_script += "BACI_WORK_RELEASE={}/baci-release\n".format(baci_build_dir)
-        run_script += "SIMULATIONS_BASE_DIR={}\n\n".format(self.path)
+            run_script += f"FOUR_C_WORK_RELEASE={four_c_build_dir}/4C\n"
+        run_script += f"SIMULATIONS_BASE_DIR={self.path}\n\n"
 
         if status_file:
             run_script += "rm -f run_status.log\n"
 
         for simulation in self.simulations:
             if status_file:
-                run_script += "cd {}\n".format(self.path)
-                run_script += 'echo "{}" >> run_status.log\n'.format(
-                    simulation.file_path
-                )
+                run_script += f"cd {self.path}\n"
+                run_script += f'echo "{simulation.file_path}" >> run_status.log\n'
             if status:
                 run_script += 'echo "{}"\n'.format(simulation.file_path)
             run_script += simulation.create_run_script(self.path, **kwargs)
@@ -382,7 +380,7 @@ class SimulationManager:
         return run_script_path
 
     def create_batch_scripts(
-        self, *, baci_build_dir=None, script_name="run.sh", batch_name="batch.sh"
+        self, *, four_c_build_dir=None, script_name="run.sh", batch_name="batch.sh"
     ):
         """
         Create cluster batch scripts to run all simulations contained in this
@@ -390,8 +388,8 @@ class SimulationManager:
 
         Args
         ----
-        baci_build_dir: str
-            Path to the baci build directory.
+        four_c_build_dir: str
+            Path to the 4C build directory.
         script_name: str:
             Name of script to submit batch files.
         bath_name: str
@@ -399,11 +397,11 @@ class SimulationManager:
         """
 
         run_script = ""
-        if baci_build_dir is None:
-            run_script += "export BACI_BUILD_DIR="
-            run_script += "<set baci path build directory here>\n"
+        if four_c_build_dir is None:
+            run_script += "export FOUR_C_BUILD_DIR="
+            run_script += "<set path to 4C build directory here>\n"
         else:
-            run_script += "export BACI_BUILD_DIR={}\n".format(baci_build_dir)
+            run_script += "export FOUR_C_BUILD_DIR={}\n".format(four_c_build_dir)
         run_script += "export SIMULATIONS_BASE_DIR=$(readlink -f $(dirname $0))\n\n"
 
         for simulation in self.simulations:
@@ -436,14 +434,16 @@ class SimulationManager:
         job_ids = [int(job.strip().split(" ")[-1]) for job in jobs]
         return job_ids
 
-    def submit_batch_files_and_wait_for_finish(self, *, baci_build_dir=None, **kwargs):
+    def submit_batch_files_and_wait_for_finish(
+        self, *, four_c_build_dir=None, **kwargs
+    ):
         """
         Execute all simulations the run_script and wait for the jobs to finish.
 
         Args
         ----
-        baci_build_dir: str
-            Path the baci build directory.
+        four_c_build_dir: str
+            Path the 4C build directory.
         check_interval: int, float
             Interval in seconds where the job status is read.
         status: bool
@@ -453,7 +453,7 @@ class SimulationManager:
 
         # Submit the jobs and wait for them to finish.
         wait_for_jobs_to_finish(
-            self.submit_batch_files(baci_build_dir=baci_build_dir), **kwargs
+            self.submit_batch_files(four_c_build_dir=four_c_build_dir), **kwargs
         )
 
     def run_simulations_and_wait_for_finish(
