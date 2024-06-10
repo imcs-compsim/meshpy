@@ -50,7 +50,7 @@ FILE_TYPE                             csv
 WRITE_HEADER                          yes
 INTERVAL_STEPS                        1
 ----------------------------------------------------------STRUCT NOX/Status Test
-XML File                            = dbc_to_nbc_initial.xml
+XML File                            = NOT_DEFINED
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_BeamReissnerElastHyper YOUNG 100.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.031415926535897934 SHEARCORR 1 MOMINPOL 0.00015707963267948968 MOMIN2 7.853981633974484e-05 MOMIN3 7.853981633974484e-05
 --------------------------------------------------------------------------FUNCT1
