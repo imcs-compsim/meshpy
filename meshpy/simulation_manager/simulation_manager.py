@@ -338,7 +338,7 @@ class SimulationManager:
 
         Args
         ----
-        FOUR_C_BUILD_DIR: str
+        four_c_build_dir: str
             Build directory for 4C.
         status: bool
             If the status should be output during the simulation. This will
