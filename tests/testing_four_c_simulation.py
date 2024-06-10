@@ -41,7 +41,7 @@ import shutil
 import glob
 
 # Testing imports.
-from utilities import (
+from utils import (
     compare_test_result,
     get_four_c_path,
     testing_temp,

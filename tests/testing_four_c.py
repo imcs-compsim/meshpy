@@ -38,7 +38,7 @@ import unittest
 import numpy as np
 
 # Testing imports.
-from utilities import compare_test_result
+from utils import compare_test_result
 
 # Meshpy imports.
 from meshpy import (
