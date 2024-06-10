@@ -36,7 +36,7 @@ This module defines classes and functions to create and edit a 4C input file.
 from .conf import mpy
 
 # Utility functions.
-from .utility import clean_simulation_directory, flatten
+from .utility import clean_simulation_directory
 
 # 3D rotations for nodes.
 from .rotation import Rotation

@@ -76,17 +76,6 @@ def get_git_data(repo):
 mpy.git_sha, mpy.git_date = get_git_data(os.path.dirname(os.path.realpath(__file__)))
 
 
-def flatten(data):
-    """Flatten out all list items in data."""
-    flatten_list = []
-    if isinstance(data, list):
-        for item in data:
-            flatten_list.extend(flatten(item))
-        return flatten_list
-    else:
-        return [data]
-
-
 def find_close_nodes(nodes, **kwargs):
     """
     Find nodes in a point cloud that are within a certain tolerance
