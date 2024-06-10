@@ -37,7 +37,7 @@ import sys
 import unittest
 
 # Import testing functions.
-from utilities import empty_testing_directory
+from utils import empty_testing_directory
 
 
 if __name__ == "__main__":

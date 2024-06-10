@@ -53,12 +53,7 @@ from meshpy import (
 )
 from meshpy.mesh_creation_functions import create_beam_mesh_line
 from meshpy.simulation_manager import Simulation, SimulationManager
-from utilities import (
-    testing_temp,
-    get_four_c_path,
-    testing_input,
-    compare_test_result,
-)
+from utils import testing_temp, get_four_c_path, testing_input, compare_test_result
 
 
 def is_cluster_test():

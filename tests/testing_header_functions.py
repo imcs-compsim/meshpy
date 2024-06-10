@@ -48,7 +48,7 @@ from meshpy.header_functions import (
 )
 
 # Testing imports.
-from utilities import compare_test_result
+from utils import compare_test_result
 
 
 class TestHeaderFunctions(unittest.TestCase):
