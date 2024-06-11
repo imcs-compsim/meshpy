@@ -185,8 +185,7 @@ def compare_test_result(
 
 
 def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs):
-    """
-    Compare two stings. If they are not identical open meld and show the
+    """Compare two stings. If they are not identical open a comparison and show the
     differences.
     """
 
@@ -241,9 +240,9 @@ def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs)
             with open(compare_file, "w") as input_file:
                 input_file.write(compare_string)
 
-        if shutil.which("meld") is not None:
+        if shutil.which("code") is not None:
             child = subprocess.Popen(
-                ["meld", reference_file, compare_file], stderr=subprocess.PIPE
+                ["code", "--diff", reference_file, compare_file], stderr=subprocess.PIPE
             )
             child.communicate()
         else:
