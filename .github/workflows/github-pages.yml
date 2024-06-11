@@ -18,6 +18,10 @@ concurrency:
   group: "pages"
   cancel-in-progress: false
 
+env:
+  # Use spack to provide the correct ruby version
+  SPACK_ACTIVATION_SCRIPT: /home_local/github-runner/testing_lib/spack/share/spack/setup-env.sh
+
 jobs:
   # Build job
   build:
@@ -30,9 +34,12 @@ jobs:
         uses: actions/configure-pages@v3
       - name: Build with Jekyll
         run: |
+          . ${SPACK_ACTIVATION_SCRIPT}
+          spack load ruby@3.1.0
           mkdir public
           cd website
-          bundle install --path ./vendor
+          bundle config set --local path ./vendor
+          bundle install
           bundle exec jekyll build -d public
           cd public
           mv * ../../public
