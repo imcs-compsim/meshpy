@@ -236,9 +236,6 @@ class Rotation:
         elif isinstance(other, (list, np.ndarray)) and len(other) == 3:
             # Apply rotation to vector.
             return np.dot(self.get_rotation_matrix(), np.array(other))
-        elif other is None:
-            # If multiplied with none, nothing happens.
-            return self
         raise NotImplementedError("Error, not implemented, does not make sense anyway!")
 
     def __eq__(self, other):

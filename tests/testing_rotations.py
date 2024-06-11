@@ -241,10 +241,6 @@ class TestRotation(unittest.TestCase):
             "test_rotation_vector",
         )
 
-        # Check multiplication with None.
-        self.assertTrue(rot == rot * None)
-        self.assertTrue(rot == rot.copy() * None)
-
     def test_rotation_matrix(self):
         """
         Test if the correct quaternions are generated from a rotation matrix.
