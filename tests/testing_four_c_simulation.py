@@ -79,16 +79,6 @@ class TestFullFourC(unittest.TestCase):
     return 0.
     """
 
-    def setUp(self):
-        """
-        This method is called before each test. Check if 4C was found.
-        If not, skip the test.
-        """
-        if four_c_release is None:
-            self.skipTest("4C path was not found!")
-        if shutil.which("mpirun") is None:
-            self.skipTest("mpirun was not found!")
-
     def run_four_c_test(
         self, name, mesh, n_proc=2, delete_files=True, restart=None, **kwargs
     ):
@@ -109,6 +99,12 @@ class TestFullFourC(unittest.TestCase):
         restart: [n_restart, xxx_restart]
             If the simulation should be a restart.
         """
+
+        # Only run the test if an executable can be found
+        if four_c_release is None:
+            self.skipTest("4C path was not found!")
+        if shutil.which("mpirun") is None:
+            self.skipTest("mpirun was not found!")
 
         # Check if temp directory exists.
         os.makedirs(testing_temp, exist_ok=True)
@@ -167,13 +163,18 @@ class TestFullFourC(unittest.TestCase):
         """
 
         mpy.set_default_values()
-        self.create_honeycomb_sphere_as_input("honeycomb_sphere")
+        mpy.import_mesh_full = True
+        self.create_honeycomb_sphere_as_input(
+            "honeycomb_sphere", compare_created_input_file=True
+        )
 
         mpy.set_default_values()
-        mpy.import_mesh_full = not mpy.import_mesh_full
+        mpy.import_mesh_full = False
         self.create_honeycomb_sphere_as_input("honeycomb_sphere_full_input")
 
-    def create_honeycomb_sphere_as_input(self, name):
+    def create_honeycomb_sphere_as_input(
+        self, name, *, compare_created_input_file=False
+    ):
         """
         Create the same honeycomb mesh as defined in
         /Input/beam3r_herm2lin3_static_point_coupling_BTSPH_contact_stent_\
@@ -268,22 +269,31 @@ class TestFullFourC(unittest.TestCase):
         # Add the mesh to the imported solid mesh.
         input_file.add(mesh_honeycomb)
 
+        # Check the created input file
+        if compare_created_input_file:
+            compare_test_result(
+                self, input_file.get_string(check_nox=False, header=False)
+            )
+
         # Run the input file in 4C.
         self.run_four_c_test(name, input_file)
 
     def test_four_c_simulation_beam_and_solid_tube(self):
         """
-        Test the honeycomb sphere model with different types of mesh import.
+        Test the beam and solid tube model with different types of mesh import.
         """
 
         mpy.set_default_values()
-        self.create_beam_and_solid_tube("beam_and_solid_tube")
+        mpy.import_mesh_full = True
+        self.create_beam_and_solid_tube(
+            "beam_and_solid_tube", compare_created_input_file=True
+        )
 
         mpy.set_default_values()
-        mpy.import_mesh_full = not mpy.import_mesh_full
+        mpy.import_mesh_full = False
         self.create_beam_and_solid_tube("beam_and_solid_tube")
 
-    def create_beam_and_solid_tube(self, name):
+    def create_beam_and_solid_tube(self, name, *, compare_created_input_file=False):
         """Merge a solid tube with a beam tube and simulate them together."""
 
         # Create the input file and read solid mesh data.
@@ -356,6 +366,12 @@ class TestFullFourC(unittest.TestCase):
         # Call get_unique_geometry_sets to check that this does not affect the
         # mesh creation.
         input_file.get_unique_geometry_sets(link_nodes="all_nodes")
+
+        # Check the created input file
+        if compare_created_input_file:
+            compare_test_result(
+                self, input_file.get_string(check_nox=False, header=False)
+            )
 
         # Run the input file in 4C.
         self.run_four_c_test(name, input_file)
@@ -508,6 +524,9 @@ class TestFullFourC(unittest.TestCase):
                     )
                 )
 
+        # Check the created input file
+        compare_test_result(self, input_file.get_string(check_nox=False, header=False))
+
         # Run the input file in 4C.
         self.run_four_c_test("honeycomb_variants", input_file)
 
@@ -615,6 +634,9 @@ class TestFullFourC(unittest.TestCase):
                     )
                 )
 
+        # Check the created input file
+        compare_test_result(self, input_file.get_string(check_nox=False, header=False))
+
         # Run the input file in 4C.
         self.run_four_c_test("rotated_beam_axis", input_file)
         self.run_four_c_test("rotated_beam_axis", input_file, nox_xml_file="xml_name")
@@ -669,6 +691,15 @@ class TestFullFourC(unittest.TestCase):
             INTERVAL_STEPS         1
             """
         )
+
+        # Check the input file
+        compare_test_result(
+            self,
+            initial_simulation.get_string(check_nox=False, header=False),
+            additional_identifier="initial",
+        )
+
+        # Run the simulation in 4C
         self.run_four_c_test(
             "dbc_to_nbc_initial", initial_simulation, delete_files=False
         )
@@ -705,23 +736,20 @@ class TestFullFourC(unittest.TestCase):
             STRUCTURE DIS structure NODE 21 QUANTITY dispz VALUE  6.62050065618549843e-01 TOLERANCE 1e-10
             """
         )
+
+        # Check the input file of the restart simulation
+        compare_test_result(
+            self,
+            restart_simulation.get_string(check_nox=False, header=False),
+            additional_identifier="restart",
+        )
+
+        # Run the restart simulation
         self.run_four_c_test(
             "dbc_to_nbc_restart",
             restart_simulation,
             restart=[2, "xxx_dbc_to_nbc_initial"],
             delete_files=False,
-        )
-
-        # Check the input files.
-        compare_test_result(
-            self,
-            initial_simulation.get_string(header=False),
-            additional_identifier="initial",
-        )
-        compare_test_result(
-            self,
-            restart_simulation.get_string(header=False),
-            additional_identifier="restart",
         )
 
         # Delete all files from this test.
