@@ -189,8 +189,6 @@ def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs)
     differences.
     """
 
-    # TODO: improve the name parameter given to this function, check if it makes sense
-
     # Check if the input data is a file that exists.
     reference_is_file = os.path.isfile(reference)
     compare_is_file = os.path.isfile(compare)
