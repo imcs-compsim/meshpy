@@ -238,9 +238,8 @@ class Beam(Element):
         add_point_data_node_sets(point_data, self.nodes)
 
         # Add poly line to writer.
-        vtk_writer_beam.add_cell(
-            vtk.vtkPolyLine, coordinates, cell_data=cell_data, point_data=point_data
-        )
+        indices = vtk_writer_beam.add_points(coordinates, point_data=point_data)
+        vtk_writer_beam.add_cell(vtk.vtkPolyLine, indices, cell_data=cell_data)
 
 
 class Beam3rHerm2Line3(Beam):

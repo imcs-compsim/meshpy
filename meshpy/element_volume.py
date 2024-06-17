@@ -91,12 +91,9 @@ class VolumeElement(Element):
         add_point_data_node_sets(point_data, self.nodes)
 
         # Add hex8 line to writer.
+        indices = vtk_writer_solid.add_points(coordinates, point_data=point_data)
         vtk_writer_solid.add_cell(
-            self.vtk_cell_type,
-            coordinates,
-            self.vtk_topology,
-            cell_data=cell_data,
-            point_data=point_data,
+            self.vtk_cell_type, indices[self.vtk_topology], cell_data=cell_data
         )
 
 
@@ -104,18 +101,21 @@ class VolumeHEX8(VolumeElement):
     """A HEX8 volume element."""
 
     vtk_cell_type = vtk.vtkHexahedron
+    vtk_topology = list(range(8))
 
 
 class VolumeTET4(VolumeElement):
     """A TET4 volume element."""
 
     vtk_cell_type = vtk.vtkTetra
+    vtk_topology = list(range(4))
 
 
 class VolumeTET10(VolumeElement):
     """A TET10 volume element."""
 
     vtk_cell_type = vtk.vtkQuadraticTetra
+    vtk_topology = list(range(10))
 
 
 class VolumeHEX20(VolumeElement):

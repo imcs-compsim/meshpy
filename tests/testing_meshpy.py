@@ -1417,7 +1417,8 @@ class TestMeshpy(unittest.TestCase):
         writer = VTKWriter()
 
         # Add poly line.
-        writer.add_cell(vtk.vtkPolyLine, [[0, 0, -2], [1, 1, -2], [2, 2, -1]])
+        indices = writer.add_points([[0, 0, -2], [1, 1, -2], [2, 2, -1]])
+        writer.add_cell(vtk.vtkPolyLine, indices)
 
         # Add quadratic quad.
         cell_data = {}
@@ -1435,8 +1436,7 @@ class TestMeshpy(unittest.TestCase):
             [0, 2.25, 0],
             [0, 1, 0.5],
         ]
-        writer.add_cell(
-            vtk.vtkQuadraticQuad,
+        indices = writer.add_points(
             [
                 [0.25, 0, -0.25],
                 [1, 0.25, 0],
@@ -1447,9 +1447,10 @@ class TestMeshpy(unittest.TestCase):
                 [0, 2.25, 0],
                 [0, 1, 0.5],
             ],
-            [0, 2, 4, 6, 1, 3, 5, 7],
-            cell_data=cell_data,
             point_data=point_data,
+        )
+        writer.add_cell(
+            vtk.vtkQuadraticQuad, indices[[0, 2, 4, 6, 1, 3, 5, 7]], cell_data=cell_data
         )
 
         # Add tetrahedron.
@@ -1457,13 +1458,10 @@ class TestMeshpy(unittest.TestCase):
         cell_data["cell_data_2"] = [5, 0, 10]
         point_data = {}
         point_data["point_data_1"] = [1, 2, 3, 4]
-        writer.add_cell(
-            vtk.vtkTetra,
-            [[3, 3, 3], [4, 4, 3], [4, 3, 3], [4, 4, 4]],
-            [0, 2, 1, 3],
-            cell_data=cell_data,
-            point_data=point_data,
+        indices = writer.add_points(
+            [[3, 3, 3], [4, 4, 3], [4, 3, 3], [4, 4, 4]], point_data=point_data
         )
+        writer.add_cell(vtk.vtkTetra, indices[[0, 2, 1, 3]], cell_data=cell_data)
 
         # Before we can write the data to file we have to store the cell and
         # point data in the grid
