@@ -108,9 +108,9 @@ def meshpy_tutorial(base_dir, preview=False):
     print("mesh_1 number of nodes: {}".format(len(mesh.nodes)))
     print("mesh_1 number of elements: {}".format(len(mesh.elements)))
 
-    # We can also look at the created mesh, either in python or in ParaView.
+    # We can also look at the created mesh, either with pyvista or in ParaView.
     if preview:
-        mesh.display_python()
+        mesh.display_pyvista()
     mesh.write_vtk("step_1", base_dir)
 
     # We want to fix all positions and rotations of the first node.

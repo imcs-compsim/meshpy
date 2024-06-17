@@ -184,12 +184,6 @@ class Beam(Element):
                 f"Beam of type {type(self)} can not have a material of type {type(self.material)}!"
             )
 
-    def display_python(self, ax):
-        """Plot the beam in matplotlib, by connecting the nodes."""
-
-        coordinates = np.array([node.coordinates for node in self.nodes])
-        ax.plot(coordinates[:, 0], coordinates[:, 1], coordinates[:, 2], "-x")
-
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
         """
         Add the representation of this element to the VTK writer as a poly

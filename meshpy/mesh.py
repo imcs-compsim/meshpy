@@ -685,28 +685,6 @@ class Mesh:
                 for i_node in partners:
                     middle_nodes[i_node].element_partner_index = i_partner
 
-    def display_python(self):
-        """Display the elements in this mesh in matplotlib."""
-
-        # Import the relevant matplotlib modules.
-        import matplotlib.pyplot as plt
-        from mpl_toolkits.mplot3d import Axes3D
-
-        # Create figure.
-        fig = plt.figure()
-        ax = fig.gca(projection="3d")
-
-        # Loop over elements.
-        for element in self.elements:
-            element.display_python(ax)
-
-        # Finish plot.
-        ax.set_aspect("auto")
-        ax.set_xlabel("X")
-        ax.set_ylabel("Y")
-        ax.set_zlabel("Z")
-        plt.show()
-
     def get_vtk_representation(self, *, overlapping_elements=True, coupling_sets=False):
         """Return a vtk representation of the beams and solid in this mesh
 
