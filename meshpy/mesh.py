@@ -776,7 +776,7 @@ class Mesh:
         beam_nodes=True,
         beam_tube=True,
         beam_cross_section_directors=True,
-        beam_radius_for_display=0.1,
+        beam_radius_for_display=None,
         resolution=20,
         is_testing=False,
         parallel_projection=False,
@@ -821,12 +821,26 @@ class Mesh:
         if vtk_writer_beam.points.GetNumberOfPoints() > 0:
             beam_grid = pv.UnstructuredGrid(vtk_writer_beam.grid)
 
-            # Check if all beams have a given cross-section radius
+            # Check if all beams have a given cross-section radius, if not set the given input
+            # value
             all_beams_have_cross_section_radius = (
                 min(beam_grid.cell_data["cross_section_radius"]) > 0
             )
+            if not all_beams_have_cross_section_radius:
+                if beam_radius_for_display is None:
+                    raise ValueError(
+                        "Not all beams have a radius, you need to set "
+                        "beam_radius_for_display to allow a display of the beams."
+                    )
+                beam_grid.cell_data["cross_section_radius"] = beam_radius_for_display
 
+            # Grid with beam polyl ine
             beam_grid = beam_grid.cell_data_to_point_data()
+
+            # Poly data for nodes
+            finite_element_nodes = beam_grid.cast_to_poly_points().threshold(
+                scalars="node_value", value=(0.4, 1.1)
+            )
 
             # Plot the nodes
             node_radius_scaling_factor = 1.5
@@ -836,28 +850,19 @@ class Mesh:
                     theta_resolution=resolution,
                     phi_resolution=resolution,
                 )
-
-                if all_beams_have_cross_section_radius:
-                    nodes = beam_grid.glyph(
-                        geom=sphere,
-                        scale="cross_section_radius",
-                        factor=node_radius_scaling_factor,
-                        orient=False,
-                    )
-                else:
-                    nodes = beam_grid.glyph(
-                        geom=sphere,
-                        scale=False,
-                        orient=False,
-                        factor=node_radius_scaling_factor * beam_radius_for_display,
-                    )
-
-                start_end_nodes = nodes.threshold(
-                    scalars="node_value", value=(0.9, 1.1)
+                nodes_glyph = finite_element_nodes.glyph(
+                    geom=sphere,
+                    scale="cross_section_radius",
+                    factor=node_radius_scaling_factor,
+                    orient=False,
                 )
-                plotter.add_mesh(start_end_nodes, color="green")
-
-                middle_nodes = nodes.threshold(scalars="node_value", value=(0.4, 0.6))
+                plotter.add_mesh(
+                    nodes_glyph.threshold(scalars="node_value", value=(0.9, 1.1)),
+                    color="green",
+                )
+                middle_nodes = nodes_glyph.threshold(
+                    scalars="node_value", value=(0.4, 0.6)
+                )
                 if len(middle_nodes.points) > 0:
                     plotter.add_mesh(middle_nodes, color="cyan")
 
@@ -883,28 +888,15 @@ class Mesh:
             director_radius_scaling_factor = 3.5
             if beam_cross_section_directors:
                 arrow = pv.Arrow(tip_resolution=resolution, shaft_resolution=resolution)
-
-                if all_beams_have_cross_section_radius:
-                    directors = [
-                        beam_grid.glyph(
-                            geom=arrow,
-                            orient=f"base_vector_{i+1}",
-                            scale="cross_section_radius",
-                            factor=director_radius_scaling_factor,
-                        )
-                        for i in range(3)
-                    ]
-                else:
-                    directors = [
-                        beam_grid.glyph(
-                            geom=arrow,
-                            orient=f"base_vector_{i+1}",
-                            factor=director_radius_scaling_factor
-                            * beam_radius_for_display,
-                            scale=False,
-                        )
-                        for i in range(3)
-                    ]
+                directors = [
+                    finite_element_nodes.glyph(
+                        geom=arrow,
+                        orient=f"base_vector_{i+1}",
+                        scale="cross_section_radius",
+                        factor=director_radius_scaling_factor,
+                    )
+                    for i in range(3)
+                ]
                 colors = ["white", "blue", "red"]
                 for i, arrow in enumerate(directors):
                     plotter.add_mesh(arrow, color=colors[i])
