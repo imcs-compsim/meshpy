@@ -1496,8 +1496,6 @@ class TestMeshpy(unittest.TestCase):
             output_directory=testing_temp,
             binary=False,
         )
-
-        # Compare the vtk files.
         compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
 
         # Write VTK output, without coupling sets."""
@@ -1511,8 +1509,22 @@ class TestMeshpy(unittest.TestCase):
             output_directory=testing_temp,
             binary=False,
         )
+        compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
 
-        # Compare the vtk files.
+        # Write VTK output, with coupling sets and additional points for visualization."""
+        ref_file = os.path.join(
+            testing_input, "test_meshpy_vtk_smooth_centerline_beam_reference.vtu"
+        )
+        vtk_file = os.path.join(
+            testing_temp, "test_meshpy_vtk_smooth_centerline_beam.vtu"
+        )
+        mesh.write_vtk(
+            output_name="test_meshpy_vtk_smooth_centerline",
+            coupling_sets=True,
+            output_directory=testing_temp,
+            binary=False,
+            beam_centerline_visualization_segments=3,
+        )
         compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
 
     def test_meshpy_vtk_writer_solid(self):
