@@ -43,10 +43,12 @@ import numpy as np
 from .conf import mpy
 
 
-def add_point_data_node_sets(point_data, nodes):
+def add_point_data_node_sets(point_data, nodes, *, extra_points=0):
     """
     Add the information if a node is part of a set to the point_data vector
-    for all nodes in the list 'nodes'.
+    for all nodes in the list 'nodes'. The extra_points argument specifies how
+    many additional visualization points there are, i.e., points that are not based
+    on nodes, but are only used for visualization purposes.
     """
 
     # Get list with node set indices of the given nodes
@@ -58,14 +60,19 @@ def add_point_data_node_sets(point_data, nodes):
     geometry_set_list = list(set(geometry_set_list))
 
     # Loop over the geometry sets.
+    n_nodes = len(nodes)
     for geometry_set in geometry_set_list:
         # Check which nodes are connected to a geometry set.
-        data_vector = np.zeros(len(nodes))
+        data_vector = np.zeros(n_nodes + extra_points)
         for i, node in enumerate(nodes):
             if geometry_set in node.node_sets_link:
                 data_vector[i] = 1
             else:
                 data_vector[i] = mpy.vtk_nan_int
+        for i in range(extra_points):
+            data_vector[n_nodes + i] = (
+                1 if geometry_set.geometry_type is mpy.geo.line else mpy.vtk_nan_int
+            )
 
         # Get the name of the geometry type.
         if geometry_set.geometry_type is mpy.geo.point:
