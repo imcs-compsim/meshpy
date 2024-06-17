@@ -1513,7 +1513,7 @@ class TestMeshpy(unittest.TestCase):
         )
 
         # Compare the vtk files.
-        # compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
+        compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
 
     def test_meshpy_vtk_writer_solid(self):
         """Import a solid mesh and check the VTK output."""
