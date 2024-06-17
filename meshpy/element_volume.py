@@ -67,7 +67,7 @@ class VolumeElement(Element):
             f"{self.n_global} {self.dat_pre_nodes} {nodes_string} {self.dat_post_nodes}"
         )
 
-    def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
+    def get_vtk(self, vtk_writer_beam, vtk_writer_solid, **kwargs):
         """
         Add the representation of this element to the VTK writer as a quad.
         """

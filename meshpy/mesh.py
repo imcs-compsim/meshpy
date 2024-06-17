@@ -685,7 +685,9 @@ class Mesh:
                 for i_node in partners:
                     middle_nodes[i_node].element_partner_index = i_partner
 
-    def get_vtk_representation(self, *, overlapping_elements=True, coupling_sets=False):
+    def get_vtk_representation(
+        self, *, overlapping_elements=True, coupling_sets=False, **kwargs
+    ):
         """Return a vtk representation of the beams and solid in this mesh
 
         Args
@@ -712,7 +714,7 @@ class Mesh:
 
         # Get representation of elements.
         for element in self.elements:
-            element.get_vtk(vtk_writer_beam, vtk_writer_solid)
+            element.get_vtk(vtk_writer_beam, vtk_writer_solid, **kwargs)
 
         # Finish and return the writers
         vtk_writer_beam.complete_data()
@@ -734,8 +736,18 @@ class Mesh:
             Directory where the output files will be written.
         binary: bool
             If the data should be written encoded in binary or in human readable text
-        **kwargs:
-            Have a look at Mesh().get_vtk_representation
+
+        **kwargs
+            For all of them look into:
+                Mesh().get_vtk_representation
+                Beam().get_vtk
+                VolumeElement().get_vtk
+        ----
+        beam_centerline_visualization_segments: int
+            Number of segments to be used for visualization of beam centerline between successive
+            nodes. Default is 1, which means a straight line is drawn between the beam nodes. For
+            Values greater than 1, a Hermite interpolation of the centerline is assumed for
+            visualization purposes.
         """
 
         vtk_writer_beam, vtk_writer_solid = self.get_vtk_representation(**kwargs)
@@ -784,8 +796,18 @@ class Mesh:
             will be returned.
         parallel_projection: bool
             Flag to change camera view to parallel projection.
-        **kwargs:
-            Have a look at Mesh().get_vtk_representation
+
+        **kwargs
+            For all of them look into:
+                Mesh().get_vtk_representation
+                Beam().get_vtk
+                VolumeElement().get_vtk
+        ----
+        beam_centerline_visualization_segments: int
+            Number of segments to be used for visualization of beam centerline between successive
+            nodes. Default is 1, which means a straight line is drawn between the beam nodes. For
+            Values greater than 1, a Hermite interpolation of the centerline is assumed for
+            visualization purposes.
         """
 
         plotter = pv.Plotter()

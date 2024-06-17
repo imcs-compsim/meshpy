@@ -184,11 +184,35 @@ class Beam(Element):
                 f"Beam of type {type(self)} can not have a material of type {type(self.material)}!"
             )
 
-    def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
+    def get_vtk(
+        self,
+        vtk_writer_beam,
+        vtk_writer_solid,
+        *,
+        beam_centerline_visualization_segments=1,
+        **kwargs,
+    ):
+        """Add the representation of this element to the VTK writer as a poly line.
+
+        Args
+        ----
+        vtk_writer_beam:
+            VTK writer for the beams.
+        vtk_writer_solid:
+            VTK writer for solid elements, not used in this method.
+        beam_centerline_visualization_segments: int
+            Number of segments to be used for visualization of beam centerline between successive
+            nodes. Default is 1, which means a straight line is drawn between the beam nodes. For
+            Values greater than 1, a Hermite interpolation of the centerline is assumed for
+            visualization purposes.
         """
-        Add the representation of this element to the VTK writer as a poly
-        line.
-        """
+
+        n_nodes = len(self.nodes)
+        n_segments = n_nodes - 1
+        n_additional_points_per_segment = beam_centerline_visualization_segments - 1
+        # Number of points (in addition to the nodes) to be used for output
+        n_additional_points = n_segments * n_additional_points_per_segment
+        n_points = n_nodes + n_additional_points
 
         # Dictionary with cell data.
         cell_data = self.vtk_cell_data.copy()
@@ -196,44 +220,118 @@ class Beam(Element):
 
         # Dictionary with point data.
         point_data = {}
-        point_data["node_value"] = []
-        point_data["base_vector_1"] = []
-        point_data["base_vector_2"] = []
-        point_data["base_vector_3"] = []
+        point_data["node_value"] = np.zeros(n_points)
+        point_data["base_vector_1"] = np.zeros((n_points, 3))
+        point_data["base_vector_2"] = np.zeros((n_points, 3))
+        point_data["base_vector_3"] = np.zeros((n_points, 3))
 
-        # Array with nodal coordinates.
-        coordinates = np.zeros([len(self.nodes), 3])
-        element_partner_index = None
-        for i, node in enumerate(self.nodes):
-            coordinates[i, :] = node.coordinates
+        coordinates = np.zeros((n_points, 3))
+        nodal_rotation_matrices = [
+            node.rotation.get_rotation_matrix() for node in self.nodes
+        ]
+
+        for i_node, (node, rotation_matrix) in enumerate(
+            zip(self.nodes, nodal_rotation_matrices)
+        ):
+            coordinates[i_node, :] = node.coordinates
             if node.is_middle_node:
-                point_data["node_value"].append(0.5)
+                point_data["node_value"][i_node] = 0.5
             else:
-                point_data["node_value"].append(1.0)
+                point_data["node_value"][i_node] = 1.0
 
-            R = node.rotation.get_rotation_matrix()
+            point_data["base_vector_1"][i_node] = rotation_matrix[:, 0]
+            point_data["base_vector_2"][i_node] = rotation_matrix[:, 1]
+            point_data["base_vector_3"][i_node] = rotation_matrix[:, 2]
 
-            # Set small values to 0.
-            R[abs(R.real) < mpy.eps_quaternion] = 0.0
+        # We can output the element partner index, which is a debug quantity to help find elements
+        # with matching middle nodes. This is usually an indicator for an issue with the mesh.
+        # TODO: Check if we really need this partner index output any more
+        element_partner_indices = list(
+            [
+                node.element_partner_index
+                for node in self.nodes
+                if node.element_partner_index is not None
+            ]
+        )
+        if len(element_partner_indices) > 1:
+            raise ValueError(
+                "More than one element partner indices are currently not supported in the output"
+                "functionality"
+            )
+        elif len(element_partner_indices) == 1:
+            cell_data["partner_index"] = element_partner_indices[0] + 1
 
-            point_data["base_vector_1"].append(R[:, 0])
-            point_data["base_vector_2"].append(R[:, 1])
-            point_data["base_vector_3"].append(R[:, 2])
+        # Check if we have everything we need to write output or if we need to calculate additional
+        # points for a smooth beam visualization.
+        if beam_centerline_visualization_segments == 1:
+            point_connectivity = np.arange(n_nodes)
+        else:
+            # We need the centerline shape function matrices, so calculate them once and use for
+            # all segments that we need. Drop the first and last value, since they represent the
+            # nodes which we have already added above.
+            xi = np.linspace(-1, 1, beam_centerline_visualization_segments + 1)[1:-1]
+            hermite_shape_functions_pos = np.array(
+                [
+                    0.25 * (2.0 + xi) * (1.0 - xi) ** 2,
+                    0.25 * (2.0 - xi) * (1.0 + xi) ** 2,
+                ]
+            ).transpose()
+            hermite_shape_functions_tan = np.array(
+                [
+                    0.125 * (1.0 + xi) * (1.0 - xi) ** 2,
+                    -0.125 * (1.0 - xi) * (1.0 + xi) ** 2,
+                ]
+            ).transpose()
 
-            # Check if the element has a double middle node.
-            if node.element_partner_index is not None:
-                element_partner_index = node.element_partner_index + 1
+            point_connectivity = np.zeros(n_points, dtype=int)
 
-        # Check if a cell attribute for the partner should be added.
-        if element_partner_index is not None:
-            cell_data["partner_index"] = element_partner_index
+            for i_segment in range(n_segments):
+                positions = np.array(
+                    [
+                        self.nodes[i_node].coordinates
+                        for i_node in [i_segment, i_segment + 1]
+                    ]
+                )
+                tangents = np.array(
+                    [
+                        nodal_rotation_matrices[i_node][:, 0]
+                        for i_node in [i_segment, i_segment + 1]
+                    ]
+                )
+                length_factor = np.linalg.norm(positions[1] - positions[0])
+                interpolated_coordinates = np.dot(
+                    hermite_shape_functions_pos, positions
+                ) + length_factor * np.dot(hermite_shape_functions_tan, tangents)
 
-        # Add the node sets connected to this element.
-        add_point_data_node_sets(point_data, self.nodes)
+                index_first_point = (
+                    n_nodes + i_segment * n_additional_points_per_segment
+                )
+                index_last_point = (
+                    n_nodes + (i_segment + 1) * n_additional_points_per_segment
+                )
 
-        # Add poly line to writer.
+                coordinates[
+                    index_first_point:index_last_point
+                ] = interpolated_coordinates
+                point_connectivity[
+                    i_segment * beam_centerline_visualization_segments
+                ] = i_segment
+                point_connectivity[
+                    (i_segment + 1) * beam_centerline_visualization_segments
+                ] = (i_segment + 1)
+                point_connectivity[
+                    i_segment * beam_centerline_visualization_segments
+                    + 1 : (i_segment + 1) * beam_centerline_visualization_segments
+                ] = np.arange(index_first_point, index_last_point)
+
+        # Get the point data sets and add everything to the output file.
+        add_point_data_node_sets(
+            point_data, self.nodes, extra_points=n_additional_points
+        )
         indices = vtk_writer_beam.add_points(coordinates, point_data=point_data)
-        vtk_writer_beam.add_cell(vtk.vtkPolyLine, indices, cell_data=cell_data)
+        vtk_writer_beam.add_cell(
+            vtk.vtkPolyLine, indices[point_connectivity], cell_data=cell_data
+        )
 
 
 class Beam3rHerm2Line3(Beam):
