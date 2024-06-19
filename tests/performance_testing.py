@@ -190,7 +190,8 @@ class TestPerformance(object):
         "meshpy_wrap_around_cylinder_without_check": 0.7,
         "meshpy_find_close_nodes": 0.5,
         "meshpy_write_dat": 9.0,
-        "meshpy_write_vtk": 15.0,
+        "meshpy_write_vtk": 4.5,
+        "meshpy_write_vtk_smooth": 9.0,
         "geometric_search_find_nodes_brute_force": 0.05,
     }
 
@@ -322,13 +323,28 @@ if __name__ == "__main__":
         "meshpy_write_dat", InputFile.write_input_file, args=[mesh, testing_beam]
     )
 
+    # Use a smaller mesh for shorter times in vtk testing
+    mesh_smaller_for_output = create_large_beam_mesh(20, 20, 10, 2)
+
     test_performance.time_function(
         "meshpy_write_vtk",
         Mesh.write_vtk,
-        args=[mesh],
+        args=[mesh_smaller_for_output],
         kwargs={
             "output_name": "performance_testing_beam",
             "output_directory": testing_temp,
+            "beam_centerline_visualization_segments": 1,
+        },
+    )
+
+    test_performance.time_function(
+        "meshpy_write_vtk_smooth",
+        Mesh.write_vtk,
+        args=[mesh_smaller_for_output],
+        kwargs={
+            "output_name": "performance_testing_beam",
+            "output_directory": testing_temp,
+            "beam_centerline_visualization_segments": 5,
         },
     )
 

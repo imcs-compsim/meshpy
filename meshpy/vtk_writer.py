@@ -43,10 +43,12 @@ import numpy as np
 from .conf import mpy
 
 
-def add_point_data_node_sets(point_data, nodes):
+def add_point_data_node_sets(point_data, nodes, *, extra_points=0):
     """
     Add the information if a node is part of a set to the point_data vector
-    for all nodes in the list 'nodes'.
+    for all nodes in the list 'nodes'. The extra_points argument specifies how
+    many additional visualization points there are, i.e., points that are not based
+    on nodes, but are only used for visualization purposes.
     """
 
     # Get list with node set indices of the given nodes
@@ -58,14 +60,19 @@ def add_point_data_node_sets(point_data, nodes):
     geometry_set_list = list(set(geometry_set_list))
 
     # Loop over the geometry sets.
+    n_nodes = len(nodes)
     for geometry_set in geometry_set_list:
         # Check which nodes are connected to a geometry set.
-        data_vector = np.zeros(len(nodes))
+        data_vector = np.zeros(n_nodes + extra_points)
         for i, node in enumerate(nodes):
             if geometry_set in node.node_sets_link:
                 data_vector[i] = 1
             else:
                 data_vector[i] = mpy.vtk_nan_int
+        for i in range(extra_points):
+            data_vector[n_nodes + i] = (
+                1 if geometry_set.geometry_type is mpy.geo.line else mpy.vtk_nan_int
+            )
 
         # Get the name of the geometry type.
         if geometry_set.geometry_type is mpy.geo.point:
@@ -124,43 +131,27 @@ class VTKWriter:
             for key2 in mpy.vtk_tensor:
                 self.data[key1, key2] = {}
 
-    def add_cell(
-        self, cell_type, coordinates, topology=None, cell_data=None, point_data=None
-    ):
-        """
-        Create a cell and add it to the global array.
+    def add_points(self, points, *, point_data=None):
+        """Add points to the data stored in this object.
 
         Args
         ----
-        cell_type: VTK_type
-            Type of cell that will be created.
-        coordinates: [3d vector]
-            Coordinated of points for this cell.
-        topology: [int]
-            The connectivity between the cell and the coordinates. If nothing
-            is given, it is assumed that the coordinates are in the right order
-            for the cell.
-        cell_data, point_data: dic
-            A dictionary containing data that will be added to this cell,
-            either as cell data, or point data for each point of the cell.
-            There are some checks in place, but the length of the data should
-            be chosen carefully. If some cells do not have a filed, that field
-            will be set to 0 for this cell / points.
+        points: [3d vector]
+            Coordinates of points for this cell.
+        point_data: dic
+            A dictionary containing data that will be added for the newly added points.
+            If a field exists in the global data but not in the one added here, that field
+            will be set to mpy.vtk_nan for the newly added points.
+
+        Return:
+        ----
+        indices: [int]
+            A list with the global indices of the added points.
         """
 
-        # Consistency checks.
-        # Size of coordinates and topology.
-        n_points = len(coordinates)
-        if topology is None:
-            topology = list(range(n_points))
-        else:
-            if not n_points == len(topology):
-                raise ValueError(
-                    f"Coordinates is of size {n_points}, while topology is of "
-                    f"size {len(topology)}!"
-                )
+        n_points = len(points)
 
-        # Check if point data containers are of the correct size.
+        # Check if point data containers are of the correct size
         if point_data is not None:
             for key, item_value in point_data.items():
                 value, _data_type = _get_data_value_and_type(item_value)
@@ -170,17 +161,72 @@ class VTKWriter:
                         f"the length of {key} is {len(value)}, does not match!"
                     )
 
+        # Add point data
+        self._add_data(point_data, mpy.vtk_geo.point, n_new_items=n_points)
+
+        # Add point coordinates
+        n_grid_points = self.points.GetNumberOfPoints()
+        for point in points:
+            # Add the coordinate to the global list of coordinates.
+            self.points.InsertNextPoint(*point)
+
+        return np.array(
+            [n_grid_points + i_point for i_point in range(len(points))], dtype=int
+        )
+
+    def add_cell(self, cell_type, topology, *, cell_data=None):
+        """
+        Create a cell and add it to the global array.
+
+        Args
+        ----
+        cell_type: VTK_type
+            Type of cell that will be created.
+        topology: [int]
+            The connectivity between the cell and the global points.
+        cell_data: dic
+            A dictionary containing data that will be added for the newly added cell.
+            If a field exists in the global data but not in the one added here, that field
+            will be set to mpy.vtk_nan for the newly added cell.
+        """
+
+        # Add the data entries.
+        self._add_data(cell_data, mpy.vtk_geo.cell)
+
+        # Create the cell.
+        geometry_item = cell_type()
+        geometry_item.GetPointIds().SetNumberOfIds(len(topology))
+
+        # Set the connectivity
+        for i_local, i_global in enumerate(topology):
+            geometry_item.GetPointIds().SetId(i_local, i_global)
+
+        # Add to global cells
+        self.grid.InsertNextCell(
+            geometry_item.GetCellType(), geometry_item.GetPointIds()
+        )
+
+    def _add_data(self, data_container, vtk_geom_type, *, n_new_items=1):
+        """Add a data container to the existing global data container of this object.
+
+        Args
+        ----
+        data_container: see self.add_cell
+        vtk_geom_type: mpy.vtk_geo
+            Type of data container that is added
+        n_new_items: int
+            Number of new items added. This is needed fo fill up data fields that are in the
+            global data but not in the one that is added.
+        """
+
         # Check if data container already exists. If not, add it and also add
         # previous entries.
-        for data_container, vtk_geom_type in [
-            (input_data, vtk_geom_type)
-            for (input_data, vtk_geom_type) in [
-                (cell_data, mpy.vtk_geo.cell),
-                (point_data, mpy.vtk_geo.point),
-            ]
-            if input_data is not None
-        ]:
-            # Loop through output fields.
+        if data_container is not None:
+            if vtk_geom_type == mpy.vtk_geo.cell:
+                n_items = self.grid.GetNumberOfCells()
+            else:
+                n_items = self.grid.GetNumberOfPoints()
+
             for key, item_value in data_container.items():
                 # Get the data and the value type (int or float).
                 value, data_type = _get_data_value_and_type(item_value)
@@ -206,12 +252,9 @@ class VTKWriter:
                         data.SetNumberOfComponents(3)
 
                     # Add the empty values for all previous cells / points.
-                    if vtk_geom_type == mpy.vtk_geo.cell:
-                        n_items = self.grid.GetNumberOfCells()
-                    else:
-                        n_items = self.grid.GetNumberOfPoints()
+
                     for i in range(n_items):
-                        self._add_data(data, vtk_tensor_type)
+                        self._add_single_data_item(data, vtk_tensor_type)
                     self.data[vtk_geom_type, vtk_tensor_type][key] = data
 
                 else:
@@ -227,56 +270,39 @@ class VTKWriter:
                             ).format(key, data_array.GetDataTypeAsString(), data_type)
                         )
 
-        # Create the cell.
-        geometry_item = cell_type()
-        geometry_item.GetPointIds().SetNumberOfIds(n_points)
-
-        # Create the connection between the coordinates.
-        n_grid_points = self.points.GetNumberOfPoints()
-        for i, coord in enumerate(coordinates):
-            # Add the coordinate to the global list of coordinates.
-            self.points.InsertNextPoint(coord[0], coord[1], coord[2])
-
-            # Set the local connectivity.
-            geometry_item.GetPointIds().SetId(i, n_grid_points + topology[i])
-
-        # Add to global cells.
-        self.grid.InsertNextCell(
-            geometry_item.GetCellType(), geometry_item.GetPointIds()
-        )
-
-        # Add to global data. Loop over data items and check if there is
-        # something to be added in this cell. If not an empty value is added.
-        for [key_geom, key_data], data in self.data.items():
-            # Get input data container.
-            if key_geom == mpy.vtk_geo.cell:
-                data_container = cell_data
-            else:
-                data_container = point_data
+        # Add to global data. Check if there is something to be added. If not an empty value
+        # is added.
+        for key_tensor in mpy.vtk_tensor:
+            global_data = self.data[vtk_geom_type, key_tensor]
             if data_container is None:
                 data_container = {}
 
-            for key, value in data.items():
+            for key, value in global_data.items():
                 # Check if an existing field is also given for this function.
                 if key in data_container.keys():
                     # Get the data and the value type (int or float).
                     data_values, _ = _get_data_value_and_type(data_container[key])
 
                     # Add the given data.
-                    if key_geom == mpy.vtk_geo.cell:
-                        self._add_data(value, key_data, non_zero_data=data_values)
+                    if vtk_geom_type == mpy.vtk_geo.cell:
+                        self._add_single_data_item(
+                            value, key_tensor, non_zero_data=data_values
+                        )
                     else:
                         for item in data_values:
-                            self._add_data(value, key_data, non_zero_data=item)
+                            self._add_single_data_item(
+                                value, key_tensor, non_zero_data=item
+                            )
                 else:
                     # Add empty data.
-                    if key_geom == mpy.vtk_geo.cell:
-                        self._add_data(value, key_data)
+                    if vtk_geom_type == mpy.vtk_geo.cell:
+                        self._add_single_data_item(value, key_tensor)
                     else:
-                        for item in range(n_points):
-                            self._add_data(value, key_data)
+                        for item in range(n_new_items):
+                            self._add_single_data_item(value, key_tensor)
 
-    def _get_vtk_data_type(self, data):
+    @staticmethod
+    def _get_vtk_data_type(data):
         """Return the type of data. Check if data matches an expected case."""
 
         if isinstance(data, (list, np.ndarray)):
@@ -290,7 +316,8 @@ class VTKWriter:
 
         raise ValueError(f"Data {data} did not match any expected case!")
 
-    def _add_data(self, data, vtk_tensor_type, non_zero_data=None):
+    @staticmethod
+    def _add_single_data_item(data, vtk_tensor_type, non_zero_data=None):
         """Add data to a VTK data array."""
 
         if _get_vtk_array_type(data) == mpy.vtk_type.int:

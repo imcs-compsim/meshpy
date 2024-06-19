@@ -1417,7 +1417,8 @@ class TestMeshpy(unittest.TestCase):
         writer = VTKWriter()
 
         # Add poly line.
-        writer.add_cell(vtk.vtkPolyLine, [[0, 0, -2], [1, 1, -2], [2, 2, -1]])
+        indices = writer.add_points([[0, 0, -2], [1, 1, -2], [2, 2, -1]])
+        writer.add_cell(vtk.vtkPolyLine, indices)
 
         # Add quadratic quad.
         cell_data = {}
@@ -1435,8 +1436,7 @@ class TestMeshpy(unittest.TestCase):
             [0, 2.25, 0],
             [0, 1, 0.5],
         ]
-        writer.add_cell(
-            vtk.vtkQuadraticQuad,
+        indices = writer.add_points(
             [
                 [0.25, 0, -0.25],
                 [1, 0.25, 0],
@@ -1447,9 +1447,10 @@ class TestMeshpy(unittest.TestCase):
                 [0, 2.25, 0],
                 [0, 1, 0.5],
             ],
-            [0, 2, 4, 6, 1, 3, 5, 7],
-            cell_data=cell_data,
             point_data=point_data,
+        )
+        writer.add_cell(
+            vtk.vtkQuadraticQuad, indices[[0, 2, 4, 6, 1, 3, 5, 7]], cell_data=cell_data
         )
 
         # Add tetrahedron.
@@ -1457,13 +1458,10 @@ class TestMeshpy(unittest.TestCase):
         cell_data["cell_data_2"] = [5, 0, 10]
         point_data = {}
         point_data["point_data_1"] = [1, 2, 3, 4]
-        writer.add_cell(
-            vtk.vtkTetra,
-            [[3, 3, 3], [4, 4, 3], [4, 3, 3], [4, 4, 4]],
-            [0, 2, 1, 3],
-            cell_data=cell_data,
-            point_data=point_data,
+        indices = writer.add_points(
+            [[3, 3, 3], [4, 4, 3], [4, 3, 3], [4, 4, 4]], point_data=point_data
         )
+        writer.add_cell(vtk.vtkTetra, indices[[0, 2, 1, 3]], cell_data=cell_data)
 
         # Before we can write the data to file we have to store the cell and
         # point data in the grid
@@ -1498,8 +1496,6 @@ class TestMeshpy(unittest.TestCase):
             output_directory=testing_temp,
             binary=False,
         )
-
-        # Compare the vtk files.
         compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
 
         # Write VTK output, without coupling sets."""
@@ -1513,9 +1509,23 @@ class TestMeshpy(unittest.TestCase):
             output_directory=testing_temp,
             binary=False,
         )
+        compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
 
-        # Compare the vtk files.
-        # compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
+        # Write VTK output, with coupling sets and additional points for visualization."""
+        ref_file = os.path.join(
+            testing_input, "test_meshpy_vtk_smooth_centerline_beam_reference.vtu"
+        )
+        vtk_file = os.path.join(
+            testing_temp, "test_meshpy_vtk_smooth_centerline_beam.vtu"
+        )
+        mesh.write_vtk(
+            output_name="test_meshpy_vtk_smooth_centerline",
+            coupling_sets=True,
+            output_directory=testing_temp,
+            binary=False,
+            beam_centerline_visualization_segments=3,
+        )
+        compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
 
     def test_meshpy_vtk_writer_solid(self):
         """Import a solid mesh and check the VTK output."""

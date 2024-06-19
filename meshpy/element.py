@@ -166,7 +166,7 @@ class Element(BaseMeshItemFull):
         """Add element specific section (e.g. STRUCTURE KNOTVECTORS for
         NURBS elements) to the sections dictionary"""
 
-    def get_vtk(self, vtk_writer_beam, vtk_writer_solid):
+    def get_vtk(self, vtk_writer_beam, vtk_writer_solid, **kwargs):
         """
         Add representation of this element to the vtk_writers for solid and
         beam.
