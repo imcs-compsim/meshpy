@@ -528,7 +528,12 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
         do_uniform_knot_refinement_surface(surf, n_ele_u, n_ele_v)
 
     # Define the rotations and translations to rotate the base patches and form a complete torus
-    tmp_trans = [radius_torus, radius_torus + radius_circle, radius_torus, radius_torus - radius_circle]
+    tmp_trans = [
+        radius_torus,
+        radius_torus + radius_circle,
+        radius_torus,
+        radius_torus - radius_circle,
+    ]
 
     transform_surf1 = [
         [(-tmp_trans[0], tmp_trans[0], 0), 90, 2],
@@ -556,7 +561,9 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
 
     # Rotate base patches and store them
     surfaces_torus = [surf_1, surf_2, surf_3, surf_4]
-    for transform1, transform2, transform3, transform4 in zip(transform_surf1, transform_surf2, transform_surf3, transform_surf4):
+    for transform1, transform2, transform3, transform4 in zip(
+        transform_surf1, transform_surf2, transform_surf3, transform_surf4
+    ):
         new_surf1 = operations.translate(surf_1, transform1[0])
         new_surf1 = operations.rotate(new_surf1, transform1[1], axis=transform1[2])
         surfaces_torus.append(new_surf1)
