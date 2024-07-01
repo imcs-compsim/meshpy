@@ -28,10 +28,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This file includes functions to ease the creation of input files using beam
-interaction potentials.
-"""
+"""This file includes functions to ease the creation of input files using beam
+interaction potentials."""
 
 
 # Python modules
@@ -44,9 +42,8 @@ from ..inputfile import InputSection
 
 
 class BeamPotential:
-    """Class which provides functions for the usage of beam to beam
-    potential interactions within 4C based on a potential law in form
-    of a power law."""
+    """Class which provides functions for the usage of beam to beam potential
+    interactions within 4C based on a potential law in form of a power law."""
 
     def __init__(
         self,
@@ -122,8 +119,7 @@ class BeamPotential:
         choice_master_slave=None,
         option_overwrite=False,
     ):
-        """
-        Set the basic header options for beam potential interactions.
+        """Set the basic header options for beam potential interactions.
 
         Args
         ----
@@ -167,16 +163,15 @@ class BeamPotential:
             NUM_INTEGRATION_SEGMENTS        {integration_segments}
             NUM_GAUSSPOINTS                 {gauss_points}
             POTENTIAL_REDUCTION_LENGTH      {potential_reduction_length}
-            AUTOMATIC_DIFFERENTIATION       {automatic_differentiation}"""
+            AUTOMATIC_DIFFERENTIATION       {get_yes_no(automatic_differentiation)}"""
 
         if regularization_type is not None:
-            settings.append(
-                f"""
+            settings += f"""
             REGULARIZATION_TYPE             {regularization_type}
             REGULARIZATION_SEPARATION       {regularization_separation}"""
-            )
+
         if choice_master_slave is not None:
-            settings.append(f"\nCHOICE_MASTER_SLAVE             {choice_master_slave}")
+            settings += f"\nCHOICE_MASTER_SLAVE             {choice_master_slave}"
 
         self.input_file.add(
             InputSection(
@@ -197,8 +192,8 @@ class BeamPotential:
         per_ele_pair=True,
         option_overwrite=False,
     ):
-        """
-        Set the basic runtime output options for beam potential interactions.
+        """Set the basic runtime output options for beam potential
+        interactions.
 
         Args
         ----
@@ -224,7 +219,7 @@ class BeamPotential:
                 "BEAM POTENTIAL/RUNTIME VTK OUTPUT",
                 f"""
             VTK_OUTPUT_BEAM_POTENTIAL           {get_yes_no(output_beam_potential)}
-            INTERVAL_STEPS                      {get_yes_no(interval_steps)}
+            INTERVAL_STEPS                      {interval_steps}
             EVERY_ITERATION                     {get_yes_no(every_iteration)}
             FORCES                              {get_yes_no(forces)}
             MOMENTS                             {get_yes_no(moments)}
