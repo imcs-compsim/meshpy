@@ -12,13 +12,16 @@ POT_LAW_EXPONENT                      6.0 12.0
 BEAMPOTENTIAL_TYPE                    Volume
 CUTOFF_RADIUS                         10.0
 STRATEGY                              SingleLengthSpecific_SmallSepApprox_Simple
-NUM_INTEGRATION_SEGMENTS              1
-NUM_GAUSSPOINTS                       10
+NUM_INTEGRATION_SEGMENTS              2
+NUM_GAUSSPOINTS                       50
 POTENTIAL_REDUCTION_LENGTH            15.0
-AUTOMATIC_DIFFERENTIATION             False
+AUTOMATIC_DIFFERENTIATION             no
+REGULARIZATION_TYPE                   linear_extrapolation
+REGULARIZATION_SEPARATION             0.1
+CHOICE_MASTER_SLAVE                   lower_eleGID_is_slave
 -----------------------------------------------BEAM POTENTIAL/RUNTIME VTK OUTPUT
 VTK_OUTPUT_BEAM_POTENTIAL             yes
-INTERVAL_STEPS                        yes
+INTERVAL_STEPS                        1
 EVERY_ITERATION                       yes
 FORCES                                yes
 MOMENTS                               yes

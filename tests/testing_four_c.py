@@ -49,7 +49,6 @@ from meshpy import (
     InputFile,
     MaterialReissner,
     mpy,
-    set_header_static,
 )
 from meshpy.four_c.beam_potential import BeamPotential
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_helix
@@ -125,9 +124,16 @@ class Test4C(unittest.TestCase):
 
             # set headers for static case and beam potential
             beampotential.add_header(
+                potential_type="Volume",
                 cutoff_radius=10.0,
                 evaluation_strategy="SingleLengthSpecific_SmallSepApprox_Simple",
+                regularization_type="linear_extrapolation",
+                regularization_separation=0.1,
+                integration_segments=2,
+                gauss_points=50,
                 potential_reduction_length=15.0,
+                automatic_differentiation=False,
+                choice_master_slave="lower_eleGID_is_slave",
             )
             beampotential.add_runtime_output(every_iteration=True)
 
