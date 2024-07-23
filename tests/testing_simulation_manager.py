@@ -256,6 +256,22 @@ class TestSimulationManager(unittest.TestCase):
             additional_identifier=2,
         )
 
+    def test_simulation_manager_clean_up(self):
+        # Create some simulations in a folder.
+        convergence_base_dir = os.path.join(
+            testing_temp, "simulation_manager_test_folder"
+        )
+        manager = self.create_simulations(convergence_base_dir)
+
+        # Perform clean up
+        manager.clean_up()
+
+        # check if the folder still exists
+        self.assertTrue(os.path.isdir(manager.path))
+
+        # check if folder is empty
+        self.assertFalse(len(os.listdir(manager.path)))
+
 
 if __name__ == "__main__":
     # Execution part of script.

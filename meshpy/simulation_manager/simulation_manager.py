@@ -35,6 +35,7 @@ A class that creates scripts to run multiple simulations.
 
 # Import python modules.
 import os
+import shutil
 import subprocess
 import time
 import builtins
@@ -301,6 +302,21 @@ class SimulationManager:
         # Class variables.
         self.path = path
         self.simulations = []
+
+    def clean_up(self):
+        """
+        Deletes all files in the path of the simulation manager.
+        """
+        if os.path.isdir(self.path):
+            for filename in os.listdir(self.path):
+                file_path = os.path.join(self.path, filename)
+                try:
+                    if os.path.isfile(file_path) or os.path.islink(file_path):
+                        os.unlink(file_path)
+                    elif os.path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print("Failed to delete %s. Reason: %s" % (file_path, e))
 
     def add(self, other):
         """
