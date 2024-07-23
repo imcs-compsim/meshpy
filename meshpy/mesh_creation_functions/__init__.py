@@ -72,6 +72,7 @@ from .nurbs_geometries import (
     create_nurbs_brick,
     create_nurbs_sphere_surface,
     create_nurbs_hemisphere_surface,
+    create_nurbs_torus_surface,
 )
 
 # Define the items that will be exported by default.
@@ -105,4 +106,5 @@ __all__ = [
     "create_nurbs_brick",
     "create_nurbs_sphere_surface",
     "create_nurbs_hemisphere_surface",
+    "create_nurbs_torus_surface",
 ]
