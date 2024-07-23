@@ -41,7 +41,73 @@ from ..conf import mpy
 from .beam_curve import create_beam_mesh_curve
 
 
-def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, tol=None, **kwargs):
+def get_nurbs_curve_function_and_jacobian_for_integration(
+    curve, curve_start, curve_end, tol=None
+):
+    """Return function objects for evaluating the curve and the derivative. These functions are
+    used in the curve integration. It can happen that the integration algorithm has to evaluate
+    the curve outside of the defined domain. This usually leads to errors in common NURBS
+    packages. Therefore, we check for this evaluation outside of the parameter domain here and
+    perform a linear extrapolation.
+
+    Args
+    ----
+    curve: geomdl object
+        Curve that is used to describe the beam centerline.
+    curve_start, curve_end: (float)
+        Start and end parameter coordinate for the NURBS curve.
+    tol: float
+        Tolerance for checking if point is close to the start or end of the
+        interval. If None is given, use the default tolerance from mpy.
+    """
+
+    if tol is None:
+        tol = mpy.eps_pos
+
+    def eval_r(t):
+        """Evaluate the position along the curve."""
+        return np.array(curve.derivatives(u=t, order=0)[0])
+
+    def eval_rp(t):
+        """Evaluate the derivative along the curve."""
+        return np.array(curve.derivatives(u=t, order=1)[1])
+
+    def function(t):
+        """Convert the curve to a function that can be used for beam
+        generation."""
+
+        if curve_start <= t <= curve_end:
+            return eval_r(t)
+        elif t < curve_start and np.abs(t - curve_start) < tol:
+            diff = t - curve_start
+            return eval_r(curve_start) + diff * eval_rp(curve_start)
+        elif t > curve_end and np.abs(t - curve_end) < tol:
+            diff = t - curve_end
+            return eval_r(curve_end) + diff * eval_rp(curve_end)
+        raise ValueError(
+            "Can not evaluate the curve function outside of the interval (plus tolerances).\n"
+            f"Abs diff start: {np.abs(curve_start - t)}\nAbs diff end: {np.abs(t - curve_end)}"
+        )
+
+    def jacobian(t):
+        """Convert the spline to a Jacobian function that can be used for curve
+        generation. There is no tolerance here, since the integration algorithms sometimes
+        evaluate the derivative far outside the interval."""
+
+        if curve_start <= t <= curve_end:
+            return eval_rp(t)
+        elif t < curve_start:
+            return eval_rp(curve_start)
+        elif curve_end < t:
+            return eval_rp(curve_end)
+        raise ValueError("Should not happen")
+
+    return function, jacobian
+
+
+def create_beam_mesh_from_nurbs(
+    mesh, beam_object, material, curve, *, tol=None, **kwargs
+):
     """
     Generate a beam from a NURBS curve.
 
@@ -57,7 +123,7 @@ def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, tol=None, **
         Curve that is used to describe the beam centerline.
     tol: float
         Tolerance for checking if point is close to the start or end of the
-        interval.
+        interval. If None is given, use the default tolerance from mpy.
 
     **kwargs (for all of them look into create_beam_mesh_function)
     ----
@@ -76,57 +142,13 @@ def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, tol=None, **
         with all nodes of the curve.
     """
 
-    # Get the tolerance.
-    if tol is None:
-        tol = mpy.eps_pos
-
-    # Get start and end values of the curve parameter space.
     curve_start = np.min(curve.knotvector)
     curve_end = np.max(curve.knotvector)
+    function, jacobian = get_nurbs_curve_function_and_jacobian_for_integration(
+        curve, curve_start, curve_end, tol=tol
+    )
 
-    def eval_r(t):
-        """Evaluate the position along the curve."""
-        return np.array(curve.derivatives(u=t, order=0)[0])
-
-    def eval_rp(t):
-        """Evaluate the derivative along the curve."""
-        return np.array(curve.derivatives(u=t, order=1)[1])
-
-    def function(t):
-        """Convert the curve to a function that can be used for beam
-        generation."""
-
-        # Due to numeric tolerances it is possible that the position has to be
-        # evaluated outside the interval.
-        if curve_start <= t and t <= curve_end:
-            return eval_r(t)
-        elif np.abs(curve_start - t) < tol:
-            return eval_r(curve_start)
-        elif np.abs(t - curve_end) < tol:
-            return eval_r(curve_end)
-        else:
-            raise ValueError(
-                (
-                    "Can not evaluate the curve function outside of the interval (plus tolerances)."
-                    "\nAbs diff start: {}\nAbs diff end: {}"
-                ).format(np.abs(curve_start - t), np.abs(t - curve_end))
-            )
-
-    def jacobian(t):
-        """Convert the spline to a Jacobian function that can be used for curve
-        generation."""
-
-        # In the curve integration it is possible that the Jacobian is
-        # evaluated outside the interval. In that case use the values at the
-        # limits of the interval.
-        if curve_start <= t and t <= curve_end:
-            return eval_rp(t)
-        elif t < curve_start:
-            return eval_rp(curve_start)
-        elif curve_end < t:
-            return eval_rp(curve_end)
-
-    # Create the beams.
+    # Create the beams
     return create_beam_mesh_curve(
         mesh,
         beam_object,
@@ -134,5 +156,5 @@ def create_beam_mesh_from_nurbs(mesh, beam_object, material, curve, tol=None, **
         function,
         [curve_start, curve_end],
         function_derivative=jacobian,
-        **kwargs
+        **kwargs,
     )

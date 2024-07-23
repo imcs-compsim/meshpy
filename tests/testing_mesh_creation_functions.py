@@ -37,6 +37,8 @@ import unittest
 import numpy as np
 import autograd.numpy as npAD
 import os
+from geomdl import NURBS
+from geomdl import utilities
 
 # Meshpy imports.
 from meshpy import (
@@ -67,6 +69,9 @@ from meshpy.mesh_creation_functions import (
     create_wire_fibers,
     create_beam_mesh_from_nurbs,
     create_beam_mesh_helix,
+)
+from meshpy.mesh_creation_functions.beam_nurbs import (
+    get_nurbs_curve_function_and_jacobian_for_integration,
 )
 
 # Testing imports.
@@ -125,6 +130,16 @@ def create_helix_function(
         )
 
     return helix
+
+
+def create_testing_nurbs_curve():
+    """Create a NURBS curve used for testing"""
+
+    curve = NURBS.Curve()
+    curve.degree = 2
+    curve.ctrlpts = [[0, 0, 0], [1, 2, -1], [2, 0, 0]]
+    curve.knotvector = utilities.generate_knot_vector(curve.degree, len(curve.ctrlpts))
+    return curve
 
 
 class TestMeshCreationFunctions(unittest.TestCase):
@@ -357,18 +372,8 @@ class TestMeshCreationFunctions(unittest.TestCase):
         Test the create_beam_mesh_from_nurbs function.
         """
 
-        # Setup the NURBS curve.
-        from geomdl import NURBS
-        from geomdl import utilities
-
-        curve = NURBS.Curve()
-        curve.degree = 2
-        curve.ctrlpts = [[0, 0, 0], [1, 2, -1], [2, 0, 0]]
-        curve.knotvector = utilities.generate_knot_vector(
-            curve.degree, len(curve.ctrlpts)
-        )
-
         # Create beam elements.
+        curve = create_testing_nurbs_curve()
         mat = MaterialReissner(radius=0.05)
         mesh = Mesh()
         create_beam_mesh_from_nurbs(mesh, Beam3rHerm2Line3, mat, curve, n_el=3)
@@ -377,6 +382,32 @@ class TestMeshCreationFunctions(unittest.TestCase):
         input_file = InputFile()
         input_file.add(mesh)
         compare_test_result(self, input_file.get_string(header=False))
+
+    def test_mesh_creation_functions_nurbs_unit(self):
+        """Unittest the function and jacobian creation in the create_beam_mesh_from_nurbs function"""
+
+        curve = create_testing_nurbs_curve()
+        curve_start = np.min(curve.knotvector)
+        curve_end = np.max(curve.knotvector)
+        r, dr = get_nurbs_curve_function_and_jacobian_for_integration(
+            curve, curve_start, curve_end, tol=10
+        )
+
+        t_values = [5.0 / 7.0, -0.3, 1.2]
+        results_r = [
+            [1.4285714285714286, 0.8163265306122449, -0.4081632653061225],
+            [-0.6, -1.2, 0.6],
+            [2.4, -0.8, 0.4],
+        ]
+        results_dr = [
+            [2.0, -1.7142857142857144, 0.8571428571428572],
+            [2.0, 4.0, -2.0],
+            [2.0, -4.0, 2.0],
+        ]
+
+        for t, result_r, result_dr in zip(t_values, results_r, results_dr):
+            self.assertTrue(np.allclose(r(t), result_r, atol=mpy.eps_pos))
+            self.assertTrue(np.allclose(dr(t), result_dr, atol=mpy.eps_pos))
 
     def test_mesh_creation_functions_node_continuation(self):
         """Test that the node continuation function work as expected."""
