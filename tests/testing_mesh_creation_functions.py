@@ -773,6 +773,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
     def test_mesh_creation_functions_helix_no_rotation(self):
         """Create a helix and compare it with the reference file."""
 
+        ## Helix angle and height helix combination
         # Create input file.
         input_file = InputFile()
 
@@ -792,8 +793,66 @@ class TestMeshCreationFunctions(unittest.TestCase):
             [0.0, 0.0, 1.0],
             [0.0, 0.0, 0.0],
             [2.0, 0.0, 0.0],
-            np.pi / 4,
+            helix_angle=np.pi / 4,
             height_helix=10.0,
+            l_el=5.0,
+        )
+        input_file.add(helix_set)
+
+        # Check the output.
+        compare_test_result(self, input_file.get_string(header=False))
+
+        ## Helix angle and turns
+        # Create input file.
+        input_file = InputFile()
+
+        # Add material and function.
+        mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
+
+        # Add simple line to verify that the helix creation does not alter additional meshes
+        create_beam_mesh_line(
+            input_file, Beam3rHerm2Line3, mat, [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]
+        )
+
+        # Create helix.
+        helix_set = create_beam_mesh_helix(
+            input_file,
+            Beam3rHerm2Line3,
+            mat,
+            [0.0, 0.0, 1.0],
+            [0.0, 0.0, 0.0],
+            [2.0, 0.0, 0.0],
+            helix_angle=np.pi / 4,
+            turns=2.5 / np.pi,
+            l_el=5.0,
+        )
+        input_file.add(helix_set)
+
+        # Check the output.
+        compare_test_result(self, input_file.get_string(header=False))
+
+        ## Height helix and turns
+        # Create input file.
+        input_file = InputFile()
+
+        # Add material and function.
+        mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
+
+        # Add simple line to verify that the helix creation does not alter additional meshes
+        create_beam_mesh_line(
+            input_file, Beam3rHerm2Line3, mat, [0.0, 0.0, 0.0], [-1.0, -1.0, -1.0]
+        )
+
+        # Create helix.
+        helix_set = create_beam_mesh_helix(
+            input_file,
+            Beam3rHerm2Line3,
+            mat,
+            [0.0, 0.0, 1.0],
+            [0.0, 0.0, 0.0],
+            [2.0, 0.0, 0.0],
+            height_helix=10.0,
+            turns=2.5 / np.pi,
             l_el=5.0,
         )
         input_file.add(helix_set)
@@ -823,7 +882,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
             [1.0, 1.0, 1.0],
             [-1.0, -1.0, -1.0],
             [3.0, 0.0, 0.0],
-            np.pi / 6,
+            helix_angle=np.pi / 6,
             height_helix=10.0,
             l_el=5.0,
         )
@@ -854,7 +913,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
             [1.0, 1.0, 1.0],
             [-1.0, -1.0, -1.0],
             [1.0, 1.0, 1.0],
-            np.pi / 6,
+            helix_angle=np.pi / 6,
             height_helix=80.0,
             n_el=4,
             warning_straight_line=False,
@@ -864,7 +923,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         # Check the output.
         compare_test_result(self, input_file.get_string(header=False))
 
-    def test_mesh_creation_functions_helix_twist_angle_right_angle(self):
+    def test_mesh_creation_functions_helix_helix_angle_right_angle(self):
         """Create a helix and compare it with the reference file."""
 
         # Create input file.
@@ -886,7 +945,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
             [1.0, 1.0, 1.0],
             [-1.0, -1.0, -1.0],
             [2.0, 2.0, 1.0],
-            np.pi / 2,
+            helix_angle=np.pi / 2,
             height_helix=10.0,
             l_el=5.0,
             warning_straight_line=False,
