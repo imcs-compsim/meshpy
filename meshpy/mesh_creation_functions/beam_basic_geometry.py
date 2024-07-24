@@ -487,7 +487,7 @@ def create_beam_mesh_helix(
     mesh,
     beam_object,
     material,
-    axis,
+    axis_vector,
     axis_point,
     start_point,
     *,
@@ -499,7 +499,9 @@ def create_beam_mesh_helix(
 ):
     """
     Generate a helical segment starting at a given start point around a
-    predefined axis.
+    predefined axis (defined by axis_vector and axis_point). The helical
+    segment is defined by a start_point and exactly two of the basic
+    helical quantities [helix_angle, height_helix, turns].
 
     Args
     ----
@@ -509,23 +511,20 @@ def create_beam_mesh_helix(
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
-    axis: np.array, list
-        Rotation axis of the helix.
+    axis_vector: np.array, list
+        Vector for the orientation of the helical center axis.
     axis_point: np.array, list
-        Point lying on the rotation axis. Does not need to align with
+        Point lying on the helical center axis. Does not need to align with
         bottom plane of helix.
     start_point: np.array, list
         Start point of the helix. Defines the radius.
     helix_angle: float
         Angle of the helix (synonyms in literature: twist angle or pitch
-        angle). Exactly two arguments of [helix_angle, height_helix, turns]
-        must be provided.
+        angle).
     height_helix: float
-        Height of helix. Exactly two arguments of [helix_angle, height_helix,
-        turns] must be provided.
+        Height of helix.
     turns: float
-        Number of turns. Exactly two arguments of [helix_angle, height_helix,
-        turns] must be provided.
+        Number of turns.
     warning_straight_line: bool
         Warn if radius of helix is zero or helix angle is 90 degrees and
         simple line is returned.
@@ -565,9 +564,9 @@ def create_beam_mesh_helix(
         )
 
     # determine radius of helix
-    axis = np.array(axis) / np.linalg.norm(np.array(axis))
+    axis_vector = np.array(axis_vector) / np.linalg.norm(np.array(axis_vector))
     origin = axis_point + np.dot(
-        np.dot((np.array(start_point) - np.array(axis_point)), axis), axis
+        np.dot((np.array(start_point) - np.array(axis_point)), axis_vector), axis_vector
     )
     start_point_origin_vec = start_point - origin
     radius = np.linalg.norm(start_point_origin_vec)
@@ -596,9 +595,11 @@ def create_beam_mesh_helix(
             )
 
         if helix_angle is not None and height_helix is not None:
-            end_point = start_point + height_helix * axis * np.sign(np.sin(helix_angle))
+            end_point = start_point + height_helix * axis_vector * np.sign(
+                np.sin(helix_angle)
+            )
         elif height_helix is not None and turns is not None:
-            end_point = start_point + height_helix * axis
+            end_point = start_point + height_helix * axis_vector
 
         line_sets = create_beam_mesh_line(
             mesh_temp,
@@ -658,7 +659,7 @@ def create_beam_mesh_helix(
 
     # rotate and translate simple helix to align with neccessary axis and starting point
     mesh_temp.rotate(
-        Rotation.from_basis(start_point_origin_vec, axis)
+        Rotation.from_basis(start_point_origin_vec, axis_vector)
         * Rotation([1, 0, 0], -np.pi * 0.5)
     )
     mesh_temp.translate(-mesh_temp.nodes[0].coordinates + start_point)
