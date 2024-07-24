@@ -256,15 +256,17 @@ class TestSimulationManager(unittest.TestCase):
             additional_identifier=2,
         )
 
-    def test_simulation_manager_clean_up(self):
+    def test_simulation_manager_cleaned_start_directory(self):
+
         # Create some simulations in a folder.
         convergence_base_dir = os.path.join(
             testing_temp, "simulation_manager_test_folder"
         )
+
         manager = self.create_simulations(convergence_base_dir)
 
-        # Perform clean up
-        manager.clean_up()
+        # Ensure clean state before adding next simulation
+        manager.ensure_clean_simulation_directory()
 
         # check if the folder still exists
         self.assertTrue(os.path.isdir(manager.path))
