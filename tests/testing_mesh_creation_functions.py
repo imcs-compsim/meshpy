@@ -792,7 +792,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
             [0.0, 0.0, 1.0],
             [0.0, 0.0, 0.0],
             [2.0, 0.0, 0.0],
-            np.pi / 4,
+            helix_angle=np.pi / 4,
             height_helix=10.0,
             l_el=5.0,
         )
@@ -823,7 +823,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
             [1.0, 1.0, 1.0],
             [-1.0, -1.0, -1.0],
             [3.0, 0.0, 0.0],
-            np.pi / 6,
+            helix_angle=np.pi / 6,
             height_helix=10.0,
             l_el=5.0,
         )
@@ -864,7 +864,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         # Check the output.
         compare_test_result(self, input_file.get_string(header=False))
 
-    def test_mesh_creation_functions_helix_twist_angle_right_angle(self):
+    def test_mesh_creation_functions_helix_helix_angle_right_angle(self):
         """Create a helix and compare it with the reference file."""
 
         # Create input file.
@@ -886,7 +886,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
             [1.0, 1.0, 1.0],
             [-1.0, -1.0, -1.0],
             [2.0, 2.0, 1.0],
-            np.pi / 2,
+            helix_angle=np.pi / 2,
             height_helix=10.0,
             l_el=5.0,
             warning_straight_line=False,

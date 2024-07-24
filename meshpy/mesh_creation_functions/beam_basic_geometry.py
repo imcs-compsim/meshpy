@@ -490,7 +490,7 @@ def create_beam_mesh_helix(
     axis,
     axis_point,
     start_point,
-    twist_angle,
+    helix_angle,
     *,
     height_helix=None,
     turns=None,
@@ -516,14 +516,15 @@ def create_beam_mesh_helix(
         bottom plane of helix.
     start_point: np.array, list
         Start point of the helix. Defines the radius.
-    twist_angle: float
-        Twist angle / Pitch of helix between 0 and 2pi.
+    helix_angle: float
+        Angle of the helix (synonyms in literature: twist angle or pitch
+        angle).
     height_helix: float
         Height of helix. Mutually exclusive with number of turns.
     turns: float
         Number of turns. Mutually exclusive with height of helix.
     warning_straight_line: bool
-        Warn if radius of helix is zero or twist angle is 90 degrees and
+        Warn if radius of helix is zero or helix angle is 90 degrees and
         simple line is returned.
 
     **kwargs (for all of them look into create_beam_mesh_function)
@@ -548,9 +549,9 @@ def create_beam_mesh_helix(
     elif height_helix is not None and turns is not None:
         raise ValueError("Only provide height_helix OR turns!")
 
-    if np.isclose(np.sin(twist_angle), 0.0):
+    if np.isclose(np.sin(helix_angle), 0.0):
         raise ValueError(
-            "Twist angle of helix is 0 degrees! "
+            "Helix angle of helix is 0 degrees! "
             + "Change angle for feasible helix geometry!"
         )
 
@@ -565,18 +566,18 @@ def create_beam_mesh_helix(
     # create temporary mesh to not alter original mesh
     mesh_temp = Mesh()
 
-    # return line if radius of helix is 0 or twist angle is np.pi/2
-    if np.isclose(radius, 0) or np.isclose(np.cos(twist_angle), 0.0):
+    # return line if radius of helix is 0 or helix angle is np.pi/2
+    if np.isclose(radius, 0) or np.isclose(np.cos(helix_angle), 0.0):
         if turns:
             raise ValueError(
-                "Radius of helix is 0 or twist angle is 90 degrees! "
+                "Radius of helix is 0 or helix angle is 90 degrees! "
                 + "Height of helix can not be determined through turns! "
                 + "Either switch to height of helix or change radius!"
             )
 
         if warning_straight_line:
             warnings.warn(
-                "Radius of helix is 0 or twist angle is 90 degrees! "
+                "Radius of helix is 0 or helix angle is 90 degrees! "
                 + "Simple line geometry is returned!"
             )
 
@@ -585,7 +586,7 @@ def create_beam_mesh_helix(
             beam_object,
             material,
             start_point=start_point,
-            end_point=start_point + height_helix * axis * np.sign(np.sin(twist_angle)),
+            end_point=start_point + height_helix * axis * np.sign(np.sin(helix_angle)),
             **kwargs,
         )
 
@@ -599,21 +600,21 @@ def create_beam_mesh_helix(
         end_point = np.array(
             [
                 radius,
-                np.sign(np.sin(twist_angle)) * height_helix / np.tan(twist_angle),
-                np.sign(np.sin(twist_angle)) * height_helix,
+                np.sign(np.sin(helix_angle)) * height_helix / np.tan(helix_angle),
+                np.sign(np.sin(helix_angle)) * height_helix,
             ]
         )
     elif turns:
         end_point = np.array(
             [
                 radius,
-                np.sign(np.cos(twist_angle)) * 2 * np.pi * radius * turns,
-                np.sign(np.cos(twist_angle))
+                np.sign(np.cos(helix_angle)) * 2 * np.pi * radius * turns,
+                np.sign(np.cos(helix_angle))
                 * 2
                 * np.pi
                 * radius
                 * turns
-                * np.tan(twist_angle),
+                * np.tan(helix_angle),
             ]
         )
 

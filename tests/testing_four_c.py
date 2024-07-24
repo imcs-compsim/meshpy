@@ -145,7 +145,7 @@ class Test4C(unittest.TestCase):
                 [0.0, 0.0, 1.0],
                 [0.0, 0.0, 0.0],
                 [2.0, 0.0, 0.0],
-                twist_angle=np.pi / 4,
+                helix_angle=np.pi / 4,
                 height_helix=10,
                 n_el=4,
             )
