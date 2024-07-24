@@ -40,6 +40,7 @@ import time
 import builtins
 from meshpy.utility import clean_simulation_directory
 
+
 def is_true_batch(value):
     """Return a batch comment if value is False."""
     if value:
@@ -306,8 +307,7 @@ class SimulationManager:
         """
         Deletes all files in the path of the simulation manager.
         """
-        clean_simulation_directory(self.path,True)
-
+        clean_simulation_directory(self.path, True)
 
     def add(self, other):
         """
