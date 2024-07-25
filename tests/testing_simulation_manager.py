@@ -257,6 +257,9 @@ class TestSimulationManager(unittest.TestCase):
         )
 
     def test_simulation_manager_cleaned_start_directory(self):
+        """
+        Creates some simulation files in a directory and tests the removal of all files within the directory.
+        """
 
         # Create some simulations in a folder.
         convergence_base_dir = os.path.join(
@@ -272,7 +275,7 @@ class TestSimulationManager(unittest.TestCase):
         self.assertTrue(os.path.isdir(manager.path))
 
         # check if folder is empty
-        self.assertFalse(len(os.listdir(manager.path)))
+        self.assertTrue(len(os.listdir(manager.path)) == 0)
 
 
 if __name__ == "__main__":
