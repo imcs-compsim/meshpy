@@ -33,7 +33,8 @@ This module defines classes and functions for the interaction of MeshPy with 4C.
 """
 
 from .beam_potential import BeamPotential
-from .dbc_monitor import dbc_monitor_to_input
+from .dbc_monitor import dbc_monitor_to_input, dbc_monitor_to_input_with_interpolation
+
 from .solid_shell_thickness_direction import (
     set_solid_shell_thickness_direction,
     visualize_third_parameter_direction_hex8,
@@ -45,4 +46,5 @@ __all__ = [
     "dbc_monitor_to_input",
     "set_solid_shell_thickness_direction",
     "visualize_third_parameter_direction_hex8",
+    "dbc_monitor_to_input_with_interpolation",
 ]
