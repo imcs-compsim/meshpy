@@ -37,7 +37,7 @@ This function converts the DBC monitor log files to Neumann input sections.
 import numpy as np
 
 # Meshpy stuff.
-from .. import mpy, GeometrySet, BoundaryCondition
+from .. import mpy, GeometrySet, BoundaryCondition,Function
 
 
 def read_dbc_monitor_file(file_path):
@@ -88,7 +88,7 @@ def read_dbc_monitor_file(file_path):
     return nodes, data[:, 1], data[:, 4:7], data[:, 7:]
 
 
-def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3):
+def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3,dt=0):
     """
     Convert the Dirichlet boundary condition monitor log to a Neumann
     boundary condition input section.
@@ -110,11 +110,32 @@ def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3):
         Number of DOFs per node.
     """
 
-    nodes, _, force, _ = read_dbc_monitor_file(file_path)
+    nodes, time, force, _ = read_dbc_monitor_file(file_path)
 
     # The forces are the negative reactions at the Dirichlet boundaries.
     force *= -1.0
+    fun_array=[]
+    time_str=' '.join(map(str, np.insert(time+dt,0,0,axis=0)))
+    force=np.append(force[-1],np.flipud (force)).reshape(force.shape[0]+1,force.shape[1])
+    if function==False:
+        for dim in range(force.shape[1]):
+            # Extract the first element from each sub-array
+            first_elements = [force_per_direction[dim] for force_per_direction in force]
 
+            # Convert the list of first elements to a string
+            first_elements_str = ' '.join(map(str, first_elements))
+
+            fun=Function(
+            """SYMBOLIC_FUNCTION_OF_TIME a \nVARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS """+str(force.shape[0])+
+            " TIMES "+time_str+" VALUES "+first_elements_str
+            )
+            fun_array.append(str(len(input_file.functions)+1))
+            input_file.add(fun)
+
+        # not set forces to 1 since the force values are extracted into a function
+        force=0*force+1
+    else:
+        fun_array=np.array([1, 1, 1])*function
     # Create the BC condition for this set and add it to the input file.
     mesh_nodes = [input_file.nodes[i_node] for i_node in nodes]
     geo = GeometrySet(mesh_nodes)
@@ -123,9 +144,8 @@ def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3):
         geo,
         (
             "NUMDOF {n_dof} ONOFF 1 1 1{edz} VAL {data[0]} {data[1]} {data[2]}"
-            "{edz} FUNCT {{0}} {{0}} {{0}}{edz}"
-        ).format(n_dof=n_dof, data=force[step], edz=extra_dof_zero),
-        bc_type=mpy.bc.neumann,
-        format_replacement=[function],
+            "{edz} FUNCT {function[0]} {function[1]} {function[2]}{edz}"
+        ).format(n_dof=n_dof, data=force[step], edz=extra_dof_zero,function=fun_array),
+        bc_type=mpy.bc.neumann
     )
     input_file.add(bc)

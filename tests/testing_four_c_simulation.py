@@ -727,7 +727,7 @@ class TestFullFourC(unittest.TestCase):
                 "xxx_dbc_to_nbc_initial_102_monitor_dbc.csv",
             ),
             n_dof=9,
-            function=function_nbc,
+            function=False,
         )
         restart_simulation.add(
             """--RESULT DESCRIPTION
