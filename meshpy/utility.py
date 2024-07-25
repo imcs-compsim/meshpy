@@ -367,3 +367,38 @@ def is_node_on_plane(
         )
 
     return distance < tol
+
+
+
+def linear_transformations(time,values,timespan,flip):
+    """
+    provides some linear_transformations of a value vector and addes a valid starting point at t=0
+    and final point t=timespan[2] to the simulation
+    """
+
+    # change values back to start
+    if(flip is True):
+        values=np.flipud(values)
+        time=np.flip(-time)+time[-1]
+
+    # transform time to intervall
+    min_t = np.min(time)
+    max_t = np.max(time)
+
+    # scaling/transforming the time into the user defined time
+    time = timespan[0] + (time - min_t) * (timespan[1] - timespan[0]) / (max_t - min_t)
+
+    # ensure that start time is valid
+    if(time[0] > 0.0):
+
+        # add starting time 0
+        time=np.append(0.0,time)
+
+        # add first coordinate again at the beginning of the array
+        values=np.append(values[0],values).reshape(values.shape[0]+1,values.shape[1])
+
+    # add last coordinate
+    if(timespan[2]>timespan[1]):
+        time=np.append(time,timespan[2])
+        values=np.append(values,values[-1]).reshape(values.shape[0]+1,values.shape[1])
+    return time,values
