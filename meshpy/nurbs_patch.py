@@ -320,9 +320,8 @@ class NURBSVolume(NURBSPatch):
                     )
 
                     patch_elements.append(
-                        "{} SONURBS{} NURBS{} {} MAT {} {}".format(
+                        "{} SOLID NURBS{} {} MAT {} {}".format(
                             self.n_global + increment_ele,
-                            num_cp_in_element,
                             num_cp_in_element,
                             string_cps,
                             self.material.n_global,
