@@ -196,14 +196,11 @@ def dbc_monitor_to_input_with_interpolation(input_file, file_path, step=-1, n_do
     force *= -1.0
     time=time[0:step]
     force=force[0:step,:]
-    print("time",time)
     # apply transformations to time and forces so that the
     # 4c boundary conditions can work with them
     if type=="":
         time, force = linear_transformations(time,force,timespan,flip)
 
-
-    print(force)
 
     if type=="hat":
         # create a hat function with peak locatet at timespan/2
@@ -213,16 +210,11 @@ def dbc_monitor_to_input_with_interpolation(input_file, file_path, step=-1, n_do
         time2, force2 = linear_transformations(time,force,[0,1,timespan[2]],not flip)
 
         # remove first element since it is dublicated zero
-        print(time1)
-        print(time2)
 
         np.delete(time2,0)
         np.delete(force2,0)
 
-
-
         time = np.concatenate((time1, time2+max(time1)))
-        print(time)
         force = np.concatenate((force1, force2), axis=0)
 
 

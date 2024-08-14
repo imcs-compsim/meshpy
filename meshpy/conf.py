@@ -190,7 +190,7 @@ class MeshPy(object):
         self.vtk_nan_float = 0.0
 
         # Check for overlapping elements when creating a dat file.
-        self.check_overlapping_elements = True
+        self.check_overlapping_elements = False
 
         # Lines to be added to each created input file
         self.input_file_meshpy_header = [

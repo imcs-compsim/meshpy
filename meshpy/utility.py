@@ -396,10 +396,14 @@ def linear_transformations(time,values,timespan,flip):
         time=np.append(0.0,time)
 
         # add first coordinate again at the beginning of the array
-        values=np.append(values[0],values).reshape(values.shape[0]+1,values.shape[1])
+        if(len(values.shape)==1):
+            values=np.append(values[0],values)
+        else:
+            values=np.append(values[0],values).reshape(values.shape[0]+1,values.shape[1])
 
     # add last coordinate
     if(timespan[2]>timespan[1]):
         time=np.append(time,timespan[2])
         values=np.append(values,values[-1]).reshape(values.shape[0]+1,values.shape[1])
+
     return time,values
