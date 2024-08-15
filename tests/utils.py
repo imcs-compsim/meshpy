@@ -131,26 +131,39 @@ def compare_string_tolerance(
 
 
 def compare_test_result(
-    self, result_string, *, extension="dat", additional_identifier=None, **kwargs
+    self,
+    result_string,
+    *,
+    extension="dat",
+    reference_file_name=None,
+    additional_identifier=None,
+    **kwargs,
 ):
-    """
-    Compare a created string in a test with the reference results. The reference results
-    are stored in a file made up of the test name.
+    """Compare a created string in a test with the reference results. The reference
+    results are stored in a file made up of the test name. The filename will always
+    end with "_reference".
 
     Args
     ----
+    result_string: str
+        String to compare with a reference file
+    reference_file_name: str
+        Name of the reference file to compare with. Defaults to the name of the
+        current test
     additional_identifier: str
-        This can be set if there are more than 1 reference files for a single test
+        Will be added to the reference file name
     extension: str
         File extension of the reference file
     """
 
-    reference_file_name = self._testMethodName
+    if reference_file_name is None:
+        reference_file_name = self._testMethodName
     if additional_identifier is not None:
         reference_file_name += f"_{additional_identifier}"
     reference_file_name += "_reference"
     if extension is not None:
         reference_file_name += "." + extension
+
     reference_file_path = os.path.join(testing_input, reference_file_name)
 
     # Compare the results
