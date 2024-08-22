@@ -38,6 +38,7 @@ import os
 import subprocess
 import time
 import builtins
+from meshpy.utility import clean_simulation_directory
 
 
 def is_true_batch(value):
@@ -301,6 +302,12 @@ class SimulationManager:
         # Class variables.
         self.path = path
         self.simulations = []
+
+    def ensure_clean_simulation_directory(self):
+        """
+        Deletes all files in the path of the simulation manager.
+        """
+        clean_simulation_directory(self.path, ask_before_clean=False)
 
     def add(self, other):
         """

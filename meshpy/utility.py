@@ -143,17 +143,27 @@ def get_min_max_coordinates(nodes):
     return min_max
 
 
-def clean_simulation_directory(sim_dir):
+def clean_simulation_directory(sim_dir, *, ask_before_clean=False):
     """
-    If the simulation directory exists, the user is asked if the contents
-    should be removed. If it does not exist, it is created.
+    Clear the simulation directory. If it does not exist, it is created.
+    Optionally the user can be asked before a deletion of files.
+    Args
+    ----
+    sim_dir:
+        Path to a directory
+    ask_before_clean: bool
+        Flag which indicates whether the user must confirm removal of files and directories
     """
 
     # Check if simulation directory exists.
     if os.path.exists(sim_dir):
-        print(f'Path "{sim_dir}" already exists')
+        if ask_before_clean:
+            print(f'Path "{sim_dir}" already exists')
         while True:
-            answer = input("DELETE all contents? (y/n): ")
+            if ask_before_clean:
+                answer = input("DELETE all contents? (y/n): ")
+            else:
+                answer = "y"
             if answer.lower() == "y":
                 for filename in os.listdir(sim_dir):
                     file_path = os.path.join(sim_dir, filename)
