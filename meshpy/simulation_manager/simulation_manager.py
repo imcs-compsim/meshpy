@@ -307,7 +307,7 @@ class SimulationManager:
         """
         Deletes all files in the path of the simulation manager.
         """
-        clean_simulation_directory(self.path, ask_before_clean=True)
+        clean_simulation_directory(self.path, ask_before_clean=False)
 
     def add(self, other):
         """

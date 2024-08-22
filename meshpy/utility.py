@@ -157,10 +157,10 @@ def clean_simulation_directory(sim_dir, *, ask_before_clean=False):
 
     # Check if simulation directory exists.
     if os.path.exists(sim_dir):
-        if not ask_before_clean:
+        if ask_before_clean:
             print(f'Path "{sim_dir}" already exists')
         while True:
-            if not ask_before_clean:
+            if ask_before_clean:
                 answer = input("DELETE all contents? (y/n): ")
             else:
                 answer = "y"
