@@ -189,6 +189,7 @@ class BeamPotential:
         every_iteration=False,
         forces=True,
         moments=True,
+        uids=True,
         per_ele_pair=True,
         option_overwrite=False,
     ):
@@ -207,6 +208,8 @@ class BeamPotential:
             If the forces should be written.
         moments: bool
             If the moments should be written.
+        uids: bool
+            If the unique ids should be written.
         per_ele_pair: bool
             If the forces/moments should be written per element pair.
         option_overwrite: bool
@@ -223,6 +226,7 @@ class BeamPotential:
             EVERY_ITERATION                     {get_yes_no(every_iteration)}
             FORCES                              {get_yes_no(forces)}
             MOMENTS                             {get_yes_no(moments)}
+            WRITE_UIDS                          {get_yes_no(uids)}
             WRITE_FORCE_MOMENT_PER_ELEMENTPAIR  {get_yes_no(per_ele_pair)}""",
                 option_overwrite=option_overwrite,
             )
