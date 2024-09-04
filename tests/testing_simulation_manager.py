@@ -230,6 +230,7 @@ class TestSimulationManager(unittest.TestCase):
             restart_from_prefix="xxx_old",
             job_name="awesome_job",
             feature="skylake",
+            custom_post_simulation_command='echo "performing post processing command:" ',
         )
         sim.create_batch_file(testing_temp, "batch_name")
         compare_test_result(
