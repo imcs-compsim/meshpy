@@ -1943,6 +1943,55 @@ class TestMeshpy(unittest.TestCase):
         mesh = self.create_beam_to_solid_conditions_model()
         _plotter = mesh.display_pyvista(is_testing=True, resolution=3)
 
+    def test_meshpy_locsys_condition(self):
+        """
+        Test case for point locsys condition for beams.
+        The testcase is similar to beam3r_herm2line3_static_locsys.dat, but with simpler material.
+        """
+
+        # Create the input file with function and material.
+        input_file = InputFile()
+
+        fun = Function("SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+        input_file.add(fun)
+
+        mat = MaterialReissner()
+        input_file.add(mat)
+
+        # Create the beam.
+        beam_set = create_beam_mesh_line(
+            input_file, Beam3rHerm2Line3, mat, [2.5, 2.5, 2.5], [4.5, 2.5, 2.5], n_el=1
+        )
+
+        # Add dirichlet boundary conditions.
+        input_file.add(
+            BoundaryCondition(
+                beam_set["start"],
+                "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0 0 0 0",
+                bc_type=mpy.bc.dirichlet,
+            )
+        )
+
+        input_file.add(
+            BoundaryCondition(
+                beam_set["end"],
+                "NUMDOF 9 ONOFF 1 0 0 0 0 0 0 0 0 VAL 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 1 0 0 0 0 0 0 0 0",
+                bc_type=mpy.bc.dirichlet,
+            )
+        )
+
+        # Add local sys condition.
+        input_file.add(
+            BoundaryCondition(
+                beam_set["end"],
+                "ROTANGLE 0.0 0.0 0.1 FUNCT 0 0 0 USEUPDATEDNODEPOS 0 USECONSISTENTNODENORMAL 0",
+                bc_type=mpy.bc.locsys,
+            )
+        )
+
+        # Compare with the reference solution.
+        compare_test_result(self, input_file.get_string(header=False, check_nox=False))
+
 
 if __name__ == "__main__":
     # Execution part of script.
