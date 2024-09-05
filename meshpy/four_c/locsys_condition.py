@@ -34,7 +34,7 @@ This file contains the wrapper for the LocSys condition for 4c.
 
 
 # MeshPy modules
-from .. import mpy
+from ..conf import mpy
 from ..boundary_condition import BoundaryCondition
 
 
@@ -54,10 +54,8 @@ class LocSysCondition(BoundaryCondition):
 
         Args
         ----
-        geometry_set: GeometrySet, int
-            Geometry that this boundary condition acts on. An integer can be
-            given, in the case a dat file is imported. This integer is only
-            temporary and will be replaced with the GeometrySet object.
+        geometry_set: GeometrySet
+            Geometry that this boundary condition acts on.
         rotation: Rotation
             Object that represents the rotation of the coordinate system.
         """
