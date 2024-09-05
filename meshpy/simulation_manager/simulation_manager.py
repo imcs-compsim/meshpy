@@ -38,6 +38,7 @@ import os
 import subprocess
 import time
 import builtins
+import warnings
 from meshpy.utility import clean_simulation_directory
 
 
@@ -155,7 +156,8 @@ class Simulation:
             If the job can only be run on certain nodes, configured via a slurm
             feature.
         custom_post_simulation_command: str
-            Adds a custom bash execution to the end of the batch template
+            Adds a custom bash execution to the end of the batch template,
+            therefore this command will only be executed by a job submitted with the generated slurm scripts.
         """
 
         # Class variables
@@ -387,6 +389,10 @@ class SimulationManager:
                 run_script += 'echo "done" >> run_status.log\n'
             if status:
                 run_script += 'echo "done"\n'
+            if simulation.custom_post_simulation_command is not None:
+                warnings.warn(
+                    "You have specified a custom post simulation command for a batch script, which will not be executed. "
+                )
 
         run_script_path = os.path.join(self.path, script_name)
         with open(run_script_path, "w") as file:
