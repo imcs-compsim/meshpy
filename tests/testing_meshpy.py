@@ -65,6 +65,7 @@ from meshpy import (
     Beam3rLine2Line2,
     MaterialStVenantKirchhoff,
 )
+from meshpy.four_c.locsys_condition import LocSysCondition
 from meshpy.node import Node, NodeCosserat
 from meshpy.vtk_writer import VTKWriter
 from meshpy.geometry_set import GeometrySet, GeometrySetNodes
@@ -1980,14 +1981,8 @@ class TestMeshpy(unittest.TestCase):
             )
         )
 
-        # Add local sys condition.
-        input_file.add(
-            BoundaryCondition(
-                beam_set["end"],
-                "ROTANGLE 0.0 0.0 0.1 FUNCT 0 0 0 USEUPDATEDNODEPOS 0 USECONSISTENTNODENORMAL 0",
-                bc_type=mpy.bc.locsys,
-            )
-        )
+        # Add local sys condition with rotation
+        input_file.add(LocSysCondition(beam_set["end"], Rotation([0, 0, 1], 0.1)))
 
         # Compare with the reference solution.
         compare_test_result(self, input_file.get_string(header=False, check_nox=False))
