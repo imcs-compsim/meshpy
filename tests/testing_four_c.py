@@ -223,7 +223,6 @@ class Test4C(unittest.TestCase):
             mesh_dome.elements,
             selection_type="projection_director_function",
             director_function=director_function,
-            identify_threshold=None,
         )
         compare_test_result(
             self,
