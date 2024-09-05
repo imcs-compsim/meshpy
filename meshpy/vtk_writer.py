@@ -120,6 +120,7 @@ class VTKWriter:
     def __init__(self):
         # Initialize VTK objects.
         self.points = vtk.vtkPoints()
+        self.points.SetDataTypeToDouble()
         self.grid = vtk.vtkUnstructuredGrid()
 
         # Link points to grid.

@@ -45,7 +45,7 @@
         </DataArray>
       </CellData>
       <Points>
-        <DataArray type="Float32" Name="Points" NumberOfComponents="3" format="ascii" RangeMin="0.3535533905932738" RangeMax="6.928203230275509">
+        <DataArray type="Float64" Name="Points" NumberOfComponents="3" format="ascii" RangeMin="0.3535533905932738" RangeMax="6.928203230275509">
           0 0 -2 1 1 -2
           2 2 -1 0.25 0 -0.25
           1 0.25 0 2 0 0
