@@ -38,6 +38,7 @@ import os
 import subprocess
 import time
 import builtins
+import warnings
 from meshpy.utility import clean_simulation_directory
 
 
@@ -122,6 +123,7 @@ class Simulation:
         restart_from_prefix="",
         job_name=None,
         feature=None,
+        custom_post_simulation_command=None,
     ):
         """
         Initialize the simulation object. The input file will be written to
@@ -153,6 +155,9 @@ class Simulation:
         feature: str
             If the job can only be run on certain nodes, configured via a slurm
             feature.
+        custom_post_simulation_command: str
+            Adds a custom bash execution to the end of the batch template,
+            therefore this command will only be executed by a job submitted with the generated slurm scripts.
         """
 
         # Class variables
@@ -165,6 +170,7 @@ class Simulation:
         self.wall_time = wall_time
         self.job_name = job_name
         self.feature = feature
+        self.custom_post_simulation_command = custom_post_simulation_command
 
         # Consistency check
         if self.n_proc is not None and (
@@ -272,6 +278,10 @@ class Simulation:
             is_not_node=is_true_batch(self.n_nodes is None),
         )
         batch_script_path = os.path.join(os.path.dirname(self.file_path), batch_name)
+
+        if self.custom_post_simulation_command is not None:
+            batch_string += self.custom_post_simulation_command
+
         with open(batch_script_path, "w") as file:
             file.write(batch_string)
 
@@ -379,6 +389,10 @@ class SimulationManager:
                 run_script += 'echo "done" >> run_status.log\n'
             if status:
                 run_script += 'echo "done"\n'
+            if simulation.custom_post_simulation_command is not None:
+                warnings.warn(
+                    "You have specified a custom post simulation command for a batch script, which will not be executed. "
+                )
 
         run_script_path = os.path.join(self.path, script_name)
         with open(run_script_path, "w") as file:

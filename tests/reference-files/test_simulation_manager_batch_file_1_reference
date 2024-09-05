@@ -106,3 +106,4 @@ StageOut
 # END ################## DO NOT TOUCH ME #########################
 echo
 echo "Job finished with exit code $? at: `date`"
+echo "performing post processing command:"
