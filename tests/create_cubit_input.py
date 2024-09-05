@@ -37,7 +37,10 @@ import os
 
 # Cubitpy imports.
 from cubitpy import CubitPy, cupy
-from cubitpy.mesh_creation_functions import create_brick
+from cubitpy.mesh_creation_functions import create_brick, extrude_mesh_normal_to_surface
+
+# Meshpy imports
+from meshpy import mpy, InputFile, Mesh, Rotation
 
 
 def create_tube_cubit_mesh(r, h, n_circumference, n_height):
@@ -51,7 +54,7 @@ def create_tube_cubit_mesh(r, h, n_circumference, n_height):
     h: float
         Height of the cylinder.
     n_circumference: int
-        Number of elements along the circumferencial direction.
+        Number of elements along the circumferential direction.
     n_height: int
         Number of elements along the axial direction.
 
@@ -246,6 +249,50 @@ def create_block(file_path):
     create_block_cubit().create_dat(file_path)
 
 
+def create_solid_shell_meshes(file_path_blocks, file_path_dome):
+    """Create the meshes needed for the solid shell tests."""
+
+    def create_brick_mesh(dimensions, n_elements):
+        """Create a MeshPy mesh with a solid brick"""
+        cubit = CubitPy()
+        create_brick(
+            cubit,
+            *dimensions,
+            mesh_interval=n_elements,
+            element_type=cupy.element_type.hex8sh,
+            mesh=True
+        )
+        mpy.import_mesh_full = True
+        return InputFile(cubit=cubit)
+
+    # Create the input file with the blocks representing plates in different planes
+    mesh = InputFile()
+    dimensions = [0.1, 2, 4]
+    elements = [1, 2, 2]
+
+    def rotate_list(original_list, n):
+        """Rotate the list"""
+        return original_list[-n:] + original_list[:-n]
+
+    for i in range(3):
+        brick = create_brick_mesh(rotate_list(dimensions, i), rotate_list(elements, i))
+        brick.translate([i * 4, 0, 0])
+        mesh.add(brick)
+
+    mesh.write_input_file(file_path_blocks, header=False)
+
+    # Create the dome input
+    cubit = CubitPy()
+    cubit.cmd("create sphere radius 1 zpositive")
+    cubit.cmd("surface 2 size auto factor 6")
+    cubit.cmd("mesh surface 2")
+    dome_mesh = extrude_mesh_normal_to_surface(
+        cubit, [cubit.surface(2)], 0.1, n_layer=1
+    )
+    cubit.add_element_type(dome_mesh, cupy.element_type.hex8sh)
+    cubit.create_dat(file_path_dome)
+
+
 if __name__ == "__main__":
     # Execution part of script.
 
@@ -266,3 +313,12 @@ if __name__ == "__main__":
         os.path.dirname(dir_path), "tutorial/4C_input_solid_tutorial.dat"
     )
     create_tube_tutorial(file_path)
+
+    # Create the input files for the solid shell direction testing
+    file_path_blocks = os.path.join(
+        dir_path, "reference-files/4C_input_solid_shell_thickness_blocks.dat"
+    )
+    file_path_dome = os.path.join(
+        dir_path, "reference-files/4C_input_solid_shell_thickness_dome.dat"
+    )
+    create_solid_shell_meshes(file_path_blocks, file_path_dome)

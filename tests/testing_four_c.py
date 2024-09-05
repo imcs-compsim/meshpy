@@ -32,15 +32,15 @@
 This script is used to test the functionality of MeshPy for creating 4C input files.
 """
 
-# Python imports.
+# Python imports
+import os
 import unittest
-
 import numpy as np
 
-# Testing imports.
-from utils import compare_test_result
+# Testing imports
+from utils import compare_test_result, compare_vtk, testing_input, testing_temp
 
-# Meshpy imports.
+# Meshpy imports
 from meshpy import (
     Beam3rHerm2Line3,
     BoundaryCondition,
@@ -51,6 +51,10 @@ from meshpy import (
     mpy,
 )
 from meshpy.four_c.beam_potential import BeamPotential
+from meshpy.four_c.solid_shell_thickness_direction import (
+    set_solid_shell_thickness_direction,
+    get_visualization_third_parameter_direction_hex8,
+)
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_helix
 from meshpy.utility import is_node_on_plane
 
@@ -174,6 +178,85 @@ class Test4C(unittest.TestCase):
         input_file = create_model()
 
         compare_test_result(self, input_file.get_string(header=False))
+
+    def test_four_c_solid_shell_direction_detection(self):
+        """Test the solid shell direction detection functionality"""
+
+        # Test the plates
+        mpy.import_mesh_full = True
+        mesh_block = InputFile(
+            dat_file=os.path.join(
+                testing_input, "4C_input_solid_shell_thickness_blocks.dat"
+            )
+        )
+        set_solid_shell_thickness_direction(
+            mesh_block.elements, selection_type="thickness"
+        )
+        compare_test_result(
+            self, mesh_block.get_string(header=False), additional_identifier="blocks"
+        )
+
+        # Test the dome
+        mesh_dome_original = InputFile(
+            dat_file=os.path.join(
+                testing_input, "4C_input_solid_shell_thickness_dome.dat"
+            )
+        )
+
+        # Test that the thickness version works
+        mesh_dome = mesh_dome_original.copy()
+        set_solid_shell_thickness_direction(
+            mesh_dome.elements, selection_type="thickness"
+        )
+        compare_test_result(
+            self,
+            mesh_dome.get_string(header=False),
+            additional_identifier="dome_thickness",
+        )
+
+        # Test that the direction function version works
+        def director_function(cell_center):
+            return cell_center / np.linalg.norm(cell_center)
+
+        mesh_dome = mesh_dome_original.copy()
+        set_solid_shell_thickness_direction(
+            mesh_dome.elements,
+            selection_type="projection_director_function",
+            director_function=director_function,
+            identify_threshold=None,
+        )
+        compare_test_result(
+            self,
+            mesh_dome.get_string(header=False),
+            additional_identifier="dome_thickness",
+        )
+
+        # Test that the constant direction version works
+        mesh_dome = mesh_dome_original.copy()
+        set_solid_shell_thickness_direction(
+            mesh_dome.elements,
+            selection_type="projection_director",
+            director=[0, 0, 1],
+            identify_threshold=None,
+        )
+        compare_test_result(
+            self,
+            mesh_dome.get_string(header=False),
+            additional_identifier="dome_constant_direction",
+        )
+
+        # Also test the visualization function
+        test_file = os.path.join(
+            testing_temp,
+            "test_four_c_solid_shell_direction_detection_dome_constant_direction.vtu",
+        )
+        ref_file = os.path.join(
+            testing_input,
+            "test_four_c_solid_shell_direction_detection_dome_constant_direction_reference.vtu",
+        )
+        grid = get_visualization_third_parameter_direction_hex8(mesh_dome)
+        grid.save(test_file)
+        compare_vtk(self, ref_file, test_file)
 
 
 if __name__ == "__main__":
