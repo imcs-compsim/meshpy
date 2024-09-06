@@ -252,14 +252,16 @@ def create_block(file_path):
 def create_solid_shell_meshes(file_path_blocks, file_path_dome):
     """Create the meshes needed for the solid shell tests."""
 
-    def create_brick_mesh(dimensions, n_elements):
+    def create_brick_mesh(
+        dimensions, n_elements, *, element_type=cupy.element_type.hex8sh
+    ):
         """Create a MeshPy mesh with a solid brick"""
         cubit = CubitPy()
         create_brick(
             cubit,
             *dimensions,
             mesh_interval=n_elements,
-            element_type=cupy.element_type.hex8sh,
+            element_type=element_type,
             mesh=True
         )
         mpy.import_mesh_full = True
@@ -274,10 +276,22 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
         """Rotate the list"""
         return original_list[-n:] + original_list[:-n]
 
+    # Add the plates in all directions (permute the dimension and number of elements
+    # in each direction)
     for i in range(3):
         brick = create_brick_mesh(rotate_list(dimensions, i), rotate_list(elements, i))
         brick.translate([i * 4, 0, 0])
         mesh.add(brick)
+
+    # Add a last plate with standard solid elements, to make sure that the algorithm
+    # skips those
+    brick = create_brick_mesh(
+        rotate_list(dimensions, 1),
+        rotate_list(elements, 1),
+        element_type=cupy.element_type.hex8,
+    )
+    brick.translate([3 * 4, 0, 0])
+    mesh.add(brick)
 
     mesh.write_input_file(file_path_blocks, header=False)
 
