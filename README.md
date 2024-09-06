@@ -81,7 +81,7 @@ python3 setup.py build_ext --inplace
 Optional, a path to the `4C` executable can be given in order to run some combined
 tests with 4C
 ```bash
-export FOUR_C_RELEASE=path_to_4C
+export MESHPY_FOUR_C_EXE=path_to_4C
 ```
 
 To check if everything worked as expected, run the tests

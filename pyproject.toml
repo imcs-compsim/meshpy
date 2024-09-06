@@ -9,7 +9,6 @@ packages = [
   "meshpy.four_c",
   "meshpy.geometric_search",
   "meshpy.mesh_creation_functions",
-  "meshpy.simulation_manager",
   "meshpy_testing",
   "meshpy_tutorial"
 ]
@@ -19,7 +18,6 @@ meshpy_testing = "tests"
 meshpy_tutorial = "tutorial"
 
 [tool.setuptools.package-data]
-"meshpy.simulation_manager" = ["batch_template.sh"]
 "meshpy_tutorial" = ["4C_input_solid_tutorial.dat"]
 
 

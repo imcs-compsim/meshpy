@@ -19,8 +19,7 @@ env:
   TESTING_GITHUB: 1
   # Some tests require the 4C executable to check if the created input file
   # works with 4C.
-  FOUR_C_BUILD: /home_local/github-runner/testing_lib/four_c_master/release
-  FOUR_C_RELEASE: /home_local/github-runner/testing_lib/four_c_master/release/4C
+  MESHPY_FOUR_C_EXE: /home_local/github-runner/testing_lib/four_c_master/release/4C
   # Python executable and virtual environment name
   PYTHON_EXE: python3
   PYTHON_VENV: python-testing-environment
@@ -47,7 +46,7 @@ jobs:
           whoami
           pwd
           MESHPY_PATH=$(pwd)
-          echo $FOUR_C_RELEASE
+          echo "Value of MESHPY_FOUR_C_EXE: \"${MESHPY_FOUR_C_EXE}\""
           # Load the python interpreter
           . ${SPACK_ACTIVATION_SCRIPT}
           spack load python@3.12.1

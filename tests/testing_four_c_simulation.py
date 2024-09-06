@@ -36,16 +36,12 @@ This script is used to simulate 4C input files created with MeshPy.
 import os
 import unittest
 import numpy as np
-import subprocess
 import shutil
-import glob
 
 # Testing imports.
 from utils import (
     compare_test_result,
-    get_four_c_path,
     testing_temp,
-    testing_path,
     testing_input,
 )
 
@@ -61,16 +57,11 @@ from meshpy import (
     BoundaryCondition,
     Mesh,
     set_header_static,
+    set_runtime_output,
 )
-from meshpy.four_c import dbc_monitor_to_input
-
-# Geometry functions.
+from meshpy.four_c import dbc_monitor_to_input, run_four_c
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
-
-
-# Get path to 4C
-four_c_release = get_four_c_path()
 
 
 class TestFullFourC(unittest.TestCase):
@@ -79,83 +70,44 @@ class TestFullFourC(unittest.TestCase):
     return 0.
     """
 
-    def run_four_c_test(
-        self, name, mesh, n_proc=2, delete_files=True, restart=None, **kwargs
-    ):
-        """
-        Run 4C with a input file and check the output. If the test passes,
-        the created files are deleted.
+    def run_four_c_test(self, name, mesh, n_proc=2, restart=[None, None], **kwargs):
+        """Run 4C with a input file and check the output
 
         Args
         ----
         name: str
-            Name of the test case.
+            Name of the test case
         mesh: InputFile
-            The InputFile object that contains the simulation.
+            The InputFile object that contains the simulation
         n_proc: int
-            Number of processors to run 4C on.
-        delete_files: bool
-            If the created files should be deleted.
-        restart: [n_restart, xxx_restart]
-            If the simulation should be a restart.
+            Number of processors to run 4C on
+        restart: [restart_step, restart_from]
+            If the simulation should be a restart
         """
 
         # Only run the test if an executable can be found
-        if four_c_release is None:
+        if "MESHPY_FOUR_C_EXE" not in os.environ.keys():
             self.skipTest("4C path was not found!")
         if shutil.which("mpirun") is None:
             self.skipTest("mpirun was not found!")
 
         # Check if temp directory exists.
-        os.makedirs(testing_temp, exist_ok=True)
+        testing_dir = os.path.join(testing_temp, name)
+        os.makedirs(testing_dir, exist_ok=True)
 
         # Create input file.
-        input_file = os.path.join(testing_temp, name + ".dat")
+        input_file = os.path.join(testing_dir, name + ".dat")
         mesh.write_input_file(input_file, add_script_to_header=False, **kwargs)
 
-        # Run 4C with the input file.
-        if restart is None:
-            child = subprocess.Popen(
-                [
-                    "mpirun",
-                    "-np",
-                    str(n_proc),
-                    four_c_release,
-                    os.path.join(testing_path, input_file),
-                    os.path.join(testing_temp, "xxx_" + name),
-                ],
-                cwd=testing_temp,
-                stdout=subprocess.PIPE,
-            )
-        else:
-            child = subprocess.Popen(
-                [
-                    "mpirun",
-                    "-np",
-                    str(n_proc),
-                    four_c_release,
-                    os.path.join(testing_path, input_file),
-                    os.path.join(testing_temp, "xxx_" + name),
-                    "restart={}".format(restart[0]),
-                    "restartfrom={}".format(restart[1]),
-                ],
-                cwd=testing_temp,
-                stdout=subprocess.PIPE,
-            )
-        child.communicate()[0]
-        self.assertEqual(0, child.returncode, msg="Test {} failed!".format(name))
-
-        # If successful delete created files directory.
-        if int(child.returncode) == 0 and delete_files:
-            os.remove(input_file)
-            if mesh._nox_xml_file is not None:
-                os.remove(os.path.join(testing_temp, mesh._nox_xml_file))
-            items = glob.glob(testing_temp + "/xxx_" + name + "*")
-            for item in items:
-                if os.path.isdir(item):
-                    shutil.rmtree(item)
-                else:
-                    os.remove(item)
+        return_code = run_four_c(
+            input_file,
+            testing_dir,
+            output_name=name,
+            n_proc=n_proc,
+            restart_step=restart[0],
+            restart_from=restart[1],
+        )
+        self.assertEqual(0, return_code, msg="Test {} failed!".format(name))
 
     def test_four_c_simulation_honeycomb_sphere_as_input(self):
         """
@@ -700,9 +652,8 @@ class TestFullFourC(unittest.TestCase):
         )
 
         # Run the simulation in 4C
-        self.run_four_c_test(
-            "dbc_to_nbc_initial", initial_simulation, delete_files=False
-        )
+        initial_run_name = "dbc_to_nbc_initial"
+        self.run_four_c_test(initial_run_name, initial_simulation)
 
         # Create and run the second simulation.
         restart_simulation, beam_set = create_model(n_steps=21)
@@ -723,8 +674,9 @@ class TestFullFourC(unittest.TestCase):
             restart_simulation,
             os.path.join(
                 testing_temp,
-                "xxx_dbc_to_nbc_initial_monitor_dbc",
-                "xxx_dbc_to_nbc_initial_102_monitor_dbc.csv",
+                initial_run_name,
+                f"{initial_run_name}_monitor_dbc",
+                f"{initial_run_name}_102_monitor_dbc.csv",
             ),
             n_dof=9,
             function=function_nbc,
@@ -748,19 +700,65 @@ class TestFullFourC(unittest.TestCase):
         self.run_four_c_test(
             "dbc_to_nbc_restart",
             restart_simulation,
-            restart=[2, "xxx_dbc_to_nbc_initial"],
-            delete_files=False,
+            restart=[2, f"../{initial_run_name}/{initial_run_name}"],
         )
 
-        # Delete all files from this test.
-        items = []
-        items.extend(glob.glob(testing_temp + "/xxx_dbc_to_nbc_*"))
-        items.extend(glob.glob(testing_temp + "/dbc_to_nbc_*"))
-        for item in items:
-            if os.path.isdir(item):
-                shutil.rmtree(item)
-            else:
-                os.remove(item)
+    def test_four_c_simulation_cantilever_convergence(self):
+        """Create multiple simulations of a cantilever beam. This is a legacy test that used to test
+        the simulation manager."""
+
+        def create_and_run_cantilever(n_el, *, n_proc=1):
+            """Create a cantilever beam for a convergence analysis."""
+
+            input_file = InputFile()
+            set_header_static(input_file, time_step=0.25, n_steps=4)
+            set_runtime_output(input_file, output_energy=True)
+            mat = MaterialReissner(radius=0.1, youngs_modulus=10000.0)
+            beam_set = create_beam_mesh_line(
+                input_file, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0], n_el=n_el
+            )
+            input_file.add(
+                BoundaryCondition(
+                    beam_set["start"],
+                    (
+                        "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0"
+                    ),
+                    bc_type=mpy.bc.dirichlet,
+                )
+            )
+            fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+            input_file.add(
+                fun,
+                BoundaryCondition(
+                    beam_set["end"],
+                    (
+                        "NUMDOF 9 ONOFF 0 0 1 0 0 0 0 0 0 VAL 0 0 -{} 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0"
+                    ),
+                    format_replacement=[0.5, fun],
+                    bc_type=mpy.bc.dirichlet,
+                ),
+            )
+            output_name = f"cantilever_convergence_{n_el}"
+            self.run_four_c_test(output_name, input_file, n_proc=n_proc)
+            testing_dir = os.path.join(testing_temp, output_name)
+            my_data = np.genfromtxt(
+                testing_dir + f"/{output_name}_energy.csv", delimiter=","
+            )
+            return my_data[-1, 2]
+
+        results = {}
+        for n_el in range(1, 7, 2):
+            results[str(n_el)] = create_and_run_cantilever(n_el)
+        results["ref"] = create_and_run_cantilever(40, n_proc=4)
+
+        results_ref = {
+            "5": 0.335081498526998,
+            "3": 0.335055487040675,
+            "1": 0.33453718896204,
+            "ref": 0.335085590674607,
+        }
+        for key in results_ref.keys():
+            self.assertTrue(abs(results[key] - results_ref[key]) < 1e-12)
 
 
 if __name__ == "__main__":

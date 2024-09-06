@@ -61,30 +61,6 @@ def skip_fail_test(self, message):
         self.skipTest(message)
 
 
-def get_four_c_path():
-    """Look for and return a path to the 4C executable."""
-
-    if "FOUR_C_RELEASE" in os.environ.keys():
-        path = os.environ["FOUR_C_RELEASE"]
-    else:
-        path = ""
-
-    # Check if the path exists.
-    if os.path.isfile(path):
-        return path
-    else:
-        # In the case that no path was found, check if the script is performed
-        # by a GitHub runner.
-        if TESTING_GITHUB:
-            raise ValueError("Path to 4C executable not found!")
-        else:
-            warnings.warn(
-                "Path to 4C executable not found. Did you set the "
-                "environment variable FOUR_C_RELEASE?"
-            )
-            return None
-
-
 # Define the testing paths
 testing_path = os.path.abspath(os.path.dirname(__file__))
 testing_input = os.path.join(testing_path, "reference-files")
