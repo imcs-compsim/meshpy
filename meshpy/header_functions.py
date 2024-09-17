@@ -75,6 +75,7 @@ def set_runtime_output(
     absolute_beam_positons=True,
     element_owner=True,
     element_gid=True,
+    element_mat_id=True,
     output_energy=False,
     output_strains=True,
     option_overwrite=False,
@@ -107,6 +108,8 @@ def set_runtime_output(
         written by default).
     element_gid: bool
         If the 4C internal GID of each element should be output.
+    element_mat_id: bool
+        If the 4C internal material ID of each element should be output.
     output_energy: bool
         If the energy output from 4C should be activated.
     output_strains: bool
@@ -137,7 +140,8 @@ def set_runtime_output(
         DISPLACEMENT                    yes
         STRESS_STRAIN                   {get_yes_no(output_stress_strain)}
         ELEMENT_OWNER                   {get_yes_no(element_owner)}
-        ELEMENT_GID                     {get_yes_no(element_gid)}""",
+        ELEMENT_GID                     {get_yes_no(element_gid)}
+        ELEMENT_MAT_ID                  {get_yes_no(element_mat_id)}""",
             option_overwrite=option_overwrite,
         )
     )
