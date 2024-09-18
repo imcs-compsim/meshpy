@@ -443,17 +443,69 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
     dummy_surf1 = radius_torus + radius_circle
     dummy_surf2 = radius_torus - radius_circle
 
+    # works for 2d, correct param space but extrusion diff
     ctrlpts_surf1 = [
-        [radius_torus, 0.0, radius_circle],
-        [dummy_surf1, 0.0, radius_circle],
-        [dummy_surf1, 0.0, 0.0],
-        [radius_torus, radius_torus, radius_circle],
-        [dummy_surf1, dummy_surf1, radius_circle],
-        [dummy_surf1, dummy_surf1, 0.0],
         [0.0, radius_torus, radius_circle],
         [0.0, dummy_surf1, radius_circle],
         [0.0, dummy_surf1, 0.0],
+        [radius_torus, radius_torus, radius_circle],
+        [dummy_surf1, dummy_surf1, radius_circle],
+        [dummy_surf1, dummy_surf1, 0.0],
+        [radius_torus, 0.0, radius_circle],
+        [dummy_surf1, 0.0, radius_circle],
+        [dummy_surf1, 0.0, 0.0]
     ]
+
+    # works for 2d, correct param space but extrusion diff
+    # ctrlpts_surf1 = [
+    #     [dummy_surf1, 0.0, 0.0],
+    #     [dummy_surf1, 0.0, radius_circle],
+    #     [radius_torus, 0.0, radius_circle],
+    #     [dummy_surf1, dummy_surf1, 0.0],
+    #     [dummy_surf1, dummy_surf1, radius_circle],
+    #     [radius_torus, radius_torus, radius_circle],
+    #     [0.0, dummy_surf1, 0.0],
+    #     [0.0, dummy_surf1, radius_circle],
+    #     [0.0, radius_torus, radius_circle],
+    # ]
+
+    # ctrlpts_surf1 = [
+    #     [0.0, dummy_surf1, 0.0],
+    #     [0.0, dummy_surf1, radius_circle],
+    #     [0.0, radius_torus, radius_circle],
+    #     [dummy_surf1, dummy_surf1, 0.0],
+    #     [dummy_surf1, dummy_surf1, radius_circle],
+    #     [radius_torus, radius_torus, radius_circle],
+    #     [dummy_surf1, 0.0, 0.0],
+    #     [dummy_surf1, 0.0, radius_circle],
+    #     [radius_torus, 0.0, radius_circle],
+    # ]
+
+    # first try
+    # ctrlpts_surf1 = [
+    #     [0.0, dummy_surf1, 0.0],
+    #     [dummy_surf1, dummy_surf1, 0.0],
+    #     [dummy_surf1, 0.0, 0.0],
+    #     [0.0, dummy_surf1, radius_circle],
+    #     [dummy_surf1, dummy_surf1, radius_circle],
+    #     [dummy_surf1, 0.0, radius_circle],
+    #     [0.0, radius_torus, radius_circle],
+    #     [radius_torus, radius_torus, radius_circle],
+    #     [radius_torus, 0.0, radius_circle],
+    # ]
+
+    # works for 2d but extrusion normal is different
+    # ctrlpts_surf1 = [
+    #     [radius_torus, 0.0, radius_circle],
+    #     [radius_torus, radius_torus, radius_circle],
+    #     [0.0, radius_torus, radius_circle],
+    #     [dummy_surf1, 0.0, radius_circle],
+    #     [dummy_surf1, dummy_surf1, radius_circle],
+    #     [0.0, dummy_surf1, radius_circle],
+    #     [dummy_surf1, 0.0, 0.0],
+    #     [dummy_surf1, dummy_surf1, 0.0],
+    #     [0.0, dummy_surf1, 0.0],
+    # ]
 
     ctrlpts_surf2 = [
         [dummy_surf1, 0.0, 0.0],
