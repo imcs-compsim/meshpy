@@ -532,15 +532,15 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
     ]
 
     ctrlpts_surf4 = [
-        [dummy_surf2, 0.0, 0.0],
-        [dummy_surf2, 0.0, radius_circle],
-        [radius_torus, 0.0, radius_circle],
-        [dummy_surf2, dummy_surf2, 0.0],
-        [dummy_surf2, dummy_surf2, radius_circle],
-        [radius_torus, radius_torus, radius_circle],
         [0.0, dummy_surf2, 0.0],
         [0.0, dummy_surf2, radius_circle],
         [0.0, radius_torus, radius_circle],
+        [dummy_surf2, dummy_surf2, 0.0],
+        [dummy_surf2, dummy_surf2, radius_circle],
+        [radius_torus, radius_torus, radius_circle],
+        [dummy_surf2, 0.0, 0.0],
+        [dummy_surf2, 0.0, radius_circle],
+        [radius_torus, 0.0, radius_circle],
     ]
 
     weights = [
