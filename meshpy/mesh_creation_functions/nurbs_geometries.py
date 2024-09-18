@@ -443,20 +443,6 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
     dummy_surf1 = radius_torus + radius_circle
     dummy_surf2 = radius_torus - radius_circle
 
-    # works for 2d, correct param space but extrusion diff
-    # ctrlpts_surf1 = [
-    #     [0.0, radius_torus, radius_circle],
-    #     [0.0, dummy_surf1, radius_circle],
-    #     [0.0, dummy_surf1, 0.0],
-    #     [radius_torus, radius_torus, radius_circle],
-    #     [dummy_surf1, dummy_surf1, radius_circle],
-    #     [dummy_surf1, dummy_surf1, 0.0],
-    #     [radius_torus, 0.0, radius_circle],
-    #     [dummy_surf1, 0.0, radius_circle],
-    #     [dummy_surf1, 0.0, 0.0]
-    # ]
-
-    # works for 2d, correct param space but extrusion diff
     ctrlpts_surf1 = [
         [dummy_surf1, 0.0, 0.0],
         [dummy_surf1, 0.0, radius_circle],
@@ -468,44 +454,6 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
         [0.0, dummy_surf1, radius_circle],
         [0.0, radius_torus, radius_circle],
     ]
-
-    # ctrlpts_surf1 = [
-    #     [0.0, dummy_surf1, 0.0],
-    #     [0.0, dummy_surf1, radius_circle],
-    #     [0.0, radius_torus, radius_circle],
-    #     [dummy_surf1, dummy_surf1, 0.0],
-    #     [dummy_surf1, dummy_surf1, radius_circle],
-    #     [radius_torus, radius_torus, radius_circle],
-    #     [dummy_surf1, 0.0, 0.0],
-    #     [dummy_surf1, 0.0, radius_circle],
-    #     [radius_torus, 0.0, radius_circle],
-    # ]
-
-    # first try
-    # ctrlpts_surf1 = [
-    #     [0.0, dummy_surf1, 0.0],
-    #     [dummy_surf1, dummy_surf1, 0.0],
-    #     [dummy_surf1, 0.0, 0.0],
-    #     [0.0, dummy_surf1, radius_circle],
-    #     [dummy_surf1, dummy_surf1, radius_circle],
-    #     [dummy_surf1, 0.0, radius_circle],
-    #     [0.0, radius_torus, radius_circle],
-    #     [radius_torus, radius_torus, radius_circle],
-    #     [radius_torus, 0.0, radius_circle],
-    # ]
-
-    # works for 2d but extrusion normal is different
-    # ctrlpts_surf1 = [
-    #     [radius_torus, 0.0, radius_circle],
-    #     [radius_torus, radius_torus, radius_circle],
-    #     [0.0, radius_torus, radius_circle],
-    #     [dummy_surf1, 0.0, radius_circle],
-    #     [dummy_surf1, dummy_surf1, radius_circle],
-    #     [0.0, dummy_surf1, radius_circle],
-    #     [dummy_surf1, 0.0, 0.0],
-    #     [dummy_surf1, dummy_surf1, 0.0],
-    #     [0.0, dummy_surf1, 0.0],
-    # ]
 
     ctrlpts_surf2 = [
         [dummy_surf1, 0.0, 0.0],
@@ -581,7 +529,7 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
 
     # Define the rotations and translations to rotate the base patches and form a complete torus
     tmp_trans = [
-        radius_torus,
+        radius_torus + radius_circle,
         radius_torus + radius_circle,
         radius_torus,
         radius_torus - radius_circle,
@@ -606,9 +554,9 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
     ]
 
     transform_surf4 = [
-        [(-tmp_trans[3], tmp_trans[3], 0), 90, 2],
-        [(-2 * tmp_trans[3], 0, 0), 180, 2],
-        [(-tmp_trans[3], -tmp_trans[3], 0), 270, 2],
+        [(-tmp_trans[3], -tmp_trans[3], 0), 90, 2],
+        [(0, -2*tmp_trans[3], 0), 180, 2],
+        [(tmp_trans[3], -tmp_trans[3], 0), 270, 2],
     ]
 
     # Rotate base patches and store them
