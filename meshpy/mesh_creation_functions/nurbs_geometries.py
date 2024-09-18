@@ -555,7 +555,7 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
 
     transform_surf4 = [
         [(-tmp_trans[3], -tmp_trans[3], 0), 90, 2],
-        [(0, -2*tmp_trans[3], 0), 180, 2],
+        [(0, -2 * tmp_trans[3], 0), 180, 2],
         [(tmp_trans[3], -tmp_trans[3], 0), 270, 2],
     ]
 
