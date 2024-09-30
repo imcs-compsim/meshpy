@@ -187,7 +187,7 @@ def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs)
         is_equal = compare_string_tolerance(
             reference_string, compare_string, rtol=rtol, atol=atol, **kwargs
         )
-    if not is_equal and not TESTING_GITHUB:
+    if not is_equal and not (get_env_variable("TESTING_GITHUB", default="0") == "1"):
         # Check if temporary directory exists, and creates it if necessary.
         os.makedirs(testing_temp, exist_ok=True)
 
