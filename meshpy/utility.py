@@ -368,3 +368,22 @@ def is_node_on_plane(
         )
 
     return distance < tol
+
+
+def get_env_variable(name, *, default="default_not_set"):
+    """Return the value of an environment variable
+
+    Args
+    ----
+    name: str
+        Name of the environment variable
+    default:
+        Value to be returned if the given named environment variable does
+        not exist. If this is not set and the name is not in the env
+        variables, then an error will be thrown.
+    """
+    if name in os.environ.keys():
+        return os.environ[name]
+    elif default == "default_not_set":
+        raise ValueError(f"Environment variable {name} is not set")
+    return default

@@ -44,45 +44,18 @@ from vtk.util import numpy_support as vtk_numpy
 from pyvista_utils.compare_grids import compare_grids
 
 
-# Global variable if this test is run by GitHub.
-if "TESTING_GITHUB" in os.environ.keys() and os.environ["TESTING_GITHUB"] == "1":
-    TESTING_GITHUB = True
-else:
-    TESTING_GITHUB = False
+# MeshPy imports
+from meshpy.utility import get_env_variable
 
 
 def skip_fail_test(self, message):
     """
     Skip or fail the test depending if the test are run in GitHub or not.
     """
-    if TESTING_GITHUB:
+    if get_env_variable("TESTING_GITHUB", default="0") == "1":
         self.skipTest(message)
     else:
         self.skipTest(message)
-
-
-def get_four_c_path():
-    """Look for and return a path to the 4C executable."""
-
-    if "FOUR_C_RELEASE" in os.environ.keys():
-        path = os.environ["FOUR_C_RELEASE"]
-    else:
-        path = ""
-
-    # Check if the path exists.
-    if os.path.isfile(path):
-        return path
-    else:
-        # In the case that no path was found, check if the script is performed
-        # by a GitHub runner.
-        if TESTING_GITHUB:
-            raise ValueError("Path to 4C executable not found!")
-        else:
-            warnings.warn(
-                "Path to 4C executable not found. Did you set the "
-                "environment variable FOUR_C_RELEASE?"
-            )
-            return None
 
 
 # Define the testing paths

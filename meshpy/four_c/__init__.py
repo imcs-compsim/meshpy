@@ -38,6 +38,7 @@ from .solid_shell_thickness_direction import (
     set_solid_shell_thickness_direction,
     visualize_third_parameter_direction_hex8,
 )
+from .run_four_c import run_four_c
 
 # Define the items that will be exported by default.
 __all__ = [
@@ -45,4 +46,5 @@ __all__ = [
     "dbc_monitor_to_input",
     "set_solid_shell_thickness_direction",
     "visualize_third_parameter_direction_hex8",
+    "run_four_c",
 ]
