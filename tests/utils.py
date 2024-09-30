@@ -44,18 +44,15 @@ from vtk.util import numpy_support as vtk_numpy
 from pyvista_utils.compare_grids import compare_grids
 
 
-# Global variable if this test is run by GitHub.
-if "TESTING_GITHUB" in os.environ.keys() and os.environ["TESTING_GITHUB"] == "1":
-    TESTING_GITHUB = True
-else:
-    TESTING_GITHUB = False
+# MeshPy imports
+from meshpy.utility import get_env_variable
 
 
 def skip_fail_test(self, message):
     """
     Skip or fail the test depending if the test are run in GitHub or not.
     """
-    if TESTING_GITHUB:
+    if get_env_variable("TESTING_GITHUB", default="0") == "1":
         self.skipTest(message)
     else:
         self.skipTest(message)

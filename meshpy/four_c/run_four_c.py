@@ -36,6 +36,9 @@ import sys
 import subprocess
 
 
+from ..utility import get_env_variable
+
+
 def run_four_c(
     input_file,
     output_dir,
@@ -84,14 +87,6 @@ def run_four_c(
     return_code: int
         Return code of 4C run
     """
-
-    def get_env_variable(name, *, fail_if_not_set=False, default=None):
-        """Return the value of an environment variable"""
-        if name in os.environ.keys():
-            return os.environ[name]
-        elif fail_if_not_set:
-            raise ValueError(f"Environment variable {name} is not set")
-        return default
 
     # Fist get all needed parameters
     if four_c_exe is None:
