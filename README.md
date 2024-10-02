@@ -34,29 +34,31 @@ A few things to keep in mind:
   Make sure to apply `black` to the changed source files.
 - Feel free to add yourself to the [CONTRIBUTORS](CONTRIBUTORS) file.
 
-
 ## Installation
 
 MeshPy is developed with `python3.12`.
 Other versions of Python might lead to issues.
-It is recommended to use virtual environments with `python`.
-On Debian systems the following packages have to be installed
-```bash
-sudo apt-get install python3-venv python3-dev
-```
+It is recommended to use a python environment container such as `conda` or `venv`.
+- `conda`:
+  A [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) environment can be created and loaded with
+  ```bash
+  conda create -n meshpy python=3.12
+  conda activate meshpy
+  ```
+- `venv`: Chose an appropriate directory for this, e.g., `/home/user/opt`.
+  A virtual environment can be created with (make sure that `python3` points to a `python3.12`).
+  - On Debian systems the following packages have to be installed:
+    ```bash
+    sudo apt-get install python3-venv python3-dev
+    ```
+  - Create and load the environment
+    ```bash
+    cd <path-to-env-folder>
+    python3 -m venv meshpy-env
+    source meshpy-env/bin/activate
+    ```
 
-Now a virtual environment can be created (chose an appropriate directory for this, e.g., `/home/user/opt`)
-
-```bash
-python3 -m venv meshpy-env
-```
-
-The created virtual environment can be loaded with
-```bash
-source meshpy-env/bin/activate
-```
-
-From now on we assume that the virtual enviroment is loaded.
+From now on we assume that the previously created environment is loaded.
 To install `meshpy` go to the repository root directory
 ```bash
 cd <path_to_meshpy>
