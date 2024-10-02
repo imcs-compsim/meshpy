@@ -40,7 +40,8 @@ from ..boundary_condition import BoundaryCondition
 
 class LocSysCondition(BoundaryCondition):
     """
-    This object handles the LocSys condition.
+    This object represents a locsys condition in 4C.
+    It allows to rotate the local coordinate system used to apply Dirichlet boundary conditions.
     """
 
     def __init__(
