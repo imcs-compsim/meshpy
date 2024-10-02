@@ -81,6 +81,7 @@ class BoundaryConditionBase(BaseMeshItemFull):
         if bc_key in (
             mpy.bc.dirichlet,
             mpy.bc.neumann,
+            mpy.bc.locsys,
             mpy.bc.beam_to_solid_surface_meshtying,
             mpy.bc.beam_to_solid_surface_contact,
             mpy.bc.beam_to_solid_volume_meshtying,

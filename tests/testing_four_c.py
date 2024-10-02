@@ -49,13 +49,18 @@ from meshpy import (
     InputFile,
     MaterialReissner,
     mpy,
+    Rotation,
 )
 from meshpy.four_c.beam_potential import BeamPotential
 from meshpy.four_c.solid_shell_thickness_direction import (
     set_solid_shell_thickness_direction,
     get_visualization_third_parameter_direction_hex8,
 )
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_helix
+from meshpy.four_c.locsys_condition import LocSysCondition
+from meshpy.mesh_creation_functions.beam_basic_geometry import (
+    create_beam_mesh_helix,
+    create_beam_mesh_line,
+)
 from meshpy.utility import is_node_on_plane
 
 
@@ -256,6 +261,48 @@ class Test4C(unittest.TestCase):
         grid = get_visualization_third_parameter_direction_hex8(mesh_dome)
         grid.save(test_file)
         compare_vtk(self, ref_file, test_file)
+
+    def test_meshpy_locsys_condition(self):
+        """Test case for point locsys condition for beams.
+        The testcase is similar to beam3r_herm2line3_static_locsys.dat, but with simpler material.
+        """
+
+        # Create the input file with function and material.
+        input_file = InputFile()
+
+        fun = Function("SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+        input_file.add(fun)
+
+        mat = MaterialReissner()
+        input_file.add(mat)
+
+        # Create the beam.
+        beam_set = create_beam_mesh_line(
+            input_file, Beam3rHerm2Line3, mat, [2.5, 2.5, 2.5], [4.5, 2.5, 2.5], n_el=1
+        )
+
+        # Add dirichlet boundary conditions.
+        input_file.add(
+            BoundaryCondition(
+                beam_set["start"],
+                "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0 0 0 0",
+                bc_type=mpy.bc.dirichlet,
+            )
+        )
+        # Add additional dirichlet boundary condtion to check if combination with locsys condition works.
+        input_file.add(
+            BoundaryCondition(
+                beam_set["end"],
+                "NUMDOF 9 ONOFF 1 0 0 0 0 0 0 0 0 VAL 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 1 0 0 0 0 0 0 0 0",
+                bc_type=mpy.bc.dirichlet,
+            )
+        )
+
+        # Add locsys condition with rotation
+        input_file.add(LocSysCondition(beam_set["end"], Rotation([0, 0, 1], 0.1)))
+
+        # Compare with the reference solution.
+        compare_test_result(self, input_file.get_string(header=False, check_nox=False))
 
 
 if __name__ == "__main__":
