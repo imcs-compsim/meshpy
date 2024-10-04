@@ -84,8 +84,8 @@ def empty_testing_directory():
 def compare_string_tolerance(
     reference, compare, *, rtol=None, atol=None, split_string=" "
 ):
-    """Compare two strings, all floating point values will be compared with an
-    absolute tolerance."""
+    """Compare two strings, all floating point values will be compared with a
+    tolerance."""
 
     def set_tol(tol):
         if tol is None:

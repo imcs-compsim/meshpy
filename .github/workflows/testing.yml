@@ -24,9 +24,7 @@ env:
   PYTHON_EXE: python3
   PYTHON_VENV: python-testing-environment
   # Meshpy can interact with cubitpy, to perform the corresponding tests,
-  # the following paths have to be set
-  CUBITPY_REPO: /home_local/github-runner/testing_lib/cubitpy_main
-  FOUR_C_PRE_EXODUS: /home_local/github-runner/testing_lib/four_c_master/release/pre_exodus
+  # the following path has to be set
   CUBIT_ROOT: /imcs/public/compsim/opt/cubit-15.2
   # Meshpy allows to perform geometric search functions with ArborX,
   # for this functionality we need Kokkos. On IMCS Ares this is provided
@@ -59,12 +57,6 @@ jobs:
           pip install .[CI-CD]
           # Check git configuration
           git config --list
-          # Install cubitpy
-          cd $CUBITPY_REPO
-          git checkout main
-          git pull
-          pip install .
-          cd $MESHPY_PATH
           # Print information on the python environment
           python --version
           pip list
@@ -114,7 +106,7 @@ jobs:
           pip install --upgrade pip
           # Install meshpy, it is not yet possible to globally install the ArborX binaries, so we
           # use the developement mode here.
-          pip install -e .
+          pip install -e .[CI-CD]
           # Print information on the python environment
           python --version
           pip list
@@ -144,12 +136,7 @@ jobs:
           # We have to update pip, otherwise there is a bug in the compilation of the cython code
           pip install --upgrade pip
           # Install meshpy
-          pip install .
-          # Install cubitpy
-          cd $CUBITPY_REPO
-          git pull
-          pip install .
-          cd $MESHPY_PATH
+          pip install .[CI-CD]
           # Print information on the python environment
           python --version
           pip list
