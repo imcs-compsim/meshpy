@@ -48,5 +48,6 @@ dynamic = ["version"]
 CI-CD = [
   "coverage==7.4.4",
   "coverage-badge",
+  "cubitpy@git+https://github.com/imcs-compsim/cubitpy.git@main",
   "setuptools" # Needed for coverage-badge
 ]
