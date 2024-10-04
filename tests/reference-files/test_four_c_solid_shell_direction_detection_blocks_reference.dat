@@ -6,6 +6,8 @@
 //     Universitaet der Bundeswehr Muenchen
 //     https://www.unibw.de/imcs-en
 // -----------------------------------------------------------------------------
+-----------------------------------------------------------------------MATERIALS
+MAT 1 MAT_BeamReissnerElastHyper YOUNG -1.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 3.141592653589793 SHEARCORR 1 MOMINPOL 1.5707963267948966 MOMIN2 0.7853981633974483 MOMIN3 0.7853981633974483
 ---------------------------------------------------------------------NODE COORDS
 NODE 1 COORD -0.05 -1 2
 NODE 2 COORD -0.05 -1 0
@@ -79,6 +81,9 @@ NODE 69 COORD 14 0.05 0
 NODE 70 COORD 14 0.05 1
 NODE 71 COORD 14 -0.05 -1
 NODE 72 COORD 14 0.05 -1
+NODE 73 COORD 0 0 0
+NODE 74 COORD 0.5 0 0
+NODE 75 COORD 1 0 0
 --------------------------------------------------------------STRUCTURE ELEMENTS
 1 SOLIDSH8 HEX8 1 2 3 4 5 6 7 8  MAT 1 KINEM nonlinear EAS none ANS none THICKDIR auto
 2 SOLIDSH8 HEX8 2 9 10 3 6 11 12 7  MAT 1 KINEM nonlinear EAS none ANS none THICKDIR auto
@@ -96,4 +101,5 @@ NODE 72 COORD 14 0.05 -1
 14 SOLID HEX8 56 63 64 57 60 65 66 61  MAT 1 KINEM nonlinear
 15 SOLID HEX8 59 60 61 62 67 68 69 70  MAT 1 KINEM nonlinear
 16 SOLID HEX8 60 65 66 61 68 71 72 69  MAT 1 KINEM nonlinear
+17 BEAM3R HERM2LINE3 73 75 74 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
 -----------------------------------------------------------------------------END
