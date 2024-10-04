@@ -202,55 +202,55 @@ def set_solid_shell_thickness_direction(
         raise ValueError("Expected a non empty element list")
 
     for element in elements:
-
         is_hex8 = isinstance(element, VolumeHEX8)
-        is_solid_shell = "SOLIDSH8" in element.dat_pre_nodes
+        if is_hex8:
+            is_solid_shell = "SOLIDSH8" in element.dat_pre_nodes
+            if is_solid_shell:
+                # Get the element center and the Jacobian at the center
+                (
+                    reference_position_center,
+                    jacobian_center,
+                ) = get_hex8_element_center_and_jacobian_mapping(element)
 
-        if is_hex8 and is_solid_shell:
+                # Depending on the chosen method, get the thickness direction
+                if selection_type == "thickness":
+                    thickness_direction = get_reordering_index_thickness(
+                        jacobian_center, identify_threshold=identify_threshold
+                    )
+                elif selection_type == "projection_director":
+                    thickness_direction = get_reordering_index_director_projection(
+                        jacobian_center, director, identify_threshold=identify_threshold
+                    )
+                elif selection_type == "projection_director_function":
+                    director = director_function(reference_position_center)
+                    thickness_direction = get_reordering_index_director_projection(
+                        jacobian_center, director, identify_threshold=identify_threshold
+                    )
+                else:
+                    raise ValueError(
+                        f'Got unexpected selection_type of value "{selection_type}"'
+                    )
 
-            # Get the element center and the Jacobian at the center
-            (
-                reference_position_center,
-                jacobian_center,
-            ) = get_hex8_element_center_and_jacobian_mapping(element)
+                n_apply_mapping = 0
+                if thickness_direction == 2:
+                    # We already have the orientation we want
+                    continue
+                elif thickness_direction == 1:
+                    # We need to apply the connectivity mapping once, i.e., the 2nd parameter
+                    # direction has to become the 3rd
+                    n_apply_mapping = 1
+                elif thickness_direction == 0:
+                    # We need to apply the connectivity mapping twice, i.e., the 1nd parameter
+                    # direction has to become the 3rd
+                    n_apply_mapping = 2
 
-            # Depending on the chosen method, get the thickness direction
-            if selection_type == "thickness":
-                thickness_direction = get_reordering_index_thickness(
-                    jacobian_center, identify_threshold=identify_threshold
-                )
-            elif selection_type == "projection_director":
-                thickness_direction = get_reordering_index_director_projection(
-                    jacobian_center, director, identify_threshold=identify_threshold
-                )
-            elif selection_type == "projection_director_function":
-                director = director_function(reference_position_center)
-                thickness_direction = get_reordering_index_director_projection(
-                    jacobian_center, director, identify_threshold=identify_threshold
-                )
-            else:
-                raise ValueError(
-                    f'Got unexpected selection_type of value "{selection_type}"'
-                )
-
-            n_apply_mapping = 0
-            if thickness_direction == 2:
-                # We already have the orientation we want
-                continue
-            elif thickness_direction == 1:
-                # We need to apply the connectivity mapping once, i.e., the 2nd parameter
-                # direction has to become the 3rd
-                n_apply_mapping = 1
-            elif thickness_direction == 0:
-                # We need to apply the connectivity mapping twice, i.e., the 1nd parameter
-                # direction has to become the 3rd
-                n_apply_mapping = 2
-
-            # This permutes the parameter coordinate the following way:
-            # [xi,eta,zeta]->[zeta,xi,eta]
-            mapping = [2, 6, 7, 3, 1, 5, 4, 0]
-            for _ in range(n_apply_mapping):
-                element.nodes = [element.nodes[local_index] for local_index in mapping]
+                # This permutes the parameter coordinate the following way:
+                # [xi,eta,zeta]->[zeta,xi,eta]
+                mapping = [2, 6, 7, 3, 1, 5, 4, 0]
+                for _ in range(n_apply_mapping):
+                    element.nodes = [
+                        element.nodes[local_index] for local_index in mapping
+                    ]
 
 
 def get_visualization_third_parameter_direction_hex8(mesh):
