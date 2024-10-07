@@ -98,6 +98,11 @@ cd <path_to_meshpy>/tests
 python3 performance_testing.py
 ```
 
+Before you are ready to contribute to MeshPy, please make sure to install the `pre-commit hook` within the python environment to follow our style guides:
+```bash
+pre-commit install
+```
+
 ### Optional dependency on [ArborX](https://github.com/arborx/ArborX)
 
 MeshPy can optionally execute its geometric search functions using the C++ library [ArborX](https://github.com/arborx/ArborX).
