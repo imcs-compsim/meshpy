@@ -194,6 +194,12 @@ class Test4C(unittest.TestCase):
                 testing_input, "4C_input_solid_shell_thickness_blocks.dat"
             )
         )
+        # Add a beam element to check the function also works with beam elements
+        mat = MaterialReissner()
+        create_beam_mesh_line(
+            mesh_block, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0], n_el=1
+        )
+        # Set the thickness direction and compare result
         set_solid_shell_thickness_direction(
             mesh_block.elements, selection_type="thickness"
         )
