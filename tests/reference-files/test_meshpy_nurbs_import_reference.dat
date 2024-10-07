@@ -160,6 +160,7 @@ DISPLACEMENT                          yes
 STRESS_STRAIN                         no
 ELEMENT_OWNER                         yes
 ELEMENT_GID                           yes
+ELEMENT_MAT_ID                        yes
 -----------------------------------------------------IO/RUNTIME VTK OUTPUT/BEAMS
 OUTPUT_BEAMS                          yes
 DISPLACEMENT                          yes
