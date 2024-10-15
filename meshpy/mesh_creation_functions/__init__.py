@@ -62,6 +62,9 @@ from .beam_stent import create_beam_mesh_stent
 # Wire.
 from .beam_wire import create_wire_fibers
 
+# Flow diverter
+from .beam_fd import create_beam_flow_diverter
+
 # Generic NURBS mesh creation function
 from .nurbs_generic import add_geomdl_nurbs_to_mesh
 
@@ -105,4 +108,5 @@ __all__ = [
     "create_nurbs_brick",
     "create_nurbs_sphere_surface",
     "create_nurbs_hemisphere_surface",
+    "create_beam_flow_diverter",
 ]
