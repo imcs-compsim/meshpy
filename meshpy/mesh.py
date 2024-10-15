@@ -37,6 +37,7 @@ sets, ...) for a meshed geometry.
 import os
 import warnings
 import copy
+import itertools
 import numpy as np
 import pyvista as pv
 
@@ -62,6 +63,18 @@ from .utility import (
     get_min_max_nodes,
 )
 from .geometric_search import find_close_points, point_partners_to_partner_indices
+
+
+def adjust_directon_of_other_node(node, node_pair_list, points_with_direction):
+
+    print(node, node_pair_list)
+    for node_pair in node_pair_list:
+        if node_pair[0] == node and points_with_direction[node] != 0:
+            points_with_direction[node_pair[1]] = points_with_direction[node] * (-1)
+        elif node_pair[1] == node and points_with_direction[node] != 0:
+            points_with_direction[node_pair[0]] = points_with_direction[node] * (-1)
+        # else:
+        #    raise ValueError("i have not found the corresponding entry - something is wrong")
 
 
 class Mesh:
@@ -631,6 +644,77 @@ class Mesh:
             # Connect close nodes with a coupling.
             for node_list in partner_nodes:
                 self.add(coupling_factory(node_list, coupling_type, coupling_dof_type))
+
+    def interwoove_nodes(self, *, nodes=None, axis=[1, 0, 0], fibers):
+        """move nodes in an interwooven fashion if the positions overlapping"""
+
+        # Get the nodes that should be checked for overlap.
+        if nodes is None:
+            node_list = self.nodes
+        else:
+            node_list = nodes
+        node_list = filter_nodes(node_list, middle_nodes=True)
+
+        # create tuple nodes
+        overlapping_nodes = find_close_nodes(node_list)
+        if len(overlapping_nodes) == 0:
+            # If no partner nodes were found, end this function.
+            return
+
+        # create a list with all nodes
+        unique_overlapping_node_list = list(itertools.chain(*overlapping_nodes))
+
+        # create a dict which tells is a node was already moved 0 = not yet moved; +/-1 for the direction
+        points_with_direction = {item: 0 for item in unique_overlapping_node_list}
+
+        if self.geometry_sets is None:
+            raise ValueError(
+                "Please add the single Fibers as geometry set to the mesh!"
+            )
+
+        # reduce all nodes to just the overlapping
+        for i in range(len(fibers)):
+            fibers[i] = [x for x in fibers[i] if x in unique_overlapping_node_list]
+
+        # simply loop through list
+        for node, direction in points_with_direction.items():
+
+            # if we find an unset value set it
+            if direction == 0:
+                # simply set first direction
+                points_with_direction[node] = -1
+
+                # and set counter part
+                adjust_directon_of_other_node(
+                    node, overlapping_nodes, points_with_direction
+                )
+
+                # fix remaining fiber
+                for fiber in fibers:
+                    if node in fiber:
+                        position = fiber.index(node)
+
+                        for i in range(position - 1, -1, -1):
+                            points_with_direction[fiber[i]] = points_with_direction[
+                                fiber[i + 1]
+                            ] * (-1)
+                            adjust_directon_of_other_node(
+                                fiber[i], overlapping_nodes, points_with_direction
+                            )
+
+                        for i in range(position, len(fiber)):
+                            points_with_direction[fiber[i]] = points_with_direction[
+                                fiber[i - 1]
+                            ] * (-1)
+                            adjust_directon_of_other_node(
+                                fiber[i], overlapping_nodes, points_with_direction
+                            )
+
+        # calculate the displacement according to direction and apply it to node
+        for node in unique_overlapping_node_list:
+            node.coordinates[0] = (
+                node.coordinates[0] + points_with_direction[node] * 0.1
+            )
 
     def unlink_nodes(self):
         """Delete the linked arrays and global indices in all nodes."""

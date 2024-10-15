@@ -68,6 +68,7 @@ from meshpy.mesh_creation_functions import (
     create_wire_fibers,
     create_beam_mesh_from_nurbs,
     create_beam_mesh_helix,
+    create_beam_flow_diverter,
 )
 from meshpy.mesh_creation_functions.beam_nurbs import (
     get_nurbs_curve_function_and_jacobian_for_integration,
@@ -951,6 +952,57 @@ class TestMeshCreationFunctions(unittest.TestCase):
             warning_straight_line=False,
         )
         input_file.add(helix_set)
+
+        # Check the output.
+        compare_test_result(self, input_file.get_string(header=False))
+
+    def test_mesh_creation_functions_flow_diverter(self):
+        """create a simple flow diverter based on beams"""
+
+        # middle points may overlap
+        mpy.check_overlapping_elements = False
+
+        # Create input file, mesh and material
+        input_file = InputFile()
+        mesh = Mesh()
+        mat = MaterialReissner(youngs_modulus=1e5, radius=0.01, shear_correction=1.0)
+
+        # create the flow diverter
+        create_beam_flow_diverter(mesh, Beam3rHerm2Line3, mat, length=2, radius=1)
+
+        # write output
+        input_file.add(mesh)
+
+        # Check the output.
+        compare_test_result(self, input_file.get_string(header=False))
+
+    def test_mesh_creation_functions_flow_diverter_interwooven(self):
+
+        # middle points may overlap
+        mpy.check_overlapping_elements = False
+
+        # Create input file, mesh and material
+        input_file = InputFile()
+        mesh = Mesh()
+        mat = MaterialReissner(youngs_modulus=1e5, radius=0.01, shear_correction=1.0)
+
+        # create a flow diverter
+        create_beam_flow_diverter(
+            mesh,
+            Beam3rHerm2Line3,
+            mat,
+            length=2,
+            radius=1,
+            n_turns=1,
+            n_wire=2,
+            n_el=2 * 2 * 1,
+            interwooven=True,
+        )
+
+        # write output
+        input_file.add(mesh)
+
+        mesh.display_pyvista()
 
         # Check the output.
         compare_test_result(self, input_file.get_string(header=False))
