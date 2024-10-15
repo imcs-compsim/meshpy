@@ -993,16 +993,14 @@ class TestMeshCreationFunctions(unittest.TestCase):
             mat,
             length=2,
             radius=1,
-            n_turns=1,
+            n_turns=2,
             n_wire=2,
-            n_el=2 * 2 * 1,
-            interwooven=True,
+            n_el=2 * 2 * 2,
+            interwoven="z-cylinder",
         )
 
         # write output
         input_file.add(mesh)
-
-        mesh.display_pyvista()
 
         # Check the output.
         compare_test_result(self, input_file.get_string(header=False))

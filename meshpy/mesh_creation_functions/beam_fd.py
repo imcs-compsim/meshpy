@@ -45,7 +45,7 @@ def create_beam_flow_diverter(
     n_turns=1,
     n_wire=1,
     n_el=10,
-    interwooven=False,
+    interwoven=False,
 ):
 
     """create a mesh consisting of multiple helix to represent a fd"""
@@ -76,5 +76,5 @@ def create_beam_flow_diverter(
             # add all single fibers as geometry set to mesh
             fibers.append(beam_set["line"].get_all_nodes())
 
-    if interwooven:
-        mesh.interwoove_nodes(fibers=fibers)
+    if interwoven == "z-cylinder":
+        mesh.interwove_nodes_of_z_cylinder(fibers=fibers, beam_radius=material.radius)

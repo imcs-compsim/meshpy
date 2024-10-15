@@ -67,14 +67,11 @@ from .geometric_search import find_close_points, point_partners_to_partner_indic
 
 def adjust_directon_of_other_node(node, node_pair_list, points_with_direction):
 
-    print(node, node_pair_list)
     for node_pair in node_pair_list:
         if node_pair[0] == node and points_with_direction[node] != 0:
             points_with_direction[node_pair[1]] = points_with_direction[node] * (-1)
         elif node_pair[1] == node and points_with_direction[node] != 0:
             points_with_direction[node_pair[0]] = points_with_direction[node] * (-1)
-        # else:
-        #    raise ValueError("i have not found the corresponding entry - something is wrong")
 
 
 class Mesh:
@@ -645,76 +642,99 @@ class Mesh:
             for node_list in partner_nodes:
                 self.add(coupling_factory(node_list, coupling_type, coupling_dof_type))
 
-    def interwoove_nodes(self, *, nodes=None, axis=[1, 0, 0], fibers):
-        """move nodes in an interwooven fashion if the positions overlapping"""
+    def interwove_nodes_of_z_cylinder(self, *, nodes=None, fibers, beam_radius=None):
+        """
+        Moves nodes in an interwoven fashion towards or outwards of the center of zylinder if the positions
+        of nodes of different fibers are overlapping.
+        Currently, this alghorithm works only , when the fibers( or helices) are directed within the within Z-Direction.
 
-        # Get the nodes that should be checked for overlap.
+        Args:
+        ----
+        nodes: [Node]
+            List of nodes to couple. If None is given, all nodes of the mesh
+            are coupled (including middle nodes).
+        fibers: [list]
+            These are lists containing all nodes which can be interpreted as a fiber.
+            Each node of a fiber will be moved according to the beam_radius if another node within another fiber coincides.
+        beam_radius:
+        """
+
+        if beam_radius is None:
+            raise ValueError(
+                "Please specifiy the beam radius, such that I know how far the node should be moved."
+            )
+
+        if len(fibers) < 2:
+            raise ValueError(
+                "I need at least two fibers, where I can search for coinciding points."
+            )
+
+        # Extract all nodes which should be checked for overlap.
         if nodes is None:
             node_list = self.nodes
         else:
             node_list = nodes
         node_list = filter_nodes(node_list, middle_nodes=True)
 
-        # create tuple nodes
+        # gather all nodes with same coordinate
         overlapping_nodes = find_close_nodes(node_list)
         if len(overlapping_nodes) == 0:
-            # If no partner nodes were found, end this function.
+            # If coinciding nodes were found, abort.
             return
 
         # create a list with all nodes
         unique_overlapping_node_list = list(itertools.chain(*overlapping_nodes))
 
-        # create a dict which tells is a node was already moved 0 = not yet moved; +/-1 for the direction
+        # create a dict which tells is a node was already moved:
+        # 0 = not yet moved; 1 was already initialized and the +/- indicates the moved direction
         points_with_direction = {item: 0 for item in unique_overlapping_node_list}
 
-        if self.geometry_sets is None:
-            raise ValueError(
-                "Please add the single Fibers as geometry set to the mesh!"
-            )
-
-        # reduce all nodes to just the overlapping
+        # reduce all nodes to just the overlapping ones and sort in ascending z-direction
         for i in range(len(fibers)):
             fibers[i] = [x for x in fibers[i] if x in unique_overlapping_node_list]
+            fibers[i] = sorted(fibers[i], key=lambda node: node.coordinates[2])
 
-        # simply loop through list
-        for node, direction in points_with_direction.items():
+        # Start by looping through every fiber
+        for fiber in fibers:
 
-            # if we find an unset value set it
-            if direction == 0:
-                # simply set first direction
-                points_with_direction[node] = -1
+            # add starting point if not yet defined
+            if points_with_direction[fiber[0]] == 0:
+                points_with_direction[fiber[0]] = -1
 
-                # and set counter part
+                # and move coinciding coordinate
                 adjust_directon_of_other_node(
-                    node, overlapping_nodes, points_with_direction
+                    fiber[0], overlapping_nodes, points_with_direction
                 )
 
-                # fix remaining fiber
-                for fiber in fibers:
-                    if node in fiber:
-                        position = fiber.index(node)
+            # for the rest we simply change sign compared to previous one
+            for i in range(1, len(fiber)):
+                points_with_direction[fiber[i]] = points_with_direction[
+                    fiber[i - 1]
+                ] * (-1)
 
-                        for i in range(position - 1, -1, -1):
-                            points_with_direction[fiber[i]] = points_with_direction[
-                                fiber[i + 1]
-                            ] * (-1)
-                            adjust_directon_of_other_node(
-                                fiber[i], overlapping_nodes, points_with_direction
-                            )
+                # and don't forget to adjust the partner node
+                adjust_directon_of_other_node(
+                    fiber[i], overlapping_nodes, points_with_direction
+                )
 
-                        for i in range(position, len(fiber)):
-                            points_with_direction[fiber[i]] = points_with_direction[
-                                fiber[i - 1]
-                            ] * (-1)
-                            adjust_directon_of_other_node(
-                                fiber[i], overlapping_nodes, points_with_direction
-                            )
+        # Since we have the directions, it's now time to apply the deformation
+        # loop over all coinciding nodes
+        for i in range(len(unique_overlapping_node_list)):
 
-        # calculate the displacement according to direction and apply it to node
-        for node in unique_overlapping_node_list:
-            node.coordinates[0] = (
-                node.coordinates[0] + points_with_direction[node] * 0.1
+            # extract coordinates of node
+            node_coord = unique_overlapping_node_list[i].coordinates
+
+            # transform to cylinder coordinates and adjust radius accoding to the +/- sign and the radius
+            rho_new = (
+                np.sqrt(node_coord[0] ** 2 + node_coord[1] ** 2)
+                + points_with_direction[unique_overlapping_node_list[i]] * beam_radius
             )
+
+            phi = np.arctan2(node_coord[0], node_coord[1])
+
+            # now transform the coordinates back into cartesion and save it.
+            unique_overlapping_node_list[i].coordinates[0] = rho_new * np.sin(phi)
+            unique_overlapping_node_list[i].coordinates[1] = rho_new * np.cos(phi)
 
     def unlink_nodes(self):
         """Delete the linked arrays and global indices in all nodes."""
