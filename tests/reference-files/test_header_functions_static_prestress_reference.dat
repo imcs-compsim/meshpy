@@ -68,4 +68,3 @@ GEOMETRY_PAIR_STRATEGY                gauss_point_projection_without_boundary_se
 GEOMETRY_PAIR_SEGMENTATION_SEARCH_POINTS   2
 ----------------------------------------------------------STRUCT NOX/Status Test
 XML File                            = NOT_DEFINED
------------------------------------------------------------------------------END

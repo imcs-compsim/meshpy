@@ -320,7 +320,6 @@ class InputFile(Mesh):
         "CELLSCATRA ELEMENTS",
         "ARTERY ELEMENTS",
         "ELECTROMAGNETIC ELEMENTS",
-        "END",
     ]
 
     def __init__(self, *, description=None, dat_file=None, cubit=None):
@@ -617,7 +616,7 @@ class InputFile(Mesh):
                 self.add_section(
                     InputSectionMultiKey(section_name, section_data, **kwargs)
                 )
-            elif section_name in ("DESIGN DESCRIPTION", "END"):
+            elif section_name in ("DESIGN DESCRIPTION",):
                 # Skip those sections as they won't be used!
                 pass
             else:
@@ -932,9 +931,6 @@ class InputFile(Mesh):
         get_section_dat("NODE COORDS", all_nodes)
         get_section_dat("STRUCTURE ELEMENTS", all_elements_structure)
         get_section_dat("FLUID ELEMENTS", self.dat_elements_fluid)
-
-        # The last section is END
-        lines.extend(InputSection("END").get_dat_lines())
 
         # Add end text.
         if end_text is not None:

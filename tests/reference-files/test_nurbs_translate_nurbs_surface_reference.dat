@@ -125,4 +125,3 @@ CP 20 COORD -1.165 -1.625 3.7 1.0
 4 WALLNURBS NURBS9 6 7 8 10 11 12 14 15 16  MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
 5 WALLNURBS NURBS9 9 10 11 13 14 15 17 18 19  MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
 6 WALLNURBS NURBS9 10 11 12 14 15 16 18 19 20  MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
------------------------------------------------------------------------------END
