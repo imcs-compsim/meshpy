@@ -87,4 +87,3 @@ NODE        27 COORD  5.0000000000000000e-01  5.0000000000000000e-01 -5.00000000
         6 SOLID HEX8 6 11 12 7 20 23 24 21 MAT 1 KINEM nonlinear
         7 SOLID HEX8 8 7 15 16 22 21 25 26 MAT 1 KINEM nonlinear
         8 SOLID HEX8 7 12 18 15 21 24 27 25 MAT 1 KINEM nonlinear
----------------------------------------------------------------END

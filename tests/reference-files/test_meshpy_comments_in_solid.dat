@@ -106,4 +106,3 @@ NODE        16 COORD  5.0000000000000003e-02  5.0000000000000003e-02 -1.00000000
 1 SOLIDH8 HEX8  1 2 3 4 5 6 7 8    MAT 1 KINEM nonlinear EAS none
 2 SOLIDH8 HEX8  2 9 10 3 6 11 12 7    MAT 1 KINEM nonlinear EAS none
 3 SOLIDH8 HEX8  9 13 14 10 11 15 16 12    MAT 1 KINEM nonlinear EAS none
------------------------------------------------------------------------------END

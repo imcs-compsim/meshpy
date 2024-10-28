@@ -80,4 +80,3 @@ INTEGRATION_POINTS                    yes
 AVERAGED_NORMALS                      yes
 ----------------------------------------------------------STRUCT NOX/Status Test
 XML File                            = NOT_DEFINED
------------------------------------------------------------------------------END

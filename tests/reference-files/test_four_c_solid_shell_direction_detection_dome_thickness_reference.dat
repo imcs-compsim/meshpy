@@ -154,4 +154,3 @@ NODE 104 COORD 0.93216592927 0.195173785752 0.550430625659
 40 SOLIDSH8 HEX8 103 26 30 80 104 28 32 82  MAT 1 KINEM nonlinear EAS none ANS none THICKDIR auto
 41 SOLIDSH8 HEX8 103 80 96 77 104 82 98 78  MAT 1 KINEM nonlinear EAS none ANS none THICKDIR auto
 42 SOLIDSH8 HEX8 103 77 14 18 104 78 16 20  MAT 1 KINEM nonlinear EAS none ANS none THICKDIR auto
------------------------------------------------------------------------------END

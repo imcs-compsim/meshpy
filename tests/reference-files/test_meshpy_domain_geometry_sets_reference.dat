@@ -16,4 +16,3 @@ PARTITION                             structured
 EDGE fluid y+ z+ DLINE 1
 -------------------------------------------------------------DSURF-NODE TOPOLOGY
 SIDE fluid z+ DSURFACE 1
------------------------------------------------------------------------------END
