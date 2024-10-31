@@ -600,7 +600,6 @@ class TestMeshpy(unittest.TestCase):
         """
 
         # Create input file.
-        material = MaterialKirchhoff(radius=0.1, youngs_modulus=1000)
         input_file = InputFile()
 
         with warnings.catch_warnings():
@@ -609,6 +608,9 @@ class TestMeshpy(unittest.TestCase):
 
             # Loop over options.
             for is_fad in (True, False):
+                material = MaterialKirchhoff(
+                    radius=0.1, youngs_modulus=1000, is_fad=is_fad
+                )
                 for weak in (True, False):
                     for rotvec in (True, False):
                         # Define the beam object factory function for the
