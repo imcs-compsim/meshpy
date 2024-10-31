@@ -189,8 +189,9 @@ class MaterialReissnerElastoplastic(MaterialReissner):
 class MaterialKirchhoff(MaterialBeam):
     """Holds material definition for Kirchhoff beams."""
 
-    def __init__(self, **kwargs):
+    def __init__(self, is_fad=False, **kwargs):
         super().__init__(material_string="MAT_BeamKirchhoffElastHyper", **kwargs)
+        self.is_fad = is_fad
 
     def _get_dat(self):
         """Return the line for this material."""
@@ -218,7 +219,7 @@ class MaterialKirchhoff(MaterialBeam):
                 "A combination is not possible"
             )
         string = "MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} "
-        string += "MOMINPOL {} MOMIN2 {} MOMIN3 {}"
+        string += "MOMINPOL {} MOMIN2 {} MOMIN3 {} FAD {}"
         return string.format(
             self.n_global,
             self.material_string,
@@ -229,6 +230,8 @@ class MaterialKirchhoff(MaterialBeam):
             polar,
             mom2,
             mom3,
+            # TODO: replace this with a common utils function
+            "yes" if self.is_fad else "no",
         )
 
 
