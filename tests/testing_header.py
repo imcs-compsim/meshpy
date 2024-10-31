@@ -31,7 +31,7 @@
 """
 This script is used to test that all headers in the repository are correct.
 
-This file is adapted from LaTeX2AI (https://github.com/stoani89/LaTeX2AI).
+This file is adapted from LaTeX2AI (https://github.com/isteinbrecher/LaTeX2AI).
 """
 
 # Import python modules.

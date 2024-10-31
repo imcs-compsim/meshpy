@@ -1,0 +1,47 @@
+// -----------------------------------------------------------------------------
+// This input file was created with MeshPy.
+// Copyright (c) 2018-2024
+//     Ivo Steinbrecher
+//     Institute for Mathematics and Computer-Based Simulation
+//     Universitaet der Bundeswehr Muenchen
+//     https://www.unibw.de/imcs-en
+// -----------------------------------------------------------------------------
+---------------------------------------------------------------------PROBLEM TYP
+PROBLEMTYP                            Structure
+RESTART                               0
+------------------------------------------------------------------------------IO
+OUTPUT_BIN                            no
+STRUCT_DISP                           No
+STRUCT_STRESS                         no
+STRUCT_STRAIN                         no
+FILESTEPS                             1000
+VERBOSITY                             Standard
+--------------------------------------------------------------STRUCTURAL DYNAMIC
+LINEAR_SOLVER                         1
+INT_STRATEGY                          Standard
+DYNAMICTYP                            Statics
+RESULTSEVRY                           1
+NLNSOL                                fullnewton
+PREDICT                               TangDis
+PRESTRESS                             none
+PRESTRESSTIME                         0
+TIMESTEP                              0.12352941176470589
+NUMSTEP                               17
+MAXTIME                               2.1
+LOADLIN                               no
+------------------------------------------------------------------------SOLVER 1
+NAME                                  Structure_Solver
+SOLVER                                Superlu
+-------------------------------------------------------------STRUCT NOX/Printing
+Error                               = Yes
+Warning                             = Yes
+Outer Iteration                     = Yes
+Inner Iteration                     = No
+Parameters                          = No
+Details                             = Yes
+Outer Iteration StatusTest          = Yes
+Linear Solver Details               = Yes
+Test Details                        = Yes
+Debug                               = No
+----------------------------------------------------------STRUCT NOX/Status Test
+XML File                            = NOT_DEFINED
