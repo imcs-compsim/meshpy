@@ -354,6 +354,7 @@ def set_header_static(
     *,
     time_step=None,
     n_steps=None,
+    total_time=None,
     max_iter=20,
     tol_residuum=1e-8,
     tol_increment=1e-10,
@@ -368,6 +369,9 @@ def set_header_static(
     """
     Set the default parameters for a static structure analysis.
 
+    At least two of the three time stepping keyword arguments ["time_step",
+    "n_steps", "total_time"] have to be set.
+
     Args
     ----
     input_file:
@@ -376,6 +380,8 @@ def set_header_static(
         Time increment per step.
     n_steps: int
         Number of time steps.
+    total_time: float
+        Total time of simulation
     max_iter: int
         Maximal number of Newton iterations.
     tol_residuum: float
@@ -425,6 +431,22 @@ def set_header_static(
         )
     )
 
+    # Set the time step parameters
+    given_time_arguments = sum(
+        1 for arg in (time_step, n_steps, total_time) if arg is not None
+    )
+    if given_time_arguments < 2:
+        raise ValueError(
+            'At least two of the following arguments "time_step", "n_steps" or '
+            '"total_time" are required'
+        )
+    if time_step is None:
+        time_step = total_time / n_steps
+    elif n_steps is None:
+        n_steps = round(total_time / time_step)
+    elif total_time is None:
+        total_time = time_step * n_steps
+
     input_file.add(
         InputSection(
             "STRUCTURAL DYNAMIC",
@@ -439,7 +461,7 @@ def set_header_static(
         PRESTRESSTIME     {prestress_time}
         TIMESTEP          {time_step}
         NUMSTEP           {n_steps}
-        MAXTIME           {time_step * n_steps}
+        MAXTIME           {total_time}
         LOADLIN           {get_yes_no(load_lin)}
         """,
             option_overwrite=option_overwrite,
