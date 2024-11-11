@@ -407,8 +407,8 @@ class TestMeshCreationFunctions(unittest.TestCase):
         ]
 
         for t, result_r, result_dr in zip(t_values, results_r, results_dr):
-            self.assertTrue(np.allclose(r(t), result_r, atol=mpy.eps_pos))
-            self.assertTrue(np.allclose(dr(t), result_dr, atol=mpy.eps_pos))
+            self.assertTrue(np.allclose(r(t), result_r, atol=mpy.eps_pos, rtol=0.0))
+            self.assertTrue(np.allclose(dr(t), result_dr, atol=mpy.eps_pos, rtol=0.0))
 
     def test_mesh_creation_functions_node_continuation(self):
         """Test that the node continuation function work as expected."""
