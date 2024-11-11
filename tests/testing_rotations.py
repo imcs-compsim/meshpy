@@ -270,6 +270,69 @@ class TestRotation(unittest.TestCase):
                 "test_rotation_matrix: compare t2",
             )
 
+    def test_transformation_matrix(self):
+        """Test that the transformation matrix is computed correctly"""
+
+        rotation_vector_large = [1.0, 2.0, np.pi / 5.0]
+        rotation_large = Rotation.from_rotation_vector(rotation_vector_large)
+        rotation_vector_small = (
+            rotation_vector_large
+            / np.linalg.norm(rotation_vector_large)
+            / 10.0
+            * mpy.eps_quaternion
+        )
+        rotation_small = Rotation.from_rotation_vector(rotation_vector_small)
+
+        # Test transformation matrix
+        transformation_matrix_large_reference = np.array(
+            [
+                [0.44154375784863664, 0.45016106128606925, -0.5440964474342915],
+                [0.05812896596538622, 0.8227612782872282, 0.47165325065541175],
+                [0.7037804689849043, -0.15228520755418617, 0.3646374659356807],
+            ]
+        )
+        self.assertTrue(
+            np.allclose(
+                rotation_large.get_transformation_matrix(),
+                transformation_matrix_large_reference,
+                atol=mpy.eps_quaternion,
+                rtol=0.0,
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                rotation_small.get_transformation_matrix(),
+                np.identity(3),
+                atol=mpy.eps_quaternion,
+                rtol=0.0,
+            )
+        )
+
+        # Test transformation matrix inverse
+        transformation_matrix_inverse_large_reference = np.array(
+            [
+                [0.5959488405656388, -0.13028167626739834, 1.0577668483049911],
+                [0.4980368544505602, 0.8717652242030102, -0.3844663033900173],
+                [-0.9422331516950085, 0.6155336966099826, 0.5403060272710477],
+            ]
+        )
+        self.assertTrue(
+            np.allclose(
+                rotation_large.get_transformation_matrix_inv(),
+                transformation_matrix_inverse_large_reference,
+                atol=mpy.eps_quaternion,
+                rtol=0.0,
+            )
+        )
+        self.assertTrue(
+            np.allclose(
+                rotation_small.get_transformation_matrix_inv(),
+                np.identity(3),
+                atol=mpy.eps_quaternion,
+                rtol=0.0,
+            )
+        )
+
     def test_smallest_rotation_triad(self):
         """
         Test that the smallest rotation triad is calculated correctly.
