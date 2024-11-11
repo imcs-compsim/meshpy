@@ -408,9 +408,9 @@ def set_header_static(
     # Set the parameters for a static analysis.
     input_file.add(
         InputSection(
-            "PROBLEM TYP",
+            "PROBLEM TYPE",
             """
-        PROBLEMTYP Structure
+        PROBLEMTYPE Structure
         RESTART    0
         """,
             option_overwrite=option_overwrite,
@@ -453,7 +453,7 @@ def set_header_static(
             f"""
         LINEAR_SOLVER     1
         INT_STRATEGY      Standard
-        DYNAMICTYP        Statics
+        DYNAMICTYPE       Statics
         RESULTSEVRY       1
         NLNSOL            fullnewton
         PREDICT           TangDis

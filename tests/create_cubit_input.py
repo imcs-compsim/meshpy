@@ -110,8 +110,8 @@ def create_tube_cubit():
 
     # Set header.
     cubit.head = """
-        ------------------------------------------------------------PROBLEM TYP
-        PROBLEMTYP                      Structure
+        -----------------------------------------------------------PROBLEM TYPE
+        PROBLEMTYPE                     Structure
         RESTART                         0
         ----------------------------------------------------------DISCRETISATION
         NUMFLUIDDIS                     0
@@ -133,7 +133,7 @@ def create_tube_cubit():
         -----------------------------------------------------STRUCTURAL DYNAMIC
         LINEAR_SOLVER                   1
         INT_STRATEGY                    Standard
-        DYNAMICTYP                      Statics
+        DYNAMICTYPE                     Statics
         RESULTSEVRY                     1
         RESTARTEVRY                     5
         NLNSOL                          fullnewton
