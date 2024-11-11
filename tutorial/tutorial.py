@@ -275,8 +275,8 @@ def meshpy_tutorial(base_dir, preview=False):
         """
         ------------------------------------------------------------------TITLE
         meshpy tutorial
-        ------------------------------------------------------------PROBLEM TYP
-        PROBLEMTYP                            Structure
+        -----------------------------------------------------------PROBLEM TYPE
+        PROBLEMTYPE                           Structure
         RESTART                               0
         ---------------------------------------------------------------------IO
         OUTPUT_BIN                            no
@@ -288,7 +288,7 @@ def meshpy_tutorial(base_dir, preview=False):
         -----------------------------------------------------STRUCTURAL DYNAMIC
         LINEAR_SOLVER                         1
         INT_STRATEGY                          Standard
-        DYNAMICTYP                            Statics
+        DYNAMICTYPE                           Statics
         RESULTSEVRY                           1
         NLNSOL                                fullnewton
         TIMESTEP                              0.1

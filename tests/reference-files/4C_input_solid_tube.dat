@@ -1,6 +1,6 @@
 
-------------------------------------------------------------PROBLEM TYP
-PROBLEMTYP                      Structure
+-----------------------------------------------------------PROBLEM TYPE
+PROBLEMTYPE                     Structure
 RESTART                         0
 ----------------------------------------------------------DISCRETISATION
 NUMFLUIDDIS                     0
@@ -22,7 +22,7 @@ DISPLACEMENT                    Yes
 -----------------------------------------------------STRUCTURAL DYNAMIC
 LINEAR_SOLVER                   1
 INT_STRATEGY                    Standard
-DYNAMICTYP                      Statics
+DYNAMICTYPE                     Statics
 RESULTSEVRY                     1
 RESTARTEVRY                     5
 NLNSOL                          fullnewton
