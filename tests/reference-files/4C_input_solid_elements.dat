@@ -5,8 +5,8 @@ created by pre_exodus
 //NODES       419
 DIM           3
 
-------------------------------------------------------------PROBLEM TYP
-PROBLEMTYP                      Structure
+-----------------------------------------------------------PROBLEM TYPE
+PROBLEMTYPE                     Structure
 ---------------------------------------------------------------------IO
 OUTPUT_BIN                      Yes
 STRUCT_DISP                     Yes
@@ -21,7 +21,7 @@ DISPLACEMENT                    Yes
 -----------------------------------------------------STRUCTURAL DYNAMIC
 LINEAR_SOLVER                   1
 INT_STRATEGY                    Standard
-DYNAMICTYP                      Statics
+DYNAMICTYPE                     Statics
 TIMESTEP                        0.1
 NUMSTEP                         10
 TOLRES                          1.0E-6

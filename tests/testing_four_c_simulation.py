@@ -343,8 +343,8 @@ class TestFullFourC(unittest.TestCase):
         input_file.add(InputSection("PROBLEM SIZE", "DIM 3"))
         input_file.add(
             """
-        ------------------------------------PROBLEM TYP
-        PROBLEMTYP                            Structure
+        -----------------------------------PROBLEM TYPE
+        PROBLEMTYPE                           Structure
         RESTART                               0
         --------------------------------------IO
         OUTPUT_BIN                            No
@@ -368,7 +368,7 @@ class TestFullFourC(unittest.TestCase):
             ------------------------------------STRUCTURAL DYNAMIC
             LINEAR_SOLVER                         1
             INT_STRATEGY                          Standard
-            DYNAMICTYP                            Statics
+            DYNAMICTYPE                           Statics
             RESULTSEVRY                           1
             NLNSOL                                fullnewton
             PREDICT                               TangDis

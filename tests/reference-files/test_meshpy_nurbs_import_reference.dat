@@ -6,8 +6,8 @@
 //     Universitaet der Bundeswehr Muenchen
 //     https://www.unibw.de/imcs-en
 // -----------------------------------------------------------------------------
----------------------------------------------------------------------PROBLEM TYP
-PROBLEMTYP                            Structure
+--------------------------------------------------------------------PROBLEM TYPE
+PROBLEMTYPE                           Structure
 RESTART                               0
 SHAPEFCT                              Nurbs
 -----------------------------------------------------------STRUCTURE KNOTVECTORS
@@ -111,7 +111,7 @@ VERBOSITY                             Standard
 --------------------------------------------------------------STRUCTURAL DYNAMIC
 LINEAR_SOLVER                         1
 INT_STRATEGY                          Standard
-DYNAMICTYP                            Statics
+DYNAMICTYPE                           Statics
 RESULTSEVRY                           1
 NLNSOL                                fullnewton
 PREDICT                               TangDis
