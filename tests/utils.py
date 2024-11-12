@@ -41,7 +41,7 @@ import warnings
 import xml.etree.ElementTree as ET
 import vtk
 from vtk.util import numpy_support as vtk_numpy
-from vtk_utils.compare_grids import compare_grids
+from pyvista_utils.compare_grids import compare_grids
 
 
 # MeshPy imports
