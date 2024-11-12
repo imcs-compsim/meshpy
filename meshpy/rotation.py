@@ -214,21 +214,27 @@ class Rotation:
             return phi * self.q[1:] / norm
 
     def get_transformation_matrix(self):
-        """Return the transformation matrix for this rotation"""
+        """Return the transformation matrix for this rotation
+
+        The transformation matrix maps the (infinitesimal) multiplicative rotational
+        increments onto the additive ones."""
 
         omega = self.get_rotation_vector()
         omega_norm = np.linalg.norm(omega)
-        omega_skew = skew_matrix(omega)
 
         # We have to take the inverse of the the rotation angle here, therefore,
         # we have a branch for small angles where the singularity is not present.
         if omega_norm**2 > mpy.eps_quaternion:
-            alpha = np.sin(omega_norm) / omega_norm
-            beta = 2.0 * (1.0 - np.cos(omega_norm)) / omega_norm**2
+            # Taken from Jelenic and Crisfield (1999) Equation (2.5)
+            omega_dir = omega / omega_norm
+            omega_skew = skew_matrix(omega)
             transformation_matrix = (
-                np.identity(3)
-                - 0.5 * beta * omega_skew
-                + (1.0 - alpha) / omega_norm**2 * (np.dot(omega_skew, omega_skew))
+                np.outer(omega_dir, omega_dir)
+                - 0.5 * omega_skew
+                + 0.5
+                * omega_norm
+                / np.tan(0.5 * omega_norm)
+                * (np.identity(3) - np.outer(omega_dir, omega_dir))
             )
         else:
             # This is the constant part of the Taylor series expansion. If this
@@ -238,24 +244,24 @@ class Rotation:
         return transformation_matrix
 
     def get_transformation_matrix_inv(self):
-        """Return the inverse of the transformation matrix for this rotation"""
+        """Return the inverse of the transformation matrix for this rotation
+
+        The inverse of the transformation matrix maps the (infinitesimal)
+        additive rotational increments onto the multiplicative ones."""
 
         omega = self.get_rotation_vector()
         omega_norm = np.linalg.norm(omega)
-        omega_skew = skew_matrix(omega)
 
         # We have to take the inverse of the the rotation angle here, therefore,
         # we have a branch for small angles where the singularity is not present.
         if omega_norm**2 > mpy.eps_quaternion:
-            alpha = np.sin(omega_norm) / omega_norm
-            beta = 2.0 * (1.0 - np.cos(omega_norm)) / omega_norm**2
+            # Taken from Jelenic and Crisfield (1999) Equation (2.5)
+            omega_dir = omega / omega_norm
+            omega_skew = skew_matrix(omega)
             transformation_matrix_inverse = (
-                np.identity(3)
-                + 0.5 * omega_skew
-                + 1.0
-                / omega_norm**2
-                * (1 - alpha / beta)
-                * (np.dot(omega_skew, omega_skew))
+                (1.0 - np.sin(omega_norm) / omega_norm) * np.outer(omega_dir, omega_dir)
+                + np.sin(omega_norm) / omega_norm * np.identity(3)
+                + (1.0 - np.cos(omega_norm)) / omega_norm**2 * omega_skew
             )
         else:
             # This is the constant part of the Taylor series expansion. If this
