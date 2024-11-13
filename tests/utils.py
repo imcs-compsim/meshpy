@@ -33,15 +33,15 @@ Define utility functions for the testing process.
 """
 
 # Python imports.
-import os
 import numpy as np
+import os
 import shutil
 import subprocess
-import warnings
-import xml.etree.ElementTree as ET
 import vtk
 from vtk.util import numpy_support as vtk_numpy
 from vtk_utils.compare_grids import compare_grids
+import warnings
+import xml.etree.ElementTree as ET
 
 
 # MeshPy imports

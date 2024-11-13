@@ -20,6 +20,8 @@ env:
   # Some tests require the 4C executable to check if the created input file
   # works with 4C.
   MESHPY_FOUR_C_EXE: /home_local/github-runner/testing_lib/four_c_master/release/4C
+  # Specify the testing directory
+  MESHPY_TESTING_DIR: ${{github.workspace}}/tests/testing-tmp/
   # Python executable and virtual environment name
   PYTHON_EXE: python3
   PYTHON_VENV: python-testing-environment
@@ -72,6 +74,11 @@ jobs:
           # If we did not exit earlier, raise an error here
           exit 1
           ls
+      - name: Upload Results
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{github.job}}-${{github.run_number}}
+          path: ${{env.MESHPY_TESTING_DIR}}
 
   geometric-search-testing:
     name: geometric-search-testing
