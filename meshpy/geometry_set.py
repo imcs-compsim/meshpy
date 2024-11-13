@@ -219,7 +219,8 @@ class GeometrySet(GeometrySetBase):
             nodes = []
             for element in self.geometry_objects[mpy.geo.line]:
                 nodes.extend(element.nodes)
-            return list(set(nodes))
+            # Remove duplicates while preserving order
+            return list(dict.fromkeys(nodes))
         else:
             raise TypeError(
                 "Currently GeometrySet are only implemented for points and lines"
