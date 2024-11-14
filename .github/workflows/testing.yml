@@ -75,6 +75,7 @@ jobs:
           exit 1
           ls
       - name: Upload Results
+        if: failure()
         uses: actions/upload-artifact@v3
         with:
           name: ${{github.job}}-${{github.run_number}}
