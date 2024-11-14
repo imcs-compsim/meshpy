@@ -86,7 +86,6 @@ tests with 4C
 export MESHPY_FOUR_C_EXE=path_to_4C
 ```
 
-
 To check if everything worked as expected, run the tests
 ```bash
 cd <path_to_meshpy>/tests
