@@ -297,6 +297,10 @@ class InputFile(Mesh):
             mpy.geo.point,
         ): "DESIGN POINT PENALTY COUPLING CONDITIONS",
         (
+            mpy.bc.beam_to_beam_interaction,
+            mpy.geo.line,
+        ): "BEAM INTERACTION/BEAM TO BEAM CONTACT CONDITIONS",
+        (
             "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
             mpy.geo.surface,
         ): "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
