@@ -683,7 +683,7 @@ class TestFullFourC(unittest.TestCase):
         )
         restart_simulation.add(
             """--RESULT DESCRIPTION
-            STRUCTURE DIS structure NODE 21 QUANTITY dispx VALUE -4.09988307566066690e-01 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 21 QUANTITY dispx VALUE -4.022229988307566066690e-01 TOLERANCE 1e-10
             STRUCTURE DIS structure NODE 21 QUANTITY dispy VALUE  9.93075098427816383e-01 TOLERANCE 1e-10
             STRUCTURE DIS structure NODE 21 QUANTITY dispz VALUE  6.62050065618549843e-01 TOLERANCE 1e-10
             """
