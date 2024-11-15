@@ -21,7 +21,7 @@ env:
   # works with 4C.
   MESHPY_FOUR_C_EXE: /home_local/github-runner/testing_lib/four_c_master/release/4C
   # Python executable and virtual environment name
-  PYTHON_EXE: python3
+  PYTHON_EXE: python
   PYTHON_VENV: python-testing-environment
   # Meshpy can interact with cubitpy, to perform the corresponding tests,
   # the following path has to be set
@@ -112,7 +112,7 @@ jobs:
           pip list
           # Run tests
           cd tests
-          python3 testing_geometric_search.py
+          python testing_geometric_search.py
 
   performance-test:
     name: meshpy-performance-testing
@@ -142,4 +142,4 @@ jobs:
           pip list
           # Run performance tests
           cd tests
-          python3 performance_testing.py
+          python performance_testing.py

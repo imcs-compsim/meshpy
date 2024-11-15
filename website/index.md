@@ -7,7 +7,7 @@ permalink: index.html
 
 # MeshPy: A general purpose 3D beam finite element input generator
 
-MeshPy is a general purpose 3D beam finite element input generator written in `python3`.
+MeshPy is a general purpose 3D beam finite element input generator written in `python`.
 It contains basic geometry creation and manipulation functions to create complex beam geometries, including rotational degrees of freedom for the beam nodes.
 It can be used to create input files for the following finite element solvers:
 - [4C](https://www.4c-multiphysics.org/) (academic finite element solver)

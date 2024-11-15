@@ -29,8 +29,8 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This script is used to compile the cython code.
-python3 setup.py build_ext --inplace
+This script can be used to compile the cython code:
+> python setup.py build_ext --inplace
 """
 
 from setuptools import setup, Extension
