@@ -72,6 +72,12 @@ jobs:
           # If we did not exit earlier, raise an error here
           exit 1
           ls
+      - name: Upload Test Results
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{github.job}}-${{github.run_number}}
+          path: ${{github.workspace}}/tests/testing-tmp/
 
   geometric-search-testing:
     name: geometric-search-testing
