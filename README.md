@@ -1,6 +1,6 @@
 # MeshPy
 
-MeshPy is a general purpose 3D beam finite element input generator written in `python3`.
+MeshPy is a general purpose 3D beam finite element input generator written in `python`.
 It contains basic geometry creation and manipulation functions to create complex beam geometries, including rotational degrees of freedom for the beam nodes.
 It can be used to create input files for the following finite element solvers:
 - [4C](https://www.4c-multiphysics.org/) (academic finite element solver)
@@ -46,7 +46,7 @@ It is recommended to use a python environment container such as `conda` or `venv
   conda activate meshpy
   ```
 - `venv`: Chose an appropriate directory for this, e.g., `/home/user/opt`.
-  A virtual environment can be created with (make sure that `python3` points to a `python3.12`).
+  A virtual environment can be setup with
   - On Debian systems the following packages have to be installed:
     ```bash
     sudo apt-get install python3-venv python3-dev
@@ -54,7 +54,7 @@ It is recommended to use a python environment container such as `conda` or `venv
   - Create and load the environment
     ```bash
     cd <path-to-env-folder>
-    python3 -m venv meshpy-env
+    python -m venv meshpy-env
     source meshpy-env/bin/activate
     ```
 
@@ -77,7 +77,7 @@ pip install -e .
 
 If `cython` code is changed, it has to be recompiled. This can be done by running (in the root directory)
 ```bash
-python3 setup.py build_ext --inplace
+python setup.py build_ext --inplace
 ```
 
 Optional, a path to the `4C` executable can be given in order to run some combined
@@ -89,13 +89,13 @@ export MESHPY_FOUR_C_EXE=path_to_4C
 To check if everything worked as expected, run the tests
 ```bash
 cd <path_to_meshpy>/tests
-python3 testing_main.py
+python testing_main.py
 ```
 
 Also run the performance tests (the reference time values and host name might have to be adapted in the file `<path_to_meshpy>/tests/performance_testing.py`)
 ```bash
 cd <path_to_meshpy>/tests
-python3 performance_testing.py
+python performance_testing.py
 ```
 
 Before you are ready to contribute to MeshPy, please make sure to install the `pre-commit hook` within the python environment to follow our style guides:
@@ -125,5 +125,5 @@ make -j4
 If the ArborX extension is working correctly can be checked by running the geometric search tests
 ```bash
 cd <path_to_meshpy>/tests
-python3 testing_geometric_search.py
+python testing_geometric_search.py
 ```
