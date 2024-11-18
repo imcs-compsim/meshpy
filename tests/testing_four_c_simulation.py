@@ -62,7 +62,6 @@ from meshpy import (
 )
 from meshpy.four_c import (
     all_dbc_monitor_values_to_input,
-    dbc_monitor_to_input,
     run_four_c,
 )
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
@@ -660,7 +659,7 @@ class TestFullFourC(unittest.TestCase):
             "TIMES 1.0 11.0 VALUES 1.0 0.0"
         )
         restart_simulation.add(function_nbc)
-        dbc_monitor_to_input(
+        all_dbc_monitor_values_to_input(
             restart_simulation,
             os.path.join(
                 testing_temp,
@@ -668,7 +667,8 @@ class TestFullFourC(unittest.TestCase):
                 "xxx_dbc_to_nbc_initial_102_monitor_dbc.csv",
             ),
             n_dof=9,
-            function=function_nbc,
+            time_span=[2 * 0.5, 4 * 0.5],
+            fun_array=[function_nbc, function_nbc, function_nbc],
         )
         restart_simulation.add(
             """--RESULT DESCRIPTION
