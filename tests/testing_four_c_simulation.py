@@ -68,6 +68,7 @@ from meshpy.four_c import (
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
 from meshpy.utility import check_node_by_coordinate
+from meshes_for_testing import create_cantilver_model
 
 
 class TestFullFourC(unittest.TestCase):
@@ -114,29 +115,6 @@ class TestFullFourC(unittest.TestCase):
             restart_from=restart[1],
         )
         self.assertEqual(0, return_code, msg="Test {} failed!".format(name))
-
-    def create_cantilver_model(self, n_steps, time_step=0.5):
-        """
-        Create the cantilver model.
-
-        Args
-        ----
-        name: int
-            Number of simulation steps.
-        """
-
-        mpy.set_default_values()
-        input_file = InputFile()
-        set_header_static(input_file, time_step=time_step, n_steps=n_steps)
-        input_file.add("--IO\nOUTPUT_BIN yes\nSTRUCT_DISP yes", option_overwrite=True)
-        ft = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
-        input_file.add(ft)
-        mat = MaterialReissner(youngs_modulus=100.0, radius=0.1)
-        beam_set = create_beam_mesh_line(
-            input_file, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
-        )
-
-        return input_file, beam_set
 
     def test_four_c_simulation_honeycomb_sphere_as_input(self):
         """
@@ -629,7 +607,7 @@ class TestFullFourC(unittest.TestCase):
         """
 
         # Create and run the initial simulation.
-        initial_simulation, beam_set = self.create_cantilver_model(n_steps=2)
+        initial_simulation, beam_set = create_cantilver_model(n_steps=2)
         initial_simulation.add(
             BoundaryCondition(
                 beam_set["start"],
@@ -668,7 +646,7 @@ class TestFullFourC(unittest.TestCase):
         )
 
         # Create and run the second simulation.
-        restart_simulation, beam_set = self.create_cantilver_model(n_steps=21)
+        restart_simulation, beam_set = create_cantilver_model(n_steps=21)
         restart_simulation.add(
             BoundaryCondition(
                 beam_set["start"],
@@ -733,7 +711,7 @@ class TestFullFourC(unittest.TestCase):
         """
 
         # Create and run the initial simulation.
-        initial_simulation, beam_set = self.create_cantilver_model(2)
+        initial_simulation, beam_set = create_cantilver_model(2)
         initial_simulation.add(
             BoundaryCondition(
                 beam_set["start"],
@@ -771,7 +749,7 @@ class TestFullFourC(unittest.TestCase):
         self.run_four_c_test(initial_run_name, initial_simulation)
 
         # Create and run the second simulation.
-        restart_simulation, beam_set = self.create_cantilver_model(n_steps=21)
+        restart_simulation, beam_set = create_cantilver_model(n_steps=21)
         restart_simulation.add(
             BoundaryCondition(
                 beam_set["start"],
@@ -833,7 +811,7 @@ class TestFullFourC(unittest.TestCase):
         dt = 0.1  # time step size from create_cantilver_model
 
         # Create and run the initial simulation.
-        initial_simulation, beam_set = self.create_cantilver_model(n_steps, dt)
+        initial_simulation, beam_set = create_cantilver_model(n_steps, dt)
 
         # add function with
         initial_simulation.add(
@@ -895,7 +873,7 @@ class TestFullFourC(unittest.TestCase):
         self.run_four_c_test(initial_run_name, initial_simulation)
 
         # Create and run the second simulation.
-        force_simulation, beam_set = self.create_cantilver_model(2 * n_steps, dt)
+        force_simulation, beam_set = create_cantilver_model(2 * n_steps, dt)
         force_simulation.add(
             BoundaryCondition(
                 beam_set["start"],
