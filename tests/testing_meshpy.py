@@ -541,7 +541,7 @@ class TestMeshpy(unittest.TestCase):
         # Check the output.
         compare_test_result(self, mesh.get_string(header=False))
 
-    def test_unique_ordering_of_get_all_nodes_for_line_condition(self):
+    def test_unique_ordering_of_line_condition(self):
         """This test ensures that the ordering of the nodes returned from the
         function get_all_nodes is unique for line sets."""
 
