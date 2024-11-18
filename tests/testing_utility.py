@@ -37,7 +37,8 @@ import unittest
 import numpy as np
 
 # Meshpy imports
-from meshpy.utility import is_node_on_plane, linear_time_transformation
+from meshpy.utility import is_node_on_plane
+from meshpy.function_utility import linear_time_transformation
 
 from meshpy.node import Node
 

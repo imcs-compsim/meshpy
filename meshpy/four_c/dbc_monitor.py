@@ -38,8 +38,10 @@ import numpy as np
 
 # Meshpy stuff.
 from .. import mpy, GeometrySet, BoundaryCondition, Function
-from ..utility import linear_time_transformation
-from meshpy.function_utility import create_linear_interpolation_function
+from meshpy.function_utility import (
+    create_linear_interpolation_function,
+    linear_time_transformation,
+)
 
 
 def read_dbc_monitor_file(file_path):
