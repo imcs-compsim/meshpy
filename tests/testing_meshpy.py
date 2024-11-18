@@ -541,6 +541,35 @@ class TestMeshpy(unittest.TestCase):
         # Check the output.
         compare_test_result(self, mesh.get_string(header=False))
 
+    def test_unique_ordering_of_line_condition(self):
+        """This test ensures that the ordering of the nodes returned from the
+        function get_all_nodes is unique for line sets."""
+
+        # set up a beam mesh with material
+        input_file = InputFile()
+        mat = MaterialReissner()
+        beam_set = create_beam_mesh_line(
+            input_file, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
+        )
+
+        # apply different Dirichlet conditions to all nodes within this condition
+        for i, node in enumerate(beam_set["line"].get_all_nodes()):
+
+            # add different condition value for each node
+            input_file.add(
+                BoundaryCondition(
+                    GeometrySet(node),
+                    node.coordinates[0],
+                    bc_type=mpy.bc.dirichlet,
+                )
+            )
+
+        # Check the input file
+        compare_test_result(
+            self,
+            input_file.get_string(check_nox=False, header=False),
+        )
+
     def test_meshpy_reissner_beam(self):
         """
         Test that the input file for all types of Reissner beams is generated
