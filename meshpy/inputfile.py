@@ -37,6 +37,7 @@ import sys
 import os
 import datetime
 import re
+import yaml
 from _collections import OrderedDict
 
 # Meshpy modules.
@@ -52,12 +53,9 @@ from .utility import get_git_data
 from .nurbs_patch import NURBSPatch
 
 
-def get_section_string(section_name):
-    """Return the string for a section in the dat file."""
-    return (
-        "".join(["-" for _i in range(mpy.dat_len_section - len(section_name))])
-        + section_name
-    )
+class CustomDumper(yaml.Dumper):
+    def increase_indent(self, flow=False, *args, **kwargs):
+        return super().increase_indent(flow=flow, indentless=False)
 
 
 class InputLine:
@@ -218,7 +216,7 @@ class InputSection:
     def get_dat_lines(self):
         """Return the lines for this section in the input file."""
 
-        lines = [get_section_string(self.name)]
+        lines = []
         lines.extend([str(line) for line in self.data.values()])
         return lines
 
@@ -301,6 +299,7 @@ class InputFile(Mesh):
             mpy.geo.surface,
         ): "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
     }
+
     geometry_counter = {
         mpy.geo.point: "DPOINT",
         mpy.geo.line: "DLINE",
@@ -322,15 +321,15 @@ class InputFile(Mesh):
         "ELECTROMAGNETIC ELEMENTS",
     ]
 
-    def __init__(self, *, description=None, dat_file=None, cubit=None):
+    def __init__(self, *, description=None, input_file=None, cubit=None):
         """
         Initialize the input file.
 
         Args
         ----
-        description: srt
+        description: str
             Will be shown in the input file as description of the system.
-        dat_file: str
+        input_file: str
             A file path to an existing input file that will be read into this
             object.
         cubit:
@@ -344,7 +343,7 @@ class InputFile(Mesh):
         self.description = description
         self.dat_header = []
 
-        # In case we import a 4C dat file with plain string data, we store them in these lists,
+        # In case we import a 4C input file with plain string data, we store them in these lists,
         # they do not interfere with other operations.
         self.dat_nodes = []
         self.dat_elements = []
@@ -352,21 +351,22 @@ class InputFile(Mesh):
         self.dat_geometry_sets = GeometrySetContainer()
         self.dat_boundary_conditions = BoundaryConditionContainer()
 
-        # Contents of NOX xml file.
-        self.nox_xml = None
-        self._nox_xml_file = None
+        # NOX xml file.
+        self.nox_xml_file_path = None
+        self.nox_xml_contents = None
 
         # Dictionaries for sections other than mesh sections.
         self.sections = OrderedDict()
 
-        # Flag if dat file was loaded.
-        self._dat_file_loaded = False
+        # Load existing input files
+        if input_file is not None and cubit is not None:
+            raise ValueError("Only one of input_file and cubit can be given!")
 
-        # Load existing dat files. If both of the following if statements are
-        # true, an error will be thrown.
-        if dat_file is not None:
-            self.read_dat(dat_file)
-        if cubit is not None:
+        if input_file:
+            # TODO make read in input file work with yaml file
+            self.read_dat(input_file)
+        elif cubit:
+            # TODO make cubit work with yaml file
             self._read_dat_lines(cubit.get_dat_lines())
 
     def read_dat(self, file_path):
@@ -402,8 +402,6 @@ class InputFile(Mesh):
             > 0
         ):
             raise RuntimeError("A dat file can only be loaded for an empty mesh!")
-        if self._dat_file_loaded:
-            raise RuntimeError("It is not possible to import two dat files!")
 
         # Add the lines to this input file.
         self._add_dat_lines(dat_lines)
@@ -427,8 +425,6 @@ class InputFile(Mesh):
                     geom_index = boundary_condition.geometry_set
                     boundary_condition.geometry_set = geom_list[geom_index]
                     boundary_condition.check()
-
-        self._dat_file_loaded = True
 
     def _add_dat_lines(self, data, **kwargs):
         """Read lines of string into this object."""
@@ -653,7 +649,16 @@ class InputFile(Mesh):
         else:
             raise Warning(f"Section {section_name} does not exist!")
 
-    def write_input_file(self, file_path, *, nox_xml_file=None, **kwargs):
+    def write_input_file(
+        self,
+        file_path,
+        *,
+        nox_xml_file=None,
+        header=True,
+        dat_header=True,
+        add_script_to_header=True,
+        **kwargs,
+    ):
         """
         Write the input to a file.
 
@@ -667,80 +672,76 @@ class InputFile(Mesh):
         """
 
         # Check if a xml file needs to be written.
-        if self.nox_xml is not None:
+        if self.nox_xml_contents is not None:
             if nox_xml_file is None:
                 # Get the name of the xml file.
-                self._nox_xml_file = (
+                self.nox_xml_file_path = (
                     os.path.splitext(os.path.basename(file_path))[0] + ".xml"
                 )
             else:
-                self._nox_xml_file = nox_xml_file
+                self.nox_xml_file_path = nox_xml_file
 
-            # Write the xml file to the disc.
+            # Write the xml file
             with open(
-                os.path.join(os.path.dirname(file_path), self._nox_xml_file), "w"
+                os.path.join(os.path.dirname(file_path), self.nox_xml_file_path), "w"
             ) as xml_file:
-                xml_file.write(self.nox_xml)
+                xml_file.write(self.nox_xml_contents)
 
         with open(file_path, "w") as input_file:
-            for line in self.get_dat_lines(**kwargs):
-                input_file.write(line)
-                input_file.write("\n")
+            # add header
+            input_file.writelines(
+                ["# " + line + "\n" for line in mpy.input_file_meshpy_header]
+            )
 
-    def get_dat_lines(
+            if header:
+                header_text, end_text = self.get_header(add_script_to_header)
+                input_file.writelines(header_text)
+
+            if dat_header:
+                input_file.writelines(self.dat_header)
+
+            # add data
+            yaml.dump(
+                self.get_input_data(**kwargs),
+                input_file,
+                Dumper=CustomDumper,
+                width=10000,
+                sort_keys=False,
+            )
+
+            # add footer
+            if header:
+                input_file.writelines(end_text)
+
+    def get_input_data(
         self,
         *,
-        header=True,
-        dat_header=True,
-        add_script_to_header=True,
         check_nox=True,
-        design_description=False,
     ):
         """
-        Return the lines for the input file for the whole object.
+        Return the data for the input file for the whole object.
 
         Args
         ----
-        header: bool
-            If the header should be exported to the input file files.
-        dat_header: bool
-            If header lines from the imported dat file should be exported.
-        append_script_to_header: bool
-            If true, a copy of the executing script will be added to the input
-            file. This is only in affect when dat_header==True.
         check_nox: bool
             If this is true, an error will be thrown if no nox file is set.
-        design_description: bool
-            If the design description should be output. This option exists for
-            backwards compatibility. The design description field in 4C was made
-            obsolete in October 2023.
         """
 
         # Perform some checks on the mesh.
         if mpy.check_overlapping_elements:
             self.check_overlapping_elements()
 
-        # List that will contain all input lines.
-        lines = []
-
-        # Add header to the input file.
-        end_text = None
-
-        lines.extend(["// " + line for line in mpy.input_file_meshpy_header])
-        if header:
-            header_text, end_text = self._get_header(add_script_to_header)
-            lines.append(header_text)
-        if dat_header:
-            lines.extend(self.dat_header)
+        # dict that will contain all input data.
+        input_data = {}  # TODO change to ordered dict or other approach
 
         # Check if a file has to be created for the NOX xml information.
-        if self.nox_xml is not None:
-            if self._nox_xml_file is None:
+        if self.nox_xml_contents is not None:
+            if self.nox_xml_file_path is None:
                 if check_nox:
                     raise ValueError("NOX xml content is given, but no file defined!")
                 nox_xml_name = "NOT_DEFINED"
             else:
-                nox_xml_name = self._nox_xml_file
+                nox_xml_name = self.nox_xml_file_path
             self.add(
                 InputSection(
                     "STRUCT NOX/Status Test",
@@ -749,10 +750,25 @@ class InputFile(Mesh):
                 )
             )
 
+        def add_data(section_name, data):
+
+            # do not write section if no content is available
+            if len(data) == 0:
+                return
+
+            # add data
+            if section_name not in input_data:
+                input_data[section_name] = []
+            if type(data) == str:
+                input_data[section_name].append(data)
+            else:
+                for item in data:
+                    input_data[section_name].extend(item.get_dat_lines())
+
         # Export the basic sections in the input file.
         for section in self.sections.values():
             if section.name not in self.skip_sections:
-                lines.extend(section.get_dat_lines())
+                add_data(section.name, [section])
 
         def set_n_global(data_list):
             """Set n_global in every item of data_list."""
@@ -840,44 +856,13 @@ class InputFile(Mesh):
         for value in all_boundary_conditions.values():
             set_n_global(value)
 
-        def get_section_dat(section_name, data_list, header_lines=None):
-            """
-            Output a section name and apply the get_dat_line for each list
-            item.
-            """
-
-            # do not write section if no content is available
-            if len(data_list) == 0:
-                return
-
-            lines.append(get_section_string(section_name))
-            if header_lines:
-                if isinstance(header_lines, list):
-                    lines.extend(header_lines)
-                elif isinstance(header_lines, str):
-                    lines.append(header_lines)
-                else:
-                    raise TypeError(
-                        f"Expected string or list, got {type(header_lines)}"
-                    )
-            for item in data_list:
-                lines.extend(item.get_dat_lines())
-
         # Add material data to the input file.
-        get_section_dat("MATERIALS", self.materials)
+        add_data("MATERIALS", self.materials)
 
-        # Add the functions.
+        # TODO rework to also use add_section
+        # Add the functions
         for i, funct in enumerate(self.functions):
-            lines.append(get_section_string("FUNCT{}".format(i + 1)))
-            lines.extend(funct.get_dat_lines())
-
-        # Add the design description.
-        if design_description:
-            lines.append(get_section_string("DESIGN DESCRIPTION"))
-            lines.append(f"NDPOINT {len(all_geometry_sets[mpy.geo.point])}".format())
-            lines.append(f"NDLINE {len(all_geometry_sets[mpy.geo.line])}")
-            lines.append(f"NDSURF {len(all_geometry_sets[mpy.geo.surface])}")
-            lines.append(f"NDVOL {len(all_geometry_sets[mpy.geo.volume])}")
+            input_data[f"FUNCT{i+1}"] = funct.get_dat_lines()
 
         # If there are couplings in the mesh, set the link between the nodes
         # and elements, so the couplings can decide which DOFs they couple,
@@ -903,13 +888,14 @@ class InputFile(Mesh):
                     if isinstance(bc_key, str)
                     else self.boundary_condition_names[bc_key, geom_key]
                 )
-                get_section_dat(
+                # add BC header
+                add_data(
+                    section_name,
+                    f"{self.geometry_counter[geom_key]} {len(all_boundary_conditions[bc_key, geom_key])}",
+                )
+                add_data(
                     section_name,
                     bc_list,
-                    header_lines=(
-                        f"{self.geometry_counter[geom_key]} "
-                        f"{len(all_boundary_conditions[bc_key, geom_key])}"
-                    ),
                 )
 
         # Add additional element sections (e.g. STRUCTURE KNOTVECTORS)
@@ -925,55 +911,52 @@ class InputFile(Mesh):
         # Add the geometry sets.
         for geom_key, item in all_geometry_sets.items():
             if len(item) > 0:
-                get_section_dat(self.geometry_set_names[geom_key], item)
+                add_data(self.geometry_set_names[geom_key], item)
 
         # Add the nodes and elements.
-        get_section_dat("NODE COORDS", all_nodes)
-        get_section_dat("STRUCTURE ELEMENTS", all_elements_structure)
-        get_section_dat("FLUID ELEMENTS", self.dat_elements_fluid)
+        add_data("NODE COORDS", all_nodes)
+        add_data("STRUCTURE ELEMENTS", all_elements_structure)
+        add_data("FLUID ELEMENTS", self.dat_elements_fluid)
 
-        # Add end text.
-        if end_text is not None:
-            lines.append(end_text)
+        return input_data
 
-        return lines
-
+    # TODO change to get_dict and compare with dict in tests / write out file and compare files to reference files
     def get_string(self, **kwargs):
         """Return the lines of the input file as string."""
-        return "\n".join(self.get_dat_lines(**kwargs))
+        return "\n".join(self.get_input_data(**kwargs))
 
     def __str__(self, **kwargs):
         return self.get_string(**kwargs)
 
-    def _get_header(self, add_script):
+    def get_header(self, add_script):
         """Return the header for the input file."""
 
-        headers = []
+        header = []
         end_text = None
 
         # Header containing model information.
         current_time_string = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        model_header = f"// Date:       {current_time_string}\n"
+        model_header = f"# Date:       {current_time_string}\n"
         if self.description:
-            model_header += f"// Description: {self.description}\n"
-        headers.append(model_header)
+            model_header += f"# Description: {self.description}\n"
+        header.append(model_header)
 
         # Get information about the script.
         script_path = os.path.realpath(sys.argv[0])
         script_git_sha, script_git_date = get_git_data(os.path.dirname(script_path))
-        script_header = "// Script used to create input file:\n"
-        script_header += f"// path:       {script_path}\n"
+        script_header = "# Script used to create input file:\n"
+        script_header += f"# path:       {script_path}\n"
         if script_git_sha is not None:
             script_header += (
-                f"// git sha:    {script_git_sha}\n// git date:   {script_git_date}\n"
+                f"# git sha:    {script_git_sha}\n# git date:   {script_git_date}\n"
             )
-        headers.append(script_header)
+        header.append(script_header)
 
         # Header containing meshpy information.
-        headers.append(
-            "// Input file created with meshpy\n"
-            f"// git sha:    {mpy.git_sha}\n"
-            f"// git date:   {mpy.git_date}\n"
+        header.append(
+            "# Input file created with meshpy\n"
+            f"# git sha:    {mpy.git_sha}\n"
+            f"# git date:   {mpy.git_date}\n"
         )
 
         # Check if cubitpy is loaded.
@@ -988,22 +971,21 @@ class InputFile(Mesh):
 
             if cubitpy_git_sha is not None:
                 # Cubitpy_header.
-                headers.append(
-                    "// The module cubitpy was loaded\n"
-                    f"// git sha:    {cubitpy_git_sha}\n"
-                    f"// git date:   {cubitpy_git_date}\n"
+                header.append(
+                    "# The module cubitpy was loaded\n"
+                    f"# git sha:    {cubitpy_git_sha}\n"
+                    f"# git date:   {cubitpy_git_date}\n"
                 )
 
-        string_line = "// " + "".join(["-" for _i in range(mpy.dat_len_section - 3)])
+        string_line = "# " + "".join(["-" for _i in range(80 - 3)]) + "\n"
 
         # If needed, append the contents of the script.
         if add_script:
             # Header for the script 'section'.
             script_lines = [
                 string_line
-                + "\n// Full script used to create this input file.\n"
+                + "# Full script used to create this input file.\n"
                 + string_line
-                + "\n"
             ]
 
             # Get the contents of script.
@@ -1011,8 +993,6 @@ class InputFile(Mesh):
                 script_lines.extend(script_file.readlines())
 
             # Comment the python code lines.
-            end_text = "//".join(script_lines)
+            end_text = "# ".join(script_lines)
 
-        return (
-            string_line + "\n" + (string_line + "\n").join(headers) + string_line
-        ), end_text
+        return (string_line + (string_line).join(header) + string_line), end_text
