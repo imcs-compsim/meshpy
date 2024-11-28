@@ -369,7 +369,7 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
                 input_file,
                 surf,
                 material=mat,
-                element_description=element_description,
+                element_description=dummy_string,
             )
 
             input_file.add(patch_set)
