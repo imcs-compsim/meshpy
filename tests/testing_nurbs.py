@@ -354,12 +354,12 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         input_file = InputFile()
 
         # Create the surface of a torus
-        surfs = create_nurbs_torus_surface(1, 0.5, n_ele_u=2, n_ele_v=1)
+        surfs = create_nurbs_torus_surface(1, 0.5, n_ele_u=2, n_ele_v=3)
 
         # Define material and element description
         mat = MaterialStVenantKirchhoff()
 
-        element_description = (
+        dummy_string = (
             "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
         )
 
