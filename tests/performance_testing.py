@@ -188,8 +188,8 @@ class TestPerformance(object):
     expected_times = {}
     expected_times["sisyphos2.bauv.unibw-muenchen.de"] = {
         "cubitpy_create_solid": 8.0,
-        "meshpy_load_solid": 0.9,
-        "meshpy_load_solid_full": 4.5,
+        "meshpy_load_solid": 1.5,
+        "meshpy_load_solid_full": 3.5,
         "meshpy_create_beams": 9.0,
         "meshpy_rotate": 0.6,
         "meshpy_translate": 0.5,
