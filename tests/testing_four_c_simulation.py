@@ -317,7 +317,7 @@ class TestFullFourC(unittest.TestCase):
 
         # Call get_unique_geometry_sets to check that this does not affect the
         # mesh creation.
-        input_file.get_unique_geometry_sets(link_nodes="all_nodes")
+        input_file.get_unique_geometry_sets(link_to_nodes="all_nodes")
 
         # Check the created input file
         if compare_created_input_file:

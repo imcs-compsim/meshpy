@@ -70,20 +70,35 @@ class GeometrySetBase(BaseMeshItemFull):
         self.geometry_type = geometry_type
         self.name = name
 
-    def link_to_nodes(self):
+    def link_to_nodes(self, *, link_to_nodes="explicitly_contained_nodes"):
         """Set a link to this object in the all contained nodes of this geometry set.
-        This will also set a link to nodes connected to an edge in a node based line
-        set.
+
+        link_to_nodes: str
+            "explicitly_contained_nodes":
+                A link will be set for all nodes that are explicitly part of the geometry set
+            "all_nodes":
+                A link will be set for all nodes that are part of the geometry set, i.e., also
+                nodes connected to elements of an element set. This is mainly used for vtk
+                output so we can color the nodes which are part of element sets.
         """
-        for node in self.get_all_nodes():
+        if link_to_nodes == "explicitly_contained_nodes":
+            node_list = self.get_nodes_explicitly_contained_in_set(
+                fail_if_not_point_set=False
+            )
+        elif link_to_nodes == "all_nodes":
+            node_list = self.get_all_nodes()
+        else:
+            raise ValueError(f'Got unexpected value link nodes="{link_to_nodes}"')
+        for node in node_list:
             node.node_sets_link.append(self)
 
     def check_replaced_nodes(self):
+        """Check if nodes in this set have to be replaced.
+        We need to do this for explicitly contained nodes in this set.
         """
-        Check if nodes in this set have to be replaced.
-        We need to do this for all nodes to correctly represent node-based sets.
-        """
-        for node in self.get_all_nodes():
+        for node in self.get_nodes_explicitly_contained_in_set(
+            fail_if_not_point_set=False
+        ):
             if node.master_node is not None:
                 self.replace_node(node, node.get_master_node())
 
@@ -91,7 +106,9 @@ class GeometrySetBase(BaseMeshItemFull):
         """Replace old_node with new_node. This is only done for point sets."""
 
         # Check if the new node is in the set.
-        my_nodes = self.get_all_nodes()
+        my_nodes = self.get_nodes_explicitly_contained_in_set(
+            fail_if_not_point_set=False
+        )
         has_new_node = new_node in my_nodes
 
         for i, node in enumerate(my_nodes):
@@ -105,6 +122,12 @@ class GeometrySetBase(BaseMeshItemFull):
             raise ValueError(
                 "The node that should be replaced is not in the current node set"
             )
+
+    def get_points(self):
+        """Return nodes explicitly associated with this set."""
+        raise NotImplementedError(
+            'The "get_points" method has to be overwritten in the derived class'
+        )
 
     def get_all_nodes(self):
         """
