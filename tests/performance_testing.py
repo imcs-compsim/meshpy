@@ -114,6 +114,14 @@ def create_solid_block(file_path, nx, ny, nz):
             bc_description="NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0",
         )
         counter += 1
+    for item in brick.volumes():
+        cubit.add_node_set(
+            item,
+            name="node_set_" + str(counter),
+            bc_type=cupy.bc_type.neumann,
+            bc_description="NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0",
+        )
+        counter += 1
 
     # Export mesh
     cubit.create_dat(file_path)
