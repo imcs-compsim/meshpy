@@ -48,14 +48,37 @@ from vtk_utils.compare_grids import compare_grids
 from meshpy.utility import get_env_variable
 
 
-def skip_fail_test(self, message):
-    """
-    Skip or fail the test depending if the test are run in GitHub or not.
-    """
-    if get_env_variable("TESTING_GITHUB", default="0") == "1":
-        self.skipTest(message)
-    else:
-        self.skipTest(message)
+def skip_fail_arborx(self):
+    """Check if ArborX geometric search can be loaded
+
+    If TESTING_GITHUB_ARBORX==1 then we raise an error if we cant load
+    ArborX, otherwise the test is skipped"""
+
+    from meshpy.geometric_search.geometric_search_arborx import arborx_available
+
+    message = "Can not import ArborX geometric search"
+    if not arborx_available:
+        if get_env_variable("TESTING_GITHUB_ARBORX", default="0") == "1":
+            raise ImportError(message)
+        else:
+            self.skipTest(message)
+
+
+def skip_fail_cubitpy(self):
+    """Check if CubitPy can be loaded
+
+    If TESTING_GITHUB_CUBITPY==1 then we raise an error if we cant load
+    CubitPy, otherwise the test is skipped"""
+    message = "Can not import and initialize CubitPy"
+    try:
+        from cubitpy import CubitPy
+
+        cubit = CubitPy()
+    except Exception as e:
+        if get_env_variable("TESTING_GITHUB_CUBITPY", default="0") == "1":
+            raise ImportError(message)
+        else:
+            self.skipTest(message)
 
 
 # Define the testing paths
