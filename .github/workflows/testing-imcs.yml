@@ -16,14 +16,11 @@ on:
 env:
   # Indicate the testing script, that it is performed on GitHub.
   TESTING_GITHUB: 1
-  # Python executable and virtual environment name
-  PYTHON_EXE: python
-  PYTHON_VENV: python-testing-environment
+  # Python executable
+  PYTHON_EXE: /home_local/github-runner/testing_lib/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/python-3.12.1-qnjucxirxh534suwewl6drfa237u6t7w/bin/python
   # Meshpy can interact with CubitPy. To perform the corresponding tests,
   # the following path has to be set
   CUBIT_ROOT: /imcs/public/compsim/opt/cubit-15.2
-  # We provide the python executable via Spack
-  SPACK_ACTIVATION_SCRIPT: /home_local/github-runner/testing_lib/spack/share/spack/setup-env.sh
 
 jobs:
   meshpy-testing-imcs:
@@ -33,6 +30,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Create python virtual environment
+        uses: ./.github/actions/config_python_venv
+        with:
+          python-exe: ${{ env.PYTHON_EXE }}
       - name: Test MeshPy
         env:
           # This ensures that the CubitPy test are run
@@ -42,18 +43,10 @@ jobs:
           pwd
           MESHPY_PATH=$(pwd)
           echo "Value of MESHPY_FOUR_C_EXE: \"${MESHPY_FOUR_C_EXE}\""
-          # Load the python interpreter
-          . ${SPACK_ACTIVATION_SCRIPT}
-          spack load python@3.12.1
-          # Create the virtual environment
-          ${PYTHON_EXE} -m venv ${PYTHON_VENV}
+          # Load the virtual environment
           source ${PYTHON_VENV}/bin/activate
-          # We have to update pip, otherwise there is a bug in the compilation of the cython code
-          pip install --upgrade pip
           # Install meshpy
           pip install .[CI-CD]
-          # Check git configuration
-          git config --list
           # Print information on the python environment
           python --version
           pip list
@@ -78,20 +71,18 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Create python virtual environment
+        uses: ./.github/actions/config_python_venv
+        with:
+          python-exe: ${{ env.PYTHON_EXE }}
       - name: Performance test
         run: |
           whoami
           pwd
           MESHPY_PATH=$(pwd)
-          # Load the python interpreter
-          . ${SPACK_ACTIVATION_SCRIPT}
-          spack load python@3.12.1
-          # Create the virtual environment
-          ${PYTHON_EXE} -m venv ${PYTHON_VENV}
+          # Load the virtual environment
           source ${PYTHON_VENV}/bin/activate
-          # We have to update pip, otherwise there is a bug in the compilation of the cython code
-          pip install --upgrade pip
-          # Install meshpy
+          # Install MeshPy
           pip install .[CI-CD]
           # Print information on the python environment
           python --version
