@@ -26,7 +26,7 @@ env:
   # Python executable and virtual environment name
   PYTHON_EXE: python
   PYTHON_VENV: python-testing-environment
- 
+
 jobs:
   meshpy-code-check:
     name: Code check
