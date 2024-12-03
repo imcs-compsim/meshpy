@@ -30,9 +30,10 @@ env:
 jobs:
   meshpy-code-check:
     name: Code check
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     container:
       image: ghcr.io/ppraegla/4c:latest
+      options: --user root
     defaults:
       run:
         shell: bash
