@@ -34,6 +34,8 @@ jobs:
     container:
       image: ghcr.io/ppraegla/4c:latest
       options: --user root
+      volumes:
+        - /home_local/github-runner/testing_lib/testfolder:/run/docker
     defaults:
       run:
         shell: bash
@@ -46,6 +48,7 @@ jobs:
         uses: ./.github/actions/config_python_venv
       - name: Test MeshPy
         run: |
+          touch /run/docker/new
           # Activate the virtual environment
           source ${PYTHON_VENV}/bin/activate
           # Install MeshPy
