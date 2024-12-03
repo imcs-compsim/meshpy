@@ -1,0 +1,28 @@
+name: configure_python_venv
+description: Configure the python virtual environment
+inputs:
+  python-exe:
+    description: Command for python executable
+    required: false
+    default: "python"
+  python-venv:
+    description: Name of the virtual environment
+    required: false
+    default: "python-testing-environment"
+runs:
+  using: composite
+  steps:
+    - name: Setup virtual environment
+      shell: bash
+      run: |
+        pwd
+        ls
+        cd ${GITHUB_WORKSPACE}
+        echo "Installing virtual environment in ${GITHUB_WORKSPACE}"
+        # Display python version
+        ${{ inputs.python-exe }} --version
+        # Create the virtual environment
+        ${{ inputs.python-exe }} -m venv ${{ inputs.python-venv }}
+        # Update pip
+        source ${{ inputs.python-venv }}/bin/activate
+        pip install --upgrade pip

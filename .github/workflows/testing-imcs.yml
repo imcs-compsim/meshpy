@@ -1,5 +1,5 @@
-# Workflow for testing meshpy
-name: Test meshpy
+# Workflow for testing MeshPy
+name: Test MeshPy on IMCS hosted runners
 
 on:
   push:
@@ -14,32 +14,29 @@ on:
     type: choice
 
 env:
-  # Indicated the testing script, that it is performed on GitHub. In this
-  # case all test have to pass.
+  # Indicate the testing script, that it is performed on GitHub.
   TESTING_GITHUB: 1
-  # Some tests require the 4C executable to check if the created input file
-  # works with 4C.
-  MESHPY_FOUR_C_EXE: /home_local/github-runner/testing_lib/four_c_master/release/4C
   # Python executable and virtual environment name
   PYTHON_EXE: python
   PYTHON_VENV: python-testing-environment
-  # Meshpy can interact with cubitpy, to perform the corresponding tests,
+  # Meshpy can interact with CubitPy. To perform the corresponding tests,
   # the following path has to be set
   CUBIT_ROOT: /imcs/public/compsim/opt/cubit-15.2
-  # Meshpy allows to perform geometric search functions with ArborX,
-  # for this functionality we need Kokkos. On IMCS Ares this is provided
-  # with the spack installation under the following path.
+  # We provide the python executable via Spack
   SPACK_ACTIVATION_SCRIPT: /home_local/github-runner/testing_lib/spack/share/spack/setup-env.sh
 
 jobs:
-  meshpy-testing:
-    name: meshpy-testing
+  meshpy-testing-imcs:
+    name: MeshPy @ IMCS
     runs-on: self-hosted
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Test meshpy
+      - name: Test MeshPy
+        env:
+          # This ensures that the CubitPy test are run
+          TESTING_GITHUB_CUBITPY: 1
         run: |
           whoami
           pwd
@@ -66,12 +63,6 @@ jobs:
           coverage html
           coverage report
           coverage-badge -o htmlcov/coverage.svg
-          # Check codestyle
-          cd $MESHPY_PATH
-          black . --check --exclude="${PYTHON_VENV}" && exit 0
-          # If we did not exit earlier, raise an error here
-          exit 1
-          ls
       - name: Upload Test Results
         if: failure()
         uses: actions/upload-artifact@v3
@@ -79,56 +70,15 @@ jobs:
           name: ${{github.job}}-${{github.run_number}}
           path: ${{github.workspace}}/tests/testing-tmp/
 
-  geometric-search-testing:
-    name: geometric-search-testing
-    runs-on: self-hosted
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          submodules: true
-      - name: Additionally test the geometric search module with ArborX
-        run: |
-          whoami
-          pwd
-          MESHPY_PATH=$(pwd)
-          # Load the external modules
-          git submodule update --init
-          # Load the required packages via spack
-          . ${SPACK_ACTIVATION_SCRIPT}
-          spack load python@3.12.1
-          spack load ninja@1.11.1
-          spack load cmake@3.25.2
-          spack load kokkos@4.1.00
-          # Build the binaries
-          mkdir -p build/arborx
-          cd build/arborx
-          cmake ../../meshpy/geometric_search/src -G Ninja
-          ninja
-          cd $MESHPY_PATH
-          # Create the virtual environment
-          ${PYTHON_EXE} -m venv ${PYTHON_VENV}
-          source ${PYTHON_VENV}/bin/activate
-          # We have to update pip, otherwise there is a bug in the compilation of the cython code
-          pip install --upgrade pip
-          # Install meshpy, it is not yet possible to globally install the ArborX binaries, so we
-          # use the developement mode here.
-          pip install -e .[CI-CD]
-          # Print information on the python environment
-          python --version
-          pip list
-          # Run tests
-          cd tests
-          python testing_geometric_search.py
-
   performance-test:
-    name: meshpy-performance-testing
+    name: Performance tests
     runs-on: self-hosted
     continue-on-error: true
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Performace test
+      - name: Performance test
         run: |
           whoami
           pwd

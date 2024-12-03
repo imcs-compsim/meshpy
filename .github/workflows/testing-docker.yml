@@ -1,0 +1,146 @@
+# Workflow for testing MeshPy on a Github hosted docker runner
+name: Test the main MeshPy functionality on a GitHub hosted docker runner
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_dispatch:
+    type: choice
+
+env:
+  # Indicate the testing script, that it is performed on GitHub.
+  TESTING_GITHUB: 1
+  # Some tests require the 4C executable to check if the created input file
+  # works with 4C.
+  MESHPY_FOUR_C_EXE: /home/user/4C/build/4C
+  # Activate MPI oversubscribe per default, to test if we can run 4C tests with 4 cores
+  OMPI_MCA_rmaps_base_oversubscribe: 1
+  # For ArborX we need a Kokkos installation
+  KOKKOS_DIR: /opt/4C-dependencies/lib/cmake/Kokkos
+  # Python executable and virtual environment name
+  PYTHON_EXE: python
+  PYTHON_VENV: python-testing-environment
+
+jobs:
+  meshpy-code-check:
+    name: Code check
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ppraegla/4c:latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Create python virtual environment
+        uses: ./.github/actions/config_python_venv
+      - name: Test MeshPy
+        run: |
+          # Activate the virtual environment
+          source ${PYTHON_VENV}/bin/activate
+          # Install MeshPy
+          pip install -e .[CI-CD]
+          black . --check --exclude="${PYTHON_VENV}" && exit 0
+          # If we did not exit in the code check line, raise an error here
+          exit 1
+
+  meshpy-testing-module-mode:
+    name: MeshPy as module
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ppraegla/4c:latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Create python virtual environment
+        uses: ./.github/actions/config_python_venv
+      - name: Test MeshPy
+        run: |
+          whoami
+          pwd
+          MESHPY_PATH=$(pwd)
+          echo "Value of MESHPY_FOUR_C_EXE: \"${MESHPY_FOUR_C_EXE}\""
+          # Activate the virtual environment
+          source ${PYTHON_VENV}/bin/activate
+          # Install MeshPy
+          pip install .[CI-CD]
+          # Print information on the python environment
+          python --version
+          pip list
+          # Run tests
+          cd tests
+          coverage run --rcfile=coverage.config testing_main.py
+          coverage html
+          coverage report
+          coverage-badge -o htmlcov/coverage.svg
+      - name: Upload Test Results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{github.job}}-${{github.run_number}}
+          path: ${{github.workspace}}/tests/testing-tmp/
+
+  # Testing of MeshPy if the package is installed in developer mode, this allows to use ArborX for geometric search
+  meshpy-testing-developer-mode:
+    name: MeshPy in developer mode
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/ppraegla/4c:latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Create python virtual environment
+        uses: ./.github/actions/config_python_venv
+      - name: Test MeshPy
+        env:
+          # This ensures that the ArborX test are run
+          TESTING_GITHUB_ARBORX: 1
+        run: |
+          whoami
+          pwd
+          MESHPY_PATH=$(pwd)
+          echo "Value of MESHPY_FOUR_C_EXE: \"${MESHPY_FOUR_C_EXE}\""
+          # Activate the virtual environment
+          source ${PYTHON_VENV}/bin/activate
+          # Build the ArborX geometric search
+          mkdir -p build/arborx
+          cd build/arborx
+          cmake -DKokkos_DIR=${KOKKOS_DIR} ../../meshpy/geometric_search/src -G Ninja
+          ninja
+          cd $MESHPY_PATH
+          # Install MeshPy
+          pip install -e .[CI-CD]
+          # Print information on the python environment
+          python --version
+          pip list
+          # Run tests
+          cd tests
+          coverage run --rcfile=coverage.config testing_main.py
+          coverage html
+          coverage report
+          coverage-badge -o htmlcov/coverage.svg
+      - name: Upload Test Results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{github.job}}-${{github.run_number}}
+          path: ${{github.workspace}}/tests/testing-tmp/
