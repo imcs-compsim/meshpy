@@ -29,16 +29,5 @@ env:
 
 jobs:
   meshpy-code-check:
-    name: Code check
-    runs-on: self-hosted
-    container:
-      image: ghcr.io/ppraegla/4c:latest
-      options: --user root
-      volumes:
-        - /home_local/github-runner/testing_lib/testfolder:/run/docker
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Use Docker in rootless mode.
-        uses: ScribeMD/rootless-docker@0.2.2
+  - name: Use Docker in rootless mode.
+    uses: ScribeMD/rootless-docker@0.2.2
