@@ -40,19 +40,5 @@ jobs:
       run:
         shell: bash
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Create python virtual environment
-        uses: ./.github/actions/config_python_venv
-      - name: Test MeshPy
-        run: |
-          touch /run/docker/new
-          # Activate the virtual environment
-          source ${PYTHON_VENV}/bin/activate
-          # Install MeshPy
-          pip install -e .[CI-CD]
-          black . --check --exclude="${PYTHON_VENV}" && exit 0
-          # If we did not exit in the code check line, raise an error here
-          exit 1
+      - name: Use Docker in rootless mode.
+        uses: ScribeMD/rootless-docker@0.2.2
