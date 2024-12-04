@@ -29,5 +29,5 @@ env:
 
 jobs:
   meshpy-code-check:
-  - name: Use Docker in rootless mode.
+    name: Use Docker in rootless mode.
     uses: ScribeMD/rootless-docker@0.2.2
