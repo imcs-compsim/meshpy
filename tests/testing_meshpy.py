@@ -85,7 +85,7 @@ from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
 
 # Testing imports.
 from utils import (
-    skip_fail_test,
+    skip_fail_cubitpy,
     testing_temp,
     testing_input,
     compare_strings,
@@ -1668,15 +1668,9 @@ class TestMeshpy(unittest.TestCase):
         dat file.
         """
 
-        # Check if cubitpy can be loaded.
-        import importlib
+        skip_fail_cubitpy(self)
 
-        found = importlib.util.find_spec("cubitpy") is not None
-        if not found:
-            # In this case skip the test.
-            skip_fail_test(self, "CubitPy could not be loaded!")
-
-        # Load the mesh creation functions.
+        # Load the mesh creation functions
         from meshpy_testing.create_cubit_input import create_tube, create_tube_cubit
 
         # Create the input file and read the file.

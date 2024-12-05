@@ -50,8 +50,7 @@ from meshpy.geometric_search import (
     point_partners_to_unique_indices,
 )
 from meshpy.utility import get_nodal_coordinates, filter_nodes
-from meshpy.geometric_search.geometric_search_arborx import arborx_available
-from meshpy.geometric_search.geometric_search_cython import cython_available
+from utils import skip_fail_arborx
 
 
 class TestGeometricSearch(unittest.TestCase):
@@ -98,20 +97,15 @@ class TestGeometricSearch(unittest.TestCase):
         self.xtest_find_close_points_between_bins(FindClosePointAlgorithm.kd_tree_scipy)
 
     def test_find_close_points_between_bins_brute_force_cython(self):
-        if cython_available:
-            self.xtest_find_close_points_between_bins(
-                FindClosePointAlgorithm.brute_force_cython
-            )
-        else:
-            self.skipTest("Cython not available")
+        self.xtest_find_close_points_between_bins(
+            FindClosePointAlgorithm.brute_force_cython
+        )
 
     def test_find_close_points_between_bins_boundary_volume_hierarchy_arborx(self):
-        if arborx_available:
-            self.xtest_find_close_points_between_bins(
-                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-            )
-        else:
-            self.skipTest("ArborX not available")
+        skip_fail_arborx(self)
+        self.xtest_find_close_points_between_bins(
+            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
+        )
 
     def xtest_find_close_points_between_bins(self, algorithm, **kwargs):
         """
@@ -370,20 +364,15 @@ class TestGeometricSearch(unittest.TestCase):
         self.xtest_find_close_points_binning_flat(FindClosePointAlgorithm.kd_tree_scipy)
 
     def test_find_close_points_flat_brute_force_cython(self):
-        if cython_available:
-            self.xtest_find_close_points_binning_flat(
-                FindClosePointAlgorithm.brute_force_cython
-            )
-        else:
-            self.skipTest("Cython not available")
+        self.xtest_find_close_points_binning_flat(
+            FindClosePointAlgorithm.brute_force_cython
+        )
 
     def test_find_close_points_flat_boundary_volume_hierarchy_arborx(self):
-        if arborx_available:
-            self.xtest_find_close_points_binning_flat(
-                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-            )
-        else:
-            self.skipTest("ArborX not available")
+        skip_fail_arborx(self)
+        self.xtest_find_close_points_binning_flat(
+            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
+        )
 
     def xtest_find_close_points_binning_flat(self, algorithm, **kwargs):
         """
@@ -491,20 +480,15 @@ class TestGeometricSearch(unittest.TestCase):
         self.xtest_find_close_points_dimension(FindClosePointAlgorithm.kd_tree_scipy)
 
     def test_find_close_points_dimension_brute_force_cython(self):
-        if cython_available:
-            self.xtest_find_close_points_dimension(
-                FindClosePointAlgorithm.brute_force_cython
-            )
-        else:
-            self.skipTest("Cython not available")
+        self.xtest_find_close_points_dimension(
+            FindClosePointAlgorithm.brute_force_cython
+        )
 
     def test_find_close_points_dimension_boundary_volume_hierarchy_arborx(self):
-        if arborx_available:
-            self.xtest_find_close_points_dimension(
-                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-            )
-        else:
-            self.skipTest("ArborX not available")
+        skip_fail_arborx(self)
+        self.xtest_find_close_points_dimension(
+            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
+        )
 
     def xtest_find_close_points_dimension(self, algorithm, **kwargs):
         """
@@ -574,22 +558,17 @@ class TestGeometricSearch(unittest.TestCase):
         )
 
     def test_find_close_points_tolerance_precision_brute_force_cython(self):
-        if cython_available:
-            self.xtest_find_close_points_tolerance_precision(
-                FindClosePointAlgorithm.brute_force_cython
-            )
-        else:
-            self.skipTest("Cython not available")
+        self.xtest_find_close_points_tolerance_precision(
+            FindClosePointAlgorithm.brute_force_cython
+        )
 
     def test_find_close_points_tolerance_precision_boundary_volume_hierarchy_arborx(
         self,
     ):
-        if arborx_available:
-            self.xtest_find_close_points_tolerance_precision(
-                FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-            )
-        else:
-            self.skipTest("ArborX not available")
+        skip_fail_arborx(self)
+        self.xtest_find_close_points_tolerance_precision(
+            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
+        )
 
     def xtest_find_close_points_tolerance_precision(self, algorithm, **kwargs):
         """
