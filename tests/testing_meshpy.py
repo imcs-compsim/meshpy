@@ -1010,10 +1010,14 @@ class TestMeshpy(unittest.TestCase):
         # Add a set with all nodes, to check that the nodes in the
         # boundary condition are replaced correctly.
         if use_nodal_geometry_sets:
+            mesh_ref.add(GeometrySetNodes(mpy.geo.line, ref_nodes))
             mesh_ref.add(GeometrySetNodes(mpy.geo.point, ref_nodes))
+            mesh_couple.add(GeometrySetNodes(mpy.geo.line, coupling_nodes))
             mesh_couple.add(GeometrySetNodes(mpy.geo.point, coupling_nodes))
         else:
+            mesh_ref.add(GeometrySet(mesh_ref.elements))
             mesh_ref.add(GeometrySet(ref_nodes))
+            mesh_couple.add(GeometrySet(mesh_couple.elements))
             mesh_couple.add(GeometrySet(coupling_nodes))
 
         # Add another set with all nodes, this time only the coupling node

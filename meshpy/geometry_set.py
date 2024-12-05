@@ -70,41 +70,53 @@ class GeometrySetBase(BaseMeshItemFull):
         self.geometry_type = geometry_type
         self.name = name
 
-    def link_to_nodes(self):
+    def link_to_nodes(self, *, link_to_nodes="explicitly_contained_nodes"):
         """Set a link to this object in the all contained nodes of this geometry set.
-        This will also set a link to nodes connected to an edge in a node based line
-        set.
+
+        link_to_nodes: str
+            "explicitly_contained_nodes":
+                A link will be set for all nodes that are explicitly part of the geometry set
+            "all_nodes":
+                A link will be set for all nodes that are part of the geometry set, i.e., also
+                nodes connected to elements of an element set. This is mainly used for vtk
+                output so we can color the nodes which are part of element sets.
         """
-        for node in self.get_all_nodes():
+        if link_to_nodes == "explicitly_contained_nodes":
+            node_list = self.get_node_dict().keys()
+        elif link_to_nodes == "all_nodes":
+            node_list = self.get_all_nodes()
+        else:
+            raise ValueError(f'Got unexpected value link nodes="{link_to_nodes}"')
+        for node in node_list:
             node.node_sets_link.append(self)
 
     def check_replaced_nodes(self):
+        """Check if nodes in this set have to be replaced.
+        We need to do this for explicitly contained nodes in this set.
         """
-        Check if nodes in this set have to be replaced.
-        We need to do this for all nodes to correctly represent node-based sets.
-        """
-        for node in self.get_all_nodes():
+        # Don't iterate directly over the keys as the dict changes during this iteration
+        for node in list(self.get_node_dict().keys()):
             if node.master_node is not None:
                 self.replace_node(node, node.get_master_node())
 
     def replace_node(self, old_node, new_node):
-        """Replace old_node with new_node. This is only done for point sets."""
+        """Replace old_node with new_node."""
 
-        # Check if the new node is in the set.
-        my_nodes = self.get_all_nodes()
-        has_new_node = new_node in my_nodes
+        explicit_nodes_in_this_set = self.get_node_dict()
+        explicit_nodes_in_this_set[new_node] = None
+        del explicit_nodes_in_this_set[old_node]
 
-        for i, node in enumerate(my_nodes):
-            if node == old_node:
-                if has_new_node:
-                    del my_nodes[i]
-                else:
-                    my_nodes[i] = new_node
-                break
-        else:
-            raise ValueError(
-                "The node that should be replaced is not in the current node set"
-            )
+    def get_node_dict(self):
+        """Return the dictionary containing the explicitly added nodes for this set"""
+        raise NotImplementedError(
+            'The "get_node_dict" method has to be overwritten in the derived class'
+        )
+
+    def get_points(self):
+        """Return nodes explicitly associated with this set."""
+        raise NotImplementedError(
+            'The "get_points" method has to be overwritten in the derived class'
+        )
 
     def get_all_nodes(self):
         """
@@ -156,7 +168,7 @@ class GeometrySet(GeometrySetBase):
 
         self.geometry_objects = {}
         for geo in mpy.geo:
-            self.geometry_objects[geo] = []
+            self.geometry_objects[geo] = {}
         self.add(geometry)
 
     @staticmethod
@@ -189,10 +201,17 @@ class GeometrySet(GeometrySetBase):
                     "This is not possible"
                 )
         elif self._get_geometry_type(item) is self.geometry_type:
-            if item not in self.geometry_objects[self.geometry_type]:
-                self.geometry_objects[self.geometry_type].append(item)
+            self.geometry_objects[self.geometry_type][item] = None
         else:
             raise TypeError(f"Got unexpected geometry type {type(item)}")
+
+    def get_node_dict(self):
+        """Return the dictionary containing the explicitly added nodes for this set.
+        For non-point sets an empty dict is returned."""
+        if self.geometry_type is mpy.geo.point:
+            return self.geometry_objects[mpy.geo.point]
+        else:
+            return {}
 
     def get_points(self):
         """
@@ -200,7 +219,7 @@ class GeometrySet(GeometrySetBase):
         point set something is returned here.
         """
         if self.geometry_type is mpy.geo.point:
-            return self.geometry_objects[mpy.geo.point]
+            return list(self.geometry_objects[mpy.geo.point].keys())
         else:
             raise TypeError(
                 "The function get_points can only be called for point sets."
@@ -214,10 +233,10 @@ class GeometrySet(GeometrySetBase):
         """
 
         if self.geometry_type is mpy.geo.point:
-            return self.geometry_objects[mpy.geo.point]
+            return list(self.geometry_objects[mpy.geo.point].keys())
         elif self.geometry_type is mpy.geo.line:
             nodes = []
-            for element in self.geometry_objects[mpy.geo.line]:
+            for element in self.geometry_objects[mpy.geo.line].keys():
                 nodes.extend(element.nodes)
             # Remove duplicates while preserving order
             return list(dict.fromkeys(nodes))
@@ -244,7 +263,7 @@ class GeometrySetNodes(GeometrySetBase):
         """
 
         super().__init__(geometry_type, **kwargs)
-        self.nodes = []
+        self.nodes = {}
         if nodes is not None:
             self.add(nodes)
 
@@ -263,8 +282,10 @@ class GeometrySetNodes(GeometrySetBase):
     def replace_indices_with_nodes(self, nodes):
         """After the set is imported from a dat file, replace the node indices
         with the corresponding nodes objects."""
-        for i, node in enumerate(self.nodes):
-            self.nodes[i] = nodes[node]
+        node_dict = {}
+        for node_id in self.nodes.keys():
+            node_dict[nodes[node_id]] = None
+        self.nodes = node_dict
 
     def add(self, value):
         """
@@ -283,8 +304,7 @@ class GeometrySetNodes(GeometrySetBase):
             for item in value:
                 self.add(item)
         elif isinstance(value, (int, Node)):
-            if value not in self.nodes:
-                self.nodes.append(value)
+            self.nodes[value] = None
         elif isinstance(value, GeometrySetNodes):
             # Add all nodes from this geometry set.
             if self.geometry_type == value.geometry_type:
@@ -298,10 +318,14 @@ class GeometrySetNodes(GeometrySetBase):
         else:
             raise TypeError(f"Expected Node or list, but got {type(value)}")
 
+    def get_node_dict(self):
+        """Return the dictionary containing the explicitly added nodes for this set."""
+        return self.nodes
+
     def get_points(self):
         """Return nodes explicitly associated with this set."""
         if self.geometry_type is mpy.geo.point:
-            return self.nodes
+            return self.get_all_nodes()
         else:
             raise TypeError(
                 "The function get_points can only be called for point sets."
@@ -310,4 +334,4 @@ class GeometrySetNodes(GeometrySetBase):
 
     def get_all_nodes(self):
         """Return all nodes associated with this set."""
-        return self.nodes
+        return list(self.nodes.keys())

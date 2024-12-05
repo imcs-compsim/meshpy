@@ -195,20 +195,27 @@ class Mesh:
         else:
             raise ValueError("The node that should be replaced is not in the mesh")
 
-    def get_unique_geometry_sets(self, coupling_sets=True, link_nodes=False):
-        """
-        Return a geometry set container that contains geometry sets explicitly
+    def get_unique_geometry_sets(self, *, coupling_sets=True, link_to_nodes="no_link"):
+        """Return a geometry set container that contains geometry sets explicitly
         added to the mesh, as well as sets for boundary conditions.
 
         Args
         ----
         coupling_sets: bool
             If this is true, also sets for couplings will be added.
-        link_nodes: bool
-            If a link to the geometry sets should be added to each connected node
+        link_to_nodes: str
+            "no_link":
+                No link between the geometry set and the nodes is set
+            "explicitly_contained_nodes":
+                A link will be set for all nodes that are explicitly part of the geometry set
+            "all_nodes":
+                A link will be set for all nodes that are part of the geometry set, i.e., also
+                nodes connected to elements of an element set. This is mainly used for vtk
+                output so we can color the nodes which are part of element sets.
         """
 
-        if link_nodes:
+        is_link_nodes = not link_to_nodes == "no_link"
+        if is_link_nodes:
             # First clear all links in existing nodes.
             for node in self.nodes:
                 node.node_sets_link = []
@@ -235,17 +242,8 @@ class Mesh:
             for i, geometry_set in enumerate(mesh_sets[key]):
                 # Add global indices to the geometry set.
                 geometry_set.n_global = i + 1
-                if link_nodes:
-                    geometry_set.link_to_nodes()
-
-        # Set the global value for digits in the VTK output.
-        if link_nodes:
-            # Get highest number of node_sets.
-            max_sets = max(len(geometry_list) for geometry_list in mesh_sets.values())
-
-            # Set the mpy value.
-            digits = len(str(max_sets))
-            mpy.vtk_node_set_format = "{:0" + str(digits) + "}"
+                if is_link_nodes:
+                    geometry_set.link_to_nodes(link_to_nodes=link_to_nodes)
 
         return mesh_sets
 
@@ -557,7 +555,7 @@ class Mesh:
             # "all_nodes" since we also have to replace nodes that are in existing
             # GeometrySetNodes.
             self.unlink_nodes()
-            self.get_unique_geometry_sets(link_nodes="all_nodes")
+            self.get_unique_geometry_sets(link_to_nodes="explicitly_contained_nodes")
             self.set_node_links()
 
             # Go through partner nodes.
@@ -704,9 +702,17 @@ class Mesh:
         vtk_writer_solid = VTKWriter()
 
         # Get the set numbers of the mesh
-        self.get_unique_geometry_sets(
-            coupling_sets=coupling_sets, link_nodes="all_nodes"
+        mesh_sets = self.get_unique_geometry_sets(
+            coupling_sets=coupling_sets, link_to_nodes="all_nodes"
         )
+
+        # Set the global value for digits in the VTK output.
+        # Get highest number of node_sets.
+        max_sets = max(len(geometry_list) for geometry_list in mesh_sets.values())
+
+        # Set the mpy value.
+        digits = len(str(max_sets))
+        mpy.vtk_node_set_format = "{:0" + str(digits) + "}"
 
         if overlapping_elements:
             # Check for overlapping elements.

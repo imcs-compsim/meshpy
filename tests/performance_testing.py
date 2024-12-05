@@ -114,6 +114,14 @@ def create_solid_block(file_path, nx, ny, nz):
             bc_description="NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0",
         )
         counter += 1
+    for item in brick.volumes():
+        cubit.add_node_set(
+            item,
+            name="node_set_" + str(counter),
+            bc_type=cupy.bc_type.neumann,
+            bc_description="NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0",
+        )
+        counter += 1
 
     # Export mesh
     cubit.create_dat(file_path)
@@ -180,8 +188,8 @@ class TestPerformance(object):
     expected_times = {}
     expected_times["sisyphos2.bauv.unibw-muenchen.de"] = {
         "cubitpy_create_solid": 8.0,
-        "meshpy_load_solid": 0.9,
-        "meshpy_load_solid_full": 4.5,
+        "meshpy_load_solid": 1.5,
+        "meshpy_load_solid_full": 3.5,
         "meshpy_create_beams": 9.0,
         "meshpy_rotate": 0.6,
         "meshpy_translate": 0.5,
