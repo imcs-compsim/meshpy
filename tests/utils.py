@@ -135,7 +135,7 @@ def compare_test_result(
     result_string,
     *,
     extension="dat",
-    reference_file_name=None,
+    reference_file_base_name=None,
     additional_identifier=None,
     **kwargs,
 ):
@@ -147,24 +147,24 @@ def compare_test_result(
     ----
     result_string: str
         String to compare with a reference file
-    reference_file_name: str
-        Name of the reference file to compare with. Defaults to the name of the
+    reference_file_base_name: str
+        Base name of the reference file to compare with. Defaults to the name of the
         current test
     additional_identifier: str
-        Will be added to the reference file name
+        Will be added after the base reference file name
     extension: str
         File extension of the reference file
     """
 
-    if reference_file_name is None:
-        reference_file_name = self._testMethodName
+    if reference_file_base_name is None:
+        reference_file_base_name = self._testMethodName
     if additional_identifier is not None:
-        reference_file_name += f"_{additional_identifier}"
-    reference_file_name += "_reference"
+        reference_file_base_name += f"_{additional_identifier}"
+    reference_file_base_name += "_reference"
     if extension is not None:
-        reference_file_name += "." + extension
+        reference_file_base_name += "." + extension
 
-    reference_file_path = os.path.join(testing_input, reference_file_name)
+    reference_file_path = os.path.join(testing_input, reference_file_base_name)
 
     # Compare the results
     compare_strings(self, reference_file_path, result_string, **kwargs)
