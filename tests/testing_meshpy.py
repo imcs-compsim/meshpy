@@ -300,7 +300,9 @@ class TestMeshpy(unittest.TestCase):
         # Convert the solid mesh to meshpy objects.
         mpy.import_mesh_full = full_import
 
-        solid_file = os.path.join(testing_input, "test_meshpy_comments_in_solid.dat")
+        solid_file = os.path.join(
+            testing_input, "test_meshpy_comments_in_solid_initial.dat"
+        )
         mesh = InputFile(dat_file=solid_file)
 
         # Add one element with BCs.
@@ -365,7 +367,7 @@ class TestMeshpy(unittest.TestCase):
                 testing_input,
                 "test_meshpy_mesh_transformations_with_solid_"
                 + ("full" if import_full else "dat")
-                + "_reference.dat",
+                + ".dat",
             )
             compare_test_result(
                 self,
@@ -1503,7 +1505,7 @@ class TestMeshpy(unittest.TestCase):
         writer.complete_data()
 
         # Write to file.
-        ref_file = os.path.join(testing_input, "test_meshpy_vtk_writer_reference.vtu")
+        ref_file = os.path.join(testing_input, "test_meshpy_vtk_writer.vtu")
         vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_writer.vtu")
         writer.write_vtk(vtk_file, binary=False)
 
@@ -1523,7 +1525,7 @@ class TestMeshpy(unittest.TestCase):
         )
 
         # Write VTK output, with coupling sets."""
-        ref_file = os.path.join(testing_input, "test_meshpy_vtk_beam_reference.vtu")
+        ref_file = os.path.join(testing_input, "test_meshpy_vtk_beam.vtu")
         vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_beam.vtu")
         mesh.write_vtk(
             output_name="test_meshpy_vtk",
@@ -1534,9 +1536,7 @@ class TestMeshpy(unittest.TestCase):
         compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
 
         # Write VTK output, without coupling sets."""
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_vtk_no_coupling_beam_reference.vtu"
-        )
+        ref_file = os.path.join(testing_input, "test_meshpy_vtk_no_coupling_beam.vtu")
         vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_no_coupling_beam.vtu")
         mesh.write_vtk(
             output_name="test_meshpy_vtk_no_coupling",
@@ -1548,7 +1548,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Write VTK output, with coupling sets and additional points for visualization."""
         ref_file = os.path.join(
-            testing_input, "test_meshpy_vtk_smooth_centerline_beam_reference.vtu"
+            testing_input, "test_meshpy_vtk_smooth_centerline_beam.vtu"
         )
         vtk_file = os.path.join(
             testing_temp, "test_meshpy_vtk_smooth_centerline_beam.vtu"
@@ -1574,7 +1574,7 @@ class TestMeshpy(unittest.TestCase):
         input_file.read_dat(os.path.join(testing_input, "4C_input_solid_tube.dat"))
 
         # Write VTK output.
-        ref_file = os.path.join(testing_input, "test_meshpy_vtk_solid_reference.vtu")
+        ref_file = os.path.join(testing_input, "test_meshpy_vtk_solid.vtu")
         vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_solid.vtu")
         if os.path.isfile(vtk_file):
             os.remove(vtk_file)
@@ -1599,9 +1599,7 @@ class TestMeshpy(unittest.TestCase):
         input_file.read_dat(os.path.join(testing_input, "4C_input_solid_elements.dat"))
 
         # Write VTK output.
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_vtk_solid_elements_reference.vtu"
-        )
+        ref_file = os.path.join(testing_input, "test_meshpy_vtk_solid_elements.vtu")
         vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_elements_solid.vtu")
         if os.path.isfile(vtk_file):
             os.remove(vtk_file)
@@ -1651,9 +1649,7 @@ class TestMeshpy(unittest.TestCase):
         )
 
         # Write VTK output, with coupling sets."""
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_vtk_curve_cell_data_reference.vtu"
-        )
+        ref_file = os.path.join(testing_input, "test_meshpy_vtk_curve_cell_data.vtu")
         vtk_file = os.path.join(
             testing_temp, "test_meshpy_vtk_curve_cell_data_beam.vtu"
         )
@@ -1880,9 +1876,7 @@ class TestMeshpy(unittest.TestCase):
 
         # Check if the overlapping elements are written to the vtk output.
         warnings.filterwarnings("ignore")
-        ref_file = os.path.join(
-            testing_input, "test_meshpy_vtk_element_overlap_reference.vtu"
-        )
+        ref_file = os.path.join(testing_input, "test_meshpy_vtk_element_overlap.vtu")
         vtk_file = os.path.join(
             testing_temp, "test_meshpy_vtk_element_overlap_beam.vtu"
         )

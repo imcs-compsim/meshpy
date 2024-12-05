@@ -158,9 +158,10 @@ def compare_test_result(
 
     if reference_file_base_name is None:
         reference_file_base_name = self._testMethodName
+
     if additional_identifier is not None:
         reference_file_base_name += f"_{additional_identifier}"
-    reference_file_base_name += "_reference"
+
     if extension is not None:
         reference_file_base_name += "." + extension
 
@@ -210,7 +211,7 @@ def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs)
             reference_file = reference
         else:
             reference_file = os.path.join(
-                testing_temp, "{}_reference.dat".format(self._testMethodName)
+                testing_temp, "{}.dat".format(self._testMethodName)
             )
             with open(reference_file, "w") as input_file:
                 input_file.write(reference_string)

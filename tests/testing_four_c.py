@@ -262,7 +262,7 @@ class Test4C(unittest.TestCase):
         )
         ref_file = os.path.join(
             testing_input,
-            "test_four_c_solid_shell_direction_detection_dome_constant_direction_reference.vtu",
+            "test_four_c_solid_shell_direction_detection_dome_constant_direction.vtu",
         )
         grid = get_visualization_third_parameter_direction_hex8(mesh_dome)
         grid.save(test_file)
