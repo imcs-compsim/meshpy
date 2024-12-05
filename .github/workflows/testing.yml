@@ -2,6 +2,8 @@
 name: Test MeshPy during pull requests
 
 on:
+  schedule:
+    - cron: '0 22 * * *'
   push:
     branches:
       - main
@@ -18,7 +20,7 @@ jobs:
     name: Code check
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/ppraegla/4c:latest
+      image: ghcr.io/4c-multiphysics/4c:latest
     defaults:
       run:
         shell: bash
@@ -59,7 +61,7 @@ jobs:
     name: Run MeshPy test suite with ArborX
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/ppraegla/4c:latest
+      image: ghcr.io/4c-multiphysics/4c:latest
     defaults:
       run:
         shell: bash
