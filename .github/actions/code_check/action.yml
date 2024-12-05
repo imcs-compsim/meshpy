@@ -1,0 +1,13 @@
+name: code_check
+description: Perform MeshPy code checks
+runs:
+  using: composite
+  steps:
+    - name: Code Checks
+      shell: bash
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        source python-testing-environment/bin/activate
+        pip install -e .[CI-CD]
+        black . --check --exclude=python-testing-environment && exit 0
+        exit 1
