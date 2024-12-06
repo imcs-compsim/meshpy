@@ -31,7 +31,7 @@ jobs:
         uses: actions/checkout@v4
       - name: Setup Pages
         id: pages
-        uses: actions/configure-pages@v4
+        uses: actions/configure-pages@v5
       - name: Build with Jekyll
         run: |
           . ${SPACK_ACTIVATION_SCRIPT}
@@ -46,7 +46,7 @@ jobs:
         env:
           JEKYLL_ENV: production
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v4
+        uses: actions/upload-pages-artifact@v3
         with:
           path: public
 
