@@ -17,6 +17,10 @@ inputs:
     description: Fail if the CubitPy tests can not be performed
     required: false
     default: 1
+  coverage_config:
+    description: Config file to use for coverage analysis
+    required: false
+    default: "coverage.config"
 runs:
   using: composite
   steps:
@@ -37,7 +41,7 @@ runs:
         python --version
         pip list
         cd tests
-        coverage run --rcfile=coverage.config testing_main.py
+        coverage run --rcfile=${{ inputs.coverage_config }} testing_main.py
         coverage html
         coverage report
         coverage-badge -o htmlcov/coverage.svg
