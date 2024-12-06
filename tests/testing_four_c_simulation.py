@@ -41,6 +41,7 @@ import shutil
 # Testing imports.
 from utils import (
     compare_test_result,
+    skip_fail_four_c,
     testing_temp,
     testing_input,
 )
@@ -85,11 +86,7 @@ class TestFullFourC(unittest.TestCase):
             If the simulation should be a restart
         """
 
-        # Only run the test if an executable can be found
-        if "MESHPY_FOUR_C_EXE" not in os.environ.keys():
-            self.skipTest("4C path was not found!")
-        if shutil.which("mpirun") is None:
-            self.skipTest("mpirun was not found!")
+        skip_fail_four_c(self)
 
         # Check if temp directory exists.
         testing_dir = os.path.join(testing_temp, name)

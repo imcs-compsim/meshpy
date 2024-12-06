@@ -1,7 +1,9 @@
-# Workflow for testing meshpy
-name: Test meshpy
+
+name: Test MeshPy during pull requests
 
 on:
+  schedule:
+    - cron: '0 22 * * *'
   push:
     branches:
       - main
@@ -13,139 +15,91 @@ on:
   workflow_dispatch:
     type: choice
 
-env:
-  # Indicated the testing script, that it is performed on GitHub. In this
-  # case all test have to pass.
-  TESTING_GITHUB: 1
-  # Some tests require the 4C executable to check if the created input file
-  # works with 4C.
-  MESHPY_FOUR_C_EXE: /home_local/github-runner/testing_lib/four_c_master/release/4C
-  # Python executable and virtual environment name
-  PYTHON_EXE: python
-  PYTHON_VENV: python-testing-environment
-  # Meshpy can interact with cubitpy, to perform the corresponding tests,
-  # the following path has to be set
-  CUBIT_ROOT: /imcs/public/compsim/opt/cubit-15.2
-  # Meshpy allows to perform geometric search functions with ArborX,
-  # for this functionality we need Kokkos. On IMCS Ares this is provided
-  # with the spack installation under the following path.
-  SPACK_ACTIVATION_SCRIPT: /home_local/github-runner/testing_lib/spack/share/spack/setup-env.sh
-
 jobs:
-  meshpy-testing:
-    name: meshpy-testing
-    runs-on: self-hosted
+  meshpy-code-check:
+    name: Code check
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/4c-multiphysics/4c:latest
+    defaults:
+      run:
+        shell: bash
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup virtual python environment
+        uses: ./.github/actions/setup_virtual_python_environment
+      - name: Code checks
+        uses: ./.github/actions/code_check
+
+  meshpy-testing:
+    name: Run MeshPy test suite
+    runs-on: self-hosted
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup virtual python environment
+        uses: ./.github/actions/setup_virtual_python_environment
         with:
-          submodules: true
-      - name: Test meshpy
-        run: |
-          whoami
-          pwd
-          MESHPY_PATH=$(pwd)
-          echo "Value of MESHPY_FOUR_C_EXE: \"${MESHPY_FOUR_C_EXE}\""
-          # Load the python interpreter
-          . ${SPACK_ACTIVATION_SCRIPT}
-          spack load python@3.12.1
-          # Create the virtual environment
-          ${PYTHON_EXE} -m venv ${PYTHON_VENV}
-          source ${PYTHON_VENV}/bin/activate
-          # We have to update pip, otherwise there is a bug in the compilation of the cython code
-          pip install --upgrade pip
-          # Install meshpy
-          pip install .[CI-CD]
-          # Check git configuration
-          git config --list
-          # Print information on the python environment
-          python --version
-          pip list
-          # Run tests
-          cd tests
-          coverage run --rcfile=coverage.config testing_main.py
-          coverage html
-          coverage report
-          coverage-badge -o htmlcov/coverage.svg
-          # Check codestyle
-          cd $MESHPY_PATH
-          black . --check --exclude="${PYTHON_VENV}" && exit 0
-          # If we did not exit earlier, raise an error here
-          exit 1
-          ls
-      - name: Upload Test Results
+          python-exe: /home_local/github-runner/testing_lib/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/python-3.12.1-qnjucxirxh534suwewl6drfa237u6t7w/bin/python
+      - name: Run the test suite
+        uses: ./.github/actions/run_tests
+        with:
+          require_four_c: 0
+          require_arborx: 0
+      - name: Upload test results on failure
         if: failure()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{github.job}}-${{github.run_number}}
           path: ${{github.workspace}}/tests/testing-tmp/
 
-  geometric-search-testing:
-    name: geometric-search-testing
-    runs-on: self-hosted
+  meshpy-testing-arborx:
+    name: Run MeshPy test suite with ArborX
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/4c-multiphysics/4c:latest
+    defaults:
+      run:
+        shell: bash
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
         with:
           submodules: true
-      - name: Additionally test the geometric search module with ArborX
-        run: |
-          whoami
-          pwd
-          MESHPY_PATH=$(pwd)
-          # Load the external modules
-          git submodule update --init
-          # Load the required packages via spack
-          . ${SPACK_ACTIVATION_SCRIPT}
-          spack load python@3.12.1
-          spack load ninja@1.11.1
-          spack load cmake@3.25.2
-          spack load kokkos@4.1.00
-          # Build the binaries
-          mkdir -p build/arborx
-          cd build/arborx
-          cmake ../../meshpy/geometric_search/src -G Ninja
-          ninja
-          cd $MESHPY_PATH
-          # Create the virtual environment
-          ${PYTHON_EXE} -m venv ${PYTHON_VENV}
-          source ${PYTHON_VENV}/bin/activate
-          # We have to update pip, otherwise there is a bug in the compilation of the cython code
-          pip install --upgrade pip
-          # Install meshpy, it is not yet possible to globally install the ArborX binaries, so we
-          # use the developement mode here.
-          pip install -e .[CI-CD]
-          # Print information on the python environment
-          python --version
-          pip list
-          # Run tests
-          cd tests
-          python testing_geometric_search.py
+      - name: Setup virtual python environment
+        uses: ./.github/actions/setup_virtual_python_environment
+      - name: Build ArborX geometric search
+        uses: ./.github/actions/build_arbrox_geometric_search
+      - name: Run the test suite
+        uses: ./.github/actions/run_tests
+        with:
+          install-command: "-e .[CI-CD]"
+          require_cubitpy: 0
+          coverage_config: "coverage_local.config"
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{github.job}}-${{github.run_number}}
+          path: ${{github.workspace}}/tests/testing-tmp/
 
-  performance-test:
-    name: meshpy-performance-testing
+  meshpy-performance-testing:
+    name: Run MeshPy performance test suite
     runs-on: self-hosted
     continue-on-error: true
+    defaults:
+      run:
+        shell: bash
     steps:
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup virtual python environment
+        uses: ./.github/actions/setup_virtual_python_environment
         with:
-          submodules: true
-      - name: Performace test
-        run: |
-          whoami
-          pwd
-          MESHPY_PATH=$(pwd)
-          # Load the python interpreter
-          . ${SPACK_ACTIVATION_SCRIPT}
-          spack load python@3.12.1
-          # Create the virtual environment
-          ${PYTHON_EXE} -m venv ${PYTHON_VENV}
-          source ${PYTHON_VENV}/bin/activate
-          # We have to update pip, otherwise there is a bug in the compilation of the cython code
-          pip install --upgrade pip
-          # Install meshpy
-          pip install .[CI-CD]
-          # Print information on the python environment
-          python --version
-          pip list
-          # Run performance tests
-          cd tests
-          python performance_testing.py
+          python-exe: /home_local/github-runner/testing_lib/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/python-3.12.1-qnjucxirxh534suwewl6drfa237u6t7w/bin/python
+      - name: Run the performance test suite
+        uses: ./.github/actions/run_performance_tests

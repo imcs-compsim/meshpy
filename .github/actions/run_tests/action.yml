@@ -1,0 +1,47 @@
+name: run_tests
+description: Perform MeshPy test suite
+inputs:
+  install-command:
+    description: Command to install MeshPy with pip
+    required: false
+    default: ".[CI-CD]"
+  require_four_c:
+    description: Fail if the 4C tests can not be performed
+    required: false
+    default: 1
+  require_arborx:
+    description: Fail if the ArborX tests can not be performed
+    required: false
+    default: 1
+  require_cubitpy:
+    description: Fail if the CubitPy tests can not be performed
+    required: false
+    default: 1
+  coverage_config:
+    description: Config file to use for coverage analysis
+    required: false
+    default: "coverage.config"
+runs:
+  using: composite
+  steps:
+    - name: MeshPy testing
+      shell: bash
+      env:
+        MESHPY_FOUR_C_EXE: /home/user/4C/build/4C
+        TESTING_GITHUB: 1
+        TESTING_GITHUB_4C: ${{ inputs.require_four_c }}
+        TESTING_GITHUB_ARBORX: ${{ inputs.require_arborx }}
+        TESTING_GITHUB_CUBITPY: ${{ inputs.require_cubitpy }}
+        CUBIT_ROOT: /imcs/public/compsim/opt/cubit-15.2
+        OMPI_MCA_rmaps_base_oversubscribe: 1
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        source python-testing-environment/bin/activate
+        pip install ${{ inputs.install-command }}
+        python --version
+        pip list
+        cd tests
+        coverage run --rcfile=${{ inputs.coverage_config }} testing_main.py
+        coverage html
+        coverage report
+        coverage-badge -o htmlcov/coverage.svg

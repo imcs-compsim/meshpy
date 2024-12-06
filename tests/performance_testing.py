@@ -50,7 +50,7 @@ from meshpy import (
     Beam3rHerm2Line3,
     Rotation,
 )
-from meshpy.utility import find_close_nodes
+from meshpy.utility import find_close_nodes, get_env_variable
 from meshpy.geometric_search import FindClosePointAlgorithm, find_close_points
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 
@@ -186,7 +186,7 @@ class TestPerformance(object):
 
     # Set expected test times.
     expected_times = {}
-    expected_times["sisyphos2.bauv.unibw-muenchen.de"] = {
+    expected_times["github-sisyphos-docker"] = {
         "cubitpy_create_solid": 8.0,
         "meshpy_load_solid": 1.5,
         "meshpy_load_solid_full": 3.5,
@@ -222,7 +222,9 @@ class TestPerformance(object):
             kwargs = {}
 
         # Get the expected time for this function.
-        host = socket.gethostname()
+        host = get_env_variable(
+            "PERFORMANCE_TESTING_HOST", default=socket.gethostname()
+        )
         if host in self.expected_times.keys():
             if name in self.expected_times[host].keys():
                 expected_time = self.expected_times[host][name]
