@@ -36,7 +36,6 @@ runs:
         OMPI_MCA_rmaps_base_oversubscribe: 1
       run: |
         cd ${GITHUB_WORKSPACE}
-        source python-testing-environment/bin/activate
         pip install ${{ inputs.install-command }}
         python --version
         pip list
