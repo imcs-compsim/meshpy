@@ -220,7 +220,7 @@ class MaterialKirchhoff(MaterialBeam):
             )
         string = "MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} "
         string += "MOMINPOL {} MOMIN2 {} MOMIN3 {} FAD {}"
-        return string.format(
+        string = string.format(
             self.n_global,
             self.material_string,
             self.youngs_modulus,
@@ -233,6 +233,9 @@ class MaterialKirchhoff(MaterialBeam):
             # TODO: replace this with a common utils function
             "yes" if self.is_fad else "no",
         )
+        if self.interaction_radius is not None:
+            string += f" INTERACTIONRADIUS {self.interaction_radius}"
+        return string
 
 
 class MaterialEulerBernoulli(MaterialBeam):
