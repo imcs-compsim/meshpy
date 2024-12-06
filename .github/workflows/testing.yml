@@ -37,3 +37,25 @@ jobs:
         with:
           name: ${{github.job}}-${{github.run_number}}
           path: ${{github.workspace}}/tests/testing-tmp/
+
+
+  meshpy-testing2:
+    name: Run MeshPedddy test suite
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup virtual python environment
+        uses: ./.github/actions/setup_virtual_python_environment
+      - name: Run the test suite
+        uses: ./.github/actions/run_tests
+        with:
+          require_cubitpy: 0
+          require_four_c: 0
+          require_arborx: 0
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{github.job}}-${{github.run_number}}
+          path: ${{github.workspace}}/tests/testing-tmp/
