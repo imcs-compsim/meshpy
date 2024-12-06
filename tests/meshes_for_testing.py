@@ -29,23 +29,40 @@
 # SOFTWARE.
 # -----------------------------------------------------------------------------
 """
-This module defines classes and functions for the interaction of MeshPy with 4C.
+Utility functions to create all different kind of meshes used within the tests.
 """
-
-from .beam_potential import BeamPotential
-from .dbc_monitor import all_dbc_monitor_values_to_input
-
-from .solid_shell_thickness_direction import (
-    set_solid_shell_thickness_direction,
-    visualize_third_parameter_direction_hex8,
+from meshpy import (
+    mpy,
+    set_header_static,
+    InputFile,
+    Function,
+    MaterialReissner,
+    Beam3rHerm2Line3,
 )
-from .run_four_c import run_four_c
+from meshpy.mesh_creation_functions import create_beam_mesh_line
 
-# Define the items that will be exported by default.
-__all__ = [
-    "all_dbc_monitor_values_to_input",
-    "BeamPotential",
-    "set_solid_shell_thickness_direction",
-    "visualize_third_parameter_direction_hex8",
-    "run_four_c",
-]
+
+def create_cantilver_model(n_steps, time_step=0.5):
+    """
+    Create a simple cantilver model.
+
+    Args
+    ----
+    n_steps: int
+        Number of simulation steps.
+    time_step: float
+        Time step size.
+    """
+
+    mpy.set_default_values()
+    input_file = InputFile()
+    set_header_static(input_file, time_step=time_step, n_steps=n_steps)
+    input_file.add("--IO\nOUTPUT_BIN yes\nSTRUCT_DISP yes", option_overwrite=True)
+    ft = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+    input_file.add(ft)
+    mat = MaterialReissner(youngs_modulus=100.0, radius=0.1)
+    beam_set = create_beam_mesh_line(
+        input_file, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
+    )
+
+    return input_file, beam_set
