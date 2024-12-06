@@ -681,6 +681,36 @@ class TestMeshpy(unittest.TestCase):
         # Compare with the reference solution.
         compare_test_result(self, input_file.get_string(header=False))
 
+    def test_meshpy_kirchhoff_material(self):
+        """Test the Kirchhoff Love beam material"""
+
+        def set_stiff(material):
+            material.area = 2.0
+            material.mom2 = 3.0
+            material.mom3 = 4.0
+            material.polar = 5.0
+
+        material = MaterialKirchhoff(youngs_modulus=1000, is_fad=True)
+        set_stiff(material)
+        self.assertTrue(
+            " ".join(material.get_dat_lines())
+            == "MAT None MAT_BeamKirchhoffElastHyper YOUNG 1000 SHEARMOD 500.0 DENS 0.0 CROSSAREA 2.0 MOMINPOL 5.0 MOMIN2 3.0 MOMIN3 4.0 FAD yes"
+        )
+
+        material = MaterialKirchhoff(youngs_modulus=1000, is_fad=False)
+        set_stiff(material)
+        self.assertTrue(
+            " ".join(material.get_dat_lines())
+            == "MAT None MAT_BeamKirchhoffElastHyper YOUNG 1000 SHEARMOD 500.0 DENS 0.0 CROSSAREA 2.0 MOMINPOL 5.0 MOMIN2 3.0 MOMIN3 4.0 FAD no"
+        )
+
+        material = MaterialKirchhoff(youngs_modulus=1000, interaction_radius=1.1)
+        set_stiff(material)
+        self.assertTrue(
+            " ".join(material.get_dat_lines())
+            == "MAT None MAT_BeamKirchhoffElastHyper YOUNG 1000 SHEARMOD 500.0 DENS 0.0 CROSSAREA 2.0 MOMINPOL 5.0 MOMIN2 3.0 MOMIN3 4.0 FAD no INTERACTIONRADIUS 1.1"
+        )
+
     def test_meshpy_euler_bernoulli(self):
         """
         Recreate the 4C test case beam3eb_static_endmoment_quartercircle.dat
