@@ -16,38 +16,23 @@ on:
     type: choice
 
 jobs:
-  meshpy-code-check:
-    name: Code check
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/4c-multiphysics/4c:latest
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Setup virtual python environment
-        uses: ./.github/actions/setup_virtual_python_environment
-      - name: Code checks
-        uses: ./.github/actions/code_check
 
-  meshpy-testing:
-    name: Run MeshPy test suite
-    runs-on: self-hosted
-    defaults:
-      run:
-        shell: bash
+
+
+  meshpy-testing2:
+    name: Run MeshPedddy test suite
+    runs-on: windows-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Setup virtual python environment
-        uses: ./.github/actions/setup_virtual_python_environment
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-exe: /home_local/github-runner/testing_lib/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/python-3.12.1-qnjucxirxh534suwewl6drfa237u6t7w/bin/python
+          python-version: "3.12"
       - name: Run the test suite
         uses: ./.github/actions/run_tests
         with:
+          require_cubitpy: 0
           require_four_c: 0
           require_arborx: 0
       - name: Upload test results on failure
@@ -56,50 +41,3 @@ jobs:
         with:
           name: ${{github.job}}-${{github.run_number}}
           path: ${{github.workspace}}/tests/testing-tmp/
-
-  meshpy-testing-arborx:
-    name: Run MeshPy test suite with ArborX
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/4c-multiphysics/4c:latest
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Setup virtual python environment
-        uses: ./.github/actions/setup_virtual_python_environment
-      - name: Build ArborX geometric search
-        uses: ./.github/actions/build_arbrox_geometric_search
-      - name: Run the test suite
-        uses: ./.github/actions/run_tests
-        with:
-          install-command: "-e .[CI-CD]"
-          require_cubitpy: 0
-          coverage_config: "coverage_local.config"
-      - name: Upload test results on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{github.job}}-${{github.run_number}}
-          path: ${{github.workspace}}/tests/testing-tmp/
-
-  meshpy-performance-testing:
-    name: Run MeshPy performance test suite
-    runs-on: self-hosted
-    continue-on-error: true
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Setup virtual python environment
-        uses: ./.github/actions/setup_virtual_python_environment
-        with:
-          python-exe: /home_local/github-runner/testing_lib/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/python-3.12.1-qnjucxirxh534suwewl6drfa237u6t7w/bin/python
-      - name: Run the performance test suite
-        uses: ./.github/actions/run_performance_tests
