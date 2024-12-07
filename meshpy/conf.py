@@ -177,9 +177,6 @@ class MeshPy(object):
         self.geometric_search_max_nodes_brute_force = 1000
         self.geometric_search_binning_n_bin = 10
 
-        # Values for the formating of the input file.
-        self.dat_len_section = 80
-
         # Import meshes as pure dat or import the geometry.
         self.import_mesh_full = False
 
