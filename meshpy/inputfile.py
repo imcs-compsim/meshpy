@@ -37,7 +37,6 @@ import sys
 import os
 import datetime
 import re
-from _collections import OrderedDict
 
 # Meshpy modules.
 from .conf import mpy
@@ -168,7 +167,7 @@ class InputSection:
         self.name = name
 
         # Each input line will be one entry in this dictionary.
-        self.data = OrderedDict()
+        self.data = dict()
 
         for arg in args:
             self.add(arg, **kwargs)
@@ -357,7 +356,7 @@ class InputFile(Mesh):
         self._nox_xml_file = None
 
         # Dictionaries for sections other than mesh sections.
-        self.sections = OrderedDict()
+        self.sections = dict()
 
         # Flag if dat file was loaded.
         self._dat_file_loaded = False
@@ -915,7 +914,7 @@ class InputFile(Mesh):
         # Add additional element sections (e.g. STRUCTURE KNOTVECTORS)
         # We only need to to this on the "real" elements as the imported ones already have their
         # dat sections.
-        element_sections = OrderedDict()
+        element_sections = dict()
         for element in self.elements:
             element.add_element_specific_section(element_sections)
 
