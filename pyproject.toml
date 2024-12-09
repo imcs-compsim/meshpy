@@ -37,6 +37,7 @@ dependencies = [
   "geomdl",
   "numpy<2",
   "pre-commit",
+  "pytest",
   "pyvista",
   "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@3aeb8329bd28b55c01977a10c8eae3a9b2f67442",
   "scipy",
