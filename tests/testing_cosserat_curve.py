@@ -73,6 +73,7 @@ def test_translate_and_rotate():
     sol_full = curve.get_centerline_positions_and_rotations(t, factor=1.0)
 
     def load_compare(name):
+        """Load the compare files and return a numpy array"""
         return np.loadtxt(
             os.path.join(
                 testing_input,
@@ -80,7 +81,6 @@ def test_translate_and_rotate():
             )
         )
 
-    # Compare
     assert np.allclose(
         sol_half[0], load_compare("translate_and_rotate_pos_half_ref"), rtol=1e-14
     )
