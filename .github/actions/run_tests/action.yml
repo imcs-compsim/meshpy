@@ -5,6 +5,10 @@ inputs:
     description: Command to install MeshPy with pip
     required: false
     default: ".[CI-CD]"
+  source-command:
+    description: Command to source the virtual environment
+    required: false
+    default: ""
   require_four_c:
     description: Fail if the 4C tests can not be performed
     required: false
@@ -36,7 +40,7 @@ runs:
         OMPI_MCA_rmaps_base_oversubscribe: 1
       run: |
         cd ${GITHUB_WORKSPACE}
-        source python-testing-environment/bin/activate
+        ${{ inputs.source-command }}
         pip install ${{ inputs.install-command }}
         python --version
         pip list
