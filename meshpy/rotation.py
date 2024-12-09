@@ -213,6 +213,20 @@ class Rotation:
         # Check if effective rotation angle is 0.
         if np.abs(np.sin(phi / 2)) < mpy.eps_quaternion:
             return np.zeros(3)
+        elif np.abs(np.abs(phi) - np.pi) < mpy.eps_quaternion:
+            # For rotations of -pi and pi, numerical issues might occur that the output
+            # rotation vector is non-deterministic (correct, but the sign can switch).
+            # To avoid this, we scale the rotation axis in such a way, that for a
+            # rotation angle of -pi or pi, the first component of the rotation axis
+            # that is not 0 is positive.
+            rotation_axis = self.q[1:] / norm
+            for i_dir in range(3):
+                if np.abs(rotation_axis[i_dir]) > mpy.eps_quaternion:
+                    if rotation_axis[i_dir] > 0:
+                        return phi * rotation_axis
+                    else:
+                        return -phi * rotation_axis
+
         else:
             return phi * self.q[1:] / norm
 
