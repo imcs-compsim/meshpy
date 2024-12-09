@@ -56,10 +56,10 @@ def test_translate_and_rotate():
 
     # Compare
     assert np.allclose(
-        sol_half[0], load_compare("translate_and_rotate_pos_half_ref"), rtol=1e-4
+        sol_half[0], load_compare("translate_and_rotate_pos_half_ref"), rtol=1e-14
     )
     assert np.allclose(
-        sol_half[1], load_compare("translate_and_rotate_q_half_ref"), rtol=1e-4
+        sol_half[1], load_compare("translate_and_rotate_q_half_ref"), rtol=1e-14
     )
     assert np.allclose(
         sol_full[0], load_compare("translate_and_rotate_pos_full_ref"), rtol=1e-14

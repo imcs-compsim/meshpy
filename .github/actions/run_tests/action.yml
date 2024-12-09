@@ -49,3 +49,4 @@ runs:
         coverage html
         coverage report
         coverage-badge -o htmlcov/coverage.svg
+        pytest testing_cosserat_curve.py
