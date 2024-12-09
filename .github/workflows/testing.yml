@@ -1,5 +1,5 @@
 
-name: Test MeshPy during pull requests
+name: MeshPy test suite
 
 on:
   schedule:
@@ -33,7 +33,35 @@ jobs:
         uses: ./.github/actions/code_check
 
   meshpy-testing:
-    name: Run MeshPy test suite
+    name: ${{ matrix.os-version }} python${{ matrix.python-version }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os-version: [ubuntu-latest, macos-latest, windows-latest]
+        python-version: ["3.10", "3.12"]
+    runs-on: ${{ matrix.os-version }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Run the test suite
+        uses: ./.github/actions/run_tests
+        with:
+          require_four_c: 0
+          require_arborx: 0
+          require_cubitpy: 0
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{github.job}}-${{ matrix.os-version }}-python${{ matrix.python-version }}-${{github.run_number}}
+          path: ${{github.workspace}}/tests/testing-tmp/
+
+  meshpy-testing-cubitpy:
+    name: self-hosted with CubitPy
     runs-on: self-hosted
     defaults:
       run:
@@ -48,6 +76,7 @@ jobs:
       - name: Run the test suite
         uses: ./.github/actions/run_tests
         with:
+          source-command: "source python-testing-environment/bin/activate"
           require_four_c: 0
           require_arborx: 0
       - name: Upload test results on failure
@@ -57,8 +86,8 @@ jobs:
           name: ${{github.job}}-${{github.run_number}}
           path: ${{github.workspace}}/tests/testing-tmp/
 
-  meshpy-testing-arborx:
-    name: Run MeshPy test suite with ArborX
+  meshpy-testing-4C-arborx:
+    name: ubuntu-latest with 4C and ArborX
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/4c-multiphysics/4c:latest
@@ -77,6 +106,7 @@ jobs:
       - name: Run the test suite
         uses: ./.github/actions/run_tests
         with:
+          source-command: "source python-testing-environment/bin/activate"
           install-command: "-e .[CI-CD]"
           require_cubitpy: 0
           coverage_config: "coverage_local.config"
@@ -88,7 +118,7 @@ jobs:
           path: ${{github.workspace}}/tests/testing-tmp/
 
   meshpy-performance-testing:
-    name: Run MeshPy performance test suite
+    name: performance tests
     runs-on: self-hosted
     continue-on-error: true
     defaults:
