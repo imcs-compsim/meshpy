@@ -40,7 +40,7 @@ from meshpy.cosserat_curve.cosserat_curve import CosseratCurve
 from meshpy.cosserat_curve.warp_mesh_along_curve import warp_mesh_along_curve
 from meshpy import mpy, InputFile, Rotation, Beam3rHerm2Line3, MaterialReissner
 from meshpy.mesh_creation_functions import create_beam_mesh_line
-from .utils import compare_string_tolerance, testing_input
+from utils import compare_string_tolerance, testing_input
 
 
 def load_cosserat_curve_from_file():
