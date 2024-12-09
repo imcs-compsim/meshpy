@@ -33,9 +33,6 @@ This module implements containers to manage boundary conditions and geometry
 sets in one object.
 """
 
-# Python modules.
-from _collections import OrderedDict
-
 # Meshpy modules.
 from .conf import mpy
 from .geometry_set import GeometrySetBase
@@ -43,7 +40,7 @@ from .base_mesh_item import BaseMeshItemString
 from .boundary_condition import BoundaryConditionBase
 
 
-class GeometryName(OrderedDict):
+class GeometryName(dict):
     """
     Group node geometry sets together. This is mainly used for export from mesh
     functions. The sets can be accessed by a unique name. There is no
@@ -62,7 +59,7 @@ class GeometryName(OrderedDict):
             raise NotImplementedError("GeometryName can only store GeometrySets")
 
 
-class ContainerBase(OrderedDict):
+class ContainerBase(dict):
     """A base class for containers to be used in MeshPy"""
 
     def append(self, key, item):
