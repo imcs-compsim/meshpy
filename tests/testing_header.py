@@ -133,7 +133,7 @@ def check_license():
                 if file.endswith(skip):
                     break
             else:
-                with open(file) as source_file:
+                with open(file, encoding="utf-8") as source_file:
                     source_text = source_file.read()
                     if not source_text.startswith(header):
                         wrong_headers.append(file)

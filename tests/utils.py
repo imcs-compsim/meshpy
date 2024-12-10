@@ -214,22 +214,18 @@ def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs)
     differences.
     """
 
-    # Check if the input data is a file that exists.
-    reference_is_file = os.path.isfile(reference)
-    compare_is_file = os.path.isfile(compare)
+    def check_is_file_get_string(item):
+        """Check if the input data is a file that exists or a string"""
+        is_file = os.path.isfile(item)
+        if is_file:
+            with open(item, "r") as myfile:
+                string = myfile.read()
+        else:
+            string = item
+        return is_file, string
 
-    # Get the correct data
-    if reference_is_file:
-        with open(reference, "r") as myfile:
-            reference_string = myfile.read()
-    else:
-        reference_string = reference
-
-    if compare_is_file:
-        with open(compare, "r") as myfile:
-            compare_string = myfile.read()
-    else:
-        compare_string = compare
+    reference_is_file, reference_string = check_is_file_get_string(reference)
+    compare_is_file, compare_string = check_is_file_get_string(compare)
 
     if rtol is None and atol is None:
         # Check if the strings are equal, if not compare the differences and
@@ -239,29 +235,32 @@ def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs)
         is_equal = compare_string_tolerance(
             reference_string, compare_string, rtol=rtol, atol=atol, **kwargs
         )
-    if not is_equal and not (get_env_variable("TESTING_GITHUB", default="0") == "1"):
+
+    message = f"Test: {self._testMethodName}"
+    if not is_equal:
         # Check if temporary directory exists, and creates it if necessary.
         os.makedirs(testing_temp, exist_ok=True)
 
-        # Get the paths of the files to compare. If a string was given
-        # create a file with the string in it.
-        if reference_is_file:
-            reference_file = reference
-        else:
-            reference_file = os.path.join(
-                testing_temp, "{}.dat".format(self._testMethodName)
-            )
-            with open(reference_file, "w") as input_file:
-                input_file.write(reference_string)
+        def get_compare_paths(item, is_file, string):
+            """Get the paths of the files to compare. If a string was given
+            create a file with the string in it."""
+            if is_file:
+                file = item
+            else:
+                file = os.path.join(
+                    testing_temp,
+                    "{}_failed_test_compare.dat".format(self._testMethodName),
+                )
+                with open(file, "w") as f:
+                    f.write(string)
+            return file
 
-        if compare_is_file:
-            compare_file = compare
-        else:
-            compare_file = os.path.join(
-                testing_temp, "{}_compare.dat".format(self._testMethodName)
-            )
-            with open(compare_file, "w") as input_file:
-                input_file.write(compare_string)
+        reference_file = get_compare_paths(
+            reference, reference_is_file, reference_string
+        )
+        compare_file = get_compare_paths(compare, compare_is_file, compare_string)
+
+        message += f"\nCompare strings failed. Files:\n  ref: {reference_file}\n  res: {compare_file}"
 
         if shutil.which("code") is not None:
             child = subprocess.Popen(
@@ -275,7 +274,7 @@ def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs)
             self._testMethodName += "\n\nDiff:\n" + result.stdout.decode("utf-8")
 
     # Check the results.
-    self.assertTrue(is_equal, self._testMethodName)
+    self.assertTrue(is_equal, message)
 
 
 def compare_vtk(self, path_1, path_2, *, tol_float=1e-14):
