@@ -89,7 +89,7 @@ class TestRotation(unittest.TestCase):
 
             # Check if the rotation is the same if it is created from its own
             # quaternion and then created from its own rotation matrix.
-            rotation = Rotation(rotation.get_quaternion())
+            rotation = Rotation.from_quaternion(rotation.get_quaternion())
             rotation_matrix = Rotation.from_rotation_matrix(
                 rotation.get_rotation_matrix()
             )
@@ -137,11 +137,15 @@ class TestRotation(unittest.TestCase):
         quaternion[1] = cy * sr * cp - sy * cr * sp
         quaternion[2] = cy * cr * sp + sy * sr * cp
         quaternion[3] = sy * cr * cp - cy * sr * sp
-        self.assertTrue(Rotation(quaternion) == rotation_euler)
+        self.assertTrue(Rotation.from_quaternion(quaternion) == rotation_euler)
         self.assertTrue(
-            Rotation(quaternion) == Rotation(rotation_euler.get_quaternion())
+            Rotation.from_quaternion(quaternion)
+            == Rotation.from_quaternion(rotation_euler.get_quaternion())
         )
-        self.assertTrue(Rotation(quaternion) == Rotation.from_rotation_matrix(R_euler))
+        self.assertTrue(
+            Rotation.from_quaternion(quaternion)
+            == Rotation.from_rotation_matrix(R_euler)
+        )
 
     def test_negative_angles(self):
         """
@@ -160,8 +164,8 @@ class TestRotation(unittest.TestCase):
 
         rot = Rotation.from_rotation_vector(vector)
         q = rot.q
-        self.assertTrue(rot == Rotation(-q))
-        self.assertTrue(Rotation(q) == Rotation(-q))
+        self.assertTrue(rot == Rotation.from_quaternion(-q))
+        self.assertTrue(Rotation.from_quaternion(q) == Rotation.from_quaternion(-q))
 
     def test_inverse_rotation(self):
         """Test the inv() function for rotations."""
@@ -208,7 +212,7 @@ class TestRotation(unittest.TestCase):
         # Check that the rotation object from the quaternion and rotation
         # vector are equal.
         rotation_from_vec = Rotation.from_rotation_vector(rotation_vector)
-        self.assertTrue(Rotation(q) == rotation_from_vec)
+        self.assertTrue(Rotation.from_quaternion(q) == rotation_from_vec)
         self.assertTrue(Rotation(axis, angle) == rotation_from_vec)
 
         # Check that the same rotation vector is returned after being converted

@@ -493,9 +493,20 @@ class TestMeshCreationFunctions(unittest.TestCase):
                 n_el=2,
             )
 
-        rotation_expected = Rotation(axis, angle) * rotation_ref
         rotation_actual = beam_set["end"].get_points()[0].rotation
+
+        # Calculate the solution and get the "analytical" solution
+        rotation_expected = Rotation(axis, angle) * rotation_ref
+        quaternion_expected = np.array([-0.5, 0.5, -0.5, -0.5])
         self.assertTrue(rotation_actual == rotation_expected)
+        self.assertTrue(
+            np.allclose(
+                rotation_actual.q,
+                quaternion_expected,
+                atol=mpy.eps_quaternion,
+                rtol=0.0,
+            )
+        )
 
     def test_mesh_creation_functions_element_length_option(self):
         """Test that the element length can be specified in the beam creation functions"""
