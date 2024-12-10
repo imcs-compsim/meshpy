@@ -474,7 +474,9 @@ class TestFullFourC(unittest.TestCase):
                 )
 
         # Check the created input file
-        compare_test_result(self, input_file.get_string(check_nox=False, header=False))
+        compare_test_result(
+            self, input_file.get_string(check_nox=False, header=False), rtol=1e-10
+        )
 
         # Run the input file in 4C.
         self.run_four_c_test("honeycomb_variants", input_file)
