@@ -33,6 +33,7 @@ This module defines a class that represents a rotation in 3D.
 """
 
 # Python modules.
+import copy
 import numpy as np
 
 # Meshpy modules.
@@ -68,8 +69,6 @@ class Rotation:
                 Create a identity rotation.
             - Rotation(axis, phi)
                 Create a rotation around the vector axis with the angle phi.
-            - Rotation([q0, q1, q2, q3])
-                Create a rotation with the quaternion values q0...q3.
         """
 
         self.q = np.zeros(4)
@@ -77,11 +76,6 @@ class Rotation:
         if len(args) == 0:
             # Identity element.
             self.q[0] = 1
-        elif len(args) == 1 and len(args[0]) == 4:
-            # Set directly from quaternion
-            # To avoid error accumulation, normalize the quaternion here
-            q = np.array(args[0])
-            self.q[:] = q / np.linalg.norm(q)
         elif len(args) == 2:
             # Set from vector and rotation angle.
             vector = args[0]
@@ -96,6 +90,15 @@ class Rotation:
                 self.q[1:] = np.sin(0.5 * phi) * np.array(vector) / norm
         else:
             raise ValueError(f"The given arguments {args} are invalid!")
+
+    @classmethod
+    def from_quaternion(cls, q):
+        """Create the object from a quaternion float array (4x1)"""
+        rotation = object.__new__(cls)
+        rotation.q = np.array(q)
+        if (not rotation.q.ndim == 1) or (not len(rotation.q) == 4):
+            raise ValueError("Got quaternion array with unexpected dimensions")
+        return rotation
 
     @classmethod
     def from_rotation_matrix(cls, R):
@@ -126,7 +129,7 @@ class Rotation:
             q[j_index + 1] = (R[j_index, i_index] + R[i_index, j_index]) / (4 * q_i)
             q[k_index + 1] = (R[k_index, i_index] + R[i_index, k_index]) / (4 * q_i)
 
-        return cls(q)
+        return cls.from_quaternion(q)
 
     @classmethod
     def from_basis(cls, t1, t2):
@@ -277,7 +280,7 @@ class Rotation:
 
         tmp_quaternion = self.q.copy()
         tmp_quaternion[0] *= -1.0
-        return Rotation(tmp_quaternion)
+        return Rotation.from_quaternion(tmp_quaternion)
 
     def __mul__(self, other):
         """
@@ -293,7 +296,7 @@ class Rotation:
             added_rotation = np.zeros_like(self.q)
             added_rotation[0] = p[0] * q[0] - np.dot(p[1:], q[1:])
             added_rotation[1:] = p[0] * q[1:] + q[0] * p[1:] + np.cross(p[1:], q[1:])
-            return Rotation(added_rotation)
+            return Rotation.from_quaternion(added_rotation)
         elif isinstance(other, (list, np.ndarray)) and len(other) == 3:
             # Apply rotation to vector.
             return np.dot(self.get_rotation_matrix(), np.array(other))
@@ -333,7 +336,7 @@ class Rotation:
 
     def copy(self):
         """Return a deep copy of this object."""
-        return Rotation(self.q)
+        return copy.deepcopy(self)
 
     def __str__(self):
         """
