@@ -49,3 +49,5 @@ runs:
         coverage html
         coverage report
         coverage-badge -o htmlcov/coverage.svg
+        coverage run --rcfile=${{ inputs.coverage_config }} -m pytest pytest_testing_cosserat_curve.py
+        coverage report
