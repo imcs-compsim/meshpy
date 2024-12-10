@@ -36,7 +36,6 @@ dependencies = [
   "Cython",
   "geomdl",
   "numpy",
-  "numpy<2",
   "numpy-quaternion",
   "pre-commit",
   "pytest",
