@@ -1,0 +1,12 @@
+# This file contains all requirements for MeshPy
+
+autograd
+Cython
+geomdl
+numpy<2
+pre-commit
+pyvista
+pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@3aeb8329bd28b55c01977a10c8eae3a9b2f67442
+scipy
+splinepy
+vtk
