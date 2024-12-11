@@ -28,9 +28,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements a basic class to manage functions in the 4C input file.
-"""
+"""This module implements a basic class to manage functions in the 4C input
+file."""
 
 # Meshpy modules.
 from .base_mesh_item import BaseMeshItemFull
@@ -43,11 +42,9 @@ class Function(BaseMeshItemFull):
         super().__init__(data=data)
 
     def __deepcopy__(self, memo):
-        """
-        When deepcopy is called on a mesh, we do not want the same functions to
-        be copied, as this will result in multiple equal functions in the input
-        file.
-        """
+        """When deepcopy is called on a mesh, we do not want the same functions
+        to be copied, as this will result in multiple equal functions in the
+        input file."""
 
         # Add this object to the memo dictionary.
         memo[id(self)] = self
@@ -56,9 +53,10 @@ class Function(BaseMeshItemFull):
         return self
 
     def __str__(self):
-        """
-        Return the global index for this function. This is usually used then
-        the function is called with the str.format() function.
+        """Return the global index for this function.
+
+        This is usually used then the function is called with the
+        str.format() function.
         """
         if self.n_global is None:
             raise IndexError("The function does not have a global index!")

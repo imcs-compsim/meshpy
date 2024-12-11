@@ -1,27 +1,22 @@
 # Workflow for building and deploying a Jekyll site to GitHub Pages
 name: Deploy Jekyll site to Pages
-
-on: 
+on:
   push:
     branches:
       - main
-
 # Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
-
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
-
 env:
   # Use spack to provide the correct ruby version
   SPACK_ACTIVATION_SCRIPT: /home_local/github-runner/testing_lib/spack/share/spack/setup-env.sh
-
 jobs:
   # Build job
   build:
@@ -49,7 +44,6 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: public
-
   # Deployment job
   deploy:
     environment:

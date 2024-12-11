@@ -28,9 +28,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-Generic function used to create all beams within meshpy.
-"""
+"""Generic function used to create all beams within meshpy."""
 
 # Python modules
 import numpy as np
@@ -55,10 +53,9 @@ def create_beam_mesh_function(
     add_sets=False,
     start_node=None,
     end_node=None,
-    vtk_cell_data=None
+    vtk_cell_data=None,
 ):
-    """
-    Generic beam creation function.
+    """Generic beam creation function.
 
     Remark for given start and/or end nodes:
         If the rotation does not match, but the tangent vector is the same,
@@ -143,11 +140,15 @@ def create_beam_mesh_function(
             raise ValueError("The given node is not in the current mesh")
 
     def get_relative_twist(rotation_node, rotation_function):
-        """Check if the rotation at a node and the one returned by the function match.
-        If not, check if the first basis vector of the triads is the same. If that is the
-        case, a simple relative twist can be applied to ensure that the triad field is
-        continuous. This relative twist can lead to issues if the beam cross-section is
-        not double symmetric."""
+        """Check if the rotation at a node and the one returned by the function
+        match.
+
+        If not, check if the first basis vector of the triads is the
+        same. If that is the case, a simple relative twist can be
+        applied to ensure that the triad field is continuous. This
+        relative twist can lead to issues if the beam cross-section is
+        not double symmetric.
+        """
 
         if rotation_node == rotation_function:
             return None

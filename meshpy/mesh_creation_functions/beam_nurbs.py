@@ -28,9 +28,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-Create a beam filament from a NURBS curve represented with splinepy.
-"""
+"""Create a beam filament from a NURBS curve represented with splinepy."""
 
 # Python packages.
 import numpy as np
@@ -41,10 +39,11 @@ from .beam_curve import create_beam_mesh_curve
 
 
 def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
-    """Return function objects for evaluating the curve and the derivative. These functions are
-    used in the curve integration. It can happen that the integration algorithm has to evaluate
-    the curve outside of the defined domain. This usually leads to errors in common NURBS
-    packages. Therefore, we check for this evaluation outside of the parameter domain here and
+    """Return function objects for evaluating the curve and the derivative.
+    These functions are used in the curve integration. It can happen that the
+    integration algorithm has to evaluate the curve outside of the defined
+    domain. This usually leads to errors in common NURBS packages. Therefore,
+    we check for this evaluation outside of the parameter domain here and
     perform a linear extrapolation.
 
     Args
@@ -102,8 +101,11 @@ def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
 
     def jacobian(t):
         """Convert the spline to a Jacobian function that can be used for curve
-        generation. There is no tolerance here, since the integration algorithms sometimes
-        evaluate the derivative far outside the interval."""
+        generation.
+
+        There is no tolerance here, since the integration algorithms
+        sometimes evaluate the derivative far outside the interval.
+        """
 
         if curve_start <= t <= curve_end:
             return eval_rp(t)
@@ -119,8 +121,7 @@ def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
 def create_beam_mesh_from_nurbs(
     mesh, beam_object, material, curve, *, tol=None, **kwargs
 ):
-    """
-    Generate a beam from a NURBS curve.
+    """Generate a beam from a NURBS curve.
 
     Args
     ----

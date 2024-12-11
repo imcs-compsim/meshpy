@@ -1,6 +1,4 @@
-
 name: MeshPy test suite
-
 on:
   schedule:
     - cron: '0 22 * * *'
@@ -14,7 +12,6 @@ on:
       - synchronize
   workflow_dispatch:
     type: choice
-
 jobs:
   meshpy-code-check:
     name: Code check
@@ -31,7 +28,6 @@ jobs:
         uses: ./.github/actions/setup_virtual_python_environment
       - name: Code checks
         uses: ./.github/actions/code_check
-
   meshpy-testing:
     name: ${{ matrix.os-version }} python${{ matrix.python-version }}
     strategy:
@@ -59,7 +55,6 @@ jobs:
         with:
           name: ${{github.job}}-${{ matrix.os-version }}-python${{ matrix.python-version }}-${{github.run_number}}
           path: ${{github.workspace}}/tests/testing-tmp/
-
   meshpy-testing-cubitpy:
     name: self-hosted with CubitPy
     runs-on: self-hosted
@@ -85,7 +80,6 @@ jobs:
         with:
           name: ${{github.job}}-${{github.run_number}}
           path: ${{github.workspace}}/tests/testing-tmp/
-
   meshpy-testing-4C-arborx:
     name: ubuntu-latest with 4C and ArborX
     runs-on: ubuntu-latest
@@ -116,7 +110,6 @@ jobs:
         with:
           name: ${{github.job}}-${{github.run_number}}
           path: ${{github.workspace}}/tests/testing-tmp/
-
   meshpy-performance-testing:
     name: performance tests
     runs-on: self-hosted

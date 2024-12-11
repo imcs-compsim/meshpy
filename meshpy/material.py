@@ -28,10 +28,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements a basic class to manage materials in the 4C input
-file.
-"""
+"""This module implements a basic class to manage materials in the 4C input
+file."""
 
 # Python modules.
 import numpy as np
@@ -47,11 +45,9 @@ class Material(BaseMeshItemFull):
         super().__init__(data=data, **kwargs)
 
     def __deepcopy__(self, memo):
-        """
-        When deepcopy is called on a mesh, we do not want the materials to be
-        copied, as this will result in multiple equal materials in the input
-        file.
-        """
+        """When deepcopy is called on a mesh, we do not want the materials to
+        be copied, as this will result in multiple equal materials in the input
+        file."""
 
         # Add this object to the memo dictionary.
         memo[id(self)] = self
@@ -89,9 +85,8 @@ class MaterialBeam(Material):
         self.polar = None
 
     def calc_area_stiffness(self):
-        """
-        Calculate the relevant stiffness terms and the area for the given beam.
-        """
+        """Calculate the relevant stiffness terms and the area for the given
+        beam."""
         area = 4 * self.radius**2 * np.pi * 0.25
         mom2 = self.radius**4 * np.pi * 0.25
         mom3 = mom2
@@ -285,7 +280,7 @@ class MaterialString(Material):
 
 
 class MaterialSolid(Material):
-    """Base class for a material for solids"""
+    """Base class for a material for solids."""
 
     def __init__(
         self, material_string=None, youngs_modulus=-1.0, nu=0.0, density=0.0, **kwargs

@@ -28,17 +28,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines classes and functions for the interaction of MeshPy with 4C.
-"""
+"""This module defines classes and functions for the interaction of MeshPy with
+4C."""
 
 from .beam_potential import BeamPotential
 from .dbc_monitor import dbc_monitor_to_input
+from .run_four_c import run_four_c
 from .solid_shell_thickness_direction import (
     set_solid_shell_thickness_direction,
     visualize_third_parameter_direction_hex8,
 )
-from .run_four_c import run_four_c
 
 # Define the items that will be exported by default.
 __all__ = [
