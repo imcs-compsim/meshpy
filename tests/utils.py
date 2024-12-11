@@ -282,7 +282,7 @@ def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs)
     self.assertTrue(is_equal, message)
 
 
-def compare_vtk(self, path_1, path_2, *, tol_float=1e-14):
+def compare_vtk(self, path_1, path_2, *, rtol=1e-14, atol=1e-14):
     """Compare two vtk files and raise an error if they are not equal."""
 
     def get_vtk(path):
@@ -295,7 +295,7 @@ def compare_vtk(self, path_1, path_2, *, tol_float=1e-14):
         return reader.GetOutput()
 
     compare = compare_grids(
-        get_vtk(path_1), get_vtk(path_2), output=True, tol=tol_float
+        get_vtk(path_1), get_vtk(path_2), output=True, rtol=rtol, atol=atol
     )
     self.assertTrue(compare[0], msg="\n".join(compare[1]))
 
@@ -410,7 +410,7 @@ def compare_strings_pytest(reference, compare, *, rtol=None, atol=None, **kwargs
     assert is_equal, message
 
 
-def compare_vtk_pytest(path_1, path_2, *, tol_float=1e-14):
+def compare_vtk_pytest(path_1, path_2, *, rtol=1e-14, atol=1e-14):
     """Compare two vtk files and raise an error if they are not equal."""
 
     def get_vtk(path):
@@ -423,6 +423,6 @@ def compare_vtk_pytest(path_1, path_2, *, tol_float=1e-14):
         return reader.GetOutput()
 
     compare = compare_grids(
-        get_vtk(path_1), get_vtk(path_2), output=True, tol=tol_float
+        get_vtk(path_1), get_vtk(path_2), output=True, rtol=rtol, atol=atol
     )
     assert compare[0], "\n".join(compare[1])

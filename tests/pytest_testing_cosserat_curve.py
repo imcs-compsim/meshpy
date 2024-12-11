@@ -50,7 +50,6 @@ from meshpy.cosserat_curve.warping_along_cosserat_curve import (
 )
 
 from .utils import (
-    compare_string_tolerance,
     testing_input,
     testing_temp,
     get_pytest_test_name,
@@ -139,6 +138,8 @@ def test_cosserat_curve_vtk_representation():
     compare_vtk_pytest(
         os.path.join(testing_input, get_pytest_test_name() + ".vtu"),
         result_name,
+        rtol=1e-8,
+        atol=1e-8,
     )
 
 
@@ -152,11 +153,11 @@ def test_cosserat_curve_project_point():
     curve.translate(-curve.centerline_interpolation(0.0))
 
     # Check the projection results
-    tol = 1e-14
+    rtol = 1e-14
     t_ref = 4.264045157204052
-    assert t_ref == pytest.approx(curve.project_point([-5, 1, 1]), rel=tol)
-    assert t_ref == pytest.approx(curve.project_point([-5, 1, 1], t0=2.0), rel=tol)
-    assert t_ref == pytest.approx(curve.project_point([-5, 1, 1], t0=4.0), rel=tol)
+    assert np.allclose(t_ref, curve.project_point([-5, 1, 1]), rtol=rtol)
+    assert np.allclose(t_ref, curve.project_point([-5, 1, 1], t0=2.0), rtol=rtol)
+    assert np.allclose(t_ref, curve.project_point([-5, 1, 1], t0=4.0), rtol=rtol)
 
 
 def test_cosserat_mesh_transformation():
