@@ -107,14 +107,11 @@ def test_cosserat_curve_translate_and_rotate():
     # Get the points and rotations at certain points
     t = list(map(float, range(-10, 30, 5)))
     sol_half_pos, sol_half_q = curve.get_centerline_positions_and_rotations(
-        t, factor=0.5, solve_ivp_kwargs={"atol": 1e-14, "rtol": 1e-12}
+        t, factor=0.5
     )
     sol_full_pos, sol_full_q = curve.get_centerline_positions_and_rotations(
         t, factor=1.0
     )
-
-    def sol_quaternion_to_np_array(sol_q):
-        return np.array([quaternion.as_float_array(q) for q in sol_q])
 
     def load_compare(name):
         """Load the compare files and return a numpy array"""
@@ -122,14 +119,14 @@ def test_cosserat_curve_translate_and_rotate():
             os.path.join(testing_input, f"{get_pytest_test_name()}_{name}.txt")
         )
 
-    assert np.allclose(sol_half_pos, load_compare("pos_half_ref"), rtol=1e-8)
+    assert np.allclose(sol_half_pos, load_compare("pos_half_ref"), rtol=1e-14)
     assert np.allclose(
-        sol_quaternion_to_np_array(sol_half_q), load_compare("q_half_ref"), rtol=1e-8
+        quaternion.as_float_array(sol_half_q), load_compare("q_half_ref"), rtol=1e-14
     )
 
     assert np.allclose(sol_full_pos, load_compare("pos_full_ref"), rtol=1e-14)
     assert np.allclose(
-        sol_quaternion_to_np_array(sol_full_q), load_compare("q_full_ref"), rtol=1e-14
+        quaternion.as_float_array(sol_full_q), load_compare("q_full_ref"), rtol=1e-14
     )
 
 
@@ -180,7 +177,6 @@ def test_cosserat_mesh_transformation():
             Rotation([0, 0, 1], -0.5 * np.pi) * Rotation([0, 1, 0], -0.5 * np.pi)
         ),
         n_steps=3,
-        solve_ivp_kwargs={"atol": 1e-14, "rtol": 1e-12},
     )
 
     # Save as json:
@@ -253,7 +249,6 @@ def test_cosserat_curve_mesh_warp_transform_boundary_conditions():
         reference_rotation=(
             Rotation([0, 0, 1], -0.5 * np.pi) * Rotation([0, 1, 0], -0.5 * np.pi)
         ),
-        solve_ivp_kwargs={"atol": 1e-14, "rtol": 1e-12},
     )
 
     # Compare with the reference result

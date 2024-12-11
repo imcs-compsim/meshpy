@@ -123,6 +123,36 @@ def get_quaternions_along_curve(centerline, point_arc_length):
     return quaternions
 
 
+def get_relative_distance_and_rotations(coordinates, quaternions):
+    """Get relative distances and rotations that can be used to evaluate
+    "intermediate" states of the Cosserat curve."""
+
+    n_points = len(coordinates)
+    relative_distances = np.zeros(n_points - 1)
+    relative_distances_rotation = np.zeros(n_points - 1, dtype=quaternion.quaternion)
+    relative_rotations = np.zeros(n_points - 1, dtype=quaternion.quaternion)
+
+    for i_segment in range(n_points - 1):
+        relative_distance = coordinates[i_segment + 1] - coordinates[i_segment]
+        relative_distance_local = quaternion.rotate_vectors(
+            quaternions[i_segment].conjugate(), relative_distance
+        )
+        relative_distances[i_segment] = np.linalg.norm(relative_distance_local)
+
+        smallest_relative_rotation_onto_distance = smallest_rotation(
+            Rotation(),
+            relative_distance_local,
+        )
+        relative_distances_rotation[i_segment] = quaternion.from_float_array(
+            smallest_relative_rotation_onto_distance.q
+        )
+        relative_rotations[i_segment] = (
+            quaternions[i_segment + 1] * quaternions[i_segment].conjugate()
+        )
+
+    return relative_distances, relative_distances_rotation, relative_rotations
+
+
 class CosseratCurve(object):
     """Represent a Cosserat curve in space"""
 
@@ -174,6 +204,13 @@ class CosseratCurve(object):
             self.centerline_interpolation, self.point_arc_length
         )
 
+        # Get the relative quantities used to warp the curve
+        (
+            self.relative_distances,
+            self.relative_distances_rotation,
+            self.relative_rotations,
+        ) = get_relative_distance_and_rotations(self.coordinates, self.quaternions)
+
     def get_curvature_function(self, *, factor=1.0):
         """Get a function that returns the curvature along the centerline
 
@@ -219,11 +256,7 @@ class CosseratCurve(object):
         return pos[0], rot[0]
 
     def get_centerline_positions_and_rotations(
-        self,
-        points_on_arc_length,
-        *,
-        factor=1.0,
-        solve_ivp_kwargs={"atol": 1e-08, "rtol": 1e-08},
+        self, points_on_arc_length, *, factor=1.0
     ):
         """Return the position and rotation at given centerline arc lengths.
 
@@ -239,13 +272,8 @@ class CosseratCurve(object):
                 factor == 1
                     Use the default positions and the triads obtained via a smallest rotation mapping
                 factor < 1
-                    Integrate the (scaled by the factor) curvature of the curve to obtain a intuitive unwrapping
-                The results will have a small discontinuity between a factor close to 1 and exactly one. This
-                is due to the different evaluation of the centerline and the rotations. For an exact integration
-                of the ivp, the centerline positions will match, however there might still be a difference in
-                the rotations. For practical purposes this does not affect the usability of the results.
-        solve_ivp_kwargs: dict
-            Keyword arguments passed scipy.integrate.solve_ivp
+                    Integrate (piecewise constant as evaluated with get_relative_distance_and_rotations)
+                    the scaled curvature of the curve to obtain a intuitive wrapping
         """
 
         # Get the points that are within the arc length of the given curve.
@@ -263,84 +291,81 @@ class CosseratCurve(object):
         ]
 
         if factor < (1.0 - mpy.eps_quaternion):
-            centerline_interpolation_p = self.centerline_interpolation.derivative(1)
-
-            # Integrate the curvature along the centerline. The curvature is multiplied with the factor
-            # to allow for a consistent "warping" of the curve.
-            curvature = self.get_curvature_function(factor=factor)
-
-            def rhs(t, y):
-                """Right hand side of the differential equation, see meshpy:utility/rotation.wls"""
-                q = y[:4]
-                rotation_angular_vel = quaternion.from_float_array(
-                    [0.0, *(curvature(t))]
+            coordinates = np.zeros_like(self.coordinates)
+            quaternions = np.zeros_like(self.quaternions)
+            coordinates[0] = self.coordinates[0]
+            quaternions[0] = self.quaternions[0]
+            for i_segment in range(self.n_points - 1):
+                relative_distance_rotation = quaternion.slerp_evaluate(
+                    quaternion.quaternion(1),
+                    self.relative_distances_rotation[i_segment],
+                    factor,
                 )
-                rotation_increment = (
-                    rotation_angular_vel * quaternion.from_float_array(q)
-                ) * 0.5
-                dr = np.linalg.norm(
-                    centerline_interpolation_p(t)
-                ) * quaternion.rotate_vectors(quaternion.from_float_array(q), [1, 0, 0])
-                return [*quaternion.as_float_array(rotation_increment), *dr]
-
-            # Integrate the position and rotation along the centerline
-            # The accuracy can be improved with the tolerance parameters
-            sol_ivp = integrate.solve_ivp(
-                rhs,
-                [self.point_arc_length[0], self.point_arc_length[-1]],
-                [
-                    *(quaternion.as_float_array(self.quaternions[0])),
-                    *(self.centerline_interpolation(0)),
-                ],
-                t_eval=points_on_arc_length_in_bound,
-                **solve_ivp_kwargs,
-            )
-            sol_y = np.transpose((sol_ivp.y))
-            sol_r = sol_y[:, 4:]
-            sol_q = quaternion.as_quat_array(sol_y[:, :4])
+                # In the initial configuration (factor=0) we get a straight curve, so we need
+                # to use the arc length here. In the final configuration (factor=1) we want to
+                # exactly recover the input points, so we need the piecewise linear distance.
+                # Between them, we interpolate.
+                relative_distance = (factor * self.relative_distances[i_segment]) + (
+                    1.0 - factor
+                ) * (
+                    self.point_arc_length[i_segment + 1]
+                    - self.point_arc_length[i_segment]
+                )
+                coordinates[i_segment + 1] = (
+                    quaternion.rotate_vectors(
+                        quaternions[i_segment] * relative_distance_rotation,
+                        [relative_distance, 0, 0],
+                    )
+                    + coordinates[i_segment]
+                )
+                quaternions[i_segment + 1] = (
+                    quaternion.slerp_evaluate(
+                        quaternion.quaternion(1),
+                        self.relative_rotations[i_segment],
+                        factor,
+                    )
+                    * quaternions[i_segment]
+                )
         else:
-            # Do a slerp interpolation of quaternions for the given points
-            sol_r = np.zeros([len(points_on_arc_length_in_bound), 3])
-            sol_q = np.zeros(
-                len(points_on_arc_length_in_bound), dtype=quaternion.quaternion
-            )
-            for i_point, centerline_arc_length in enumerate(
-                points_on_arc_length_in_bound
+            coordinates = self.coordinates
+            quaternions = self.quaternions
+
+        sol_r = np.zeros([len(points_on_arc_length_in_bound), 3])
+        sol_q = np.zeros(
+            len(points_on_arc_length_in_bound), dtype=quaternion.quaternion
+        )
+        for i_point, centerline_arc_length in enumerate(points_on_arc_length_in_bound):
+            if (
+                centerline_arc_length >= self.point_arc_length[0]
+                and centerline_arc_length <= self.point_arc_length[-1]
             ):
-                if (
-                    centerline_arc_length >= self.point_arc_length[0]
-                    and centerline_arc_length <= self.point_arc_length[-1]
-                ):
-                    for i in range(1, self.n_points):
-                        centerline_index = i - 1
-                        if self.point_arc_length[i] > centerline_arc_length:
-                            break
+                for i in range(1, self.n_points):
+                    centerline_index = i - 1
+                    if self.point_arc_length[i] > centerline_arc_length:
+                        break
 
-                    # Get the two rotation vectors and arc length values
-                    arc_length = self.point_arc_length[
-                        centerline_index : centerline_index + 2
-                    ]
-                    q1 = self.quaternions[centerline_index]
-                    q2 = self.quaternions[centerline_index + 1]
+                # Get the two rotation vectors and arc length values
+                arc_length = self.point_arc_length[
+                    centerline_index : centerline_index + 2
+                ]
+                q1 = quaternions[centerline_index]
+                q2 = quaternions[centerline_index + 1]
 
-                    # Linear interpolate the arc length
-                    xi = (centerline_arc_length - arc_length[0]) / (
-                        arc_length[1] - arc_length[0]
-                    )
+                # Linear interpolate the arc length
+                xi = (centerline_arc_length - arc_length[0]) / (
+                    arc_length[1] - arc_length[0]
+                )
 
-                    # Perform a slerp interpolation of the rotation
-                    rotation = Rotation.from_quaternion(
-                        quaternion.as_float_array(quaternion.slerp_evaluate(q1, q2, xi))
-                    )
-
-                    sol_r[i_point] = self.centerline_interpolation(
-                        centerline_arc_length
-                    )
-                    sol_q[i_point] = quaternion.as_float_array(
-                        quaternion.slerp_evaluate(q1, q2, xi)
-                    )
-                else:
-                    raise ValueError("Centerline value out of bounds")
+                # Perform a spline interpolation for the positions and a slerp
+                # interpolation for the rotations
+                sol_r[i_point] = get_spline_interpolation(
+                    coordinates, self.point_arc_length
+                )(centerline_arc_length)
+                sol_q[i_point] = quaternion.as_float_array(
+                    quaternion.slerp_evaluate(q1, q2, xi)
+                )
+            else:
+                raise ValueError("Centerline value out of bounds")
 
         # Set the already computed results in the final data structures
         sol_r_final = np.zeros([len(points_on_arc_length), 3])
