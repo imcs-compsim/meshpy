@@ -28,18 +28,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements the class that will be used as the base for all items
-that are in a mesh.
-"""
+"""This module implements the class that will be used as the base for all items
+that are in a mesh."""
 
 
 class BaseMeshItem:
     """Base class for all objects that are related to a mesh."""
 
     def __init__(self, data=None, comments=None):
-        """
-        Create the object
+        """Create the object.
 
         Args
         ----
@@ -60,9 +57,9 @@ class BaseMeshItem:
             self.comments = comments
 
     def get_dat_lines(self):
-        """
-        Return the content of this object as a list. If comments exist, also
-        add those.
+        """Return the content of this object as a list.
+
+        If comments exist, also add those.
         """
 
         # Get data of object.
@@ -85,9 +82,10 @@ class BaseMeshItem:
 
 
 class BaseMeshItemFull(BaseMeshItem):
-    """Base class for all objects that are related to a mesh and are fully created
-    in MeshPy."""
+    """Base class for all objects that are related to a mesh and are fully
+    created in MeshPy."""
 
 
 class BaseMeshItemString(BaseMeshItem):
-    """Base class for all objects that are imported from a dat file as a plain string."""
+    """Base class for all objects that are imported from a dat file as a plain
+    string."""

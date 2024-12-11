@@ -28,9 +28,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements the class that represents one element in the Mesh.
-"""
+"""This module implements the class that represents one element in the Mesh."""
 
 # Meshpy modules.
 from .base_mesh_item import BaseMeshItemFull
@@ -56,20 +54,20 @@ class Element(BaseMeshItemFull):
 
     @classmethod
     def from_dat(cls, input_line):
-        """
-        Check the string to decide which element to use. Nodes are linked with
-        the 0 based index and will be connected to the Node objects after the
-        whole input file is parsed.
+        """Check the string to decide which element to use.
+
+        Nodes are linked with the 0 based index and will be connected to
+        the Node objects after the whole input file is parsed.
         """
 
         # Import solid element classes for creation of the element.
         from .element_volume import (
-            VolumeHEX8,
             SolidRigidSphere,
-            VolumeHEX27,
+            VolumeHEX8,
             VolumeHEX20,
-            VolumeTET10,
+            VolumeHEX27,
             VolumeTET4,
+            VolumeTET10,
         )
 
         # Split up input line and get pre node string.
@@ -142,8 +140,9 @@ class Element(BaseMeshItemFull):
                 )
 
     def flip(self):
-        """
-        Reverse the nodes of this element. This is usually used when reflected.
+        """Reverse the nodes of this element.
+
+        This is usually used when reflected.
         """
         raise NotImplementedError(
             f"The flip method is not implemented for {self.__class__}"
@@ -163,12 +162,10 @@ class Element(BaseMeshItemFull):
             )
 
     def add_element_specific_section(self, sections):
-        """Add element specific section (e.g. STRUCTURE KNOTVECTORS for
-        NURBS elements) to the sections dictionary"""
+        """Add element specific section (e.g. STRUCTURE KNOTVECTORS for NURBS
+        elements) to the sections dictionary."""
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid, **kwargs):
-        """
-        Add representation of this element to the vtk_writers for solid and
-        beam.
-        """
+        """Add representation of this element to the vtk_writers for solid and
+        beam."""
         raise NotImplementedError("VTK output has to be implemented in the class!")

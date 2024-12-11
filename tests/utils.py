@@ -28,31 +28,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-Define utility functions for the testing process.
-"""
+"""Define utility functions for the testing process."""
 
 # Python imports.
 import os
-import numpy as np
 import shutil
 import subprocess
-import warnings
-import xml.etree.ElementTree as ET
-import vtk
-from vtk.util import numpy_support as vtk_numpy
-from vtk_utils.compare_grids import compare_grids
 
+import numpy as np
+import vtk
+from vtk_utils.compare_grids import compare_grids
 
 # MeshPy imports
 from meshpy.utility import get_env_variable
 
 
 def skip_fail_four_c(self):
-    """Check if a 4C executable can be found
+    """Check if a 4C executable can be found.
 
-    If TESTING_GITHUB_4C==1 then we raise an error if we cant find
-    the 4C executable, otherwise the test is skipped"""
+    If TESTING_GITHUB_4C==1 then we raise an error if we cant find the
+    4C executable, otherwise the test is skipped
+    """
 
     message = "Can not find 4C executable"
     four_c_path = get_env_variable("MESHPY_FOUR_C_EXE", default="")
@@ -64,10 +60,11 @@ def skip_fail_four_c(self):
 
 
 def skip_fail_arborx(self):
-    """Check if ArborX geometric search can be loaded
+    """Check if ArborX geometric search can be loaded.
 
     If TESTING_GITHUB_ARBORX==1 then we raise an error if we cant load
-    ArborX, otherwise the test is skipped"""
+    ArborX, otherwise the test is skipped
+    """
 
     from meshpy.geometric_search.geometric_search_arborx import arborx_available
 
@@ -80,16 +77,15 @@ def skip_fail_arborx(self):
 
 
 def skip_fail_cubitpy(self):
-    """Check if CubitPy can be loaded
+    """Check if CubitPy can be loaded.
 
     If TESTING_GITHUB_CUBITPY==1 then we raise an error if we cant load
-    CubitPy, otherwise the test is skipped"""
+    CubitPy, otherwise the test is skipped
+    """
     message = "Can not import and initialize CubitPy"
     try:
-        from cubitpy import CubitPy
-
-        cubit = CubitPy()
-    except Exception as e:
+        pass
+    except Exception:
         if get_env_variable("TESTING_GITHUB_CUBITPY", default="0") == "1":
             raise ImportError(message)
         else:
@@ -177,9 +173,9 @@ def compare_test_result(
     additional_identifier=None,
     **kwargs,
 ):
-    """Compare a created string in a test with the reference results. The reference
-    results are stored in a file made up of the test name. The filename will always
-    end with "_reference".
+    """Compare a created string in a test with the reference results. The
+    reference results are stored in a file made up of the test name. The
+    filename will always end with "_reference".
 
     Args
     ----
@@ -210,12 +206,14 @@ def compare_test_result(
 
 
 def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs):
-    """Compare two stings. If they are not identical open a comparison and show the
+    """Compare two stings.
+
+    If they are not identical open a comparison and show the
     differences.
     """
 
     def check_is_file_get_string(item):
-        """Check if the input data is a file that exists or a string"""
+        """Check if the input data is a file that exists or a string."""
         is_file = os.path.isfile(item)
         if is_file:
             with open(item, "r") as myfile:
@@ -242,8 +240,10 @@ def compare_strings(self, reference, compare, *, rtol=None, atol=None, **kwargs)
         os.makedirs(testing_temp, exist_ok=True)
 
         def get_compare_paths(item, is_file, string):
-            """Get the paths of the files to compare. If a string was given
-            create a file with the string in it."""
+            """Get the paths of the files to compare.
+
+            If a string was given create a file with the string in it.
+            """
             if is_file:
                 file = item
             else:
@@ -281,9 +281,7 @@ def compare_vtk(self, path_1, path_2, *, tol_float=1e-14):
     """Compare two vtk files and raise an error if they are not equal."""
 
     def get_vtk(path):
-        """
-        Return a vtk object for the file at path.
-        """
+        """Return a vtk object for the file at path."""
         reader = vtk.vtkXMLGenericDataObjectReader()
         reader.SetFileName(path)
         reader.Update()

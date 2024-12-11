@@ -33,7 +33,6 @@ interaction potentials."""
 
 
 # Python modules
-import numpy as np
 
 # MeshPy modules
 from ..boundary_condition import BoundaryCondition
@@ -246,7 +245,6 @@ class BeamPotential:
                 self.pot_law_line_charge_density, self.pot_law_line_charge_density_funcs
             )
         ):
-
             if func != "none":
                 self.input_file.add(func)
 

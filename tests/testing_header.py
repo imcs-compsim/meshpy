@@ -28,10 +28,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to test that all headers in the repository are correct.
+"""This script is used to test that all headers in the repository are correct.
 
-This file is adapted from LaTeX2AI (https://github.com/isteinbrecher/LaTeX2AI).
+This file is adapted from LaTeX2AI (
+https://github.com/isteinbrecher/LaTeX2AI).
 """
 
 # Import python modules.
@@ -41,9 +41,7 @@ import unittest
 
 
 def get_repository_dir():
-    """
-    Get the root directory of this repository.
-    """
+    """Get the root directory of this repository."""
 
     script_path = os.path.realpath(__file__)
     root_dir = os.path.dirname(os.path.dirname(script_path))
@@ -51,9 +49,7 @@ def get_repository_dir():
 
 
 def get_license_text():
-    """
-    Return the license text as a string.
-    """
+    """Return the license text as a string."""
 
     license_path = os.path.join(get_repository_dir(), "LICENSE")
     with open(license_path) as license_file:
@@ -61,9 +57,7 @@ def get_license_text():
 
 
 def get_all_source_files():
-    """
-    Get all source files that should be checked for license headers.
-    """
+    """Get all source files that should be checked for license headers."""
 
     # Get the files in the git repository.
     repo_dir = get_repository_dir()
@@ -88,9 +82,8 @@ def get_all_source_files():
 
 
 def license_to_source(license_text, source_type):
-    """
-    Convert the license text to a text that can be written to source code.
-    """
+    """Convert the license text to a text that can be written to source
+    code."""
 
     header = None
     start_line = "-" * 77
@@ -116,9 +109,7 @@ def license_to_source(license_text, source_type):
 
 
 def check_license():
-    """
-    Check the license for all source files.
-    """
+    """Check the license for all source files."""
 
     license_text = get_license_text()
     source_files = get_all_source_files()
@@ -145,9 +136,7 @@ class TestHeaders(unittest.TestCase):
     """This class tests the headers in the repository."""
 
     def test_headers(self):
-        """
-        Check if all headers are correct.
-        """
+        """Check if all headers are correct."""
 
         wrong_headers = check_license()
         wrong_headers_string = "Wrong headers in: " + ", ".join(wrong_headers)

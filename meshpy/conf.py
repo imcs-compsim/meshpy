@@ -28,10 +28,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines a global object that manages all kind of stuff regarding
-meshpy.
-"""
+"""This module defines a global object that manages all kind of stuff regarding
+meshpy."""
 
 # Python imports.
 from enum import Enum, auto
@@ -120,9 +118,7 @@ class VTKType(Enum):
 
 
 class MeshPy(object):
-    """
-    A global object that stores options for the whole meshpy application.
-    """
+    """A global object that stores options for the whole meshpy application."""
 
     def __init__(self):
         self.set_default_values()

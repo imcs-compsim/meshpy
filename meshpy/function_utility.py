@@ -28,9 +28,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements utility functions to create 4C space time function
-"""
+"""This module implements utility functions to create 4C space time
+function."""
 
 # Python modules
 import numpy as np
@@ -42,7 +41,8 @@ from .function import Function
 def create_linear_interpolation_string(
     t, values, *, variable_name="var", variable_index=0
 ):
-    """Create a string that describes a variable that is linear interpolated over time
+    """Create a string that describes a variable that is linear interpolated
+    over time.
 
     Args
     ----
@@ -77,8 +77,8 @@ def create_linear_interpolation_string(
 def create_linear_interpolation_function(
     t, values, *, function_type="SYMBOLIC_FUNCTION_OF_SPACE_TIME"
 ):
-    """Create a function that describes a linear interpolation between the given time points and
-    values. Before and after it will be constant.
+    """Create a function that describes a linear interpolation between the
+    given time points and values. Before and after it will be constant.
 
     Args
     ----

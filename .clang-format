@@ -1,6 +1,5 @@
 ## Define the base style
 BasedOnStyle: Google
-
 ## Deviations from the base style
 AlignAfterOpenBracket: DontAlign
 AlignOperands: false

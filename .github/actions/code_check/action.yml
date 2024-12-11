@@ -9,5 +9,6 @@ runs:
         cd ${GITHUB_WORKSPACE}
         source python-testing-environment/bin/activate
         pip install -e .[CI-CD]
-        black . --check --exclude=python-testing-environment && exit 0
+        pre-commit install --install-hooks
+        SKIP=no-commit-to-branch pre-commit run --all-files
         exit 1

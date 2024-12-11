@@ -28,29 +28,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements a class to handle boundary conditions in the input file.
-"""
+"""This module implements a class to handle boundary conditions in the input
+file."""
 
 # Python modules.
 import warnings
 
+from .base_mesh_item import BaseMeshItemFull
+
 # Meshpy modules.
 from .conf import mpy
-from .base_mesh_item import BaseMeshItemFull
 from .geometry_set import GeometrySet
 from .utility import find_close_nodes
 
 
 class BoundaryConditionBase(BaseMeshItemFull):
-    """
-    This is a base object, which represents one boundary condition in the input
-    file, e.g. Dirichlet, Neumann, coupling or beam-to-solid.
-    """
+    """This is a base object, which represents one boundary condition in the
+    input file, e.g. Dirichlet, Neumann, coupling or beam-to-solid."""
 
     def __init__(self, geometry_set, bc_type=None, **kwargs):
-        """
-        Initialize the object.
+        """Initialize the object.
 
         Args
         ----
@@ -68,11 +65,11 @@ class BoundaryConditionBase(BaseMeshItemFull):
 
     @classmethod
     def from_dat(cls, bc_key, line, **kwargs):
-        """
-        This function acts as a factory and creates the correct boundary
-        condition object from a line in the dat file. The geometry set is
-        passed as integer (0 based index) and will be connected after the whole
-        input file is parsed.
+        """This function acts as a factory and creates the correct boundary
+        condition object from a line in the dat file.
+
+        The geometry set is passed as integer (0 based index) and will
+        be connected after the whole input file is parsed.
         """
 
         # Split up the input line.
@@ -106,10 +103,8 @@ class BoundaryConditionBase(BaseMeshItemFull):
 
 
 class BoundaryCondition(BoundaryConditionBase):
-    """
-    This object represents a Dirichlet, Neumann or beam-to-solid boundary
-    condition.
-    """
+    """This object represents a Dirichlet, Neumann or beam-to-solid boundary
+    condition."""
 
     def __init__(
         self,
@@ -121,8 +116,7 @@ class BoundaryCondition(BoundaryConditionBase):
         double_nodes=None,
         **kwargs,
     ):
-        """
-        Initialize the object.
+        """Initialize the object.
 
         Args
         ----
@@ -149,8 +143,7 @@ class BoundaryCondition(BoundaryConditionBase):
         self.check()
 
     def _get_dat(self):
-        """
-        Add the content of this object to the list of lines.
+        """Add the content of this object to the list of lines.
 
         Args:
         ----
@@ -166,10 +159,8 @@ class BoundaryCondition(BoundaryConditionBase):
         return f"E {self.geometry_set.n_global} - {dat_string}"
 
     def check(self):
-        """
-        Check for point Neumann boundaries that there is not a double
-        Node in the set.
-        """
+        """Check for point Neumann boundaries that there is not a double Node
+        in the set."""
 
         if isinstance(self.geometry_set, int):
             # In the case of solid imports this is a integer at initialization.

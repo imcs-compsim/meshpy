@@ -33,11 +33,11 @@ This script can be used to compile the cython code:
 > python setup.py build_ext --inplace
 """
 
-from setuptools import setup, Extension
 import os
+
 import numpy as np
 from Cython.Build import cythonize
-
+from setuptools import Extension, setup
 
 extensions = [
     Extension(

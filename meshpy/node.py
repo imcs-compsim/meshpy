@@ -28,22 +28,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements the class that represents one node in the Mesh.
-"""
+"""This module implements the class that represents one node in the Mesh."""
 
 # Python modules.
 import numpy as np
 
+from .base_mesh_item import BaseMeshItemFull
+
 # Meshpy modules.
 from .conf import mpy
-from .base_mesh_item import BaseMeshItemFull
 
 
 class Node(BaseMeshItemFull):
-    """
-    This object represents one node in the mesh
-    """
+    """This object represents one node in the mesh."""
 
     def __init__(self, coordinates, *, is_middle_node=False, **kwargs):
         super().__init__(data=None, **kwargs)
@@ -78,9 +75,9 @@ class Node(BaseMeshItemFull):
         return cls([float(line_split[i]) for i in range(3, 6)], comments=input_line[1])
 
     def get_master_node(self):
-        """
-        Return the master node of this node. If the node has not been replaced,
-        this object is returned.
+        """Return the master node of this node.
+
+        If the node has not been replaced, this object is returned.
         """
 
         if self.master_node is None:
@@ -116,14 +113,11 @@ class Node(BaseMeshItemFull):
         self.n_global = None
 
     def rotate(self, *args, **kwargs):
-        """
-        Don't do anything for a standard node, as this node can not be rotated.
-        """
+        """Don't do anything for a standard node, as this node can not be
+        rotated."""
 
     def _get_dat(self):
-        """
-        Return the line that represents this node in the input file.
-        """
+        """Return the line that represents this node in the input file."""
 
         coordinate_string = " ".join(
             [
@@ -139,10 +133,8 @@ class Node(BaseMeshItemFull):
 
 
 class NodeCosserat(Node):
-    """
-    This object represents a Cosserat node in the mesh, i.e., it contains three
-    positions and three rotations.
-    """
+    """This object represents a Cosserat node in the mesh, i.e., it contains
+    three positions and three rotations."""
 
     def __init__(self, coordinates, rotation, **kwargs):
         super().__init__(coordinates, **kwargs)
@@ -151,12 +143,12 @@ class NodeCosserat(Node):
         self.rotation = rotation.copy()
 
     def rotate(self, rotation, *, origin=None, only_rotate_triads=False):
-        """
-        Rotate this node. By default the node is rotated around the origin
-        (0,0,0), if the keyword argument origin is given, it is rotated around
-        that point.
-        If only_rotate_triads is True, then only the rotation is affected,
-        the position of the node stays the same.
+        """Rotate this node.
+
+        By default the node is rotated around the origin (0,0,0), if the
+        keyword argument origin is given, it is rotated around that
+        point. If only_rotate_triads is True, then only the rotation is
+        affected, the position of the node stays the same.
         """
 
         self.rotation = rotation * self.rotation
@@ -171,9 +163,7 @@ class NodeCosserat(Node):
 
 
 class ControlPoint(Node):
-    """
-    This object represents a control point with a weight in the mesh.
-    """
+    """This object represents a control point with a weight in the mesh."""
 
     def __init__(self, coordinates, weight, **kwargs):
         super().__init__(coordinates, **kwargs)
@@ -182,9 +172,7 @@ class ControlPoint(Node):
         self.weight = weight
 
     def _get_dat(self):
-        """
-        Return the line that represents this node in the input file.
-        """
+        """Return the line that represents this node in the input file."""
 
         coordinate_string = " ".join(
             [

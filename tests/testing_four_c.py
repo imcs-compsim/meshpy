@@ -28,13 +28,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to test the functionality of MeshPy for creating 4C input files.
-"""
+"""This script is used to test the functionality of MeshPy for creating 4C
+input files."""
 
 # Python imports
 import os
 import unittest
+
 import numpy as np
 
 # Testing imports
@@ -48,15 +48,15 @@ from meshpy import (
     GeometrySet,
     InputFile,
     MaterialReissner,
-    mpy,
     Rotation,
+    mpy,
 )
 from meshpy.four_c.beam_potential import BeamPotential
-from meshpy.four_c.solid_shell_thickness_direction import (
-    set_solid_shell_thickness_direction,
-    get_visualization_third_parameter_direction_hex8,
-)
 from meshpy.four_c.locsys_condition import LocSysCondition
+from meshpy.four_c.solid_shell_thickness_direction import (
+    get_visualization_third_parameter_direction_hex8,
+    set_solid_shell_thickness_direction,
+)
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_helix,
     create_beam_mesh_line,
@@ -65,24 +65,22 @@ from meshpy.utility import is_node_on_plane
 
 
 class Test4C(unittest.TestCase):
-    """
-    Test 4C related functionality in MeshPy
-    """
+    """Test 4C related functionality in MeshPy."""
 
     def setUp(self):
-        """
-        This method is called before each test and sets the default MeshPy
-        values for each test. The values can be changed in the individual
-        tests.
+        """This method is called before each test and sets the default MeshPy
+        values for each test.
+
+        The values can be changed in the individual tests.
         """
 
         # Set default values for global parameters.
         mpy.set_default_values()
 
     def test_four_c_material_numbering(self):
-        """Test that materials can be added as strings to an input file (as is done when
-        importing dat files) and that the numbering with other added materials does not
-        lead to materials with double IDs."""
+        """Test that materials can be added as strings to an input file (as is
+        done when importing dat files) and that the numbering with other added
+        materials does not lead to materials with double IDs."""
 
         input_file = InputFile()
         input_file.add(
@@ -108,8 +106,8 @@ class Test4C(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False, dat_header=False))
 
     def test_four_c_simulation_beam_potential_helix(self):
-        """Test the correct creation of input files for simulations including beam to
-        beam potential interactions."""
+        """Test the correct creation of input files for simulations including
+        beam to beam potential interactions."""
 
         def create_model():
             """Create the beam to beam potential interaction model."""
@@ -185,7 +183,7 @@ class Test4C(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_four_c_solid_shell_direction_detection(self):
-        """Test the solid shell direction detection functionality"""
+        """Test the solid shell direction detection functionality."""
 
         # Test the plates
         mpy.import_mesh_full = True
@@ -270,7 +268,9 @@ class Test4C(unittest.TestCase):
 
     def test_meshpy_locsys_condition(self):
         """Test case for point locsys condition for beams.
-        The testcase is similar to beam3r_herm2line3_static_locsys.dat, but with simpler material.
+
+        The testcase is similar to beam3r_herm2line3_static_locsys.dat,
+        but with simpler material.
         """
 
         # Create the input file with function and material.
