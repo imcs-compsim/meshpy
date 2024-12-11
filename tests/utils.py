@@ -48,6 +48,11 @@ from vtk_utils.compare_grids import compare_grids
 from meshpy.utility import get_env_variable
 
 
+def get_pytest_test_name():
+    """Return the name of the current pytest test"""
+    return os.environ.get("PYTEST_CURRENT_TEST").split(":")[-1].split(" ")[0]
+
+
 def skip_fail_four_c(self):
     """Check if a 4C executable can be found
 
@@ -293,3 +298,131 @@ def compare_vtk(self, path_1, path_2, *, tol_float=1e-14):
         get_vtk(path_1), get_vtk(path_2), output=True, tol=tol_float
     )
     self.assertTrue(compare[0], msg="\n".join(compare[1]))
+
+
+def compare_test_result_pytest(
+    result_string,
+    *,
+    extension="dat",
+    reference_file_base_name=None,
+    additional_identifier=None,
+    **kwargs,
+):
+    """Compare a created string in a test with the reference results. The reference
+    results are stored in a file made up of the test name. The filename will always
+    end with "_reference".
+
+    Args
+    ----
+    result_string: str
+        String to compare with a reference file
+    reference_file_base_name: str
+        Base name of the reference file to compare with. Defaults to the name of the
+        current test
+    additional_identifier: str
+        Will be added after the base reference file name
+    extension: str
+        File extension of the reference file
+    """
+
+    if reference_file_base_name is None:
+        reference_file_base_name = get_pytest_test_name()
+
+    if additional_identifier is not None:
+        reference_file_base_name += f"_{additional_identifier}"
+
+    if extension is not None:
+        reference_file_base_name += "." + extension
+
+    reference_file_path = os.path.join(testing_input, reference_file_base_name)
+
+    # Compare the results
+    compare_strings_pytest(reference_file_path, result_string, **kwargs)
+
+
+def compare_strings_pytest(reference, compare, *, rtol=None, atol=None, **kwargs):
+    """Compare two stings. If they are not identical open a comparison and show the
+    differences.
+    """
+
+    def check_is_file_get_string(item):
+        """Check if the input data is a file that exists or a string"""
+        is_file = os.path.isfile(item)
+        if is_file:
+            with open(item, "r") as myfile:
+                string = myfile.read()
+        else:
+            string = item
+        return is_file, string
+
+    reference_is_file, reference_string = check_is_file_get_string(reference)
+    compare_is_file, compare_string = check_is_file_get_string(compare)
+
+    if rtol is None and atol is None:
+        # Check if the strings are equal, if not compare the differences and
+        # fail the test.
+        is_equal = reference_string.strip() == compare_string.strip()
+    else:
+        is_equal = compare_string_tolerance(
+            reference_string, compare_string, rtol=rtol, atol=atol, **kwargs
+        )
+
+    test_name = get_pytest_test_name()
+    message = f"Test: {test_name}"
+    if not is_equal:
+        # Check if temporary directory exists, and creates it if necessary.
+        os.makedirs(testing_temp, exist_ok=True)
+
+        def get_compare_paths(item, is_file, string, name):
+            """Get the paths of the files to compare. If a string was given
+            create a file with the string in it."""
+            if is_file:
+                file = item
+            else:
+                file = os.path.join(
+                    testing_temp,
+                    f"{test_name}_failed_test_{name}.dat",
+                )
+                with open(file, "w") as f:
+                    f.write(string)
+            return file
+
+        reference_file = get_compare_paths(
+            reference, reference_is_file, reference_string, "reference"
+        )
+        compare_file = get_compare_paths(
+            compare, compare_is_file, compare_string, "compare"
+        )
+
+        message += f"\nCompare strings failed. Files:\n  ref: {reference_file}\n  res: {compare_file}"
+
+        if shutil.which("code") is not None:
+            child = subprocess.Popen(
+                ["code", "--diff", reference_file, compare_file], stderr=subprocess.PIPE
+            )
+            child.communicate()
+        else:
+            result = subprocess.run(
+                ["diff", reference_file, compare_file], stdout=subprocess.PIPE
+            )
+
+    # Check the results.
+    assert is_equal, message
+
+
+def compare_vtk_pytest(path_1, path_2, *, tol_float=1e-14):
+    """Compare two vtk files and raise an error if they are not equal."""
+
+    def get_vtk(path):
+        """
+        Return a vtk object for the file at path.
+        """
+        reader = vtk.vtkXMLGenericDataObjectReader()
+        reader.SetFileName(path)
+        reader.Update()
+        return reader.GetOutput()
+
+    compare = compare_grids(
+        get_vtk(path_1), get_vtk(path_2), output=True, tol=tol_float
+    )
+    assert compare[0], "\n".join(compare[1])
