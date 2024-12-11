@@ -37,6 +37,7 @@ import numpy as np
 import pytest
 import pyvista as pv
 import json
+import quaternion
 
 from meshpy import mpy, InputFile, Rotation, Beam3rHerm2Line3, MaterialReissner
 from meshpy.mesh_creation_functions import create_beam_mesh_helix
@@ -101,14 +102,19 @@ def test_cosserat_curve_translate_and_rotate():
 
     # Rotate the curve around its center point
     pos_1, q_1 = curve.get_centerline_position_and_rotation(0.0)
-    curve.rotate(q_1, origin=pos_1)
+    curve.rotate(Rotation.from_quaternion(quaternion.as_float_array(q_1)), origin=pos_1)
 
     # Get the points and rotations at certain points
     t = list(map(float, range(-10, 30, 5)))
-    sol_half = curve.get_centerline_positions_and_rotations(
+    sol_half_pos, sol_half_q = curve.get_centerline_positions_and_rotations(
         t, factor=0.5, solve_ivp_kwargs={"atol": 1e-14, "rtol": 1e-12}
     )
-    sol_full = curve.get_centerline_positions_and_rotations(t, factor=1.0)
+    sol_full_pos, sol_full_q = curve.get_centerline_positions_and_rotations(
+        t, factor=1.0
+    )
+
+    def sol_quaternion_to_np_array(sol_q):
+        return np.array([quaternion.as_float_array(q) for q in sol_q])
 
     def load_compare(name):
         """Load the compare files and return a numpy array"""
@@ -116,10 +122,15 @@ def test_cosserat_curve_translate_and_rotate():
             os.path.join(testing_input, f"{get_pytest_test_name()}_{name}.txt")
         )
 
-    assert np.allclose(sol_half[0], load_compare("pos_half_ref"), rtol=1e-8)
-    assert np.allclose(sol_half[1], load_compare("q_half_ref"), rtol=1e-8)
-    assert np.allclose(sol_full[0], load_compare("pos_full_ref"), rtol=1e-14)
-    assert np.allclose(sol_full[1], load_compare("q_full_ref"), rtol=1e-14)
+    assert np.allclose(sol_half_pos, load_compare("pos_half_ref"), rtol=1e-8)
+    assert np.allclose(
+        sol_quaternion_to_np_array(sol_half_q), load_compare("q_half_ref"), rtol=1e-8
+    )
+
+    assert np.allclose(sol_full_pos, load_compare("pos_full_ref"), rtol=1e-14)
+    assert np.allclose(
+        sol_quaternion_to_np_array(sol_full_q), load_compare("q_full_ref"), rtol=1e-14
+    )
 
 
 def test_cosserat_curve_vtk_representation():
@@ -156,7 +167,7 @@ def test_cosserat_mesh_transformation():
 
     curve = load_cosserat_curve_from_file()
     pos, rot = curve.get_centerline_position_and_rotation(0)
-    rot = Rotation.from_quaternion(rot)
+    rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
     curve.translate(-pos)
     curve.translate([1, 2, 3])
 
@@ -186,7 +197,7 @@ def test_cosserat_mesh_transformation():
     rot_ref = load_result("rot")
 
     pos_np = np.array(pos)
-    rot_np = np.array([[rotation.q for rotation in rot_step] for rot_step in rot])
+    rot_np = quaternion.as_float_array(rot)
 
     assert np.allclose(pos_ref, pos_np, rtol=1e-14)
     assert np.allclose(rot_ref, rot_np, rtol=1e-14)
@@ -198,7 +209,7 @@ def test_cosserat_curve_mesh_warp():
     # Load the curve
     curve = load_cosserat_curve_from_file()
     pos, rot = curve.get_centerline_position_and_rotation(0)
-    rot = Rotation.from_quaternion(rot)
+    rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
     curve.translate(-pos)
     curve.translate([1, 2, 3])
 
@@ -226,7 +237,7 @@ def test_cosserat_curve_mesh_warp_transform_boundary_conditions():
     # Load the curve
     curve = load_cosserat_curve_from_file()
     pos, rot = curve.get_centerline_position_and_rotation(0)
-    rot = Rotation.from_quaternion(rot)
+    rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
     curve.translate(-pos)
     curve.translate([1, 2, 3])
 

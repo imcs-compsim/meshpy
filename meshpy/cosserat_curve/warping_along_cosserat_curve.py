@@ -109,8 +109,8 @@ def get_mesh_transformation(
 
     # Create output arrays
     n_nodes = len(nodes)
-    positions = [np.zeros((n_nodes, 3)) for i in range(n_steps + 1)]
-    relative_rotations = [[None] * n_nodes for i in range(n_steps + 1)]
+    positions = np.zeros((n_steps + 1, n_nodes, 3))
+    relative_rotations = np.zeros((n_steps + 1, n_nodes), dtype=quaternion.quaternion)
 
     # Get all arc lengths and cross section positions
     arc_lengths = np.zeros((n_nodes, 1))
@@ -161,9 +161,10 @@ def get_mesh_transformation(
 
     # Get data required for the rigid body motion
     curve_start_pos, curve_start_rot = curve.get_centerline_position_and_rotation(0.0)
-    curve_start_rot = Rotation.from_quaternion(curve_start_rot)
     rigid_body_relative_pos = curve_start_pos - origin
-    rigid_body_relative_rot = curve_start_rot * reference_rotation.inv()
+    rigid_body_relative_rot = curve_start_rot * quaternion.from_float_array(
+        reference_rotation.inv().q
+    )
 
     # Loop over nodes and map them to the new configuration
     for i_node, node in enumerate(nodes):
@@ -186,37 +187,35 @@ def get_mesh_transformation(
         for i_step, factor in enumerate(factors):
 
             centerline_pos = positions_for_all_steps[i_step][node_unique_id]
-            centerline_rotation = Rotation.from_quaternion(
-                quaternions_for_all_steps[i_step][node_unique_id]
-            )
+            centerline_rotation = quaternions_for_all_steps[i_step][node_unique_id]
 
-            relative_rotation_for_factor = Rotation.from_quaternion(
-                quaternion.as_float_array(
-                    quaternion.slerp_evaluate(
-                        quaternion.from_float_array([1, 0, 0, 0]),
-                        quaternion.from_float_array(rigid_body_relative_rot.q),
-                        factor,
-                    )
-                )
+            relative_rotation_for_factor = quaternion.slerp_evaluate(
+                quaternion.from_float_array([1, 0, 0, 0]),
+                rigid_body_relative_rot,
+                factor,
             )
 
             current_pos = (
-                relative_rotation_for_factor
-                * reference_rotation
-                * curve_start_rot.inv()
-                * (
-                    centerline_pos
-                    + centerline_rotation * cross_section_position
-                    - curve_start_pos
+                quaternion.rotate_vectors(
+                    relative_rotation_for_factor
+                    * quaternion.from_float_array(reference_rotation.q)
+                    * curve_start_rot.conjugate(),
+                    (
+                        centerline_pos
+                        + quaternion.rotate_vectors(
+                            centerline_rotation, cross_section_position
+                        )
+                        - curve_start_pos
+                    ),
                 )
                 + origin
                 + factor * rigid_body_relative_pos
             )
 
-            positions[i_step][i_node] = current_pos
-            relative_rotations[i_step][i_node] = (
+            positions[i_step, i_node] = current_pos
+            relative_rotations[i_step, i_node] = (
                 centerline_rotation
-                * curve_start_rot.inv()
+                * curve_start_rot.conjugate()
                 * relative_rotation_for_factor
             )
 
@@ -335,4 +334,7 @@ def warp_mesh_along_curve(
         new_pos = pos[1][i_node]
         node.coordinates = new_pos
         if isinstance(node, NodeCosserat):
-            node.rotation = rot[1][i_node] * node.rotation
+            node.rotation = (
+                Rotation.from_quaternion(quaternion.as_float_array(rot[1][i_node]))
+                * node.rotation
+            )

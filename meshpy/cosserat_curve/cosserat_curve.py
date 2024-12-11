@@ -111,7 +111,7 @@ def get_quaternions_along_curve(centerline, point_arc_length):
 
     # Get the rotation vectors along the curve. They are calculated with smallest rotation mappings.
     n_points = len(point_arc_length)
-    quaternions = np.zeros([n_points, 4])
+    quaternions = np.zeros(n_points, dtype=quaternion.quaternion)
     quaternions[0] = last_rotation.q
     for i in range(1, n_points):
         rotation = smallest_rotation(
@@ -209,7 +209,7 @@ class CosseratCurve(object):
     def rotate(self, rotation, *, origin=None):
         """Rotate the curve and the quaternions"""
 
-        self.quaternions = add_rotations(rotation, self.quaternions)
+        self.quaternions = quaternion.from_float_array(rotation.q) * self.quaternions
         self.coordinates = rotate_coordinates(self.coordinates, rotation, origin=origin)
         self.set_centerline_interpolation()
 
@@ -288,17 +288,22 @@ class CosseratCurve(object):
             sol_ivp = integrate.solve_ivp(
                 rhs,
                 [self.point_arc_length[0], self.point_arc_length[-1]],
-                [*(self.quaternions[0]), *(self.centerline_interpolation(0))],
+                [
+                    *(quaternion.as_float_array(self.quaternions[0])),
+                    *(self.centerline_interpolation(0)),
+                ],
                 t_eval=points_on_arc_length_in_bound,
                 **solve_ivp_kwargs,
             )
             sol_y = np.transpose((sol_ivp.y))
             sol_r = sol_y[:, 4:]
-            sol_q = sol_y[:, :4]
+            sol_q = quaternion.as_quat_array(sol_y[:, :4])
         else:
             # Do a slerp interpolation of quaternions for the given points
             sol_r = np.zeros([len(points_on_arc_length_in_bound), 3])
-            sol_q = np.zeros([len(points_on_arc_length_in_bound), 4])
+            sol_q = np.zeros(
+                len(points_on_arc_length_in_bound), dtype=quaternion.quaternion
+            )
             for i_point, centerline_arc_length in enumerate(
                 points_on_arc_length_in_bound
             ):
@@ -315,10 +320,8 @@ class CosseratCurve(object):
                     arc_length = self.point_arc_length[
                         centerline_index : centerline_index + 2
                     ]
-                    q1 = quaternion.from_float_array(self.quaternions[centerline_index])
-                    q2 = quaternion.from_float_array(
-                        self.quaternions[centerline_index + 1]
-                    )
+                    q1 = self.quaternions[centerline_index]
+                    q2 = self.quaternions[centerline_index + 1]
 
                     # Linear interpolate the arc length
                     xi = (centerline_arc_length - arc_length[0]) / (
@@ -341,7 +344,7 @@ class CosseratCurve(object):
 
         # Set the already computed results in the final data structures
         sol_r_final = np.zeros([len(points_on_arc_length), 3])
-        sol_q_final = np.zeros([len(points_on_arc_length), 4])
+        sol_q_final = np.zeros(len(points_on_arc_length), dtype=quaternion.quaternion)
         if len(index_in_bound) > 0:
             sol_r_final[index_in_bound] = sol_r[index_in_bound - index_in_bound[0] + 1]
             sol_q_final[index_in_bound] = sol_q[index_in_bound - index_in_bound[0] + 1]
@@ -359,7 +362,9 @@ class CosseratCurve(object):
             length = arc_length - self.point_arc_length[index]
             r = sol_r[index]
             q = sol_q[index]
-            sol_r_final[i] = r + Rotation.from_quaternion(q) * [length, 0, 0]
+            sol_r_final[i] = r + Rotation.from_quaternion(
+                quaternion.as_float_array(q)
+            ) * [length, 0, 0]
             sol_q_final[i] = q
 
         return sol_r_final, sol_q_final
@@ -399,8 +404,10 @@ class CosseratCurve(object):
         poly_line.lines = cell
 
         base = [[], [], []]
-        for quaternion in self.quaternions:
-            R = Rotation.from_quaternion(quaternion).get_rotation_matrix()
+        for q in self.quaternions:
+            R = Rotation.from_quaternion(
+                quaternion.as_float_array(q)
+            ).get_rotation_matrix()
             for i_dir in range(3):
                 base[i_dir].append(R[:, i_dir])
 
