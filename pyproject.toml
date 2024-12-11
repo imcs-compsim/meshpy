@@ -34,7 +34,7 @@ dependencies = [
   "black==22.12.0",
   "Cython",
   "geomdl",
-  "numpy<2",
+  "numpy",
   "pre-commit",
   "pyvista",
   "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@3aeb8329bd28b55c01977a10c8eae3a9b2f67442",
