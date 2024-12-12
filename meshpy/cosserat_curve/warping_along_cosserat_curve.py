@@ -263,7 +263,7 @@ def create_transform_boundary_conditions(
     t_end:
         End time for applying the warping boundary conditions
     n_dof_per_node:
-        Number of DOF per node in 4C
+        Number of DOF per node in 4C (is needed to correctly define the boundary conditions)
     kwargs:
         Keyword arguments passed to get_mesh_transformation
     """
