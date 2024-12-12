@@ -32,7 +32,9 @@
 
 
 import numpy as np
+from numpy.typing import NDArray
 import quaternion
+from typing import Tuple
 
 from .. import mpy
 from ..mesh import Mesh
@@ -47,8 +49,8 @@ from .cosserat_curve import CosseratCurve
 
 
 def get_arc_length_and_cross_section_coordinates(
-    coordinates, origin, reference_rotation
-):
+    coordinates: np.ndarray, origin: np.ndarray, reference_rotation: Rotation
+) -> Tuple[float, np.ndarray]:
     """Return the arc length and the cross section coordinates for a coordinate
     system defined by the reference rotation and the origin.
 
@@ -78,7 +80,7 @@ def get_mesh_transformation(
     n_steps: int = 10,
     initial_configuration: bool = True,
     **kwargs,
-):
+) -> Tuple[np.ndarray, NDArray[quaternion.quaternion]]:
     """Generate a list of positions for each node that describe the transformation
     of the nodes from the given configuration to the Cosserat curve.
 
@@ -245,7 +247,7 @@ def create_transform_boundary_conditions(
     n_steps: int = 10,
     n_dof_per_node: int = 3,
     **kwargs,
-):
+) -> None:
     """Create the Dirichlet boundary conditions that enforce the warping.
     The warped object is assumed to align with the z-axis in the reference configuration.
 
@@ -313,7 +315,7 @@ def warp_mesh_along_curve(
     *,
     origin=[0.0, 0.0, 0.0],
     reference_rotation=Rotation(),
-):
+) -> None:
     """Warp an existing mesh along the given curve. The reference coordinates for the
     transformation are defined by the given origin and rotation, where the first basis
     vector of the triad defines the centerline axis."""
