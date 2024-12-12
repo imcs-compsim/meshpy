@@ -1563,7 +1563,7 @@ class TestMeshpy(unittest.TestCase):
             output_directory=testing_temp,
             binary=False,
         )
-        compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
+        compare_vtk(self, ref_file, vtk_file, atol=mpy.eps_pos)
 
         # Write VTK output, without coupling sets."""
         ref_file = os.path.join(testing_input, "test_meshpy_vtk_no_coupling_beam.vtu")
@@ -1574,7 +1574,7 @@ class TestMeshpy(unittest.TestCase):
             output_directory=testing_temp,
             binary=False,
         )
-        compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
+        compare_vtk(self, ref_file, vtk_file, atol=mpy.eps_pos)
 
         # Write VTK output, with coupling sets and additional points for visualization."""
         ref_file = os.path.join(
@@ -1590,7 +1590,7 @@ class TestMeshpy(unittest.TestCase):
             binary=False,
             beam_centerline_visualization_segments=3,
         )
-        compare_vtk(self, ref_file, vtk_file, tol_float=mpy.eps_pos)
+        compare_vtk(self, ref_file, vtk_file, atol=mpy.eps_pos)
 
     def test_meshpy_vtk_writer_solid(self):
         """Import a solid mesh and check the VTK output."""

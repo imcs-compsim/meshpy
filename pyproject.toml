@@ -6,6 +6,7 @@ requires = ["setuptools", "Cython", "numpy", "wheel"]
 packages = [
   "meshpy",
   "meshpy.abaqus",
+  "meshpy.cosserat_curve",
   "meshpy.four_c",
   "meshpy.geometric_search",
   "meshpy.mesh_creation_functions",
@@ -35,9 +36,11 @@ dependencies = [
   "Cython",
   "geomdl",
   "numpy",
+  "numpy-quaternion",
   "pre-commit",
+  "pytest",
   "pyvista",
-  "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@3aeb8329bd28b55c01977a10c8eae3a9b2f67442",
+  "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@main",
   "scipy",
   "splinepy",
   "vtk"
