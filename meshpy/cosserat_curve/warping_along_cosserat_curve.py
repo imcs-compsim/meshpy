@@ -76,6 +76,7 @@ def get_mesh_transformation(
     origin=[0.0, 0.0, 0.0],
     reference_rotation=Rotation(),
     n_steps: int = 10,
+    initial_configuration: bool = True,
     **kwargs,
 ):
     """Generate a list of positions for each node that describe the transformation
@@ -94,7 +95,10 @@ def get_mesh_transformation(
         Rotation of the coordinate system. The first basis vector is the arc
         length direction.
     n_steps:
-        Number of steps to apply the warping condition
+        Number of steps to get from the unwrapped configuration to the final configuration.
+    initial_configuration:
+        If the initial, unwrapped configuration (factor=0) should also be added to the
+        results.
     kwargs:
         Keyword arguments passed to CosseratCurve.get_centerline_positions_and_rotations
 
@@ -107,10 +111,20 @@ def get_mesh_transformation(
         time step
     """
 
+    # Define the factors for which we will generate the positions and rotations
+    factors = np.linspace(0.0, 1.0, n_steps + 1)
+    if initial_configuration:
+        n_output_steps = n_steps + 1
+    else:
+        n_output_steps = n_steps
+        factors = np.delete(factors, 0)
+
     # Create output arrays
     n_nodes = len(nodes)
-    positions = np.zeros((n_steps + 1, n_nodes, 3))
-    relative_rotations = np.zeros((n_steps + 1, n_nodes), dtype=quaternion.quaternion)
+    positions = np.zeros((n_output_steps, n_nodes, 3))
+    relative_rotations = np.zeros(
+        (n_output_steps, n_nodes), dtype=quaternion.quaternion
+    )
 
     # Get all arc lengths and cross section positions
     arc_lengths = np.zeros((n_nodes, 1))
@@ -151,7 +165,7 @@ def get_mesh_transformation(
     # Get all configurations for the unique points
     positions_for_all_steps = []
     quaternions_for_all_steps = []
-    factors = np.linspace(0.0, 1.0, n_steps + 1)
+
     for factor in factors:
         sol_r, sol_q = curve.get_centerline_positions_and_rotations(
             arc_lengths_sorted, factor=factor, **kwargs
@@ -310,6 +324,7 @@ def warp_mesh_along_curve(
         origin=origin,
         reference_rotation=reference_rotation,
         n_steps=1,
+        initial_configuration=False,
     )
 
     # Loop over nodes and map them to the new configuration
@@ -319,22 +334,10 @@ def warp_mesh_along_curve(
                 "All nodes in the mesh have to be derived from the base Node object"
             )
 
-        # Get the coordinates in the cylindrical coordinate system, so we can transform
-        # the node along the centerline curve.
-        (
-            centerline_position,
-            cross_section_coordinates,
-        ) = get_arc_length_and_cross_section_coordinates(
-            node.coordinates, origin, reference_rotation
-        )
-
-        # pos, rot = curve.get_centerline_position_and_rotation(centerline_position)
-        # rot = Rotation.from_quaternion(rot)
-
-        new_pos = pos[1][i_node]
+        new_pos = pos[0, i_node]
         node.coordinates = new_pos
         if isinstance(node, NodeCosserat):
             node.rotation = (
-                Rotation.from_quaternion(quaternion.as_float_array(rot[1][i_node]))
+                Rotation.from_quaternion(quaternion.as_float_array(rot[0, i_node]))
                 * node.rotation
             )
