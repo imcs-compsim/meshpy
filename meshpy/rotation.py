@@ -484,11 +484,15 @@ def smallest_rotation(q: Rotation, t):
 
     R_old = q.get_rotation_matrix()
     g1_old = R_old[:, 0]
-    g2_old = R_old[:, 1]
-    g3_old = R_old[:, 2]
-
     g1 = np.array(t) / np.linalg.norm(t)
-    g2 = g2_old - np.dot(g2_old, g1) / (1 + np.dot(g1_old, g1)) * (g1 + g1_old)
-    g3 = g3_old - np.dot(g3_old, g1) / (1 + np.dot(g1_old, g1)) * (g1 + g1_old)
 
-    return Rotation.from_rotation_matrix(np.transpose([g1, g2, g3]))
+    # Quaternion components of relative rotation
+    q_rel = np.zeros(4)
+
+    # The scalar quaternion part is cos(alpha/2) this is equal to
+    q_rel[0] = np.linalg.norm(0.5 * (g1_old + g1))
+
+    # Vector part of the quaternion is sin(alpha/2)*axis
+    q_rel[1:] = np.cross(g1_old, g1) / (2.0 * q_rel[0])
+
+    return Rotation.from_quaternion(q_rel) * q
