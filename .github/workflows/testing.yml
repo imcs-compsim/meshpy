@@ -19,8 +19,6 @@ jobs:
   meshpy-code-check:
     name: Code check
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/4c-multiphysics/4c:latest
     defaults:
       run:
         shell: bash

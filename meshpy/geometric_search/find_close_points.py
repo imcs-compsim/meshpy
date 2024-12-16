@@ -28,26 +28,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-Find unique points in a point cloud, i.e., points that are within a certain tolerance
-of each other will be considered as unique.
-"""
+"""Find unique points in a point cloud, i.e., points that are within a certain
+tolerance of each other will be considered as unique."""
 
-# Python modules
 from enum import Enum, auto
 
-
-# Geometric search modules
-# SciPy
-from .geometric_search_scipy import find_close_points_scipy
-
-# Cython modules
 from .geometric_search_cython import cython_available
+from .geometric_search_scipy import find_close_points_scipy
 
 if cython_available:
     from .geometric_search_cython import find_close_points_brute_force_cython
 
-# ArborX
 from .geometric_search_arborx import arborx_available
 
 if arborx_available:
@@ -63,8 +54,7 @@ class FindClosePointAlgorithm(Enum):
 
 
 def point_partners_to_unique_indices(point_partners, n_partners):
-    """
-    Convert the partner indices to lists that can be used for converting
+    """Convert the partner indices to lists that can be used for converting
     between the full and unique coordinates.
 
     Returns
@@ -104,10 +94,8 @@ def point_partners_to_unique_indices(point_partners, n_partners):
 
 
 def point_partners_to_partner_indices(point_partners, n_partners):
-    """
-    Convert the partner indices for each point to a list of lists with the
-    indices for all partners.
-    """
+    """Convert the partner indices for each point to a list of lists with the
+    indices for all partners."""
     partner_indices = [[] for i in range(n_partners)]
     for i, partner_index in enumerate(point_partners):
         if partner_index != -1:
@@ -116,10 +104,8 @@ def point_partners_to_partner_indices(point_partners, n_partners):
 
 
 def partner_indices_to_point_partners(partner_indices, n_points):
-    """
-    Convert the list of lists with the indices for all partners to the partner
-    indices for each point.
-    """
+    """Convert the list of lists with the indices for all partners to the
+    partner indices for each point."""
     point_partners = [-1 for _i in range(n_points)]
     for i_partner, partners in enumerate(partner_indices):
         for index in partners:
@@ -128,9 +114,8 @@ def partner_indices_to_point_partners(partner_indices, n_points):
 
 
 def find_close_points(point_coordinates, *, algorithm=None, tol=1e-8, **kwargs):
-    """
-    Find unique points in a point cloud, i.e., points that are within a certain tolerance
-    of each other will be considered as unique.
+    """Find unique points in a point cloud, i.e., points that are within a
+    certain tolerance of each other will be considered as unique.
 
     Args
     ----

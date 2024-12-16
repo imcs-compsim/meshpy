@@ -31,8 +31,8 @@
 """This function allows to reorder the connectivity of solid shell elements
 such that the solid shell direction is correctly represented."""
 
-
 from typing import List
+
 import numpy as np
 import pyvista as pv
 
@@ -42,7 +42,7 @@ from ..utility import get_nodal_coordinates
 
 
 def shape_functions_hex8(xi1, xi2, xi3):
-    """Return the shape functions for a hex8 element"""
+    """Return the shape functions for a hex8 element."""
     shape_functions = np.zeros(8)
     one_over_eight = 0.125
     shape_functions[0] = one_over_eight * (1 - xi1) * (1 - xi2) * (1 - xi3)
@@ -57,7 +57,7 @@ def shape_functions_hex8(xi1, xi2, xi3):
 
 
 def shape_functions_derivative_hex8(xi1, xi2, xi3):
-    """Return the derivative of the shape functions for a hex8 element"""
+    """Return the derivative of the shape functions for a hex8 element."""
     derivatives = np.zeros((3, 8))
     one_over_eight = 0.125
 
@@ -95,8 +95,8 @@ def shape_functions_derivative_hex8(xi1, xi2, xi3):
 
 
 def get_hex8_element_center_and_jacobian_mapping(element):
-    """Return the center of a hex8 element and the Jacobian mapping for
-    that point"""
+    """Return the center of a hex8 element and the Jacobian mapping for that
+    point."""
 
     nodal_coordinates = get_nodal_coordinates(element.nodes)
     if not len(nodal_coordinates) == 8:
@@ -113,9 +113,12 @@ def get_hex8_element_center_and_jacobian_mapping(element):
 
 def get_reordering_index_thickness(jacobian, *, identify_threshold=None):
     """Return the reordering index from the Jacobian such that the thinnest
-    direction is the 3rd parameter direction. Additionally it is checked,
-    that the thinnest direction is at least identify_threshold times smaller
-    than the next thinnest, to avoid wrongly detected directions."""
+    direction is the 3rd parameter direction.
+
+    Additionally it is checked, that the thinnest direction is at least
+    identify_threshold times smaller than the next thinnest, to avoid
+    wrongly detected directions.
+    """
 
     # The direction with the smallest parameter derivative is the thickness direction
     parameter_derivative_norms = [
@@ -174,8 +177,8 @@ def set_solid_shell_thickness_direction(
     director_function=None,
     identify_threshold=2.0,
 ):
-    """Set the solid shell directions for all solid shell elements in the element
-    list.
+    """Set the solid shell directions for all solid shell elements in the
+    element list.
 
     Args:
     ----
@@ -204,7 +207,8 @@ def set_solid_shell_thickness_direction(
     for element in elements:
         is_hex8 = isinstance(element, VolumeHEX8)
         if is_hex8:
-            is_solid_shell = "SOLIDSH8" in element.dat_pre_nodes
+            is_solid_shell = "SOLIDSH8" in element.dat_pre_nodes  # type: ignore[attr-defined]
+
             if is_solid_shell:
                 # Get the element center and the Jacobian at the center
                 (
@@ -280,9 +284,11 @@ def get_visualization_third_parameter_direction_hex8(mesh):
 
 
 def visualize_third_parameter_direction_hex8(mesh):
-    """Visualize the third parameter direction for hex8 elements. This can be
-    used to check the correct definition of the shell thickness for solid
-    shell elements."""
+    """Visualize the third parameter direction for hex8 elements.
+
+    This can be used to check the correct definition of the shell
+    thickness for solid shell elements.
+    """
 
     grid = get_visualization_third_parameter_direction_hex8(mesh)
     grid = grid.clean()

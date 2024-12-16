@@ -28,20 +28,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This file contains the wrapper for the LocSys condition for 4c.
-"""
-
+"""This file contains the wrapper for the LocSys condition for 4c."""
 
 # MeshPy modules
-from ..conf import mpy
 from ..boundary_condition import BoundaryCondition
+from ..conf import mpy
 
 
 class LocSysCondition(BoundaryCondition):
-    """
-    This object represents a locsys condition in 4C.
-    It allows to rotate the local coordinate system used to apply Dirichlet boundary conditions.
+    """This object represents a locsys condition in 4C.
+
+    It allows to rotate the local coordinate system used to apply
+    Dirichlet boundary conditions.
     """
 
     def __init__(
@@ -50,8 +48,7 @@ class LocSysCondition(BoundaryCondition):
         rotation,
         **kwargs,
     ):
-        """
-        Initialize the object.
+        """Initialize the object.
 
         Args
         ----

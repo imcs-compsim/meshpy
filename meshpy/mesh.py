@@ -28,47 +28,45 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines the Mesh class, which holds the content (nodes, elements,
-sets, ...) for a meshed geometry.
-"""
+"""This module defines the Mesh class, which holds the content (nodes,
+elements, sets, ...) for a meshed geometry."""
 
-# Python modules.
+import copy
 import os
 import warnings
-import copy
+
 import numpy as np
 import pyvista as pv
 
-# Meshpy modules.
+from .boundary_condition import BoundaryConditionBase
 from .conf import mpy
-from .rotation import Rotation, add_rotations, rotate_coordinates
-from .function import Function
-from .material import Material
-from .node import Node, NodeCosserat
+from .container import BoundaryConditionContainer, GeometryName, GeometrySetContainer
+from .coupling import coupling_factory
 from .element import Element
 from .element_beam import Beam
+from .function import Function
+from .geometric_search.find_close_points import (
+    find_close_points,
+    point_partners_to_partner_indices,
+)
 from .geometry_set import GeometrySetBase
-from .container import GeometryName, GeometrySetContainer, BoundaryConditionContainer
-from .boundary_condition import BoundaryConditionBase
-from .coupling import coupling_factory
-from .vtk_writer import VTKWriter
+from .material import Material
+from .node import Node, NodeCosserat
+from .rotation import Rotation, add_rotations, rotate_coordinates
 from .utility import (
-    find_close_nodes,
     filter_nodes,
+    find_close_nodes,
+    get_min_max_nodes,
     get_nodal_coordinates,
     get_nodal_quaternions,
     get_nodes_by_function,
-    get_min_max_nodes,
 )
-from .geometric_search import find_close_points, point_partners_to_partner_indices
+from .vtk_writer import VTKWriter
 
 
 class Mesh:
-    """
-    A class that contains a full mesh, i.e. Nodes, Elements, Boundary
-    Conditions, Sets, Couplings, Materials and Functions.
-    """
+    """A class that contains a full mesh, i.e. Nodes, Elements, Boundary
+    Conditions, Sets, Couplings, Materials and Functions."""
 
     def __init__(self):
         """Initialize all empty containers."""
@@ -81,11 +79,12 @@ class Mesh:
         self.boundary_conditions = BoundaryConditionContainer()
 
     def add(self, *args, **kwargs):
-        """
-        Add an item to this mesh, depending on its type. If an list is given
-        each list element is added with this function. If multiple arguments
-        are given, each one is individually added with this function. Keyword
-        arguments are passed through to the adding function.
+        """Add an item to this mesh, depending on its type.
+
+        If an list is given each list element is added with this
+        function. If multiple arguments are given, each one is
+        individually added with this function. Keyword arguments are
+        passed through to the adding function.
         """
 
         match len(args):
@@ -141,17 +140,17 @@ class Mesh:
         self.boundary_conditions.append((bc_key, geom_key), bc)
 
     def add_function(self, function):
-        """
-        Add a function to this mesh item. Check that the function is only added
-        once.
+        """Add a function to this mesh item.
+
+        Check that the function is only added once.
         """
         if function not in self.functions:
             self.functions.append(function)
 
     def add_material(self, material):
-        """
-        Add a material to this mesh item. Check that the material is only added
-        once.
+        """Add a material to this mesh item.
+
+        Check that the material is only added once.
         """
         if material not in self.materials:
             self.materials.append(material)
@@ -174,8 +173,11 @@ class Mesh:
         self.geometry_sets.append(geometry_set.geometry_type, geometry_set)
 
     def add_geometry_name(self, geometry_name):
-        """Add a set of geometry sets to this mesh. Sort by the keys here to create
-        a deterministic ordering, especially for testing purposes"""
+        """Add a set of geometry sets to this mesh.
+
+        Sort by the keys here to create a deterministic ordering,
+        especially for testing purposes
+        """
         keys = list(geometry_name.keys())
         keys.sort()
         for key in keys:
@@ -196,8 +198,8 @@ class Mesh:
             raise ValueError("The node that should be replaced is not in the mesh")
 
     def get_unique_geometry_sets(self, *, coupling_sets=True, link_to_nodes="no_link"):
-        """Return a geometry set container that contains geometry sets explicitly
-        added to the mesh, as well as sets for boundary conditions.
+        """Return a geometry set container that contains geometry sets
+        explicitly added to the mesh, as well as sets for boundary conditions.
 
         Args
         ----
@@ -248,9 +250,9 @@ class Mesh:
         return mesh_sets
 
     def set_node_links(self):
-        """
-        Create a link of all elements to the nodes connected to them. Also add
-        a link to this mesh.
+        """Create a link of all elements to the nodes connected to them.
+
+        Also add a link to this mesh.
         """
         for element in self.elements:
             for node in element.nodes:
@@ -259,8 +261,7 @@ class Mesh:
             node.mesh = self
 
     def translate(self, vector):
-        """
-        Translate all beam nodes of this mesh.
+        """Translate all beam nodes of this mesh.
 
         Args
         ----
@@ -271,8 +272,7 @@ class Mesh:
             node.coordinates += vector
 
     def rotate(self, rotation, origin=None, only_rotate_triads=False):
-        """
-        Rotate all beam nodes of the mesh with rotation.
+        """Rotate all beam nodes of the mesh with rotation.
 
         Args
         ----
@@ -304,10 +304,9 @@ class Mesh:
                 node.coordinates = pos_new[i, :]
 
     def reflect(self, normal_vector, origin=None, flip_beams=False):
-        """
-        Reflect all nodes of the mesh with respect to a plane defined by its
-        normal_vector. Per default the plane goes through the origin, if not
-        a point on the plane can be given with the parameter origin.
+        """Reflect all nodes of the mesh with respect to a plane defined by its
+        normal_vector. Per default the plane goes through the origin, if not a
+        point on the plane can be given with the parameter origin.
 
         For the reflection we assume that e1' and e2' are mirrored with respect
         to the original frame and e3' is in the opposite direction than the
@@ -390,8 +389,7 @@ class Mesh:
                 node.rotation.q = rot_new[i, :]
 
     def wrap_around_cylinder(self, radius=None, advanced_warning=True):
-        """
-        Wrap the geometry around a cylinder. The y-z plane gets morphed into
+        """Wrap the geometry around a cylinder. The y-z plane gets morphed into
         the z-axis of symmetry. If all nodes are on the same y-z plane, the
         radius of the created cylinder is the x coordinate of that plane. If
         the nodes are not on the same y-z plane, the radius has to be given
@@ -507,8 +505,8 @@ class Mesh:
         coupling_type=mpy.bc.point_coupling,
         coupling_dof_type=mpy.coupling_dof.fix,
     ):
-        """
-        Search through nodes and connect all nodes with the same coordinates.
+        """Search through nodes and connect all nodes with the same
+        coordinates.
 
         Args:
         ----
@@ -640,14 +638,15 @@ class Mesh:
         return get_nodes_by_function(self.nodes, *args, **kwargs)
 
     def get_min_max_nodes(self, *args, **kwargs):
-        """Return a geometry set with the max and min nodes in all directions."""
+        """Return a geometry set with the max and min nodes in all
+        directions."""
         return get_min_max_nodes(self.nodes, *args, **kwargs)
 
     def check_overlapping_elements(self, raise_error=True):
-        """
-        Check if there are overlapping elements in the mesh. This is done by
-        checking if all middle nodes of beam elements have unique coordinates
-        in the mesh.
+        """Check if there are overlapping elements in the mesh.
+
+        This is done by checking if all middle nodes of beam elements
+        have unique coordinates in the mesh.
         """
 
         # Number of middle nodes.
@@ -686,7 +685,7 @@ class Mesh:
     def get_vtk_representation(
         self, *, overlapping_elements=True, coupling_sets=False, **kwargs
     ):
-        """Return a vtk representation of the beams and solid in this mesh
+        """Return a vtk representation of the beams and solid in this mesh.
 
         Args
         ----
@@ -730,8 +729,7 @@ class Mesh:
     def write_vtk(
         self, output_name="meshpy", output_directory="", binary=True, **kwargs
     ):
-        """
-        Write the contents of this mesh to VTK files.
+        """Write the contents of this mesh to VTK files.
 
         Args
         ----
@@ -778,7 +776,7 @@ class Mesh:
         parallel_projection=False,
         **kwargs,
     ):
-        """Display the mesh in pyvista
+        """Display the mesh in pyvista.
 
         Args
         ----
@@ -917,8 +915,8 @@ class Mesh:
             return plotter
 
     def copy(self):
-        """
-        Return a deep copy of this mesh. The functions and materials will not
-        be deep copied.
+        """Return a deep copy of this mesh.
+
+        The functions and materials will not be deep copied.
         """
         return copy.deepcopy(self)

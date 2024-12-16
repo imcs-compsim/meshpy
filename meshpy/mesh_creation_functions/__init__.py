@@ -28,20 +28,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module stores all functions to create beam meshes. From simple lines to
-complex stent craft structures.
+"""This module stores all functions to create beam meshes.
+
+From simple lines to complex stent craft structures.
 """
 
 # Basic geometry functions
 from .beam_basic_geometry import (
-    create_beam_mesh_line,
+    create_beam_mesh_arc_at_node,
+    create_beam_mesh_arc_segment_2d,
     create_beam_mesh_arc_segment_via_axis,
     create_beam_mesh_arc_segment_via_rotation,
-    create_beam_mesh_arc_segment_2d,
-    create_beam_mesh_line_at_node,
-    create_beam_mesh_arc_at_node,
     create_beam_mesh_helix,
+    create_beam_mesh_line,
+    create_beam_mesh_line_at_node,
 )
 
 # Parametric curve.
@@ -51,7 +51,7 @@ from .beam_curve import create_beam_mesh_curve
 from .beam_fibers_in_rectangle import create_fibers_in_rectangle
 
 # Honeycomb.
-from .beam_honeycomb import create_beam_mesh_honeycomb_flat, create_beam_mesh_honeycomb
+from .beam_honeycomb import create_beam_mesh_honeycomb, create_beam_mesh_honeycomb_flat
 
 # Create a beam mesh along a NURBS curve.
 from .beam_nurbs import create_beam_mesh_from_nurbs
@@ -67,11 +67,11 @@ from .nurbs_generic import add_geomdl_nurbs_to_mesh
 
 # NURBS geometry functions
 from .nurbs_geometries import (
-    create_nurbs_hollow_cylinder_segment_2d,
-    create_nurbs_flat_plate_2d,
     create_nurbs_brick,
-    create_nurbs_sphere_surface,
+    create_nurbs_flat_plate_2d,
     create_nurbs_hemisphere_surface,
+    create_nurbs_hollow_cylinder_segment_2d,
+    create_nurbs_sphere_surface,
     create_nurbs_torus_surface,
 )
 

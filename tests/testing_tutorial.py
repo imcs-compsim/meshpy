@@ -28,29 +28,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to test the tutorial.
-"""
+"""This script is used to test the tutorial."""
 
-# Import python modules.
-import unittest
 import os
-import sys
+import unittest
 
-# Import tutorial
 import meshpy_tutorial
-
-# Import testing utilities.
-from utils import testing_temp, compare_test_result
+from utils import compare_test_result, testing_temp
 
 
 class TestTutorial(unittest.TestCase):
     """This class tests the headers in the repository."""
 
     def test_tutorial(self):
-        """
-        Test that the tutorial works.
-        """
+        """Test that the tutorial works."""
 
         input_file = meshpy_tutorial.meshpy_tutorial(testing_temp)
         tutorial_file = os.path.join(testing_temp, "tutorial.dat")

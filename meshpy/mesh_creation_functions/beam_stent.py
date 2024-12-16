@@ -28,19 +28,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This file has functions to create a stent accoring to Auricchio 2012.
-"""
+"""This file has functions to create a stent accoring to Auricchio 2012."""
 
 # Python packages.
 import numpy as np
 
-# Meshpy modules.
-from ..conf import mpy
-from ..rotation import Rotation
-from ..mesh import Mesh
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
+from ..mesh import Mesh
+
+# Meshpy modules.
+from ..rotation import Rotation
 from ..utility import get_min_max_nodes
 from .beam_basic_geometry import (
     create_beam_mesh_arc_segment_via_rotation,
@@ -62,8 +60,7 @@ def create_stent_cell(
     S3=True,
     n_el=1,
 ):
-    """
-    Create a cell of the stent. This cell is on the x-y plane.
+    """Create a cell of the stent. This cell is on the x-y plane.
 
     Args
     ----
@@ -168,9 +165,8 @@ def create_stent_cell(
 def create_stent_column(
     beam_object, material, width, height, n_height, n_el=1, **kwargs
 ):
-    """Create a column of completed cells. A completed cell
-    consists of one cell, that is created with the create
-    cell function and it's reflection.
+    """Create a column of completed cells. A completed cell consists of one
+    cell, that is created with the create cell function and it's reflection.
 
     Args
     ----
@@ -219,7 +215,7 @@ def create_stent_column(
             S2=S2,
             S3=S3,
             n_el=n_el,
-            **kwargs
+            **kwargs,
         )
         unit_cell.translate([0, i * height, 0])
         mesh_column.add(unit_cell)
@@ -234,8 +230,7 @@ def create_stent_column(
 def create_beam_mesh_stent_flat(
     beam_object, material, width_flat, height_flat, n_height, n_column, n_el=1, **kwargs
 ):
-    """
-    Create a flat stent structure on the x-y plane.
+    """Create a flat stent structure on the x-y plane.
 
     Args
     ----
@@ -301,11 +296,10 @@ def create_beam_mesh_stent(
     n_axis,
     n_circumference,
     add_sets=False,
-    **kwargs
+    **kwargs,
 ):
-    """
-    Create a stent structure around cylinder, The cylinder axis will be
-    the z-axis.
+    """Create a stent structure around cylinder, The cylinder axis will be the
+    z-axis.
 
     Args
     ----
@@ -346,8 +340,6 @@ def create_beam_mesh_stent(
     width_flat = np.pi * diameter
     n_height = n_axis
     n_column = n_circumference
-
-    i_node_start = len(mesh.nodes)
 
     mesh_stent = create_beam_mesh_stent_flat(
         beam_object, material, width_flat, height_flat, n_height, n_column, **kwargs

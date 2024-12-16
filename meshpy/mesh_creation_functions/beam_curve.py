@@ -28,9 +28,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This file has functions to create a beam from a parametric curve.
-"""
+"""This file has functions to create a beam from a parametric curve."""
 
 # Python packages.
 import numpy as np
@@ -53,8 +51,7 @@ def create_beam_mesh_curve(
     function_rotation=None,
     **kwargs,
 ):
-    """
-    Generate a beam from a parametric curve. Integration along the beam is
+    """Generate a beam from a parametric curve. Integration along the beam is
     performed with scipy, and if the gradient is not explicitly provided, it is
     calculated with the numpy wrapper autograd.
 
@@ -105,10 +102,10 @@ def create_beam_mesh_curve(
     """
 
     # Packages for AD and numerical integration.
-    from autograd import jacobian
     import autograd.numpy as npAD
     import scipy.integrate as integrate
     import scipy.optimize as optimize
+    from autograd import jacobian
 
     # Check size of position function
     if len(function(interval[0])) == 2:
@@ -143,15 +140,17 @@ def create_beam_mesh_curve(
     if interval[0] > interval[1]:
         # In this case rp needs to be negated.
         rp_positive = rp
-        rp = lambda t: -(rp_positive(t))
+
+        def rp(t):
+            return -(rp_positive(t))
 
     def ds(t):
         """Increment along the curve."""
         return npAD.linalg.norm(rp(t))
 
     def S(t, start_t=None, start_S=None):
-        """
-        Function that integrates the length until a parameter value.
+        """Function that integrates the length until a parameter value.
+
         A speedup can be achieved by giving start_t and start_S, the
         parameter and Length at a known point.
         """
@@ -166,24 +165,24 @@ def create_beam_mesh_curve(
         return integrate.quad(ds, st, t)[0] + sS
 
     def get_t_along_curve(arc_length, t0, **kwargs):
-        """
-        Calculate the parameter t where the length along the curve is
-        arc_length. t0 is the start point for the Newton iteration.
+        """Calculate the parameter t where the length along the curve is
+        arc_length.
+
+        t0 is the start point for the Newton iteration.
         """
         t_root = optimize.newton(lambda t: S(t, **kwargs) - arc_length, t0, fprime=ds)
         return t_root
 
     class BeamFunctions:
-        """
-        This object manages the creation of functions which are used to create the
-        beam nodes. By wrapping this in this object, we can store some data and speed
-        up the numerical integration along the curve.
+        """This object manages the creation of functions which are used to
+        create the beam nodes.
+
+        By wrapping this in this object, we can store some data and
+        speed up the numerical integration along the curve.
         """
 
         def __init__(self):
-            """
-            Initialize the object.
-            """
+            """Initialize the object."""
             self._reset_start_values()
             self.last_triad = None
 
@@ -196,14 +195,15 @@ def create_beam_mesh_curve(
                 self.last_triad = Rotation.from_basis(r_prime, t2_temp)
 
         def _reset_start_values(self):
-            """Reset the stored start values for the next Newton iteration"""
+            """Reset the stored start values for the next Newton iteration."""
             self.t_start_newton = interval[0]
             self.S_start_newton = 0.0
 
         def __call__(self, length_a, length_b):
-            """
-            This object is called with the interval limits. This method returns a
-            function that evaluates the position and rotation within this interval.
+            """This object is called with the interval limits.
+
+            This method returns a function that evaluates the position
+            and rotation within this interval.
             """
 
             # In case the interval is not continuous with the last one, we reset the start
@@ -215,9 +215,10 @@ def create_beam_mesh_curve(
             L = length_b - length_a
 
             def get_beam_position_and_rotation_at_xi(xi):
-                """
-                Evaluate the beam position and rotation at xi. xi is the beam element
-                parameter coordinate, i.e., xi = [-1, 1].
+                """Evaluate the beam position and rotation at xi.
+
+                xi is the beam element parameter coordinate, i.e., xi =
+                [-1, 1].
                 """
                 # Parameter for xi.
                 S = length_a + 0.5 * (xi + 1) * L

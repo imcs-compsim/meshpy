@@ -28,45 +28,35 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to test the mesh creation functions for NURBS.
-"""
+"""This script is used to test the mesh creation functions for NURBS."""
 
-# Python imports
 import unittest
-import numpy as np
-import os
 
-# Meshpy imports
+import numpy as np
+from utils import compare_test_result
+
 from meshpy import (
     InputFile,
-    MaterialStVenantKirchhoff,
     MaterialString,
+    MaterialStVenantKirchhoff,
     Rotation,
 )
-
-# Geometry functions
 from meshpy.mesh_creation_functions import (
     add_geomdl_nurbs_to_mesh,
-    create_nurbs_hollow_cylinder_segment_2d,
-    create_nurbs_flat_plate_2d,
     create_nurbs_brick,
-    create_nurbs_sphere_surface,
+    create_nurbs_flat_plate_2d,
     create_nurbs_hemisphere_surface,
+    create_nurbs_hollow_cylinder_segment_2d,
+    create_nurbs_sphere_surface,
     create_nurbs_torus_surface,
 )
 
-# Testing imports
-from utils import testing_input, compare_test_result
-
 
 class TestNurbsMeshCreationFunction(unittest.TestCase):
-    """
-    Test the Nurbs Mesh creation functions
-    """
+    """Test the Nurbs Mesh creation functions."""
 
     def test_nurbs_hollow_cylinder_segment_2d(self):
-        """Test the creation of a two dimensional hollow cylinder segment"""
+        """Test the creation of a two dimensional hollow cylinder segment."""
 
         # Create the surface of a quarter of a hollow cylinder
         surf_obj = create_nurbs_hollow_cylinder_segment_2d(
@@ -97,7 +87,7 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_nurbs_flat_plate_2d(self):
-        """Test the creation of a two dimensional flat plate"""
+        """Test the creation of a two dimensional flat plate."""
 
         # Create the surface of a flat plate
         surf_obj = create_nurbs_flat_plate_2d(0.75, 0.91, n_ele_u=2, n_ele_v=5)
@@ -126,7 +116,7 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_nurbs_brick(self):
-        """Test the creation of a brick"""
+        """Test the creation of a brick."""
 
         # Create the surface of a flat plate
         vol_obj = create_nurbs_brick(1.5, 3.0, 2.4, n_ele_u=2, n_ele_v=3, n_ele_w=4)
@@ -153,7 +143,7 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_nurbs_rotation_nurbs_surface(self):
-        """Test the rotation of a NURBS mesh"""
+        """Test the rotation of a NURBS mesh."""
 
         # Create the surface
         surf_obj = create_nurbs_hollow_cylinder_segment_2d(
@@ -185,7 +175,7 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_nurbs_translate_nurbs_surface(self):
-        """Test the translation of a NURBS surface mesh"""
+        """Test the translation of a NURBS surface mesh."""
 
         # Create the surface
         surf_obj = create_nurbs_flat_plate_2d(0.87, 1.35, n_ele_u=2, n_ele_v=3)
@@ -215,7 +205,7 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_nurbs_couple_nurbs_meshes(self):
-        """Test the coupling of NURBS surface meshes"""
+        """Test the coupling of NURBS surface meshes."""
 
         # Create input file
         input_file = InputFile()
@@ -291,7 +281,8 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_nurbs_string_types(self):
-        """Test the creating of a NURBS with strings for the element and material definition."""
+        """Test the creating of a NURBS with strings for the element and
+        material definition."""
 
         # Create input file
         input_file = InputFile()
@@ -301,8 +292,6 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
 
         # Create first patch set
         mat = MaterialString("STRING_MATERIAL")
-
-        element_description = ()
 
         patch_set = add_geomdl_nurbs_to_mesh(
             input_file,

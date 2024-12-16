@@ -28,14 +28,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to test the functionality of the meshpy.function_utility module.
-"""
+"""This script is used to test the functionality of the meshpy.function_utility
+module."""
 
-# Python imports
 import unittest
 
-# Meshpy imports
 from meshpy.function_utility import (
     create_linear_interpolation_function,
     create_linear_interpolation_string,
@@ -46,7 +43,7 @@ class TestFunctionUtilitiesGeometricSearch(unittest.TestCase):
     """Test various stuff from the meshpy.function_utility module."""
 
     def test_linear_interpolation_function(self):
-        """Test that linear interpolation functions are created correctly"""
+        """Test that linear interpolation functions are created correctly."""
 
         t = [1.5, 2.5, 3.5, 10.0]
         values = [1.0, -1.0, 3.5, -10.3]

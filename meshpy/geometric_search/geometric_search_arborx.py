@@ -28,13 +28,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This file defines the interface to the ArborX geometric search functionality.
-"""
+"""This file defines the interface to the ArborX geometric search
+functionality."""
 
-# Python modules
-import sys
 import os
+import sys
 
 # Set path so ArborX binary will be found
 sys.path.append(os.path.dirname(__file__))
@@ -44,24 +42,20 @@ try:
     import geometric_search_arborx_lib
 
     arborx_available = True
-except:
+except ImportError:
     arborx_available = False
 
 
 class KokkosScopeGuardWrapper:
-    """
-    Wrap the initialize and finalize calls to Kokkos.
-    """
+    """Wrap the initialize and finalize calls to Kokkos."""
 
     def __init__(self):
         """Call initialize when this object is created."""
         geometric_search_arborx_lib.kokkos_initialize()
 
     def __del__(self):
-        """
-        Finalize Kokkos after this object goes out of scope,
-        i.e., at the end of this modules lifetime.
-        """
+        """Finalize Kokkos after this object goes out of scope, i.e., at the
+        end of this modules lifetime."""
         geometric_search_arborx_lib.kokkos_finalize()
 
 
