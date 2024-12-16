@@ -264,15 +264,10 @@ def set_beam_to_solid_meshtying(
     # Set the binning strategy.
     if (binning_bounding_box is not None) and binning_cutoff_radius is not None:
         bounding_box_string = " ".join([str(val) for val in binning_bounding_box])
-        input_file.add(
-            InputSection(
-                "BINNING STRATEGY",
-                f"""
-            BIN_SIZE_LOWER_BOUND {binning_cutoff_radius}
-            DOMAINBOUNDINGBOX {bounding_box_string}
-            """,
-                option_overwrite=True,
-            )
+        set_binning_strategy(
+            input_file,
+            binning_size=binning_cutoff_radius,
+            bounding_box=bounding_box_string,
         )
     elif (binning_bounding_box is not None) or binning_cutoff_radius is not None:
         raise ValueError(
@@ -540,3 +535,181 @@ def set_header_static(
 
     # Set the xml content in the input file.
     input_file.nox_xml = nox_xml
+
+
+def set_binning_strategy(input_file, *, binning_size=None, bounding_box=None,**kwargs):
+    """Set Binning options in input file.
+    
+    Args
+    ----
+    input_file:
+        Input file that the options will be added to.
+    binning_size:
+        Lower bound for bin size. Exact bin size is computed via (Domain edgelength)/BIN_SIZE_LOWER_BOUND.
+    bounding_box:
+        Bounding box for computational domain using binning strategy.
+    """
+    if binning_size is None:
+        binning_size = kwargs.get("binning_size", binning_size)
+    if bounding_box is None:
+        bounding_box = kwargs.get("bounding_box", bounding_box)
+
+    input_file.add(
+        InputSection(
+            "BINNING STRATEGY",
+            f"""
+        BIN_SIZE_LOWER_BOUND    {binning_size}
+        DOMAINBOUNDINGBOX {bounding_box}
+        """,
+            option_overwrite=True,
+        )
+    )
+
+
+def set_beam_interaction(
+    inputfile,
+    *,
+    repartition_strategy="Everydt",
+    search_strategy="bounding_volume_hierarchy",
+    **kwargs,
+):
+    """
+    Args
+    ----
+    input_file:
+        Input file that the options will be added to.
+    repartition_strategy:
+        Type of employed repartitioning strategy
+        Options: "adaptive" or "everydt"
+    search_strategy:
+        Type of search strategy used for finding coupling pairs.
+        Options: "bruteforce_with_binning", "bounding_volume_hierarchy"
+    """
+    inputfile.add(
+        InputSection(
+            "BEAM INTERACTION",
+            f"""
+        REPARTITIONSTRATEGY                   {repartition_strategy}
+        SEARCH_STRATEGY                       {search_strategy}
+        """,
+            option_overwrite=True,
+        )
+    )
+
+
+def set_beam_contact_runtime_output(inputfile, *, every_iteration=False, **kwargs):
+    """
+    output the contact forces and gaps with runtime output.
+    input_file:
+        Input file that the options will be added to.
+    every_iteration: int
+        If output at every Newton iteration should be written.
+    """
+    inputfile.add(
+        InputSection(
+            "BEAM CONTACT/RUNTIME VTK OUTPUT",
+            f"""
+            VTK_OUTPUT_BEAM_CONTACT               yes
+            EVERY_ITERATION                       {get_yes_no(every_iteration)}
+            INTERVAL_STEPS                        1
+            CONTACT_FORCES                        yes
+            GAPS                                  yes
+        """,
+            option_overwrite=True,
+        )
+    )
+
+
+def set_beam_contact_section(
+    input_file,
+    *,
+    interaction_strategy="penalty",
+    btb_penalty: float = 0,
+    btb_line_penalty: float = 0,
+    per_shift_angle: list[float] = [70, 80],
+    par_shift_angle: list[float] = [70, 80],
+    b_seg_angle: float = 12,
+    num_integration: int = 5,
+    penalty_law="LinPosQuadPen",
+    penalty_regularization_g0: float = 0,
+    penalty_regularization_f0: float = 0,
+    penalty_regularization_c0: float = 0,
+    **kwargs,
+):
+    """Set default beam contact section, for more and updated details see
+    respective input file within 4C.
+
+    Args
+    ----
+    input_file:
+        Input file that the options will be added to.
+    interaction_strategy:
+        Type of employed solving strategy
+        Options: "none", "penalty" or "gmshonly"
+    btb_penalty: double
+        Penalty parameter for beam-to-beam point contact
+    btb_line_penalty:
+        Penalty parameter per unit length for beam-to-beam line contact
+    per_shift_angle:
+        Lower and upper shift angle (in degrees) for penalty scaling of large-angle-contact
+    par_shift_angle:
+        Lower and upper shift angle (in degrees) for penalty scaling of small-angle-contact
+    b_seg_angle:
+        Maximal angle deviation allowed for contact search segmentation
+    num_integration:
+        Number of integration intervals per element
+    penalty_law:
+        Penalty Law Options: "LinPen", "QuadPen", "LinNegQuadPen", "LinPosQuadPen", "LinPosCubPen", "LinPosDoubleQuadPen", "LinPosExpPen"
+    penalty_regularization_g0:
+        First penalty regularization parameter G0
+    penalty_regularization_f0:
+        Second penalty regularization parameter F0
+    penalty_regularization_c0:
+        Third penalty regularization parameter C0
+    """
+
+    if len(per_shift_angle) != 2:
+        raise ValueError(
+            "Please provide lower and upper value of BEAMS_PERPSHIFTANGLE."
+        )
+
+    if len(par_shift_angle) != 2:
+        raise ValueError("Please provide lower and upper value of BEAMS_PARSHIFTANGLE.")
+
+    input_file.add(
+        InputSection(
+            "BEAM INTERACTION/BEAM TO BEAM CONTACT",
+            f"""STRATEGY   {interaction_strategy}""",
+            option_overwrite=True,
+        )
+    )
+    input_file.add(
+        InputSection(
+            "BEAM CONTACT",
+            f"""MODELEVALUATOR                  Standard
+        BEAMS_STRATEGY                  Penalty
+        BEAMS_BTBPENALTYPARAM           {btb_penalty}
+        BEAMS_BTBLINEPENALTYPARAM       {btb_line_penalty}
+        BEAMS_SEGCON                    Yes
+        BEAMS_PERPSHIFTANGLE1           {per_shift_angle[0]}
+        BEAMS_PERPSHIFTANGLE2           {per_shift_angle[1]}
+        BEAMS_PARSHIFTANGLE1            {par_shift_angle[0]}
+        BEAMS_PARSHIFTANGLE2            {par_shift_angle[1]}
+        BEAMS_SEGANGLE                  {b_seg_angle}
+        BEAMS_NUMINTEGRATIONINTERVAL    {num_integration}
+        BEAMS_PENALTYLAW                {penalty_law}
+        BEAMS_PENREGPARAM_G0            {penalty_regularization_g0}
+        BEAMS_PENREGPARAM_F0            {penalty_regularization_f0}
+        BEAMS_PENREGPARAM_C0            {penalty_regularization_c0}
+        BEAMS_MAXDISISCALEFAC           -1.0
+        BEAMS_MAXDELTADISSCALEFAC       -1.0
+        """,
+            option_overwrite=True,
+        )
+    )
+
+    # beam contact needs a binning strategy
+    set_binning_strategy(input_file, **kwargs)
+
+    # beam contact needs interaction strategy
+    set_beam_interaction(input_file, **kwargs)

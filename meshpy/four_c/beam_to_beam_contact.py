@@ -34,6 +34,7 @@
 # MeshPy modules
 from ..conf import mpy
 from ..boundary_condition import BoundaryCondition
+from ..conf import mpy
 from ..geometry_set import GeometrySet
 
 
