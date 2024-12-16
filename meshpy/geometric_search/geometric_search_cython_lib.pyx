@@ -35,11 +35,9 @@ It uses cython to gain performance.
 """
 
 
-# Python imports.
 import numpy as np
 from libc.math cimport sqrt
 
-# Cython imports.
 cimport cython
 cimport numpy as np
 

@@ -28,29 +28,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to test the functionality of the meshpy.geometric_search module.
-"""
+"""This script is used to test the functionality of the meshpy.geometric_search
+module."""
 
-# Python imports
-import unittest
-import numpy as np
 import random
+import unittest
 
-# Meshpy imports
-from meshpy import mpy, Rotation, Mesh, MaterialReissner, Beam3rHerm2Line3
-from meshpy.mesh_creation_functions.beam_honeycomb import (
-    create_beam_mesh_honeycomb_flat,
-)
-from meshpy.geometric_search import (
+import numpy as np
+from utils import skip_fail_arborx
+
+from meshpy import Beam3rHerm2Line3, MaterialReissner, Mesh, Rotation
+from meshpy.geometric_search.find_close_points import (
     FindClosePointAlgorithm,
     find_close_points,
     partner_indices_to_point_partners,
     point_partners_to_partner_indices,
     point_partners_to_unique_indices,
 )
-from meshpy.utility import get_nodal_coordinates, filter_nodes
-from utils import skip_fail_arborx
+from meshpy.mesh_creation_functions.beam_honeycomb import (
+    create_beam_mesh_honeycomb_flat,
+)
+from meshpy.utility import filter_nodes, get_nodal_coordinates
 
 
 class TestGeometricSearch(unittest.TestCase):
@@ -66,10 +64,8 @@ class TestGeometricSearch(unittest.TestCase):
         unique_indices_ref,
         inverse_indices_ref,
     ):
-        """
-        Test if the unique coordinates are really unique and that the inverse indices
-        result in the original array.
-        """
+        """Test if the unique coordinates are really unique and that the
+        inverse indices result in the original array."""
 
         # Get the array with the unique indices.
         unique_indices, inverse_indices = point_partners_to_unique_indices(
@@ -108,11 +104,11 @@ class TestGeometricSearch(unittest.TestCase):
         )
 
     def xtest_find_close_points_between_bins(self, algorithm, **kwargs):
-        """
-        Test if the find_close_points function returns the expected results.
-        The points are chosen such that for n_bins = [4, 4, 4], some points
-        are exactly at the boundary between bins. This test case can be used
-        for all algorithms, not just binning.
+        """Test if the find_close_points function returns the expected results.
+
+        The points are chosen such that for n_bins = [4, 4, 4], some
+        points are exactly at the boundary between bins. This test case
+        can be used for all algorithms, not just binning.
         """
 
         # Set the seed for the pseudo random numbers
@@ -375,10 +371,10 @@ class TestGeometricSearch(unittest.TestCase):
         )
 
     def xtest_find_close_points_binning_flat(self, algorithm, **kwargs):
-        """
-        Test case for coupling of points, when the nodes are all on a plane. This is
-        challenging for a binning based approach. However, this test case can also
-        be used for all find_close_point algorithms.
+        """Test case for coupling of points, when the nodes are all on a plane.
+
+        This is challenging for a binning based approach. However, this
+        test case can also be used for all find_close_point algorithms.
         """
 
         # Dummy material.
@@ -450,7 +446,7 @@ class TestGeometricSearch(unittest.TestCase):
                     filter_nodes(create_flat_mesh().nodes, middle_nodes=False)
                 ),
                 algorithm=algorithm,
-                **kwargs
+                **kwargs,
             )
 
             # Apply the result conversion, so we check this functionality too.
@@ -491,10 +487,8 @@ class TestGeometricSearch(unittest.TestCase):
         )
 
     def xtest_find_close_points_dimension(self, algorithm, **kwargs):
-        """
-        Test that the find_close_points function also works properly with
-        multidimensional points.
-        """
+        """Test that the find_close_points function also works properly with
+        multidimensional points."""
 
         # Set the seed for the pseudo random numbers.
         random.seed(0)
@@ -531,7 +525,6 @@ class TestGeometricSearch(unittest.TestCase):
 
         # Get results
         has_partner, partner = find_close_points(coords, algorithm=algorithm, **kwargs)
-        partner_indices = point_partners_to_partner_indices(has_partner, partner)
 
         # Check the results
         self.assertTrue(has_partner_expected, has_partner)
@@ -571,9 +564,8 @@ class TestGeometricSearch(unittest.TestCase):
         )
 
     def xtest_find_close_points_tolerance_precision(self, algorithm, **kwargs):
-        """
-        Test that the find_close_points tolerance works with a precision of at least 12.
-        """
+        """Test that the find_close_points tolerance works with a precision of
+        at least 12."""
 
         n_points = 4
         delta = 1e-12

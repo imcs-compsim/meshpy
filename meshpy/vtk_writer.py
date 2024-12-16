@@ -28,27 +28,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module provides a class that is used to write VTK files.
-"""
+"""This module provides a class that is used to write VTK files."""
 
-# Python modules.
-import os
 import numbers
+import os
 import warnings
-import vtk
-import numpy as np
 
-# Meshpy modules.
-from .conf import mpy
+import numpy as np
+import vtk
+
+from meshpy.conf import mpy
 
 
 def add_point_data_node_sets(point_data, nodes, *, extra_points=0):
-    """
-    Add the information if a node is part of a set to the point_data vector
-    for all nodes in the list 'nodes'. The extra_points argument specifies how
-    many additional visualization points there are, i.e., points that are not based
-    on nodes, but are only used for visualization purposes.
+    """Add the information if a node is part of a set to the point_data vector
+    for all nodes in the list 'nodes'.
+
+    The extra_points argument specifies how many additional
+    visualization points there are, i.e., points that are not based on
+    nodes, but are only used for visualization purposes.
     """
 
     # Get list with node set indices of the given nodes
@@ -92,8 +90,8 @@ def add_point_data_node_sets(point_data, nodes, *, extra_points=0):
 
 
 def _get_data_value_and_type(data):
-    """
-    Return the data and its type if one was given.
+    """Return the data and its type if one was given.
+
     The default type, if none was given is float.
     """
     if isinstance(data, tuple):
@@ -103,9 +101,7 @@ def _get_data_value_and_type(data):
 
 
 def _get_vtk_array_type(data):
-    """
-    Return the corresponding meshpy type.
-    """
+    """Return the corresponding meshpy type."""
     data_type = data.GetDataTypeAsString()
     if data_type == "int":
         return mpy.vtk_type.int
@@ -176,8 +172,7 @@ class VTKWriter:
         )
 
     def add_cell(self, cell_type, topology, *, cell_data=None):
-        """
-        Create a cell and add it to the global array.
+        """Create a cell and add it to the global array.
 
         Args
         ----
@@ -208,7 +203,8 @@ class VTKWriter:
         )
 
     def _add_data(self, data_container, vtk_geom_type, *, n_new_items=1):
-        """Add a data container to the existing global data container of this object.
+        """Add a data container to the existing global data container of this
+        object.
 
         Args
         ----
@@ -304,7 +300,10 @@ class VTKWriter:
 
     @staticmethod
     def _get_vtk_data_type(data):
-        """Return the type of data. Check if data matches an expected case."""
+        """Return the type of data.
+
+        Check if data matches an expected case.
+        """
 
         if isinstance(data, (list, np.ndarray)):
             if len(data) == 3:
@@ -340,7 +339,7 @@ class VTKWriter:
                 )
 
     def complete_data(self):
-        """Add the stored data to the vtk grid"""
+        """Add the stored data to the vtk grid."""
         for (key_geom, _key_data), value in self.data.items():
             for vtk_data in value.values():
                 if key_geom == mpy.vtk_geo.cell:

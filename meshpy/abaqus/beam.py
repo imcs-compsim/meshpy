@@ -28,23 +28,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This file provides functions to create Abaqus beam element classes to be used
-with MeshPy.
-"""
+"""This file provides functions to create Abaqus beam element classes to be
+used with MeshPy."""
 
-# Python modules
 import numpy as np
 
-# MeshPy modules
 from ..element_beam import Beam
 from ..material import MaterialBeam
 
 
 def generate_abaqus_beam(beam_type: str):
-    """
-    Return a class representing a beam in Abaqus. This class can be used in the
-    standard MeshPy mesh generation functions.
+    """Return a class representing a beam in Abaqus. This class can be used in
+    the standard MeshPy mesh generation functions.
 
     Args
     ----
@@ -88,12 +83,12 @@ def generate_abaqus_beam(beam_type: str):
 
 
 class AbaqusBeamMaterial(MaterialBeam):
-    """A class representing an Abaqus beam material"""
+    """A class representing an Abaqus beam material."""
 
     def __init__(self, name: str):
-        """Initialize the material. For now it is only supported to state the name of the
-        resulting element set here. The material and cross-section lines in the input file
-        have to be defined manually
+        """Initialize the material. For now it is only supported to state the
+        name of the resulting element set here. The material and cross-section
+        lines in the input file have to be defined manually.
 
         Args
         ----

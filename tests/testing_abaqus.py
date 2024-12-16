@@ -28,62 +28,55 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to test the creation of Abaqus input files.
-"""
+"""This script is used to test the creation of Abaqus input files."""
 
-# Python imports
-import os
 import unittest
+
 import numpy as np
-
-# MeshPy imports
-from meshpy import mpy, Mesh, GeometrySet, Rotation
-
-# MeshPy Abaqus imports
-from meshpy.abaqus import (
-    generate_abaqus_beam,
-    AbaqusBeamMaterial,
-    AbaqusInputFile,
-    AbaqusBeamNormalDefinition,
-)
-
-# Geometry functions
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
-
-# Testing imports
 from utils import compare_test_result
+
+from meshpy import GeometrySet, Mesh, Rotation, mpy
+from meshpy.abaqus import (
+    AbaqusBeamMaterial,
+    AbaqusBeamNormalDefinition,
+    AbaqusInputFile,
+    generate_abaqus_beam,
+)
+from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 
 
 class TestAbaqusMeshpy(unittest.TestCase):
     """Test various stuff from the meshpy Abaqus interface."""
 
     def setUp(self):
-        """
-        This method is called before each test and sets the default meshpy
-        values for each test. The values can be changed in the individual
-        tests.
+        """This method is called before each test and sets the default meshpy
+        values for each test.
+
+        The values can be changed in the individual tests.
         """
 
         # Set default values for global parameters.
         mpy.set_default_values()
 
     def test_abaqus_helix(self):
-        """
-        Create a helix and check the created Abaqus input file
-        """
+        """Create a helix and check the created Abaqus input file."""
 
         # Helix parameters
         n_el = 10
         turns = 1.5
-        l = 1.0
+        length = 1.0
         r = 0.5
 
         mesh = Mesh()
         mat = AbaqusBeamMaterial("beam_material")
         beam_type = generate_abaqus_beam("B32H")
         helix_set = create_beam_mesh_line(
-            mesh, beam_type, mat, [r, 0, 0], [r, r * 2.0 * np.pi * turns, l], n_el=n_el
+            mesh,
+            beam_type,
+            mat,
+            [r, 0, 0],
+            [r, r * 2.0 * np.pi * turns, length],
+            n_el=n_el,
         )
         mesh.wrap_around_cylinder()
 
@@ -111,9 +104,7 @@ class TestAbaqusMeshpy(unittest.TestCase):
         )
 
     def test_abaqus_frame(self):
-        """
-        Create a frame out of connected beams with different materials
-        """
+        """Create a frame out of connected beams with different materials."""
 
         mesh = Mesh()
         mat_1 = AbaqusBeamMaterial("beam_material_1")

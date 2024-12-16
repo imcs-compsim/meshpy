@@ -28,19 +28,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This file has functions to create a honeycomb beam mesh.
-"""
+"""This file has functions to create a honeycomb beam mesh."""
 
 # Python packages.
 import numpy as np
 
-# Meshpy modules.
-from ..conf import mpy
-from ..rotation import Rotation
-from ..mesh import Mesh
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
+from ..mesh import Mesh
+
+# Meshpy modules.
+from ..rotation import Rotation
 from ..utility import get_min_max_nodes
 from .beam_basic_geometry import create_beam_mesh_line
 
@@ -57,11 +55,10 @@ def create_beam_mesh_honeycomb_flat(
     closed_width=True,
     closed_height=True,
     create_couplings=True,
-    add_sets=False
+    add_sets=False,
 ):
-    """
-    Add a flat honeycomb structure. The structure will be created in the
-    x-y plane.
+    """Add a flat honeycomb structure. The structure will be created in the x-y
+    plane.
 
     Args
     ----
@@ -187,10 +184,9 @@ def create_beam_mesh_honeycomb(
     n_el=1,
     closed_top=True,
     vertical=True,
-    add_sets=False
+    add_sets=False,
 ):
-    """
-    Wrap a honeycomb structure around a cylinder. The cylinder axis will be
+    """Wrap a honeycomb structure around a cylinder. The cylinder axis will be
     the z-axis.
 
     Args

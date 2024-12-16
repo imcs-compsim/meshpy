@@ -28,26 +28,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements some basic functions that are used in the meshpy
-application.
-"""
+"""This module implements some basic functions that are used in the meshpy
+application."""
 
-# Python modules.
-import subprocess
 import os
 import shutil
+import subprocess
 from pathlib import Path
+
 import numpy as np
 
-# Meshpy modules.
 from .conf import mpy
-from .node import Node, NodeCosserat
-from .geometry_set import GeometrySetBase, GeometrySet
 from .geometric_search.find_close_points import (
     find_close_points,
     point_partners_to_partner_indices,
 )
+from .geometry_set import GeometrySet, GeometrySetBase
+from .node import Node, NodeCosserat
 
 
 def get_git_data(repo):
@@ -77,9 +74,8 @@ mpy.git_sha, mpy.git_date = get_git_data(os.path.dirname(os.path.realpath(__file
 
 
 def find_close_nodes(nodes, **kwargs):
-    """
-    Find nodes in a point cloud that are within a certain tolerance
-    of each other.
+    """Find nodes in a point cloud that are within a certain tolerance of each
+    other.
 
     Args
     ----
@@ -106,8 +102,7 @@ def find_close_nodes(nodes, **kwargs):
 
 
 def check_node_by_coordinate(node, axis, value, eps=mpy.eps_pos):
-    """
-    Check if the node is at a certain coordinate value.
+    """Check if the node is at a certain coordinate value.
 
     Args
     ----
@@ -125,8 +120,7 @@ def check_node_by_coordinate(node, axis, value, eps=mpy.eps_pos):
 
 
 def get_min_max_coordinates(nodes):
-    """
-    Return an array with the minimal and maximal coordinates of the given
+    """Return an array with the minimal and maximal coordinates of the given
     nodes.
 
     Return
@@ -144,9 +138,9 @@ def get_min_max_coordinates(nodes):
 
 
 def clean_simulation_directory(sim_dir, *, ask_before_clean=False):
-    """
-    Clear the simulation directory. If it does not exist, it is created.
+    """Clear the simulation directory. If it does not exist, it is created.
     Optionally the user can be asked before a deletion of files.
+
     Args
     ----
     sim_dir:
@@ -182,8 +176,7 @@ def clean_simulation_directory(sim_dir, *, ask_before_clean=False):
 
 
 def get_single_node(item, *, check_cosserat_node=False):
-    """
-    Function to get a single node from the input variable. This function
+    """Function to get a single node from the input variable. This function
     accepts a Node object as well as a GeometrySet object.
 
     Args
@@ -214,9 +207,8 @@ def get_single_node(item, *, check_cosserat_node=False):
 
 
 def filter_nodes(nodes, *, middle_nodes=True):
-    """
-    Filter the list of the given nodes.
-    Be aware that if no filters are enabled the original list will be returned.
+    """Filter the list of the given nodes. Be aware that if no filters are
+    enabled the original list will be returned.
 
     Args
     ----
@@ -233,8 +225,7 @@ def filter_nodes(nodes, *, middle_nodes=True):
 
 
 def get_nodal_coordinates(nodes):
-    """
-    Return an array with the coordinates of the given nodes.
+    """Return an array with the coordinates of the given nodes.
 
     Args
     ----
@@ -253,8 +244,7 @@ def get_nodal_coordinates(nodes):
 
 
 def get_nodal_quaternions(nodes):
-    """
-    Return an array with the quaternions of the given nodes.
+    """Return an array with the quaternions of the given nodes.
 
     Args
     ----
@@ -278,8 +268,7 @@ def get_nodal_quaternions(nodes):
 
 
 def get_nodes_by_function(nodes, function, *args, middle_nodes=False, **kwargs):
-    """
-    Return all nodes for which the function evaluates to true.
+    """Return all nodes for which the function evaluates to true.
 
     Args
     ----
@@ -295,8 +284,7 @@ def get_nodes_by_function(nodes, function, *args, middle_nodes=False, **kwargs):
 
 
 def get_min_max_nodes(nodes, *, middle_nodes=False):
-    """
-    Return a geometry set with the max and min nodes in all directions.
+    """Return a geometry set with the max and min nodes in all directions.
 
     Args
     ----
@@ -332,8 +320,8 @@ def get_min_max_nodes(nodes, *, middle_nodes=False):
 def is_node_on_plane(
     node, *, normal=None, origin_distance=None, point_on_plane=None, tol=mpy.eps_pos
 ):
-    """
-    Query if a node lies on a plane defined by a point_on_plane or the origin distance.
+    """Query if a node lies on a plane defined by a point_on_plane or the
+    origin distance.
 
     Args
     ----
@@ -371,7 +359,7 @@ def is_node_on_plane(
 
 
 def get_env_variable(name, *, default="default_not_set"):
-    """Return the value of an environment variable
+    """Return the value of an environment variable.
 
     Args
     ----

@@ -28,40 +28,40 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script contains a tutorial for meshpy. Most basic functionality is covered
-by this tutorial. For more information have a closer look at the test cases,
-as they cover all functionality.
+"""This script contains a tutorial for meshpy.
+
+Most basic functionality is covered by this tutorial. For more
+information have a closer look at the test cases, as they cover all
+functionality.
 """
 
-# Import python modules.
-import numpy as np
-import autograd.numpy as npAD
 import os
+
+import autograd.numpy as npAD
+import numpy as np
 
 # Import the objects we need from meshpy.
 from meshpy import (
-    mpy,
-    Mesh,
-    MaterialReissner,
     Beam3rHerm2Line3,
     BoundaryCondition,
-    Rotation,
     Function,
     GeometrySet,
     InputFile,
+    MaterialReissner,
+    Mesh,
+    Rotation,
+    mpy,
 )
-from meshpy.utility import get_single_node
 from meshpy.mesh_creation_functions import (
-    create_beam_mesh_line,
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_curve,
+    create_beam_mesh_line,
 )
+from meshpy.utility import get_single_node
 
 
 def meshpy_tutorial(base_dir, preview=False):
-    """
-    Create a honeycomb like structure with different type of connectors.
+    """Create a honeycomb like structure with different type of connectors.
 
     Args
     ----
@@ -159,9 +159,9 @@ def meshpy_tutorial(base_dir, preview=False):
 
     # Next, a sinusoidal beam is created.
     def beam_sinus(t):
-        """
-        Define a parametric function for the beam. For this the numpy wrapper
-        autograd has to be used.
+        """Define a parametric function for the beam.
+
+        For this the numpy wrapper autograd has to be used.
         """
         return 0.5 / npAD.pi * npAD.array([t, npAD.sin(t)])
 
@@ -320,6 +320,6 @@ if __name__ == "__main__":
     """Execution part of script."""
 
     # Adapt this path to the directory you want to store the tutorial files in.
-    tutorial_directory = None
+    tutorial_directory = ""
     input_file = meshpy_tutorial(tutorial_directory)
     input_file.write_input_file(os.path.join(tutorial_directory, "tutorial.dat"))

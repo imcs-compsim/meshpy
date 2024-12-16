@@ -28,42 +28,36 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-Create a couple of different mesh cases and test the performance.
-"""
+"""Create a couple of different mesh cases and test the performance."""
 
-
-# Python imports.
-import time
-import numpy as np
 import os
 import socket
-import warnings
 import sys
+import time
+import warnings
 
-# Meshpy imports.
-from meshpy import (
-    mpy,
-    InputFile,
-    Mesh,
-    MaterialReissner,
-    Beam3rHerm2Line3,
-    Rotation,
-)
-from meshpy.utility import find_close_nodes, get_env_variable
-from meshpy.geometric_search import FindClosePointAlgorithm, find_close_points
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
-
+import numpy as np
+from cubitpy import CubitPy, cupy
 from utils import empty_testing_directory, testing_temp
 
-# Cubitpy imports.
-from cubitpy import cupy, CubitPy
+from meshpy import (
+    Beam3rHerm2Line3,
+    InputFile,
+    MaterialReissner,
+    Mesh,
+    Rotation,
+    mpy,
+)
+from meshpy.geometric_search.find_close_points import (
+    FindClosePointAlgorithm,
+    find_close_points,
+)
+from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
+from meshpy.utility import find_close_nodes, get_env_variable
 
 
 def create_solid_block(file_path, nx, ny, nz):
-    """
-    Create a solid block (1 x 1 x 1) with (nx * ny * nz) elements.
-    """
+    """Create a solid block (1 x 1 x 1) with (nx * ny * nz) elements."""
 
     # Initialize cubit.
     cubit = CubitPy()
@@ -128,9 +122,7 @@ def create_solid_block(file_path, nx, ny, nz):
 
 
 def load_solid(solid_file, full_import):
-    """
-    Load a solid into an input file.
-    """
+    """Load a solid into an input file."""
 
     mpy.set_default_values()
     mpy.import_mesh_full = full_import
@@ -138,10 +130,8 @@ def load_solid(solid_file, full_import):
 
 
 def create_large_beam_mesh(nx, ny, nz, n_el):
-    """
-    Create a beam grid on the domain (1 x 1 x 1) with (nx * ny * nz)
-    "grid cells".
-    """
+    """Create a beam grid on the domain (1 x 1 x 1) with (nx * ny * nz) "grid
+    cells"."""
 
     mesh = InputFile()
     material = MaterialReissner(radius=0.25 / np.max([nx, ny, nz]))
@@ -180,9 +170,7 @@ def create_large_beam_mesh(nx, ny, nz, n_el):
 
 
 class TestPerformance(object):
-    """
-    A class to test meshpy performance.
-    """
+    """A class to test meshpy performance."""
 
     # Set expected test times.
     expected_times = {}
@@ -204,17 +192,13 @@ class TestPerformance(object):
     }
 
     def __init__(self):
-        """
-        Initialize counters.
-        """
+        """Initialize counters."""
 
         self.passed_tests = 0
         self.failed_tests = 0
 
     def time_function(self, name, funct, args=None, kwargs=None):
-        """
-        Execute a function and check if the time is as expected.
-        """
+        """Execute a function and check if the time is as expected."""
 
         if args is None:
             args = []
@@ -259,7 +243,7 @@ class TestPerformance(object):
 
 
 def get_geometric_search_time(algorithm, n_points, n_runs):
-    """Return the time needed to perform geometric search functions"""
+    """Return the time needed to perform geometric search functions."""
 
     np.random.seed(seed=1)
     points = np.random.rand(n_points, 3)

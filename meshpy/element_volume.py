@@ -28,15 +28,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements volume elements for the mesh.
-"""
+"""This module implements volume elements for the mesh."""
 
-# Python modules.
+from typing import List, Optional
+
 import numpy as np
 import vtk
 
-# Meshpy modules.
 from .element import Element
 from .vtk_writer import add_point_data_node_sets
 
@@ -47,7 +45,7 @@ class VolumeElement(Element):
     # This class variables stores the information about the element shape in
     # vtk. And the connectivity to the nodes.
     vtk_cell_type = None
-    vtk_topology = None
+    vtk_topology: list = []
 
     def __init__(self, nodes=None, dat_pre_nodes="", dat_post_nodes="", **kwargs):
         super().__init__(nodes=nodes, material=None, **kwargs)
@@ -68,9 +66,8 @@ class VolumeElement(Element):
         )
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid, **kwargs):
-        """
-        Add the representation of this element to the VTK writer as a quad.
-        """
+        """Add the representation of this element to the VTK writer as a
+        quad."""
 
         # Check that the element has a valid vtk cell type.
         if self.vtk_cell_type is None:

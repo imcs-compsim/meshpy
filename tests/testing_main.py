@@ -28,21 +28,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to call all unit test modules in python.
-"""
+"""This script is used to call all unit test modules in python."""
 
-# Python imports.
 import sys
 import unittest
 
-# Import testing functions.
 from utils import empty_testing_directory
-
 
 if __name__ == "__main__":
     # Execution part of script.
-
     empty_testing_directory()
 
     # Load the test cases.

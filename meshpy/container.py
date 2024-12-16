@@ -28,24 +28,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements containers to manage boundary conditions and geometry
-sets in one object.
-"""
+"""This module implements containers to manage boundary conditions and geometry
+sets in one object."""
 
 # Meshpy modules.
-from .conf import mpy
-from .geometry_set import GeometrySetBase
 from .base_mesh_item import BaseMeshItemString
 from .boundary_condition import BoundaryConditionBase
+from .conf import mpy
+from .geometry_set import GeometrySetBase
 
 
 class GeometryName(dict):
-    """
-    Group node geometry sets together. This is mainly used for export from mesh
-    functions. The sets can be accessed by a unique name. There is no
-    distinction between different types of geometry, every name can only be
-    used once -> use meaningful names.
+    """Group node geometry sets together.
+
+    This is mainly used for export from mesh functions. The sets can be
+    accessed by a unique name. There is no distinction between different
+    types of geometry, every name can only be used once -> use
+    meaningful names.
     """
 
     def __setitem__(self, key, value):
@@ -60,11 +59,11 @@ class GeometryName(dict):
 
 
 class ContainerBase(dict):
-    """A base class for containers to be used in MeshPy"""
+    """A base class for containers to be used in MeshPy."""
 
     def append(self, key, item):
-        """Append item to this container and check if the item is already in the list
-        corresponding to key."""
+        """Append item to this container and check if the item is already in
+        the list corresponding to key."""
 
         type_ok = False
         for item_type in self.item_types:
@@ -84,7 +83,7 @@ class ContainerBase(dict):
         self[key].append(item)
 
     def extend(self, container):
-        """Add all items of another container to this container"""
+        """Add all items of another container to this container."""
 
         if not isinstance(container, self.__class__):
             raise TypeError(
@@ -97,9 +96,9 @@ class ContainerBase(dict):
 
 
 class BoundaryConditionContainer(ContainerBase):
-    """
-    A class to group boundary conditions together. The key of the dictionary
-    are (bc_type, geometry_type).
+    """A class to group boundary conditions together.
+
+    The key of the dictionary are (bc_type, geometry_type).
     """
 
     def __init__(self, *args, **kwargs):
@@ -114,10 +113,8 @@ class BoundaryConditionContainer(ContainerBase):
 
 
 class GeometrySetContainer(ContainerBase):
-    """
-    A class to group geometry sets together with the key being the geometry
-    type.
-    """
+    """A class to group geometry sets together with the key being the geometry
+    type."""
 
     def __init__(self, *args, **kwargs):
         """Initialize the container and create the default keys in the map."""
@@ -129,10 +126,8 @@ class GeometrySetContainer(ContainerBase):
             self[geometry_key] = []
 
     def copy(self):
-        """
-        When creating a copy of this object, all lists in this object will be
-        copied also.
-        """
+        """When creating a copy of this object, all lists in this object will
+        be copied also."""
 
         # Create a new geometry set container.
         copy = GeometrySetContainer()

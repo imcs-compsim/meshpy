@@ -28,22 +28,27 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines classes and functions to create and edit a 4C input file.
-"""
-
-# Global configuration object.
-from .conf import mpy
-
-# Utility functions.
-from .utility import clean_simulation_directory
-
-# 3D rotations for nodes.
-from .rotation import Rotation
+"""This module defines classes and functions to create and edit a 4C input
+file."""
 
 # Mesh items.
 from .base_mesh_item import BaseMeshItemString
+
+# Boundary conditions and couplings for geometry in the mesh.
+from .boundary_condition import BoundaryCondition
+from .conf import mpy
+from .coupling import Coupling
+from .element_beam import Beam3eb, Beam3k, Beam3rHerm2Line3, Beam3rLine2Line2
 from .function import Function
+from .geometry_set import GeometrySet, GeometrySetNodes
+
+# Functions to set default header options.
+from .header_functions import (
+    set_beam_to_solid_meshtying,
+    set_header_static,
+    set_runtime_output,
+)
+from .inputfile import InputFile, InputSection
 from .material import (
     MaterialBeam,
     MaterialEulerBernoulli,
@@ -53,26 +58,13 @@ from .material import (
     MaterialString,
     MaterialStVenantKirchhoff,
 )
-from .element_beam import Beam3eb, Beam3k, Beam3rHerm2Line3, Beam3rLine2Line2
-from .geometry_set import GeometrySet, GeometrySetNodes
-from .node import Node, NodeCosserat
-
-# Boundary conditions and couplings for geometry in the mesh.
-from .boundary_condition import BoundaryCondition
-from .coupling import Coupling
 
 # The mesh class itself and the input file classes.
 from .mesh import Mesh
-from .inputfile import InputFile, InputSection, InputSectionMultiKey
+from .node import Node, NodeCosserat
 
-# Functions to set default header options.
-from .header_functions import (
-    get_comment,
-    get_yes_no,
-    set_beam_to_solid_meshtying,
-    set_header_static,
-    set_runtime_output,
-)
+# 3D rotations for nodes.
+from .rotation import Rotation
 
 # Define the items that will be exported by default.
 __all__ = [

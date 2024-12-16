@@ -28,27 +28,24 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines the classes that are used to create an input file for 4C.
-"""
+"""This module defines the classes that are used to create an input file for
+4C."""
 
-# Python modules.
-import sys
-import os
 import datetime
+import os
 import re
+import sys
 
-# Meshpy modules.
-from .conf import mpy
-from .container import GeometrySetContainer, BoundaryConditionContainer
-from .mesh import Mesh
-from .base_mesh_item import BaseMeshItemString, BaseMeshItemFull
-from .node import Node
-from .element import Element
+from .base_mesh_item import BaseMeshItemFull, BaseMeshItemString
 from .boundary_condition import BoundaryConditionBase
+from .conf import mpy
+from .container import BoundaryConditionContainer, GeometrySetContainer
+from .element import Element
 from .geometry_set import GeometrySetNodes
-from .utility import get_git_data
+from .mesh import Mesh
+from .node import Node
 from .nurbs_patch import NURBSPatch
+from .utility import get_git_data
 
 
 def get_section_string(section_name):
@@ -63,8 +60,7 @@ class InputLine:
     """This class is a single option in a 4C input file."""
 
     def __init__(self, *args, option_comment=None, option_overwrite=False):
-        """
-        Set a line of the 4C input file.
+        """Set a line of the 4C input file.
 
         Args
         ----
@@ -131,10 +127,12 @@ class InputLine:
             )
 
     def get_key(self):
-        """
-        Return a key that will be used in the dictionary storage for this item.
-        If the option_comment is empty the identifier of this object will be
-        returned, so than more than one empty lines can be in one section.
+        """Return a key that will be used in the dictionary storage for this
+        item.
+
+        If the option_comment is empty the identifier of this object
+        will be returned, so than more than one empty lines can be in
+        one section.
         """
 
         if self.option_name == "":
@@ -173,8 +171,7 @@ class InputSection:
             self.add(arg, **kwargs)
 
     def add(self, data, **kwargs):
-        """
-        Add data to this section in the form of an InputLine object.
+        """Add data to this section in the form of an InputLine object.
 
         Args
         ----
@@ -203,13 +200,16 @@ class InputSection:
     def _add_data(self, option):
         """Add a InputLine object to the item."""
 
-        if (not option.get_key() in self.data.keys()) or option.overwrite:
+        if (option.get_key() not in self.data.keys()) or option.overwrite:
             self.data[option.get_key()] = option
         else:
             raise KeyError(f"Key {option.get_key()} is already set!")
 
     def merge_section(self, section):
-        """Merge this section with another. This one is the master."""
+        """Merge this section with another.
+
+        This one is the master.
+        """
 
         for option in section.data.values():
             self._add_data(option)
@@ -223,14 +223,15 @@ class InputSection:
 
 
 class InputSectionMultiKey(InputSection):
-    """
-    Represent a single section in the input file.
+    """Represent a single section in the input file.
+
     This section can have the same key multiple times.
     """
 
     def _add_data(self, option):
-        """
-        Add an InputLine object to the item. Each key can exist multiple times.
+        """Add an InputLine object to the item.
+
+        Each key can exist multiple times.
         """
 
         # We add each line with a key that represents the index of the line.
@@ -322,8 +323,7 @@ class InputFile(Mesh):
     ]
 
     def __init__(self, *, description=None, dat_file=None, cubit=None):
-        """
-        Initialize the input file.
+        """Initialize the input file.
 
         Args
         ----
@@ -369,8 +369,7 @@ class InputFile(Mesh):
             self._read_dat_lines(cubit.get_dat_lines())
 
     def read_dat(self, file_path):
-        """
-        Read an existing input file into this object.
+        """Read an existing input file into this object.
 
         Args
         ----
@@ -384,8 +383,7 @@ class InputFile(Mesh):
         self._read_dat_lines(lines)
 
     def _read_dat_lines(self, dat_lines):
-        """
-        Add an existing input file into this object.
+        """Add an existing input file into this object.
 
         Args
         ----
@@ -453,8 +451,7 @@ class InputFile(Mesh):
         self._add_dat_section(section_line, section_data, **kwargs)
 
     def _add_dat_section(self, section_line, section_data, **kwargs):
-        """
-        Add a section to the object.
+        """Add a section to the object.
 
         Args
         ----
@@ -476,10 +473,11 @@ class InputFile(Mesh):
             section_name = name[start:]
 
             def group_input_comments(section_data):
-                """
-                Group the section data in relevant input data and comment /
-                empty lines. The comments at the end of the section are lost,
-                as it is not clear where they belong to.
+                """Group the section data in relevant input data and comment /
+                empty lines.
+
+                The comments at the end of the section are lost, as it
+                is not clear where they belong to.
                 """
 
                 group_list = []
@@ -518,12 +516,13 @@ class InputFile(Mesh):
                         )
 
             def add_set(section_header, section_data_comment):
-                """
-                Add sets of points, lines, surfaces or volumes to the object.
-                We have to do a check of the set index, as it is possible that
-                the existing input file skips sections. If a section is skipped
-                a dummy section will be inserted, so the final numbering
-                matches the sections again.
+                """Add sets of points, lines, surfaces or volumes to the
+                object.
+
+                We have to do a check of the set index, as it is
+                possible that the existing input file skips sections. If
+                a section is skipped a dummy section will be inserted,
+                so the final numbering matches the sections again.
                 """
 
                 def add_to_set(section_header, dat_list, comments):
@@ -623,9 +622,9 @@ class InputFile(Mesh):
                 self.add_section(InputSection(section_name, section_data, **kwargs))
 
     def add(self, *args, **kwargs):
-        """
-        Add to this object. If the type is not recognized, the child add method
-        is called.
+        """Add to this object.
+
+        If the type is not recognized, the child add method is called.
         """
 
         if len(args) == 1 and isinstance(args[0], InputSection):
@@ -636,8 +635,8 @@ class InputFile(Mesh):
             super().add(*args, **kwargs)
 
     def add_section(self, section):
-        """
-        Add a section to the object.
+        """Add a section to the object.
+
         If the section name already exists, it is added to that section.
         """
         if section.name in self.sections.keys():
@@ -653,8 +652,7 @@ class InputFile(Mesh):
             raise Warning(f"Section {section_name} does not exist!")
 
     def write_input_file(self, file_path, *, nox_xml_file=None, **kwargs):
-        """
-        Write the input to a file.
+        """Write the input to a file.
 
         Args
         ----
@@ -695,8 +693,7 @@ class InputFile(Mesh):
         check_nox=True,
         design_description=False,
     ):
-        """
-        Return the lines for the input file for the whole object.
+        """Return the lines for the input file for the whole object.
 
         Args
         ----
@@ -765,7 +762,7 @@ class InputFile(Mesh):
                 item.n_global = i + 1
 
         def set_n_global_elements(element_list):
-            """Set n_global in every item of element_list"""
+            """Set n_global in every item of element_list."""
 
             # A check is performed that every entry in element_list is unique.
             if len(element_list) != len(set(element_list)):
@@ -788,7 +785,9 @@ class InputFile(Mesh):
 
         def set_n_global_materials(material_list):
             """Set n_global in every item of the materials list.
-            We have to account for materials imported from dat files that have a random numbering.
+
+            We have to account for materials imported from dat files
+            that have a random numbering.
             """
 
             # A check is performed that every entry in material_list is unique.
@@ -840,10 +839,8 @@ class InputFile(Mesh):
             set_n_global(value)
 
         def get_section_dat(section_name, data_list, header_lines=None):
-            """
-            Output a section name and apply the get_dat_line for each list
-            item.
-            """
+            """Output a section name and apply the get_dat_line for each list
+            item."""
 
             # do not write section if no content is available
             if len(data_list) == 0:

@@ -28,15 +28,4 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines geometric search functionality.
-"""
-
-# Functions that should be used from the outside
-from .find_close_points import (
-    FindClosePointAlgorithm,
-    find_close_points,
-    partner_indices_to_point_partners,
-    point_partners_to_partner_indices,
-    point_partners_to_unique_indices,
-)
+"""This module defines geometric search functionality."""

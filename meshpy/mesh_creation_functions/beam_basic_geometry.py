@@ -28,13 +28,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This file has functions to create basic geometry items with meshpy.
-"""
+"""This file has functions to create basic geometry items with meshpy."""
 
 # Python packages.
-import numpy as np
 import warnings
+
+import numpy as np
 
 # Meshpy modules.
 from ..conf import mpy
@@ -47,8 +46,7 @@ from .beam_generic import create_beam_mesh_function
 def create_beam_mesh_line(
     mesh, beam_object, material, start_point, end_point, **kwargs
 ):
-    """
-    Generate a straight line of beam elements.
+    """Generate a straight line of beam elements.
 
     Args
     ----
@@ -103,10 +101,8 @@ def create_beam_mesh_line(
     rotation = Rotation.from_basis(t1, t2)
 
     def get_beam_geometry(parameter_a, parameter_b):
-        """
-        Return a function for the position and rotation along the beam
-        axis.
-        """
+        """Return a function for the position and rotation along the beam
+        axis."""
 
         def beam_function(xi):
             point_a = start_point + parameter_a * direction
@@ -130,8 +126,7 @@ def create_beam_mesh_line(
 def create_beam_mesh_arc_segment_via_rotation(
     mesh, beam_object, material, center, axis_rotation, radius, angle, **kwargs
 ):
-    """
-    Generate a circular segment of beam elements.
+    """Generate a circular segment of beam elements.
 
     The circular segment is defined via a rotation, specifying the "initial"
     triad of the beam at the beginning of the arc.
@@ -194,10 +189,9 @@ def create_beam_mesh_arc_segment_via_axis(
     angle,
     *,
     start_node=None,
-    **kwargs
+    **kwargs,
 ):
-    """
-    Generate a circular segment of beam elements.
+    """Generate a circular segment of beam elements.
 
     The arc is defined via a rotation axis, a point on the rotation axis a starting
     point, as well as the angle of the arc segment.
@@ -261,7 +255,8 @@ def create_beam_mesh_arc_segment_via_axis(
         start_rotation = get_single_node(start_node).rotation
 
     def get_beam_geometry(alpha, beta):
-        """Return a function for the position and rotation along the beam axis"""
+        """Return a function for the position and rotation along the beam
+        axis."""
 
         def beam_function(xi):
             phi = 0.5 * (xi + 1) * (beta - alpha) + alpha
@@ -288,8 +283,7 @@ def create_beam_mesh_arc_segment_via_axis(
 def create_beam_mesh_arc_segment_2d(
     mesh, beam_object, material, center, radius, phi_start, phi_end, **kwargs
 ):
-    """
-    Generate a circular segment of beam elements in the x-y plane.
+    """Generate a circular segment of beam elements in the x-y plane.
 
     Args
     ----
@@ -357,8 +351,8 @@ def create_beam_mesh_arc_segment_2d(
 def create_beam_mesh_line_at_node(
     mesh, beam_object, material, start_node, length, **kwargs
 ):
-    """
-    Generate a straight line at a given node. The tangent will be the same as at that node.
+    """Generate a straight line at a given node. The tangent will be the same
+    as at that node.
 
     Args
     ----
@@ -413,9 +407,8 @@ def create_beam_mesh_line_at_node(
 def create_beam_mesh_arc_at_node(
     mesh, beam_object, material, start_node, arc_axis_normal, radius, angle, **kwargs
 ):
-    """
-    Generate a circular segment starting at a given node. The arc will be tangent to
-    the given node.
+    """Generate a circular segment starting at a given node. The arc will be
+    tangent to the given node.
 
     Args
     ----
@@ -495,13 +488,12 @@ def create_beam_mesh_helix(
     height_helix=None,
     turns=None,
     warning_straight_line=True,
-    **kwargs
+    **kwargs,
 ):
-    """
-    Generate a helical segment starting at a given start point around a
+    """Generate a helical segment starting at a given start point around a
     predefined axis (defined by axis_vector and axis_point). The helical
-    segment is defined by a start_point and exactly two of the basic
-    helical quantities [helix_angle, height_helix, turns].
+    segment is defined by a start_point and exactly two of the basic helical
+    quantities [helix_angle, height_helix, turns].
 
     Args
     ----

@@ -28,33 +28,31 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-Test the functionality of the Cosserat curve module
-"""
+"""Test the functionality of the Cosserat curve module."""
 
+import json
 import os
+
 import numpy as np
 import pytest
 import pyvista as pv
-import json
 import quaternion
 
-from meshpy import mpy, InputFile, Rotation, Beam3rHerm2Line3, MaterialReissner
-from meshpy.mesh_creation_functions import create_beam_mesh_helix
-
+from meshpy import Beam3rHerm2Line3, InputFile, MaterialReissner, Rotation, mpy
 from meshpy.cosserat_curve.cosserat_curve import CosseratCurve
 from meshpy.cosserat_curve.warping_along_cosserat_curve import (
-    warp_mesh_along_curve,
     create_transform_boundary_conditions,
     get_mesh_transformation,
+    warp_mesh_along_curve,
 )
+from meshpy.mesh_creation_functions import create_beam_mesh_helix
 
 from .utils import (
+    compare_test_result_pytest,
+    compare_vtk_pytest,
+    get_pytest_test_name,
     testing_input,
     testing_temp,
-    get_pytest_test_name,
-    compare_vtk_pytest,
-    compare_test_result_pytest,
 )
 
 
@@ -71,7 +69,7 @@ def load_cosserat_curve_from_file():
 
 
 def create_beam_solid_input_file():
-    """Create a beam and solid input file for testing purposes"""
+    """Create a beam and solid input file for testing purposes."""
 
     mpy.import_mesh_full = True
     mesh = InputFile(
@@ -92,7 +90,7 @@ def create_beam_solid_input_file():
 
 
 def test_cosserat_curve_translate_and_rotate():
-    """Test that a curve can be loaded, rotated and transformed"""
+    """Test that a curve can be loaded, rotated and transformed."""
 
     curve = load_cosserat_curve_from_file()
 
@@ -113,7 +111,7 @@ def test_cosserat_curve_translate_and_rotate():
     )
 
     def load_compare(name):
-        """Load the compare files and return a numpy array"""
+        """Load the compare files and return a numpy array."""
         return np.loadtxt(
             os.path.join(testing_input, f"{get_pytest_test_name()}_{name}.txt")
         )
@@ -130,7 +128,7 @@ def test_cosserat_curve_translate_and_rotate():
 
 
 def test_cosserat_curve_vtk_representation():
-    """Test the vtk representation of the Cosserat curve"""
+    """Test the vtk representation of the Cosserat curve."""
 
     result_name = os.path.join(testing_temp, get_pytest_test_name() + ".vtu")
     curve = load_cosserat_curve_from_file()
@@ -144,7 +142,7 @@ def test_cosserat_curve_vtk_representation():
 
 
 def test_cosserat_curve_project_point():
-    """Test that the project point function works as expected"""
+    """Test that the project point function works as expected."""
 
     # Load the curve
     curve = load_cosserat_curve_from_file()
@@ -161,7 +159,7 @@ def test_cosserat_curve_project_point():
 
 
 def test_cosserat_mesh_transformation():
-    """Test that the get_mesh_transformation function works as expected"""
+    """Test that the get_mesh_transformation function works as expected."""
 
     curve = load_cosserat_curve_from_file()
     pos, rot = curve.get_centerline_position_and_rotation(0)
@@ -201,7 +199,7 @@ def test_cosserat_mesh_transformation():
 
 
 def test_cosserat_curve_mesh_warp():
-    """Warp a balloon along a centerline"""
+    """Warp a balloon along a centerline."""
 
     # Load the curve
     curve = load_cosserat_curve_from_file()
@@ -229,7 +227,7 @@ def test_cosserat_curve_mesh_warp():
 
 
 def test_cosserat_curve_mesh_warp_transform_boundary_conditions():
-    """Test the transform boundary creation function"""
+    """Test the transform boundary creation function."""
 
     # Load the curve
     curve = load_cosserat_curve_from_file()

@@ -28,17 +28,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to test the functionality of the Rotation class in the
-meshpy module.
-"""
+"""This script is used to test the functionality of the Rotation class in the
+meshpy module."""
 
-# Python imports.
 import unittest
+
 import numpy as np
 
-# Meshpy imports.
-from meshpy import mpy, Rotation
+from meshpy import Rotation, mpy
 from meshpy.rotation import get_relative_rotation, smallest_rotation
 
 
@@ -46,8 +43,7 @@ class TestRotation(unittest.TestCase):
     """This class tests the implementation of the Rotation class."""
 
     def rotation_matrix(self, axis, alpha):
-        """
-        Create a rotation about one of the Cartesian axis.
+        """Create a rotation about one of the Cartesian axis.
 
         Args
         ----
@@ -70,9 +66,9 @@ class TestRotation(unittest.TestCase):
         return rot3D
 
     def test_cartesian_rotations(self):
-        """
-        Create a rotation in all 3 directions. And compare with the rotation
-        matrix.
+        """Create a rotation in all 3 directions.
+
+        And compare with the rotation matrix.
         """
 
         # Set default values for global parameters.
@@ -148,10 +144,8 @@ class TestRotation(unittest.TestCase):
         )
 
     def test_negative_angles(self):
-        """
-        Check if a rotation is created correctly if a negative angle or a large
-        angle is given.
-        """
+        """Check if a rotation is created correctly if a negative angle or a
+        large angle is given."""
 
         # Set default values for global parameters.
         mpy.set_default_values()
@@ -246,9 +240,8 @@ class TestRotation(unittest.TestCase):
         )
 
     def test_rotation_matrix(self):
-        """
-        Test if the correct quaternions are generated from a rotation matrix.
-        """
+        """Test if the correct quaternions are generated from a rotation
+        matrix."""
 
         # Do one calculation for each case in
         # Rotation().from_rotation_matrix().
@@ -275,7 +268,7 @@ class TestRotation(unittest.TestCase):
             )
 
     def test_transformation_matrix(self):
-        """Test that the transformation matrix is computed correctly"""
+        """Test that the transformation matrix is computed correctly."""
 
         rotation_vector_large = [1.0, 2.0, np.pi / 5.0]
         rotation_large = Rotation.from_rotation_vector(rotation_vector_large)
@@ -338,9 +331,7 @@ class TestRotation(unittest.TestCase):
         )
 
     def test_smallest_rotation_triad(self):
-        """
-        Test that the smallest rotation triad is calculated correctly.
-        """
+        """Test that the smallest rotation triad is calculated correctly."""
 
         # Get the triad obtained by a smallest rotation from an arbitrary triad
         # onto an arbitrary tangent vector.

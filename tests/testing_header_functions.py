@@ -28,38 +28,26 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to test the header functions.
-"""
+"""This script is used to test the header functions."""
 
-# Python imports.
 import unittest
-import os
 
-# Meshpy imports.
-from meshpy import mpy, InputFile
+from utils import compare_test_result
 
-# Header functions.
+from meshpy import InputFile, mpy
 from meshpy.header_functions import (
+    get_comment,
+    set_beam_to_solid_meshtying,
     set_header_static,
     set_runtime_output,
-    set_beam_to_solid_meshtying,
-    get_comment,
 )
-
-# Testing imports.
-from utils import compare_test_result
 
 
 class TestHeaderFunctions(unittest.TestCase):
-    """
-    Test the header functions.
-    """
+    """Test the header functions."""
 
     def test_header_functions_static(self):
-        """
-        Test the default static header function.
-        """
+        """Test the default static header function."""
 
         # Set default values for global parameters.
         mpy.set_default_values()
@@ -122,10 +110,8 @@ class TestHeaderFunctions(unittest.TestCase):
         test_time_values("no_total_time", {"time_step": 0.01, "n_steps": 17})
 
     def test_header_functions_static_prestress(self):
-        """
-        Test the static header function with non default prestressing
-        parameter.
-        """
+        """Test the static header function with non default prestressing
+        parameter."""
 
         # Set default values for global parameters.
         mpy.set_default_values()
@@ -163,10 +149,8 @@ class TestHeaderFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False, check_nox=False))
 
     def test_header_functions_stress_output(self):
-        """
-        Test the static header function with non default stress output
-        parameter.
-        """
+        """Test the static header function with non default stress output
+        parameter."""
 
         # Set default values for global parameters.
         mpy.set_default_values()
