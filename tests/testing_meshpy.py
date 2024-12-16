@@ -966,6 +966,43 @@ class TestMeshpy(unittest.TestCase):
             additional_identifier=additional_identifier,
         )
 
+    def test_get_geometry_set_to_boundary_conditions(self):
+        """Test if the geometry set returns the objects(elements) and if they
+        can be forwarded to a GeometrySet."""
+
+        # Initialize material and input file.
+        mat = MaterialReissner(radius=0.1, youngs_modulus=1)
+        mesh = InputFile()
+
+        # number of elements
+        n_el = 5
+
+        # Create a simple beam.
+        geometry = create_beam_mesh_line(
+            mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=n_el
+        )
+
+        # Check if all objects elements are returned.
+        elements_of_geometry = list(geometry["line"].get_geometry_objects().keys())
+
+        # First check type.
+        self.assertEqual(type(elements_of_geometry[0]), Beam3rHerm2Line3)
+
+        # Check number of elements.
+        self.assertEqual(len(elements_of_geometry), n_el)
+
+        # Add boundary condition to all elements except the first and last element.
+        mesh.add(
+            BoundaryCondition(
+                GeometrySet(elements_of_geometry[1:-1]),
+                "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+                bc_type=mpy.bc.dirichlet,
+            )
+        )
+
+        # Compare with the reference file.
+        compare_test_result(self, mesh.get_string(header=False))
+
     def test_meshpy_replace_nodes_geometry_set(self):
         """Test case for coupling of nodes, and reusing the identical nodes.
 
