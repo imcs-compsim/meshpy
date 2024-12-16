@@ -28,9 +28,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements volume elements for the mesh.
-"""
+"""This module implements volume elements for the mesh."""
 
 # Python modules.
 import numpy as np
@@ -68,9 +66,8 @@ class VolumeElement(Element):
         )
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid, **kwargs):
-        """
-        Add the representation of this element to the VTK writer as a quad.
-        """
+        """Add the representation of this element to the VTK writer as a
+        quad."""
 
         # Check that the element has a valid vtk cell type.
         if self.vtk_cell_type is None:

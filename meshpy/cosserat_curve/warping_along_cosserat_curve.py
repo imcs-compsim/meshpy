@@ -28,23 +28,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""This file contains functionality to warp an existing mesh along a 1D curve"""
+"""This file contains functionality to warp an existing mesh along a 1D
+curve."""
 
-
-import numpy as np
-from numpy.typing import NDArray
-import quaternion
 from typing import Tuple
 
+import numpy as np
+import quaternion
+from numpy.typing import NDArray
+
 from .. import mpy
+from ..boundary_condition import BoundaryCondition
+from ..function_utility import create_linear_interpolation_function
+from ..geometric_search import find_close_points
+from ..geometry_set import GeometrySet
 from ..mesh import Mesh
 from ..node import Node, NodeCosserat
 from ..rotation import Rotation
-from ..geometric_search import find_close_points
-from ..function_utility import create_linear_interpolation_function
-from ..boundary_condition import BoundaryCondition
-from ..geometry_set import GeometrySet
-
 from .cosserat_curve import CosseratCurve
 
 
@@ -81,8 +81,9 @@ def get_mesh_transformation(
     initial_configuration: bool = True,
     **kwargs,
 ) -> Tuple[np.ndarray, NDArray[quaternion.quaternion]]:
-    """Generate a list of positions for each node that describe the transformation
-    of the nodes from the given configuration to the Cosserat curve.
+    """Generate a list of positions for each node that describe the
+    transformation of the nodes from the given configuration to the Cosserat
+    curve.
 
     Args
     ----
@@ -201,7 +202,6 @@ def get_mesh_transformation(
 
         # Create the functions that describe the deformation
         for i_step, factor in enumerate(factors):
-
             centerline_pos = positions_for_all_steps[i_step][node_unique_id]
             centerline_rotation = quaternions_for_all_steps[i_step][node_unique_id]
 
@@ -248,8 +248,9 @@ def create_transform_boundary_conditions(
     n_dof_per_node: int = 3,
     **kwargs,
 ) -> None:
-    """Create the Dirichlet boundary conditions that enforce the warping.
-    The warped object is assumed to align with the z-axis in the reference configuration.
+    """Create the Dirichlet boundary conditions that enforce the warping. The
+    warped object is assumed to align with the z-axis in the reference
+    configuration.
 
     Args
     ----
@@ -281,7 +282,6 @@ def create_transform_boundary_conditions(
 
     # Loop over nodes and map them to the new configuration
     for i_node, node in enumerate(nodes):
-
         # Create the functions that describe the deformation
         reference_position = node.coordinates
         displacement_values = np.array(
@@ -316,9 +316,12 @@ def warp_mesh_along_curve(
     origin=[0.0, 0.0, 0.0],
     reference_rotation=Rotation(),
 ) -> None:
-    """Warp an existing mesh along the given curve. The reference coordinates for the
-    transformation are defined by the given origin and rotation, where the first basis
-    vector of the triad defines the centerline axis."""
+    """Warp an existing mesh along the given curve.
+
+    The reference coordinates for the transformation are defined by the
+    given origin and rotation, where the first basis vector of the triad
+    defines the centerline axis.
+    """
 
     pos, rot = get_mesh_transformation(
         curve,

@@ -28,18 +28,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements a basic class to manage geometry in the input file.
-"""
+"""This module implements a basic class to manage geometry in the input
+file."""
 
 # Python modules.
 import numpy as np
 
+from .base_mesh_item import BaseMeshItemFull
+
 # Meshpy modules.
 from .conf import mpy
-from .base_mesh_item import BaseMeshItemFull
-from .node import Node
 from .element_beam import Beam
+from .node import Node
 
 
 class GeometrySetBase(BaseMeshItemFull):
@@ -54,8 +54,7 @@ class GeometrySetBase(BaseMeshItemFull):
     }
 
     def __init__(self, geometry_type, name=None, **kwargs):
-        """
-        Initialize the geometry set.
+        """Initialize the geometry set.
 
         Args
         ----
@@ -71,7 +70,8 @@ class GeometrySetBase(BaseMeshItemFull):
         self.name = name
 
     def link_to_nodes(self, *, link_to_nodes="explicitly_contained_nodes"):
-        """Set a link to this object in the all contained nodes of this geometry set.
+        """Set a link to this object in the all contained nodes of this
+        geometry set.
 
         link_to_nodes: str
             "explicitly_contained_nodes":
@@ -92,6 +92,7 @@ class GeometrySetBase(BaseMeshItemFull):
 
     def check_replaced_nodes(self):
         """Check if nodes in this set have to be replaced.
+
         We need to do this for explicitly contained nodes in this set.
         """
         # Don't iterate directly over the keys as the dict changes during this iteration
@@ -107,7 +108,8 @@ class GeometrySetBase(BaseMeshItemFull):
         del explicit_nodes_in_this_set[old_node]
 
     def get_node_dict(self):
-        """Return the dictionary containing the explicitly added nodes for this set"""
+        """Return the dictionary containing the explicitly added nodes for this
+        set."""
         raise NotImplementedError(
             'The "get_node_dict" method has to be overwritten in the derived class'
         )
@@ -119,9 +121,10 @@ class GeometrySetBase(BaseMeshItemFull):
         )
 
     def get_all_nodes(self):
-        """
-        Return all nodes associated with this set. This includes nodes contained within
-        the geometry added to this set.
+        """Return all nodes associated with this set.
+
+        This includes nodes contained within the geometry added to this
+        set.
         """
         raise NotImplementedError(
             'The "get_all_nodes" method has to be overwritten in the derived class'
@@ -148,8 +151,7 @@ class GeometrySet(GeometrySetBase):
     """Geometry set which is defined by geometric entries."""
 
     def __init__(self, geometry, **kwargs):
-        """
-        Initialize the geometry set.
+        """Initialize the geometry set.
 
         Args
         ----
@@ -184,9 +186,7 @@ class GeometrySet(GeometrySetBase):
         raise TypeError(f"Got unexpected type {type(item)}")
 
     def add(self, item):
-        """
-        Add a geometry item to this object.
-        """
+        """Add a geometry item to this object."""
 
         if isinstance(item, list):
             for sub_item in item:
@@ -206,17 +206,20 @@ class GeometrySet(GeometrySetBase):
             raise TypeError(f"Got unexpected geometry type {type(item)}")
 
     def get_node_dict(self):
-        """Return the dictionary containing the explicitly added nodes for this set.
-        For non-point sets an empty dict is returned."""
+        """Return the dictionary containing the explicitly added nodes for this
+        set.
+
+        For non-point sets an empty dict is returned.
+        """
         if self.geometry_type is mpy.geo.point:
             return self.geometry_objects[mpy.geo.point]
         else:
             return {}
 
     def get_points(self):
-        """
-        Return nodes explicitly associated with this set. Only in case this is a
-        point set something is returned here.
+        """Return nodes explicitly associated with this set.
+
+        Only in case this is a point set something is returned here.
         """
         if self.geometry_type is mpy.geo.point:
             return list(self.geometry_objects[mpy.geo.point].keys())
@@ -227,9 +230,10 @@ class GeometrySet(GeometrySetBase):
             )
 
     def get_all_nodes(self):
-        """
-        Return all nodes associated with this set. This includes nodes contained within
-        the geometry added to this set.
+        """Return all nodes associated with this set.
+
+        This includes nodes contained within the geometry added to this
+        set.
         """
 
         if self.geometry_type is mpy.geo.point:
@@ -250,8 +254,7 @@ class GeometrySetNodes(GeometrySetBase):
     """Geometry set which is defined by nodes and not explicit geometry."""
 
     def __init__(self, geometry_type, nodes=None, **kwargs):
-        """
-        Initialize the geometry set.
+        """Initialize the geometry set.
 
         Args
         ----
@@ -269,10 +272,10 @@ class GeometrySetNodes(GeometrySetBase):
 
     @classmethod
     def from_dat(cls, geometry_key, lines, comments=None):
-        """
-        Get a geometry set from an input line in a dat file. The geometry set
-        is passed as integer (0 based index) and will be connected after the
-        whole input file is parsed.
+        """Get a geometry set from an input line in a dat file.
+
+        The geometry set is passed as integer (0 based index) and will
+        be connected after the whole input file is parsed.
         """
         nodes = []
         for line in lines:
@@ -288,8 +291,7 @@ class GeometrySetNodes(GeometrySetBase):
         self.nodes = node_dict
 
     def add(self, value):
-        """
-        Add nodes to this object.
+        """Add nodes to this object.
 
         Args
         ----
@@ -319,7 +321,8 @@ class GeometrySetNodes(GeometrySetBase):
             raise TypeError(f"Expected Node or list, but got {type(value)}")
 
     def get_node_dict(self):
-        """Return the dictionary containing the explicitly added nodes for this set."""
+        """Return the dictionary containing the explicitly added nodes for this
+        set."""
         return self.nodes
 
     def get_points(self):

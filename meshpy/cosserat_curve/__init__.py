@@ -28,8 +28,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module contains functionality to convert a curve in 3D to a Cosserat curve.
-Furthermore, additional utility functions are included, such as warping a mesh
-along the curve and the creation of non-homogeneous DBC to achieve such a warping.
+"""This module contains functionality to convert a curve in 3D to a Cosserat
+curve.
+
+Furthermore, additional utility functions are included, such as warping
+a mesh along the curve and the creation of non-homogeneous DBC to
+achieve such a warping.
 """

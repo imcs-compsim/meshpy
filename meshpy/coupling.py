@@ -28,17 +28,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements a class to couple geometry together.
-"""
+"""This module implements a class to couple geometry together."""
 
 # Python modules.
 import numpy as np
 
+from .boundary_condition import BoundaryConditionBase
+
 # Meshpy modules.
 from .conf import mpy
-from .geometry_set import GeometrySetBase, GeometrySet
-from .boundary_condition import BoundaryConditionBase
+from .geometry_set import GeometrySet, GeometrySetBase
 
 
 class Coupling(BoundaryConditionBase):
@@ -102,9 +101,8 @@ class Coupling(BoundaryConditionBase):
             self.check()
 
     def check(self):
-        """Check that all nodes that are coupled have the same position (depending
-        on the check_overlapping_nodes parameter).
-        """
+        """Check that all nodes that are coupled have the same position
+        (depending on the check_overlapping_nodes parameter)."""
 
         if not self.check_overlapping_nodes:
             return
@@ -120,8 +118,10 @@ class Coupling(BoundaryConditionBase):
             )
 
     def _get_dat(self):
-        """Return the dat line for this object. If no explicit string was given,
-        it depends on the coupling type as well as the beam type.
+        """Return the dat line for this object.
+
+        If no explicit string was given, it depends on the coupling type
+        as well as the beam type.
         """
 
         if isinstance(self.coupling_dof_type, str):
@@ -165,10 +165,13 @@ class Coupling(BoundaryConditionBase):
 
 
 def coupling_factory(geometry, coupling_type, coupling_dof_type, **kwargs):
-    """Create coupling conditions for the nodes in geometry. Some solvers only allow
-    coupling conditions containing two points at once, in that case we have to create
-    multiple coupling conditions between the individual points to ensure the correct
-    representation of the coupling."""
+    """Create coupling conditions for the nodes in geometry.
+
+    Some solvers only allow coupling conditions containing two points at
+    once, in that case we have to create multiple coupling conditions
+    between the individual points to ensure the correct representation
+    of the coupling.
+    """
 
     if coupling_type is mpy.bc.point_coupling_penalty:
         # Penalty point couplings in 4C can only contain two nodes. In this case

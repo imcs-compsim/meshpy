@@ -28,9 +28,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This file has functions to generate multiple parallel fibers within a
-rectangle. This can for example be used to create fiber reinforced composite
+"""This file has functions to generate multiple parallel fibers within a
+rectangle.
+
+This can for example be used to create fiber reinforced composite
 plates.
 """
 
@@ -38,7 +39,7 @@ plates.
 import numpy as np
 
 # Meshpy modules.
-from .. import mpy, GeometrySet
+from .. import GeometrySet, mpy
 from ..container import GeometryName
 from ..utility import check_node_by_coordinate
 from .beam_basic_geometry import create_beam_mesh_line
@@ -47,8 +48,7 @@ from .beam_basic_geometry import create_beam_mesh_line
 def _intersect_line_with_rectangle(
     length, width, start_line, direction_line, fail_if_no_intersection=True
 ):
-    """
-    Calculate the intersection points between a line and a rectangle.
+    """Calculate the intersection points between a line and a rectangle.
 
     Args
     ----
@@ -131,10 +131,9 @@ def create_fibers_in_rectangle(
     fiber_element_length,
     *,
     reference_point=None,
-    fiber_element_length_min=None
+    fiber_element_length_min=None,
 ):
-    """
-    Create multiple fibers in a rectangle.
+    """Create multiple fibers in a rectangle.
 
     Args
     ----

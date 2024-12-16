@@ -132,4 +132,3 @@ rIntegrated=NIntegrate[
   {t,tStart,tEval}][[1]]+r[tStart];
 Print["position integrated with curvature:\n"<>ToString[rIntegrated]]
 Print["position evaluated with parametric curve:\n"<>ToString[N[r[tEval]]]]
-

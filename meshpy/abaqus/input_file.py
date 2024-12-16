@@ -28,13 +28,12 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines the class that is used to create an input file for Abaqus.
-"""
-
+"""This module defines the class that is used to create an input file for
+Abaqus."""
 
 # Python modules
 from enum import Enum, auto
+
 import numpy as np
 
 # MeshPy modules
@@ -42,7 +41,6 @@ from ..conf import mpy
 from ..geometry_set import GeometrySet
 from ..mesh import Mesh
 from ..rotation import smallest_rotation
-
 
 # Format template for different number types.
 F_INT = "{:6d}"
@@ -70,9 +68,8 @@ def set_n_global(data_list, *, start_index=0):
 
 
 def get_set_lines(set_type, items, name):
-    """
-    Get the Abaqus input file lines for a set of items (max 16 items per row)
-    """
+    """Get the Abaqus input file lines for a set of items (max 16 items per
+    row)"""
     max_entries_per_line = 16
     lines = ["*{}, {}={}".format(set_type, set_type.lower(), name)]
     set_ids = [item.n_global + 1 for item in items]
@@ -87,7 +84,7 @@ def get_set_lines(set_type, items, name):
 
 
 class AbaqusBeamNormalDefinition(Enum):
-    """Enum for different ways to define the beam cross-section normal"""
+    """Enum for different ways to define the beam cross-section normal."""
 
     smallest_rotation_of_triad_at_first_node = auto()
 
@@ -96,8 +93,7 @@ class AbaqusInputFile(object):
     """This class represents an Abaqus input file."""
 
     def __init__(self, mesh: Mesh):
-        """
-        Initialize the input file.
+        """Initialize the input file.
 
         Args
         ----
@@ -112,8 +108,7 @@ class AbaqusInputFile(object):
         *,
         normal_definition=AbaqusBeamNormalDefinition.smallest_rotation_of_triad_at_first_node,
     ):
-        """
-        Write the ASCII input file to disk.
+        """Write the ASCII input file to disk.
 
         Args
         ----
@@ -129,7 +124,7 @@ class AbaqusInputFile(object):
             input_file.write("\n")
 
     def get_input_file_string(self, normal_definition):
-        """Generate the string for the Abaqus input file"""
+        """Generate the string for the Abaqus input file."""
 
         # Perform some checks on the mesh.
         if mpy.check_overlapping_elements:
@@ -152,18 +147,20 @@ class AbaqusInputFile(object):
         return "\n".join(input_file_lines)
 
     def calculate_cross_section_normal_data(self, normal_definition):
-        """Evaluate all data that is required to fully specify the cross-section orientation in Abaqus.
-        The evaluated data is stored in the elements.
+        """Evaluate all data that is required to fully specify the cross-
+        section orientation in Abaqus. The evaluated data is stored in the
+        elements.
 
         For more information see the Abaqus documentation on: "Beam element cross-section orientation"
 
         Args
         ----
         normal_definition: AbaqusBeamNormalDefinition
-            How the beam cross-section should be defined."""
+            How the beam cross-section should be defined.
+        """
 
         def normalize(vector):
-            """Normalize a vector"""
+            """Normalize a vector."""
             return vector / np.linalg.norm(vector)
 
         # Reset possibly existing data stored in the elements
@@ -207,7 +204,7 @@ class AbaqusInputFile(object):
             raise ValueError(f"Got unexpected normal_definition {normal_definition}")
 
     def get_nodes_lines(self):
-        """Get the lines for the input file that represent the nodes"""
+        """Get the lines for the input file that represent the nodes."""
 
         # The nodes require postprocessing, as we have to identify coupled nodes in Abaqus.
         # Internally in Abaqus, coupled nodes are a single node with different normals for the
@@ -262,7 +259,7 @@ class AbaqusInputFile(object):
         return input_file_lines
 
     def get_element_lines(self):
-        """Get the lines for the input file that represent the elements"""
+        """Get the lines for the input file that represent the elements."""
 
         # Sort the elements after their types.
         element_types = {}
@@ -308,7 +305,8 @@ class AbaqusInputFile(object):
             return element_lines
 
     def get_material_lines(self):
-        """Get the lines for the input file that represent the element sets with the same material"""
+        """Get the lines for the input file that represent the element sets
+        with the same material."""
 
         materials = {}
         for element in self.mesh.elements:
@@ -326,7 +324,7 @@ class AbaqusInputFile(object):
         return input_file_lines
 
     def get_set_lines(self):
-        """Add lines to the input file that represent node and element sets"""
+        """Add lines to the input file that represent node and element sets."""
 
         input_file_lines = []
         for point_set in self.mesh.geometry_sets[mpy.geo.point]:

@@ -28,11 +28,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines functions that can be used to add header information to an
-input file.
-"""
-
+"""This module defines functions that can be used to add header information to
+an input file."""
 
 # Meshpy imports.
 from .conf import mpy
@@ -80,8 +77,7 @@ def set_runtime_output(
     output_strains=True,
     option_overwrite=False,
 ):
-    """
-    Set the basic runtime output options.
+    """Set the basic runtime output options.
 
     Args
     ----
@@ -220,8 +216,7 @@ def set_beam_to_solid_meshtying(
     binning_cutoff_radius=None,
     option_overwrite=False,
 ):
-    """
-    Set the beam to solid meshtying options.
+    """Set the beam to solid meshtying options.
 
     Args
     ----
@@ -366,8 +361,7 @@ def set_header_static(
     prestress_time=0,
     option_overwrite=False,
 ):
-    """
-    Set the default parameters for a static structure analysis.
+    """Set the default parameters for a static structure analysis.
 
     At least two of the three time stepping keyword arguments ["time_step",
     "n_steps", "total_time"] have to be set.

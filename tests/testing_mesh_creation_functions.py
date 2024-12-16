@@ -28,61 +28,60 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to test the mesh creation functions.
-"""
+"""This script is used to test the mesh creation functions."""
 
 # Python imports.
-import unittest
-import numpy as np
-import autograd.numpy as npAD
 import os
+import unittest
+
+import autograd.numpy as npAD
+import numpy as np
 import splinepy
+
+# Testing imports.
+from utils import compare_strings, compare_test_result, testing_input
 
 # Meshpy imports.
 from meshpy import (
-    mpy,
-    Mesh,
-    InputFile,
-    MaterialReissner,
-    Beam3rHerm2Line3,
-    MaterialEulerBernoulli,
     Beam3eb,
-    Rotation,
+    Beam3rHerm2Line3,
     BoundaryCondition,
+    InputFile,
+    MaterialEulerBernoulli,
+    MaterialReissner,
+    Mesh,
+    Rotation,
+    mpy,
 )
-from meshpy.node import NodeCosserat
-from meshpy.utility import get_nodal_coordinates
+from meshpy.mesh_creation_functions import (
+    create_beam_mesh_arc_at_node,
+    create_beam_mesh_arc_segment_2d,
+    create_beam_mesh_arc_segment_via_rotation,
+    create_beam_mesh_curve,
+    create_beam_mesh_from_nurbs,
+    create_beam_mesh_helix,
+    create_beam_mesh_line,
+    create_beam_mesh_line_at_node,
+    create_beam_mesh_stent,
+    create_fibers_in_rectangle,
+    create_wire_fibers,
+)
 
 # Geometry functions.
 from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_function
-from meshpy.mesh_creation_functions import (
-    create_beam_mesh_line,
-    create_beam_mesh_curve,
-    create_beam_mesh_arc_segment_via_rotation,
-    create_beam_mesh_arc_segment_2d,
-    create_beam_mesh_stent,
-    create_beam_mesh_line_at_node,
-    create_beam_mesh_arc_at_node,
-    create_fibers_in_rectangle,
-    create_wire_fibers,
-    create_beam_mesh_from_nurbs,
-    create_beam_mesh_helix,
-)
 from meshpy.mesh_creation_functions.beam_nurbs import (
     get_nurbs_curve_function_and_jacobian_for_integration,
 )
-
-# Testing imports.
-from utils import testing_input, compare_test_result, compare_strings
+from meshpy.node import NodeCosserat
+from meshpy.utility import get_nodal_coordinates
 
 
 def create_helix_function(
     radius, incline, *, transformation_factor=None, number_of_turns=None
 ):
     """Create and return a parametric function that represents a helix shape.
-    The parameter coordinate can optionally be stretched to make the curve
-    arc-length along the parameter coordinated non-constant and create a more
+    The parameter coordinate can optionally be stretched to make the curve arc-
+    length along the parameter coordinated non-constant and create a more
     complex curve for testing purposes.
 
     Args
@@ -132,7 +131,7 @@ def create_helix_function(
 
 
 def create_testing_nurbs_curve():
-    """Create a NURBS curve used for testing"""
+    """Create a NURBS curve used for testing."""
 
     return splinepy.NURBS(
         degrees=[2],
@@ -143,9 +142,7 @@ def create_testing_nurbs_curve():
 
 
 class TestMeshCreationFunctions(unittest.TestCase):
-    """
-    Test the mesh creation functions.
-    """
+    """Test the mesh creation functions."""
 
     def test_mesh_creation_functions_arc_segment(self):
         """Create a circular segment and compare it with the reference file."""
@@ -176,9 +173,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_mesh_creation_functions_arc_segment_2d(self):
-        """
-        Create a circular segments in 2D.
-        """
+        """Create a circular segments in 2D."""
 
         # Create input file.
         input_file = InputFile()
@@ -223,9 +218,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_mesh_creation_functions_stent(self):
-        """
-        Test the stent creation function.
-        """
+        """Test the stent creation function."""
 
         # Set default values for global parameters.
         mpy.set_default_values()
@@ -256,9 +249,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False), rtol=1e-10)
 
     def test_mesh_creation_functions_fibers_in_rectangle(self):
-        """
-        Test the create_fibers_in_rectangle function.
-        """
+        """Test the create_fibers_in_rectangle function."""
 
         # Set default values for global parameters.
         mpy.set_default_values()
@@ -289,10 +280,8 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_mesh_creation_functions_fibers_in_rectangle_reference_point(self):
-        """
-        Test the create_fibers_in_rectangle function with using the reference_point
-        option.
-        """
+        """Test the create_fibers_in_rectangle function with using the
+        reference_point option."""
 
         # Set default values for global parameters.
         mpy.set_default_values()
@@ -322,9 +311,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_mesh_creation_functions_fibers_in_rectangle_return_set(self):
-        """
-        Test the set returned by the create_fibers_in_rectangle function.
-        """
+        """Test the set returned by the create_fibers_in_rectangle function."""
 
         # Set default values for global parameters.
         mpy.set_default_values()
@@ -343,9 +330,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_mesh_creation_functions_wire(self):
-        """
-        Test the create_wire_fibers function
-        """
+        """Test the create_wire_fibers function."""
 
         # Set default values for global parameters.
         mpy.set_default_values()
@@ -368,9 +353,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_mesh_creation_functions_nurbs(self):
-        """
-        Test the create_beam_mesh_from_nurbs function.
-        """
+        """Test the create_beam_mesh_from_nurbs function."""
 
         # Create beam elements.
         curve = create_testing_nurbs_curve()
@@ -387,7 +370,8 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_mesh_creation_functions_nurbs_unit(self):
-        """Unittest the function and jacobian creation in the create_beam_mesh_from_nurbs function"""
+        """Unittest the function and jacobian creation in the
+        create_beam_mesh_from_nurbs function."""
 
         curve = create_testing_nurbs_curve()
         r, dr, _, _ = get_nurbs_curve_function_and_jacobian_for_integration(
@@ -462,9 +446,12 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_mesh_creation_functions_node_continuation_accumulated(self):
-        """Test that the arc node continuation function can be applied multiple times in a row.
-        This function can lead to accumulated errors in the rotations if not implemented
-        carefully."""
+        """Test that the arc node continuation function can be applied multiple
+        times in a row.
+
+        This function can lead to accumulated errors in the rotations if
+        not implemented carefully.
+        """
 
         mesh = Mesh()
         mat = MaterialReissner(radius=0.1)
@@ -509,7 +496,8 @@ class TestMeshCreationFunctions(unittest.TestCase):
         )
 
     def test_mesh_creation_functions_element_length_option(self):
-        """Test that the element length can be specified in the beam creation functions"""
+        """Test that the element length can be specified in the beam creation
+        functions."""
 
         input_file = InputFile()
         mat = MaterialReissner(radius=0.1)
@@ -587,11 +575,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
             return create_beam_mesh_function(mesh, interval=[0.0, 1.0], l_el=2.0)
 
     def test_mesh_creation_functions_curve_3d_helix(self):
-        """
-        Create a helix from a parametric curve where the parameter is
-        transformed so the arc length along the beam is not proportional to
-        the parameter.
-        """
+        """Create a helix from a parametric curve where the parameter is
+        transformed so the arc length along the beam is not proportional to the
+        parameter."""
 
         # Create input file.
         input_file = InputFile()
@@ -633,8 +619,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
 
     def test_mesh_creation_functions_curve_3d_helix_length(self):
         """Create a helix from a parametric curve where and check that the
-        correct length is returned.
-        """
+        correct length is returned."""
 
         input_file_1 = InputFile()
         input_file_2 = InputFile()
@@ -750,10 +735,11 @@ class TestMeshCreationFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False))
 
     def test_mesh_creation_functions_curve_3d_line(self):
-        """
-        Create a line from a parametric curve. Once the interval is in
-        ascending order, once in descending. This tests checks that the
-        elements are created with the correct tangent vectors.
+        """Create a line from a parametric curve.
+
+        Once the interval is in ascending order, once in descending.
+        This tests checks that the elements are created with the correct
+        tangent vectors.
         """
 
         # Create input file.

@@ -28,13 +28,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""Provide a function that allows to run 4C"""
-
+"""Provide a function that allows to run 4C."""
 
 import os
-import sys
 import subprocess
-
+import sys
 
 from ..utility import get_env_variable
 
@@ -51,7 +49,7 @@ def run_four_c(
     restart_from=None,
     log_to_console=False,
 ):
-    """Run a 4C simulation and return the exit code of the run
+    """Run a 4C simulation and return the exit code of the run.
 
     This function looks into the environment variables for some parameters:
         "MESHPY_FOUR_C_EXE"

@@ -28,21 +28,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This function converts the DBC monitor log files to Neumann input sections.
-"""
-
+"""This function converts the DBC monitor log files to Neumann input
+sections."""
 
 # Python modules.
 import numpy as np
 
 # Meshpy stuff.
-from .. import mpy, GeometrySet, BoundaryCondition
+from .. import BoundaryCondition, GeometrySet, mpy
 
 
 def read_dbc_monitor_file(file_path):
-    """
-    Load the Dirichlet boundary condition monitor log and return the data as
+    """Load the Dirichlet boundary condition monitor log and return the data as
     well as the nodes of this boundary condition.
 
     Args
@@ -89,8 +86,7 @@ def read_dbc_monitor_file(file_path):
 
 
 def dbc_monitor_to_input(input_file, file_path, step=-1, function=1, n_dof=3):
-    """
-    Convert the Dirichlet boundary condition monitor log to a Neumann
+    """Convert the Dirichlet boundary condition monitor log to a Neumann
     boundary condition input section.
 
     Args

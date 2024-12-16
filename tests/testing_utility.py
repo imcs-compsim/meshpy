@@ -28,17 +28,15 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-Test utilities of MeshPy.
-"""
+"""Test utilities of MeshPy."""
 
 # Python imports
 import unittest
 
+from meshpy.node import Node
+
 # Meshpy imports
 from meshpy.utility import is_node_on_plane
-
-from meshpy.node import Node
 
 
 class TestUtilities(unittest.TestCase):

@@ -28,10 +28,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-Create a steel wire.
-"""
-
+"""Create a steel wire."""
 
 # Import python modules.
 import numpy as np
@@ -40,15 +37,14 @@ import numpy as np
 from ..conf import mpy
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
-from .beam_basic_geometry import create_beam_mesh_line
 from ..utility import check_node_by_coordinate
+from .beam_basic_geometry import create_beam_mesh_line
 
 
 def create_wire_fibers(
     mesh, beam_object, material, length, *, radius=None, layers=1, n_el=1
 ):
-    """
-    Create a steel wire consisting of multiple filaments. The wire will be
+    """Create a steel wire consisting of multiple filaments. The wire will be
     oriented in x-direction.
 
     Args
@@ -87,9 +83,8 @@ def create_wire_fibers(
         wire_beam_radius = radius
 
     def create_line(pos_yz):
-        """
-        Create a line starting at the yz-plane with the 2D coordinates pos_yz.
-        """
+        """Create a line starting at the yz-plane with the 2D coordinates
+        pos_yz."""
         create_beam_mesh_line(
             mesh,
             beam_object,

@@ -28,9 +28,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-Generic function used to create NURBS meshes within meshpy.
-"""
+"""Generic function used to create NURBS meshes within meshpy."""
 
 # Python modules
 import numpy as np
@@ -51,8 +49,7 @@ def add_geomdl_nurbs_to_mesh(
     element_string=None,
     element_description=None,
 ):
-    """
-    Generic NURBS mesh creation function.
+    """Generic NURBS mesh creation function.
 
     Args
     ----
@@ -135,9 +132,8 @@ def add_geomdl_nurbs_to_mesh(
 
 
 def create_control_points_surface(geomdl_obj):
-    """
-    Creates a list with the ControlPoint objects of a surface created with geomdl
-    """
+    """Creates a list with the ControlPoint objects of a surface created with
+    geomdl."""
     control_points = []
     for dir_v in range(geomdl_obj.ctrlpts_size_v):
         for dir_u in range(geomdl_obj.ctrlpts_size_u):
@@ -157,9 +153,8 @@ def create_control_points_surface(geomdl_obj):
 
 
 def create_control_points_volume(geomdl_obj):
-    """
-    Creates a list with the ControlPoint objects of a volume created with geomdl
-    """
+    """Creates a list with the ControlPoint objects of a volume created with
+    geomdl."""
     control_points = []
     for dir_w in range(geomdl_obj.ctrlpts_size_w):
         for dir_v in range(geomdl_obj.ctrlpts_size_v):
@@ -187,13 +182,15 @@ def create_control_points_volume(geomdl_obj):
 
 
 def create_geometry_sets(element):
-    """
-    Function that returns a GeometryName object. For more information of the
-    return item, look into add_geomdl_nurbs_to_mesh.
+    """Function that returns a GeometryName object.
+
+    For more information of the return item, look into
+    add_geomdl_nurbs_to_mesh.
     """
 
     def get_num_cps_uvw(knot_vectors):
-        """Obtain the number of control points on each parametric direction of a patch"""
+        """Obtain the number of control points on each parametric direction of
+        a patch."""
         num_cps_uvw = np.zeros(len(knot_vectors), dtype=int)
 
         for direction in range(len(knot_vectors)):
@@ -206,7 +203,7 @@ def create_geometry_sets(element):
         return num_cps_uvw
 
     def get_patch_vertices(return_set, num_cps_uvw, nurbs_dimension, element):
-        """Get the control points positioned over the vertices of a patch"""
+        """Get the control points positioned over the vertices of a patch."""
 
         if nurbs_dimension == 2:
             # Vertex 1 is positioned on u = 0, v = 0
@@ -294,7 +291,7 @@ def create_geometry_sets(element):
             )
 
     def get_patch_lines(return_set, num_cps_uvw, nurbs_dimension, element):
-        """Get the control points positioned over the lines of a patch"""
+        """Get the control points positioned over the lines of a patch."""
 
         if nurbs_dimension == 2:
             name_dir = ["v", "u"]
@@ -458,7 +455,7 @@ def create_geometry_sets(element):
             )
 
     def get_patch_surfaces(return_set, num_cps_uvw, nurbs_dimension, element):
-        """Get the control points positioned over the surfaces of a patch"""
+        """Get the control points positioned over the surfaces of a patch."""
 
         control_points_surface_1 = []
 
@@ -552,7 +549,7 @@ def create_geometry_sets(element):
             )
 
     def get_patch_volume(return_set, num_cps_uvw, nurbs_dimension, element):
-        """Get the control points positioned in the volume of a patch"""
+        """Get the control points positioned in the volume of a patch."""
 
         control_points_volume_1 = []
 

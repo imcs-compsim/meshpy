@@ -28,27 +28,25 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements beam elements for the mesh.
-"""
+"""This module implements beam elements for the mesh."""
 
 # Python modules.
 import warnings
+
 import numpy as np
 import vtk
-
 
 # Meshpy modules.
 from .conf import mpy
 from .element import Element
-from .node import NodeCosserat
-from .vtk_writer import add_point_data_node_sets
 from .material import (
-    MaterialReissner,
-    MaterialKirchhoff,
     MaterialEulerBernoulli,
+    MaterialKirchhoff,
+    MaterialReissner,
     MaterialReissnerElastoplastic,
 )
+from .node import NodeCosserat
+from .vtk_writer import add_point_data_node_sets
 
 
 class Beam(Element):
@@ -74,8 +72,7 @@ class Beam(Element):
     def create_beam(
         self, beam_function, *, start_node=None, end_node=None, relative_twist=None
     ):
-        """
-        Create the nodes for this beam element. The function returns a list
+        """Create the nodes for this beam element. The function returns a list
         with the created nodes.
 
         In the case of start_node and end_node, it is checked, that the
@@ -99,7 +96,8 @@ class Beam(Element):
             raise ValueError("The beam should not have any local nodes yet!")
 
         def check_node(node, pos, rot, name):
-            """Check if the given node matches with the position and rotation"""
+            """Check if the given node matches with the position and
+            rotation."""
 
             if np.linalg.norm(pos - node.coordinates) > mpy.eps_pos:
                 raise ValueError(
@@ -148,9 +146,7 @@ class Beam(Element):
 
     @classmethod
     def get_coupling_string(cls, coupling_dof_type):
-        """
-        Return the string to couple this beam to another beam.
-        """
+        """Return the string to couple this beam to another beam."""
 
         match coupling_dof_type:
             case mpy.coupling_dof.joint:
@@ -167,15 +163,15 @@ class Beam(Element):
                 )
 
     def flip(self):
-        """
-        Reverse the nodes of this element. This is usually used when reflected.
+        """Reverse the nodes of this element.
+
+        This is usually used when reflected.
         """
         self.nodes = [self.nodes[-1 - i] for i in range(len(self.nodes))]
 
     def _check_material(self):
-        """
-        Check if the linked material is valid for this type of beam element.
-        """
+        """Check if the linked material is valid for this type of beam
+        element."""
         for material_type in self.valid_material:
             if isinstance(self.material, material_type):
                 break
@@ -192,7 +188,8 @@ class Beam(Element):
         beam_centerline_visualization_segments=1,
         **kwargs,
     ):
-        """Add the representation of this element to the VTK writer as a poly line.
+        """Add the representation of this element to the VTK writer as a poly
+        line.
 
         Args
         ----
@@ -310,18 +307,20 @@ class Beam(Element):
                     n_nodes + (i_segment + 1) * n_additional_points_per_segment
                 )
 
-                coordinates[
-                    index_first_point:index_last_point
-                ] = interpolated_coordinates
+                coordinates[index_first_point:index_last_point] = (
+                    interpolated_coordinates
+                )
                 point_connectivity[
                     i_segment * beam_centerline_visualization_segments
                 ] = i_segment
                 point_connectivity[
                     (i_segment + 1) * beam_centerline_visualization_segments
-                ] = (i_segment + 1)
+                ] = i_segment + 1
                 point_connectivity[
-                    i_segment * beam_centerline_visualization_segments
-                    + 1 : (i_segment + 1) * beam_centerline_visualization_segments
+                    i_segment * beam_centerline_visualization_segments + 1 : (
+                        i_segment + 1
+                    )
+                    * beam_centerline_visualization_segments
                 ] = np.arange(index_first_point, index_last_point)
 
         # Get the point data sets and add everything to the output file.
@@ -364,10 +363,8 @@ class Beam3rHerm2Line3(Beam):
 
 
 class Beam3rLine2Line2(Beam):
-    """
-    Represents a Reissner beam with linear shapefunctions in the rotations as
-    well as the displacements.
-    """
+    """Represents a Reissner beam with linear shapefunctions in the rotations
+    as well as the displacements."""
 
     nodes_create = [[-1, False], [1, False]]
     beam_type = mpy.beam.reissner
@@ -447,16 +444,17 @@ class Beam3kClass(Beam):
 
 
 def Beam3k(**kwargs_class):
-    """
-    This factory returns a function that creates a new Beam3kClass object with
-    certain attributes defined. The returned function behaves like a call to
-    the object.
+    """This factory returns a function that creates a new Beam3kClass object
+    with certain attributes defined.
+
+    The returned function behaves like a call to the object.
     """
 
     def create_class(**kwargs):
-        """
-        The function that will be returned. This function should behave like
-        the call to the __init__ function of the class.
+        """The function that will be returned.
+
+        This function should behave like the call to the __init__
+        function of the class.
         """
         return Beam3kClass(**kwargs_class, **kwargs)
 

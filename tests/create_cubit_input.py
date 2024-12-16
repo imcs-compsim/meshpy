@@ -28,9 +28,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script creates a solid input files with cubitpy.
-"""
+"""This script creates a solid input files with cubitpy."""
 
 # Python imports.
 import os
@@ -40,12 +38,11 @@ from cubitpy import CubitPy, cupy
 from cubitpy.mesh_creation_functions import create_brick, extrude_mesh_normal_to_surface
 
 # Meshpy imports
-from meshpy import mpy, InputFile, Mesh, Rotation
+from meshpy import InputFile, Mesh, Rotation, mpy
 
 
 def create_tube_cubit_mesh(r, h, n_circumference, n_height):
-    """
-    Create a solid tube in cubit.
+    """Create a solid tube in cubit.
 
     Args
     ----
@@ -255,14 +252,14 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
     def create_brick_mesh(
         dimensions, n_elements, *, element_type=cupy.element_type.hex8sh
     ):
-        """Create a MeshPy mesh with a solid brick"""
+        """Create a MeshPy mesh with a solid brick."""
         cubit = CubitPy()
         create_brick(
             cubit,
             *dimensions,
             mesh_interval=n_elements,
             element_type=element_type,
-            mesh=True
+            mesh=True,
         )
         mpy.import_mesh_full = True
         return InputFile(cubit=cubit)
@@ -273,7 +270,7 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
     elements = [1, 2, 2]
 
     def rotate_list(original_list, n):
-        """Rotate the list"""
+        """Rotate the list."""
         return original_list[-n:] + original_list[:-n]
 
     # Add the plates in all directions (permute the dimension and number of elements

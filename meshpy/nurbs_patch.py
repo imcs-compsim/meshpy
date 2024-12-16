@@ -28,9 +28,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module implements NURBS patches for the mesh.
-"""
+"""This module implements NURBS patches for the mesh."""
 
 # Python modules
 import numpy as np
@@ -38,14 +36,11 @@ import numpy as np
 # Meshpy modules
 from .conf import mpy
 from .element import Element
-
 from .material import MaterialString, MaterialStVenantKirchhoff
 
 
 class NURBSPatch(Element):
-    """
-    A base class for a NURBS patch
-    """
+    """A base class for a NURBS patch."""
 
     # A list of valid material types for this element
     valid_material = [MaterialString, MaterialStVenantKirchhoff]
@@ -75,7 +70,7 @@ class NURBSPatch(Element):
         self.element_description = element_description
 
     def get_nurbs_dimension(self):
-        """Return the number of dimensions of the NURBS structure"""
+        """Return the number of dimensions of the NURBS structure."""
         n_knots = len(self.knot_vectors)
         n_polynomial = len(self.polynomial_orders)
         if not n_knots == n_polynomial:
@@ -86,7 +81,7 @@ class NURBSPatch(Element):
         return n_knots
 
     def add_element_specific_section(self, sections):
-        """Return additional information of the NURBS patch"""
+        """Return additional information of the NURBS patch."""
 
         from .inputfile import InputSectionMultiKey
 
@@ -135,8 +130,8 @@ class NURBSPatch(Element):
         section.add("END NURBSPATCH")
 
     def get_number_elements(self):
-        """Get the number of elements in this patch by checking
-        the amount of nonzero knot spans in the knot vector"""
+        """Get the number of elements in this patch by checking the amount of
+        nonzero knot spans in the knot vector."""
 
         num_elements_dir = np.zeros(len(self.knot_vectors), dtype=int)
 
@@ -156,7 +151,8 @@ class NURBSPatch(Element):
         return total_num_elements
 
     def _check_material(self):
-        """Check if the linked material is valid for this type of NURBS solid element"""
+        """Check if the linked material is valid for this type of NURBS solid
+        element."""
         for material_type in self.valid_material:
             if isinstance(self.material, material_type):
                 return
@@ -167,9 +163,7 @@ class NURBSPatch(Element):
 
 
 class NURBSSurface(NURBSPatch):
-    """
-    A patch of a NURBS surface
-    """
+    """A patch of a NURBS surface."""
 
     def __init__(self, *args, element_string=None, **kwargs):
         if element_string is None:
@@ -177,7 +171,7 @@ class NURBSSurface(NURBSPatch):
         super().__init__(*args, element_string, **kwargs)
 
     def _get_dat(self):
-        """Return the lines with elements for the input file"""
+        """Return the lines with elements for the input file."""
 
         # Check the material
         self._check_material()
@@ -186,8 +180,9 @@ class NURBSSurface(NURBSPatch):
         ctrlpts_size_u = len(self.knot_vectors[0]) - self.polynomial_orders[0] - 1
 
         def get_ids_ctrlpts_surface(knot_span_u, knot_span_v):
-            """For an interpolated patch, calculate control points involved in evaluation of the
-            surface point at the knot span (knot_span_u, knot_span_v)"""
+            """For an interpolated patch, calculate control points involved in
+            evaluation of the surface point at the knot span (knot_span_u,
+            knot_span_v)"""
 
             id_u = knot_span_u - self.polynomial_orders[0]
             id_v = knot_span_v - self.polynomial_orders[1]
@@ -241,9 +236,7 @@ class NURBSSurface(NURBSPatch):
 
 
 class NURBSVolume(NURBSPatch):
-    """
-    A patch of a NURBS volume
-    """
+    """A patch of a NURBS volume."""
 
     def __init__(self, *args, element_string=None, **kwargs):
         if element_string is not None:
@@ -251,7 +244,7 @@ class NURBSVolume(NURBSPatch):
         super().__init__(*args, element_string, **kwargs)
 
     def _get_dat(self):
-        """Return the lines with elements for the input file"""
+        """Return the lines with elements for the input file."""
 
         # Check the material
         self._check_material()
@@ -261,8 +254,9 @@ class NURBSVolume(NURBSPatch):
         ctrlpts_size_v = len(self.knot_vectors[1]) - self.polynomial_orders[1] - 1
 
         def get_ids_ctrlpts_volume(knot_span_u, knot_span_v, knot_span_w):
-            """For an interpolated patch, calculate control points involved in evaluation of the
-            surface point at the knot span (knot_span_u, knot_span_v, knot_span_w)"""
+            """For an interpolated patch, calculate control points involved in
+            evaluation of the surface point at the knot span (knot_span_u,
+            knot_span_v, knot_span_w)"""
 
             id_u = knot_span_u - self.polynomial_orders[0]
             id_v = knot_span_v - self.polynomial_orders[1]

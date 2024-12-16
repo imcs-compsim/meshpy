@@ -28,35 +28,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This script is used to simulate 4C input files created with MeshPy.
-"""
+"""This script is used to simulate 4C input files created with MeshPy."""
 
 # Python imports.
 import os
-import unittest
-import numpy as np
 import shutil
+import unittest
+
+import numpy as np
 
 # Testing imports.
 from utils import (
     compare_test_result,
     skip_fail_four_c,
-    testing_temp,
     testing_input,
+    testing_temp,
 )
 
 # Meshpy imports.
 from meshpy import (
-    mpy,
-    Rotation,
+    Beam3rHerm2Line3,
+    BoundaryCondition,
+    Function,
     InputFile,
     InputSection,
     MaterialReissner,
-    Function,
-    Beam3rHerm2Line3,
-    BoundaryCondition,
     Mesh,
+    Rotation,
+    mpy,
     set_header_static,
     set_runtime_output,
 )
@@ -66,13 +65,13 @@ from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honey
 
 
 class TestFullFourC(unittest.TestCase):
-    """
-    Create and run input files in 4C. They are test files and 4C should
-    return 0.
+    """Create and run input files in 4C.
+
+    They are test files and 4C should return 0.
     """
 
     def run_four_c_test(self, name, mesh, n_proc=2, restart=[None, None], **kwargs):
-        """Run 4C with a input file and check the output
+        """Run 4C with a input file and check the output.
 
         Args
         ----
@@ -107,9 +106,8 @@ class TestFullFourC(unittest.TestCase):
         self.assertEqual(0, return_code, msg="Test {} failed!".format(name))
 
     def test_four_c_simulation_honeycomb_sphere_as_input(self):
-        """
-        Test the honeycomb sphere model with different types of mesh import.
-        """
+        """Test the honeycomb sphere model with different types of mesh
+        import."""
 
         mpy.set_default_values()
         mpy.import_mesh_full = True
@@ -124,14 +122,13 @@ class TestFullFourC(unittest.TestCase):
     def create_honeycomb_sphere_as_input(
         self, name, *, compare_created_input_file=False
     ):
-        """
-        Create the same honeycomb mesh as defined in
+        """Create the same honeycomb mesh as defined in
         /Input/beam3r_herm2lin3_static_point_coupling_BTSPH_contact_stent_\
-        honeycomb_stretch_r01_circ10.dat
-        The honeycomb beam is in contact with a rigid sphere, the sphere is
-        moved compared to the original test file, since there are some problems
-        with the contact convergence. The sphere is imported as an existing
-        mesh.
+        honeycomb_stretch_r01_circ10.dat The honeycomb beam is in contact with
+        a rigid sphere, the sphere is moved compared to the original test file,
+        since there are some problems with the contact convergence.
+
+        The sphere is imported as an existing mesh.
         """
 
         # Read input file with information of the sphere and simulation.
@@ -228,9 +225,8 @@ class TestFullFourC(unittest.TestCase):
         self.run_four_c_test(name, input_file)
 
     def test_four_c_simulation_beam_and_solid_tube(self):
-        """
-        Test the beam and solid tube model with different types of mesh import.
-        """
+        """Test the beam and solid tube model with different types of mesh
+        import."""
 
         mpy.set_default_values()
         mpy.import_mesh_full = True
@@ -326,9 +322,7 @@ class TestFullFourC(unittest.TestCase):
         self.run_four_c_test(name, input_file)
 
     def test_four_c_simulation_honeycomb_variants(self):
-        """
-        Create a few different honeycomb structures.
-        """
+        """Create a few different honeycomb structures."""
 
         # Set default values for global parameters.
         mpy.set_default_values()
@@ -593,10 +587,8 @@ class TestFullFourC(unittest.TestCase):
         self.run_four_c_test("rotated_beam_axis", input_file, nox_xml_file="xml_name")
 
     def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary(self):
-        """
-        First simulate a cantilever beam with Dirichlet boundary conditions and
-        then apply those as Neumann boundaries.
-        """
+        """First simulate a cantilever beam with Dirichlet boundary conditions
+        and then apply those as Neumann boundaries."""
 
         def create_model(n_steps):
             """Create the cantilver model."""
@@ -703,8 +695,10 @@ class TestFullFourC(unittest.TestCase):
         )
 
     def test_four_c_simulation_cantilever_convergence(self):
-        """Create multiple simulations of a cantilever beam. This is a legacy test that used to test
-        the simulation manager."""
+        """Create multiple simulations of a cantilever beam.
+
+        This is a legacy test that used to test the simulation manager.
+        """
 
         def create_and_run_cantilever(n_el, *, n_proc=1):
             """Create a cantilever beam for a convergence analysis."""

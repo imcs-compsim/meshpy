@@ -28,42 +28,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines classes and functions to create and edit a 4C input file.
-"""
+"""This module defines classes and functions to create and edit a 4C input
+file."""
 
 # Global configuration object.
-from .conf import mpy
-
-# Utility functions.
-from .utility import clean_simulation_directory
-
-# 3D rotations for nodes.
-from .rotation import Rotation
-
 # Mesh items.
 from .base_mesh_item import BaseMeshItemString
-from .function import Function
-from .material import (
-    MaterialBeam,
-    MaterialEulerBernoulli,
-    MaterialKirchhoff,
-    MaterialReissner,
-    MaterialReissnerElastoplastic,
-    MaterialString,
-    MaterialStVenantKirchhoff,
-)
-from .element_beam import Beam3eb, Beam3k, Beam3rHerm2Line3, Beam3rLine2Line2
-from .geometry_set import GeometrySet, GeometrySetNodes
-from .node import Node, NodeCosserat
 
 # Boundary conditions and couplings for geometry in the mesh.
 from .boundary_condition import BoundaryCondition
+from .conf import mpy
 from .coupling import Coupling
-
-# The mesh class itself and the input file classes.
-from .mesh import Mesh
-from .inputfile import InputFile, InputSection, InputSectionMultiKey
+from .element_beam import Beam3eb, Beam3k, Beam3rHerm2Line3, Beam3rLine2Line2
+from .function import Function
+from .geometry_set import GeometrySet, GeometrySetNodes
 
 # Functions to set default header options.
 from .header_functions import (
@@ -73,6 +51,26 @@ from .header_functions import (
     set_header_static,
     set_runtime_output,
 )
+from .inputfile import InputFile, InputSection, InputSectionMultiKey
+from .material import (
+    MaterialBeam,
+    MaterialEulerBernoulli,
+    MaterialKirchhoff,
+    MaterialReissner,
+    MaterialReissnerElastoplastic,
+    MaterialString,
+    MaterialStVenantKirchhoff,
+)
+
+# The mesh class itself and the input file classes.
+from .mesh import Mesh
+from .node import Node, NodeCosserat
+
+# 3D rotations for nodes.
+from .rotation import Rotation
+
+# Utility functions.
+from .utility import clean_simulation_directory
 
 # Define the items that will be exported by default.
 __all__ = [

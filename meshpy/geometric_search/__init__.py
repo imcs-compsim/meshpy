@@ -28,9 +28,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines geometric search functionality.
-"""
+"""This module defines geometric search functionality."""
 
 # Functions that should be used from the outside
 from .find_close_points import (

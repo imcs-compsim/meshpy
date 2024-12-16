@@ -28,12 +28,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines a class that represents a rotation in 3D.
-"""
+"""This module defines a class that represents a rotation in 3D."""
 
 # Python modules.
 import copy
+
 import numpy as np
 
 # Meshpy modules.
@@ -41,7 +40,7 @@ from . import mpy
 
 
 def skew_matrix(vector):
-    """Return the skew matrix for the vector"""
+    """Return the skew matrix for the vector."""
     skew = np.zeros([3, 3])
     skew[0, 1] = -vector[2]
     skew[0, 2] = vector[1]
@@ -53,14 +52,13 @@ def skew_matrix(vector):
 
 
 class Rotation:
-    """
-    A class that represents a rotation of a coordinate system.
+    """A class that represents a rotation of a coordinate system.
+
     Internally the rotations are stored as quaternions.
     """
 
     def __init__(self, *args):
-        """
-        Initialize the rotation object.
+        """Initialize the rotation object.
 
         Args
         ----
@@ -102,8 +100,8 @@ class Rotation:
 
     @classmethod
     def from_rotation_matrix(cls, R):
-        """
-        Create the object from a rotation matrix.
+        """Create the object from a rotation matrix.
+
         The code is based on Spurriers algorithm:
             R. A. Spurrier (1978): “Comment on “Singularity-free extraction of a quaternion from a
             direction-cosine matrix”
@@ -133,10 +131,10 @@ class Rotation:
 
     @classmethod
     def from_basis(cls, t1, t2):
-        """
-        Create the object from two basis vectors t1, t2.
-        t2 will be orthogonalized on t1, and t3 will be calculated with the
-        cross product.
+        """Create the object from two basis vectors t1, t2.
+
+        t2 will be orthogonalized on t1, and t3 will be calculated with
+        the cross product.
         """
 
         t1_normal = t1 / np.linalg.norm(t1)
@@ -163,10 +161,8 @@ class Rotation:
         self.check_quaternion_constraint()
 
     def check_uniqueness(self):
-        """
-        We always want q0 to be positive -> the range for the rotational angle
-        is [-pi, pi].
-        """
+        """We always want q0 to be positive -> the range for the rotational
+        angle is [-pi, pi]."""
 
         if self.q[0] < 0:
             self.q = -self.q
@@ -180,8 +176,8 @@ class Rotation:
             )
 
     def get_rotation_matrix(self):
-        """
-        Return the rotation matrix for this rotation.
+        """Return the rotation matrix for this rotation.
+
         (Krenk (3.50))
         """
         q_skew = skew_matrix(self.q[1:])
@@ -194,16 +190,12 @@ class Rotation:
         return R
 
     def get_quaternion(self):
-        """
-        Return the quaternion for this rotation, as tuple.
-        """
+        """Return the quaternion for this rotation, as tuple."""
 
         return np.array(self.q)
 
     def get_rotation_vector(self):
-        """
-        Return the rotation vector for this object.
-        """
+        """Return the rotation vector for this object."""
 
         self.check()
 
@@ -231,10 +223,11 @@ class Rotation:
             return phi * self.q[1:] / norm
 
     def get_transformation_matrix(self):
-        """Return the transformation matrix for this rotation
+        """Return the transformation matrix for this rotation.
 
-        The transformation matrix maps the (infinitesimal) multiplicative rotational
-        increments onto the additive ones."""
+        The transformation matrix maps the (infinitesimal)
+        multiplicative rotational increments onto the additive ones.
+        """
 
         omega = self.get_rotation_vector()
         omega_norm = np.linalg.norm(omega)
@@ -261,10 +254,12 @@ class Rotation:
         return transformation_matrix
 
     def get_transformation_matrix_inv(self):
-        """Return the inverse of the transformation matrix for this rotation
+        """Return the inverse of the transformation matrix for this rotation.
 
-        The inverse of the transformation matrix maps the (infinitesimal)
-        additive rotational increments onto the multiplicative ones."""
+        The inverse of the transformation matrix maps the
+        (infinitesimal) additive rotational increments onto the
+        multiplicative ones.
+        """
 
         omega = self.get_rotation_vector()
         omega_norm = np.linalg.norm(omega)
@@ -288,18 +283,14 @@ class Rotation:
         return transformation_matrix_inverse
 
     def inv(self):
-        """
-        Return the inverse of this rotation.
-        """
+        """Return the inverse of this rotation."""
 
         tmp_quaternion = self.q.copy()
         tmp_quaternion[0] *= -1.0
         return Rotation.from_quaternion(tmp_quaternion)
 
     def __mul__(self, other):
-        """
-        Add this rotation to another, or apply it on a vector.
-        """
+        """Add this rotation to another, or apply it on a vector."""
 
         # Check if the other object is also a rotation.
         if isinstance(other, Rotation):
@@ -317,9 +308,7 @@ class Rotation:
         raise NotImplementedError("Error, not implemented, does not make sense anyway!")
 
     def __eq__(self, other):
-        """
-        Check if the other rotation is equal to this one
-        """
+        """Check if the other rotation is equal to this one."""
 
         if isinstance(other, Rotation):
             return bool(
@@ -330,9 +319,7 @@ class Rotation:
             return object.__eq__(self, other)
 
     def get_dat(self):
-        """
-        Return a string with the triad components for the .dat line
-        """
+        """Return a string with the triad components for the .dat line."""
 
         rotation_vector = self.get_rotation_vector()
 
@@ -353,9 +340,7 @@ class Rotation:
         return copy.deepcopy(self)
 
     def __str__(self):
-        """
-        String representation of object.
-        """
+        """String representation of object."""
 
         self.check()
         return f"Rotation:\n    q0: {self.q[0]}\n    q: {self.q[1:]}"
@@ -367,8 +352,7 @@ def get_relative_rotation(rotation1, rotation2):
 
 
 def add_rotations(rotation_21, rotation_10):
-    """
-    Multiply a rotation onto another.
+    """Multiply a rotation onto another.
 
     Args
     ----
@@ -419,8 +403,7 @@ def add_rotations(rotation_21, rotation_10):
 
 
 def rotate_coordinates(coordinates, rotation, *, origin=None):
-    """
-    Rotate all given coordinates
+    """Rotate all given coordinates.
 
     Args
     ----
@@ -485,10 +468,9 @@ def rotate_coordinates(coordinates, rotation, *, origin=None):
 
 
 def smallest_rotation(q: Rotation, t):
-    """
-    Get the triad that results from the smallest rotation (rotation without twist) from
-    the triad q such that the rotated first basis vector aligns with t. For more details
-    see Christoph Meier's dissertation chapter 2.1.2.
+    """Get the triad that results from the smallest rotation (rotation without
+    twist) from the triad q such that the rotated first basis vector aligns
+    with t. For more details see Christoph Meier's dissertation chapter 2.1.2.
 
     Args
     ----

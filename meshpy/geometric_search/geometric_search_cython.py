@@ -28,9 +28,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This file defines the interface to the Cython geometric search functionality.
-"""
+"""This file defines the interface to the Cython geometric search
+functionality."""
 
 # Import python module
 import os

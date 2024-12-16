@@ -28,11 +28,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""
-This module defines classes and functions to create an Abaqus beam input file.
-"""
+"""This module defines classes and functions to create an Abaqus beam input
+file."""
 
-from .beam import generate_abaqus_beam, AbaqusBeamMaterial
+from .beam import AbaqusBeamMaterial, generate_abaqus_beam
 from .input_file import AbaqusBeamNormalDefinition, AbaqusInputFile
 
 # Define the items that will be exported by default.
