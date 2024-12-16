@@ -30,7 +30,6 @@
 # -----------------------------------------------------------------------------
 """This script is used to test the functionality of the meshpy module."""
 
-# Python imports.
 import os
 import random
 import unittest
@@ -39,8 +38,6 @@ import warnings
 import autograd.numpy as npAD
 import numpy as np
 import vtk
-
-# Testing imports.
 from utils import (
     compare_strings,
     compare_test_result,
@@ -50,7 +47,6 @@ from utils import (
     testing_temp,
 )
 
-# Meshpy imports.
 from meshpy import (
     Beam3eb,
     Beam3k,
@@ -77,8 +73,6 @@ from meshpy import (
 from meshpy.container import GeometryName
 from meshpy.element_beam import Beam
 from meshpy.geometry_set import GeometrySet, GeometrySetNodes
-
-# Geometry functions.
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_via_rotation,
     create_beam_mesh_line,
@@ -354,12 +348,6 @@ class TestMeshpy(unittest.TestCase):
                 mesh.reflect([0.1, -2, 1])
 
             # Check the output.
-            ref_file = os.path.join(
-                testing_input,
-                "test_meshpy_mesh_transformations_with_solid_"
-                + ("full" if import_full else "dat")
-                + ".dat",
-            )
             compare_test_result(
                 self,
                 mesh.get_string(header=False),

@@ -35,7 +35,6 @@ information have a closer look at the test cases, as they cover all
 functionality.
 """
 
-# Import python modules.
 import os
 
 import autograd.numpy as npAD
@@ -321,6 +320,6 @@ if __name__ == "__main__":
     """Execution part of script."""
 
     # Adapt this path to the directory you want to store the tutorial files in.
-    tutorial_directory = None
+    tutorial_directory = ""
     input_file = meshpy_tutorial(tutorial_directory)
     input_file.write_input_file(os.path.join(tutorial_directory, "tutorial.dat"))

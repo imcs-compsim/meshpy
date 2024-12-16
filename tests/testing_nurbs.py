@@ -30,24 +30,17 @@
 # -----------------------------------------------------------------------------
 """This script is used to test the mesh creation functions for NURBS."""
 
-# Python imports
-import os
 import unittest
 
 import numpy as np
+from utils import compare_test_result
 
-# Testing imports
-from utils import compare_test_result, testing_input
-
-# Meshpy imports
 from meshpy import (
     InputFile,
     MaterialString,
     MaterialStVenantKirchhoff,
     Rotation,
 )
-
-# Geometry functions
 from meshpy.mesh_creation_functions import (
     add_geomdl_nurbs_to_mesh,
     create_nurbs_brick,
@@ -299,8 +292,6 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
 
         # Create first patch set
         mat = MaterialString("STRING_MATERIAL")
-
-        element_description = ()
 
         patch_set = add_geomdl_nurbs_to_mesh(
             input_file,

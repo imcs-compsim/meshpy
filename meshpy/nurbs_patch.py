@@ -30,10 +30,8 @@
 # -----------------------------------------------------------------------------
 """This module implements NURBS patches for the mesh."""
 
-# Python modules
 import numpy as np
 
-# Meshpy modules
 from .conf import mpy
 from .element import Element
 from .material import MaterialString, MaterialStVenantKirchhoff
@@ -87,7 +85,7 @@ class NURBSPatch(Element):
 
         knotvectors_section = "STRUCTURE KNOTVECTORS"
 
-        if not knotvectors_section in sections.keys():
+        if knotvectors_section not in sections.keys():
             sections[knotvectors_section] = InputSectionMultiKey(knotvectors_section)
 
         section = sections[knotvectors_section]

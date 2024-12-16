@@ -31,11 +31,9 @@
 """This function converts the DBC monitor log files to Neumann input
 sections."""
 
-# Python modules.
 import numpy as np
 
-# Meshpy stuff.
-from .. import BoundaryCondition, GeometrySet, mpy
+from meshpy import BoundaryCondition, GeometrySet, mpy
 
 
 def read_dbc_monitor_file(file_path):

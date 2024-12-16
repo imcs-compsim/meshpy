@@ -39,7 +39,7 @@ plates.
 import numpy as np
 
 # Meshpy modules.
-from .. import GeometrySet, mpy
+from .. import GeometrySet
 from ..container import GeometryName
 from ..utility import check_node_by_coordinate
 from .beam_basic_geometry import create_beam_mesh_line

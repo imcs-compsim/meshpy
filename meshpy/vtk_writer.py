@@ -30,7 +30,6 @@
 # -----------------------------------------------------------------------------
 """This module provides a class that is used to write VTK files."""
 
-# Python modules.
 import numbers
 import os
 import warnings
@@ -38,8 +37,7 @@ import warnings
 import numpy as np
 import vtk
 
-# Meshpy modules.
-from .conf import mpy
+from meshpy.conf import mpy
 
 
 def add_point_data_node_sets(point_data, nodes, *, extra_points=0):

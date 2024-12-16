@@ -30,15 +30,12 @@
 # -----------------------------------------------------------------------------
 """This script creates a solid input files with cubitpy."""
 
-# Python imports.
 import os
 
-# Cubitpy imports.
 from cubitpy import CubitPy, cupy
 from cubitpy.mesh_creation_functions import create_brick, extrude_mesh_normal_to_surface
 
-# Meshpy imports
-from meshpy import InputFile, Mesh, Rotation, mpy
+from meshpy import InputFile, mpy
 
 
 def create_tube_cubit_mesh(r, h, n_circumference, n_height):

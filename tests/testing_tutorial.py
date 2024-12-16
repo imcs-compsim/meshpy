@@ -30,15 +30,10 @@
 # -----------------------------------------------------------------------------
 """This script is used to test the tutorial."""
 
-# Import python modules.
 import os
-import sys
 import unittest
 
-# Import tutorial
 import meshpy_tutorial
-
-# Import testing utilities.
 from utils import compare_test_result, testing_temp
 
 

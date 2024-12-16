@@ -31,10 +31,6 @@
 """This file includes functions to ease the creation of input files using beam
 interaction potentials."""
 
-# Python modules
-import numpy as np
-
-# MeshPy modules
 from ..boundary_condition import BoundaryCondition
 from ..header_functions import get_yes_no
 from ..inputfile import InputSection

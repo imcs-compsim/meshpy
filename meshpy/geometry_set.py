@@ -31,12 +31,9 @@
 """This module implements a basic class to manage geometry in the input
 file."""
 
-# Python modules.
 import numpy as np
 
 from .base_mesh_item import BaseMeshItemFull
-
-# Meshpy modules.
 from .conf import mpy
 from .element_beam import Beam
 from .node import Node

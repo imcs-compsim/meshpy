@@ -30,12 +30,9 @@
 # -----------------------------------------------------------------------------
 """This module implements the class that represents one node in the Mesh."""
 
-# Python modules.
 import numpy as np
 
 from .base_mesh_item import BaseMeshItemFull
-
-# Meshpy modules.
 from .conf import mpy
 
 

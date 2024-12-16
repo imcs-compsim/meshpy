@@ -30,11 +30,11 @@
 # -----------------------------------------------------------------------------
 """This module implements volume elements for the mesh."""
 
-# Python modules.
+from typing import List, Optional
+
 import numpy as np
 import vtk
 
-# Meshpy modules.
 from .element import Element
 from .vtk_writer import add_point_data_node_sets
 
@@ -45,7 +45,7 @@ class VolumeElement(Element):
     # This class variables stores the information about the element shape in
     # vtk. And the connectivity to the nodes.
     vtk_cell_type = None
-    vtk_topology = None
+    vtk_topology: list = []
 
     def __init__(self, nodes=None, dat_pre_nodes="", dat_post_nodes="", **kwargs):
         super().__init__(nodes=nodes, material=None, **kwargs)

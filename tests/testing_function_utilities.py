@@ -31,10 +31,8 @@
 """This script is used to test the functionality of the meshpy.function_utility
 module."""
 
-# Python imports
 import unittest
 
-# Meshpy imports
 from meshpy.function_utility import (
     create_linear_interpolation_function,
     create_linear_interpolation_string,

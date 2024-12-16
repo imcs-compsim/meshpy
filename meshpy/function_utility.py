@@ -31,10 +31,8 @@
 """This module implements utility functions to create 4C space time
 function."""
 
-# Python modules
 import numpy as np
 
-# Meshpy modules
 from .function import Function
 
 

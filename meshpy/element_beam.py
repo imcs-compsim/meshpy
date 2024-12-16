@@ -30,13 +30,12 @@
 # -----------------------------------------------------------------------------
 """This module implements beam elements for the mesh."""
 
-# Python modules.
 import warnings
+from typing import Any, Optional
 
 import numpy as np
 import vtk
 
-# Meshpy modules.
 from .conf import mpy
 from .element import Element
 from .material import (
@@ -57,14 +56,14 @@ class Beam(Element):
     #        [ xi, is_middle_node ], # fist node
     #        ...
     #        ]
-    nodes_create = []
+    nodes_create: Any = []
 
     # A list of valid material types for this element.
-    valid_material = []
+    valid_material: Any = []
 
     # Coupling strings.
-    coupling_fix_string = None
-    coupling_joint_string = None
+    coupling_fix_string: Optional[str] = None
+    coupling_joint_string: Optional[str] = None
 
     def __init__(self, material=None, nodes=None):
         super().__init__(nodes=nodes, material=material)

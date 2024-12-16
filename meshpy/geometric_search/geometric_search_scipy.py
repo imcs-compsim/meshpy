@@ -31,7 +31,6 @@
 """This file defines the interface to the Scipy spatial geometric search
 functionality."""
 
-import numpy as np
 from scipy.spatial import KDTree
 
 

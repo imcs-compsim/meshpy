@@ -31,16 +31,14 @@
 """This script is used to test the functionality of the meshpy.geometric_search
 module."""
 
-# Python imports
 import random
 import unittest
 
 import numpy as np
 from utils import skip_fail_arborx
 
-# Meshpy imports
-from meshpy import Beam3rHerm2Line3, MaterialReissner, Mesh, Rotation, mpy
-from meshpy.geometric_search import (
+from meshpy import Beam3rHerm2Line3, MaterialReissner, Mesh, Rotation
+from meshpy.geometric_search.find_close_points import (
     FindClosePointAlgorithm,
     find_close_points,
     partner_indices_to_point_partners,
@@ -527,7 +525,6 @@ class TestGeometricSearch(unittest.TestCase):
 
         # Get results
         has_partner, partner = find_close_points(coords, algorithm=algorithm, **kwargs)
-        partner_indices = point_partners_to_partner_indices(has_partner, partner)
 
         # Check the results
         self.assertTrue(has_partner_expected, has_partner)

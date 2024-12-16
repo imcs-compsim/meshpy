@@ -31,7 +31,6 @@
 """This module defines functions that can be used to add header information to
 an input file."""
 
-# Meshpy imports.
 from .conf import mpy
 from .inputfile import InputSection
 

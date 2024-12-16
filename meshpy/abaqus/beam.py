@@ -31,10 +31,8 @@
 """This file provides functions to create Abaqus beam element classes to be
 used with MeshPy."""
 
-# Python modules
 import numpy as np
 
-# MeshPy modules
 from ..element_beam import Beam
 from ..material import MaterialBeam
 

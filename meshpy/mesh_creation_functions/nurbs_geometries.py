@@ -30,10 +30,7 @@
 # -----------------------------------------------------------------------------
 """This file has functions to create NURBS geometries using Geomdl."""
 
-# Python modules
 import numpy as np
-
-# Geomdl modules
 from geomdl import NURBS, operations
 from geomdl import compatibility as compat
 

@@ -30,17 +30,11 @@
 # -----------------------------------------------------------------------------
 """This script is used to test the header functions."""
 
-# Python imports.
-import os
 import unittest
 
-# Testing imports.
 from utils import compare_test_result
 
-# Meshpy imports.
 from meshpy import InputFile, mpy
-
-# Header functions.
 from meshpy.header_functions import (
     get_comment,
     set_beam_to_solid_meshtying,

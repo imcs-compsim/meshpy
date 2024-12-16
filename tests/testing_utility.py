@@ -30,12 +30,9 @@
 # -----------------------------------------------------------------------------
 """Test utilities of MeshPy."""
 
-# Python imports
 import unittest
 
 from meshpy.node import Node
-
-# Meshpy imports
 from meshpy.utility import is_node_on_plane
 
 

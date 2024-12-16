@@ -31,12 +31,10 @@
 """This script is used to test the functionality of the Rotation class in the
 meshpy module."""
 
-# Python imports.
 import unittest
 
 import numpy as np
 
-# Meshpy imports.
 from meshpy import Rotation, mpy
 from meshpy.rotation import get_relative_rotation, smallest_rotation
 

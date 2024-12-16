@@ -31,7 +31,6 @@
 """This module defines classes and functions to create and edit a 4C input
 file."""
 
-# Global configuration object.
 # Mesh items.
 from .base_mesh_item import BaseMeshItemString
 
@@ -45,13 +44,11 @@ from .geometry_set import GeometrySet, GeometrySetNodes
 
 # Functions to set default header options.
 from .header_functions import (
-    get_comment,
-    get_yes_no,
     set_beam_to_solid_meshtying,
     set_header_static,
     set_runtime_output,
 )
-from .inputfile import InputFile, InputSection, InputSectionMultiKey
+from .inputfile import InputFile, InputSection
 from .material import (
     MaterialBeam,
     MaterialEulerBernoulli,
@@ -68,9 +65,6 @@ from .node import Node, NodeCosserat
 
 # 3D rotations for nodes.
 from .rotation import Rotation
-
-# Utility functions.
-from .utility import clean_simulation_directory
 
 # Define the items that will be exported by default.
 __all__ = [

@@ -31,10 +31,8 @@
 """This module implements a basic class to manage materials in the 4C input
 file."""
 
-# Python modules.
 import numpy as np
 
-# Meshpy modules.
 from .base_mesh_item import BaseMeshItemFull
 
 

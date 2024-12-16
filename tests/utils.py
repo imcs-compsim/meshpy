@@ -30,19 +30,14 @@
 # -----------------------------------------------------------------------------
 """Define utility functions for the testing process."""
 
-# Python imports.
 import os
 import shutil
 import subprocess
-import warnings
-import xml.etree.ElementTree as ET
 
 import numpy as np
 import vtk
-from vtk.util import numpy_support as vtk_numpy
 from vtk_utils.compare_grids import compare_grids
 
-# MeshPy imports
 from meshpy.utility import get_env_variable
 
 
@@ -95,7 +90,7 @@ def skip_fail_cubitpy(self):
         from cubitpy import CubitPy
 
         cubit = CubitPy()
-    except Exception as e:
+    except Exception:
         if get_env_variable("TESTING_GITHUB_CUBITPY", default="0") == "1":
             raise ImportError(message)
         else:

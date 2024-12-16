@@ -30,10 +30,8 @@
 # -----------------------------------------------------------------------------
 """Generic function used to create NURBS meshes within meshpy."""
 
-# Python modules
 import numpy as np
 
-# Meshpy modules
 from ..conf import mpy
 from ..container import GeometryName
 from ..geometry_set import GeometrySetNodes

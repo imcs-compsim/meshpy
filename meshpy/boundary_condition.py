@@ -31,12 +31,9 @@
 """This module implements a class to handle boundary conditions in the input
 file."""
 
-# Python modules.
 import warnings
 
 from .base_mesh_item import BaseMeshItemFull
-
-# Meshpy modules.
 from .conf import mpy
 from .geometry_set import GeometrySet
 from .utility import find_close_nodes

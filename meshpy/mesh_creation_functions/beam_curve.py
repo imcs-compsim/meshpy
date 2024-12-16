@@ -140,7 +140,9 @@ def create_beam_mesh_curve(
     if interval[0] > interval[1]:
         # In this case rp needs to be negated.
         rp_positive = rp
-        rp = lambda t: -(rp_positive(t))
+
+        def rp(t):
+            return -(rp_positive(t))
 
     def ds(t):
         """Increment along the curve."""

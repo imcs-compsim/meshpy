@@ -31,7 +31,6 @@
 """This module defines the Mesh class, which holds the content (nodes,
 elements, sets, ...) for a meshed geometry."""
 
-# Python modules.
 import copy
 import os
 import warnings
@@ -40,15 +39,16 @@ import numpy as np
 import pyvista as pv
 
 from .boundary_condition import BoundaryConditionBase
-
-# Meshpy modules.
 from .conf import mpy
 from .container import BoundaryConditionContainer, GeometryName, GeometrySetContainer
 from .coupling import coupling_factory
 from .element import Element
 from .element_beam import Beam
 from .function import Function
-from .geometric_search import find_close_points, point_partners_to_partner_indices
+from .geometric_search.find_close_points import (
+    find_close_points,
+    point_partners_to_partner_indices,
+)
 from .geometry_set import GeometrySetBase
 from .material import Material
 from .node import Node, NodeCosserat

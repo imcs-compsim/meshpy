@@ -30,14 +30,11 @@
 # -----------------------------------------------------------------------------
 """This script is used to simulate 4C input files created with MeshPy."""
 
-# Python imports.
 import os
 import shutil
 import unittest
 
 import numpy as np
-
-# Testing imports.
 from utils import (
     compare_test_result,
     skip_fail_four_c,
@@ -45,7 +42,6 @@ from utils import (
     testing_temp,
 )
 
-# Meshpy imports.
 from meshpy import (
     Beam3rHerm2Line3,
     BoundaryCondition,

@@ -31,7 +31,6 @@
 """This module implements some basic functions that are used in the meshpy
 application."""
 
-# Python modules.
 import os
 import shutil
 import subprocess
@@ -39,7 +38,6 @@ from pathlib import Path
 
 import numpy as np
 
-# Meshpy modules.
 from .conf import mpy
 from .geometric_search.find_close_points import (
     find_close_points,

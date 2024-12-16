@@ -30,7 +30,6 @@
 # -----------------------------------------------------------------------------
 """Create a couple of different mesh cases and test the performance."""
 
-# Python imports.
 import os
 import socket
 import sys
@@ -38,12 +37,9 @@ import time
 import warnings
 
 import numpy as np
-
-# Cubitpy imports.
 from cubitpy import CubitPy, cupy
 from utils import empty_testing_directory, testing_temp
 
-# Meshpy imports.
 from meshpy import (
     Beam3rHerm2Line3,
     InputFile,
@@ -52,7 +48,10 @@ from meshpy import (
     Rotation,
     mpy,
 )
-from meshpy.geometric_search import FindClosePointAlgorithm, find_close_points
+from meshpy.geometric_search.find_close_points import (
+    FindClosePointAlgorithm,
+    find_close_points,
+)
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.utility import find_close_nodes, get_env_variable
 

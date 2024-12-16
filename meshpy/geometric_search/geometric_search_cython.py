@@ -44,7 +44,7 @@ try:
     import geometric_search_cython_lib
 
     cython_available = True
-except:
+except ImportError:
     cython_available = False
 
 

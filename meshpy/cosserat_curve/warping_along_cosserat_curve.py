@@ -31,7 +31,7 @@
 """This file contains functionality to warp an existing mesh along a 1D
 curve."""
 
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 import quaternion
@@ -141,9 +141,9 @@ def get_mesh_transformation(
         )
 
     # Get unique arc length points
-    has_partner, n_partner = find_close_points(arc_lengths)
-    arc_lengths_unique = [None for i in range(n_partner)]
-    has_partner_total = [None for i in range(len(arc_lengths))]
+    has_partner, n_partner = find_close_points.find_close_points(arc_lengths)
+    arc_lengths_unique = [None] * n_partner
+    has_partner_total = [-2] * len(arc_lengths)
     for i in range(len(arc_lengths)):
         partner_id = has_partner[i]
         if partner_id == -1:
@@ -158,7 +158,7 @@ def get_mesh_transformation(
     arc_lengths_unique = np.array(arc_lengths_unique)
     arc_lengths_sorted_index = np.argsort(arc_lengths_unique)
     arc_lengths_sorted = arc_lengths_unique[arc_lengths_sorted_index]
-    arc_lengths_sorted_index_inv = [None for i in range(n_total)]
+    arc_lengths_sorted_index_inv = [-2 for i in range(n_total)]
     for i in range(n_total):
         arc_lengths_sorted_index_inv[arc_lengths_sorted_index[i]] = i
     point_to_unique = []
@@ -242,7 +242,7 @@ def create_transform_boundary_conditions(
     mesh: Mesh,
     curve: CosseratCurve,
     *,
-    nodes: list[Node] = None,
+    nodes: Optional[list[Node]] = None,
     t_end: float = 1.0,
     n_steps: int = 10,
     n_dof_per_node: int = 3,

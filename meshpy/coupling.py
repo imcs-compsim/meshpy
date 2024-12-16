@@ -30,12 +30,9 @@
 # -----------------------------------------------------------------------------
 """This module implements a class to couple geometry together."""
 
-# Python modules.
 import numpy as np
 
 from .boundary_condition import BoundaryConditionBase
-
-# Meshpy modules.
 from .conf import mpy
 from .geometry_set import GeometrySet, GeometrySetBase
 
@@ -154,7 +151,7 @@ class Coupling(BoundaryConditionBase):
             beam_four_c_type = type(nodes[0].element_link[0])
             for node in nodes:
                 for element in node.element_link:
-                    if not beam_four_c_type == type(element):
+                    if beam_four_c_type is not type(element):
                         raise ValueError(
                             "Coupling beams of different types is not yet possible!"
                         )

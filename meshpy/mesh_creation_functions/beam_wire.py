@@ -30,11 +30,8 @@
 # -----------------------------------------------------------------------------
 """Create a steel wire."""
 
-# Import python modules.
 import numpy as np
 
-# Import meshpy modules.
-from ..conf import mpy
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
 from ..utility import check_node_by_coordinate

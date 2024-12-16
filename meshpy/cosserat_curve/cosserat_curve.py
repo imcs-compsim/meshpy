@@ -356,15 +356,15 @@ class CosseratCurve(object):
                         break
 
                 # Get the two rotation vectors and arc length values
-                arc_length = self.point_arc_length[
+                arc_lengths = self.point_arc_length[
                     centerline_index : centerline_index + 2
                 ]
                 q1 = quaternions[centerline_index]
                 q2 = quaternions[centerline_index + 1]
 
                 # Linear interpolate the arc length
-                xi = (centerline_arc_length - arc_length[0]) / (
-                    arc_length[1] - arc_length[0]
+                xi = (centerline_arc_length - arc_lengths[0]) / (
+                    arc_lengths[1] - arc_lengths[0]
                 )
 
                 # Perform a spline interpolation for the positions and a slerp
@@ -440,16 +440,15 @@ class CosseratCurve(object):
         cell = np.insert(cell, 0, self.n_points)
         poly_line.lines = cell
 
-        base = [[], [], []]
-        for q in self.quaternions:
-            R = Rotation.from_quaternion(
-                quaternion.as_float_array(q)
-            ).get_rotation_matrix()
-            for i_dir in range(3):
-                base[i_dir].append(R[:, i_dir])
+        rotation_matrices = np.zeros((len(self.quaternions), 3, 3))
+        for i_quaternion, q in enumerate(self.quaternions):
+            R = quaternion.as_rotation_matrix(q)
+            rotation_matrices[i_quaternion] = R
 
         for i_dir in range(3):
-            poly_line.point_data.set_array(base[i_dir], f"base_vector_{i_dir + 1}")
+            poly_line.point_data.set_array(
+                rotation_matrices[:, :, i_dir], f"base_vector_{i_dir + 1}"
+            )
 
         return poly_line
 

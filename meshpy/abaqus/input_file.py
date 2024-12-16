@@ -31,12 +31,10 @@
 """This module defines the class that is used to create an input file for
 Abaqus."""
 
-# Python modules
 from enum import Enum, auto
 
 import numpy as np
 
-# MeshPy modules
 from ..conf import mpy
 from ..geometry_set import GeometrySet
 from ..mesh import Mesh
@@ -215,7 +213,7 @@ class AbaqusInputFile(object):
         for coupling in self.mesh.boundary_conditions[
             mpy.bc.point_coupling, mpy.geo.point
         ]:
-            if not coupling.coupling_dof_type is mpy.coupling_dof.fix:
+            if coupling.coupling_dof_type is not mpy.coupling_dof.fix:
                 raise ValueError(
                     "Abaqus coupling is only implemented for rigid joints at the DOFs"
                 )

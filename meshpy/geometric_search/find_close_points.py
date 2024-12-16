@@ -31,20 +31,14 @@
 """Find unique points in a point cloud, i.e., points that are within a certain
 tolerance of each other will be considered as unique."""
 
-# Python modules
 from enum import Enum, auto
 
-# Cython modules
 from .geometric_search_cython import cython_available
-
-# Geometric search modules
-# SciPy
 from .geometric_search_scipy import find_close_points_scipy
 
 if cython_available:
     from .geometric_search_cython import find_close_points_brute_force_cython
 
-# ArborX
 from .geometric_search_arborx import arborx_available
 
 if arborx_available:

@@ -30,18 +30,14 @@
 # -----------------------------------------------------------------------------
 """This script is used to test the mesh creation functions."""
 
-# Python imports.
 import os
 import unittest
 
 import autograd.numpy as npAD
 import numpy as np
 import splinepy
-
-# Testing imports.
 from utils import compare_strings, compare_test_result, testing_input
 
-# Meshpy imports.
 from meshpy import (
     Beam3eb,
     Beam3rHerm2Line3,
@@ -66,8 +62,6 @@ from meshpy.mesh_creation_functions import (
     create_fibers_in_rectangle,
     create_wire_fibers,
 )
-
-# Geometry functions.
 from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_function
 from meshpy.mesh_creation_functions.beam_nurbs import (
     get_nurbs_curve_function_and_jacobian_for_integration,

@@ -31,7 +31,6 @@
 """This module defines the classes that are used to create an input file for
 4C."""
 
-# Python modules.
 import datetime
 import os
 import re
@@ -39,8 +38,6 @@ import sys
 
 from .base_mesh_item import BaseMeshItemFull, BaseMeshItemString
 from .boundary_condition import BoundaryConditionBase
-
-# Meshpy modules.
 from .conf import mpy
 from .container import BoundaryConditionContainer, GeometrySetContainer
 from .element import Element
@@ -203,7 +200,7 @@ class InputSection:
     def _add_data(self, option):
         """Add a InputLine object to the item."""
 
-        if (not option.get_key() in self.data.keys()) or option.overwrite:
+        if (option.get_key() not in self.data.keys()) or option.overwrite:
             self.data[option.get_key()] = option
         else:
             raise KeyError(f"Key {option.get_key()} is already set!")

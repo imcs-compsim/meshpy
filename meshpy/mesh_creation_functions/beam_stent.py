@@ -33,11 +33,11 @@
 # Python packages.
 import numpy as np
 
-# Meshpy modules.
-from ..conf import mpy
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
 from ..mesh import Mesh
+
+# Meshpy modules.
 from ..rotation import Rotation
 from ..utility import get_min_max_nodes
 from .beam_basic_geometry import (
@@ -340,8 +340,6 @@ def create_beam_mesh_stent(
     width_flat = np.pi * diameter
     n_height = n_axis
     n_column = n_circumference
-
-    i_node_start = len(mesh.nodes)
 
     mesh_stent = create_beam_mesh_stent_flat(
         beam_object, material, width_flat, height_flat, n_height, n_column, **kwargs

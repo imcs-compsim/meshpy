@@ -31,16 +31,12 @@
 """This script is used to test the functionality of MeshPy for creating 4C
 input files."""
 
-# Python imports
 import os
 import unittest
 
 import numpy as np
-
-# Testing imports
 from utils import compare_test_result, compare_vtk, testing_input, testing_temp
 
-# Meshpy imports
 from meshpy import (
     Beam3rHerm2Line3,
     BoundaryCondition,

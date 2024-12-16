@@ -31,7 +31,6 @@
 """This file defines the interface to the ArborX geometric search
 functionality."""
 
-# Python modules
 import os
 import sys
 
@@ -43,7 +42,7 @@ try:
     import geometric_search_arborx_lib
 
     arborx_available = True
-except:
+except ImportError:
     arborx_available = False
 
 

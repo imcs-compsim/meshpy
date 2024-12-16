@@ -34,7 +34,6 @@ This file is adapted from LaTeX2AI (
 https://github.com/isteinbrecher/LaTeX2AI).
 """
 
-# Import python modules.
 import os
 import subprocess
 import unittest

@@ -31,7 +31,6 @@
 """This module defines a global object that manages all kind of stuff regarding
 meshpy."""
 
-# Python imports.
 from enum import Enum, auto
 
 
