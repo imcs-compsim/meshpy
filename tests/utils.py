@@ -126,14 +126,8 @@ def compare_string_tolerance(
     """Compare two strings, all floating point values will be compared with a
     tolerance."""
 
-    def set_tol(tol):
-        if tol is None:
-            return 0.0
-        else:
-            return tol
-
-    rtol = set_tol(rtol)
-    atol = set_tol(atol)
+    rtol = 0.0 if rtol is None else rtol
+    atol = 0.0 if atol is None else atol
 
     lines_reference = reference.strip().split("\n")
     lines_compare = compare.strip().split("\n")

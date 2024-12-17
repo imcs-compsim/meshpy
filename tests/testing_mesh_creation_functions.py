@@ -93,13 +93,16 @@ def create_helix_function(
     """
 
     if transformation_factor is None and number_of_turns is None:
-        # Identity transformation
+
         def transformation(t):
+            """Return identity transformation."""
             return 1.0
 
     elif transformation_factor is not None and number_of_turns is not None:
-        # Transform the parameter coordinate to make the function more complex
+
         def transformation(t):
+            """Transform the parameter coordinate to make the function more
+            complex."""
             return (
                 npAD.exp(transformation_factor * t / (2.0 * np.pi * number_of_turns))
                 * t
@@ -113,6 +116,7 @@ def create_helix_function(
         )
 
     def helix(t):
+        """Parametric function to describe a helix."""
         return npAD.array(
             [
                 radius * npAD.cos(transformation(t)),
@@ -661,8 +665,8 @@ class TestMeshCreationFunctions(unittest.TestCase):
         # Set parameters for the sin.
         n_el = 8
 
-        # Create a helix with a parametric curve.
         def sin(t):
+            """Parametric curve as a sin."""
             return npAD.array([t, npAD.sin(t)])
 
         sin_set = create_beam_mesh_curve(
@@ -705,9 +709,11 @@ class TestMeshCreationFunctions(unittest.TestCase):
         n_el = 4
 
         def curve(t):
+            """Parametric representation of the centerline curve."""
             return npAD.array([L * t, t * t * L * L, 0.0])
 
         def rotation(t):
+            """Function that defines the triad along the centerline curve."""
             rp2 = jacobian(curve)(t)
             rp = [rp2[0], rp2[1], 0]
             R1 = Rotation([1, 0, 0], t * 2 * np.pi)
@@ -742,8 +748,9 @@ class TestMeshCreationFunctions(unittest.TestCase):
         # Add material and function.
         mat = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
 
-        # Create a line with a parametric curve (and a transformed parameter).
         def line(t):
+            """Create a line with a parametric curve (and a transformed
+            parameter)."""
             factor = 2
             t_trans = npAD.exp(factor * t / (2.0 * np.pi)) * t / npAD.exp(factor)
             return npAD.array([t_trans, 0, 0])

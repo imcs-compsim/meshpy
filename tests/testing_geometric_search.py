@@ -90,14 +90,17 @@ class TestGeometricSearch(unittest.TestCase):
         self.assertEqual(inverse_indices, inverse_indices_ref)
 
     def test_find_close_points_between_bins_scipy(self):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         self.xtest_find_close_points_between_bins(FindClosePointAlgorithm.kd_tree_scipy)
 
     def test_find_close_points_between_bins_brute_force_cython(self):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         self.xtest_find_close_points_between_bins(
             FindClosePointAlgorithm.brute_force_cython
         )
 
     def test_find_close_points_between_bins_boundary_volume_hierarchy_arborx(self):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         skip_fail_arborx(self)
         self.xtest_find_close_points_between_bins(
             FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
@@ -357,14 +360,17 @@ class TestGeometricSearch(unittest.TestCase):
         )
 
     def test_find_close_points_flat_brute_force_scipy(self):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         self.xtest_find_close_points_binning_flat(FindClosePointAlgorithm.kd_tree_scipy)
 
     def test_find_close_points_flat_brute_force_cython(self):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         self.xtest_find_close_points_binning_flat(
             FindClosePointAlgorithm.brute_force_cython
         )
 
     def test_find_close_points_flat_boundary_volume_hierarchy_arborx(self):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         skip_fail_arborx(self)
         self.xtest_find_close_points_binning_flat(
             FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
@@ -473,14 +479,17 @@ class TestGeometricSearch(unittest.TestCase):
             )
 
     def test_find_close_points_dimension_scipy(self):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         self.xtest_find_close_points_dimension(FindClosePointAlgorithm.kd_tree_scipy)
 
     def test_find_close_points_dimension_brute_force_cython(self):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         self.xtest_find_close_points_dimension(
             FindClosePointAlgorithm.brute_force_cython
         )
 
     def test_find_close_points_dimension_boundary_volume_hierarchy_arborx(self):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         skip_fail_arborx(self)
         self.xtest_find_close_points_dimension(
             FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
@@ -546,11 +555,13 @@ class TestGeometricSearch(unittest.TestCase):
         )
 
     def test_find_close_points_tolerance_precision_brute_force_scipy(self):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         self.xtest_find_close_points_tolerance_precision(
             FindClosePointAlgorithm.kd_tree_scipy
         )
 
     def test_find_close_points_tolerance_precision_brute_force_cython(self):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         self.xtest_find_close_points_tolerance_precision(
             FindClosePointAlgorithm.brute_force_cython
         )
@@ -558,6 +569,7 @@ class TestGeometricSearch(unittest.TestCase):
     def test_find_close_points_tolerance_precision_boundary_volume_hierarchy_arborx(
         self,
     ):
+        """TODO: Remove this once we can use pytest fixtures for this"""
         skip_fail_arborx(self)
         self.xtest_find_close_points_tolerance_precision(
             FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
