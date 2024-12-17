@@ -221,6 +221,8 @@ class Test4C(unittest.TestCase):
 
         # Test that the direction function version works
         def director_function(cell_center):
+            """Return director that will be used to determine the solid
+            thickness direction."""
             return cell_center / np.linalg.norm(cell_center)
 
         mesh_dome = mesh_dome_original.copy()

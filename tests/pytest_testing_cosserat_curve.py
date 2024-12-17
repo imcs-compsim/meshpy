@@ -183,6 +183,7 @@ def test_cosserat_mesh_transformation():
     #     json.dump(np_array.tolist(), f, indent=2)
 
     def load_result(name):
+        """Load the position and rotation results from the reference files."""
         with open(
             os.path.join(testing_input, f"{get_pytest_test_name()}_{name}.json"), "r"
         ) as f:

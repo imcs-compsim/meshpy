@@ -655,6 +655,7 @@ class TestMeshpy(unittest.TestCase):
         """Test the Kirchhoff Love beam material."""
 
         def set_stiff(material):
+            """Set the material properties for the beam material."""
             material.area = 2.0
             material.mom2 = 3.0
             material.mom3 = 4.0

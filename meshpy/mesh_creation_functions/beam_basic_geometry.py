@@ -101,10 +101,11 @@ def create_beam_mesh_line(
     rotation = Rotation.from_basis(t1, t2)
 
     def get_beam_geometry(parameter_a, parameter_b):
-        """Return a function for the position and rotation along the beam
-        axis."""
+        """Return a function for the position along the beams axis."""
 
         def beam_function(xi):
+            """Return a point on the beams axis for a given parameter
+            coordinate xi."""
             point_a = start_point + parameter_a * direction
             point_b = start_point + parameter_b * direction
             return (0.5 * (1 - xi) * point_a + 0.5 * (1 + xi) * point_b, rotation)
@@ -259,6 +260,8 @@ def create_beam_mesh_arc_segment_via_axis(
         axis."""
 
         def beam_function(xi):
+            """Return a point and the triad on the beams axis for a given
+            parameter coordinate xi."""
             phi = 0.5 * (xi + 1) * (beta - alpha) + alpha
             arc_rotation = Rotation(axis, phi)
             rot = arc_rotation * start_rotation

@@ -58,7 +58,7 @@ repos:
     hooks:
       - id: interrogate
         name: Run interrogate (linter for docstrings)
-        args: [--fail-under=95, --ignore-init-module, --style=google, -vv, meshpy/]
+        args: [--fail-under=100, --ignore-init-module, --style=google, -vv]
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.13.0
     hooks:

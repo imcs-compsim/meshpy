@@ -92,9 +92,13 @@ class TestHeaderFunctions(unittest.TestCase):
         compare_test_result(self, input_file.get_string(header=False, check_nox=False))
 
     def test_header_functions_static_time(self):
-        """Test the time setting options in the static header functions."""
+        """Test the time setting options in the static header functions.
+
+        TODO: Replace this with pytest fixtures
+        """
 
         def test_time_values(additional_identifier, kwargs):
+            """Test the time setting options in the static header functions."""
             mpy.set_default_values()
             input_file = InputFile()
             set_header_static(input_file, **kwargs)

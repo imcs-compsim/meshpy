@@ -142,6 +142,7 @@ def create_beam_mesh_curve(
         rp_positive = rp
 
         def rp(t):
+            """Return the inverted tangent vector."""
             return -(rp_positive(t))
 
     def ds(t):

@@ -879,6 +879,7 @@ class InputFile(Mesh):
         # and elements, so the couplings can decide which DOFs they couple,
         # depending on the type of the connected beam element.
         def get_number_of_coupling_conditions(key):
+            """Return the number of coupling conditions in the mesh."""
             if (key, mpy.geo.point) in all_boundary_conditions.keys():
                 return len(all_boundary_conditions[key, mpy.geo.point])
             else:
@@ -935,10 +936,11 @@ class InputFile(Mesh):
         return lines
 
     def get_string(self, **kwargs):
-        """Return the lines of the input file as string."""
+        """Return the lines of the input file as a joined string."""
         return "\n".join(self.get_dat_lines(**kwargs))
 
     def __str__(self, **kwargs):
+        """Return the string representation of this input file."""
         return self.get_string(**kwargs)
 
     def _get_header(self, add_script):
