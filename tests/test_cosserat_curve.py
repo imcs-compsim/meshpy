@@ -32,6 +32,7 @@
 
 import json
 import os
+from pathlib import Path
 
 import numpy as np
 import pyvista as pv
@@ -45,11 +46,6 @@ from meshpy.cosserat_curve.warping_along_cosserat_curve import (
     warp_mesh_along_curve,
 )
 from meshpy.mesh_creation_functions import create_beam_mesh_helix
-
-from .utils import (
-    compare_test_result_pytest,
-    compare_vtk_pytest,
-)
 
 
 def load_cosserat_curve_from_file(reference_file_directory):
@@ -126,16 +122,21 @@ def test_cosserat_curve_translate_and_rotate(
 
 
 def test_cosserat_curve_vtk_representation(
-    tmp_path, reference_file_directory, current_test_name
+    tmp_path, reference_file_directory, current_test_name, compare_results
 ):
     """Test the vtk representation of the Cosserat curve."""
 
-    result_name = os.path.join(tmp_path, current_test_name + ".vtu")
+    reference_path = Path(
+        os.path.join(reference_file_directory, current_test_name + ".vtu")
+    )
+    result_path = Path(os.path.join(tmp_path, current_test_name + ".vtu"))
+
     curve = load_cosserat_curve_from_file(reference_file_directory)
-    pv.UnstructuredGrid(curve.get_pyvista_polyline()).save(result_name)
-    compare_vtk_pytest(
-        os.path.join(reference_file_directory, current_test_name + ".vtu"),
-        result_name,
+    pv.UnstructuredGrid(curve.get_pyvista_polyline()).save(result_path)
+
+    assert compare_results(
+        reference_path,
+        result_path,
         rtol=1e-8,
         atol=1e-8,
     )
@@ -200,7 +201,9 @@ def test_cosserat_mesh_transformation(reference_file_directory, current_test_nam
     assert np.allclose(rot_ref, rot_np, rtol=1e-14)
 
 
-def test_cosserat_curve_mesh_warp(reference_file_directory):
+def test_cosserat_curve_mesh_warp(
+    reference_file_directory, get_string, current_test_name, compare_results
+):
     """Warp a balloon along a centerline."""
 
     # Load the curve
@@ -222,14 +225,19 @@ def test_cosserat_curve_mesh_warp(reference_file_directory):
         ),
     )
 
-    # Compare with the reference result
-    compare_test_result_pytest(
-        mesh.get_string(check_nox=False, header=False), rtol=1e-10
+    reference_string = get_string(
+        reference_file_directory / (current_test_name + ".dat")
     )
+    result_string = mesh.get_string(check_nox=False, header=False)
+
+    assert compare_results(reference_string, result_string, rtol=1e-10)
 
 
 def test_cosserat_curve_mesh_warp_transform_boundary_conditions(
     reference_file_directory,
+    get_string,
+    current_test_name,
+    compare_results,
 ):
     """Test the transform boundary creation function."""
 
@@ -254,7 +262,9 @@ def test_cosserat_curve_mesh_warp_transform_boundary_conditions(
         ),
     )
 
-    # Compare with the reference result
-    compare_test_result_pytest(
-        mesh.get_string(check_nox=False, header=False), rtol=1e-8, atol=1e-8
+    reference_string = get_string(
+        reference_file_directory / (current_test_name + ".dat")
     )
+    result_string = mesh.get_string(check_nox=False, header=False)
+
+    assert compare_results(reference_string, result_string, rtol=1e-8, atol=1e-8)
