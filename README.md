@@ -86,16 +86,21 @@ tests with 4C
 export MESHPY_FOUR_C_EXE=path_to_4C
 ```
 
-To check if everything worked as expected, run the tests
+To check if everything worked as expected, run the standard tests with
 ```bash
-cd <path_to_meshpy>/tests
-python testing_main.py
+pytest
 ```
 
-Also run the performance tests (the reference time values and host name might have to be adapted in the file `<path_to_meshpy>/tests/performance_testing.py`)
+Further tests can be added with the following flags: `--4C`, `--ArborX`, `--CubitPy`, `--performance-tests`.
+These can be arbitrarily combined, for example
 ```bash
-cd <path_to_meshpy>/tests
-python performance_testing.py
+pytest --4C --CubityPy
+```
+executes the standard tests, the 4C tests and the CubitPy tests. Note that the reference time values for the performance tests might not suite your system.
+
+Finally, the base tests can be deactivated with `--exclude-standard-tests`. For example to just run the CubitPy tests execute
+```bash
+pytest --CubitPy --exclude-standard-tests
 ```
 
 Before you are ready to contribute to MeshPy, please make sure to install the `pre-commit hook` within the python environment to follow our style guides:
@@ -122,8 +127,8 @@ cd <path_to_meshpy>/build/geometric_search
 cmake ../../meshpy/geometric_search/src/
 make -j4
 ```
+
 If the ArborX extension is working correctly can be checked by running the geometric search tests
 ```bash
-cd <path_to_meshpy>/tests
-python testing_geometric_search.py
+pytest --ArborX
 ```
