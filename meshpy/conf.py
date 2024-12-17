@@ -152,6 +152,7 @@ class MeshPy(object):
         self.vtk_type = VTKType
 
     def set_default_values(self):
+        """Set the configuration to the default values."""
         # Version information.
         self.git_sha = None
         self.git_date = None

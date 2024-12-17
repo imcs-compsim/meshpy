@@ -28,5 +28,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
+"""This module contains the MeshPy tutorials."""
 
 from .tutorial import meshpy_tutorial
