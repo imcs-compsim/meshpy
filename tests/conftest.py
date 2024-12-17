@@ -46,24 +46,38 @@ def pytest_addoption(parser: Parser) -> None:
     """
 
     parser.addoption(
-        "--4C_ArborX",
+        "--4C",
         action="store_true",
         default=False,
-        help="Execute 4C and ArborX based tests.",
+        help="Execute standard and 4C based tests.",
+    )
+
+    parser.addoption(
+        "--ArborX",
+        action="store_true",
+        default=False,
+        help="Execute standard and ArborX based tests.",
     )
 
     parser.addoption(
         "--CubitPy",
         action="store_true",
         default=False,
-        help="Execute CubitPy based tests.",
+        help="Execute standard and CubitPy based tests.",
     )
 
     parser.addoption(
-        "--performance",
+        "--Performance",
         action="store_true",
         default=False,
-        help="Execute performance tests.",
+        help="Execute standard and performance tests.",
+    )
+
+    parser.addoption(
+        "--exclude-standard-tests",
+        action="store_true",
+        default=False,
+        help="Exclude standard tests.",
     )
 
 
@@ -71,10 +85,12 @@ def pytest_collection_modifyitems(config: Config, items: list) -> None:
     """Filter tests based on their markers and provided command line options.
 
     Currently configured options:
-        `pytest`: execute tests with no markers
-        `pytest --4C_ArborX`: execute tests with the `fourc_arborx` marker
-        `pytest --CubitPy`: execute tests with the `cubitpy` marker
-        `pytest --performance`: execute tests with the `performance` marker
+        `pytest`: Execute standard tests with no markers
+        `pytest --4C`: Execute standard tests and tests with the `fourc` marker
+        `pytest --ArborX`: Execute standard tests and tests with the `arborx` marker
+        `pytest --CubitPy`: Execute standard tests and tests with the `cubitpy` marker
+        `pytest --Performance`: Execute standard tests and tests with the `performance` marker
+        `pytest --exclude-standard-tests`: Execute tests with any other marker and exclude the standard unmarked tests
 
     Args:
         config: Pytest config
@@ -88,16 +104,19 @@ def pytest_collection_modifyitems(config: Config, items: list) -> None:
         # Get all set markers for current test (e.g. `fourc_arborx`, `cubitpy`, `performance`)
         markers = [marker.name for marker in item.iter_markers()]
 
-        if config.getoption("--4C_ArborX") and "fourc_arborx" in markers:
+        if config.getoption("--4C") and "fourc" in markers:
+            selected_tests.append(item)
+
+        if config.getoption("--ArborX") and "arborx" in markers:
             selected_tests.append(item)
 
         if config.getoption("--CubitPy") and "cubitpy" in markers:
             selected_tests.append(item)
 
-        if config.getoption("--performance") and "performance" in markers:
+        if config.getoption("--Performance") and "performance" in markers:
             selected_tests.append(item)
 
-        if not markers:
+        if not markers and not config.getoption("--exclude-standard-tests"):
             selected_tests.append(item)
 
     deselected_tests = list(set(items) - set(selected_tests))
@@ -133,5 +152,5 @@ def current_test_name(request: pytest.FixtureRequest) -> str:
 
 
 @pytest.fixture
-def compare_result_file(reference, result, rtol, atol):
+def compare_results(reference, result, rtol, atol):
     raise NotImplementedError

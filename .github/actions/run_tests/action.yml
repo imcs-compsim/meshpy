@@ -46,7 +46,5 @@ runs:
         pip list
         cd tests
         coverage run --rcfile=${{ inputs.coverage_config }} testing_main.py
-        coverage html
-        coverage report
-        coverage-badge -o htmlcov/coverage.svg
+        cd ..
         pytest

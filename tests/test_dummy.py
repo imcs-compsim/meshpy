@@ -35,7 +35,9 @@ from pathlib import Path
 import pytest
 
 
-def test_dummy(reference_file_directory: Path, tmp_path: Path, current_test_name: str):
+def test_dummy(
+    reference_file_directory: Path, tmp_path: Path, current_test_name: str
+) -> None:
     """Dummy test to demonstrate pytest fixtures.
 
     Args:
@@ -58,9 +60,16 @@ def test_dummy(reference_file_directory: Path, tmp_path: Path, current_test_name
     assert True
 
 
-@pytest.mark.fourc_arborx
-def test_4C_ArborX() -> None:
-    """Test with 4C and ArborX."""
+@pytest.mark.fourc
+def test_4C() -> None:
+    """Test with 4C."""
+
+    assert True
+
+
+@pytest.mark.arborx
+def test_ArborX() -> None:
+    """Test with ArborX."""
 
     assert True
 
