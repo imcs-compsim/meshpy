@@ -72,7 +72,7 @@ def pytest_addoption(parser: Parser) -> None:
     )
 
     parser.addoption(
-        "--Performance",
+        "--performance-tests",
         action="store_true",
         default=False,
         help="Execute standard and performance tests.",
@@ -94,7 +94,7 @@ def pytest_collection_modifyitems(config: Config, items: list) -> None:
         `pytest --4C`: Execute standard tests and tests with the `fourc` marker
         `pytest --ArborX`: Execute standard tests and tests with the `arborx` marker
         `pytest --CubitPy`: Execute standard tests and tests with the `cubitpy` marker
-        `pytest --Performance`: Execute standard tests and tests with the `performance` marker
+        `pytest --performance-tests`: Execute standard tests and tests with the `performance` marker
         `pytest --exclude-standard-tests`: Execute tests with any other marker and exclude the standard unmarked tests
 
     Args:
@@ -118,7 +118,7 @@ def pytest_collection_modifyitems(config: Config, items: list) -> None:
         if config.getoption("--CubitPy") and "cubitpy" in markers:
             selected_tests.append(item)
 
-        if config.getoption("--Performance") and "performance" in markers:
+        if config.getoption("--performance-tests") and "performance" in markers:
             selected_tests.append(item)
 
         if not markers and not config.getoption("--exclude-standard-tests"):
