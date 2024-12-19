@@ -67,6 +67,7 @@ class Element(BaseMeshItemFull):
             VolumeHEX27,
             VolumeTET4,
             VolumeTET10,
+            VolumeWEDGE6,
         )
 
         # Split up input line and get pre node string.
@@ -91,6 +92,13 @@ class Element(BaseMeshItemFull):
         # Depending on the number of nodes chose which solid element to return.
         n_nodes = len(element_nodes)
         match n_nodes:
+            case 6:
+                return VolumeWEDGE6(
+                    nodes=element_nodes,
+                    dat_pre_nodes=dat_pre_nodes,
+                    dat_post_nodes=dat_post_nodes,
+                    comments=input_line[1],
+                )
             case 8:
                 return VolumeHEX8(
                     nodes=element_nodes,
