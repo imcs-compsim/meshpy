@@ -28,25 +28,38 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""This module defines classes and functions for the interaction of MeshPy with
-4C."""
+"""This file contains the definition of the beam to beam contact condtion for
+4c."""
 
-from .beam_potential import BeamPotential
-from .beam_to_beam_contact import BeamtoBeamContactCondition
-from .dbc_monitor import dbc_monitor_to_input, dbc_monitor_to_input_all_values
-from .run_four_c import run_four_c
-from .solid_shell_thickness_direction import (
-    set_solid_shell_thickness_direction,
-    visualize_third_parameter_direction_hex8,
-)
+# MeshPy modules
+from ..boundary_condition import BoundaryCondition
+from ..conf import mpy
+from ..geometry_set import GeometrySet
 
-# Define the items that will be exported by default.
-__all__ = [
-    "dbc_monitor_to_input_all_values",
-    "BeamPotential",
-    "dbc_monitor_to_input",
-    "set_solid_shell_thickness_direction",
-    "visualize_third_parameter_direction_hex8",
-    "run_four_c",
-    "BeamtoBeamContactCondition",
-]
+
+class BeamtoBeamContactCondition(BoundaryCondition):
+    """This object represents the beam to beam contact condition in 4C.
+
+    It sets the conditions to enable contact between beams.
+    """
+
+    def __init__(
+        self,
+        geometry_set,
+        ID,
+        **kwargs,
+    ):
+        """Initialize the object.
+
+        Args
+        ----
+        geometry_set: GeometrySet
+            Geometry that this boundary condition acts on.
+        """
+
+        super().__init__(
+            geometry_set,
+            "COUPLING_ID {}".format(ID),
+            bc_type=mpy.bc.beam_to_beam_interaction,
+            **kwargs,
+        )
