@@ -37,6 +37,7 @@ from utils import compare_test_result
 
 from meshpy import (
     InputFile,
+    InputSection,
     MaterialString,
     MaterialStVenantKirchhoff,
     Rotation,
@@ -44,6 +45,7 @@ from meshpy import (
 from meshpy.mesh_creation_functions import (
     add_geomdl_nurbs_to_mesh,
     create_nurbs_brick,
+    create_nurbs_cylindrical_shell_sector,
     create_nurbs_flat_plate_2d,
     create_nurbs_hemisphere_surface,
     create_nurbs_hollow_cylinder_segment_2d,
@@ -61,6 +63,37 @@ class TestNurbsMeshCreationFunction(unittest.TestCase):
         # Create the surface of a quarter of a hollow cylinder
         surf_obj = create_nurbs_hollow_cylinder_segment_2d(
             1.74, 2.46, np.pi * 5 / 6, n_ele_u=2, n_ele_v=3
+        )
+
+        # Create input file
+        input_file = InputFile()
+
+        # Add material
+        mat = MaterialStVenantKirchhoff(youngs_modulus=50, nu=0.19, density=5.3e-7)
+
+        # Create patch set
+        element_description = (
+            "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
+        )
+
+        patch_set = add_geomdl_nurbs_to_mesh(
+            input_file,
+            surf_obj,
+            material=mat,
+            element_description=element_description,
+        )
+
+        input_file.add(patch_set)
+
+        # Compare with the reference file
+        compare_test_result(self, input_file.get_string(header=False))
+
+    def test_nurbs_cylindrical_shell_sector(self):
+        """Test the creation of a 3-dimensional cylindrical shell sector."""
+
+        # Create the surface of a quarter of a hollow cylinder
+        surf_obj = create_nurbs_cylindrical_shell_sector(
+            1, np.pi / 3, 1, n_ele_u=4, n_ele_v=3
         )
 
         # Create input file
