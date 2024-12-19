@@ -246,6 +246,10 @@ class GeometrySet(GeometrySetBase):
                 "Currently GeometrySet are only implemented for points and lines"
             )
 
+    def get_geometry_objects(self):
+        """Return the objects of the specified geometry type."""
+        return self.geometry_objects[self.geometry_type]
+
 
 class GeometrySetNodes(GeometrySetBase):
     """Geometry set which is defined by nodes and not explicit geometry."""
