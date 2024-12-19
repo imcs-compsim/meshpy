@@ -32,7 +32,6 @@
 4c."""
 
 # MeshPy modules
-from ..conf import mpy
 from ..boundary_condition import BoundaryCondition
 from ..conf import mpy
 from ..geometry_set import GeometrySet
@@ -40,6 +39,7 @@ from ..geometry_set import GeometrySet
 
 class BeamtoBeamContactCondition(BoundaryCondition):
     """This object represents the beam to beam contact condition in 4C.
+
     It sets the conditions to enable contact between beams.
     """
 

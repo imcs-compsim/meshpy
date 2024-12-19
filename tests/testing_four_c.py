@@ -46,8 +46,13 @@ from meshpy import (
     MaterialReissner,
     Rotation,
     mpy,
+    set_beam_contact_runtime_output,
+    set_beam_contact_section,
+    set_header_static,
+    set_runtime_output,
 )
 from meshpy.four_c.beam_potential import BeamPotential
+from meshpy.four_c.beam_to_beam_contact import BeamtoBeamContactCondition
 from meshpy.four_c.dbc_monitor import linear_time_transformation
 from meshpy.four_c.locsys_condition import LocSysCondition
 from meshpy.four_c.solid_shell_thickness_direction import (
@@ -411,6 +416,133 @@ class Test4C(unittest.TestCase):
         )
         self.assertEqual(time_result.tolist(), time_trans.tolist())
         self.assertEqual(force_trans.tolist(), force_result.tolist())
+
+    def test_meshpy_beam_contact_example(self):
+        """Small test example to show how a beam contact example with beam
+        penalty contact can be set up.
+
+        The test case consists of two beams: one beam is allocated along the x-axis and
+        the other beam is located along the y-axis.
+        The beam along the y-axis is placed above the other beam by an additional offset in z-Directions.
+        Due to prescribed displacements at the tips of beam in y-axis, the two beams get in contact around the origin.
+        """
+
+        # Define Parameters for example
+
+        # length of the beam
+        l_beam = 2
+
+        # radius of beam
+        r_beam = 0.1
+
+        # define number of elements of beam
+        n_ele = 5
+
+        # starting height of beam 2
+        h = 0.25
+
+        # Set up mesh and material.
+        mesh = InputFile()
+        mat = MaterialReissner(radius=0.1, youngs_modulus=1)
+
+        # Create a beam in x-axis.
+        beam_x = create_beam_mesh_line(
+            mesh,
+            Beam3rHerm2Line3,
+            mat,
+            [-l_beam / 2, 0, 0],
+            [l_beam / 2, 0, 0],
+            n_el=n_ele,
+        )
+
+        # Get the starting and end node for a Dirichlet condition.
+        dirichlet_nodes_beam_x = beam_x["start"]
+        dirichlet_nodes_beam_x.add(beam_x["end"])
+
+        # Fix start and end nodes of beam 1.
+        mesh.add(
+            BoundaryCondition(
+                dirichlet_nodes_beam_x,
+                "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+                bc_type=mpy.bc.dirichlet,
+            )
+        )
+
+        # Create a second beam in y-axis.
+        beam_y = create_beam_mesh_line(
+            mesh,
+            Beam3rHerm2Line3,
+            mat,
+            [0, -l_beam / 2, h],
+            [0, l_beam / 2, h],
+            n_el=n_ele,
+        )
+
+        # Get the starting and end node for a Dirichlet condition.
+        dirichlet_nodes_beam_y = beam_y["start"]
+        dirichlet_nodes_beam_y.add(beam_y["end"])
+
+        # Create a linear interpolation function with the displacment.
+        fun = Function(
+            "SYMBOLIC_FUNCTION_OF_SPACE_TIME -disp\n"
+            f"VARIABLE 0 NAME disp TYPE linearinterpolation NUMPOINTS 3 TIMES 0 1 1000.0 VALUES 0.0 {h+r_beam} {h+r_beam}"
+        )
+        mesh.add(fun)
+
+        # Apply Dirichlet conditions to move the beam endings down.
+        mesh.add(
+            BoundaryCondition(
+                dirichlet_nodes_beam_y,
+                "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 1 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0",
+                bc_type=mpy.bc.dirichlet,
+                format_replacement=[fun],
+            )
+        )
+
+        # Add nodes of beam 1 with Coupling ID 1.
+        mesh.add(
+            BeamtoBeamContactCondition(
+                beam_x["line"],
+                1,
+            )
+        )
+
+        # Add nodes of beam 2 with same Coupling ID.
+        mesh.add(
+            BeamtoBeamContactCondition(
+                beam_y["line"],
+                1,
+            )
+        )
+
+        # Add the standard,static header.
+        set_header_static(
+            mesh,
+            time_step=0.05,
+            n_steps=24,
+            total_time=1.2,
+            write_stress="Yes",
+            tol_residuum=1e-6,
+            tol_increment=1e-6,
+        )
+
+        # Set the parameters for beam to beam contact.
+        set_beam_contact_section(
+            mesh,
+            btb_penalty=50,
+            penalty_regularization_g0=r_beam * 0.02,
+            binning_size=5,
+            bounding_box="-3 -3 -3 3 3 3",
+        )
+
+        # Add normal runtime output.
+        set_runtime_output(input_file=mesh)
+
+        # Add special runtime output for beam interaction.
+        set_beam_contact_runtime_output(mesh, every_iteration=False)
+
+        # Compare with the reference solution.
+        compare_test_result(self, mesh.get_string(header=False, check_nox=False))
 
 
 if __name__ == "__main__":

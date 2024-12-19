@@ -537,9 +537,9 @@ def set_header_static(
     input_file.nox_xml = nox_xml
 
 
-def set_binning_strategy(input_file, *, binning_size=None, bounding_box=None,**kwargs):
+def set_binning_strategy(input_file, *, binning_size=None, bounding_box=None, **kwargs):
     """Set Binning options in input file.
-    
+
     Args
     ----
     input_file:
@@ -598,8 +598,8 @@ def set_beam_interaction(
 
 
 def set_beam_contact_runtime_output(inputfile, *, every_iteration=False, **kwargs):
-    """
-    output the contact forces and gaps with runtime output.
+    """Output the contact forces and gaps with runtime output.
+
     input_file:
         Input file that the options will be added to.
     every_iteration: int
