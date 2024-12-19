@@ -25,9 +25,9 @@ NLNSOL                                fullnewton
 PREDICT                               TangDis
 PRESTRESS                             none
 PRESTRESSTIME                         0
-TIMESTEP                              0.5
-NUMSTEP                               21
-MAXTIME                               10.5
+TIMESTEP                              0.1
+NUMSTEP                               5
+MAXTIME                               0.5
 LOADLIN                               no
 ------------------------------------------------------------------------SOLVER 1
 NAME                                  Structure_Solver
@@ -43,10 +43,12 @@ Outer Iteration StatusTest          = Yes
 Linear Solver Details               = Yes
 Test Details                        = Yes
 Debug                               = No
---------------------------------------------------------------RESULT DESCRIPTION
-STRUCTURE DIS structure NODE 21 QUANTITY dispx VALUE -4.09988307566066690e-01 TOLERANCE 1e-10
-STRUCTURE DIS structure NODE 21 QUANTITY dispy VALUE  9.93075098427816383e-01 TOLERANCE 1e-10
-STRUCTURE DIS structure NODE 21 QUANTITY dispz VALUE  6.62050065618549843e-01 TOLERANCE 1e-10
+--------------------------------------------------------IO/MONITOR STRUCTURE DBC
+PRECISION_FILE                        10
+PRECISION_SCREEN                      5
+FILE_TYPE                             csv
+WRITE_HEADER                          yes
+INTERVAL_STEPS                        1
 ----------------------------------------------------------STRUCT NOX/Status Test
 XML File                            = NOT_DEFINED
 -----------------------------------------------------------------------MATERIALS
@@ -54,17 +56,33 @@ MAT 1 MAT_BeamReissnerElastHyper YOUNG 100.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA
 --------------------------------------------------------------------------FUNCT1
 COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t
 --------------------------------------------------------------------------FUNCT2
-SYMBOLIC_FUNCTION_OF_TIME nbc_value
-            VARIABLE 0 NAME nbc_value TYPE linearinterpolation NUMPOINTS 2 TIMES 1.0 11.0 VALUES 1.0 0.0
+SYMBOLIC_FUNCTION_OF_SPACE_TIME a
+VARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 4 TIMES 0 0.5 1.0 9999999999.0 VALUES 0.0 1.0 0.0 0.0
 --------------------------------------------------DESIGN POINT DIRICH CONDITIONS
-DPOINT 1
-E 1 - NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0
--------------------------------------------------DESIGN POINT NEUMANN CONDITIONS
-DPOINT 1
-E 2 - NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0.60082018126 0.52746233233 0.35164155489 0 0 0 0 0 0 FUNCT 2 2 2 0 0 0 0 0 0
+DPOINT 11
+E 1 - NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 1 1 1 0 0 0 0 0 0
+E 2 - NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0.14694631307311828 0 0 0 0 0 0 FUNCT 0 0 2 0 0 0 0 0 0 TAG monitor_reaction
+E 3 - NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0.23776412907378838 0 0 0 0 0 0 FUNCT 0 0 2 0 0 0 0 0 0 TAG monitor_reaction
+E 4 - NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0.2377641290737884 0 0 0 0 0 0 FUNCT 0 0 2 0 0 0 0 0 0 TAG monitor_reaction
+E 5 - NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0.1469463130731183 0 0 0 0 0 0 FUNCT 0 0 2 0 0 0 0 0 0 TAG monitor_reaction
+E 6 - NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 3.061616997868383e-17 0 0 0 0 0 0 FUNCT 0 0 2 0 0 0 0 0 0 TAG monitor_reaction
+E 7 - NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 -0.14694631307311826 0 0 0 0 0 0 FUNCT 0 0 2 0 0 0 0 0 0 TAG monitor_reaction
+E 8 - NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 -0.23776412907378838 0 0 0 0 0 0 FUNCT 0 0 2 0 0 0 0 0 0 TAG monitor_reaction
+E 9 - NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 -0.2377641290737884 0 0 0 0 0 0 FUNCT 0 0 2 0 0 0 0 0 0 TAG monitor_reaction
+E 10 - NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 -0.14694631307311834 0 0 0 0 0 0 FUNCT 0 0 2 0 0 0 0 0 0 TAG monitor_reaction
+E 11 - NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 -6.123233995736766e-17 0 0 0 0 0 0 FUNCT 0 0 2 0 0 0 0 0 0 TAG monitor_reaction
 -------------------------------------------------------------DNODE-NODE TOPOLOGY
 NODE 1 DNODE 1
-NODE 21 DNODE 2
+NODE 3 DNODE 2
+NODE 5 DNODE 3
+NODE 7 DNODE 4
+NODE 9 DNODE 5
+NODE 11 DNODE 6
+NODE 13 DNODE 7
+NODE 15 DNODE 8
+NODE 17 DNODE 9
+NODE 19 DNODE 10
+NODE 21 DNODE 11
 ---------------------------------------------------------------------NODE COORDS
 NODE 1 COORD 0 0 0
 NODE 2 COORD 0.1 0 0

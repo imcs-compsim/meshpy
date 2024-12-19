@@ -32,7 +32,7 @@
 4C."""
 
 from .beam_potential import BeamPotential
-from .dbc_monitor import dbc_monitor_to_input
+from .dbc_monitor import dbc_monitor_to_input, dbc_monitor_to_input_all_values
 from .run_four_c import run_four_c
 from .solid_shell_thickness_direction import (
     set_solid_shell_thickness_direction,
@@ -41,6 +41,7 @@ from .solid_shell_thickness_direction import (
 
 # Define the items that will be exported by default.
 __all__ = [
+    "dbc_monitor_to_input_all_values",
     "BeamPotential",
     "dbc_monitor_to_input",
     "set_solid_shell_thickness_direction",

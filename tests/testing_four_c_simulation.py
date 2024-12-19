@@ -31,7 +31,6 @@
 """This script is used to simulate 4C input files created with MeshPy."""
 
 import os
-import shutil
 import unittest
 
 import numpy as np
@@ -46,6 +45,7 @@ from meshpy import (
     Beam3rHerm2Line3,
     BoundaryCondition,
     Function,
+    GeometrySet,
     InputFile,
     InputSection,
     MaterialReissner,
@@ -55,9 +55,39 @@ from meshpy import (
     set_header_static,
     set_runtime_output,
 )
-from meshpy.four_c import dbc_monitor_to_input, run_four_c
+from meshpy.four_c import (
+    dbc_monitor_to_input,
+    dbc_monitor_to_input_all_values,
+    run_four_c,
+)
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
+from meshpy.utility import check_node_by_coordinate
+
+
+def create_cantilever_model(n_steps, time_step=0.5):
+    """Create a simple cantilever model.
+
+    Args
+    ----
+    n_steps: int
+        Number of simulation steps.
+    time_step: float
+        Time step size.
+    """
+
+    mpy.set_default_values()
+    input_file = InputFile()
+    set_header_static(input_file, time_step=time_step, n_steps=n_steps)
+    input_file.add("--IO\nOUTPUT_BIN yes\nSTRUCT_DISP yes", option_overwrite=True)
+    ft = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+    input_file.add(ft)
+    mat = MaterialReissner(youngs_modulus=100.0, radius=0.1)
+    beam_set = create_beam_mesh_line(
+        input_file, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
+    )
+
+    return input_file, beam_set
 
 
 class TestFullFourC(unittest.TestCase):
@@ -582,30 +612,18 @@ class TestFullFourC(unittest.TestCase):
         self.run_four_c_test("rotated_beam_axis", input_file)
         self.run_four_c_test("rotated_beam_axis", input_file, nox_xml_file="xml_name")
 
-    def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary(self):
-        """First simulate a cantilever beam with Dirichlet boundary conditions
-        and then apply those as Neumann boundaries."""
+    def xtest_four_c_simulation_dbc_monitor_to_input(self, initial_run_name):
+        """Common driver to simulate a cantilever beam with Dirichlet boundary
+        conditions and then apply those as Neumann boundaries.
 
-        def create_model(n_steps):
-            """Create the cantilver model."""
-
-            mpy.set_default_values()
-            input_file = InputFile()
-            set_header_static(input_file, time_step=0.5, n_steps=n_steps)
-            input_file.add(
-                "--IO\nOUTPUT_BIN yes\nSTRUCT_DISP yes", option_overwrite=True
-            )
-            ft = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
-            input_file.add(ft)
-            mat = MaterialReissner(youngs_modulus=100.0, radius=0.1)
-            beam_set = create_beam_mesh_line(
-                input_file, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
-            )
-
-            return input_file, beam_set
+        This can be used to test the two different functions
+        by selecting one of the appropriate initial run_names:
+            test_cantilever_w_dbc_monitor_to_input
+            test_cantilever_w_dbc_monitor_to_input_all_values
+        """
 
         # Create and run the initial simulation.
-        initial_simulation, beam_set = create_model(n_steps=2)
+        initial_simulation, beam_set = create_cantilever_model(n_steps=2)
         initial_simulation.add(
             BoundaryCondition(
                 beam_set["start"],
@@ -636,14 +654,14 @@ class TestFullFourC(unittest.TestCase):
             self,
             initial_simulation.get_string(check_nox=False, header=False),
             additional_identifier="initial",
+            reference_file_base_name="test_four_c_simulation_dbc_monitor_to_input",
         )
 
         # Run the simulation in 4C
-        initial_run_name = "dbc_to_nbc_initial"
         self.run_four_c_test(initial_run_name, initial_simulation)
 
         # Create and run the second simulation.
-        restart_simulation, beam_set = create_model(n_steps=21)
+        restart_simulation, beam_set = create_cantilever_model(n_steps=21)
         restart_simulation.add(
             BoundaryCondition(
                 beam_set["start"],
@@ -652,22 +670,41 @@ class TestFullFourC(unittest.TestCase):
             )
         )
         function_nbc = Function(
-            """SYMBOLIC_FUNCTION_OF_TIME nbc_value
-            VARIABLE 0 NAME nbc_value TYPE linearinterpolation NUMPOINTS 2 """
+            """SYMBOLIC_FUNCTION_OF_TIME nbc_value\nVARIABLE 0 NAME nbc_value TYPE linearinterpolation NUMPOINTS 2 """
             "TIMES 1.0 11.0 VALUES 1.0 0.0"
         )
         restart_simulation.add(function_nbc)
-        dbc_monitor_to_input(
-            restart_simulation,
-            os.path.join(
-                testing_temp,
-                initial_run_name,
-                f"{initial_run_name}_monitor_dbc",
-                f"{initial_run_name}_102_monitor_dbc.csv",
-            ),
-            n_dof=9,
-            function=function_nbc,
-        )
+
+        if initial_run_name == "test_cantilever_w_dbc_monitor_to_input":
+            dbc_monitor_to_input(
+                restart_simulation,
+                os.path.join(
+                    testing_temp,
+                    initial_run_name,
+                    f"{initial_run_name}_monitor_dbc",
+                    f"{initial_run_name}_102_monitor_dbc.csv",
+                ),
+                n_dof=9,
+                function=function_nbc,
+            )
+        elif initial_run_name == "test_cantilever_w_dbc_monitor_to_input_all_values":
+            dbc_monitor_to_input_all_values(
+                restart_simulation,
+                os.path.join(
+                    testing_temp,
+                    initial_run_name,
+                    f"{initial_run_name}_monitor_dbc",
+                    f"{initial_run_name}_102_monitor_dbc.csv",
+                ),
+                n_dof=9,
+                time_span=[10 * 0.5, 21 * 0.5],
+                functions=[function_nbc, function_nbc, function_nbc],
+            )
+        else:
+            raise ValueError(
+                initial_run_name + " is not yet implemented for this test case."
+            )
+
         restart_simulation.add(
             """--RESULT DESCRIPTION
             STRUCTURE DIS structure NODE 21 QUANTITY dispx VALUE -4.09988307566066690e-01 TOLERANCE 1e-10
@@ -681,14 +718,163 @@ class TestFullFourC(unittest.TestCase):
             self,
             restart_simulation.get_string(check_nox=False, header=False),
             additional_identifier="restart",
+            reference_file_base_name="test_four_c_simulation_dbc_monitor_to_input",
         )
 
         # Run the restart simulation
         self.run_four_c_test(
-            "dbc_to_nbc_restart",
+            f"{initial_run_name}_restart",
             restart_simulation,
             restart=[2, f"../{initial_run_name}/{initial_run_name}"],
         )
+
+    def test_four_c_simulation_dbc_monitor_to_input(self):
+        """First simulate a cantilever beam with Dirichlet boundary conditions
+        and then apply those as Neumann boundaries.
+
+        This function explictly tests dbc_monitor_to_input.
+        """
+
+        self.xtest_four_c_simulation_dbc_monitor_to_input(
+            "test_cantilever_w_dbc_monitor_to_input"
+        )
+
+    def test_four_c_simulation_dbc_monitor_to_input_all_values(self):
+        """First simulate a cantilever beam with Dirichlet boundary conditions
+        and then apply those as Neumann boundaries.
+
+        For the application of the boundary conditions, the last values
+        for the force are used. This function explictly tests
+        dbc_monitor_to_input_all_values.
+        """
+        self.xtest_four_c_simulation_dbc_monitor_to_input(
+            "test_cantilever_w_dbc_monitor_to_input_all_values"
+        )
+
+    def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_values(
+        self,
+    ):
+        """First simulate a cantilever beam with Dirichlet boundary conditions
+        and then apply those as Neumann boundaries.
+
+        For the application of the boundary conditions, all values of
+        the force are used.
+        """
+
+        # Define Parameters.
+        n_steps = 5  # number of simulation steps
+        dt = 0.1  # time step size from create_cantilever_model
+
+        # Create and run the initial simulation.
+        initial_simulation, beam_set = create_cantilever_model(n_steps, dt)
+
+        # Add simple lienar interpolation function.
+        initial_simulation.add(
+            Function(
+                "SYMBOLIC_FUNCTION_OF_SPACE_TIME a\nVARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 4 TIMES 0 {} {} 9999999999.0 VALUES 0.0 1.0 0.0 0.0".format(
+                    dt * n_steps, 2 * dt * n_steps
+                )
+            )
+        )
+
+        # Apply displacments to all nodes.
+        for i, node in enumerate(beam_set["line"].get_all_nodes()):
+            # do not constraint middle nodes
+            if not node.is_middle_node:
+                # Set Dirichlet conditions at one end.
+                if check_node_by_coordinate(node, 0, 0):
+                    initial_simulation.add(
+                        BoundaryCondition(
+                            GeometrySet(node),
+                            "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 1 1 1 0 0 0 0 0 0",
+                            bc_type=mpy.bc.dirichlet,
+                        )
+                    )
+                else:
+                    # Add small displacment at other end.
+                    initial_simulation.add(
+                        BoundaryCondition(
+                            GeometrySet(node),
+                            "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 {} 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0 TAG monitor_reaction".format(
+                                0.25 * np.sin(node.coordinates[0] * np.pi),
+                                "2",
+                            ),
+                            bc_type=mpy.bc.dirichlet,
+                        )
+                    )
+
+        # Add DB-monitor header.
+        initial_simulation.add(
+            """
+            --IO/MONITOR STRUCTURE DBC
+            PRECISION_FILE         10
+            PRECISION_SCREEN       5
+            FILE_TYPE              csv
+            WRITE_HEADER           yes
+            INTERVAL_STEPS         1
+            """
+        )
+
+        # Check the input file.
+        compare_test_result(
+            self,
+            initial_simulation.get_string(check_nox=False, header=False),
+            additional_identifier="dirichlet",
+        )
+
+        # Run the simulation in 4C.
+        initial_run_name = "all_dbc_to_nbc_initial"
+        self.run_four_c_test(initial_run_name, initial_simulation)
+
+        # Create and run the second simulation.
+        force_simulation, beam_set = create_cantilever_model(2 * n_steps, dt)
+        force_simulation.add(
+            BoundaryCondition(
+                beam_set["start"],
+                "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+                bc_type=mpy.bc.dirichlet,
+            )
+        )
+
+        # Set up path to monitor.
+        monitor_db_path = os.path.join(
+            testing_temp, initial_run_name + "/", initial_run_name + "_monitor_dbc"
+        )
+
+        # Convert the Dirichlet conditions into Neuman conditions.
+        for root, dirs, file_names in os.walk(monitor_db_path):
+            for file_name in sorted(file_names):
+                if "_monitor_dbc" in file_name:
+                    dbc_monitor_to_input_all_values(
+                        force_simulation,
+                        os.path.join(monitor_db_path, file_name),
+                        steps=[0, n_steps + 1],
+                        time_span=[0, n_steps * dt, 2 * n_steps * dt],
+                        type="hat",
+                        n_dof=9,
+                    )
+
+        force_simulation.add(
+            """--RESULT DESCRIPTION
+            STRUCTURE DIS structure NODE 21 QUANTITY dispx VALUE 0.0 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 21 QUANTITY dispy VALUE 0.0 TOLERANCE 1e-10
+            STRUCTURE DIS structure NODE 21 QUANTITY dispz VALUE 0.0 TOLERANCE 1e-10
+            """
+        )
+
+        # Compare the input file of the restart simulation.
+        compare_test_result(
+            self,
+            force_simulation.get_string(check_nox=False, header=False),
+            additional_identifier="neumann",
+            atol=1e-6,
+        )
+
+        # Add runtime output.
+        set_runtime_output(force_simulation)
+
+        initial_run_name = "all_dbc_to_nbc_initial_3"
+        self.run_four_c_test(initial_run_name, force_simulation)
 
     def test_four_c_simulation_cantilever_convergence(self):
         """Create multiple simulations of a cantilever beam.

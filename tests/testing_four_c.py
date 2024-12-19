@@ -48,6 +48,7 @@ from meshpy import (
     mpy,
 )
 from meshpy.four_c.beam_potential import BeamPotential
+from meshpy.four_c.dbc_monitor import linear_time_transformation
 from meshpy.four_c.locsys_condition import LocSysCondition
 from meshpy.four_c.solid_shell_thickness_direction import (
     get_visualization_third_parameter_direction_hex8,
@@ -307,6 +308,109 @@ class Test4C(unittest.TestCase):
 
         # Compare with the reference solution.
         compare_test_result(self, input_file.get_string(header=False, check_nox=False))
+
+    def test_linear_time_transformation_scaling(self):
+        """Test the scaling of the interval for the function.
+
+        Starts with a function within the interval [0,1] and transforms
+        them.
+        """
+
+        # starting time array
+        time = np.array([0, 0.5, 0.75, 1.0])
+
+        # corresponding values 3 values per time step
+        force = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]])
+
+        # with the result vector
+        force_result = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]])
+
+        # base case no scaling only
+        time_trans, force_trans = linear_time_transformation(
+            time, force, [0, 1], flip=False
+        )
+
+        # first result is simply the attached
+        time_result = np.array([0, 0.5, 0.75, 1.0])
+
+        # check solution
+        self.assertEqual(time_trans.tolist(), time_result.tolist())
+        self.assertEqual(force_trans.tolist(), force_result.tolist())
+
+        # transform to interval [0, 2]
+        time_trans, force_trans = linear_time_transformation(
+            time, force, [0, 2], flip=False
+        )
+
+        # time values should double
+        self.assertEqual(time_trans.tolist(), (2 * time_result).tolist())
+        self.assertEqual(force_trans.tolist(), force_result.tolist())
+
+        # new result
+        force_result = np.array(
+            [[1, 2, 3], [1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12], [10, 11, 12]]
+        )
+
+        # shift to the interval [1 ,2] and add valid start end point
+        time_trans, force_trans = linear_time_transformation(
+            time, force, [1, 2, 5], flip=False, valid_start_and_end_point=True
+        )
+        self.assertEqual(
+            time_trans.tolist(), np.array([0, 1.0, 1.5, 1.75, 2.0, 5.0]).tolist()
+        )
+        self.assertEqual(force_trans.tolist(), force_result.tolist())
+
+    def test_linear_time_transformation_flip(self):
+        """Test the flip flag option of linear_time_transformationto mirror the
+        function."""
+
+        # base case no scaling no end points should be attached
+        # starting time array
+        time = np.array([0, 0.5, 0.75, 1.0])
+
+        # corresponding values:  3 values per time step
+        force = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9], [10, 11, 12]])
+
+        # first result is simply the attached point at the end
+        time_result = np.array([0, 0.25, 0.5, 1.0])
+
+        # with the value vector:
+        force_result = np.array([[10, 11, 12], [7, 8, 9], [4, 5, 6], [1, 2, 3]])
+
+        # base case no scaling only end points should be attached
+        time_trans, force_trans = linear_time_transformation(
+            time, force, [0, 1], flip=True
+        )
+
+        # check solution
+        self.assertEqual(time_result.tolist(), time_trans.tolist())
+        self.assertEqual(force_trans.tolist(), force_result.tolist())
+
+        # new force result
+        force_result = np.array([[10, 11, 12], [7, 8, 9], [4, 5, 6], [1, 2, 3]])
+
+        time_result = np.array([0, 0.25, 0.5, 1.0]) + 1
+
+        # test now an shift to the interval [1 ,2]
+        time_trans, force_trans = linear_time_transformation(
+            time, force, [1, 2], flip=True
+        )
+        self.assertEqual(time_result.tolist(), time_trans.tolist())
+        self.assertEqual(force_trans.tolist(), force_result.tolist())
+
+        # same trick as above but with 2
+        time_result = np.array([0, 2.0, 2.25, 2.5, 3.0, 5.0])
+        # new force result
+        force_result = np.array(
+            [[10, 11, 12], [10, 11, 12], [7, 8, 9], [4, 5, 6], [1, 2, 3], [1, 2, 3]]
+        )
+
+        # test offset and scaling and add valid start and end point
+        time_trans, force_trans = linear_time_transformation(
+            time, force, [2, 3, 5], flip=True, valid_start_and_end_point=True
+        )
+        self.assertEqual(time_result.tolist(), time_trans.tolist())
+        self.assertEqual(force_trans.tolist(), force_result.tolist())
 
 
 if __name__ == "__main__":
