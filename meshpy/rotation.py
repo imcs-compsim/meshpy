@@ -88,10 +88,22 @@ class Rotation:
             raise ValueError(f"The given arguments {args} are invalid!")
 
     @classmethod
-    def from_quaternion(cls, q):
-        """Create the object from a quaternion float array (4x1)"""
+    def from_quaternion(cls, q, *, normalized=False):
+        """Create the object from a quaternion float array (4x1)
+
+        Args
+        ----
+        q: Quaternion, q0, qx,qy,qz
+        normalized: Flag if the input quaternion is normalized. If so, no
+            normalization is performed which can potentially improve performance.
+            Skipping the normalization should only be done in very special cases
+            where we can be sure that the input quaternion is normalized to avoid
+            error accumulation.
+        """
         rotation = object.__new__(cls)
         rotation.q = np.array(q)
+        if not normalized:
+            rotation.q /= np.linalg.norm(rotation.q)
         if (not rotation.q.ndim == 1) or (not len(rotation.q) == 4):
             raise ValueError("Got quaternion array with unexpected dimensions")
         return rotation
