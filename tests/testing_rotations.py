@@ -172,7 +172,7 @@ class TestRotation(unittest.TestCase):
 
         # Check if inverse rotation gets identity rotation. Use two different
         # constructors for identity rotation.
-        self.assertTrue(Rotation([0, 0, 0], 0) == rot * rot.inv())
+        self.assertTrue(Rotation.from_rotation_vector([0, 0, 0]) == rot * rot.inv())
         self.assertTrue(Rotation() == rot * rot.inv())
 
         # Check that there is no warning or error when getting the vector for

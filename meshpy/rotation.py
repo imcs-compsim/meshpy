@@ -73,17 +73,14 @@ class Rotation:
             # Identity element.
             self.q[0] = 1
         elif len(args) == 2:
-            # Set from vector and rotation angle.
-            vector = args[0]
+            # Set from rotation axis and rotation angle.
+            axis = np.array(args[0])
             phi = args[1]
-            norm = np.linalg.norm(vector)
-            if np.abs(phi) < mpy.eps_quaternion:
-                self.q[0] = 1
-            elif norm < mpy.eps_quaternion:
+            norm = np.linalg.norm(axis)
+            if norm < mpy.eps_quaternion:
                 raise ValueError("The rotation axis can not be a zero vector!")
-            else:
-                self.q[0] = np.cos(0.5 * phi)
-                self.q[1:] = np.sin(0.5 * phi) * np.array(vector) / norm
+            self.q[0] = np.cos(0.5 * phi)
+            self.q[1:] = np.sin(0.5 * phi) * axis / norm
         else:
             raise ValueError(f"The given arguments {args} are invalid!")
 
@@ -101,7 +98,7 @@ class Rotation:
             error accumulation.
         """
         rotation = object.__new__(cls)
-        rotation.q = np.array(q)
+        rotation.q = np.array(q, dtype=float)
         if not normalized:
             rotation.q /= np.linalg.norm(rotation.q)
         if (not rotation.q.ndim == 1) or (not len(rotation.q) == 4):
