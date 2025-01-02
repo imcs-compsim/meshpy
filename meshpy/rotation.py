@@ -344,11 +344,6 @@ class Rotation:
         return f"Rotation:\n    q0: {self.q[0]}\n    q: {self.q[1:]}"
 
 
-def get_relative_rotation(rotation1, rotation2):
-    """Return the rotation from rotation1 to rotation2."""
-    return rotation2 * rotation1.inv()
-
-
 def add_rotations(rotation_21, rotation_10):
     """Multiply a rotation onto another.
 

@@ -36,7 +36,7 @@ import unittest
 import numpy as np
 
 from meshpy import Rotation, mpy
-from meshpy.rotation import get_relative_rotation, smallest_rotation
+from meshpy.rotation import smallest_rotation
 
 
 class TestRotation(unittest.TestCase):
@@ -178,19 +178,6 @@ class TestRotation(unittest.TestCase):
         # Check that there is no warning or error when getting the vector for
         # an identity rotation.
         (rot * rot.inv()).get_rotation_vector()
-
-    def test_relative_roation(self):
-        """Test the relative rotation between two rotations."""
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
-
-        rot1 = Rotation([1, 2, 3], 2)
-        rot2 = Rotation([0.1, -0.2, 2], np.pi / 5)
-
-        rot21 = get_relative_rotation(rot1, rot2)
-
-        self.assertTrue(rot2 == rot21 * rot1)
 
     def test_rotation_vector(self):
         """Test if the rotation vector functions give a correct result."""
