@@ -1710,7 +1710,7 @@ class TestMeshpy(unittest.TestCase):
         )
 
     def test_meshpy_deep_copy(self):
-        """Thist test checks that the deep copy function on a mesh does not
+        """This test checks that the deep copy function on a mesh does not
         copy the materials or functions."""
 
         # Create material and function object.

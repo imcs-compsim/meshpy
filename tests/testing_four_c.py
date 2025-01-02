@@ -294,7 +294,7 @@ class Test4C(unittest.TestCase):
                 bc_type=mpy.bc.dirichlet,
             )
         )
-        # Add additional dirichlet boundary condtion to check if combination with locsys condition works.
+        # Add additional dirichlet boundary condition to check if combination with locsys condition works.
         input_file.add(
             BoundaryCondition(
                 beam_set["end"],
