@@ -78,6 +78,12 @@ repos:
         args: ["--fix", "--select", "I"] # "--select I" -> sort imports
       - id: ruff-format # formatter
         name: Run ruff (formatter for Python)
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.28.4
+    hooks:
+      - id: typos
+        name: Check for typos
+        exclude: ".*\\.(nb|wls)$"
   - repo: https://github.com/pamoller/xmlformatter
     rev: v0.2.8
     hooks:
