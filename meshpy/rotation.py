@@ -156,11 +156,16 @@ class Rotation:
     def from_rotation_vector(cls, rotation_vector):
         """Create the object from a rotation vector."""
 
+        q = np.zeros(4)
+        rotation_vector = np.array(rotation_vector)
         phi = np.linalg.norm(rotation_vector)
-        if np.abs(phi) < mpy.eps_quaternion:
-            return cls([0, 0, 0], 0)
+        q[0] = np.cos(0.5 * phi)
+        if phi < mpy.eps_quaternion:
+            # This is the Taylor series expansion of sin(phi/2)/phi around phi=0
+            q[1:] = 0.5 * rotation_vector
         else:
-            return cls(rotation_vector, phi)
+            q[1:] = np.sin(0.5 * phi) / phi * rotation_vector
+        return cls.from_quaternion(q)
 
     def check(self):
         """Perform all checks for the rotation."""
@@ -169,10 +174,10 @@ class Rotation:
 
     def check_uniqueness(self):
         """We always want q0 to be positive -> the range for the rotational
-        angle is [-pi, pi]."""
+        angle is 0 <= phi <= pi."""
 
         if self.q[0] < 0:
-            self.q = -self.q
+            self.q *= -1
 
     def check_quaternion_constraint(self):
         """We want to check that q.q = 1."""
@@ -209,25 +214,25 @@ class Rotation:
         norm = np.linalg.norm(self.q[1:])
         phi = 2 * np.arctan2(norm, self.q[0])
 
-        # Check if effective rotation angle is 0.
-        if np.abs(np.sin(phi / 2)) < mpy.eps_quaternion:
-            return np.zeros(3)
-        elif np.abs(np.abs(phi) - np.pi) < mpy.eps_quaternion:
-            # For rotations of -pi and pi, numerical issues might occur that the output
-            # rotation vector is non-deterministic (correct, but the sign can switch).
-            # To avoid this, we scale the rotation axis in such a way, that for a
-            # rotation angle of -pi or pi, the first component of the rotation axis
-            # that is not 0 is positive.
-            rotation_axis = self.q[1:] / norm
-            for i_dir in range(3):
-                if np.abs(rotation_axis[i_dir]) > mpy.eps_quaternion:
-                    if rotation_axis[i_dir] > 0:
-                        return phi * rotation_axis
-                    else:
-                        return -phi * rotation_axis
-
+        if phi < mpy.eps_quaternion:
+            # For small angles return the Taylor series expansion of phi/sin(phi/2)
+            scale_factor = 2
         else:
-            return phi * self.q[1:] / norm
+            scale_factor = phi / np.sin(phi / 2)
+            if np.abs(np.abs(phi) - np.pi) < mpy.eps_quaternion:
+                # For rotations of exactly +-pi, numerical issues might occur, resulting in
+                # a rotation vector that is non-deterministic. The result is correct, but
+                # the sign can switch due to different implementation of basic underlying
+                # math functions. This is especially triggered when using this code with
+                # different OS. To avoid this, we scale the rotation axis in such a way,
+                # for a rotation angle of +-pi, the first component of the rotation axis
+                # that is not 0 is positive.
+                for i_dir in range(3):
+                    if np.abs(self.q[1 + i_dir]) > mpy.eps_quaternion:
+                        if self.q[1 + i_dir] < 0:
+                            scale_factor *= -1
+                        break
+        return self.q[1:] * scale_factor
 
     def get_transformation_matrix(self):
         """Return the transformation matrix for this rotation.
