@@ -153,8 +153,9 @@ def get_relative_distance_and_rotations(
         relative_distances_rotation[i_segment] = quaternion.from_float_array(
             smallest_relative_rotation_onto_distance.q
         )
+
         relative_rotations[i_segment] = (
-            quaternions[i_segment + 1] * quaternions[i_segment].conjugate()
+            quaternions[i_segment].conjugate() * quaternions[i_segment + 1]
         )
 
     return relative_distances, relative_distances_rotation, relative_rotations
@@ -329,13 +330,12 @@ class CosseratCurve(object):
                     )
                     + coordinates[i_segment]
                 )
-                quaternions[i_segment + 1] = (
-                    quaternion.slerp_evaluate(
-                        quaternion.quaternion(1),
-                        self.relative_rotations[i_segment],
-                        factor,
-                    )
-                    * quaternions[i_segment]
+                quaternions[i_segment + 1] = quaternions[
+                    i_segment
+                ] * quaternion.slerp_evaluate(
+                    quaternion.quaternion(1),
+                    self.relative_rotations[i_segment],
+                    factor,
                 )
         else:
             coordinates = self.coordinates
