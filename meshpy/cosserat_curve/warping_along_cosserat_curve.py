@@ -178,10 +178,8 @@ def get_mesh_transformation(
 
     # Get data required for the rigid body motion
     curve_start_pos, curve_start_rot = curve.get_centerline_position_and_rotation(0.0)
-    rigid_body_relative_pos = curve_start_pos - origin
-    rigid_body_relative_rot = curve_start_rot * quaternion.from_float_array(
-        reference_rotation.inv().q
-    )
+    rigid_body_translation = curve_start_pos - origin
+    rigid_body_rotation = curve_start_rot
 
     # Loop over nodes and map them to the new configuration
     for i_node, node in enumerate(nodes):
@@ -203,36 +201,39 @@ def get_mesh_transformation(
         # Create the functions that describe the deformation
         for i_step, factor in enumerate(factors):
             centerline_pos = positions_for_all_steps[i_step][node_unique_id]
+            centerline_relative_pos = quaternion.rotate_vectors(
+                curve_start_rot.conjugate(), centerline_pos - curve_start_pos
+            )
             centerline_rotation = quaternions_for_all_steps[i_step][node_unique_id]
+            centerline_relative_rotation = (
+                curve_start_rot.conjugate() * centerline_rotation
+            )
 
-            relative_rotation_for_factor = quaternion.slerp_evaluate(
-                quaternion.from_float_array([1, 0, 0, 0]),
-                rigid_body_relative_rot,
+            rigid_body_rotation_for_factor = quaternion.slerp_evaluate(
+                quaternion.from_float_array(reference_rotation.q),
+                rigid_body_rotation,
                 factor,
             )
 
             current_pos = (
                 quaternion.rotate_vectors(
-                    relative_rotation_for_factor
-                    * quaternion.from_float_array(reference_rotation.q)
-                    * curve_start_rot.conjugate(),
+                    rigid_body_rotation_for_factor,
                     (
-                        centerline_pos
+                        centerline_relative_pos
                         + quaternion.rotate_vectors(
-                            centerline_rotation, cross_section_position
+                            centerline_relative_rotation, cross_section_position
                         )
-                        - curve_start_pos
                     ),
                 )
                 + origin
-                + factor * rigid_body_relative_pos
+                + factor * rigid_body_translation
             )
 
             positions[i_step, i_node] = current_pos
             relative_rotations[i_step, i_node] = (
-                centerline_rotation
-                * curve_start_rot.conjugate()
-                * relative_rotation_for_factor
+                rigid_body_rotation_for_factor
+                * centerline_relative_rotation
+                * quaternion.from_float_array(reference_rotation.q).conjugate()
             )
 
     return positions, relative_rotations
