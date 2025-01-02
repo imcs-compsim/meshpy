@@ -219,26 +219,6 @@ class CosseratCurve(object):
             self.relative_rotations,
         ) = get_relative_distance_and_rotations(self.coordinates, self.quaternions)
 
-    def get_curvature_function(self, *, factor: float = 1.0):
-        """Get a function that returns the curvature along the centerline.
-
-        Args
-        ----
-        factor: double
-            Scaling factor for the curvature
-        """
-
-        centerline_interpolation_p = self.centerline_interpolation.derivative(1)
-        centerline_interpolation_pp = self.centerline_interpolation.derivative(2)
-
-        def curvature(t):
-            """Get the curvature along the curve."""
-            rp = centerline_interpolation_p
-            rpp = centerline_interpolation_pp
-            return factor * np.cross(rp(t), rpp(t)) / np.dot(rp(t), rp(t))
-
-        return curvature
-
     def set_centerline_interpolation(self):
         """Set the interpolation of the centerline based on the coordinates and
         arc length stored in this object."""
