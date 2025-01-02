@@ -192,10 +192,10 @@ class CosseratCurve(object):
 
         # Integrate the arc length along the interpolated centerline, this will result
         # in a more accurate centerline arc length
-        self.point_arc_length = [0.0]
+        self.point_arc_length = np.zeros(self.n_points)
         for i in range(len(point_arc_length_piecewise_linear) - 1):
-            self.point_arc_length.append(
-                self.point_arc_length[-1]
+            self.point_arc_length[i + 1] = (
+                self.point_arc_length[i]
                 + integrate.quad(
                     ds,
                     point_arc_length_piecewise_linear[i],
