@@ -28,7 +28,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 # -----------------------------------------------------------------------------
-"""This file has functions to create a stent accoring to Auricchio 2012."""
+"""This file has functions to create a stent according to Auricchio 2012."""
 
 # Python packages.
 import numpy as np

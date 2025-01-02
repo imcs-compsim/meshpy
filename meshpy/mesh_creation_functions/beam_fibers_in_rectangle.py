@@ -89,7 +89,7 @@ def _intersect_line_with_rectangle(
         [[0, width], [length, 0]],
         [[length, 0], [0, width]],
     ]
-    # Convert fo numpy arrays.
+    # Convert to numpy arrays.
     boundary_lines = [
         [np.array(item) for item in boundary] for boundary in boundary_lines
     ]

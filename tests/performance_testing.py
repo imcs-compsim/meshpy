@@ -137,33 +137,33 @@ def create_large_beam_mesh(n_x, n_y, n_z, n_el):
     material = MaterialReissner(radius=0.25 / np.max([n_x, n_y, n_z]))
 
     for i_x in range(n_x + 1):
-        for iy in range(n_y + 1):
+        for i_y in range(n_y + 1):
             create_beam_mesh_line(
                 mesh,
                 Beam3rHerm2Line3,
                 material,
-                [ix / n_x, iy / n_y, 0],
-                [ix / n_x, iy / n_y, 1],
+                [i_x / n_x, i_y / n_y, 0],
+                [i_x / n_x, i_y / n_y, 1],
                 n_el=n_z * n_el,
             )
-    for iy in range(n_y + 1):
-        for iz in range(n_z + 1):
+    for i_y in range(n_y + 1):
+        for i_z in range(n_z + 1):
             create_beam_mesh_line(
                 mesh,
                 Beam3rHerm2Line3,
                 material,
-                [0, iy / n_y, iz / n_z],
-                [1, iy / n_y, iz / n_z],
+                [0, i_y / n_y, i_z / n_z],
+                [1, i_y / n_y, i_z / n_z],
                 n_el=n_x * n_el,
             )
-    for iz in range(n_z + 1):
-        for ix in range(n_x + 1):
+    for i_z in range(n_z + 1):
+        for i_x in range(n_x + 1):
             create_beam_mesh_line(
                 mesh,
                 Beam3rHerm2Line3,
                 material,
-                [ix / n_x, 0, iz / n_z],
-                [ix / n_x, 1, iz / n_z],
+                [i_x / n_x, 0, i_z / n_z],
+                [i_x / n_x, 1, i_z / n_z],
                 n_el=n_y * n_el,
             )
     return mesh
