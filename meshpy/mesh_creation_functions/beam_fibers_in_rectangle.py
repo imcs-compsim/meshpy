@@ -35,10 +35,8 @@ This can for example be used to create fiber reinforced composite
 plates.
 """
 
-# Python packages.
 import numpy as np
 
-# Meshpy modules.
 from .. import GeometrySet
 from ..container import GeometryName
 from ..utility import check_node_by_coordinate

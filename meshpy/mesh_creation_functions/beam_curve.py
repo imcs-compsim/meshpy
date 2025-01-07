@@ -30,10 +30,8 @@
 # -----------------------------------------------------------------------------
 """This file has functions to create a beam from a parametric curve."""
 
-# Python packages.
 import numpy as np
 
-# Meshpy modules.
 from ..conf import mpy
 from ..rotation import Rotation, smallest_rotation
 from .beam_generic import create_beam_mesh_function

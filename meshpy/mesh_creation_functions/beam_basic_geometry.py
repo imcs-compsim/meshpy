@@ -30,12 +30,10 @@
 # -----------------------------------------------------------------------------
 """This file has functions to create basic geometry items with meshpy."""
 
-# Python packages.
 import warnings
 
 import numpy as np
 
-# Meshpy modules.
 from ..conf import mpy
 from ..mesh import Mesh
 from ..rotation import Rotation

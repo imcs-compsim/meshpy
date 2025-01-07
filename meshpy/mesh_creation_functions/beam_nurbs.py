@@ -30,10 +30,8 @@
 # -----------------------------------------------------------------------------
 """Create a beam filament from a NURBS curve represented with splinepy."""
 
-# Python packages.
 import numpy as np
 
-# Meshpy modules.
 from ..conf import mpy
 from .beam_curve import create_beam_mesh_curve
 

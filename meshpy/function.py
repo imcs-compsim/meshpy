@@ -31,7 +31,6 @@
 """This module implements a basic class to manage functions in the 4C input
 file."""
 
-# Meshpy modules.
 from .base_mesh_item import BaseMeshItemFull
 
 
