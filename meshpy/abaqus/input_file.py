@@ -37,6 +37,7 @@ import numpy as np
 
 from ..conf import mpy
 from ..geometry_set import GeometrySet
+from ..inputfile_utils import get_coupled_nodes_to_master_map
 from ..mesh import Mesh
 from ..rotation import smallest_rotation
 
@@ -128,8 +129,7 @@ class AbaqusInputFile(object):
         if mpy.check_overlapping_elements:
             self.mesh.check_overlapping_elements()
 
-        # Assign global indices to all entries, the element indices will be overwritten
-        set_n_global(self.mesh.nodes)
+        # Assign global indices to all materials
         set_n_global(self.mesh.materials)
 
         # Calculate the required cross-section normal data
@@ -208,51 +208,30 @@ class AbaqusInputFile(object):
         # Internally in Abaqus, coupled nodes are a single node with different normals for the
         # connected element. Therefore, for nodes which are coupled to each other, we keep the
         # same global ID while still keeping the individual nodes in MeshPy.
+        _, unique_nodes = get_coupled_nodes_to_master_map(
+            self.mesh, assign_n_global=True
+        )
 
-        # First we have to check which nodes are coupled.
-        for coupling in self.mesh.boundary_conditions[
-            mpy.bc.point_coupling, mpy.geo.point
-        ]:
-            if coupling.coupling_dof_type is not mpy.coupling_dof.fix:
-                raise ValueError(
-                    "Abaqus coupling is only implemented for rigid joints at the DOFs"
-                )
-
-            # Give all nodes the lowest overall ID from the nodes in the coupling.
-            coupling_nodes = coupling.geometry_set.get_points()
-            coupling_ids = [node.n_global for node in coupling_nodes]
-            coupling_ids.sort()
-            for node in coupling_nodes:
-                node.n_global = coupling_ids[0]
-
-        # Write nodal data while also renumbering the nodes so we have continuous IDs.
+        # Number the remaining nodes and create nodes for the input file
         input_file_lines = ["*Node"]
-        node_id_map = {}
-        for node in self.mesh.nodes:
-            old_node_id = node.n_global
-            if old_node_id in node_id_map.keys():
-                node.n_global = node_id_map[old_node_id]
-            else:
-                new_node_id = len(node_id_map)
-                node.n_global = new_node_id
-                node_id_map[old_node_id] = new_node_id
-                input_file_lines.append(
-                    (", ".join([F_INT] + 3 * [F_FLOAT])).format(
-                        node.n_global + 1, *node.coordinates
-                    )
+        for node in unique_nodes:
+            input_file_lines.append(
+                (", ".join([F_INT] + 3 * [F_FLOAT])).format(
+                    node.n_global + 1, *node.coordinates
                 )
-        n_nodes = len(node_id_map)
+            )
 
         # Check if we need to write additional nodes for the element cross-section directions
+        node_counter = len(unique_nodes)
         for element in self.mesh.elements:
             if element.n1_position is not None:
-                n_nodes += 1
+                node_counter += 1
                 input_file_lines.append(
                     (", ".join([F_INT] + 3 * [F_FLOAT])).format(
-                        n_nodes, *element.n1_position
+                        node_counter, *element.n1_position
                     )
                 )
-                element.n1_node_id = n_nodes
+                element.n1_node_id = node_counter
 
         return input_file_lines
 
