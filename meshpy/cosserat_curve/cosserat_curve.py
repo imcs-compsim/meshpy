@@ -153,8 +153,9 @@ def get_relative_distance_and_rotations(
         relative_distances_rotation[i_segment] = quaternion.from_float_array(
             smallest_relative_rotation_onto_distance.q
         )
+
         relative_rotations[i_segment] = (
-            quaternions[i_segment + 1] * quaternions[i_segment].conjugate()
+            quaternions[i_segment].conjugate() * quaternions[i_segment + 1]
         )
 
     return relative_distances, relative_distances_rotation, relative_rotations
@@ -192,10 +193,10 @@ class CosseratCurve(object):
 
         # Integrate the arc length along the interpolated centerline, this will result
         # in a more accurate centerline arc length
-        self.point_arc_length = [0.0]
+        self.point_arc_length = np.zeros(self.n_points)
         for i in range(len(point_arc_length_piecewise_linear) - 1):
-            self.point_arc_length.append(
-                self.point_arc_length[-1]
+            self.point_arc_length[i + 1] = (
+                self.point_arc_length[i]
                 + integrate.quad(
                     ds,
                     point_arc_length_piecewise_linear[i],
@@ -217,26 +218,6 @@ class CosseratCurve(object):
             self.relative_distances_rotation,
             self.relative_rotations,
         ) = get_relative_distance_and_rotations(self.coordinates, self.quaternions)
-
-    def get_curvature_function(self, *, factor: float = 1.0):
-        """Get a function that returns the curvature along the centerline.
-
-        Args
-        ----
-        factor: double
-            Scaling factor for the curvature
-        """
-
-        centerline_interpolation_p = self.centerline_interpolation.derivative(1)
-        centerline_interpolation_pp = self.centerline_interpolation.derivative(2)
-
-        def curvature(t):
-            """Get the curvature along the curve."""
-            rp = centerline_interpolation_p
-            rpp = centerline_interpolation_pp
-            return factor * np.cross(rp(t), rpp(t)) / np.dot(rp(t), rp(t))
-
-        return curvature
 
     def set_centerline_interpolation(self):
         """Set the interpolation of the centerline based on the coordinates and
@@ -329,13 +310,12 @@ class CosseratCurve(object):
                     )
                     + coordinates[i_segment]
                 )
-                quaternions[i_segment + 1] = (
-                    quaternion.slerp_evaluate(
-                        quaternion.quaternion(1),
-                        self.relative_rotations[i_segment],
-                        factor,
-                    )
-                    * quaternions[i_segment]
+                quaternions[i_segment + 1] = quaternions[
+                    i_segment
+                ] * quaternion.slerp_evaluate(
+                    quaternion.quaternion(1),
+                    self.relative_rotations[i_segment],
+                    factor,
                 )
         else:
             coordinates = self.coordinates
