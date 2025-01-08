@@ -36,7 +36,7 @@ import unittest
 import numpy as np
 
 from meshpy import Rotation, mpy
-from meshpy.rotation import get_relative_rotation, smallest_rotation
+from meshpy.rotation import smallest_rotation
 
 
 class TestRotation(unittest.TestCase):
@@ -172,25 +172,12 @@ class TestRotation(unittest.TestCase):
 
         # Check if inverse rotation gets identity rotation. Use two different
         # constructors for identity rotation.
-        self.assertTrue(Rotation([0, 0, 0], 0) == rot * rot.inv())
+        self.assertTrue(Rotation.from_rotation_vector([0, 0, 0]) == rot * rot.inv())
         self.assertTrue(Rotation() == rot * rot.inv())
 
         # Check that there is no warning or error when getting the vector for
         # an identity rotation.
         (rot * rot.inv()).get_rotation_vector()
-
-    def test_relative_rotation(self):
-        """Test the relative rotation between two rotations."""
-
-        # Set default values for global parameters.
-        mpy.set_default_values()
-
-        rot1 = Rotation([1, 2, 3], 2)
-        rot2 = Rotation([0.1, -0.2, 2], np.pi / 5)
-
-        rot21 = get_relative_rotation(rot1, rot2)
-
-        self.assertTrue(rot2 == rot21 * rot1)
 
     def test_rotation_vector(self):
         """Test if the rotation vector functions give a correct result."""
@@ -348,6 +335,50 @@ class TestRotation(unittest.TestCase):
         self.assertLess(
             np.linalg.norm(rot_smallest.q - rot_smallest_ref), mpy.eps_quaternion
         )
+
+    def test_error_accumulation_multiplication(self):
+        """Test that error accumulation of successive multiplications of
+        rotations does not affect the results."""
+
+        rotation_1 = Rotation([1, 2, 3], 0.3)
+        rotation_2 = Rotation([1, -1, -2], np.pi / 6)
+        rotation_3 = Rotation([-1, -2, -3], 7 * np.pi / 17)
+        rotation = Rotation()
+        for _ in range(100):
+            rotation = rotation_1 * rotation * rotation_2
+            rotation = rotation * rotation_3
+
+        q_ref = [
+            -0.38478914485223104,
+            -0.0385171948379694,
+            -0.49122781649072017,
+            -0.780479962594468,
+        ]
+        assert np.allclose(q_ref, rotation.q, atol=1e-14)
+
+    def test_error_accumulation_smallest_rotation(self):
+        """Test that error accumulation of successive smallest rotation
+        mappings does not affect the results.
+
+        Calculate the smallest rotation onto a vector and then rotate that
+        vector "away" to calculate the next smallest rotation and so on...
+        """
+
+        tangent = [0.9, 0.1, -0.3]
+        rotation_old = Rotation([1, 2, 3], 0.3)
+
+        for _ in range(50):
+            rotation_new = smallest_rotation(rotation_old, tangent)
+            tangent = rotation_new * rotation_old.inv() * tangent
+            rotation_old = rotation_new
+
+        q_ref = [
+            0.6329069205124062,
+            0.13331392718187732,
+            -0.5128773537467728,
+            0.5644581887089211,
+        ]
+        assert np.allclose(q_ref, rotation_new.q, atol=1e-14)
 
 
 if __name__ == "__main__":

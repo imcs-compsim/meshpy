@@ -500,7 +500,7 @@ class TestMeshpy(unittest.TestCase):
 
         mesh = InputFile()
         for i in range(6):
-            mesh.add(NodeCosserat([i, 2 * i, 3 * i], Rotation([i, 2 * i, 3 * i], i)))
+            mesh.add(NodeCosserat([i, 2 * i, 3 * i], Rotation()))
 
         set_1 = GeometrySetNodes(
             mpy.geo.point, [mesh.nodes[0], mesh.nodes[1], mesh.nodes[2]]

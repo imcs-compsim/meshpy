@@ -399,7 +399,7 @@ class TestMeshCreationFunctions(unittest.TestCase):
         mat = MaterialReissner(radius=0.1)
         mesh.add(mat)
 
-        start_node = NodeCosserat([1, 2, 3], Rotation([0, 0, 0], 0))
+        start_node = NodeCosserat([1, 2, 3], Rotation())
         mesh.add(start_node)
         beam_set = create_beam_mesh_line_at_node(
             mesh, Beam3rHerm2Line3, mat, start_node, 1.2, n_el=1
