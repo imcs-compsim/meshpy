@@ -732,7 +732,7 @@ class TestFullFourC(unittest.TestCase):
         """First simulate a cantilever beam with Dirichlet boundary conditions
         and then apply those as Neumann boundaries.
 
-        This function explictly tests dbc_monitor_to_input.
+        This function explicitly tests dbc_monitor_to_input.
         """
 
         self.xtest_four_c_simulation_dbc_monitor_to_input(
@@ -744,7 +744,7 @@ class TestFullFourC(unittest.TestCase):
         and then apply those as Neumann boundaries.
 
         For the application of the boundary conditions, the last values
-        for the force are used. This function explictly tests
+        for the force are used. This function explicitly tests
         dbc_monitor_to_input_all_values.
         """
         self.xtest_four_c_simulation_dbc_monitor_to_input(
@@ -777,7 +777,7 @@ class TestFullFourC(unittest.TestCase):
             )
         )
 
-        # Apply displacments to all nodes.
+        # Apply displacements to all nodes.
         for i, node in enumerate(beam_set["line"].get_all_nodes()):
             # do not constraint middle nodes
             if not node.is_middle_node:
@@ -791,7 +791,7 @@ class TestFullFourC(unittest.TestCase):
                         )
                     )
                 else:
-                    # Add small displacment at other end.
+                    # Add small displacement at other end.
                     initial_simulation.add(
                         BoundaryCondition(
                             GeometrySet(node),

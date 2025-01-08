@@ -30,14 +30,11 @@
 # -----------------------------------------------------------------------------
 """This file has functions to create a honeycomb beam mesh."""
 
-# Python packages.
 import numpy as np
 
 from ..container import GeometryName
 from ..geometry_set import GeometrySet
 from ..mesh import Mesh
-
-# Meshpy modules.
 from ..rotation import Rotation
 from ..utility import get_min_max_nodes
 from .beam_basic_geometry import create_beam_mesh_line

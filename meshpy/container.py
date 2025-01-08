@@ -31,7 +31,6 @@
 """This module implements containers to manage boundary conditions and geometry
 sets in one object."""
 
-# Meshpy modules.
 from .base_mesh_item import BaseMeshItemString
 from .boundary_condition import BoundaryConditionBase
 from .conf import mpy

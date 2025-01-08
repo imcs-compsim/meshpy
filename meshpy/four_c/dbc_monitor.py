@@ -40,7 +40,6 @@ from meshpy.function_utility import (
     create_linear_interpolation_function,
 )
 
-# Meshpy stuff.
 from .. import BoundaryCondition, Function, GeometrySet, mpy
 
 

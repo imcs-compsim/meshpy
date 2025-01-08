@@ -129,42 +129,42 @@ def load_solid(solid_file, full_import):
     InputFile(dat_file=solid_file)
 
 
-def create_large_beam_mesh(nx, ny, nz, n_el):
+def create_large_beam_mesh(n_x, n_y, n_z, n_el):
     """Create a beam grid on the domain (1 x 1 x 1) with (nx * ny * nz) "grid
     cells"."""
 
     mesh = InputFile()
-    material = MaterialReissner(radius=0.25 / np.max([nx, ny, nz]))
+    material = MaterialReissner(radius=0.25 / np.max([n_x, n_y, n_z]))
 
-    for ix in range(nx + 1):
-        for iy in range(ny + 1):
+    for i_x in range(n_x + 1):
+        for i_y in range(n_y + 1):
             create_beam_mesh_line(
                 mesh,
                 Beam3rHerm2Line3,
                 material,
-                [ix / nx, iy / ny, 0],
-                [ix / nx, iy / ny, 1],
-                n_el=nz * n_el,
+                [i_x / n_x, i_y / n_y, 0],
+                [i_x / n_x, i_y / n_y, 1],
+                n_el=n_z * n_el,
             )
-    for iy in range(ny + 1):
-        for iz in range(nz + 1):
+    for i_y in range(n_y + 1):
+        for i_z in range(n_z + 1):
             create_beam_mesh_line(
                 mesh,
                 Beam3rHerm2Line3,
                 material,
-                [0, iy / ny, iz / nz],
-                [1, iy / ny, iz / nz],
-                n_el=nx * n_el,
+                [0, i_y / n_y, i_z / n_z],
+                [1, i_y / n_y, i_z / n_z],
+                n_el=n_x * n_el,
             )
-    for iz in range(nz + 1):
-        for ix in range(nx + 1):
+    for i_z in range(n_z + 1):
+        for i_x in range(n_x + 1):
             create_beam_mesh_line(
                 mesh,
                 Beam3rHerm2Line3,
                 material,
-                [ix / nx, 0, iz / nz],
-                [ix / nx, 1, iz / nz],
-                n_el=ny * n_el,
+                [i_x / n_x, 0, i_z / n_z],
+                [i_x / n_x, 1, i_z / n_z],
+                n_el=n_y * n_el,
             )
     return mesh
 
