@@ -179,7 +179,7 @@ class TestRotation(unittest.TestCase):
         # an identity rotation.
         (rot * rot.inv()).get_rotation_vector()
 
-    def test_relative_roation(self):
+    def test_relative_rotation(self):
         """Test the relative rotation between two rotations."""
 
         # Set default values for global parameters.

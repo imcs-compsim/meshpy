@@ -838,7 +838,7 @@ class Mesh:
                     )
                 beam_grid.cell_data["cross_section_radius"] = beam_radius_for_display
 
-            # Grid with beam polyl ine
+            # Grid with beam polyline
             beam_grid = beam_grid.cell_data_to_point_data()
 
             # Poly data for nodes

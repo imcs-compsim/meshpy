@@ -31,7 +31,6 @@
 """This file defines the interface to the Cython geometric search
 functionality."""
 
-# Import python module
 import os
 import sys
 import warnings
@@ -39,7 +38,7 @@ import warnings
 # Set path so the Cython binary will be found
 sys.path.append(os.path.dirname(__file__))
 
-# Import the Cython module
+# Try to import the Cython module
 try:
     import geometric_search_cython_lib
 

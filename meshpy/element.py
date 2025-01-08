@@ -30,7 +30,6 @@
 # -----------------------------------------------------------------------------
 """This module implements the class that represents one element in the Mesh."""
 
-# Meshpy modules.
 from .base_mesh_item import BaseMeshItemFull
 
 

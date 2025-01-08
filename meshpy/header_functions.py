@@ -68,7 +68,7 @@ def set_runtime_output(
     btss_output=True,
     output_triad=True,
     every_iteration=False,
-    absolute_beam_positons=True,
+    absolute_beam_positions=True,
     element_owner=True,
     element_gid=True,
     element_mat_id=True,
@@ -148,7 +148,7 @@ def set_runtime_output(
             f"""
         OUTPUT_BEAMS                    yes
         DISPLACEMENT                    yes
-        USE_ABSOLUTE_POSITIONS          {get_yes_no(absolute_beam_positons)}
+        USE_ABSOLUTE_POSITIONS          {get_yes_no(absolute_beam_positions)}
         TRIAD_VISUALIZATIONPOINT        {get_yes_no(output_triad)}
         STRAINS_GAUSSPOINT              {get_yes_no(output_strains)}
         ELEMENT_GID                     {get_yes_no(element_gid)}""",
@@ -222,7 +222,7 @@ def set_beam_to_solid_meshtying(
     input_file:
         Input file that the options will be added to.
     interaction_type: BeamToSolidInteractionType
-        Type of beam-to-solid interation.
+        Type of beam-to-solid interaction.
     contact_discretization: str
         Type of contact (mortar, Gauss point, ...)
     segmentation: bool

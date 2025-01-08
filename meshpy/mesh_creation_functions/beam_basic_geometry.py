@@ -30,12 +30,10 @@
 # -----------------------------------------------------------------------------
 """This file has functions to create basic geometry items with meshpy."""
 
-# Python packages.
 import warnings
 
 import numpy as np
 
-# Meshpy modules.
 from ..conf import mpy
 from ..mesh import Mesh
 from ..rotation import Rotation
@@ -652,7 +650,7 @@ def create_beam_mesh_helix(
 
     mesh_temp.wrap_around_cylinder()
 
-    # rotate and translate simple helix to align with neccessary axis and starting point
+    # rotate and translate simple helix to align with necessary axis and starting point
     mesh_temp.rotate(
         Rotation.from_basis(start_point_origin_vec, axis_vector)
         * Rotation([1, 0, 0], -np.pi * 0.5)

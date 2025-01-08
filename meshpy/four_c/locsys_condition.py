@@ -30,7 +30,6 @@
 # -----------------------------------------------------------------------------
 """This file contains the wrapper for the LocSys condition for 4c."""
 
-# MeshPy modules
 from ..boundary_condition import BoundaryCondition
 from ..conf import mpy
 

@@ -212,7 +212,7 @@ class VTKWriter:
         vtk_geom_type: mpy.vtk_geo
             Type of data container that is added
         n_new_items: int
-            Number of new items added. This is needed fo fill up data fields that are in the
+            Number of new items added. This is needed to fill up data fields that are in the
             global data but not in the one that is added.
         """
 

@@ -80,7 +80,7 @@ def find_close_nodes(nodes, **kwargs):
     Args
     ----
     nodes: list(Node)
-        Nodes who are part ot eh point cloud.
+        Nodes who are part of the point cloud.
     **kwargs:
         Arguments passed on to geometric_search.find_close_points
 
