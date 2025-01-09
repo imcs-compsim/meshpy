@@ -68,6 +68,7 @@ from .nurbs_generic import add_geomdl_nurbs_to_mesh
 # NURBS geometry functions
 from .nurbs_geometries import (
     create_nurbs_brick,
+    create_nurbs_cylindrical_shell_sector,
     create_nurbs_flat_plate_2d,
     create_nurbs_hemisphere_surface,
     create_nurbs_hollow_cylinder_segment_2d,
@@ -102,6 +103,7 @@ __all__ = [
     "add_geomdl_nurbs_to_mesh",
     # NURBS geometry functions
     "create_nurbs_hollow_cylinder_segment_2d",
+    "create_nurbs_cylindrical_shell_sector",
     "create_nurbs_flat_plate_2d",
     "create_nurbs_brick",
     "create_nurbs_sphere_surface",
