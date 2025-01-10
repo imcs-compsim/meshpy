@@ -166,7 +166,7 @@ def create_large_beam_mesh(n_x, n_y, n_z, n_el):
     return mesh
 
 
-class TestPerformance(object):
+class PerformanceTest(object):
     """A class to test meshpy performance."""
 
     # Set expected test times.
@@ -252,7 +252,7 @@ def test_performance(tmp_path):
     testing_solid_block = tmp_path / "performance_testing_solid.dat"
     testing_beam = tmp_path / "performance_testing_beam.dat"
 
-    test_performance = TestPerformance()
+    test_performance = PerformanceTest()
 
     test_performance.time_function(
         "cubitpy_create_solid",
@@ -337,4 +337,4 @@ def test_performance(tmp_path):
         args=[FindClosePointAlgorithm.brute_force_cython, 100, 1000],
     )
 
-    assert test_performance.failed_tests > 0
+    assert test_performance.failed_tests == 0
