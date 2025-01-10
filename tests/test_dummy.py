@@ -105,3 +105,10 @@ def test_performance() -> None:
     """Performance test."""
 
     assert True
+
+
+@pytest.mark.parametrize("argument", [1, 2, pytest.param(3, marks=pytest.mark.arborx)])
+def test_parametrize(argument) -> None:
+    """Parametrize test, one parameter is tagged with an additional mark."""
+
+    assert True
