@@ -157,7 +157,7 @@ def current_test_name(request: pytest.FixtureRequest) -> str:
         str: The name of the current pytest test.
     """
 
-    return request.node.name
+    return request.node.originalname
 
 
 @pytest.fixture(scope="function")
@@ -239,7 +239,10 @@ def get_corresponding_reference_file_path(
             reference_file_directory / corresponding_reference_file
         )
 
-        assert os.path.isfile(corresponding_reference_file_path)
+        if not os.path.isfile(corresponding_reference_file_path):
+            raise AssertionError(
+                f"File path: {corresponding_reference_file_path} does not exist"
+            )
 
         return corresponding_reference_file_path
 
