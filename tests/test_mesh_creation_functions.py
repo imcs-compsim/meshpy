@@ -36,7 +36,6 @@ import unittest
 import autograd.numpy as npAD
 import numpy as np
 import splinepy
-from utils import compare_strings, compare_test_result, testing_input
 
 from meshpy import (
     Beam3eb,
