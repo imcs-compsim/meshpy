@@ -358,9 +358,8 @@ def compare_strings_equality_assert(reference: str, result: str) -> None:
     diff = list(unified_diff(reference.splitlines(), result.splitlines(), lineterm=""))
     if diff:
         raise AssertionError(
-            "Exact string comparison failed! Difference between reference and result: \n".join(
-                list(diff)
-            )
+            "Exact string comparison failed! Difference between reference and result: \n"
+            + "\n".join(list(diff))
         )
 
 
