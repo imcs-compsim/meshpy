@@ -111,7 +111,12 @@ def pytest_collection_modifyitems(config: Config, items: list) -> None:
     # loop over all collected tests
     for item in items:
         # Get all set markers for current test (e.g. `fourc_arborx`, `cubitpy`, `performance`, ...)
-        markers = [marker.name for marker in item.iter_markers()]
+        # We don't care about the "parametrize" marker here
+        markers = [
+            marker.name
+            for marker in item.iter_markers()
+            if not marker.name == "parametrize"
+        ]
 
         for flag, marker in zip(
             ["--4C", "--ArborX", "--CubitPy", "--performance-tests"],
