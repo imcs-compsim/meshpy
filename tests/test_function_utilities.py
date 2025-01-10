@@ -31,48 +31,32 @@
 """This script is used to test the functionality of the meshpy.function_utility
 module."""
 
-import unittest
-
 from meshpy.function_utility import (
     create_linear_interpolation_function,
     create_linear_interpolation_string,
 )
 
 
-class TestFunctionUtilitiesGeometricSearch(unittest.TestCase):
-    """Test various stuff from the meshpy.function_utility module."""
+def test_linear_interpolation_function():
+    """Test that linear interpolation functions are created correctly."""
 
-    def test_linear_interpolation_function(self):
-        """Test that linear interpolation functions are created correctly."""
+    t = [1.5, 2.5, 3.5, 10.0]
+    values = [1.0, -1.0, 3.5, -10.3]
 
-        t = [1.5, 2.5, 3.5, 10.0]
-        values = [1.0, -1.0, 3.5, -10.3]
+    fun = create_linear_interpolation_function(t, values)
+    assert [
+        "SYMBOLIC_FUNCTION_OF_SPACE_TIME var\nVARIABLE 0 NAME var TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3"
+    ] == fun.get_dat_lines()
 
-        fun = create_linear_interpolation_function(t, values)
-        self.assertEqual(
-            [
-                "SYMBOLIC_FUNCTION_OF_SPACE_TIME var\nVARIABLE 0 NAME var TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3"
-            ],
-            fun.get_dat_lines(),
-        )
+    fun = create_linear_interpolation_function(t, values, function_type="My type")
+    assert [
+        "My type var\nVARIABLE 0 NAME var TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3"
+    ] == fun.get_dat_lines()
 
-        fun = create_linear_interpolation_function(t, values, function_type="My type")
-        self.assertEqual(
-            [
-                "My type var\nVARIABLE 0 NAME var TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3"
-            ],
-            fun.get_dat_lines(),
-        )
-
-        fun_string = create_linear_interpolation_string(
-            t, values, variable_name="test", variable_index=12
-        )
-        self.assertEqual(
-            "VARIABLE 12 NAME test TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3",
-            fun_string,
-        )
-
-
-if __name__ == "__main__":
-    # Execution part of script.
-    unittest.main()
+    fun_string = create_linear_interpolation_string(
+        t, values, variable_name="test", variable_index=12
+    )
+    assert (
+        "VARIABLE 12 NAME test TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3"
+        == fun_string
+    )
