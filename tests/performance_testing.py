@@ -31,7 +31,6 @@
 """Create a couple of different mesh cases and test the performance."""
 
 import os
-import socket
 import sys
 import time
 import warnings
@@ -53,7 +52,7 @@ from meshpy.geometric_search.find_close_points import (
     find_close_points,
 )
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
-from meshpy.utility import find_close_nodes, get_env_variable
+from meshpy.utility import find_close_nodes
 
 
 def create_solid_block(file_path, nx, ny, nz):
@@ -173,8 +172,7 @@ class TestPerformance(object):
     """A class to test meshpy performance."""
 
     # Set expected test times.
-    expected_times = {}
-    expected_times["github-sisyphos-docker"] = {
+    expected_times = {
         "cubitpy_create_solid": 8.0,
         "meshpy_load_solid": 1.5,
         "meshpy_load_solid_full": 3.5,
@@ -206,16 +204,10 @@ class TestPerformance(object):
             kwargs = {}
 
         # Get the expected time for this function.
-        host = get_env_variable(
-            "PERFORMANCE_TESTING_HOST", default=socket.gethostname()
-        )
-        if host in self.expected_times.keys():
-            if name in self.expected_times[host].keys():
-                expected_time = self.expected_times[host][name]
-            else:
-                raise ValueError("Function name {} not found!".format(name))
+        if name in self.expected_times.keys():
+            expected_time = self.expected_times[name]
         else:
-            raise ValueError("Host {} not found!".format(host))
+            raise ValueError("Function name {} not found!".format(name))
 
         # Time before the execution.
         start_time = time.time()

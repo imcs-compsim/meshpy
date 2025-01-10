@@ -39,6 +39,7 @@ dependencies = [
   "numpy-quaternion",
   "pre-commit",
   "pytest",
+  "pytest-cov",
   "pyvista",
   "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@main",
   "scipy",
@@ -54,4 +55,14 @@ CI-CD = [
   "coverage-badge",
   "cubitpy@git+https://github.com/imcs-compsim/cubitpy.git@main",
   "setuptools" # Needed for coverage-badge
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-p pytest_cov --cov-report=term --cov-report=html --cov-fail-under=0 --cov=meshpy/ --cov=tutorial/ --cov-append"
+markers = [
+  "fourc: tests in combination with 4C",
+  "arborx: tests in combination with ArborX",
+  "cubitpy: tests in combination with CubitPy",
+  "performance: performance tests of MeshPy"
 ]

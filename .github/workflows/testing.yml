@@ -47,16 +47,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
       - name: Run the test suite
         uses: ./.github/actions/run_tests
-        with:
-          require_four_c: 0
-          require_arborx: 0
-          require_cubitpy: 0
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: ${{github.job}}-${{ matrix.os-version }}-python${{ matrix.python-version }}-${{github.run_number}}
-          path: ${{github.workspace}}/tests/testing-tmp/
+          path: ${{ env.PYTEST_TMPDIR }}
 
   meshpy-testing-cubitpy:
     name: self-hosted with CubitPy
@@ -75,14 +71,13 @@ jobs:
         uses: ./.github/actions/run_tests
         with:
           source-command: "source python-testing-environment/bin/activate"
-          require_four_c: 0
-          require_arborx: 0
+          additional-pytest-flags: "--CubitPy"
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: ${{github.job}}-${{github.run_number}}
-          path: ${{github.workspace}}/tests/testing-tmp/
+          path: ${{ env.PYTEST_TMPDIR }}
 
   meshpy-testing-4C-arborx:
     name: ubuntu-latest with 4C and ArborX
@@ -106,14 +101,13 @@ jobs:
         with:
           source-command: "source python-testing-environment/bin/activate"
           install-command: "-e .[CI-CD]"
-          require_cubitpy: 0
-          coverage_config: "coverage_local.config"
+          additional-pytest-flags: "--4C --ArborX"
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: ${{github.job}}-${{github.run_number}}
-          path: ${{github.workspace}}/tests/testing-tmp/
+          path: ${{ env.PYTEST_TMPDIR }}
 
   meshpy-performance-testing:
     name: performance tests
@@ -129,5 +123,15 @@ jobs:
         uses: ./.github/actions/setup_virtual_python_environment
         with:
           python-exe: /home_local/github-runner/testing_lib/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/python-3.12.1-qnjucxirxh534suwewl6drfa237u6t7w/bin/python
-      - name: Run the performance test suite
-        uses: ./.github/actions/run_performance_tests
+      - name: Run the test suite
+        uses: ./.github/actions/run_tests
+        with:
+          source-command: "source python-testing-environment/bin/activate"
+          install-command: ".[CI-CD]"
+          additional-pytest-flags: "--performance-tests --exclude-standard-tests"
+      - name: Upload test results on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{github.job}}-${{github.run_number}}
+          path: ${{ env.PYTEST_TMPDIR }}
