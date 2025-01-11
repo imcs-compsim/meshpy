@@ -386,7 +386,7 @@ class TestFullFourC(unittest.TestCase):
             LINEAR_SOLVER                         1
             INT_STRATEGY                          Standard
             DYNAMICTYPE                           Statics
-            RESULTSEVRY                           1
+            RESULTSEVERY                          1
             NLNSOL                                fullnewton
             PREDICT                               TangDis
             TIMESTEP                              1.

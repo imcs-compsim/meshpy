@@ -40,8 +40,8 @@ MATERIAL_FORCES_GAUSSPOINT            Yes
 INT_STRATEGY                          Standard
 LINEAR_SOLVER                         1
 DYNAMICTYPE                           Statics
-RESULTSEVRY                           1
-RESTARTEVRY                           20
+RESULTSEVERY                          1
+RESTARTEVERY                          20
 NLNSOL                                fullnewton
 TIMESTEP                              0.2
 NUMSTEP                               5
