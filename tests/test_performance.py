@@ -35,7 +35,6 @@ import warnings
 
 import numpy as np
 import pytest
-from cubitpy import CubitPy, cupy
 
 from meshpy import (
     Beam3rHerm2Line3,
@@ -57,6 +56,8 @@ def create_solid_block(file_path, nx, ny, nz):
     """Create a solid block (1 x 1 x 1) with (nx * ny * nz) elements."""
 
     # Initialize cubit.
+    from cubitpy import CubitPy, cupy
+
     cubit = CubitPy()
 
     # Create brick.
