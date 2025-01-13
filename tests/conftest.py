@@ -297,6 +297,9 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
                 )
             elif reference.suffix in [".vtk", ".vtu"]:
                 compare_vtk_files(reference, result, rtol, atol)
+            elif reference.suffix == ".dat":
+                # Do nothing here as the mechanism below will compare the dat files.
+                pass
             else:
                 raise NotImplementedError(
                     f"Comparison is not yet implemented for {reference.suffix} files."

@@ -30,25 +30,15 @@
 # -----------------------------------------------------------------------------
 """This script is used to test the tutorial."""
 
-import os
-import unittest
-
 import meshpy_tutorial
-from utils import compare_test_result, testing_temp
 
 
-class TestTutorial(unittest.TestCase):
-    """This class tests the headers in the repository."""
+def test_tutorial(
+    assert_results_equal, get_corresponding_reference_file_path, tmp_path
+):
+    """Test that the tutorial works."""
 
-    def test_tutorial(self):
-        """Test that the tutorial works."""
-
-        input_file = meshpy_tutorial.meshpy_tutorial(testing_temp)
-        tutorial_file = os.path.join(testing_temp, "tutorial.dat")
-        input_file.write_input_file(tutorial_file, header=False, dat_header=False)
-        compare_test_result(self, tutorial_file)
-
-
-if __name__ == "__main__":
-    # Execution part of script.
-    unittest.main()
+    input_file = meshpy_tutorial.meshpy_tutorial(tmp_path)
+    tutorial_file = tmp_path / "tutorial.dat"
+    input_file.write_input_file(tutorial_file, header=False, dat_header=False)
+    assert_results_equal(get_corresponding_reference_file_path(), tutorial_file)
