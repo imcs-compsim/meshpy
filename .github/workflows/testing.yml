@@ -1,5 +1,4 @@
-
-name: MeshPy test suite
+name: Test suite
 
 on:
   schedule:
@@ -16,20 +15,6 @@ on:
     type: choice
 
 jobs:
-  meshpy-code-check:
-    name: Code check
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Setup virtual python environment
-        uses: ./.github/actions/setup_virtual_python_environment
-      - name: Code checks
-        uses: ./.github/actions/code_check
-
   meshpy-testing:
     name: ${{ matrix.os-version }} python${{ matrix.python-version }}
     strategy:
