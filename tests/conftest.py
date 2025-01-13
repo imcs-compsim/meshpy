@@ -44,7 +44,7 @@ from _pytest.config import Config
 from _pytest.config.argparsing import Parser
 from vtk_utils.compare_grids import compare_grids
 
-from meshpy import InputFile
+from meshpy import InputFile, mpy
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -132,6 +132,12 @@ def pytest_collection_modifyitems(config: Config, items: list) -> None:
 
     items[:] = selected_tests
     config.hook.pytest_deselected(items=deselected_tests)
+
+
+@pytest.fixture(autouse=True)
+def run_before_each_test():
+    """Reset the global mpy object before each test."""
+    mpy.set_default_values()
 
 
 @pytest.fixture(scope="session")
