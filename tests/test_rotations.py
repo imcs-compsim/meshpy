@@ -84,7 +84,9 @@ def test_cartesian_rotations():
         rotation = Rotation.from_quaternion(rotation.get_quaternion())
         rotation_matrix = Rotation.from_rotation_matrix(rotation.get_rotation_matrix())
 
-        np.allclose(np.linalg.norm(rot3D - rotation_matrix.get_rotation_matrix()), 0.0)
+        assert np.allclose(
+            np.linalg.norm(rot3D - rotation_matrix.get_rotation_matrix()), 0.0
+        )
 
 
 def test_euler_angles():
@@ -109,7 +111,9 @@ def test_euler_angles():
     rotation_y = Rotation([0, 1, 0], beta)
     rotation_z = Rotation([0, 0, 1], gamma)
     rotation_euler = rotation_z * rotation_y * rotation_x
-    np.allclose(np.linalg.norm(R_euler - rotation_euler.get_rotation_matrix()), 0.0)
+    assert np.allclose(
+        np.linalg.norm(R_euler - rotation_euler.get_rotation_matrix()), 0.0
+    )
     assert rotation_euler == Rotation.from_rotation_matrix(R_euler)
 
     # Direct formula for quaternions for Euler angles.
