@@ -31,15 +31,9 @@
 """This script is used to simulate 4C input files created with MeshPy."""
 
 import os
-import unittest
 
 import numpy as np
-from utils import (
-    compare_test_result,
-    skip_fail_four_c,
-    testing_input,
-    testing_temp,
-)
+import pytest
 
 from meshpy import (
     Beam3rHerm2Line3,
@@ -63,6 +57,15 @@ from meshpy.four_c import (
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
 from meshpy.utility import check_node_by_coordinate
+
+# We test all test cases in this file twice. Once we only run up to the first
+# call of 4C and compare the created input files, this allows to run some core
+# functionalities of this file even if 4C is not available. To achieve "full"
+# test coverage we also run the test, where we enforce 4C to be run.
+PYTEST_4C_SIMULATION_PARAMETRIZE = [
+    "enforce_four_c",
+    [False, pytest.param(True, marks=pytest.mark.fourc)],
+]
 
 
 def create_cantilever_model(n_steps, time_step=0.5):
@@ -90,11 +93,13 @@ def create_cantilever_model(n_steps, time_step=0.5):
     return input_file, beam_set
 
 
-def run_four_c_test(self, name, mesh, n_proc=2, restart=[None, None], **kwargs):
+def run_four_c_test(tmp_path, name, mesh, n_proc=2, restart=[None, None], **kwargs):
     """Run 4C with a input file and check the output.
 
     Args
     ----
+    tmp_path: Path
+        Path to the temporary directory
     name: str
         Name of the test case
     mesh: InputFile
@@ -105,10 +110,8 @@ def run_four_c_test(self, name, mesh, n_proc=2, restart=[None, None], **kwargs):
         If the simulation should be a restart
     """
 
-    skip_fail_four_c(self)
-
     # Check if temp directory exists.
-    testing_dir = os.path.join(testing_temp, name)
+    testing_dir = tmp_path / name
     os.makedirs(testing_dir, exist_ok=True)
 
     # Create input file.
@@ -123,37 +126,33 @@ def run_four_c_test(self, name, mesh, n_proc=2, restart=[None, None], **kwargs):
         restart_step=restart[0],
         restart_from=restart[1],
     )
-    self.assertEqual(0, return_code, msg="Test {} failed!".format(name))
+    assert 0 == return_code
 
 
-def test_four_c_simulation_honeycomb_sphere_as_input(self):
-    """Test the honeycomb sphere model with different types of mesh import."""
-
-    mpy.set_default_values()
-    mpy.import_mesh_full = True
-    self.create_honeycomb_sphere_as_input(
-        "honeycomb_sphere", compare_created_input_file=True
-    )
-
-    mpy.set_default_values()
-    mpy.import_mesh_full = False
-    self.create_honeycomb_sphere_as_input("honeycomb_sphere_full_input")
-
-
-def create_honeycomb_sphere_as_input(self, name, *, compare_created_input_file=False):
-    """Create the same honeycomb mesh as defined in
-    /Input/beam3r_herm2lin3_static_point_coupling_BTSPH_contact_stent_\
-    honeycomb_stretch_r01_circ10.dat The honeycomb beam is in contact with a
-    rigid sphere, the sphere is moved compared to the original test file, since
-    there are some problems with the contact convergence.
+@pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
+@pytest.mark.parametrize("full_import", [False, True])
+def test_four_c_simulation_honeycomb_sphere(
+    enforce_four_c,
+    full_import,
+    tmp_path,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
+    reference_file_directory,
+):
+    """Create the same honeycomb mesh as defined in 4C/tests/input_files/beam3r
+    _herm2lin3_static_point_coupling_BTSPH_contact_stent_honeycomb_stretch_r01_
+    circ10.dat The honeycomb beam is in contact with a rigid sphere, the sphere
+    is moved compared to the original test file, since there are some problems
+    with the contact convergence.
 
     The sphere is imported as an existing mesh.
     """
 
     # Read input file with information of the sphere and simulation.
+    mpy.import_mesh_full = full_import
     input_file = InputFile(
         description="honeycomb beam in contact with sphere",
-        dat_file=os.path.join(testing_input, "4C_input_honeycomb_sphere.dat"),
+        dat_file=reference_file_directory / "4C_input_honeycomb_sphere.dat",
     )
 
     # Modify the time step options.
@@ -233,34 +232,41 @@ def create_honeycomb_sphere_as_input(self, name, *, compare_created_input_file=F
     input_file.add(mesh_honeycomb)
 
     # Check the created input file
-    if compare_created_input_file:
-        compare_test_result(self, input_file.get_string(check_nox=False, header=False))
-
-    # Run the input file in 4C.
-    self.run_four_c_test(name, input_file)
-
-
-def test_four_c_simulation_beam_and_solid_tube(self):
-    """Test the beam and solid tube model with different types of mesh
-    import."""
-
-    mpy.set_default_values()
-    mpy.import_mesh_full = True
-    self.create_beam_and_solid_tube(
-        "beam_and_solid_tube", compare_created_input_file=True
+    assert_results_equal(
+        get_corresponding_reference_file_path(
+            additional_identifier="full_import" if full_import else None
+        ),
+        input_file,
     )
 
-    mpy.set_default_values()
-    mpy.import_mesh_full = False
-    self.create_beam_and_solid_tube("beam_and_solid_tube")
+    # Check if we still have to actually run 4C.
+    if not enforce_four_c:
+        return
+
+    # Run the input file in 4C.
+    run_four_c_test(
+        tmp_path,
+        "honeycomb_sphere" + ("_full" if full_import else ""),
+        input_file,
+    )
 
 
-def create_beam_and_solid_tube(self, name, *, compare_created_input_file=False):
+@pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
+@pytest.mark.parametrize("full_import", [False, True])
+def test_four_c_simulation_beam_and_solid_tube(
+    enforce_four_c,
+    full_import,
+    tmp_path,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
+    reference_file_directory,
+):
     """Merge a solid tube with a beam tube and simulate them together."""
 
     # Create the input file and read solid mesh data.
+    mpy.import_mesh_full = full_import
     input_file = InputFile(description="Solid tube with beam tube")
-    input_file.read_dat(os.path.join(testing_input, "4C_input_solid_tube.dat"))
+    input_file.read_dat(reference_file_directory / "4C_input_solid_tube.dat")
 
     # Add options for beam_output.
     input_file.add(
@@ -328,14 +334,32 @@ def create_beam_and_solid_tube(self, name, *, compare_created_input_file=False):
     input_file.get_unique_geometry_sets(link_to_nodes="all_nodes")
 
     # Check the created input file
-    if compare_created_input_file:
-        compare_test_result(self, input_file.get_string(check_nox=False, header=False))
+    assert_results_equal(
+        get_corresponding_reference_file_path(
+            additional_identifier="full_import" if full_import else None
+        ),
+        input_file,
+    )
+
+    # Check if we still have to actually run 4C.
+    if not enforce_four_c:
+        return
 
     # Run the input file in 4C.
-    self.run_four_c_test(name, input_file)
+    run_four_c_test(
+        tmp_path,
+        "beam_and_solid_tube" + ("_full" if full_import else ""),
+        input_file,
+    )
 
 
-def test_four_c_simulation_honeycomb_variants(self):
+@pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
+def test_four_c_simulation_honeycomb_variants(
+    enforce_four_c,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
+    tmp_path,
+):
     """Create a few different honeycomb structures."""
 
     # Set default values for global parameters.
@@ -480,15 +504,25 @@ def test_four_c_simulation_honeycomb_variants(self):
             )
 
     # Check the created input file
-    compare_test_result(
-        self, input_file.get_string(check_nox=False, header=False), rtol=1e-10
+    assert_results_equal(
+        get_corresponding_reference_file_path(), input_file, rtol=1e-10
     )
 
+    # Check if we still have to actually run 4C.
+    if not enforce_four_c:
+        return
+
     # Run the input file in 4C.
-    self.run_four_c_test("honeycomb_variants", input_file)
+    run_four_c_test(tmp_path, "honeycomb_variants", input_file)
 
 
-def test_four_c_simulation_rotated_beam_axis(self):
+@pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
+def test_four_c_simulation_rotated_beam_axis(
+    enforce_four_c,
+    tmp_path,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
+):
     """
     Create three beams that consist of two connected lines.
     - The first case uses the same nodes for the connection of the lines,
@@ -593,21 +627,45 @@ def test_four_c_simulation_rotated_beam_axis(self):
             )
 
     # Check the created input file
-    compare_test_result(self, input_file.get_string(check_nox=False, header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+
+    # Check if we still have to actually run 4C.
+    if not enforce_four_c:
+        return
 
     # Run the input file in 4C.
-    self.run_four_c_test("rotated_beam_axis", input_file)
-    self.run_four_c_test("rotated_beam_axis", input_file, nox_xml_file="xml_name")
+    run_four_c_test(tmp_path, "rotated_beam_axis", input_file)
+    run_four_c_test(tmp_path, "rotated_beam_axis", input_file, nox_xml_file="xml_name")
 
 
-def xtest_four_c_simulation_dbc_monitor_to_input(self, initial_run_name):
+@pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
+@pytest.mark.parametrize(
+    "initial_run_name",
+    [
+        "test_cantilever_w_dbc_monitor_to_input",
+        "test_cantilever_w_dbc_monitor_to_input_all_values",
+    ],
+)
+def test_four_c_simulation_dbc_monitor_to_input(
+    enforce_four_c,
+    initial_run_name,
+    tmp_path,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
+):
     """Common driver to simulate a cantilever beam with Dirichlet boundary
     conditions and then apply those as Neumann boundaries.
 
     This can be used to test the two different functions
     by selecting one of the appropriate initial run_names:
-        test_cantilever_w_dbc_monitor_to_input
-        test_cantilever_w_dbc_monitor_to_input_all_values
+
+    test_cantilever_w_dbc_monitor_to_input:
+        This function explicitly tests dbc_monitor_to_input.
+
+    test_cantilever_w_dbc_monitor_to_input_all_values:
+        For the application of the boundary conditions, the last values for
+        the force are used. This function explicitly tests
+        dbc_monitor_to_input_all_values.
     """
 
     # Create and run the initial simulation.
@@ -638,15 +696,17 @@ def xtest_four_c_simulation_dbc_monitor_to_input(self, initial_run_name):
     )
 
     # Check the input file
-    compare_test_result(
-        self,
-        initial_simulation.get_string(check_nox=False, header=False),
-        additional_identifier="initial",
-        reference_file_base_name="test_four_c_simulation_dbc_monitor_to_input",
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier="initial"),
+        initial_simulation,
     )
 
+    # Check if we still have to actually run 4C.
+    if not enforce_four_c:
+        return
+
     # Run the simulation in 4C
-    self.run_four_c_test(initial_run_name, initial_simulation)
+    run_four_c_test(tmp_path, initial_run_name, initial_simulation)
 
     # Create and run the second simulation.
     restart_simulation, beam_set = create_cantilever_model(n_steps=21)
@@ -666,24 +726,20 @@ def xtest_four_c_simulation_dbc_monitor_to_input(self, initial_run_name):
     if initial_run_name == "test_cantilever_w_dbc_monitor_to_input":
         dbc_monitor_to_input(
             restart_simulation,
-            os.path.join(
-                testing_temp,
-                initial_run_name,
-                f"{initial_run_name}_monitor_dbc",
-                f"{initial_run_name}_102_monitor_dbc.csv",
-            ),
+            tmp_path
+            / initial_run_name
+            / f"{initial_run_name}_monitor_dbc"
+            / f"{initial_run_name}_102_monitor_dbc.csv",
             n_dof=9,
             function=function_nbc,
         )
     elif initial_run_name == "test_cantilever_w_dbc_monitor_to_input_all_values":
         dbc_monitor_to_input_all_values(
             restart_simulation,
-            os.path.join(
-                testing_temp,
-                initial_run_name,
-                f"{initial_run_name}_monitor_dbc",
-                f"{initial_run_name}_102_monitor_dbc.csv",
-            ),
+            tmp_path
+            / initial_run_name
+            / f"{initial_run_name}_monitor_dbc"
+            / f"{initial_run_name}_102_monitor_dbc.csv",
             n_dof=9,
             time_span=[10 * 0.5, 21 * 0.5],
             functions=[function_nbc, function_nbc, function_nbc],
@@ -702,48 +758,26 @@ def xtest_four_c_simulation_dbc_monitor_to_input(self, initial_run_name):
     )
 
     # Check the input file of the restart simulation
-    compare_test_result(
-        self,
-        restart_simulation.get_string(check_nox=False, header=False),
-        additional_identifier="restart",
-        reference_file_base_name="test_four_c_simulation_dbc_monitor_to_input",
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier="restart"),
+        restart_simulation,
     )
 
     # Run the restart simulation
-    self.run_four_c_test(
+    run_four_c_test(
+        tmp_path,
         f"{initial_run_name}_restart",
         restart_simulation,
         restart=[2, f"../{initial_run_name}/{initial_run_name}"],
     )
 
 
-def test_four_c_simulation_dbc_monitor_to_input(self):
-    """First simulate a cantilever beam with Dirichlet boundary conditions and
-    then apply those as Neumann boundaries.
-
-    This function explicitly tests dbc_monitor_to_input.
-    """
-
-    self.xtest_four_c_simulation_dbc_monitor_to_input(
-        "test_cantilever_w_dbc_monitor_to_input"
-    )
-
-
-def test_four_c_simulation_dbc_monitor_to_input_all_values(self):
-    """First simulate a cantilever beam with Dirichlet boundary conditions and
-    then apply those as Neumann boundaries.
-
-    For the application of the boundary conditions, the last values for
-    the force are used. This function explicitly tests
-    dbc_monitor_to_input_all_values.
-    """
-    self.xtest_four_c_simulation_dbc_monitor_to_input(
-        "test_cantilever_w_dbc_monitor_to_input_all_values"
-    )
-
-
+@pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
 def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_values(
-    self,
+    enforce_four_c,
+    tmp_path,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
 ):
     """First simulate a cantilever beam with Dirichlet boundary conditions and
     then apply those as Neumann boundaries.
@@ -807,15 +841,18 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     )
 
     # Check the input file.
-    compare_test_result(
-        self,
-        initial_simulation.get_string(check_nox=False, header=False),
-        additional_identifier="dirichlet",
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier="dirichlet"),
+        initial_simulation,
     )
+
+    # Check if we still have to actually run 4C.
+    if not enforce_four_c:
+        return
 
     # Run the simulation in 4C.
     initial_run_name = "all_dbc_to_nbc_initial"
-    self.run_four_c_test(initial_run_name, initial_simulation)
+    run_four_c_test(tmp_path, initial_run_name, initial_simulation)
 
     # Create and run the second simulation.
     force_simulation, beam_set = create_cantilever_model(2 * n_steps, dt)
@@ -828,9 +865,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     )
 
     # Set up path to monitor.
-    monitor_db_path = os.path.join(
-        testing_temp, initial_run_name + "/", initial_run_name + "_monitor_dbc"
-    )
+    monitor_db_path = tmp_path / initial_run_name / (initial_run_name + "_monitor_dbc")
 
     # Convert the Dirichlet conditions into Neuman conditions.
     for root, dirs, file_names in os.walk(monitor_db_path):
@@ -854,10 +889,9 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     )
 
     # Compare the input file of the restart simulation.
-    compare_test_result(
-        self,
-        force_simulation.get_string(check_nox=False, header=False),
-        additional_identifier="neumann",
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier="neumann"),
+        force_simulation,
         atol=1e-6,
     )
 
@@ -865,10 +899,13 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     set_runtime_output(force_simulation)
 
     initial_run_name = "all_dbc_to_nbc_initial_3"
-    self.run_four_c_test(initial_run_name, force_simulation)
+    run_four_c_test(tmp_path, initial_run_name, force_simulation)
 
 
-def test_four_c_simulation_cantilever_convergence(self):
+@pytest.mark.fourc
+def test_four_c_simulation_cantilever_convergence(
+    tmp_path,
+):
     """Create multiple simulations of a cantilever beam.
 
     This is a legacy test that used to test the simulation manager.
@@ -906,10 +943,10 @@ def test_four_c_simulation_cantilever_convergence(self):
             ),
         )
         output_name = f"cantilever_convergence_{n_el}"
-        self.run_four_c_test(output_name, input_file, n_proc=n_proc)
-        testing_dir = os.path.join(testing_temp, output_name)
+        run_four_c_test(tmp_path, output_name, input_file, n_proc=n_proc)
+        testing_dir = tmp_path / output_name
         my_data = np.genfromtxt(
-            testing_dir + f"/{output_name}_energy.csv", delimiter=","
+            testing_dir / f"{output_name}_energy.csv", delimiter=","
         )
         return my_data[-1, 2]
 
@@ -925,4 +962,4 @@ def test_four_c_simulation_cantilever_convergence(self):
         "ref": 0.335085590674607,
     }
     for key in results_ref.keys():
-        self.assertTrue(abs(results[key] - results_ref[key]) < 1e-12)
+        assert abs(results[key] - results_ref[key]) < 1e-12
