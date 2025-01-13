@@ -171,87 +171,76 @@ def test_meshpy_mesh_rotations_individual(assert_results_equal):
     assert_results_equal(mesh_1, mesh_2)
 
 
-def test_meshpy_mesh_reflection(assert_results_equal):
-    """Check the Mesh().reflect function."""
+@pytest.mark.parametrize("origin", [False, True])
+@pytest.mark.parametrize("flip", [False, True])
+def test_meshpy_mesh_reflection(origin, flip, assert_results_equal):
+    """Create a mesh, and its mirrored counterpart and then compare the dat
+    files."""
 
-    def compare_reflection(origin=False, flip=False):
-        """Create a mesh, and its mirrored counterpart and then compare the dat
-        files."""
+    # Rotations to be applied.
+    rot_1 = Rotation([0, 1, 1], np.pi / 6)
+    rot_2 = Rotation([1, 2.455, -1.2324], 1.2342352)
 
-        # Rotations to be applied.
-        rot_1 = Rotation([0, 1, 1], np.pi / 6)
-        rot_2 = Rotation([1, 2.455, -1.2324], 1.2342352)
+    mesh_ref = InputFile()
+    mesh = InputFile()
+    mat = MaterialReissner(radius=0.1)
 
-        mesh_ref = InputFile()
-        mesh = InputFile()
-        mat = MaterialReissner(radius=0.1)
-
-        # Create the reference mesh.
-        if not flip:
-            create_beam_mesh_line(
-                mesh_ref, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0], n_el=1
-            )
-            create_beam_mesh_line(
-                mesh_ref, Beam3rHerm2Line3, mat, [1, 0, 0], [1, 1, 0], n_el=1
-            )
-            create_beam_mesh_line(
-                mesh_ref, Beam3rHerm2Line3, mat, [1, 1, 0], [1, 1, 1], n_el=1
-            )
-        else:
-            create_beam_mesh_line(
-                mesh_ref, Beam3rHerm2Line3, mat, [1, 0, 0], [0, 0, 0], n_el=1
-            )
-            create_beam_mesh_line(
-                mesh_ref, Beam3rHerm2Line3, mat, [1, 1, 0], [1, 0, 0], n_el=1
-            )
-            create_beam_mesh_line(
-                mesh_ref, Beam3rHerm2Line3, mat, [1, 1, 1], [1, 1, 0], n_el=1
-            )
-
-            # Reorder the internal nodes.
-            old = mesh_ref.nodes.copy()
-            mesh_ref.nodes[0] = old[2]
-            mesh_ref.nodes[2] = old[0]
-            mesh_ref.nodes[3] = old[5]
-            mesh_ref.nodes[5] = old[3]
-            mesh_ref.nodes[6] = old[8]
-            mesh_ref.nodes[8] = old[6]
-
-        mesh_ref.rotate(rot_1)
-
-        # Create the mesh that will be mirrored.
+    # Create the reference mesh.
+    if not flip:
         create_beam_mesh_line(
-            mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [-1, 0, 0], n_el=1
+            mesh_ref, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0], n_el=1
         )
         create_beam_mesh_line(
-            mesh, Beam3rHerm2Line3, mat, [-1, 0, 0], [-1, 1, 0], n_el=1
+            mesh_ref, Beam3rHerm2Line3, mat, [1, 0, 0], [1, 1, 0], n_el=1
         )
         create_beam_mesh_line(
-            mesh, Beam3rHerm2Line3, mat, [-1, 1, 0], [-1, 1, 1], n_el=1
+            mesh_ref, Beam3rHerm2Line3, mat, [1, 1, 0], [1, 1, 1], n_el=1
         )
-        mesh.rotate(rot_1.inv())
+    else:
+        create_beam_mesh_line(
+            mesh_ref, Beam3rHerm2Line3, mat, [1, 0, 0], [0, 0, 0], n_el=1
+        )
+        create_beam_mesh_line(
+            mesh_ref, Beam3rHerm2Line3, mat, [1, 1, 0], [1, 0, 0], n_el=1
+        )
+        create_beam_mesh_line(
+            mesh_ref, Beam3rHerm2Line3, mat, [1, 1, 1], [1, 1, 0], n_el=1
+        )
 
-        # Rotate everything, to show generalized reflection.
-        mesh_ref.rotate(rot_2)
-        mesh.rotate(rot_2)
+        # Reorder the internal nodes.
+        old = mesh_ref.nodes.copy()
+        mesh_ref.nodes[0] = old[2]
+        mesh_ref.nodes[2] = old[0]
+        mesh_ref.nodes[3] = old[5]
+        mesh_ref.nodes[5] = old[3]
+        mesh_ref.nodes[6] = old[8]
+        mesh_ref.nodes[8] = old[6]
 
-        if origin:
-            # Translate everything so the reflection plane is not in the
-            # origin.
-            r = [1, 2.455, -1.2324]
-            mesh_ref.translate(r)
-            mesh.translate(r)
-            mesh.reflect(2 * (rot_2 * [1, 0, 0]), origin=r, flip_beams=flip)
-        else:
-            mesh.reflect(2 * (rot_2 * [1, 0, 0]), flip_beams=flip)
+    mesh_ref.rotate(rot_1)
 
-        # Compare the dat files.
-        assert_results_equal(mesh_ref, mesh)
+    # Create the mesh that will be mirrored.
+    create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [-1, 0, 0], n_el=1)
+    create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [-1, 0, 0], [-1, 1, 0], n_el=1)
+    create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [-1, 1, 0], [-1, 1, 1], n_el=1)
+    mesh.rotate(rot_1.inv())
 
-    # Compare all 4 possible variations.
-    for flip in [True, False]:
-        for origin in [True, False]:
-            compare_reflection(origin=origin, flip=flip)
+    # Rotate everything, to show generalized reflection.
+    mesh_ref.rotate(rot_2)
+    mesh.rotate(rot_2)
+
+    if origin:
+        # Translate everything so the reflection plane is not in the
+        # origin.
+        r = [1, 2.455, -1.2324]
+        mesh_ref.translate(r)
+        mesh.translate(r)
+        mesh.reflect(2 * (rot_2 * [1, 0, 0]), origin=r, flip_beams=flip)
+    else:
+        mesh.reflect(2 * (rot_2 * [1, 0, 0]), flip_beams=flip)
+
+    # Compare the dat files.
+    # TODO: Also add fixed result files to compare the tests with
+    assert_results_equal(mesh_ref, mesh)
 
 
 @pytest.mark.parametrize("full_import", [[True, "full"], [False, None]])
@@ -1847,7 +1836,8 @@ def test_meshpy_check_double_elements(
     assert_results_equal(ref_file, vtk_file)
 
 
-def perform_test_check_overlapping_coupling_nodes(check=True):
+@pytest.mark.parametrize("check", [True, False])
+def test_meshpy_check_overlapping_coupling_nodes(check):
     """Per default, we check that coupling nodes are at the same physical
     position.
 
@@ -1879,13 +1869,6 @@ def perform_test_check_overlapping_coupling_nodes(check=True):
             Coupling(*args)
     else:
         Coupling(*args, check_overlapping_nodes=False)
-
-
-def test_meshpy_check_overlapping_coupling_nodes():
-    """Perform the test that the coupling nodes can be tested if they are at
-    the same position."""
-    perform_test_check_overlapping_coupling_nodes(True)
-    perform_test_check_overlapping_coupling_nodes(False)
 
 
 def test_meshpy_check_start_end_node_error():
