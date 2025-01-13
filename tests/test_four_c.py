@@ -32,10 +32,8 @@
 input files."""
 
 import os
-import unittest
 
 import numpy as np
-from utils import compare_test_result, compare_vtk, testing_input, testing_temp
 
 from meshpy import (
     Beam3rHerm2Line3,
@@ -61,18 +59,9 @@ from meshpy.mesh_creation_functions.beam_basic_geometry import (
 from meshpy.utility import is_node_on_plane
 
 
-def setUp(self):
-    """This method is called before each test and sets the default MeshPy
-    values for each test.
-
-    The values can be changed in the individual tests.
-    """
-
-    # Set default values for global parameters.
-    mpy.set_default_values()
-
-
-def test_four_c_material_numbering(self):
+def test_four_c_material_numbering(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test that materials can be added as strings to an input file (as is done
     when importing dat files) and that the numbering with other added materials
     does not lead to materials with double IDs."""
@@ -98,94 +87,92 @@ def test_four_c_material_numbering(self):
         """
     )
     input_file.add(MaterialReissner(youngs_modulus=1.0, radius=2.0))
-    compare_test_result(self, input_file.get_string(header=False, dat_header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_four_c_simulation_beam_potential_helix(self):
+def test_four_c_simulation_beam_potential_helix(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test the correct creation of input files for simulations including beam
     to beam potential interactions."""
 
-    def create_model():
-        """Create the beam to beam potential interaction model."""
+    input_file = InputFile()
+    mat = MaterialReissner(youngs_modulus=1000, radius=0.5, shear_correction=1.0)
 
-        input_file = InputFile()
-        mat = MaterialReissner(youngs_modulus=1000, radius=0.5, shear_correction=1.0)
+    # define function for line charge density
+    fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
 
-        # define function for line charge density
-        fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+    # define the beam potential
+    beampotential = BeamPotential(
+        input_file,
+        pot_law_prefactor=[-1.0e-3, 12.45e-8],
+        pot_law_exponent=[6.0, 12.0],
+        pot_law_line_charge_density=[1.0, 2.0],
+        pot_law_line_charge_density_funcs=[fun, "none"],
+    )
 
-        # define the beam potential
-        beampotential = BeamPotential(
-            input_file,
-            pot_law_prefactor=[-1.0e-3, 12.45e-8],
-            pot_law_exponent=[6.0, 12.0],
-            pot_law_line_charge_density=[1.0, 2.0],
-            pot_law_line_charge_density_funcs=[fun, "none"],
+    # set headers for static case and beam potential
+    beampotential.add_header(
+        potential_type="Volume",
+        cutoff_radius=10.0,
+        evaluation_strategy="SingleLengthSpecific_SmallSepApprox_Simple",
+        regularization_type="linear_extrapolation",
+        regularization_separation=0.1,
+        integration_segments=2,
+        gauss_points=50,
+        potential_reduction_length=15.0,
+        automatic_differentiation=False,
+        choice_master_slave="lower_eleGID_is_slave",
+    )
+    beampotential.add_runtime_output(every_iteration=True)
+
+    # create helix
+    helix_set = create_beam_mesh_helix(
+        input_file,
+        Beam3rHerm2Line3,
+        mat,
+        [0.0, 0.0, 1.0],
+        [0.0, 0.0, 0.0],
+        [2.0, 0.0, 0.0],
+        helix_angle=np.pi / 4,
+        height_helix=10,
+        n_el=4,
+    )
+
+    # add potential charge conditions to helix
+    beampotential.add_potential_charge_condition(geometry_set=helix_set["line"])
+
+    # Add boundary condition to bottom node
+    input_file.add(
+        BoundaryCondition(
+            GeometrySet(
+                input_file.get_nodes_by_function(
+                    is_node_on_plane,
+                    normal=[0, 0, 1],
+                    origin_distance=0.0,
+                    tol=0.1,
+                )
+            ),
+            "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0",
+            bc_type=mpy.bc.dirichlet,
         )
+    )
 
-        # set headers for static case and beam potential
-        beampotential.add_header(
-            potential_type="Volume",
-            cutoff_radius=10.0,
-            evaluation_strategy="SingleLengthSpecific_SmallSepApprox_Simple",
-            regularization_type="linear_extrapolation",
-            regularization_separation=0.1,
-            integration_segments=2,
-            gauss_points=50,
-            potential_reduction_length=15.0,
-            automatic_differentiation=False,
-            choice_master_slave="lower_eleGID_is_slave",
-        )
-        beampotential.add_runtime_output(every_iteration=True)
-
-        # create helix
-        helix_set = create_beam_mesh_helix(
-            input_file,
-            Beam3rHerm2Line3,
-            mat,
-            [0.0, 0.0, 1.0],
-            [0.0, 0.0, 0.0],
-            [2.0, 0.0, 0.0],
-            helix_angle=np.pi / 4,
-            height_helix=10,
-            n_el=4,
-        )
-
-        # add potential charge conditions to helix
-        beampotential.add_potential_charge_condition(geometry_set=helix_set["line"])
-
-        ### Add boundary condition to bottom node
-        input_file.add(
-            BoundaryCondition(
-                GeometrySet(
-                    input_file.get_nodes_by_function(
-                        is_node_on_plane,
-                        normal=[0, 0, 1],
-                        origin_distance=0.0,
-                        tol=0.1,
-                    )
-                ),
-                "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0",
-                bc_type=mpy.bc.dirichlet,
-            )
-        )
-
-        return input_file
-
-    input_file = create_model()
-
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_four_c_solid_shell_direction_detection(self):
+def test_four_c_solid_shell_direction_detection(
+    assert_results_equal,
+    get_corresponding_reference_file_path,
+    reference_file_directory,
+    tmp_path,
+):
     """Test the solid shell direction detection functionality."""
 
     # Test the plates
     mpy.import_mesh_full = True
     mesh_block = InputFile(
-        dat_file=os.path.join(
-            testing_input, "4C_input_solid_shell_thickness_blocks.dat"
-        )
+        dat_file=reference_file_directory / "4C_input_solid_shell_thickness_blocks.dat"
     )
     # Add a beam element to check the function also works with beam elements
     mat = MaterialReissner()
@@ -194,22 +181,22 @@ def test_four_c_solid_shell_direction_detection(self):
     )
     # Set the thickness direction and compare result
     set_solid_shell_thickness_direction(mesh_block.elements, selection_type="thickness")
-    compare_test_result(
-        self, mesh_block.get_string(header=False), additional_identifier="blocks"
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier="blocks"),
+        mesh_block,
     )
 
     # Test the dome
     mesh_dome_original = InputFile(
-        dat_file=os.path.join(testing_input, "4C_input_solid_shell_thickness_dome.dat")
+        dat_file=reference_file_directory / "4C_input_solid_shell_thickness_dome.dat"
     )
 
     # Test that the thickness version works
     mesh_dome = mesh_dome_original.copy()
     set_solid_shell_thickness_direction(mesh_dome.elements, selection_type="thickness")
-    compare_test_result(
-        self,
-        mesh_dome.get_string(header=False),
-        additional_identifier="dome_thickness",
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier="dome_thickness"),
+        mesh_dome,
     )
 
     # Test that the direction function version works
@@ -224,10 +211,9 @@ def test_four_c_solid_shell_direction_detection(self):
         selection_type="projection_director_function",
         director_function=director_function,
     )
-    compare_test_result(
-        self,
-        mesh_dome.get_string(header=False),
-        additional_identifier="dome_thickness",
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier="dome_thickness"),
+        mesh_dome,
     )
 
     # Test that the constant direction version works
@@ -238,27 +224,31 @@ def test_four_c_solid_shell_direction_detection(self):
         director=[0, 0, 1],
         identify_threshold=None,
     )
-    compare_test_result(
-        self,
-        mesh_dome.get_string(header=False),
-        additional_identifier="dome_constant_direction",
+    assert_results_equal(
+        get_corresponding_reference_file_path(
+            additional_identifier="dome_constant_direction"
+        ),
+        mesh_dome,
     )
 
     # Also test the visualization function
-    test_file = os.path.join(
-        testing_temp,
-        "test_four_c_solid_shell_direction_detection_dome_constant_direction.vtu",
+    ref_file = (
+        reference_file_directory
+        / "test_four_c_solid_shell_direction_detection_dome_constant_direction.vtu"
     )
-    ref_file = os.path.join(
-        testing_input,
-        "test_four_c_solid_shell_direction_detection_dome_constant_direction.vtu",
+    test_file = (
+        tmp_path
+        / "test_four_c_solid_shell_direction_detection_dome_constant_direction_result.vtu"
     )
+
     grid = get_visualization_third_parameter_direction_hex8(mesh_dome)
     grid.save(test_file)
-    compare_vtk(self, ref_file, test_file)
+    assert_results_equal(ref_file, test_file)
 
 
-def test_meshpy_locsys_condition(self):
+def test_meshpy_locsys_condition(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test case for point locsys condition for beams.
 
     The testcase is similar to beam3r_herm2line3_static_locsys.dat, but
@@ -300,10 +290,10 @@ def test_meshpy_locsys_condition(self):
     input_file.add(LocSysCondition(beam_set["end"], Rotation([0, 0, 1], 0.1)))
 
     # Compare with the reference solution.
-    compare_test_result(self, input_file.get_string(header=False, check_nox=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_linear_time_transformation_scaling(self):
+def test_linear_time_transformation_scaling():
     """Test the scaling of the interval for the function.
 
     Starts with a function within the interval [0,1] and transforms
@@ -328,8 +318,8 @@ def test_linear_time_transformation_scaling(self):
     time_result = np.array([0, 0.5, 0.75, 1.0])
 
     # check solution
-    self.assertEqual(time_trans.tolist(), time_result.tolist())
-    self.assertEqual(force_trans.tolist(), force_result.tolist())
+    assert time_trans.tolist() == time_result.tolist()
+    assert force_trans.tolist() == force_result.tolist()
 
     # transform to interval [0, 2]
     time_trans, force_trans = linear_time_transformation(
@@ -337,8 +327,8 @@ def test_linear_time_transformation_scaling(self):
     )
 
     # time values should double
-    self.assertEqual(time_trans.tolist(), (2 * time_result).tolist())
-    self.assertEqual(force_trans.tolist(), force_result.tolist())
+    assert time_trans.tolist() == (2 * time_result).tolist()
+    assert force_trans.tolist() == force_result.tolist()
 
     # new result
     force_result = np.array(
@@ -349,14 +339,12 @@ def test_linear_time_transformation_scaling(self):
     time_trans, force_trans = linear_time_transformation(
         time, force, [1, 2, 5], flip=False, valid_start_and_end_point=True
     )
-    self.assertEqual(
-        time_trans.tolist(), np.array([0, 1.0, 1.5, 1.75, 2.0, 5.0]).tolist()
-    )
-    self.assertEqual(force_trans.tolist(), force_result.tolist())
+    assert time_trans.tolist() == np.array([0, 1.0, 1.5, 1.75, 2.0, 5.0]).tolist()
+    assert force_trans.tolist() == force_result.tolist()
 
 
-def test_linear_time_transformation_flip(self):
-    """Test the flip flag option of linear_time_transformationto mirror the
+def test_linear_time_transformation_flip():
+    """Test the flip flag option of linear_time_transformation to mirror the
     function."""
 
     # base case no scaling no end points should be attached
@@ -376,8 +364,8 @@ def test_linear_time_transformation_flip(self):
     time_trans, force_trans = linear_time_transformation(time, force, [0, 1], flip=True)
 
     # check solution
-    self.assertEqual(time_result.tolist(), time_trans.tolist())
-    self.assertEqual(force_trans.tolist(), force_result.tolist())
+    assert time_result.tolist() == time_trans.tolist()
+    assert force_trans.tolist() == force_result.tolist()
 
     # new force result
     force_result = np.array([[10, 11, 12], [7, 8, 9], [4, 5, 6], [1, 2, 3]])
@@ -386,8 +374,8 @@ def test_linear_time_transformation_flip(self):
 
     # test now an shift to the interval [1 ,2]
     time_trans, force_trans = linear_time_transformation(time, force, [1, 2], flip=True)
-    self.assertEqual(time_result.tolist(), time_trans.tolist())
-    self.assertEqual(force_trans.tolist(), force_result.tolist())
+    assert time_result.tolist() == time_trans.tolist()
+    assert force_trans.tolist() == force_result.tolist()
 
     # same trick as above but with 2
     time_result = np.array([0, 2.0, 2.25, 2.5, 3.0, 5.0])
@@ -400,5 +388,5 @@ def test_linear_time_transformation_flip(self):
     time_trans, force_trans = linear_time_transformation(
         time, force, [2, 3, 5], flip=True, valid_start_and_end_point=True
     )
-    self.assertEqual(time_result.tolist(), time_trans.tolist())
-    self.assertEqual(force_trans.tolist(), force_result.tolist())
+    assert time_result.tolist() == time_trans.tolist()
+    assert force_trans.tolist() == force_result.tolist()
