@@ -22,7 +22,6 @@ runs:
         MESHPY_FOUR_C_EXE: /home/user/4C/build/4C
         CUBIT_ROOT: /imcs/public/compsim/opt/cubit-15.2
         OMPI_MCA_rmaps_base_oversubscribe: 1
-        PERFORMANCE_TESTING_HOST: github-sisyphos-docker
       run: |
         cd ${GITHUB_WORKSPACE}
         ${{ inputs.source-command }}

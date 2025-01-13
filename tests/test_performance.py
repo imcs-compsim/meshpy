@@ -30,14 +30,12 @@
 # -----------------------------------------------------------------------------
 """Create a couple of different mesh cases and test the performance."""
 
-import os
-import sys
 import time
 import warnings
 
 import numpy as np
+import pytest
 from cubitpy import CubitPy, cupy
-from utils import empty_testing_directory, testing_temp
 
 from meshpy import (
     Beam3rHerm2Line3,
@@ -168,7 +166,7 @@ def create_large_beam_mesh(n_x, n_y, n_z, n_el):
     return mesh
 
 
-class TestPerformance(object):
+class PerformanceTest(object):
     """A class to test meshpy performance."""
 
     # Set expected test times.
@@ -246,16 +244,15 @@ def get_geometric_search_time(algorithm, n_points, n_runs):
     return time.time() - start
 
 
-if __name__ == "__main__":
-    """Execute part of script."""
+@pytest.mark.performance
+def test_performance(tmp_path):
+    """The actual performance test."""
 
     # Directories and files for testing.
-    testing_solid_block = os.path.join(testing_temp, "performance_testing_solid.dat")
-    testing_beam = os.path.join(testing_temp, "performance_testing_beam.dat")
+    testing_solid_block = tmp_path / "performance_testing_solid.dat"
+    testing_beam = tmp_path / "performance_testing_beam.dat"
 
-    empty_testing_directory()
-
-    test_performance = TestPerformance()
+    test_performance = PerformanceTest()
 
     test_performance.time_function(
         "cubitpy_create_solid",
@@ -318,7 +315,7 @@ if __name__ == "__main__":
         args=[mesh_smaller_for_output],
         kwargs={
             "output_name": "performance_testing_beam",
-            "output_directory": testing_temp,
+            "output_directory": tmp_path,
             "beam_centerline_visualization_segments": 1,
         },
     )
@@ -329,7 +326,7 @@ if __name__ == "__main__":
         args=[mesh_smaller_for_output],
         kwargs={
             "output_name": "performance_testing_beam",
-            "output_directory": testing_temp,
+            "output_directory": tmp_path,
             "beam_centerline_visualization_segments": 5,
         },
     )
@@ -340,7 +337,4 @@ if __name__ == "__main__":
         args=[FindClosePointAlgorithm.brute_force_cython, 100, 1000],
     )
 
-    if test_performance.failed_tests > 0:
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    assert test_performance.failed_tests == 0
