@@ -1,10 +1,8 @@
-# -*- coding: utf-8 -*-
-# -----------------------------------------------------------------------------
 # MeshPy: A beam finite element input generator
 #
 # MIT License
 #
-# Copyright (c) 2018-2024
+# Copyright (c) 2018-2025
 #     Ivo Steinbrecher
 #     Institute for Mathematics and Computer-Based Simulation
 #     Universitaet der Bundeswehr Muenchen
@@ -27,7 +25,6 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-# -----------------------------------------------------------------------------
 """Find unique points in a point cloud, i.e., points that are within a certain
 tolerance of each other will be considered as unique."""
 

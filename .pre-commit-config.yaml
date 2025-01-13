@@ -29,6 +29,7 @@ repos:
         name: Check valid YAML syntax
       - id: end-of-file-fixer
         name: Check for newline at end of file
+        exclude: '^LICENSE$'
       - id: debug-statements
         name: Check for debugger imports
       - id: no-commit-to-branch
@@ -65,6 +66,28 @@ repos:
       - id: mypy
         name: Run mypy (static type checker for python)
         args: ["--install-types", "--non-interactive", "--ignore-missing-imports", "--follow-imports=silent"]
+  - repo: https://github.com/Lucas-C/pre-commit-hooks
+    rev: v1.5.5
+    hooks:
+      - id: insert-license
+        name: Insert license header (//)
+        types_or: [c++, c]
+        exclude: 'mm$'
+        args:
+          - --license-filepath
+          - LICENSE
+          - --comment-style
+          - '//'
+          - --no-extra-eol
+      - id: insert-license
+        name: Insert license header (#)
+        types_or: [cmake, cython, dockerfile, python, shell]
+        args:
+          - --license-filepath
+          - LICENSE
+          - --comment-style
+          - '#'
+          - --no-extra-eol
   - repo: https://github.com/asmeurer/removestar
     rev: "1.5.2"
     hooks:
