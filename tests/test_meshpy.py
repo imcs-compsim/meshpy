@@ -32,20 +32,12 @@
 
 import os
 import random
-import unittest
 import warnings
 
 import autograd.numpy as npAD
 import numpy as np
+import pytest
 import vtk
-from utils import (
-    compare_strings,
-    compare_test_result,
-    compare_vtk,
-    skip_fail_cubitpy,
-    testing_input,
-    testing_temp,
-)
 
 from meshpy import (
     Beam3eb,
@@ -122,18 +114,7 @@ def create_test_mesh(mesh):
     )
 
 
-def setUp(self):
-    """This method is called before each test and sets the default meshpy
-    values for each test.
-
-    The values can be changed in the individual tests.
-    """
-
-    # Set default values for global parameters.
-    mpy.set_default_values()
-
-
-def test_meshpy_rotations(self):
+def test_meshpy_rotations(assert_results_equal):
     """Check if the Mesh function rotation gives the same results as rotating
     each node it self."""
 
@@ -157,12 +138,10 @@ def test_meshpy_rotations(self):
     mesh_2.rotate(rot, origin=origin)
 
     # Compare the output for the two meshes.
-    compare_strings(
-        self, mesh_1.get_string(header=False), mesh_2.get_string(header=False)
-    )
+    assert_results_equal(mesh_1, mesh_2)
 
 
-def test_meshpy_mesh_rotations_individual(self):
+def test_meshpy_mesh_rotations_individual(assert_results_equal):
     """Check if the Mesh function rotation gives the same results as rotating
     each node it self, when an array is passed with different rotations."""
 
@@ -189,12 +168,10 @@ def test_meshpy_mesh_rotations_individual(self):
     mesh_2.rotate(rotations, origin=origin)
 
     # Compare the output for the two meshes.
-    compare_strings(
-        self, mesh_1.get_string(header=False), mesh_2.get_string(header=False)
-    )
+    assert_results_equal(mesh_1, mesh_2)
 
 
-def test_meshpy_mesh_reflection(self):
+def test_meshpy_mesh_reflection(assert_results_equal):
     """Check the Mesh().reflect function."""
 
     def compare_reflection(origin=False, flip=False):
@@ -269,9 +246,7 @@ def test_meshpy_mesh_reflection(self):
             mesh.reflect(2 * (rot_2 * [1, 0, 0]), flip_beams=flip)
 
         # Compare the dat files.
-        compare_strings(
-            self, mesh_ref.get_string(header=False), mesh.get_string(header=False)
-        )
+        assert_results_equal(mesh_ref, mesh)
 
     # Compare all 4 possible variations.
     for flip in [True, False]:
@@ -279,16 +254,16 @@ def test_meshpy_mesh_reflection(self):
             compare_reflection(origin=origin, flip=flip)
 
 
-def create_comments_in_solid(self, full_import):
+@pytest.mark.parametrize("full_import", [[True, "full"], [False, None]])
+def test_meshpy_comments_in_solid(
+    assert_results_equal, get_corresponding_reference_file_path, full_import
+):
     """Check if comments in the solid file are handled correctly if they are
     inside a mesh section."""
 
     # Convert the solid mesh to meshpy objects.
-    mpy.import_mesh_full = full_import
-
-    solid_file = os.path.join(
-        testing_input, "test_meshpy_comments_in_solid_initial.dat"
-    )
+    mpy.import_mesh_full = full_import[0]
+    solid_file = get_corresponding_reference_file_path(additional_identifier="initial")
     mesh = InputFile(dat_file=solid_file)
 
     # Add one element with BCs.
@@ -298,20 +273,17 @@ def create_comments_in_solid(self, full_import):
     mesh.add(BoundaryCondition(sets["end"], "test", bc_type=mpy.bc.neumann))
 
     # Compare the output of the mesh.
-    compare_test_result(self, mesh.get_string(header=False).strip())
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier=full_import[1]),
+        mesh,
+    )
 
 
-def test_meshpy_comments_in_solid(self):
-    """Test case with full classical import."""
-    self.create_comments_in_solid(False)
-
-
-def test_meshpy_comments_in_solid_full(self):
-    """Test case with full solid import."""
-    self.create_comments_in_solid(True)
-
-
-def test_meshpy_mesh_transformations_with_solid(self):
+def test_meshpy_mesh_transformations_with_solid(
+    assert_results_equal,
+    reference_file_directory,
+    get_corresponding_reference_file_path,
+):
     """Test the different mesh transformation methods in combination with solid
     elements."""
 
@@ -327,7 +299,7 @@ def test_meshpy_mesh_transformations_with_solid(self):
 
         # Create the mesh.
         mesh = InputFile(
-            dat_file=os.path.join(testing_input, "4C_input_solid_cuboid.dat")
+            dat_file=reference_file_directory / "4C_input_solid_cuboid.dat"
         )
         mat = MaterialReissner(radius=0.05)
 
@@ -349,10 +321,11 @@ def test_meshpy_mesh_transformations_with_solid(self):
             mesh.reflect([0.1, -2, 1])
 
         # Check the output.
-        compare_test_result(
-            self,
-            mesh.get_string(header=False),
-            additional_identifier="full" if import_full else "dat",
+        assert_results_equal(
+            get_corresponding_reference_file_path(
+                additional_identifier="full" if import_full else "dat"
+            ),
+            mesh,
         )
 
     base_test_mesh_translations(import_full=False, radius=None)
@@ -362,29 +335,27 @@ def test_meshpy_mesh_transformations_with_solid(self):
     # Not specifying or specifying the wrong radius should raise an error
     # In this case because everything is on one plane ("no" solid nodes in this case)
     # and we specify the radius
-    self.assertRaises(
-        ValueError,
-        base_test_mesh_translations,
-        import_full=False,
-        radius=666,
-        reflect=False,
-    )
+    with pytest.raises(ValueError):
+        base_test_mesh_translations(import_full=False, radius=666, reflect=False)
+
     # In this case because we need to specify a radius because with the solid nodes there
     # is no clear radius
-    self.assertRaises(
-        ValueError,
-        base_test_mesh_translations,
-        import_full=True,
-        radius=None,
-        reflect=False,
-    )
+    with pytest.raises(ValueError):
+        base_test_mesh_translations(
+            import_full=True,
+            radius=None,
+            reflect=False,
+        )
 
 
-def test_meshpy_fluid_element_section(self):
+def test_meshpy_fluid_element_section(
+    assert_results_equal,
+    reference_file_directory,
+    get_corresponding_reference_file_path,
+):
     """Add beam elements to an input file containing fluid elements."""
-
     input_file = InputFile(
-        dat_file=os.path.join(testing_input, "fluid_element_input.dat")
+        dat_file=reference_file_directory / "fluid_element_input.dat"
     )
 
     beam_mesh = Mesh()
@@ -397,10 +368,12 @@ def test_meshpy_fluid_element_section(self):
     input_file.add(beam_mesh)
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_meshpy_domain_geometry_sets(self):
+def test_meshpy_domain_geometry_sets(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Add geometry set based on a 4C internal domain."""
 
     input_file = InputFile()
@@ -421,10 +394,12 @@ def test_meshpy_domain_geometry_sets(self):
     )
 
     # Compare the output of the mesh.
-    compare_test_result(self, input_file.get_string(header=False).strip())
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_meshpy_wrap_cylinder_not_on_same_plane(self):
+def test_meshpy_wrap_cylinder_not_on_same_plane(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Create a helix that is itself wrapped around a cylinder."""
 
     # Ignore the warnings from wrap around cylinder.
@@ -456,10 +431,10 @@ def test_meshpy_wrap_cylinder_not_on_same_plane(self):
     mesh.wrap_around_cylinder(radius=2.0)
 
     # Check the output.
-    compare_test_result(self, mesh.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-def test_meshpy_get_nodes_by_function(self):
+def test_meshpy_get_nodes_by_function():
     """Check if the get_nodes_by_function method of Mesh works properly."""
 
     def get_nodes_at_x(node, x_value):
@@ -476,27 +451,29 @@ def test_meshpy_get_nodes_by_function(self):
     create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 1, 0], [10, 1, 0], n_el=10)
 
     nodes = mesh.get_nodes_by_function(get_nodes_at_x, 1.0)
-    self.assertTrue(2 == len(nodes))
+    assert 2 == len(nodes)
     for node in nodes:
-        self.assertTrue(np.abs(1.0 - node.coordinates[0]) < 1e-10)
+        assert np.abs(1.0 - node.coordinates[0]) < 1e-10
 
 
-def test_meshpy_get_min_max_coordinates(self):
+def test_meshpy_get_min_max_coordinates(reference_file_directory):
     """Test if the get_min_max_coordinates function works properly."""
 
     # Create the mesh.
     mpy.import_mesh_full = True
-    mesh = InputFile(dat_file=os.path.join(testing_input, "4C_input_solid_cuboid.dat"))
+    mesh = InputFile(dat_file=reference_file_directory / "4C_input_solid_cuboid.dat")
     mat = MaterialReissner(radius=0.05)
     create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 3, 4], n_el=10)
 
     # Check the results.
     min_max = get_min_max_coordinates(mesh.nodes)
     ref_solution = [-0.5, -1.0, -1.5, 2.0, 3.0, 4.0]
-    self.assertTrue(np.linalg.norm(min_max - ref_solution) < 1e-10)
+    assert np.linalg.norm(min_max - ref_solution) < 1e-10
 
 
-def test_meshpy_geometry_sets(self):
+def test_meshpy_geometry_sets(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test functionality of the GeometrySet objects."""
 
     mesh = InputFile()
@@ -517,10 +494,12 @@ def test_meshpy_geometry_sets(self):
     mesh.add(set_1, set_2, set_12, set_3)
 
     # Check the output.
-    compare_test_result(self, mesh.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-def test_meshpy_unique_ordering_of_get_all_nodes_for_line_condition(self):
+def test_meshpy_unique_ordering_of_get_all_nodes_for_line_condition(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """This test ensures that the ordering of the nodes returned from the
     function get_all_nodes is unique for line sets."""
 
@@ -543,13 +522,15 @@ def test_meshpy_unique_ordering_of_get_all_nodes_for_line_condition(self):
         )
 
     # Check the input file
-    compare_test_result(
-        self,
-        input_file.get_string(check_nox=False, header=False),
+    assert_results_equal(
+        get_corresponding_reference_file_path(),
+        input_file,
     )
 
 
-def test_meshpy_reissner_beam(self):
+def test_meshpy_reissner_beam(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test that the input file for all types of Reissner beams is generated
     correctly."""
 
@@ -571,10 +552,10 @@ def test_meshpy_reissner_beam(self):
         )
 
     # Compare with the reference solution.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_meshpy_reissner_elasto_plastic(self):
+def test_meshpy_reissner_elasto_plastic():
     """Test the elasto plastic Reissner beam material."""
 
     kwargs = {
@@ -591,15 +572,17 @@ def test_meshpy_reissner_elasto_plastic(self):
 
     mat = MaterialReissnerElastoplastic(**kwargs)
     mat.n_global = 69
-    self.assertEqual(mat.get_dat_lines(), [ref_string + "0"])
+    assert mat.get_dat_lines() == [ref_string + "0"]
 
     kwargs["torsion_plasticity"] = True
     mat = MaterialReissnerElastoplastic(**kwargs)
     mat.n_global = 69
-    self.assertEqual(mat.get_dat_lines(), [ref_string + "1"])
+    assert mat.get_dat_lines() == [ref_string + "1"]
 
 
-def test_meshpy_kirchhoff_beam(self):
+def test_meshpy_kirchhoff_beam(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test that the input file for all types of Kirchhoff beams is generated
     correctly."""
 
@@ -650,10 +633,10 @@ def test_meshpy_kirchhoff_beam(self):
                     input_file.translate([0, 0.5, 0])
 
     # Compare with the reference solution.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_meshpy_kirchhoff_material(self):
+def test_meshpy_kirchhoff_material():
     """Test the Kirchhoff Love beam material."""
 
     def set_stiff(material):
@@ -665,27 +648,29 @@ def test_meshpy_kirchhoff_material(self):
 
     material = MaterialKirchhoff(youngs_modulus=1000, is_fad=True)
     set_stiff(material)
-    self.assertTrue(
+    assert (
         " ".join(material.get_dat_lines())
         == "MAT None MAT_BeamKirchhoffElastHyper YOUNG 1000 SHEARMOD 500.0 DENS 0.0 CROSSAREA 2.0 MOMINPOL 5.0 MOMIN2 3.0 MOMIN3 4.0 FAD yes"
     )
 
     material = MaterialKirchhoff(youngs_modulus=1000, is_fad=False)
     set_stiff(material)
-    self.assertTrue(
+    assert (
         " ".join(material.get_dat_lines())
         == "MAT None MAT_BeamKirchhoffElastHyper YOUNG 1000 SHEARMOD 500.0 DENS 0.0 CROSSAREA 2.0 MOMINPOL 5.0 MOMIN2 3.0 MOMIN3 4.0 FAD no"
     )
 
     material = MaterialKirchhoff(youngs_modulus=1000, interaction_radius=1.1)
     set_stiff(material)
-    self.assertTrue(
+    assert (
         " ".join(material.get_dat_lines())
         == "MAT None MAT_BeamKirchhoffElastHyper YOUNG 1000 SHEARMOD 500.0 DENS 0.0 CROSSAREA 2.0 MOMINPOL 5.0 MOMIN2 3.0 MOMIN3 4.0 FAD no INTERACTIONRADIUS 1.1"
     )
 
 
-def test_meshpy_euler_bernoulli(self):
+def test_meshpy_euler_bernoulli(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Recreate the 4C test case beam3eb_static_endmoment_quartercircle.dat
     This tests the implementation for Euler Bernoulli beams."""
 
@@ -722,25 +707,25 @@ def test_meshpy_euler_bernoulli(self):
     )
 
     # Compare with the reference solution.
-    compare_test_result(self, input_file.get_string(header=False, check_nox=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
     # Test consistency checks.
     rot = Rotation([1, 2, 3], 2.3434)
     input_file.nodes[-1].rotation = rot
-    with self.assertRaises(ValueError):
+    with pytest.raises(ValueError):
         # This raises an error because not all rotation in the beams are
         # the same.
         input_file.get_string(header=False)
 
     for node in input_file.nodes:
         node.rotation = rot
-    with self.assertRaises(ValueError):
+    with pytest.raises(ValueError):
         # This raises an error because the rotations do not match the
         # director between the nodes.
         input_file.get_string(header=False)
 
 
-def test_meshpy_close_beam(self):
+def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_file_path):
     """
     Create a circle with different methods.
     - Create the mesh manually by creating the nodes and connecting them to
@@ -897,79 +882,84 @@ def test_meshpy_close_beam(self):
         }
 
     # Check the meshes without additional rotation.
-    compare_test_result(self, create_mesh_manually(Rotation()).get_string(header=False))
-    compare_test_result(
-        self,
+    assert_results_equal(
+        get_corresponding_reference_file_path(), create_mesh_manually(Rotation())
+    )
+    assert_results_equal(
+        get_corresponding_reference_file_path(),
         one_full_circle_closed(
             create_beam_mesh_arc_segment_via_rotation, get_arguments_arc_segment(0)
-        ).get_string(header=False),
+        ),
     )
-    compare_test_result(
-        self,
+    assert_results_equal(
+        get_corresponding_reference_file_path(),
         two_half_circles_closed(
             create_beam_mesh_arc_segment_via_rotation,
             [get_arguments_arc_segment(1), get_arguments_arc_segment(2)],
-        ).get_string(header=False),
+        ),
     )
-    compare_test_result(
-        self,
-        one_full_circle_closed(
-            create_beam_mesh_curve, get_arguments_curve(0)
-        ).get_string(header=False),
+    assert_results_equal(
+        get_corresponding_reference_file_path(),
+        one_full_circle_closed(create_beam_mesh_curve, get_arguments_curve(0)),
     )
-    compare_test_result(
-        self,
+    assert_results_equal(
+        get_corresponding_reference_file_path(),
         two_half_circles_closed(
             create_beam_mesh_curve, [get_arguments_curve(1), get_arguments_curve(2)]
-        ).get_string(header=False),
+        ),
     )
 
     # Check the meshes with additional rotation.
     additional_identifier = "rotation"
-    compare_test_result(
-        self,
-        create_mesh_manually(additional_rotation).get_string(header=False),
-        additional_identifier=additional_identifier,
+    assert_results_equal(
+        get_corresponding_reference_file_path(
+            additional_identifier=additional_identifier
+        ),
+        create_mesh_manually(additional_rotation),
     )
-    compare_test_result(
-        self,
+    assert_results_equal(
+        get_corresponding_reference_file_path(
+            additional_identifier=additional_identifier
+        ),
         one_full_circle_closed(
             create_beam_mesh_arc_segment_via_rotation,
             get_arguments_arc_segment(0),
             additional_rotation=additional_rotation,
-        ).get_string(header=False),
-        additional_identifier=additional_identifier,
+        ),
     )
-    compare_test_result(
-        self,
+    assert_results_equal(
+        get_corresponding_reference_file_path(
+            additional_identifier=additional_identifier
+        ),
         two_half_circles_closed(
             create_beam_mesh_arc_segment_via_rotation,
             [get_arguments_arc_segment(1), get_arguments_arc_segment(2)],
             additional_rotation=additional_rotation,
-        ).get_string(header=False),
-        additional_identifier=additional_identifier,
+        ),
     )
-    compare_test_result(
-        self,
+    assert_results_equal(
+        get_corresponding_reference_file_path(
+            additional_identifier=additional_identifier
+        ),
         one_full_circle_closed(
             create_beam_mesh_curve,
             get_arguments_curve(0),
             additional_rotation=additional_rotation,
-        ).get_string(header=False),
-        additional_identifier=additional_identifier,
+        ),
     )
-    compare_test_result(
-        self,
+    assert_results_equal(
+        get_corresponding_reference_file_path(
+            additional_identifier=additional_identifier
+        ),
         two_half_circles_closed(
             create_beam_mesh_curve,
             [get_arguments_curve(1), get_arguments_curve(2)],
             additional_rotation=additional_rotation,
-        ).get_string(header=False),
-        additional_identifier=additional_identifier,
+        ),
     )
 
 
-def test_geometry_set_get_geometry_objects(self):
+def test_geometry_set_get_geometry_objects():
     """Test if the geometry set returns the objects(elements) in the correct
     order."""
 
@@ -989,30 +979,17 @@ def test_geometry_set_get_geometry_objects(self):
     elements_of_geometry = geometry["line"].get_geometry_objects()
 
     # Check number of elements.
-    self.assertEqual(len(elements_of_geometry), n_el)
+    assert len(elements_of_geometry) == n_el
 
     # Check if the order of the elements from the geometry set is the same as for the mesh.
     for i_element, element in enumerate(elements_of_geometry):
-        self.assertEqual(element, mesh.elements[i_element])
+        assert element == mesh.elements[i_element]
 
 
-def test_meshpy_replace_nodes_geometry_set(self):
-    """Test case for coupling of nodes, and reusing the identical nodes.
-
-    This test case uses geometry-based sets.
-    """
-    self.x_test_replace_nodes(False)
-
-
-def test_meshpy_replace_nodes_geometry_set_nodes(self):
-    """Test case for coupling of nodes, and reusing the identical nodes.
-
-    This test case uses node-based sets.
-    """
-    self.x_test_replace_nodes(True)
-
-
-def x_test_replace_nodes(self, use_nodal_geometry_sets=False):
+@pytest.mark.parametrize("use_nodal_geometry_sets", [True, False])
+def test_meshpy_replace_nodes_geometry_set(
+    use_nodal_geometry_sets, assert_results_equal
+):
     """Test case for coupling of nodes, and reusing the identical nodes."""
 
     mpy.check_overlapping_elements = False
@@ -1085,11 +1062,7 @@ def x_test_replace_nodes(self, use_nodal_geometry_sets=False):
     )
 
     # Compare the meshes.
-    compare_strings(
-        self,
-        mesh_ref.get_string(header=False),
-        mesh_couple.get_string(header=False),
-    )
+    assert_results_equal(mesh_ref, mesh_couple)
 
     # Create two overlapping beams. This is to test that the middle nodes
     # are not coupled.
@@ -1121,11 +1094,7 @@ def x_test_replace_nodes(self, use_nodal_geometry_sets=False):
     )
 
     # Compare the meshes.
-    compare_strings(
-        self,
-        mesh_ref.get_string(header=False),
-        mesh_couple.get_string(header=False),
-    )
+    assert_results_equal(mesh_ref, mesh_couple)
 
     # Create a beam with two elements. Once immediately and once as two
     # beams with couplings.
@@ -1173,21 +1142,15 @@ def x_test_replace_nodes(self, use_nodal_geometry_sets=False):
     mesh_couple.add(BoundaryCondition(node_set_2_couple, "BC1", bc_type=mpy.bc.neumann))
 
     # Compare the meshes.
-    compare_strings(
-        self,
-        mesh_ref.get_string(header=False),
-        mesh_couple.get_string(header=False),
-    )
+    assert_results_equal(mesh_ref, mesh_couple)
 
 
-def create_beam_to_solid_conditions_model(self):
+def create_beam_to_solid_conditions_model(reference_file_directory):
     """Create the input file for the beam-to-solid input conditions tests."""
 
     # Create input file.
     input_file = InputFile(
-        dat_file=os.path.join(
-            testing_input, "test_meshpy_btsvm_coupling_solid_mesh.dat"
-        ),
+        dat_file=reference_file_directory / "test_meshpy_btsvm_coupling_solid_mesh.dat"
     )
 
     # Add beams to the model.
@@ -1219,58 +1182,60 @@ def create_beam_to_solid_conditions_model(self):
 
     # Add the beam to the solid mesh.
     input_file.add(beam_mesh)
+
     return input_file
 
 
-def test_meshpy_beam_to_solid_conditions(self):
-    """Create beam-to-solid input conditions."""
+@pytest.mark.parametrize("test_type", [None, "with_design_description", "full"])
+def test_meshpy_beam_to_solid_conditions(
+    test_type,
+    reference_file_directory,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
+):
+    """Create the input file for the beam-to-solid input conditions tests."""
 
-    # Create input file.
-    input_file = self.create_beam_to_solid_conditions_model()
+    if test_type == "full":
+        mpy.import_mesh_full = True
+    else:
+        mpy.import_mesh_full = False
 
-    # Compare with the reference file.
-    compare_test_result(self, input_file.get_string(header=False))
+    # Get the input file.
+    input_file = create_beam_to_solid_conditions_model(reference_file_directory)
 
-
-def test_meshpy_beam_to_solid_conditions_with_design_description(self):
-    """Create beam-to-solid input conditions with the old design description
-    section in 4C."""
-
-    # Create input file.
-    input_file = self.create_beam_to_solid_conditions_model()
-
-    # Compare with the reference file.
-    compare_test_result(
-        self, input_file.get_string(header=False, design_description=True)
+    # Check results
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier=test_type),
+        input_file,
+        input_file_kwargs={
+            "design_description": test_type == "with_design_description",
+            "check_nox": False,
+            "header": False,
+        },
     )
 
 
-def test_meshpy_beam_to_solid_conditions_full(self):
-    """Create beam-to-solid input conditions with full import."""
-
-    # Create input file.
-    mpy.import_mesh_full = True
-    input_file = self.create_beam_to_solid_conditions_model()
-
-    # Compare with the reference file.
-    compare_test_result(self, input_file.get_string(header=False))
-
-
-def test_meshpy_surface_to_surface_contact_import(self):
+def test_meshpy_surface_to_surface_contact_import(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test that surface-to-surface contact problems can be imported as
     expected."""
 
     # Create input file.
     mpy.import_mesh_full = True
     input_file = InputFile(
-        dat_file=os.path.join(testing_input, self._testMethodName + "_solid_mesh.dat")
+        dat_file=get_corresponding_reference_file_path(
+            additional_identifier="solid_mesh"
+        )
     )
 
     # Compare with the reference file.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_meshpy_nurbs_import(self):
+def test_meshpy_nurbs_import(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test if the import of a NURBS mesh works as expected.
 
     This script generates the 4C test case:
@@ -1279,7 +1244,9 @@ def test_meshpy_nurbs_import(self):
 
     # Create beam mesh and load solid file.
     input_file = InputFile(
-        dat_file=os.path.join(testing_input, "test_meshpy_nurbs_import_solid_mesh.dat"),
+        dat_file=get_corresponding_reference_file_path(
+            additional_identifier="solid_mesh"
+        )
     )
     set_header_static(
         input_file,
@@ -1388,10 +1355,12 @@ def test_meshpy_nurbs_import(self):
             )
 
     # Compare with the reference solution.
-    compare_test_result(self, input_file.get_string(header=False, check_nox=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_meshpy_stvenantkirchhoff_solid(self):
+def test_meshpy_stvenantkirchhoff_solid(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test that the input file for a solid with St.
 
     Venant Kirchhoff material properties is generated correctly
@@ -1408,30 +1377,19 @@ def test_meshpy_stvenantkirchhoff_solid(self):
     input_file.add(material_2)
 
     # Compare with the reference file
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_meshpy_point_couplings(self):
-    """Test that the different point coupling types can be created."""
-
-    # The "old" way of coupling points.
-    input_file = self.x_test_point_couplings(
-        mpy.bc.point_coupling, mpy.coupling_dof.fix
-    )
-    compare_test_result(
-        self, input_file.get_string(header=False), additional_identifier="exact"
-    )
-
-    # The "new" way of coupling points.
-    input_file = self.x_test_point_couplings(
-        mpy.bc.point_coupling_penalty, "PENALTY_VALUE"
-    )
-    compare_test_result(
-        self, input_file.get_string(header=False), additional_identifier="penalty"
-    )
-
-
-def x_test_point_couplings(self, coupling_type, coupling_dof_type):
+@pytest.mark.parametrize(
+    "coupling_type",
+    [
+        ["exact", mpy.bc.point_coupling, mpy.coupling_dof.fix],
+        ["penalty", mpy.bc.point_coupling_penalty, "PENALTY_VALUE"],
+    ],
+)
+def test_meshpy_point_couplings(
+    coupling_type, assert_results_equal, get_corresponding_reference_file_path
+):
     """Create the input file for the test_point_couplings method."""
 
     # Create input file.
@@ -1451,14 +1409,17 @@ def x_test_point_couplings(self, coupling_type, coupling_dof_type):
     # Couple the beams.
     input_file.couple_nodes(
         reuse_matching_nodes=True,
-        coupling_type=coupling_type,
-        coupling_dof_type=coupling_dof_type,
+        coupling_type=coupling_type[1],
+        coupling_dof_type=coupling_type[2],
     )
 
-    return input_file
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier=coupling_type[0]),
+        input_file,
+    )
 
 
-def test_meshpy_vtk_writer(self):
+def test_meshpy_vtk_writer(assert_results_equal, reference_file_directory, tmp_path):
     """Test the output created by the VTK writer."""
 
     # Initialize writer.
@@ -1516,15 +1477,17 @@ def test_meshpy_vtk_writer(self):
     writer.complete_data()
 
     # Write to file.
-    ref_file = os.path.join(testing_input, "test_meshpy_vtk_writer.vtu")
-    vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_writer.vtu")
+    ref_file = reference_file_directory / "test_meshpy_vtk_writer.vtu"
+    vtk_file = tmp_path / "test_meshpy_vtk_writer_result.vtu"
     writer.write_vtk(vtk_file, binary=False)
 
     # Compare the vtk files.
-    compare_vtk(self, ref_file, vtk_file)
+    assert_results_equal(ref_file, vtk_file)
 
 
-def test_meshpy_vtk_writer_beam(self):
+def test_meshpy_vtk_writer_beam(
+    assert_results_equal, reference_file_directory, tmp_path
+):
     """Create a sample mesh and check the VTK output."""
 
     # Create the mesh.
@@ -1537,41 +1500,43 @@ def test_meshpy_vtk_writer_beam(self):
     )
 
     # Write VTK output, with coupling sets."""
-    ref_file = os.path.join(testing_input, "test_meshpy_vtk_beam.vtu")
-    vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_beam.vtu")
+    ref_file = reference_file_directory / "test_meshpy_vtk_beam.vtu"
+    vtk_file = tmp_path / "test_meshpy_vtk_result_beam.vtu"
     mesh.write_vtk(
-        output_name="test_meshpy_vtk",
+        output_name="test_meshpy_vtk_result",
         coupling_sets=True,
-        output_directory=testing_temp,
+        output_directory=tmp_path,
         binary=False,
     )
-    compare_vtk(self, ref_file, vtk_file, atol=mpy.eps_pos)
+    assert_results_equal(ref_file, vtk_file, atol=mpy.eps_pos)
 
     # Write VTK output, without coupling sets."""
-    ref_file = os.path.join(testing_input, "test_meshpy_vtk_no_coupling_beam.vtu")
-    vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_no_coupling_beam.vtu")
+    ref_file = reference_file_directory / "test_meshpy_vtk_no_coupling_beam.vtu"
+    vtk_file = tmp_path / "test_meshpy_vtk_no_coupling_result_beam.vtu"
     mesh.write_vtk(
-        output_name="test_meshpy_vtk_no_coupling",
+        output_name="test_meshpy_vtk_no_coupling_result",
         coupling_sets=False,
-        output_directory=testing_temp,
+        output_directory=tmp_path,
         binary=False,
     )
-    compare_vtk(self, ref_file, vtk_file, atol=mpy.eps_pos)
+    assert_results_equal(ref_file, vtk_file, atol=mpy.eps_pos)
 
     # Write VTK output, with coupling sets and additional points for visualization."""
-    ref_file = os.path.join(testing_input, "test_meshpy_vtk_smooth_centerline_beam.vtu")
-    vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_smooth_centerline_beam.vtu")
+    ref_file = reference_file_directory / "test_meshpy_vtk_smooth_centerline_beam.vtu"
+    vtk_file = tmp_path / "test_meshpy_vtk_smooth_centerline_result_beam.vtu"
     mesh.write_vtk(
-        output_name="test_meshpy_vtk_smooth_centerline",
+        output_name="test_meshpy_vtk_smooth_centerline_result",
         coupling_sets=True,
-        output_directory=testing_temp,
+        output_directory=tmp_path,
         binary=False,
         beam_centerline_visualization_segments=3,
     )
-    compare_vtk(self, ref_file, vtk_file, atol=mpy.eps_pos)
+    assert_results_equal(ref_file, vtk_file, atol=mpy.eps_pos)
 
 
-def test_meshpy_vtk_writer_solid(self):
+def test_meshpy_vtk_writer_solid(
+    assert_results_equal, reference_file_directory, tmp_path
+):
     """Import a solid mesh and check the VTK output."""
 
     # Convert the solid mesh to meshpy objects. Without this parameter no
@@ -1580,22 +1545,26 @@ def test_meshpy_vtk_writer_solid(self):
 
     # Create the input file and read solid mesh data.
     input_file = InputFile()
-    input_file.read_dat(os.path.join(testing_input, "4C_input_solid_tube.dat"))
+    input_file.read_dat(
+        os.path.join(reference_file_directory, "4C_input_solid_tube.dat")
+    )
 
     # Write VTK output.
-    ref_file = os.path.join(testing_input, "test_meshpy_vtk_solid.vtu")
-    vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_solid.vtu")
+    ref_file = reference_file_directory / "test_meshpy_vtk_solid.vtu"
+    vtk_file = tmp_path / "test_meshpy_vtk_result_solid.vtu"
     if os.path.isfile(vtk_file):
         os.remove(vtk_file)
     input_file.write_vtk(
-        output_name="test_meshpy_vtk", output_directory=testing_temp, binary=False
+        output_name="test_meshpy_vtk_result", output_directory=tmp_path, binary=False
     )
 
     # Compare the vtk files.
-    compare_vtk(self, ref_file, vtk_file)
+    assert_results_equal(ref_file, vtk_file)
 
 
-def test_meshpy_vtk_writer_solid_elements(self):
+def test_meshpy_vtk_writer_solid_elements(
+    assert_results_equal, reference_file_directory, tmp_path
+):
     """Import a solid mesh with all solid types and check the VTK output."""
 
     # Convert the solid mesh to meshpy objects. Without this parameter no
@@ -1604,24 +1573,28 @@ def test_meshpy_vtk_writer_solid_elements(self):
 
     # Create the input file and read solid mesh data.
     input_file = InputFile()
-    input_file.read_dat(os.path.join(testing_input, "4C_input_solid_elements.dat"))
+    input_file.read_dat(
+        os.path.join(reference_file_directory, "4C_input_solid_elements.dat")
+    )
 
     # Write VTK output.
-    ref_file = os.path.join(testing_input, "test_meshpy_vtk_solid_elements.vtu")
-    vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_elements_solid.vtu")
+    ref_file = reference_file_directory / "test_meshpy_vtk_solid_elements.vtu"
+    vtk_file = tmp_path / "test_meshpy_vtk_elements_result_solid.vtu"
     if os.path.isfile(vtk_file):
         os.remove(vtk_file)
     input_file.write_vtk(
-        output_name="test_meshpy_vtk_elements",
-        output_directory=testing_temp,
+        output_name="test_meshpy_vtk_elements_result",
+        output_directory=tmp_path,
         binary=False,
     )
 
     # Compare the vtk files.
-    compare_vtk(self, ref_file, vtk_file)
+    assert_results_equal(ref_file, vtk_file)
 
 
-def test_meshpy_vtk_curve_cell_data(self):
+def test_meshpy_vtk_curve_cell_data(
+    assert_results_equal, reference_file_directory, tmp_path
+):
     """Test that when creating a beam, cell data can be given.
 
     This test also checks, that the nan values in vtk can be explicitly
@@ -1658,29 +1631,33 @@ def test_meshpy_vtk_curve_cell_data(self):
     )
 
     # Write VTK output, with coupling sets."""
-    ref_file = os.path.join(testing_input, "test_meshpy_vtk_curve_cell_data.vtu")
-    vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_curve_cell_data_beam.vtu")
+    ref_file = reference_file_directory / "test_meshpy_vtk_curve_cell_data.vtu"
+
+    vtk_file = tmp_path / "test_meshpy_vtk_curve_cell_data_result_beam.vtu"
     mesh.write_vtk(
-        output_name="test_meshpy_vtk_curve_cell_data",
-        output_directory=testing_temp,
+        output_name="test_meshpy_vtk_curve_cell_data_result",
+        output_directory=tmp_path,
         binary=False,
     )
 
     # Compare the vtk files.
-    compare_vtk(self, ref_file, vtk_file)
+    assert_results_equal(ref_file, vtk_file)
 
 
-def test_meshpy_cubitpy_import(self):
+@pytest.mark.cubitpy
+def test_meshpy_cubitpy_import(
+    assert_results_equal,
+    reference_file_directory,
+    tmp_path,
+):
     """Check that a import from a cubitpy object is the same as importing the
     dat file."""
-
-    skip_fail_cubitpy(self)
 
     # Load the mesh creation functions
     from meshpy_testing.create_cubit_input import create_tube, create_tube_cubit
 
     # Create the input file and read the file.
-    file_path = os.path.join(testing_temp, "test_cubitpy_import.dat")
+    file_path = os.path.join(tmp_path, "test_cubitpy_import.dat")
     create_tube(file_path)
     input_file = InputFile(dat_file=file_path)
 
@@ -1688,24 +1665,15 @@ def test_meshpy_cubitpy_import(self):
     input_file_cubit = InputFile(cubit=create_tube_cubit())
 
     # Load the file from the reference folder.
-    file_path_ref = os.path.join(testing_input, "4C_input_solid_tube.dat")
+    file_path_ref = os.path.join(reference_file_directory, "4C_input_solid_tube.dat")
     input_file_ref = InputFile(dat_file=file_path_ref)
 
     # Compare the input files.
-    compare_strings(
-        self,
-        input_file.get_string(header=False),
-        input_file_cubit.get_string(header=False),
-    )
-    compare_strings(
-        self,
-        input_file.get_string(header=False),
-        input_file_ref.get_string(header=False),
-        rtol=1e-14,
-    )
+    assert_results_equal(input_file, input_file_cubit)
+    assert_results_equal(input_file, input_file_ref, rtol=1e-14)
 
 
-def test_meshpy_deep_copy(self):
+def test_meshpy_deep_copy(assert_results_equal):
     """This test checks that the deep copy function on a mesh does not copy the
     materials or functions."""
 
@@ -1746,18 +1714,10 @@ def test_meshpy_deep_copy(self):
     input_file_copy.add(mesh_copy_1, mesh_copy_2)
 
     # Check that the input files are the same.
-    compare_strings(
-        self,
-        input_file_ref.get_string(
-            header=False, dat_header=False, add_script_to_header=False
-        ),
-        input_file_copy.get_string(
-            header=False, dat_header=False, add_script_to_header=False
-        ),
-    )
+    assert_results_equal(input_file_ref, input_file_copy)
 
 
-def test_meshpy_mesh_add_checks(self):
+def test_meshpy_mesh_add_checks():
     """This test checks that Mesh raises an error when double objects are added
     to the mesh."""
 
@@ -1781,14 +1741,21 @@ def test_meshpy_mesh_add_checks(self):
     mesh.add(geometry_set)
 
     # Add the objects again and check for errors.
-    self.assertRaises(ValueError, mesh.add, node)
-    self.assertRaises(ValueError, mesh.add, element)
-    self.assertRaises(ValueError, mesh.add, coupling)
-    self.assertRaises(ValueError, mesh.add, coupling_penalty)
-    self.assertRaises(ValueError, mesh.add, geometry_set)
+    with pytest.raises(ValueError):
+        mesh.add(node)
+    with pytest.raises(ValueError):
+        mesh.add(element)
+    with pytest.raises(ValueError):
+        mesh.add(coupling)
+    with pytest.raises(ValueError):
+        mesh.add(coupling_penalty)
+    with pytest.raises(ValueError):
+        mesh.add(geometry_set)
 
 
-def test_meshpy_check_two_couplings(self):
+def test_meshpy_check_two_couplings(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """The current implementation can handle more than one coupling on a node
     correctly, therefore we check this here."""
 
@@ -1808,10 +1775,13 @@ def test_meshpy_check_two_couplings(self):
     mesh.couple_nodes()
 
     # Create the input file
-    compare_test_result(self, mesh.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-def xtest_meshpy_check_multiple_node_penalty_coupling(self, reuse_nodes=True):
+@pytest.mark.parametrize("reuse_nodes", [[None, False], ["reuse", True]])
+def test_meshpy_check_multiple_node_penalty_coupling(
+    reuse_nodes, assert_results_equal, get_corresponding_reference_file_path
+):
     """For point penalty coupling constraints, we add multiple coupling
     conditions.
 
@@ -1830,29 +1800,18 @@ def xtest_meshpy_check_multiple_node_penalty_coupling(self, reuse_nodes=True):
     create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [1, 0, 0], [2, -1, 0])
 
     mesh.couple_nodes(
-        reuse_matching_nodes=reuse_nodes,
+        reuse_matching_nodes=reuse_nodes[1],
         coupling_type=mpy.bc.point_coupling_penalty,
     )
-    return mesh
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier=reuse_nodes[0]),
+        mesh,
+    )
 
 
-def test_meshpy_check_multiple_node_penalty_coupling_reuse(self):
-    """Test the xtest_meshpy_check_multiple_node_penalty_coupling test and
-    replace equal nodes."""
-
-    mesh = self.xtest_meshpy_check_multiple_node_penalty_coupling(reuse_nodes=True)
-    compare_test_result(self, mesh.get_string(header=False))
-
-
-def test_meshpy_check_multiple_node_penalty_coupling(self):
-    """Test the xtest_meshpy_check_multiple_node_penalty_coupling test and do
-    not replace equal nodes."""
-
-    mesh = self.xtest_meshpy_check_multiple_node_penalty_coupling(reuse_nodes=False)
-    compare_test_result(self, mesh.get_string(header=False))
-
-
-def test_meshpy_check_double_elements(self):
+def test_meshpy_check_double_elements(
+    assert_results_equal, reference_file_directory, tmp_path
+):
     """Check if there are overlapping elements in a mesh."""
 
     # Create mesh object.
@@ -1870,24 +1829,25 @@ def test_meshpy_check_double_elements(self):
 
     # The elements in the created mesh are overlapping, check that an error
     # is thrown.
-    self.assertRaises(ValueError, mesh.check_overlapping_elements)
+    with pytest.raises(ValueError):
+        mesh.check_overlapping_elements()
 
     # Check if the overlapping elements are written to the vtk output.
     warnings.filterwarnings("ignore")
-    ref_file = os.path.join(testing_input, "test_meshpy_vtk_element_overlap.vtu")
-    vtk_file = os.path.join(testing_temp, "test_meshpy_vtk_element_overlap_beam.vtu")
+    ref_file = reference_file_directory / "test_meshpy_vtk_element_overlap.vtu"
+    vtk_file = tmp_path / "test_meshpy_vtk_element_overlap_result_beam.vtu"
     mesh.write_vtk(
-        output_name="test_meshpy_vtk_element_overlap",
-        output_directory=testing_temp,
+        output_name="test_meshpy_vtk_element_overlap_result",
+        output_directory=tmp_path,
         binary=False,
         overlapping_elements=True,
     )
 
     # Compare the vtk files.
-    compare_vtk(self, ref_file, vtk_file)
+    assert_results_equal(ref_file, vtk_file)
 
 
-def perform_test_check_overlapping_coupling_nodes(self, check=True):
+def perform_test_check_overlapping_coupling_nodes(check=True):
     """Per default, we check that coupling nodes are at the same physical
     position.
 
@@ -1915,19 +1875,20 @@ def perform_test_check_overlapping_coupling_nodes(self, check=True):
         "coupling_type_string",
     ]
     if check:
-        self.assertRaises(ValueError, Coupling, *args)
+        with pytest.raises(ValueError):
+            Coupling(*args)
     else:
         Coupling(*args, check_overlapping_nodes=False)
 
 
-def test_meshpy_check_overlapping_coupling_nodes(self):
+def test_meshpy_check_overlapping_coupling_nodes():
     """Perform the test that the coupling nodes can be tested if they are at
     the same position."""
-    self.perform_test_check_overlapping_coupling_nodes(True)
-    self.perform_test_check_overlapping_coupling_nodes(False)
+    perform_test_check_overlapping_coupling_nodes(True)
+    perform_test_check_overlapping_coupling_nodes(False)
 
 
-def test_meshpy_check_start_end_node_error(self):
+def test_meshpy_check_start_end_node_error():
     """Check that an error is raised if wrong start and end nodes are given to
     a mesh creation function."""
 
@@ -1940,13 +1901,17 @@ def test_meshpy_check_start_end_node_error(self):
     node = NodeCosserat([0, 0, 0], Rotation())
     args = [mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0]]
     kwargs = {"start_node": node}
-    self.assertRaises(ValueError, create_beam_mesh_line, *args, **kwargs)
+    with pytest.raises(ValueError):
+        create_beam_mesh_line(*args, **kwargs)
     node.coordinates = [1, 0, 0]
     kwargs = {"end_node": node}
-    self.assertRaises(ValueError, create_beam_mesh_line, *args, **kwargs)
+    with pytest.raises(ValueError):
+        create_beam_mesh_line(*args, **kwargs)
 
 
-def test_meshpy_userdefined_boundary_condition(self):
+def test_meshpy_userdefined_boundary_condition(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Check if an user defined boundary condition can be added."""
 
     mesh = InputFile()
@@ -1956,15 +1921,15 @@ def test_meshpy_userdefined_boundary_condition(self):
     mesh.add(BoundaryCondition(sets["line"], "test", bc_type="USER SECTION FOR BC"))
 
     # Compare the output of the mesh.
-    compare_test_result(self, mesh.get_string(header=False).strip())
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-def test_meshpy_display_pyvista(self):
+def test_meshpy_display_pyvista(reference_file_directory):
     """Test that the display in pyvista function does not lead to errors.
 
     TODO: Add a check for the created visualziation
     """
 
     mpy.import_mesh_full = True
-    mesh = self.create_beam_to_solid_conditions_model()
+    mesh = create_beam_to_solid_conditions_model(reference_file_directory)
     _plotter = mesh.display_pyvista(is_testing=True, resolution=3)
