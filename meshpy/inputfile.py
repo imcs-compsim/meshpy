@@ -750,31 +750,31 @@ class InputFile(Mesh):
             if section.name not in self.skip_sections:
                 lines.extend(section.get_dat_lines())
 
-        def set_n_global(data_list):
-            """Set n_global in every item of data_list."""
+        def set_i_global(data_list):
+            """Set i_global in every item of data_list."""
 
             # A check is performed that every entry in data_list is unique.
             if len(data_list) != len(set(data_list)):
                 raise ValueError("Elements in data_list are not unique!")
 
-            # Set the values for n_global.
+            # Set the values for i_global.
             for i, item in enumerate(data_list):
-                item.n_global = i + 1
+                item.i_global = i + 1
 
-        def set_n_global_elements(element_list):
-            """Set n_global in every item of element_list."""
+        def set_i_global_elements(element_list):
+            """Set i_global in every item of element_list."""
 
             # A check is performed that every entry in element_list is unique.
             if len(element_list) != len(set(element_list)):
                 raise ValueError("Elements in element_list are not unique!")
 
-            # Set the values for n_global.
+            # Set the values for i_global.
             i = 0
             i_nurbs_patch = 0
             for item in element_list:
                 # As a NURBS patch can be defined with more elements, an offset is applied to the
                 # rest of the items
-                item.n_global = i + 1
+                item.i_global = i + 1
                 if isinstance(item, NURBSPatch):
                     item.n_nurbs_patch = i_nurbs_patch + 1
                     offset = item.get_number_elements()
@@ -783,8 +783,8 @@ class InputFile(Mesh):
                 else:
                     i += 1
 
-        def set_n_global_materials(material_list):
-            """Set n_global in every item of the materials list.
+        def set_i_global_materials(material_list):
+            """Set i_global in every item of the materials list.
 
             We have to account for materials imported from dat files
             that have a random numbering.
@@ -808,7 +808,7 @@ class InputFile(Mesh):
             i_material = max_material_id + 1
             for material in material_list:
                 if not isinstance(material, BaseMeshItemString):
-                    material.n_global = i_material
+                    material.i_global = i_material
                     i_material += 1
 
         # Add sets from couplings and boundary conditions to a temp container.
@@ -827,16 +827,16 @@ class InputFile(Mesh):
         all_boundary_conditions.extend(self.boundary_conditions)
 
         # Assign global indices to all entries.
-        set_n_global(all_nodes)
-        set_n_global_elements(all_elements)
-        set_n_global_materials(self.materials)
-        set_n_global(self.functions)
+        set_i_global(all_nodes)
+        set_i_global_elements(all_elements)
+        set_i_global_materials(self.materials)
+        set_i_global(self.functions)
         for value in all_geometry_sets.values():
             # We reset the geometry set index here since in self.get_unique_geometry_sets the
             # geometry sets from the dat file are not included.
-            set_n_global(value)
+            set_i_global(value)
         for value in all_boundary_conditions.values():
-            set_n_global(value)
+            set_i_global(value)
 
         def get_section_dat(section_name, data_list, header_lines=None):
             """Output a section name and apply the get_dat_line for each list

@@ -158,7 +158,7 @@ class Coupling(BoundaryConditionBase):
 
             string = beam_four_c_type.get_coupling_string(self.coupling_dof_type)
 
-        return f"E {self.geometry_set.n_global} - {string}"
+        return f"E {self.geometry_set.i_global} - {string}"
 
 
 def coupling_factory(geometry, coupling_type, coupling_dof_type, **kwargs):

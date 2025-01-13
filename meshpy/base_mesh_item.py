@@ -48,7 +48,7 @@ class BaseMeshItem:
         self.data = data
 
         # Overall index of this item in the mesh.
-        self.n_global = None
+        self.i_global = None
 
         # Comments regarding this Mesh Item.
         if comments is None:

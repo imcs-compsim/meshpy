@@ -215,16 +215,16 @@ class NURBSSurface(NURBSPatch):
                 string_cps = ""
                 for i in element_cps_ids:
                     cp = self.nodes[i]
-                    string_cps += f"{cp.n_global} "
+                    string_cps += f"{cp.i_global} "
 
                 patch_elements.append(
                     "{} {} NURBS{} {} MAT {} {}".format(
-                        self.n_global + j,
+                        self.i_global + j,
                         self.element_string,
                         (self.polynomial_orders[0] + 1)
                         * (self.polynomial_orders[1] + 1),
                         string_cps,
-                        self.material.n_global,
+                        self.material.i_global,
                         self.element_description,
                     )
                 )
@@ -303,7 +303,7 @@ class NURBSVolume(NURBSPatch):
                     string_cps = ""
                     for i in element_cps_ids:
                         cp = self.nodes[i]
-                        string_cps += f"{cp.n_global} "
+                        string_cps += f"{cp.i_global} "
 
                     num_cp_in_element = (
                         (self.polynomial_orders[0] + 1)
@@ -313,10 +313,10 @@ class NURBSVolume(NURBSPatch):
 
                     patch_elements.append(
                         "{} SOLID NURBS{} {} MAT {} {}".format(
-                            self.n_global + increment_ele,
+                            self.i_global + increment_ele,
                             num_cp_in_element,
                             string_cps,
-                            self.material.n_global,
+                            self.material.i_global,
                             self.element_description,
                         )
                     )

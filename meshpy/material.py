@@ -131,7 +131,7 @@ class MaterialReissner(MaterialBeam):
         if self.interaction_radius is not None:
             string += f" INTERACTIONRADIUS {self.interaction_radius}"
         return string.format(
-            self.n_global,
+            self.i_global,
             self.material_string,
             self.youngs_modulus,
             self.nu,
@@ -214,7 +214,7 @@ class MaterialKirchhoff(MaterialBeam):
         string = "MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} "
         string += "MOMINPOL {} MOMIN2 {} MOMIN3 {} FAD {}"
         string = string.format(
-            self.n_global,
+            self.i_global,
             self.material_string,
             self.youngs_modulus,
             self.youngs_modulus / (2.0 * (1.0 + self.nu)),
@@ -255,7 +255,7 @@ class MaterialEulerBernoulli(MaterialBeam):
             )
         string = "MAT {} {} YOUNG {} DENS {} CROSSAREA {} MOMIN {}"
         return string.format(
-            self.n_global,
+            self.i_global,
             self.material_string,
             self.youngs_modulus,
             self.density,
@@ -274,7 +274,7 @@ class MaterialString(Material):
     def _get_dat(self):
         """Return the line for this material."""
         string = "MAT {} {}"
-        return string.format(self.n_global, self.material_string)
+        return string.format(self.i_global, self.material_string)
 
 
 class MaterialSolid(Material):
@@ -303,7 +303,7 @@ class MaterialStVenantKirchhoff(MaterialSolid):
 
         string = "MAT {} {} YOUNG {} NUE {} DENS {}"
         return string.format(
-            self.n_global,
+            self.i_global,
             self.material_string,
             self.youngs_modulus,
             self.nu,

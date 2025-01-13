@@ -153,7 +153,7 @@ class BoundaryCondition(BoundaryConditionBase):
         else:
             dat_string = self.bc_string
 
-        return f"E {self.geometry_set.n_global} - {dat_string}"
+        return f"E {self.geometry_set.i_global} - {dat_string}"
 
     def check(self):
         """Check for point Neumann boundaries that there is not a double Node

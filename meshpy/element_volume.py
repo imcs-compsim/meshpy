@@ -58,11 +58,11 @@ class VolumeElement(Element):
         # String with the node ids.
         nodes_string = ""
         for node in self.nodes:
-            nodes_string += f"{node.n_global} "
+            nodes_string += f"{node.i_global} "
 
         # Return the dat line.
         return (
-            f"{self.n_global} {self.dat_pre_nodes} {nodes_string} {self.dat_post_nodes}"
+            f"{self.i_global} {self.dat_pre_nodes} {nodes_string} {self.dat_post_nodes}"
         )
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid, **kwargs):

@@ -107,7 +107,7 @@ class Node(BaseMeshItemFull):
         self.element_link = []
         self.node_sets_link = []
         self.mesh = None
-        self.n_global = None
+        self.i_global = None
 
     def rotate(self, *args, **kwargs):
         """Don't do anything for a standard node, as this node can not be
@@ -126,7 +126,7 @@ class Node(BaseMeshItemFull):
                 for component in self.coordinates
             ]
         )
-        return f"NODE {self.n_global} COORD {coordinate_string}"
+        return f"NODE {self.i_global} COORD {coordinate_string}"
 
 
 class NodeCosserat(Node):
@@ -181,4 +181,4 @@ class ControlPoint(Node):
                 for component in self.coordinates
             ]
         )
-        return f"CP {self.n_global} COORD {coordinate_string} {self.weight}"
+        return f"CP {self.i_global} COORD {coordinate_string} {self.weight}"

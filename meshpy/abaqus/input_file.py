@@ -46,8 +46,8 @@ F_INT = "{:6d}"
 F_FLOAT = "{: .14e}"
 
 
-def set_n_global(data_list, *, start_index=0):
-    """Set n_global in every item of data_list.
+def set_i_global(data_list, *, start_index=0):
+    """Set i_global in every item of data_list.
 
     Args
     ----
@@ -61,9 +61,9 @@ def set_n_global(data_list, *, start_index=0):
     if len(data_list) != len(set(data_list)):
         raise ValueError("Elements in data_list are not unique!")
 
-    # Set the values for n_global.
+    # Set the values for i_global.
     for i, item in enumerate(data_list):
-        item.n_global = i + start_index
+        item.i_global = i + start_index
 
 
 def get_set_lines(set_type, items, name):
@@ -71,7 +71,7 @@ def get_set_lines(set_type, items, name):
     row)"""
     max_entries_per_line = 16
     lines = ["*{}, {}={}".format(set_type, set_type.lower(), name)]
-    set_ids = [item.n_global + 1 for item in items]
+    set_ids = [item.i_global + 1 for item in items]
     set_ids.sort()
     set_ids = [
         set_ids[i : i + max_entries_per_line]
@@ -130,7 +130,7 @@ class AbaqusInputFile(object):
             self.mesh.check_overlapping_elements()
 
         # Assign global indices to all materials
-        set_n_global(self.mesh.materials)
+        set_i_global(self.mesh.materials)
 
         # Calculate the required cross-section normal data
         self.calculate_cross_section_normal_data(normal_definition)
@@ -209,7 +209,7 @@ class AbaqusInputFile(object):
         # connected element. Therefore, for nodes which are coupled to each other, we keep the
         # same global ID while still keeping the individual nodes in MeshPy.
         _, unique_nodes = get_coupled_nodes_to_master_map(
-            self.mesh, assign_n_global=True
+            self.mesh, assign_i_global=True
         )
 
         # Number the remaining nodes and create nodes for the input file
@@ -217,7 +217,7 @@ class AbaqusInputFile(object):
         for node in unique_nodes:
             input_file_lines.append(
                 (", ".join([F_INT] + 3 * [F_FLOAT])).format(
-                    node.n_global + 1, *node.coordinates
+                    node.i_global + 1, *node.coordinates
                 )
             )
 
@@ -253,15 +253,15 @@ class AbaqusInputFile(object):
         normal_lines = ["*Normal, type=element"]
         for element_type, elements in element_types.items():
             # Number the elements of this type
-            set_n_global(elements, start_index=element_count)
+            set_i_global(elements, start_index=element_count)
 
             # Set the element connectivity, possibly including the n1 direction node
             element_lines.append("*Element, type={}".format(element_type))
             for element in elements:
-                node_ids = [node.n_global + 1 for node in element.nodes]
+                node_ids = [node.i_global + 1 for node in element.nodes]
                 if element.n1_node_id is not None:
                     node_ids.append(element.n1_node_id)
-                line_ids = [element.n_global + 1] + node_ids
+                line_ids = [element.i_global + 1] + node_ids
                 element_lines.append(", ".join(F_INT.format(i) for i in line_ids))
 
                 # Set explicit normal definitions for the nodes
@@ -270,7 +270,7 @@ class AbaqusInputFile(object):
                         node = element.nodes[i_node]
                         normal_lines.append(
                             (", ".join(2 * [F_INT] + 3 * [F_FLOAT])).format(
-                                element.n_global + 1, node.n_global + 1, *n2
+                                element.i_global + 1, node.i_global + 1, *n2
                             )
                         )
 

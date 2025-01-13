@@ -243,7 +243,7 @@ class Mesh:
         for key in mesh_sets.keys():
             for i, geometry_set in enumerate(mesh_sets[key]):
                 # Add global indices to the geometry set.
-                geometry_set.n_global = i + 1
+                geometry_set.i_global = i + 1
                 if is_link_nodes:
                     geometry_set.link_to_nodes(link_to_nodes=link_to_nodes)
 

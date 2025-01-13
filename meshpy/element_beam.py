@@ -349,14 +349,14 @@ class Beam3rHerm2Line3(Beam):
         string_triads = ""
         for i in [0, 2, 1]:
             node = self.nodes[i]
-            string_nodes += f"{node.n_global} "
+            string_nodes += f"{node.i_global} "
             string_triads += " " + node.rotation.get_dat()
 
         # Check the material.
         self._check_material()
 
         return (
-            f"{self.n_global} BEAM3R HERM2LINE3 {string_nodes}MAT {self.material.n_global} "
+            f"{self.i_global} BEAM3R HERM2LINE3 {string_nodes}MAT {self.material.i_global} "
             f"TRIADS{string_triads}"
         )
 
@@ -379,14 +379,14 @@ class Beam3rLine2Line2(Beam):
         string_triads = ""
         for i in [0, 1]:
             node = self.nodes[i]
-            string_nodes += f"{node.n_global} "
+            string_nodes += f"{node.i_global} "
             string_triads += " " + node.rotation.get_dat()
 
         # Check the material.
         self._check_material()
 
         return (
-            f"{self.n_global} BEAM3R LINE2 {string_nodes}MAT {self.material.n_global} "
+            f"{self.i_global} BEAM3R LINE2 {string_nodes}MAT {self.material.i_global} "
             f"TRIADS{string_triads}"
         )
 
@@ -423,18 +423,18 @@ class Beam3kClass(Beam):
         string_triads = ""
         for i in [0, 2, 1]:
             node = self.nodes[i]
-            string_nodes += f"{node.n_global} "
+            string_nodes += f"{node.i_global} "
             string_triads += " " + node.rotation.get_dat()
 
         # Check the material.
         self._check_material()
 
         string_dat = ("{} BEAM3K LINE3 {} WK {} ROTVEC {} MAT {} TRIADS{}{}").format(
-            self.n_global,
+            self.i_global,
             string_nodes,
             "1" if self.weak else "0",
             "1" if self.rotvec else "0",
-            self.material.n_global,
+            self.material.i_global,
             string_triads,
             " FAD" if self.is_fad else "",
         )
@@ -488,12 +488,12 @@ class Beam3eb(Beam):
         string_triads = ""
         for i in [0, 1]:
             node = self.nodes[i]
-            string_nodes += f"{node.n_global} "
+            string_nodes += f"{node.i_global} "
             string_triads += " " + node.rotation.get_dat()
 
         # Check the material.
         self._check_material()
 
         return (
-            f"{self.n_global} BEAM3EB LINE2 {string_nodes}MAT {self.material.n_global}"
+            f"{self.i_global} BEAM3EB LINE2 {string_nodes}MAT {self.material.i_global}"
         )

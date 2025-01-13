@@ -560,12 +560,12 @@ def test_meshpy_reissner_elasto_plastic():
     ref_string = "MAT 69 MAT_BeamReissnerElastPlastic YOUNG 1000 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.031415926535897934 SHEARCORR 0.8333333333333334 MOMINPOL 0.00015707963267948968 MOMIN2 7.853981633974484e-05 MOMIN3 7.853981633974484e-05 INTERACTIONRADIUS 2.0 YIELDM 2.3 ISOHARDM 4.5 TORSIONPLAST "
 
     mat = MaterialReissnerElastoplastic(**kwargs)
-    mat.n_global = 69
+    mat.i_global = 69
     assert mat.get_dat_lines() == [ref_string + "0"]
 
     kwargs["torsion_plasticity"] = True
     mat = MaterialReissnerElastoplastic(**kwargs)
-    mat.n_global = 69
+    mat.i_global = 69
     assert mat.get_dat_lines() == [ref_string + "1"]
 
 

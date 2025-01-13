@@ -134,12 +134,12 @@ class GeometrySetBase(BaseMeshItemFull):
         nodes = self.get_all_nodes()
         if len(nodes) == 0:
             raise ValueError("Writing empty geometry sets is not supported")
-        nodes_id = [node.n_global for node in nodes]
+        nodes_id = [node.i_global for node in nodes]
         sort_indices = np.argsort(nodes_id)
         nodes = [nodes[i] for i in sort_indices]
 
         return [
-            f"NODE {node.n_global} {self.geometry_set_names[self.geometry_type]} {self.n_global}"
+            f"NODE {node.i_global} {self.geometry_set_names[self.geometry_type]} {self.i_global}"
             for node in nodes
         ]
 

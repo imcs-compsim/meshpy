@@ -39,7 +39,7 @@ from .node import Node
 
 
 def get_coupled_nodes_to_master_map(
-    mesh: Mesh, *, assign_n_global: bool = False
+    mesh: Mesh, *, assign_i_global: bool = False
 ) -> Tuple[Dict[Node, Node], List[Node]]:
     """Get a mapping of nodes in a mesh that should be "replaced" because they
     are coupled via a joint.
@@ -53,7 +53,7 @@ def get_coupled_nodes_to_master_map(
     ----
     mesh:
         Input mesh
-    assign_n_global:
+    assign_i_global:
         If this flag is set, the global indices are set in the node objects.
 
     Return
@@ -90,11 +90,11 @@ def get_coupled_nodes_to_master_map(
     ]
 
     # Optionally number the nodes
-    if assign_n_global:
+    if assign_i_global:
         for i_node, node in enumerate(unique_nodes):
-            node.n_global = i_node
+            node.i_global = i_node
         for replaced_node, master_node in replaced_node_to_master_map.items():
-            replaced_node.n_global = master_node.n_global
+            replaced_node.i_global = master_node.i_global
 
     # Return the mapping
     return replaced_node_to_master_map, unique_nodes
