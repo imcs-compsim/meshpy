@@ -32,10 +32,9 @@
 module."""
 
 import random
-import unittest
 
 import numpy as np
-from utils import skip_fail_arborx
+import pytest
 
 from meshpy import Beam3rHerm2Line3, MaterialReissner, Mesh, Rotation
 from meshpy.geometric_search.find_close_points import (
@@ -51,8 +50,7 @@ from meshpy.mesh_creation_functions.beam_honeycomb import (
 from meshpy.utility import filter_nodes, get_nodal_coordinates
 
 
-def unique_id_coordinate_test(
-    self,
+def assert_unique_id_coordinates(
     coords,
     point_partners,
     n_partners,
@@ -71,48 +69,40 @@ def unique_id_coordinate_test(
     unique_points = coords[unique_indices]
 
     # In the unique indices there should be no partners.
-    unique_partners, unique_n_partners = find_close_points(
+    _, unique_n_partners = find_close_points(
         unique_points, algorithm=algorithm, tol=tol
     )
-    self.assertEqual(unique_n_partners, 0)
+    assert unique_n_partners == 0
 
     # Check that the inverse IDs result in the original array.
     reconstructed_coords = unique_points[inverse_indices]
-    self.assertTrue(
-        np.max(np.linalg.norm(coords - reconstructed_coords, axis=1)) <= tol
-    )
+    assert np.max(np.linalg.norm(coords - reconstructed_coords, axis=1)) <= tol
 
     # Check the IDs
-    self.assertEqual(unique_indices, unique_indices_ref)
-    self.assertEqual(inverse_indices, inverse_indices_ref)
+    assert unique_indices == unique_indices_ref
+    assert inverse_indices == inverse_indices_ref
 
 
-def test_find_close_points_between_bins_scipy(self):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    self.xtest_find_close_points_between_bins(FindClosePointAlgorithm.kd_tree_scipy)
-
-
-def test_find_close_points_between_bins_brute_force_cython(self):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    self.xtest_find_close_points_between_bins(
-        FindClosePointAlgorithm.brute_force_cython
-    )
-
-
-def test_find_close_points_between_bins_boundary_volume_hierarchy_arborx(self):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    skip_fail_arborx(self)
-    self.xtest_find_close_points_between_bins(
-        FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-    )
-
-
-def xtest_find_close_points_between_bins(self, algorithm, **kwargs):
+@pytest.mark.parametrize(
+    "algorithm",
+    [
+        FindClosePointAlgorithm.kd_tree_scipy,
+        FindClosePointAlgorithm.brute_force_cython,
+        pytest.param(
+            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
+            marks=pytest.mark.arborx,
+        ),
+    ],
+)
+def test_find_close_points_between_bins(algorithm):
     """Test if the find_close_points function returns the expected results.
 
     The points are chosen such that for n_bins = [4, 4, 4], some points
     are exactly at the boundary between bins. This test case can be used
     for all algorithms, not just binning.
+
+    This test was used to test the binning implementation, we still keep
+    it for the other algorithms.
     """
 
     # Set the seed for the pseudo random numbers
@@ -165,7 +155,7 @@ def xtest_find_close_points_between_bins(self, algorithm, **kwargs):
 
     # Test the number of partners and list of partners
     point_partners, n_partners = find_close_points(
-        coords, algorithm=algorithm, tol=eps_medium, **kwargs
+        coords, algorithm=algorithm, tol=eps_medium
     )
     partner_indices = point_partners_to_partner_indices(point_partners, n_partners)
 
@@ -346,11 +336,11 @@ def xtest_find_close_points_between_bins(self, algorithm, **kwargs):
         783, 783, 787, 788]
     # fmt: on
     point_partners_reference[index_vector] = val_vector
-    self.assertEqual(len(partner_indices), 146)
-    self.assertTrue(np.array_equal(point_partners, point_partners_reference))
+    assert len(partner_indices) == 146
+    assert np.array_equal(point_partners, point_partners_reference)
 
     # Test unique IDs
-    self.unique_id_coordinate_test(
+    assert_unique_id_coordinates(
         coords,
         point_partners,
         n_partners,
@@ -361,27 +351,18 @@ def xtest_find_close_points_between_bins(self, algorithm, **kwargs):
     )
 
 
-def test_find_close_points_flat_brute_force_scipy(self):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    self.xtest_find_close_points_binning_flat(FindClosePointAlgorithm.kd_tree_scipy)
-
-
-def test_find_close_points_flat_brute_force_cython(self):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    self.xtest_find_close_points_binning_flat(
-        FindClosePointAlgorithm.brute_force_cython
-    )
-
-
-def test_find_close_points_flat_boundary_volume_hierarchy_arborx(self):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    skip_fail_arborx(self)
-    self.xtest_find_close_points_binning_flat(
-        FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-    )
-
-
-def xtest_find_close_points_binning_flat(self, algorithm, **kwargs):
+@pytest.mark.parametrize(
+    "algorithm",
+    [
+        FindClosePointAlgorithm.kd_tree_scipy,
+        FindClosePointAlgorithm.brute_force_cython,
+        pytest.param(
+            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
+            marks=pytest.mark.arborx,
+        ),
+    ],
+)
+def test_find_close_points_binning_flat(algorithm):
     """Test case for coupling of points, when the nodes are all on a plane.
 
     This is challenging for a binning based approach. However, this test
@@ -448,14 +429,13 @@ def xtest_find_close_points_binning_flat(self, algorithm, **kwargs):
         # The reference data was created for the nodes without the middle
         # nodes, therefore we filter the middle nodes here
         coords = get_nodal_coordinates(filter_nodes(mesh.nodes, middle_nodes=False))
-        partners = find_close_points(coords, algorithm=algorithm, **kwargs)
+        partners = find_close_points(coords, algorithm=algorithm)
 
         has_partners, n_partner = find_close_points(
             get_nodal_coordinates(
                 filter_nodes(create_flat_mesh().nodes, middle_nodes=False)
             ),
             algorithm=algorithm,
-            **kwargs,
         )
 
         # Apply the result conversion, so we check this functionality too.
@@ -464,12 +444,12 @@ def xtest_find_close_points_binning_flat(self, algorithm, **kwargs):
         has_partners, n_partner = partner_indices_to_point_partners(partners, n_points)
 
         # Compare results with the reference.
-        self.assertEqual(partners, reference_partners)
-        self.assertEqual(list(has_partners), reference_partners_list)
-        self.assertEqual(n_partner, 66)
+        assert partners == reference_partners
+        assert list(has_partners) == reference_partners_list
+        assert n_partner == 66
 
         # Test unique IDs
-        self.unique_id_coordinate_test(
+        assert_unique_id_coordinates(
             coords,
             has_partners,
             n_partner,
@@ -480,25 +460,18 @@ def xtest_find_close_points_binning_flat(self, algorithm, **kwargs):
         )
 
 
-def test_find_close_points_dimension_scipy(self):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    self.xtest_find_close_points_dimension(FindClosePointAlgorithm.kd_tree_scipy)
-
-
-def test_find_close_points_dimension_brute_force_cython(self):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    self.xtest_find_close_points_dimension(FindClosePointAlgorithm.brute_force_cython)
-
-
-def test_find_close_points_dimension_boundary_volume_hierarchy_arborx(self):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    skip_fail_arborx(self)
-    self.xtest_find_close_points_dimension(
-        FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-    )
-
-
-def xtest_find_close_points_dimension(self, algorithm, **kwargs):
+@pytest.mark.parametrize(
+    "algorithm",
+    [
+        FindClosePointAlgorithm.kd_tree_scipy,
+        FindClosePointAlgorithm.brute_force_cython,
+        pytest.param(
+            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
+            marks=pytest.mark.arborx,
+        ),
+    ],
+)
+def test_find_close_points_dimension(algorithm):
     """Test that the find_close_points function also works properly with
     multidimensional points."""
 
@@ -536,18 +509,18 @@ def xtest_find_close_points_dimension(self, algorithm, **kwargs):
     partner_expected = 5
 
     # Get results
-    has_partner, partner = find_close_points(coords, algorithm=algorithm, **kwargs)
+    has_partner, partner = find_close_points(coords, algorithm=algorithm)
 
     # Check the results
-    self.assertTrue(has_partner_expected, has_partner)
-    self.assertEqual(partner_expected, partner)
+    assert np.array_equal(has_partner_expected, has_partner)
+    assert partner_expected == partner
 
     # Test unique IDs
     # fmt: off
     unique_indices_ref = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
     inverse_indices_ref = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 4, 5, 6, 7, 8]
     # fmt: on
-    self.unique_id_coordinate_test(
+    assert_unique_id_coordinates(
         coords,
         has_partner,
         partner,
@@ -558,31 +531,18 @@ def xtest_find_close_points_dimension(self, algorithm, **kwargs):
     )
 
 
-def test_find_close_points_tolerance_precision_brute_force_scipy(self):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    self.xtest_find_close_points_tolerance_precision(
-        FindClosePointAlgorithm.kd_tree_scipy
-    )
-
-
-def test_find_close_points_tolerance_precision_brute_force_cython(self):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    self.xtest_find_close_points_tolerance_precision(
-        FindClosePointAlgorithm.brute_force_cython
-    )
-
-
-def test_find_close_points_tolerance_precision_boundary_volume_hierarchy_arborx(
-    self,
-):
-    """TODO: Remove this once we can use pytest fixtures for this"""
-    skip_fail_arborx(self)
-    self.xtest_find_close_points_tolerance_precision(
-        FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
-    )
-
-
-def xtest_find_close_points_tolerance_precision(self, algorithm, **kwargs):
+@pytest.mark.parametrize(
+    "algorithm",
+    [
+        FindClosePointAlgorithm.kd_tree_scipy,
+        FindClosePointAlgorithm.brute_force_cython,
+        pytest.param(
+            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
+            marks=pytest.mark.arborx,
+        ),
+    ],
+)
+def test_find_close_points_tolerance_precision(algorithm):
     """Test that the find_close_points tolerance works with a precision of at
     least 12."""
 
@@ -593,7 +553,5 @@ def xtest_find_close_points_tolerance_precision(self, algorithm, **kwargs):
     coords[2, 0] += 4 * delta
     coords[3, 0] += 5 * delta
 
-    has_partner, _ = find_close_points(
-        coords, algorithm=algorithm, tol=1.1 * delta, **kwargs
-    )
-    self.assertTrue(np.array_equal(has_partner, [0, 0, 1, 1]))
+    has_partner, _ = find_close_points(coords, algorithm=algorithm, tol=1.1 * delta)
+    assert np.array_equal(has_partner, [0, 0, 1, 1])
