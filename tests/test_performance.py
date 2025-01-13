@@ -32,7 +32,6 @@ import warnings
 
 import numpy as np
 import pytest
-from cubitpy import CubitPy, cupy
 
 from meshpy import (
     Beam3rHerm2Line3,
@@ -53,7 +52,9 @@ from meshpy.utility import find_close_nodes
 def create_solid_block(file_path, nx, ny, nz):
     """Create a solid block (1 x 1 x 1) with (nx * ny * nz) elements."""
 
-    # Initialize cubit.
+    # Initialize CubitPy. We do this here since otherwise the test framework will fail, even if we don't execute the CubitPy tests.
+    from cubitpy import CubitPy, cupy
+
     cubit = CubitPy()
 
     # Create brick.
