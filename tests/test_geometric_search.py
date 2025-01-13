@@ -49,6 +49,18 @@ from meshpy.mesh_creation_functions.beam_honeycomb import (
 )
 from meshpy.utility import filter_nodes, get_nodal_coordinates
 
+PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE = [
+    "algorithm",
+    [
+        FindClosePointAlgorithm.kd_tree_scipy,
+        FindClosePointAlgorithm.brute_force_cython,
+        pytest.param(
+            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
+            marks=pytest.mark.arborx,
+        ),
+    ],
+]
+
 
 def assert_unique_id_coordinates(
     coords,
@@ -83,17 +95,7 @@ def assert_unique_id_coordinates(
     assert inverse_indices == inverse_indices_ref
 
 
-@pytest.mark.parametrize(
-    "algorithm",
-    [
-        FindClosePointAlgorithm.kd_tree_scipy,
-        FindClosePointAlgorithm.brute_force_cython,
-        pytest.param(
-            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
-            marks=pytest.mark.arborx,
-        ),
-    ],
-)
+@pytest.mark.parametrize(*PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE)
 def test_find_close_points_between_bins(algorithm):
     """Test if the find_close_points function returns the expected results.
 
@@ -351,17 +353,7 @@ def test_find_close_points_between_bins(algorithm):
     )
 
 
-@pytest.mark.parametrize(
-    "algorithm",
-    [
-        FindClosePointAlgorithm.kd_tree_scipy,
-        FindClosePointAlgorithm.brute_force_cython,
-        pytest.param(
-            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
-            marks=pytest.mark.arborx,
-        ),
-    ],
-)
+@pytest.mark.parametrize(*PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE)
 def test_find_close_points_binning_flat(algorithm):
     """Test case for coupling of points, when the nodes are all on a plane.
 
@@ -460,17 +452,7 @@ def test_find_close_points_binning_flat(algorithm):
         )
 
 
-@pytest.mark.parametrize(
-    "algorithm",
-    [
-        FindClosePointAlgorithm.kd_tree_scipy,
-        FindClosePointAlgorithm.brute_force_cython,
-        pytest.param(
-            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
-            marks=pytest.mark.arborx,
-        ),
-    ],
-)
+@pytest.mark.parametrize(*PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE)
 def test_find_close_points_dimension(algorithm):
     """Test that the find_close_points function also works properly with
     multidimensional points."""
@@ -531,17 +513,7 @@ def test_find_close_points_dimension(algorithm):
     )
 
 
-@pytest.mark.parametrize(
-    "algorithm",
-    [
-        FindClosePointAlgorithm.kd_tree_scipy,
-        FindClosePointAlgorithm.brute_force_cython,
-        pytest.param(
-            FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
-            marks=pytest.mark.arborx,
-        ),
-    ],
-)
+@pytest.mark.parametrize(*PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE)
 def test_find_close_points_tolerance_precision(algorithm):
     """Test that the find_close_points tolerance works with a precision of at
     least 12."""
