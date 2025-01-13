@@ -31,10 +31,10 @@
 """This script is used to test the mesh creation functions."""
 
 import os
-import unittest
 
 import autograd.numpy as npAD
 import numpy as np
+import pytest
 import splinepy
 
 from meshpy import (
@@ -138,7 +138,9 @@ def create_testing_nurbs_curve():
     )
 
 
-def test_mesh_creation_functions_arc_segment(self):
+def test_mesh_creation_functions_arc_segment(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Create a circular segment and compare it with the reference file."""
 
     # Create input file.
@@ -164,10 +166,12 @@ def test_mesh_creation_functions_arc_segment(self):
     input_file.add(BoundaryCondition(mesh["end"], "rb", bc_type=mpy.bc.neumann))
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_arc_segment_2d(self):
+def test_mesh_creation_functions_arc_segment_2d(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Create a circular segments in 2D."""
 
     # Create input file.
@@ -206,10 +210,12 @@ def test_mesh_creation_functions_arc_segment_2d(self):
     input_file.add(BoundaryCondition(mesh2["end"], "rb4", bc_type=mpy.bc.neumann))
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_stent(self):
+def test_mesh_creation_functions_stent(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test the stent creation function."""
 
     # Set default values for global parameters.
@@ -238,10 +244,14 @@ def test_mesh_creation_functions_stent(self):
     )
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False), rtol=1e-10)
+    assert_results_equal(
+        get_corresponding_reference_file_path(), input_file, rtol=1e-10
+    )
 
 
-def test_mesh_creation_functions_fibers_in_rectangle(self):
+def test_mesh_creation_functions_fibers_in_rectangle(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test the create_fibers_in_rectangle function."""
 
     # Set default values for global parameters.
@@ -270,10 +280,12 @@ def test_mesh_creation_functions_fibers_in_rectangle(self):
     input_file.translate([0, 0, 1])
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_fibers_in_rectangle_reference_point(self):
+def test_mesh_creation_functions_fibers_in_rectangle_reference_point(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test the create_fibers_in_rectangle function with using the
     reference_point option."""
 
@@ -302,10 +314,12 @@ def test_mesh_creation_functions_fibers_in_rectangle_reference_point(self):
     )
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_fibers_in_rectangle_return_set(self):
+def test_mesh_creation_functions_fibers_in_rectangle_return_set(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test the set returned by the create_fibers_in_rectangle function."""
 
     # Set default values for global parameters.
@@ -322,10 +336,12 @@ def test_mesh_creation_functions_fibers_in_rectangle_return_set(self):
     input_file.add(beam_set)
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_wire(self):
+def test_mesh_creation_functions_wire(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test the create_wire_fibers function."""
 
     # Set default values for global parameters.
@@ -344,10 +360,12 @@ def test_mesh_creation_functions_wire(self):
     input_file.add(mesh_1, mesh_2, set_1, set_2)
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_nurbs(self):
+def test_mesh_creation_functions_nurbs(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test the create_beam_mesh_from_nurbs function."""
 
     # Create beam elements.
@@ -357,15 +375,15 @@ def test_mesh_creation_functions_nurbs(self):
     _, length = create_beam_mesh_from_nurbs(
         mesh, Beam3rHerm2Line3, mat, curve, n_el=3, output_length=True
     )
-    self.assertAlmostEqual(3.140204411551537, length, delta=mpy.eps_pos)
+    assert np.isclose(3.140204411551537, length, rtol=mpy.eps_pos, atol=0.0)
 
     # Check the output.
     input_file = InputFile()
     input_file.add(mesh)
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_nurbs_unit(self):
+def test_mesh_creation_functions_nurbs_unit():
     """Unittest the function and jacobian creation in the
     create_beam_mesh_from_nurbs function."""
 
@@ -385,11 +403,13 @@ def test_mesh_creation_functions_nurbs_unit(self):
     ]
 
     for t, result_r, result_dr in zip(t_values, results_r, results_dr):
-        self.assertTrue(np.allclose(r(t), result_r, atol=mpy.eps_pos, rtol=0.0))
-        self.assertTrue(np.allclose(dr(t), result_dr, atol=mpy.eps_pos, rtol=0.0))
+        assert np.allclose(r(t), result_r, atol=mpy.eps_pos, rtol=0.0)
+        assert np.allclose(dr(t), result_dr, atol=mpy.eps_pos, rtol=0.0)
 
 
-def test_mesh_creation_functions_node_continuation(self):
+def test_mesh_creation_functions_node_continuation(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test that the node continuation function work as expected."""
 
     mesh = Mesh()
@@ -438,10 +458,10 @@ def test_mesh_creation_functions_node_continuation(self):
     # Check the geometry
     input_file = InputFile()
     input_file.add(mesh)
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_node_continuation_accumulated(self):
+def test_mesh_creation_functions_node_continuation_accumulated():
     """Test that the arc node continuation function can be applied multiple
     times in a row.
 
@@ -479,18 +499,18 @@ def test_mesh_creation_functions_node_continuation_accumulated(self):
     # Calculate the solution and get the "analytical" solution
     rotation_expected = Rotation(axis, angle) * rotation_ref
     quaternion_expected = np.array([-0.5, 0.5, -0.5, -0.5])
-    self.assertTrue(rotation_actual == rotation_expected)
-    self.assertTrue(
-        np.allclose(
-            rotation_actual.q,
-            quaternion_expected,
-            atol=mpy.eps_quaternion,
-            rtol=0.0,
-        )
+    assert rotation_actual == rotation_expected
+    assert np.allclose(
+        rotation_actual.q,
+        quaternion_expected,
+        atol=mpy.eps_quaternion,
+        rtol=0.0,
     )
 
 
-def test_mesh_creation_functions_element_length_option(self):
+def test_mesh_creation_functions_element_length_option(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Test that the element length can be specified in the beam creation
     functions."""
 
@@ -549,11 +569,17 @@ def test_mesh_creation_functions_element_length_option(self):
 
     # Check the output
     input_file.add(mesh_line, mesh_line_long, mesh_arc, mesh_curve)
-    compare_test_result(self, input_file.get_string(header=False), rtol=1e-10)
+    assert_results_equal(
+        get_corresponding_reference_file_path(),
+        input_file,
+        rtol=1e-10,
+    )
 
     # Check error messages for input parameters
-    with self.assertRaises(ValueError):
+    with pytest.raises(ValueError):
         mesh = Mesh()
+        # This should raise an error since we dont allow `n_el` and `l_el`
+        # to be set at the same time.
         create_beam_mesh_line(
             mesh,
             Beam3rHerm2Line3,
@@ -563,12 +589,16 @@ def test_mesh_creation_functions_element_length_option(self):
             n_el=1,
             l_el=l_el,
         )
-    with self.assertRaises(ValueError):
+    with pytest.raises(ValueError):
         mesh = Mesh()
+        # This should raise an error because we set `l_el` but don't provide
+        # `interval_length`.
         return create_beam_mesh_function(mesh, interval=[0.0, 1.0], l_el=2.0)
 
 
-def test_mesh_creation_functions_curve_3d_helix(self):
+def test_mesh_creation_functions_curve_3d_helix(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Create a helix from a parametric curve where the parameter is
     transformed so the arc length along the beam is not proportional to the
     parameter."""
@@ -593,24 +623,23 @@ def test_mesh_creation_functions_curve_3d_helix(self):
 
     # Compare the coordinates with the ones from Mathematica.
     coordinates_mathematica = np.loadtxt(
-        os.path.join(
-            testing_input,
-            "test_mesh_creation_functions_curve_3d_helix_mathematica.csv",
+        get_corresponding_reference_file_path(
+            additional_identifier="mathematica", extension="csv"
         ),
         delimiter=",",
     )
-    self.assertLess(
-        np.linalg.norm(
-            coordinates_mathematica - get_nodal_coordinates(input_file.nodes)
-        ),
-        mpy.eps_pos,
+    assert np.allclose(
+        coordinates_mathematica,
+        get_nodal_coordinates(input_file.nodes),
+        rtol=mpy.eps_pos,
+        atol=1e-14,
     )
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_curve_3d_helix_length(self):
+def test_mesh_creation_functions_curve_3d_helix_length(assert_results_equal):
     """Create a helix from a parametric curve where and check that the correct
     length is returned."""
 
@@ -637,17 +666,15 @@ def test_mesh_creation_functions_curve_3d_helix_length(self):
     input_file_2.add(helix_set_2)
 
     # Check the computed length
-    self.assertAlmostEqual(length, 13.18763323790246, delta=1e-12)
+    assert np.isclose(length, 13.18763323790246, rtol=1e-12, atol=0.0)
 
     # Check that both meshes are equal
-    compare_strings(
-        self,
-        input_file_1.get_string(header=False),
-        input_file_2.get_string(header=False),
-    )
+    assert_results_equal(input_file_1, input_file_2)
 
 
-def test_mesh_creation_functions_curve_2d_sin(self):
+def test_mesh_creation_functions_curve_2d_sin(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Create a sin from a parametric curve."""
 
     # Create input file.
@@ -670,24 +697,25 @@ def test_mesh_creation_functions_curve_2d_sin(self):
 
     # Compare the coordinates with the ones from Mathematica.
     coordinates_mathematica = np.loadtxt(
-        os.path.join(
-            testing_input,
-            "test_mesh_creation_functions_curve_2d_sin_mathematica.csv",
+        get_corresponding_reference_file_path(
+            additional_identifier="mathematica", extension="csv"
         ),
         delimiter=",",
     )
-    self.assertLess(
-        np.linalg.norm(
-            coordinates_mathematica - get_nodal_coordinates(input_file.nodes)
-        ),
-        mpy.eps_pos,
+    assert np.allclose(
+        coordinates_mathematica,
+        get_nodal_coordinates(input_file.nodes),
+        rtol=mpy.eps_pos,
+        atol=1e-14,
     )
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_curve_3d_curve_rotation(self):
+def test_mesh_creation_functions_curve_3d_curve_rotation(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Create a line from a parametric curve and prescribe the rotation."""
 
     # AD.
@@ -727,10 +755,12 @@ def test_mesh_creation_functions_curve_3d_curve_rotation(self):
     input_file.add(sin_set)
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_curve_3d_line(self):
+def test_mesh_creation_functions_curve_3d_line(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Create a line from a parametric curve.
 
     Once the interval is in ascending order, once in descending. This
@@ -762,10 +792,12 @@ def test_mesh_creation_functions_curve_3d_line(self):
     input_file.add(set_1, set_2)
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_helix_no_rotation(self):
+def test_mesh_creation_functions_helix_no_rotation(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Create a helix and compare it with the reference file."""
 
     ## Helix angle and height helix combination
@@ -795,7 +827,7 @@ def test_mesh_creation_functions_helix_no_rotation(self):
     input_file.add(helix_set)
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
     ## Helix angle and turns
     # Create input file.
@@ -824,9 +856,8 @@ def test_mesh_creation_functions_helix_no_rotation(self):
     input_file.add(helix_set)
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
-    ## Height helix and turns
     # Create input file.
     input_file = InputFile()
 
@@ -853,10 +884,12 @@ def test_mesh_creation_functions_helix_no_rotation(self):
     input_file.add(helix_set)
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_helix_rotation_offset(self):
+def test_mesh_creation_functions_helix_rotation_offset(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Create a helix and compare it with the reference file."""
 
     # Create input file.
@@ -885,10 +918,12 @@ def test_mesh_creation_functions_helix_rotation_offset(self):
     input_file.add(helix_set)
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_helix_radius_zero(self):
+def test_mesh_creation_functions_helix_radius_zero(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Create a helix and compare it with the reference file."""
 
     # Create input file.
@@ -918,10 +953,12 @@ def test_mesh_creation_functions_helix_radius_zero(self):
     input_file.add(helix_set)
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_mesh_creation_functions_helix_helix_angle_right_angle(self):
+def test_mesh_creation_functions_helix_helix_angle_right_angle(
+    assert_results_equal, get_corresponding_reference_file_path
+):
     """Create a helix and compare it with the reference file."""
 
     # Create input file.
@@ -951,4 +988,4 @@ def test_mesh_creation_functions_helix_helix_angle_right_angle(self):
     input_file.add(helix_set)
 
     # Check the output.
-    compare_test_result(self, input_file.get_string(header=False))
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
