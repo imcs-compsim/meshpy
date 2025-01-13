@@ -30,12 +30,9 @@
 # -----------------------------------------------------------------------------
 """This script is used to test the creation of Abaqus input files."""
 
-import unittest
-
 import numpy as np
-from utils import compare_test_result
 
-from meshpy import GeometrySet, Mesh, Rotation, mpy
+from meshpy import GeometrySet, Mesh, Rotation
 from meshpy.abaqus import (
     AbaqusBeamMaterial,
     AbaqusBeamNormalDefinition,
@@ -45,18 +42,7 @@ from meshpy.abaqus import (
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 
 
-def setUp(self):
-    """This method is called before each test and sets the default meshpy
-    values for each test.
-
-    The values can be changed in the individual tests.
-    """
-
-    # Set default values for global parameters.
-    mpy.set_default_values()
-
-
-def test_abaqus_helix(self):
+def test_abaqus_helix(assert_results_equal, get_corresponding_reference_file_path):
     """Create a helix and check the created Abaqus input file."""
 
     # Helix parameters
@@ -91,18 +77,17 @@ def test_abaqus_helix(self):
     mesh.add(end_set)
 
     input_file = AbaqusInputFile(mesh)
-    compare_test_result(
-        self,
+    assert_results_equal(
+        get_corresponding_reference_file_path(extension="inp"),
         input_file.get_input_file_string(
             AbaqusBeamNormalDefinition.smallest_rotation_of_triad_at_first_node
         ),
-        extension="inp",
-        split_string=",",
+        string_splitter=",",
         atol=1e-14,
     )
 
 
-def test_abaqus_frame(self):
+def test_abaqus_frame(assert_results_equal, get_corresponding_reference_file_path):
     """Create a frame out of connected beams with different materials."""
 
     mesh = Mesh()
@@ -123,12 +108,11 @@ def test_abaqus_frame(self):
     mesh.add(fix_set, load_set)
 
     input_file = AbaqusInputFile(mesh)
-    compare_test_result(
-        self,
+    assert_results_equal(
+        get_corresponding_reference_file_path(extension="inp"),
         input_file.get_input_file_string(
             AbaqusBeamNormalDefinition.smallest_rotation_of_triad_at_first_node
         ),
-        extension="inp",
-        split_string=",",
+        string_splitter=",",
         atol=1e-15,
     )
