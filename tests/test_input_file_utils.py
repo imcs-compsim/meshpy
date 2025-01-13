@@ -49,7 +49,7 @@ def test_input_file_utils_get_coupled_nodes_to_master_map():
     mesh.couple_nodes()
 
     replaced_node_to_master_map, unique_nodes = get_coupled_nodes_to_master_map(
-        mesh, assign_n_global=True
+        mesh, assign_i_global=True
     )
 
     assert len(unique_nodes) == 4
@@ -61,6 +61,6 @@ def test_input_file_utils_get_coupled_nodes_to_master_map():
     assert replaced_node_to_master_map[mesh.nodes[7]] == mesh.nodes[5]
     assert replaced_node_to_master_map[mesh.nodes[6]] == mesh.nodes[1]
 
-    expected_n_global = [0, 1, 1, 2, 2, 3, 1, 3]
-    for i_node, expected_index in enumerate(expected_n_global):
-        assert mesh.nodes[i_node].n_global == expected_index
+    expected_i_global = [0, 1, 1, 2, 2, 3, 1, 3]
+    for i_node, expected_index in enumerate(expected_i_global):
+        assert mesh.nodes[i_node].i_global == expected_index
