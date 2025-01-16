@@ -1,61 +1,45 @@
-# Workflow for building and deploying a Jekyll site to GitHub Pages
-name: Deploy Jekyll site to Pages
+name: Build and Deploy Website
 
 on:
+  # Change to only push on main branch
   push:
     branches:
       - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
-env:
-  # Use spack to provide the correct ruby version
-  SPACK_ACTIVATION_SCRIPT: /home_local/github-runner/testing_lib/spack/share/spack/setup-env.sh
+  workflow_run:
+    workflows: ["Test suite"]
+    types:
+      - completed
 
 jobs:
-  # Build job
   build:
-    runs-on: self-hosted
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Pages
-        id: pages
-        uses: actions/configure-pages@v5
-      - name: Build with Jekyll
-        run: |
-          . ${SPACK_ACTIVATION_SCRIPT}
-          spack load ruby@3.1.0
-          mkdir public
-          cd website
-          bundle config set --local path ./vendor
-          bundle install
-          bundle exec jekyll build -d public
-          cd public
-          mv * ../../public
-        env:
-          JEKYLL_ENV: production
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: public
+    runs-on: ubuntu-latest
 
-  # Deployment job
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install sphinx pydata-sphinx-theme myst-parser linkify-it-py
+      - name: Build Sphinx documentation
+        run: |
+          sphinx-build -b html website/docs/source website/docs/build
+
   deploy:
     environment:
       name: github-pages
       url: http://imcs-compsim.github.io/meshpy
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     needs: build
     steps:
       - name: Deploy to GitHub Pages
