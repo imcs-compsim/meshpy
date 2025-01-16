@@ -55,7 +55,7 @@ A few things to keep in mind:
 - It is highly encouraged to add tests covering the functionality of your changes, see the test suite in `tests/`.
 - MeshPy uses `black` to format python code.
   Make sure to apply `black` to the changed source files.
-- Feel free to add yourself to the [CONTRIBUTORS](CONTRIBUTORS) file.
+- Feel free to add yourself to the [CONTRIBUTORS](https://github.com/imcs-compsim/meshpy/blob/main/CONTRIBUTORS) file.
 
 ## Installation
 
@@ -155,3 +155,20 @@ If the ArborX extension is working correctly can be checked by running the geome
 ```bash
 pytest --ArborX
 ```
+
+## Examples
+
+<p align="center">
+  <img src="utilities/assets/images_readme/composite_plate.png" width="350" title="Fiber reinforced composite plate">
+</p>
+<p align="center" style="font-style: italic; color: gray;">Fiber reinforced composite plate</p>
+
+<p align="center">
+  <img src="utilities/assets/images_readme/pressure_pipe.png" width="350" title="Fiber reinforced pipe under pressure">
+</p>
+<p align="center" style="font-style: italic; color: gray;">Fiber reinforced pipe under pressure</p>
+
+<p align="center">
+  <img src="utilities/assets/images_readme/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate">
+</p>
+<p align="center" style="font-style: italic; color: gray;">Fiber reinforcements of a twisted plate</p>
