@@ -60,12 +60,14 @@ repos:
       - id: interrogate
         name: Run interrogate (linter for docstrings)
         args: [--fail-under=100, --ignore-init-module, --style=google, -vv]
+        exclude: ^website/
   - repo: https://github.com/pre-commit/mirrors-mypy
     rev: v1.13.0
     hooks:
       - id: mypy
         name: Run mypy (static type checker for python)
         args: ["--install-types", "--non-interactive", "--ignore-missing-imports", "--follow-imports=silent"]
+        exclude: ^website/
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
