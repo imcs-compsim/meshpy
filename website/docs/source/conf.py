@@ -58,7 +58,7 @@ html_title = "MeshPy"
 
 # -- Set readme as landing page ----------------------------------------------
 
-master_doc = "README"
+master_doc = "index"
 
 source_suffix = {
     ".rst": "restructuredtext",
