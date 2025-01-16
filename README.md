@@ -32,7 +32,7 @@ It can be used to create input files for the following finite element solvers:
 MeshPy can easily be adapted to create input files for other solvers.
 MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulation (IMCS)](https://www.unibw.de/imcs-en) at the Universität der Bundeswehr München.
 
-## How to cite MeshPy?
+# How to cite MeshPy?
 
 Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as described on the [MeshPy website](https://imcs-compsim.github.io/meshpy).
 
@@ -159,16 +159,16 @@ pytest --ArborX
 ## Examples
 
 <p align="center">
-  <img src="utilities/assets/images_readme/composite_plate.png" width="350" title="Fiber reinforced composite plate">
+  <img src="https://github.com/imcs-compsim/meshpy/utilities/assets/images_readme/composite_plate.png" width="350" title="Fiber reinforced composite plate">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforced composite plate</p>
 
 <p align="center">
-  <img src="utilities/assets/images_readme/pressure_pipe.png" width="350" title="Fiber reinforced pipe under pressure">
+  <img src="https://github.com/imcs-compsim/meshpy/utilities/assets/images_readme/pressure_pipe.png" width="350" title="Fiber reinforced pipe under pressure">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforced pipe under pressure</p>
 
 <p align="center">
-  <img src="utilities/assets/images_readme/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate">
+  <img src="https://github.com/imcs-compsim/meshpy/utilities/assets/images_readme/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforcements of a twisted plate</p>

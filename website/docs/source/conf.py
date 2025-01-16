@@ -41,14 +41,36 @@ author = "MeshPy"
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
-extensions = []
+extensions = [
+    "myst_parser",
+]
 
 templates_path = ["_templates"]
-exclude_patterns = []
+exclude_patterns = ["build"]
 
 
 # -- Options for HTML output -------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#options-for-html-output
 
-html_theme = "alabaster"
+html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
+
+# -- Set readme as landing page ----------------------------------------------
+
+master_doc = "README"
+
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".md": "markdown",
+}
+
+myst_enable_extensions = [
+    "colon_fence",  # For ::: fenced code blocks
+    "linkify",  # Auto-detects URLs and makes them hyperlinks
+]
+
+# -- Additional stuff --------------------------------------------------------
+
+html_theme_options = {
+    "github_url": "https://github.com/imcs-compsim/meshpy",  # Replace with your GitHub repository URL
+}
