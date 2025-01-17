@@ -173,3 +173,15 @@ pytest --ArborX
   <img src="https://github.com/imcs-compsim/meshpy/utilities/doc/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforcements of a twisted plate</p>
+
+## Contributors
+
+### Main developer
+Ivo Steinbrecher (@isteinbrecher)
+
+### Contributors (in alphabetical order)
+- Dao Viet Anh
+- Nora Hagmeyer (@NoraHagmeyer)
+- Matthias Mayr (@mayrmt)
+- Gabriela Loera (@eulovi)
+- David Rudlstorfer (@davidrudlstorfer)
