@@ -1,6 +1,7 @@
-<h1 align="center">
-  MeshPy
-</h1>
+<center>
+
+# MeshPy
+</center>
 
 <div align="center">
 
@@ -36,7 +37,7 @@ MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulat
 
 Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as described on the [MeshPy website](https://imcs-compsim.github.io/meshpy).
 
-Feel free to leave a :star: on [GitHub](https://github.com/imcs-compsim/meshpy).
+Feel free to leave a ⭐️ on [GitHub](https://github.com/imcs-compsim/meshpy).
 
 ## How to use MeshPy?
 
@@ -55,7 +56,7 @@ A few things to keep in mind:
 - It is highly encouraged to add tests covering the functionality of your changes, see the test suite in `tests/`.
 - MeshPy uses `black` to format python code.
   Make sure to apply `black` to the changed source files.
-- Feel free to add yourself to the [CONTRIBUTORS](CONTRIBUTORS) file.
+- Feel free to add yourself to the [CONTRIBUTORS](https://github.com/imcs-compsim/meshpy/blob/main/CONTRIBUTORS) file.
 
 ## Installation
 
@@ -155,3 +156,32 @@ If the ArborX extension is working correctly can be checked by running the geome
 ```bash
 pytest --ArborX
 ```
+
+## Examples
+
+<p align="center">
+  <img src="https://github.com/imcs-compsim/meshpy/utilities/doc/composite_plate.png" width="350" title="Fiber reinforced composite plate">
+</p>
+<p align="center" style="font-style: italic; color: gray;">Fiber reinforced composite plate</p>
+
+<p align="center">
+  <img src="https://github.com/imcs-compsim/meshpy/utilities/doc/pressure_pipe.png" width="350" title="Fiber reinforced pipe under pressure">
+</p>
+<p align="center" style="font-style: italic; color: gray;">Fiber reinforced pipe under pressure</p>
+
+<p align="center">
+  <img src="https://github.com/imcs-compsim/meshpy/utilities/doc/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate">
+</p>
+<p align="center" style="font-style: italic; color: gray;">Fiber reinforcements of a twisted plate</p>
+
+## Contributors
+
+### Main developer
+Ivo Steinbrecher (@isteinbrecher)
+
+### Contributors (in alphabetical order)
+- Dao Viet Anh
+- Nora Hagmeyer (@NoraHagmeyer)
+- Matthias Mayr (@mayrmt)
+- Gabriela Loera (@eulovi)
+- David Rudlstorfer (@davidrudlstorfer)

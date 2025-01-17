@@ -1,18 +1,27 @@
 # The MeshPy website
 
-The MeshPy website is based on the static site generator `jekyll`.
+The MeshPy website is based on the Sphinx PyData Theme (https://pydata-sphinx-theme.readthedocs.io)
 
-## Setup `jekyll`
+## Setup
 
-Install the required packages (the given example is for Debian, the package names might vary for different distributions)
-```bash
-apt install ruby-dev ruby-bundler
+Ensure that the necessary packages for building the website are present. You can simply install them with
+
+```
+pip install -r website/requirements.txt
 ```
 
-## How to test changes to the website?
+## Building the website locally
 
-After making changes to the website, go to the website folder and run
+Simply execute
+
 ```bash
-bundle exec jekyll serve
-```
-this will start a local server that you can use to inspect the changes to the website.
+sphinx-build -b html website/docs/source website/docs/build
+````
+
+in the source directory of MeshPy. Afterwards you can open `website/docs/build/index.html` to view the local build of the website.
+
+## Important information
+
+The contents of the main landing page reflect the contents of the `README.md` at the top level. This is done by providing a symlinked `website/docs/source/index.md` in the website source folder.
+
+Therefore, to change any contents on the main landing page **do not** touch anything within the website directory!
