@@ -1,7 +1,7 @@
-<center>
+<div align="center">
 
 # MeshPy
-</center>
+</div>
 
 <div align="center">
 
@@ -160,17 +160,17 @@ pytest --ArborX
 ## Examples
 
 <p align="center">
-  <img src="https://github.com/imcs-compsim/meshpy/utilities/doc/composite_plate.png" width="350" title="Fiber reinforced composite plate">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/composite_plate.png" width="350" title="Fiber reinforced composite plate">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforced composite plate</p>
 
 <p align="center">
-  <img src="https://github.com/imcs-compsim/meshpy/utilities/doc/pressure_pipe.png" width="350" title="Fiber reinforced pipe under pressure">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/pressure_pipe.png" width="350" title="Fiber reinforced pipe under pressure">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforced pipe under pressure</p>
 
 <p align="center">
-  <img src="https://github.com/imcs-compsim/meshpy/utilities/doc/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforcements of a twisted plate</p>
 
