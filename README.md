@@ -1,7 +1,7 @@
-<center>
+<div align="center">
 
 # MeshPy
-</center>
+</div>
 
 <div align="center">
 
