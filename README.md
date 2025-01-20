@@ -25,23 +25,35 @@
 </div>
 
 MeshPy is a general purpose 3D beam finite element input generator written in `python`.
-It contains basic geometry creation and manipulation functions to create complex beam geometries, including rotational degrees of freedom for the beam nodes.
-It can be used to create input files for the following finite element solvers:
+It contains advanced geometry creation and manipulation functions to create complex beam geometries, including a consistent handling of finite rotations.
+It can be used to create input files for the following finite element solvers (adaption to other solvers is easily possibly):
 - [4C](https://www.4c-multiphysics.org/) (academic finite element solver)
 - [Abaqus](https://en.wikipedia.org/wiki/Abaqus) (commercial software package)
 
-MeshPy can easily be adapted to create input files for other solvers.
 MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulation (IMCS)](https://www.unibw.de/imcs-en) at the Universität der Bundeswehr München.
-
-## How to cite MeshPy?
-
-Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as described on the [MeshPy website](https://imcs-compsim.github.io/meshpy).
-
-Feel free to leave a ⭐️ on [GitHub](https://github.com/imcs-compsim/meshpy).
 
 ## How to use MeshPy?
 
 Basic tutorials can be found in the directory `tutorial/`.
+
+## How to cite MeshPy?
+
+Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as
+> Steinbrecher, I., Popp, A.: MeshPy - A general purpose 3D beam finite element input generator, https://imcs-compsim.github.io/meshpy
+
+This can be done with the following BiBTeX entry:
+```TeX
+@Misc{MeshPyWebsite,
+  author       = {Steinbrecher, I. and Popp, A.},
+  howpublished = {\url{https://imcs-compsim.github.io/meshpy}},
+  title        = {{M}esh{P}y -- {A} general purpose {3D} beam finite element input generator},
+  year         = {2021},
+  key          = {MeshPyWebsite},
+  url          = {https://imcs-compsim.github.io/meshpy},
+}
+```
+
+Feel free to leave a ⭐️ on [GitHub](https://github.com/imcs-compsim/meshpy).
 
 
 ## Contributing
@@ -54,32 +66,41 @@ Depending on the topic and amount of changes you also might want to open an [iss
 To merge your changes into the MeshPy repository, create a pull request to the `main` branch.
 A few things to keep in mind:
 - It is highly encouraged to add tests covering the functionality of your changes, see the test suite in `tests/`.
-- MeshPy uses `black` to format python code.
-  Make sure to apply `black` to the changed source files.
-- Feel free to add yourself to the [CONTRIBUTORS](https://github.com/imcs-compsim/meshpy/blob/main/CONTRIBUTORS) file.
+- To maintain high code quality, MeshPy uses a number of different pre-commit hooks to check committed code. Make sure to set up the pre-commit hooks before committing your changes (run in the repository root folder):
+  ```bash
+  pre-commit install
+  ```
+- Check that you did not break anything by running the MeshPy tests.
+  For most changes it should be sufficient to run the standard test suite (run in the repository root folder):
+  ```bash
+  pytest
+  ```
+- Feel free to add yourself to the contributors section in the [README.md](https://github.com/imcs-compsim/meshpy/blob/main/README.md) file.
 
 ## Installation
 
-MeshPy is developed with `python3.12`.
+MeshPy is tested with and supports python versions `3.9-3.12`.
 Other versions of Python might lead to issues.
 It is recommended to use a python environment container such as `conda` or `venv`.
 - `conda`:
   A [conda](https://docs.conda.io/projects/conda/en/latest/user-guide/install/index.html) environment can be created and loaded with
   ```bash
+  # Create the environment (this only has to be done once)
   conda create -n meshpy python=3.12
+  # Create the environment
   conda activate meshpy
   ```
-- `venv`: Chose an appropriate directory for this, e.g., `/home/user/opt`.
-  A virtual environment can be setup with
-  - On Debian systems the following packages have to be installed:
+- `venv`: A virtual environment can be setup with
+  - On Debian systems the following packages might have to be installed:
     ```bash
     sudo apt-get install python3-venv python3-dev
     ```
   - Create and load the environment
     ```bash
-    cd <path-to-env-folder>
-    python -m venv meshpy-env
-    source meshpy-env/bin/activate
+    # Create the environment (this only has to be done once)
+    python -m venv <path-to-env-folder>/meshpy-env
+    # Create the environment
+    source <path-to-env-folder>/meshpy-env/bin/activate
     ```
 
 From now on we assume that the previously created environment is loaded.
@@ -104,12 +125,6 @@ If `cython` code is changed, it has to be recompiled. This can be done by runnin
 python setup.py build_ext --inplace
 ```
 
-Optional, a path to the `4C` executable can be given in order to run some combined
-tests with 4C
-```bash
-export MESHPY_FOUR_C_EXE=path_to_4C
-```
-
 To check if everything worked as expected, run the standard tests with
 ```bash
 pytest
@@ -118,18 +133,22 @@ pytest
 Further tests can be added with the following flags: `--4C`, `--ArborX`, `--CubitPy`, `--performance-tests`.
 These can be arbitrarily combined, for example
 ```bash
-pytest --4C --CubityPy
+pytest --CubitPy --performance-tests
 ```
-executes the standard tests, the 4C tests and the CubitPy tests. Note that the reference time values for the performance tests might not suite your system.
+executes the standard tests, the CubitPy tests and the performance tests.
+Note: the reference time values for the performance tests might not suite your system.
 
-Finally, the base tests can be deactivated with `--exclude-standard-tests`. For example to just run the CubitPy tests execute
+We can also run tests in combination with 4C
+```bash
+# 4C Tests require a path to a 4C executable
+export MESHPY_FOUR_C_EXE=<path_to_4C>
+pytest --4C --performance-tests
+```
+
+Finally, the base tests can be deactivated with `--exclude-standard-tests`.
+For example to just run the CubitPy tests execute
 ```bash
 pytest --CubitPy --exclude-standard-tests
-```
-
-Before you are ready to contribute to MeshPy, please make sure to install the `pre-commit hook` within the python environment to follow our style guides:
-```bash
-pre-commit install
 ```
 
 ### Optional dependency on [ArborX](https://github.com/arborx/ArborX)
@@ -160,7 +179,12 @@ pytest --ArborX
 ## Examples
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/composite_plate.png" width="350" title="Fiber reinforced composite plate">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/honeycomb.png" width="350" title="Honeycomb structure under tension">
+</p>
+<p align="center" style="font-style: italic; color: gray;">Honeycomb structure under tension</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/composite_plate.png" width="400" title="Fiber reinforced composite plate">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforced composite plate</p>
 
@@ -174,6 +198,46 @@ pytest --ArborX
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforcements of a twisted plate</p>
 
+
+## Work that uses MeshPy
+
+### Peer-reviewed articles
+
+1. </span><span class="csl-right-inline">Firmbach, M., Steinbrecher, I.,
+Popp, A., Mayr, M.: An approximate block factorization preconditioner
+for mixed-dimensional beam-solid interaction. Computer Methods in
+Applied Mechanics and Engineering. 431, 117256 (2024).
+https://doi.org/<https://doi.org/10.1016/j.cma.2024.117256></span>
+1. </span><span class="csl-right-inline">Hagmeyer, N., Mayr, M., Popp, A.:
+A fully coupled regularized mortar-type finite element approach for
+embedding one-dimensional fibers into three-dimensional fluid flow.
+International Journal for Numerical Methods in Engineering. 125, e7435
+(2024). https://doi.org/<https://doi.org/10.1002/nme.7435></span>
+1. </span><span class="csl-right-inline">Steinbrecher, I., Popp, A., Meier,
+C.: Consistent coupling of positions and rotations for embedding 1D
+Cosserat beams into 3D solid volumes. Computational Mechanics. 69,
+701–732 (2022). <https://doi.org/10.1007/s00466-021-02111-4></span>
+1. </span><span class="csl-right-inline">Hagmeyer, N., Mayr, M.,
+Steinbrecher, I., Popp, A.: One-way coupled fluid-beam interaction:
+Capturing the effect of embedded slender bodies on global fluid flow and
+vice versa. Advanced Modeling and Simulation in Engineering Sciences. 9,
+9 (2022). <https://doi.org/10.1186/s40323-022-00222-y></span>
+1. </span><span class="csl-right-inline">Steinbrecher, I., Mayr, M., Grill,
+M.J., Kremheller, J., Meier, C., Popp, A.: A mortar-type finite element
+approach for embedding 1D beams into 3D solid volumes. Computational
+Mechanics. 66, 1377–1398 (2020).
+<https://doi.org/10.1007/s00466-020-01907-0></span>
+
+### PhD thesis
+
+1. </span><span class="csl-right-inline">Hagmeyer, N.: A computational
+framework for balloon angioplasty and stented arteries based on
+mixed-dimensional modeling,
+<https://athene-forschung.rz.unibw-muenchen.de/146359>, (2023)</span>
+1. </span><span class="csl-right-inline">Steinbrecher, I.:
+Mixed-dimensional finite element formulations for beam-to-solid
+interaction, <https://athene-forschung.unibw.de/143755>, (2022)</span>
+
 ## Contributors
 
 ### Main developer
@@ -181,6 +245,8 @@ Ivo Steinbrecher (@isteinbrecher)
 
 ### Contributors (in alphabetical order)
 - Dao Viet Anh
+- Max Firmbach (@maxfirmbach)
+- Martin Frank (@knarfnitram)
 - Nora Hagmeyer (@NoraHagmeyer)
 - Matthias Mayr (@mayrmt)
 - Gabriela Loera (@eulovi)
