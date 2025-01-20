@@ -27,6 +27,7 @@
 # SOFTWARE.
 """Testing framework infrastructure."""
 
+import json
 import os
 import shutil
 import subprocess
@@ -174,7 +175,7 @@ def get_string() -> Callable:
     """
 
     def _get_string(
-        data: Union[Path, str, InputFile], input_file_kwargs: dict = {}
+        data: Union[Path, str, InputFile, dict], input_file_kwargs: dict = {}
     ) -> str:
         """Get string from file, string or InputFile.
 
@@ -196,6 +197,19 @@ def get_string() -> Callable:
                 return file.read()
         elif isinstance(data, InputFile):
             return data.get_string(**input_file_kwargs)
+        elif isinstance(data, dict):
+
+            def convert_numpy(obj):
+                """Convert a numpy array to a json serializable data
+                structure."""
+                if isinstance(obj, np.ndarray):
+                    return obj.tolist()
+                raise TypeError(
+                    "Object of type {} is not JSON serializable".format(type(obj))
+                )
+
+            return json.dumps(data, indent=2, default=convert_numpy, sort_keys=True)
+
         else:
             raise TypeError(f"Data type {type(data)} not implemented.")
 
@@ -312,6 +326,19 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
                 raise NotImplementedError(
                     f"Comparison is not yet implemented for {reference.suffix} files."
                 )
+
+        if isinstance(reference, dict) or isinstance(result, dict):
+            # Do a dictionary comparison
+
+            # First check if we need to load the dictionary from a file for one of the
+            # arguments.
+            if isinstance(reference, Path):
+                reference = json.loads(get_string(reference))
+            if isinstance(result, Path):
+                result = json.loads(get_string(result))
+
+            compare_dicts(reference, result, rtol=rtol, atol=atol)  # type: ignore[arg-type]
+            return
 
         # We didn't raise an error or exit this function yet, so we default to a string
         # based comparison.
@@ -549,3 +576,59 @@ def compare_strings_with_tolerance(
         return get_return_values(True, "")
     except AssertionError as error:
         return get_return_values(False, str(error))
+
+
+def compare_dicts(
+    dict_1: dict,
+    dict_2: dict,
+    *,
+    rtol: Optional[float] = None,
+    atol: Optional[float] = None,
+):
+    """Recursively compare two dictionaries.
+
+    For NumPy arrays, use np.allclose. For other types, use direct equality.
+
+    If the dictionaries are not equal, an assertion error is raised.
+
+    Args:
+        dict_1: The first dictionary to compare.
+        dict_2: The second dictionary to compare.
+        rtol: Relative tolerance for np.allclose.
+        atol: Absolute tolerance for np.allclose.
+    """
+
+    if rtol is None:
+        rtol = 1e-10
+    if atol is None:
+        atol = 1e-10
+
+    if not isinstance(dict_1, dict) or not isinstance(dict_2, dict):
+        raise ValueError("Both arguments must be dictionaries")
+
+    if dict_1.keys() != dict_2.keys():
+        raise AssertionError(
+            "The keys of the dictionary are not equal. "
+            f"Got {dict_1.keys()} and {dict_2.keys()}"
+        )
+
+    for key in dict_1:
+        value_1 = dict_1[key]
+        value_2 = dict_2[key]
+
+        if isinstance(value_1, np.ndarray) or isinstance(value_2, np.ndarray):
+            if not np.allclose(value_1, value_2, rtol=rtol, atol=atol):
+                raise AssertionError(
+                    f'Comparison of numpy arrays for the key "{key}" failed.'
+                )
+        elif isinstance(value_1, dict) and isinstance(value_2, dict):
+            # If both values are dictionaries, compare recursively
+            compare_dicts(value_1, value_2, rtol=rtol, atol=atol)
+        elif isinstance(value_1, float) or isinstance(value_2, float):
+            # If one of the values is a float, we do a float comparison
+            if not np.isclose(value_1, value_2, rtol=rtol, atol=atol):
+                raise AssertionError(
+                    f"Comparison of the values {value_1} and {value_2} failed."
+                )
+        elif not value_1 == value_2:
+            raise AssertionError(f'Comparison of values for the key "{key}" failed.')
