@@ -292,7 +292,11 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
                 the string from the input file.
         """
 
-        # Compare two universal files
+        # Per default we do a string comparison of the objects. Some data types, e.g.,
+        # vtu files or hdf5 data structures require special comparison functions.
+        # We first check if a special case is needed, if not we default to the
+        # string comparison.
+
         if isinstance(reference, Path) and isinstance(result, Path):
             if reference.suffix != result.suffix:
                 raise RuntimeError(
@@ -300,6 +304,7 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
                 )
             elif reference.suffix in [".vtk", ".vtu"]:
                 compare_vtk_files(reference, result, rtol, atol)
+                return
             elif reference.suffix == ".dat":
                 # Do nothing here as the mechanism below will compare the dat files.
                 pass
@@ -308,22 +313,21 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
                     f"Comparison is not yet implemented for {reference.suffix} files."
                 )
 
-        # String based comparison
-        else:
-            # retrieve strings to compare
-            [reference_string, result_string] = [
-                get_string(data, input_file_kwargs) for data in [reference, result]
-            ]
+        # We didn't raise an error or exit this function yet, so we default to a string
+        # based comparison.
+        [reference_string, result_string] = [
+            get_string(data, input_file_kwargs) for data in [reference, result]
+        ]
 
-            # compare strings and handle non-matching strings
-            try:
-                compare_strings(reference_string, result_string, rtol, atol, **kwargs)
-            except AssertionError as error:
-                if isinstance(reference, Path):
-                    handle_unequal_strings(
-                        tmp_path, current_test_name, result_string, reference
-                    )
-                raise AssertionError(str(error))
+        # compare strings and handle non-matching strings
+        try:
+            compare_strings(reference_string, result_string, rtol, atol, **kwargs)
+        except AssertionError as error:
+            if isinstance(reference, Path):
+                handle_unequal_strings(
+                    tmp_path, current_test_name, result_string, reference
+                )
+            raise AssertionError(str(error))
 
     return _assert_results_equal
 
