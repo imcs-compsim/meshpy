@@ -29,6 +29,7 @@
 
 import numpy as np
 import pytest
+from meshpy_testing.test_performance import PerformanceTest
 
 from meshpy import Beam3rHerm2Line3, Beam3rLine2Line2, MaterialReissner, Mesh, mpy
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
@@ -201,3 +202,37 @@ def test_space_time_varying_material_length(
         ),
         mesh_data_arrays,
     )
+
+
+@pytest.mark.performance
+def test_space_time_performance(tmp_path):
+    """Test the performance of the space time creation."""
+
+    # These are the expected test times that should not be exceeded
+    expected_times = {
+        "space_time_create_mesh_in_space": 0.01,
+        "space_time_create_mesh_in_time": 6.0,
+    }
+    test_performance = PerformanceTest(expected_times)
+
+    # Create the beam mesh in space
+    beam_type = Beam3rHerm2Line3
+    beam_radius = 0.05
+    mat = MaterialReissner(radius=beam_radius)
+    mesh = Mesh()
+    test_performance.time_function(
+        "space_time_create_mesh_in_space",
+        create_beam_mesh_line,
+        args=[mesh, beam_type, mat, [0, 0, 0], [1, 0, 0]],
+        kwargs={"n_el": 100},
+    )
+
+    # Create the beam mesh in time
+    _, _ = test_performance.time_function(
+        "space_time_create_mesh_in_time",
+        beam_to_space_time,
+        args=[mesh, 6.9, 1000],
+        kwargs={"time_start": 1.69},
+    )
+
+    assert test_performance.failed_tests == 0
