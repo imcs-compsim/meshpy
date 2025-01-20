@@ -84,7 +84,7 @@ class VolumeElement(Element):
         # Add the node sets connected to this element.
         add_point_data_node_sets(point_data, self.nodes)
 
-        # Add hex8 line to writer.
+        # Add cell to writer.
         indices = vtk_writer_solid.add_points(coordinates, point_data=point_data)
         vtk_writer_solid.add_cell(
             self.vtk_cell_type, indices[self.vtk_topology], cell_data=cell_data
