@@ -10,6 +10,7 @@ packages = [
   "meshpy.four_c",
   "meshpy.geometric_search",
   "meshpy.mesh_creation_functions",
+  "meshpy.space_time",
   "meshpy_testing",
   "meshpy_tutorial"
 ]
