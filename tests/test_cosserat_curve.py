@@ -156,7 +156,11 @@ def test_cosserat_curve_project_point(reference_file_directory):
     assert np.allclose(t_ref, curve.project_point([-5, 1, 1], t0=4.0), rtol=rtol)
 
 
-def test_cosserat_mesh_transformation(reference_file_directory, current_test_name):
+def test_cosserat_mesh_transformation(
+    reference_file_directory,
+    get_corresponding_reference_file_path,
+    assert_results_equal,
+):
     """Test that the get_mesh_transformation function works as expected."""
 
     curve = load_cosserat_curve_from_file(reference_file_directory)
@@ -176,26 +180,11 @@ def test_cosserat_mesh_transformation(reference_file_directory, current_test_nam
         n_steps=3,
     )
 
-    # Save as json:
-    # with open("name.json", "w") as f:
-    #     json.dump(np_array.tolist(), f, indent=2)
-
-    def load_result(name):
-        """Load the position and rotation results from the reference files."""
-        with open(
-            os.path.join(reference_file_directory, f"{current_test_name}_{name}.json"),
-            "r",
-        ) as f:
-            return np.array(json.load(f))
-
-    pos_ref = load_result("pos")
-    rot_ref = load_result("rot")
-
-    pos_np = np.array(pos)
-    rot_np = quaternion.as_float_array(rot)
-
-    assert np.allclose(pos_ref, pos_np, rtol=1e-14)
-    assert np.allclose(rot_ref, rot_np, rtol=1e-14)
+    assert_results_equal(
+        get_corresponding_reference_file_path(extension="json"),
+        {"pos": pos, "rot": quaternion.as_float_array(rot)},
+        rtol=1e-14,
+    )
 
 
 def test_cosserat_curve_mesh_warp(
