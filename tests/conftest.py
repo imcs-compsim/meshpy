@@ -282,8 +282,8 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
     """
 
     def _assert_results_equal(
-        reference: Union[Path, str],
-        result: Union[Path, str, InputFile],
+        reference: Union[Path, str, dict],
+        result: Union[Path, str, dict, InputFile],
         rtol: Optional[float] = None,
         atol: Optional[float] = None,
         input_file_kwargs: dict = {
@@ -327,17 +327,22 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
                     f"Comparison is not yet implemented for {reference.suffix} files."
                 )
 
+        # Dictionary comparison
         if isinstance(reference, dict) or isinstance(result, dict):
-            # Do a dictionary comparison
 
-            # First check if we need to load the dictionary from a file for one of the
-            # arguments.
-            if isinstance(reference, Path):
-                reference = json.loads(get_string(reference))
-            if isinstance(result, Path):
-                result = json.loads(get_string(result))
+            def get_dictionary(data) -> dict:
+                """Get the dictionary representation of the data object."""
+                if isinstance(data, dict):
+                    return data
+                elif isinstance(data, Path):
+                    return json.loads(get_string(data))
+                raise TypeError(
+                    f"The comparison for {type(data)} is not yet implemented."
+                )
 
-            compare_dicts(reference, result, rtol=rtol, atol=atol)  # type: ignore[arg-type]
+            reference_dict = get_dictionary(reference)
+            result_dict = get_dictionary(result)
+            compare_dicts(reference_dict, result_dict, rtol=rtol, atol=atol)
             return
 
         # We didn't raise an error or exit this function yet, so we default to a string
