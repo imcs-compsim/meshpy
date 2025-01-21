@@ -1,6 +1,6 @@
 <div align="center">
 
-# MeshPy
+# MeshPy <!-- omit from toc -->
 </div>
 
 <div align="center">
@@ -29,8 +29,41 @@ It contains advanced geometry creation and manipulation functions to create comp
 It can be used to create input files for the following finite element solvers (adaption to other solvers is easily possibly):
 - [4C](https://www.4c-multiphysics.org/) (academic finite element solver)
 - [Abaqus](https://en.wikipedia.org/wiki/Abaqus) (commercial software package)
+- [AceFEM](http://symech.fgg.uni-lj.si) (Finite element package for automation of the finite element method in [Mathematica](https://www.wolfram.com/mathematica/)
 
 MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulation (IMCS)](https://www.unibw.de/imcs-en) at the Universität der Bundeswehr München.
+
+## Overview <!-- omit from toc -->
+- [Examples](#examples)
+- [How to use MeshPy?](#how-to-use-meshpy)
+- [How to cite MeshPy?](#how-to-cite-meshpy)
+- [Work that uses MeshPy](#work-that-uses-meshpy)
+- [Installation](#installation)
+  - [Optional dependency on ArborX](#optional-dependency-on-arborx)
+- [Contributing](#contributing)
+- [Contributors](#contributors)
+
+## Examples
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/honeycomb.png" width="350" title="Honeycomb structure under tension (simulated with 4C)">
+</p>
+<p align="center" style="font-style: italic; color: gray;">Honeycomb structure under tension (simulated with 4C)</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/composite_plate.png" width="400" title="Fiber reinforced composite plate (simulated with 4C)">
+</p>
+<p align="center" style="font-style: italic; color: gray;">Fiber reinforced composite plate (simulated with 4C)</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/pressure_pipe.png" width="350" title="Fiber reinforced pipe under pressure (simulated with 4C)">
+</p>
+<p align="center" style="font-style: italic; color: gray;">Fiber reinforced pipe under pressure (simulated with 4C)</p>
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate (simulated with 4C)">
+</p>
+<p align="center" style="font-style: italic; color: gray;">Fiber reinforcements of a twisted plate (simulated with 4C)</p>
 
 ## How to use MeshPy?
 
@@ -56,26 +89,45 @@ This can be done with the following BiBTeX entry:
 Feel free to leave a ⭐️ on [GitHub](https://github.com/imcs-compsim/meshpy).
 
 
-## Contributing
+## Work that uses MeshPy
 
-If you are interested in contributing to MeshPy, we welcome your collaboration.
-For general questions, feature request and bug reports please open an [issue](https://github.com/imcs-compsim/meshpy/issues).
+### Peer-reviewed articles <!-- omit from toc -->
 
-If you contribute actual code, fork the repository and make the changes in a feature branch.
-Depending on the topic and amount of changes you also might want to open an [issue](https://github.com/imcs-compsim/meshpy/issues).
-To merge your changes into the MeshPy repository, create a pull request to the `main` branch.
-A few things to keep in mind:
-- It is highly encouraged to add tests covering the functionality of your changes, see the test suite in `tests/`.
-- To maintain high code quality, MeshPy uses a number of different pre-commit hooks to check committed code. Make sure to set up the pre-commit hooks before committing your changes (run in the repository root folder):
-  ```bash
-  pre-commit install
-  ```
-- Check that you did not break anything by running the MeshPy tests.
-  For most changes it should be sufficient to run the standard test suite (run in the repository root folder):
-  ```bash
-  pytest
-  ```
-- Feel free to add yourself to the contributors section in the [README.md](https://github.com/imcs-compsim/meshpy/blob/main/README.md) file.
+1. </span><span class="csl-right-inline">Firmbach, M., Steinbrecher, I.,
+Popp, A., Mayr, M.: An approximate block factorization preconditioner
+for mixed-dimensional beam-solid interaction. Computer Methods in
+Applied Mechanics and Engineering. 431, 117256 (2024).
+https://doi.org/<https://doi.org/10.1016/j.cma.2024.117256></span>
+1. </span><span class="csl-right-inline">Hagmeyer, N., Mayr, M., Popp, A.:
+A fully coupled regularized mortar-type finite element approach for
+embedding one-dimensional fibers into three-dimensional fluid flow.
+International Journal for Numerical Methods in Engineering. 125, e7435
+(2024). https://doi.org/<https://doi.org/10.1002/nme.7435></span>
+1. </span><span class="csl-right-inline">Steinbrecher, I., Popp, A., Meier,
+C.: Consistent coupling of positions and rotations for embedding 1D
+Cosserat beams into 3D solid volumes. Computational Mechanics. 69,
+701–732 (2022). <https://doi.org/10.1007/s00466-021-02111-4></span>
+1. </span><span class="csl-right-inline">Hagmeyer, N., Mayr, M.,
+Steinbrecher, I., Popp, A.: One-way coupled fluid-beam interaction:
+Capturing the effect of embedded slender bodies on global fluid flow and
+vice versa. Advanced Modeling and Simulation in Engineering Sciences. 9,
+9 (2022). <https://doi.org/10.1186/s40323-022-00222-y></span>
+1. </span><span class="csl-right-inline">Steinbrecher, I., Mayr, M., Grill,
+M.J., Kremheller, J., Meier, C., Popp, A.: A mortar-type finite element
+approach for embedding 1D beams into 3D solid volumes. Computational
+Mechanics. 66, 1377–1398 (2020).
+<https://doi.org/10.1007/s00466-020-01907-0></span>
+
+### PhD thesis <!-- omit from toc -->
+
+1. </span><span class="csl-right-inline">Hagmeyer, N.: A computational
+framework for balloon angioplasty and stented arteries based on
+mixed-dimensional modeling,
+<https://athene-forschung.rz.unibw-muenchen.de/146359>, (2023)</span>
+1. </span><span class="csl-right-inline">Steinbrecher, I.:
+Mixed-dimensional finite element formulations for beam-to-solid
+interaction, <https://athene-forschung.unibw.de/143755>, (2022)</span>
+
 
 ## Installation
 
@@ -176,74 +228,34 @@ If the ArborX extension is working correctly can be checked by running the geome
 pytest --ArborX
 ```
 
-## Examples
+## Contributing
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/honeycomb.png" width="350" title="Honeycomb structure under tension (simulated with 4C)">
-</p>
-<p align="center" style="font-style: italic; color: gray;">Honeycomb structure under tension (simulated with 4C)</p>
+If you are interested in contributing to MeshPy, we welcome your collaboration.
+For general questions, feature request and bug reports please open an [issue](https://github.com/imcs-compsim/meshpy/issues).
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/composite_plate.png" width="400" title="Fiber reinforced composite plate (simulated with 4C)">
-</p>
-<p align="center" style="font-style: italic; color: gray;">Fiber reinforced composite plate (simulated with 4C)</p>
+If you contribute actual code, fork the repository and make the changes in a feature branch.
+Depending on the topic and amount of changes you also might want to open an [issue](https://github.com/imcs-compsim/meshpy/issues).
+To merge your changes into the MeshPy repository, create a pull request to the `main` branch.
+A few things to keep in mind:
+- It is highly encouraged to add tests covering the functionality of your changes, see the test suite in `tests/`.
+- To maintain high code quality, MeshPy uses a number of different pre-commit hooks to check committed code. Make sure to set up the pre-commit hooks before committing your changes (run in the repository root folder):
+  ```bash
+  pre-commit install
+  ```
+- Check that you did not break anything by running the MeshPy tests.
+  For most changes it should be sufficient to run the standard test suite (run in the repository root folder):
+  ```bash
+  pytest
+  ```
+- Feel free to add yourself to the contributors section in the [README.md](https://github.com/imcs-compsim/meshpy/blob/main/README.md) file.
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/pressure_pipe.png" width="350" title="Fiber reinforced pipe under pressure (simulated with 4C)">
-</p>
-<p align="center" style="font-style: italic; color: gray;">Fiber reinforced pipe under pressure (simulated with 4C)</p>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate (simulated with 4C)">
-</p>
-<p align="center" style="font-style: italic; color: gray;">Fiber reinforcements of a twisted plate (simulated with 4C)</p>
-
-
-## Work that uses MeshPy
-
-### Peer-reviewed articles
-
-1. </span><span class="csl-right-inline">Firmbach, M., Steinbrecher, I.,
-Popp, A., Mayr, M.: An approximate block factorization preconditioner
-for mixed-dimensional beam-solid interaction. Computer Methods in
-Applied Mechanics and Engineering. 431, 117256 (2024).
-https://doi.org/<https://doi.org/10.1016/j.cma.2024.117256></span>
-1. </span><span class="csl-right-inline">Hagmeyer, N., Mayr, M., Popp, A.:
-A fully coupled regularized mortar-type finite element approach for
-embedding one-dimensional fibers into three-dimensional fluid flow.
-International Journal for Numerical Methods in Engineering. 125, e7435
-(2024). https://doi.org/<https://doi.org/10.1002/nme.7435></span>
-1. </span><span class="csl-right-inline">Steinbrecher, I., Popp, A., Meier,
-C.: Consistent coupling of positions and rotations for embedding 1D
-Cosserat beams into 3D solid volumes. Computational Mechanics. 69,
-701–732 (2022). <https://doi.org/10.1007/s00466-021-02111-4></span>
-1. </span><span class="csl-right-inline">Hagmeyer, N., Mayr, M.,
-Steinbrecher, I., Popp, A.: One-way coupled fluid-beam interaction:
-Capturing the effect of embedded slender bodies on global fluid flow and
-vice versa. Advanced Modeling and Simulation in Engineering Sciences. 9,
-9 (2022). <https://doi.org/10.1186/s40323-022-00222-y></span>
-1. </span><span class="csl-right-inline">Steinbrecher, I., Mayr, M., Grill,
-M.J., Kremheller, J., Meier, C., Popp, A.: A mortar-type finite element
-approach for embedding 1D beams into 3D solid volumes. Computational
-Mechanics. 66, 1377–1398 (2020).
-<https://doi.org/10.1007/s00466-020-01907-0></span>
-
-### PhD thesis
-
-1. </span><span class="csl-right-inline">Hagmeyer, N.: A computational
-framework for balloon angioplasty and stented arteries based on
-mixed-dimensional modeling,
-<https://athene-forschung.rz.unibw-muenchen.de/146359>, (2023)</span>
-1. </span><span class="csl-right-inline">Steinbrecher, I.:
-Mixed-dimensional finite element formulations for beam-to-solid
-interaction, <https://athene-forschung.unibw.de/143755>, (2022)</span>
 
 ## Contributors
 
-### Main developer
+### Main developer <!-- omit from toc -->
 Ivo Steinbrecher (@isteinbrecher)
 
-### Contributors (in alphabetical order)
+### Contributors (in alphabetical order) <!-- omit from toc -->
 - Dao Viet Anh
 - Max Firmbach (@maxfirmbach)
 - Martin Frank (@knarfnitram)
