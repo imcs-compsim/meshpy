@@ -29,7 +29,7 @@ It contains advanced geometry creation and manipulation functions to create comp
 It can be used to create input files for the following finite element solvers (adaption to other solvers is easily possibly):
 - [4C](https://www.4c-multiphysics.org/) (academic finite element solver)
 - [Abaqus](https://en.wikipedia.org/wiki/Abaqus) (commercial software package)
-- [AceFEM](http://symech.fgg.uni-lj.si) (Finite element package for automation of the finite element method in [Mathematica](https://www.wolfram.com/mathematica/)
+- [AceFEM](http://symech.fgg.uni-lj.si) (Finite element package for automation of the finite element method in [Mathematica](https://www.wolfram.com/mathematica/))
 
 MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulation (IMCS)](https://www.unibw.de/imcs-en) at the Universität der Bundeswehr München.
 
@@ -139,7 +139,7 @@ It is recommended to use a python environment container such as `conda` or `venv
   ```bash
   # Create the environment (this only has to be done once)
   conda create -n meshpy python=3.12
-  # Create the environment
+  # Activate the environment
   conda activate meshpy
   ```
 - `venv`: A virtual environment can be setup with
@@ -151,7 +151,7 @@ It is recommended to use a python environment container such as `conda` or `venv
     ```bash
     # Create the environment (this only has to be done once)
     python -m venv <path-to-env-folder>/meshpy-env
-    # Create the environment
+    # Activate the environment
     source <path-to-env-folder>/meshpy-env/bin/activate
     ```
 
