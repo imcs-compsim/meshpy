@@ -42,3 +42,4 @@ website/public/
 # Don't ignore directory of Github workflows
 !.github
 !.pre-commit-config.yaml
+!.binder

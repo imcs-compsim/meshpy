@@ -1913,4 +1913,4 @@ def test_meshpy_display_pyvista(reference_file_directory):
 
     mpy.import_mesh_full = True
     mesh = create_beam_to_solid_conditions_model(reference_file_directory)
-    _plotter = mesh.display_pyvista(is_testing=True, resolution=3)
+    _ = mesh.display_pyvista(resolution=3)
