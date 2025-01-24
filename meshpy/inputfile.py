@@ -309,9 +309,7 @@ class InputFile(Mesh):
     skip_sections = [
         "ALE ELEMENTS",
         "LUBRICATION ELEMENTS",
-        "TRANSPORT ELEMENTS",
         "TRANSPORT2 ELEMENTS",
-        "THERMO ELEMENTS",
         "ACOUSTIC ELEMENTS",
         "CELL ELEMENTS",
         "CELLSCATRA ELEMENTS",
@@ -588,6 +586,18 @@ class InputFile(Mesh):
                     else:
                         add_line(self.dat_nodes, line)
             elif section_name == "STRUCTURE ELEMENTS":
+                for line in section_data_comment:
+                    if mpy.import_mesh_full:
+                        self.elements.append(Element.from_dat(line))
+                    else:
+                        add_line(self.dat_elements, line)
+            elif section_name == "THERMO ELEMENTS":
+                for line in section_data_comment:
+                    if mpy.import_mesh_full:
+                        self.elements.append(Element.from_dat(line))
+                    else:
+                        add_line(self.dat_elements, line)
+            elif section_name == "TRANSPORT ELEMENTS":
                 for line in section_data_comment:
                     if mpy.import_mesh_full:
                         self.elements.append(Element.from_dat(line))
