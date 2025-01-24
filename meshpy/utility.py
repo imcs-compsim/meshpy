@@ -372,3 +372,13 @@ def get_env_variable(name, *, default="default_not_set"):
     elif default == "default_not_set":
         raise ValueError(f"Environment variable {name} is not set")
     return default
+
+
+def is_testing_github():
+    """Check if the current environment is a testing action on GitHub."""
+    return "GITHUB_ACTION" in os.environ.keys()
+
+
+def is_mybinder():
+    """Check if the current environment is running on mybinder."""
+    return "BINDER_LAUNCH_HOST" in os.environ.keys()

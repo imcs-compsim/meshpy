@@ -48,6 +48,7 @@ repos:
     hooks:
       - id: clang-format
         name: Run clang-format (C/C++ formatter)
+        types: [c, c++]
   - repo: https://github.com/PyCQA/docformatter
     rev: "eb1df347edd128b30cd3368dddc3aa65edcfac38" # change back to version once bug is fixed in latest version to be compatible with pre-commit
     hooks:
@@ -68,6 +69,11 @@ repos:
         name: Run mypy (static type checker for python)
         args: ["--install-types", "--non-interactive", "--ignore-missing-imports", "--follow-imports=silent"]
         exclude: ^website/
+  - repo: https://github.com/kynan/nbstripout
+    rev: 0.8.1
+    hooks:
+      - id: nbstripout
+        name: Run nbstripout (strip output from Jupyter notebooks)
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
@@ -107,7 +113,7 @@ repos:
     rev: v1.28.4
     hooks:
       - id: typos
-        name: Check for typos
+        name: Run typo checker
         exclude: ".*\\.(nb|wls)$"
   - repo: https://github.com/pamoller/xmlformatter
     rev: v0.2.8

@@ -57,6 +57,7 @@ from .utility import (
     get_nodal_coordinates,
     get_nodal_quaternions,
     get_nodes_by_function,
+    is_testing_github,
 )
 from .vtk_writer import VTKWriter
 
@@ -769,11 +770,13 @@ class Mesh:
         beam_cross_section_directors=True,
         beam_radius_for_display=None,
         resolution=20,
-        is_testing=False,
         parallel_projection=False,
         **kwargs,
     ):
         """Display the mesh in pyvista.
+
+        If this is called in a GitHub testing run, nothing will be shown, instead
+        the pv.plotter object will be returned.
 
         Args
         ----
@@ -792,9 +795,6 @@ class Mesh:
         resolution: int
             Indicates how many triangulations will be performed to visualize arrows,
             tubes and spheres.
-        is_testing: bool
-            Flag if the function is used for testing. If true, the pv.plotter object
-            will be returned.
         parallel_projection: bool
             Flag to change camera view to parallel projection.
 
@@ -906,7 +906,7 @@ class Mesh:
             solid_grid = pv.UnstructuredGrid(vtk_writer_solid.grid).clean()
             plotter.add_mesh(solid_grid, color="white", show_edges=True, opacity=0.5)
 
-        if not is_testing:
+        if not is_testing_github():
             plotter.show()
         else:
             return plotter
