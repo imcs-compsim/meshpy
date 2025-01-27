@@ -205,7 +205,7 @@ def test_space_time_varying_material_length(
 
 
 @pytest.mark.performance
-def test_space_time_performance(tmp_path):
+def test_space_time_performance():
     """Test the performance of the space time creation."""
 
     # These are the expected test times that should not be exceeded
