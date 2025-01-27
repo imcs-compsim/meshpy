@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
 
   # Only build and deploy the website once the testsuite is completed => coverage badge and report are necessary
   workflow_run:
@@ -44,15 +49,21 @@ jobs:
   deploy:
     environment:
       name: Website
-      url: http://imcs-compsim.github.io/meshpy
+      # url: http://imcs-compsim.github.io/meshpy
     runs-on: ubuntu-latest
     needs: build
     permissions:
       pages: write
       id-token: write
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
+      - name: Deploy coverage report to GitHub pages
+        id: deploy-coverage
+        uses: actions/deploy-pages@v4
+        with:
+          name: coverage-report
+          artifact_name: coverage-report
+      - name: Deploy to GitHub pages
+        id: deploy-website
         uses: actions/deploy-pages@v4
         with:
           artifact_name: website
