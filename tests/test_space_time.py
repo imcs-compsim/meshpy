@@ -31,7 +31,14 @@ import numpy as np
 import pytest
 from meshpy_testing.test_performance import PerformanceTest
 
-from meshpy import Beam3rHerm2Line3, Beam3rLine2Line2, MaterialReissner, Mesh, mpy
+from meshpy import (
+    Beam3rHerm2Line3,
+    Beam3rLine2Line2,
+    InputFile,
+    MaterialReissner,
+    Mesh,
+    mpy,
+)
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_line,
@@ -68,12 +75,14 @@ def test_space_time_straight(
     space_time_mesh.add(return_set)
 
     # Check the dat file
+    space_time_input_file = InputFile()
+    space_time_input_file.add(space_time_mesh)
     additional_identifier = get_name(beam_type)
     assert_results_equal(
         get_corresponding_reference_file_path(
             additional_identifier=additional_identifier
         ),
-        space_time_mesh,
+        space_time_input_file,
     )
 
     # Check the mesh data arrays
@@ -107,12 +116,14 @@ def test_space_time_curved(
     space_time_mesh.add(return_set)
 
     # Check the dat file
+    space_time_input_file = InputFile()
+    space_time_input_file.add(space_time_mesh)
     additional_identifier = get_name(beam_type)
     assert_results_equal(
         get_corresponding_reference_file_path(
             additional_identifier=additional_identifier
         ),
-        space_time_mesh,
+        space_time_input_file,
         rtol=1e-12,
         atol=1e-12,
     )
