@@ -116,7 +116,7 @@ class SpaceTimeElement(VolumeElement):
         rotation_vectors = map(str, rotation_vectors)
 
         # Return the dat line.
-        return f'{self.i_global} {self.dat_pre_nodes} {self.four_c_name} {nodes_string} {self.dat_post_nodes} {" ".join(rotation_vectors)}'
+        return f"{self.i_global} {self.dat_pre_nodes} {self.four_c_name} {nodes_string} {self.dat_post_nodes} {' '.join(rotation_vectors)}"
 
 
 class SpaceTimeElementQuad4(SpaceTimeElement):
@@ -175,31 +175,29 @@ def beam_to_space_time(
         mesh_space_reference = mesh_space_or_generator
 
     # Perform some sanity checks
-    valid_element_types = [Beam3rLine2Line2, Beam3rHerm2Line3]
-    element_types = list(
-        set([type(element) for element in mesh_space_reference.elements])
-    )
+    element_types = {type(element) for element in mesh_space_reference.elements}
     if not len(element_types) == 1:
         raise ValueError(
             f"Expected all elements to be of the same type, got {element_types}"
         )
-    element_type = element_types[0]
-    if element_type not in valid_element_types:
-        raise ValueError(f"Got unexpected element type {element_type}")
+    element_type = element_types.pop()
 
     # Calculate global mesh properties
     number_of_nodes_in_space = len(mesh_space_reference.nodes)
     number_of_elements_in_space = len(mesh_space_reference.elements)
-    is_linear = element_type == Beam3rLine2Line2
-    space_time_element: Union[Type[SpaceTimeElementQuad4], Type[SpaceTimeElementQuad9]]
-    if is_linear:
+    space_time_element_type: Union[
+        Type[SpaceTimeElementQuad4], Type[SpaceTimeElementQuad9]
+    ]
+    if element_type == Beam3rLine2Line2:
         number_of_copies_in_time = number_of_elements_in_time + 1
         time_increment_between_nodes = time_duration / number_of_elements_in_time
-        space_time_element = SpaceTimeElementQuad4
-    else:
+        space_time_element_type = SpaceTimeElementQuad4
+    elif element_type == Beam3rHerm2Line3:
         number_of_copies_in_time = 2 * number_of_elements_in_time + 1
         time_increment_between_nodes = time_duration / (2 * number_of_elements_in_time)
-        space_time_element = SpaceTimeElementQuad9
+        space_time_element_type = SpaceTimeElementQuad9
+    else:
+        raise TypeError(f"Got unexpected element type {element_type}")
 
     # Number the nodes in the original mesh
     for i_node, node in enumerate(mesh_space_reference.nodes):
@@ -243,7 +241,7 @@ def beam_to_space_time(
     for i_element_time in range(number_of_elements_in_time):
         for element in mesh_space_reference.elements:
             element_node_ids = [node.i_global for node in element.nodes]
-            if is_linear:
+            if space_time_element_type == SpaceTimeElementQuad4:
                 # Create the indices for the linear element
                 first_time_row_start_index = i_element_time * number_of_nodes_in_space
                 second_time_row_start_index = (
@@ -255,7 +253,7 @@ def beam_to_space_time(
                     second_time_row_start_index + element_node_ids[1],
                     second_time_row_start_index + element_node_ids[0],
                 ]
-            else:
+            elif space_time_element_type == SpaceTimeElementQuad9:
                 # Create the indices for the quadratic element
                 first_time_row_start_index = (
                     2 * i_element_time * number_of_nodes_in_space
@@ -277,10 +275,14 @@ def beam_to_space_time(
                     second_time_row_start_index + element_node_ids[0],
                     second_time_row_start_index + element_node_ids[1],
                 ]
+            else:
+                raise TypeError(
+                    f"Got unexpected space time element type {space_time_element_type}"
+                )
 
             # Add the element to the mesh
             space_time_elements.append(
-                space_time_element(
+                space_time_element_type(
                     [space_time_nodes[i_node] for i_node in element_node_indices]
                 )
             )
