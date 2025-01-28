@@ -1,0 +1,22 @@
+<!-- https://img.shields.io/badge/code-ruff-green?logo=ruff&label=code-linter --><svg aria-label="code-linter: ruff" height="20" role="img" width="115" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>code-linter: ruff</title>
+  <linearGradient id="s" x2="0" y2="100%">
+    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+    <stop offset="1" stop-opacity=".1"/>
+  </linearGradient>
+  <clipPath id="r">
+    <rect fill="#fff" height="20" rx="3" width="115"/>
+  </clipPath>
+  <g clip-path="url(#r)">
+    <rect fill="#555" height="20" width="86"/>
+    <rect fill="#97ca00" height="20" width="29" x="86"/>
+    <rect fill="url(#s)" height="20" width="115"/>
+  </g>
+  <g fill="#fff" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="110" text-anchor="middle" text-rendering="geometricPrecision">
+    <image height="14" width="14" x="5" xlink:href="data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjRDdGRjY0IiByb2xlPSJpbWciIHZpZXdCb3g9IjAgMCAyNCAyNCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48dGl0bGU+UnVmZjwvdGl0bGU+PHBhdGggZD0iTTMgMEMxLjMzOCAwIDAgMS4zMzggMCAzdjE4YzAgMS42NjIgMS4zMzggMyAzIDNoMThjMS42NjIgMCAzLTEuMzM4IDMtM1YzYzAtMS42NjItMS4zMzgtMy0zLTNabTQuMiA3LjJoOC42NDFjLjUzIDAgLjk1OS40My45NTkuOTU5djMuMjY2YzAgLjUzLS40My45NTktLjk1OS45NTloLS45NjF2Ljc2OGgxLjkyVjE2LjhoLTQuNDE2di0yLjg4aC0uNzY4djIuODhINy4yWm0zLjY0OCAzLjY0OHYuNzY4aDIuMzA0di0uNzY4eiIvPjwvc3ZnPg==" y="3"/>
+    <text aria-hidden="true" fill="#010101" fill-opacity=".3" textLength="590" transform="scale(.1)" x="525" y="150">code-linter</text>
+    <text fill="#fff" textLength="590" transform="scale(.1)" x="525" y="140">code-linter</text>
+    <text aria-hidden="true" fill="#010101" fill-opacity=".3" textLength="190" transform="scale(.1)" x="995" y="150">ruff</text>
+    <text fill="#fff" textLength="190" transform="scale(.1)" x="995" y="140">ruff</text>
+  </g>
+</svg>
