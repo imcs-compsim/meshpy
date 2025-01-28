@@ -5,7 +5,7 @@
 
 <div align="center">
 
-[![website](https://img.shields.io/badge/MeshPy-website?label=website&color=blue)](https://imcs-compsim.github.io/meshpy/)
+[![website](utilities/badges/website.svg)](https://imcs-compsim.github.io/meshpy/)
 
 </div>
 
@@ -19,9 +19,9 @@
 
 <div align="center">
 
-[![pre-commit](https://img.shields.io/badge/enabled-green?logo=pre-commit&label=pre-commit)](https://pre-commit.com/)
-[![ruff-formatter](https://img.shields.io/badge/code-ruff-green?logo=ruff&label=code-formatter)](https://docs.astral.sh/ruff/formatter)
-[![ruff-linter](https://img.shields.io/badge/code-ruff-green?logo=ruff&label=code-linter)](https://docs.astral.sh/ruff/linter)
+[![pre-commit](utilities/badges/pre-commit.svg)](https://pre-commit.com/)
+[![ruff-formatter](utilities/badges/ruff-formatter.svg)](https://docs.astral.sh/ruff/formatter)
+[![ruff-linter](utilities/badges/ruff-linter.svg)](https://docs.astral.sh/ruff/linter)
 
 </div>
 

@@ -1,0 +1,21 @@
+<!-- https://img.shields.io/badge/MeshPy-website?label=website&color=blue --><svg aria-label="website: MeshPy" height="20" role="img" width="104" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <title>website: MeshPy</title>
+  <linearGradient id="s" x2="0" y2="100%">
+    <stop offset="0" stop-color="#bbb" stop-opacity=".1"/>
+    <stop offset="1" stop-opacity=".1"/>
+  </linearGradient>
+  <clipPath id="r">
+    <rect fill="#fff" height="20" rx="3" width="104"/>
+  </clipPath>
+  <g clip-path="url(#r)">
+    <rect fill="#555" height="20" width="53"/>
+    <rect fill="#007ec6" height="20" width="51" x="53"/>
+    <rect fill="url(#s)" height="20" width="104"/>
+  </g>
+  <g fill="#fff" font-family="Verdana,Geneva,DejaVu Sans,sans-serif" font-size="110" text-anchor="middle" text-rendering="geometricPrecision">
+    <text aria-hidden="true" fill="#010101" fill-opacity=".3" textLength="430" transform="scale(.1)" x="275" y="150">website</text>
+    <text fill="#fff" textLength="430" transform="scale(.1)" x="275" y="140">website</text>
+    <text aria-hidden="true" fill="#010101" fill-opacity=".3" textLength="410" transform="scale(.1)" x="775" y="150">MeshPy</text>
+    <text fill="#fff" textLength="410" transform="scale(.1)" x="775" y="140">MeshPy</text>
+  </g>
+</svg>
