@@ -374,6 +374,11 @@ def get_env_variable(name, *, default="default_not_set"):
     return default
 
 
+def is_testing():
+    """Check if the current environment is a pytest testing run."""
+    return "PYTEST_CURRENT_TEST" in os.environ
+
+
 def is_testing_github():
     """Check if the current environment is a testing action on GitHub."""
     return "GITHUB_ACTION" in os.environ.keys()
