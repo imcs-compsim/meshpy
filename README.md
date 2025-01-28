@@ -5,7 +5,7 @@
 
 <div align="center">
 
-[![website](utilities/badges/website.svg)](https://imcs-compsim.github.io/meshpy/)
+[![website](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/website.svg)](https://imcs-compsim.github.io/meshpy/)
 
 </div>
 
@@ -19,9 +19,9 @@
 
 <div align="center">
 
-[![pre-commit](utilities/badges/pre-commit.svg)](https://pre-commit.com/)
-[![ruff-formatter](utilities/badges/ruff-formatter.svg)](https://docs.astral.sh/ruff/formatter)
-[![ruff-linter](utilities/badges/ruff-linter.svg)](https://docs.astral.sh/ruff/linter)
+[![pre-commit](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/pre-commit.svg)](https://pre-commit.com/)
+[![ruff-formatter](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/ruff-formatter.svg)](https://docs.astral.sh/ruff/formatter)
+[![ruff-linter](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/ruff-linter.svg)](https://docs.astral.sh/ruff/linter)
 
 </div>
 
