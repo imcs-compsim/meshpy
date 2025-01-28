@@ -31,6 +31,7 @@ elements, sets, ...) for a meshed geometry."""
 import copy
 import os
 import warnings
+from typing import List
 
 import numpy as np
 import pyvista as pv
@@ -76,6 +77,31 @@ class Mesh:
         self.geometry_sets = GeometrySetContainer()
         self.boundary_conditions = BoundaryConditionContainer()
 
+    @staticmethod
+    def get_base_mesh_item_type(item):
+        """Return the base mesh type of the given item.
+
+        Amongst other things, we need this function so we can check if
+        all items of a list are of the same "base" type.
+
+        Args:
+            item: The object we want to get the base type from.
+        """
+
+        for cls in (
+            Mesh,
+            Function,
+            BoundaryConditionBase,
+            Material,
+            Node,
+            Element,
+            GeometrySetBase,
+            GeometryName,
+        ):
+            if isinstance(item, cls):
+                return cls
+        return type(item)
+
     def add(self, *args, **kwargs):
         """Add an item to this mesh, depending on its type.
 
@@ -90,30 +116,24 @@ class Mesh:
                 raise ValueError("At least one argument is required!")
             case 1:
                 add_item = args[0]
-                if isinstance(add_item, Mesh):
-                    self.add_mesh(add_item, **kwargs)
-                elif isinstance(add_item, Function):
-                    self.add_function(add_item, **kwargs)
-                elif isinstance(add_item, BoundaryConditionBase):
-                    self.add_bc(add_item, **kwargs)
-                elif isinstance(add_item, Material):
-                    self.add_material(add_item, **kwargs)
-                elif isinstance(add_item, Node):
-                    self.add_node(add_item, **kwargs)
-                elif isinstance(add_item, Element):
-                    self.add_element(add_item, **kwargs)
-                elif isinstance(add_item, GeometrySetBase):
-                    self.add_geometry_set(add_item, **kwargs)
-                elif isinstance(add_item, GeometryName):
-                    self.add_geometry_name(add_item, **kwargs)
-                elif isinstance(add_item, list):
-                    for item in add_item:
-                        self.add(item, **kwargs)
+                base_type = self.get_base_mesh_item_type(add_item)
+
+                base_type_to_method_map = {
+                    Mesh: self.add_mesh,
+                    Function: self.add_function,
+                    BoundaryConditionBase: self.add_bc,
+                    Material: self.add_material,
+                    Node: self.add_node,
+                    Element: self.add_element,
+                    GeometrySetBase: self.add_geometry_set,
+                    GeometryName: self.add_geometry_name,
+                    list: self.add_list,
+                }
+                if base_type in base_type_to_method_map:
+                    base_type_to_method_map[base_type](add_item, **kwargs)
                 else:
-                    raise (
-                        TypeError(
-                            f'No Mesh.add case implemented for type: "{type(add_item)}"!'
-                        )
+                    raise TypeError(
+                        f'No Mesh.add case implemented for type: "{type(add_item)}" with base type "{base_type}"!'
                     )
             case _:
                 for item in args:
@@ -180,6 +200,52 @@ class Mesh:
         keys.sort()
         for key in keys:
             self.add(geometry_name[key])
+
+    def add_list(self, add_list: List, **kwargs) -> None:
+        """Add a list of items to this mesh.
+
+        Args:
+            add_list:
+                List to be added to the mesh. This method checks that all
+                base types of the list items are the same.
+
+                In the special case of a node or element list, we add the whole list
+                at once. This avoids a check for duplicate entries for every
+                addition, which scales very badly. By doing it this way we only
+                check the final list for duplicate entries which is much more
+                performant.
+
+                For all other types of items, we add each element individually
+                via the Mesh.add method.
+        """
+
+        types = {self.get_base_mesh_item_type(item) for item in add_list}
+        if len(types) > 1:
+            raise TypeError(
+                f"You can only add lists with the same type of element. Got {types}"
+            )
+        elif len(types) == 1:
+            list_type = types.pop()
+
+            def extend_internal_list(self_list: List, new_list: List) -> None:
+                """Extend an internal list with the new list.
+
+                It is checked that the final list does not have
+                duplicate entries.
+                """
+                self_list.extend(new_list)
+                if not len(set(self_list)) == len(self_list):
+                    raise ValueError(
+                        "The added list contains entries already existing in the Mesh"
+                    )
+
+            if list_type == Node:
+                extend_internal_list(self.nodes, add_list)
+            elif list_type == Element:
+                extend_internal_list(self.elements, add_list)
+            else:
+                for item in add_list:
+                    self.add(item, **kwargs)
 
     def replace_node(self, old_node, new_node):
         """Replace the first node with the second node."""
@@ -892,7 +958,7 @@ class Mesh:
                 directors = [
                     finite_element_nodes.glyph(
                         geom=arrow,
-                        orient=f"base_vector_{i+1}",
+                        orient=f"base_vector_{i + 1}",
                         scale="cross_section_radius",
                         factor=director_radius_scaling_factor,
                     )
