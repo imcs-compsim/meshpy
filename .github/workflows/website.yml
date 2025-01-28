@@ -1,15 +1,11 @@
 name: Build and deploy website
 
 on:
-  push:
-    branches:
-      - main
-
   # Only build and deploy the website once the testsuite is completed => coverage badge and report are necessary
   workflow_run:
     workflows: [Test suite]
-    types:
-      - completed
+    types: [completed]
+    branches: [main]
 
 # Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
 # However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.

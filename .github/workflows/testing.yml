@@ -99,7 +99,7 @@ jobs:
       - name: Upload coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-report-${{github.job}}
+          name: coverage-report
           path: htmlcov/
       - name: Create coverage badge
         run: |
@@ -109,7 +109,7 @@ jobs:
       - name: Upload coverage badge
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-badge-${{github.job}}
+          name: coverage-badge
           path: coverage.svg
 
   meshpy-performance-testing:
