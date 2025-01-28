@@ -228,7 +228,7 @@ def test_space_time_performance():
     )
 
     # Create the beam mesh in time
-    _, _ = test_performance.time_function(
+    test_performance.time_function(
         "space_time_create_mesh_in_time",
         beam_to_space_time,
         args=[mesh, 6.9, 1000],
