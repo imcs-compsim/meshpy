@@ -167,27 +167,10 @@ def create_large_beam_mesh(n_x, n_y, n_z, n_el):
 class PerformanceTest(object):
     """A class to test meshpy performance."""
 
-    # Set expected test times.
-    expected_times = {
-        "cubitpy_create_solid": 8.0,
-        "meshpy_load_solid": 1.5,
-        "meshpy_load_solid_full": 3.5,
-        "meshpy_create_beams": 9.0,
-        "meshpy_rotate": 0.6,
-        "meshpy_translate": 0.5,
-        "meshpy_reflect": 0.7,
-        "meshpy_wrap_around_cylinder": 2.0,
-        "meshpy_wrap_around_cylinder_without_check": 0.7,
-        "meshpy_find_close_nodes": 0.5,
-        "meshpy_write_dat": 9.0,
-        "meshpy_write_vtk": 4.5,
-        "meshpy_write_vtk_smooth": 9.0,
-        "geometric_search_find_nodes_brute_force": 0.05,
-    }
-
-    def __init__(self):
+    def __init__(self, expected_times):
         """Initialize counters."""
 
+        self.expected_times = expected_times
         self.passed_tests = 0
         self.failed_tests = 0
 
@@ -250,7 +233,24 @@ def test_performance(tmp_path):
     testing_solid_block = tmp_path / "performance_testing_solid.dat"
     testing_beam = tmp_path / "performance_testing_beam.dat"
 
-    test_performance = PerformanceTest()
+    # These are the expected test times that should not be exceeded
+    expected_times = {
+        "cubitpy_create_solid": 8.0,
+        "meshpy_load_solid": 1.5,
+        "meshpy_load_solid_full": 3.5,
+        "meshpy_create_beams": 9.0,
+        "meshpy_rotate": 0.6,
+        "meshpy_translate": 0.5,
+        "meshpy_reflect": 0.7,
+        "meshpy_wrap_around_cylinder": 2.0,
+        "meshpy_wrap_around_cylinder_without_check": 0.7,
+        "meshpy_find_close_nodes": 0.5,
+        "meshpy_write_dat": 9.0,
+        "meshpy_write_vtk": 4.5,
+        "meshpy_write_vtk_smooth": 9.0,
+        "geometric_search_find_nodes_brute_force": 0.05,
+    }
+    test_performance = PerformanceTest(expected_times)
 
     test_performance.time_function(
         "cubitpy_create_solid",
