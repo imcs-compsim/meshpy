@@ -1,0 +1,23 @@
+name: coverage
+description: Coverage badge and report
+runs:
+  using: composite
+  steps:
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: htmlcov/
+    - name: Create coverage badge
+      shell: bash
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        source python-testing-environment/bin/activate
+        mkdir -p coverage-badge
+        coverage-badge -o coverage-badge/coverage_badge.svg
+        cp .github/actions/coverage/coverage_badge_index.html coverage-badge/index.html
+    - name: Upload coverage badge
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-badge
+        path: coverage-badge/
