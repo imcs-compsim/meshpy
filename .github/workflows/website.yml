@@ -16,7 +16,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -32,7 +31,7 @@ jobs:
         run: |
           sphinx-build -b html website/docs/source website/docs/build
       - name: Upload website artifact
-        uses: actions/upload-pages-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: website
           path: website/docs/build/
@@ -46,9 +45,31 @@ jobs:
     permissions:
       pages: write
       id-token: write
+      contents: read
     steps:
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      - name: Download website artifact
+        uses: actions/download-artifact@v4
         with:
-          artifact_name: website
+          name: website
+          path: ${{ github.workspace }}
+      - name: Download coverage report artifact
+        uses: dawidd6/action-download-artifact@v8
+        with:
+          workflow: testing.yml
+          name: coverage-report
+          path: ${{ github.workspace }}/coverage-report
+          branch: ${{ github.event.repository.default_branch }}
+      - name: Download coverage badge artifact
+        uses: dawidd6/action-download-artifact@v8
+        with:
+          workflow: testing.yml
+          name: coverage-badge
+          path: ${{ github.workspace }}/coverage-badge
+          branch: ${{ github.event.repository.default_branch }}
+      - name: Upload all pages artifacts (website, coverage-report, coverage-badge, documentation)
+        uses: actions/upload-pages-artifact@v3
+        id: deployment
+        with:
+          path: ${{ github.workspace }}
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
