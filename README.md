@@ -13,6 +13,7 @@
 
 [![Code quality](https://github.com/imcs-compsim/meshpy/actions/workflows/check_code.yml/badge.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/check_code.yml)
 [![Test suite](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml/badge.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml)
+[![Coverage](https://imcs-compsim.github.io/meshpy/coverage-badge/coverage_badge.svg)](https://imcs-compsim.github.io/meshpy/coverage-report/)
 
 </div>
 
