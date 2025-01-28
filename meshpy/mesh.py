@@ -57,7 +57,7 @@ from .utility import (
     get_nodal_coordinates,
     get_nodal_quaternions,
     get_nodes_by_function,
-    is_testing_github,
+    is_testing,
 )
 from .vtk_writer import VTKWriter
 
@@ -906,7 +906,7 @@ class Mesh:
             solid_grid = pv.UnstructuredGrid(vtk_writer_solid.grid).clean()
             plotter.add_mesh(solid_grid, color="white", show_edges=True, opacity=0.5)
 
-        if not is_testing_github():
+        if not is_testing():
             plotter.show()
         else:
             return plotter

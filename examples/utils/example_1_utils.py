@@ -31,12 +31,12 @@ import numpy as np
 import pyvista as pv
 
 from meshpy.examples.general_utils import reset_print_out
-from meshpy.utility import is_testing_github
+from meshpy.utility import is_testing
 
 
 def print_matrix(name, matrix):
     """Print a matrix to the console."""
-    print(f"{name}:\n{np.round(matrix,decimals=10)}")
+    print(f"{name}:\n{np.round(matrix, decimals=10)}")
 
 
 def print_rotation_matrix(name, rotation):
@@ -130,6 +130,6 @@ class PyVistaPlotter:
         We show the plotter (except during testing and we reset the
         console print out).
         """
-        if not is_testing_github():
+        if not is_testing():
             self.plotter.show()
         reset_print_out()
