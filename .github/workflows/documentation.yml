@@ -1,0 +1,33 @@
+name: Build documentation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_documentation:
+    name: Build documentation
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup virtual python environment
+        uses: ./.github/actions/setup_virtual_python_environment
+      - name: Install dependencies
+        run: |
+          cd ${GITHUB_WORKSPACE}
+          source python-testing-environment/bin/activate
+          pip install -e .[CI-CD]
+      - name: Build API documentation
+        run: |
+          source python-testing-environment/bin/activate
+          pdoc --output-dir api-documentation meshpy/
+      - name: Upload API documentation artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-documentation
+          path: api-documentation/

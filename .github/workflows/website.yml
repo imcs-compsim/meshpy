@@ -3,7 +3,7 @@ name: Build and deploy website
 on:
   # Only build and deploy the website once the testsuite is completed => coverage badge and report are necessary
   workflow_run:
-    workflows: [Test suite]
+    workflows: [Test suite, Build documentation]
     types: [completed]
     branches: [main]
 
@@ -14,7 +14,7 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  build_website_and_documentation:
+  build_website:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -35,21 +35,13 @@ jobs:
         with:
           name: website
           path: website/docs/build/
-      - name: Build API documentation
-        run: |
-          pdoc --output-dir api-documentation meshpy/
-      - name: Upload API documentation artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: api-documentation
-          path: api-documentation/
 
   deploy:
     environment:
       name: Website
       url: http://imcs-compsim.github.io/meshpy
     runs-on: ubuntu-latest
-    needs: build_website_and_documentation
+    needs: build_website
     permissions:
       pages: write
       id-token: write
@@ -61,10 +53,12 @@ jobs:
           name: website
           path: ${{ github.workspace }}
       - name: Download API documentation artifact
-        uses: actions/download-artifact@v4
+        uses: dawidd6/action-download-artifact@v8
         with:
+          workflow: documentation.yml
           name: api-documentation
           path: ${{ github.workspace }}/api-documentation
+          branch: ${{ github.event.repository.default_branch }}
       - name: Download coverage report artifact
         uses: dawidd6/action-download-artifact@v8
         with:
