@@ -11,9 +11,17 @@
 
 <div align="center">
 
-[![Code quality](https://github.com/imcs-compsim/meshpy/actions/workflows/check_code.yml/badge.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/check_code.yml)
-[![Test suite](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml/badge.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml)
+[![Code quality](https://github.com/imcs-compsim/meshpy/actions/workflows/check_code.yml/badge.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/check_code.yml?query=event%3Aschedule)
+[![Test suite](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml/badge.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml?query=event%3Aschedule)
 [![Coverage](https://imcs-compsim.github.io/meshpy/coverage-badge/coverage_badge.svg)](https://imcs-compsim.github.io/meshpy/coverage-report/)
+
+</div>
+
+<div align="center">
+
+[![Testing Linux/Ubuntu](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/testing_linux_ubuntu.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml?query=event%3Aschedule)
+[![Testing macOS](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/testing_macos.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml?query=event%3Aschedule)
+[![Testing Windows](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/testing_windows.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml?query=event%3Aschedule)
 
 </div>
 
