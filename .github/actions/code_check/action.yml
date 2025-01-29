@@ -7,7 +7,7 @@ runs:
       shell: bash
       run: |
         cd ${GITHUB_WORKSPACE}
-        source python-testing-environment/bin/activate
+        source python-workflow-venv/bin/activate
         pip install -e .[CI-CD]
         pre-commit install --install-hooks
         if [ "${GITHUB_REF}" = "refs/heads/main" ]; then
