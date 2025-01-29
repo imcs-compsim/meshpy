@@ -6,6 +6,7 @@
 <div align="center">
 
 [![website](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/website.svg)](https://imcs-compsim.github.io/meshpy/)
+[![documentation](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/documentation.svg)](https://imcs-compsim.github.io/meshpy/api-documentation)
 
 </div>
 
