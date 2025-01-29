@@ -1,5 +1,4 @@
 linkify-it-py
 myst-parser
-pdoc
 pydata-sphinx-theme
 sphinx

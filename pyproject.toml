@@ -59,6 +59,7 @@ CI-CD = [
   "coverage==7.4.4",
   "coverage-badge",
   "cubitpy@git+https://github.com/imcs-compsim/cubitpy.git@main",
+  "pdoc",
   "setuptools", # Needed for coverage-badge
   "testbook"
 ]
