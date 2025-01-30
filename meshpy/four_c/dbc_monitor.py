@@ -32,10 +32,12 @@ from typing import Optional
 
 import numpy as np
 
-from meshpy import BoundaryCondition, GeometrySet, InputFile, mpy
+from meshpy.boundary_condition import BoundaryCondition, GeometrySet
+from meshpy.conf import mpy
 from meshpy.function_utility import (
     create_linear_interpolation_function,
 )
+from meshpy.inputfile import InputFile
 
 from .. import BoundaryCondition, Function, GeometrySet, mpy
 

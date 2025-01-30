@@ -31,7 +31,7 @@ import copy
 
 import numpy as np
 
-from . import mpy
+from .conf import mpy
 
 
 def skew_matrix(vector):
