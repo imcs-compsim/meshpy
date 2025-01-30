@@ -1,9 +1,11 @@
 name: Build documentation
 
 on:
-  push:
-    branches:
-      - main
+  # Only build the documentation once the test suite has completed on the main branch (only after merged PR's)
+  workflow_run:
+    workflows: [Test suite]
+    types: [completed]
+    branches: [main]
 
 jobs:
   build_documentation:
