@@ -9,13 +9,11 @@
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_BeamReissnerElastHyper YOUNG -1.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.031415926535897934 SHEARCORR 1 MOMINPOL 0.00015707963267948968 MOMIN2 7.853981633974484e-05 MOMIN3 7.853981633974484e-05
 --------------------------------------------------DESIGN POINT DIRICH CONDITIONS
-DPOINT 2
-E 1 - rb1
-E 2 - rb3
+E 1 rb1
+E 2 rb3
 -------------------------------------------------DESIGN POINT NEUMANN CONDITIONS
-DPOINT 2
-E 3 - rb2
-E 4 - rb4
+E 3 rb2
+E 4 rb4
 -------------------------------------------------------------DNODE-NODE TOPOLOGY
 NODE 1 DNODE 1
 NODE 11 DNODE 2

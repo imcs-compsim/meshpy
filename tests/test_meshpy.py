@@ -1173,7 +1173,7 @@ def create_beam_to_solid_conditions_model(reference_file_directory):
     return input_file
 
 
-@pytest.mark.parametrize("test_type", [None, "with_design_description", "full"])
+@pytest.mark.parametrize("test_type", [None, "full"])
 def test_meshpy_beam_to_solid_conditions(
     test_type,
     reference_file_directory,
@@ -1195,7 +1195,6 @@ def test_meshpy_beam_to_solid_conditions(
         get_corresponding_reference_file_path(additional_identifier=test_type),
         input_file,
         input_file_kwargs={
-            "design_description": test_type == "with_design_description",
             "check_nox": False,
             "header": False,
         },

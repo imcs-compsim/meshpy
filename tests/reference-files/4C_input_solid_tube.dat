@@ -47,13 +47,10 @@ COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME cos(2*pi*t)
 COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME sin(2*pi*t)
 
 ----------------------------------------DESIGN SURF DIRICH CONDITIONS
-DSURF 2
 // fix
-E 1 - NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0
+E 1 NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0
 // dirichlet_controlled
-E 2 - NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0
------------------------------------------------DNODE-NODE TOPOLOGY
------------------------------------------------DLINE-NODE TOPOLOGY
+E 2 NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0
 -----------------------------------------------DSURF-NODE TOPOLOGY
 NODE      5 DSURFACE 1
 NODE      6 DSURFACE 1
@@ -67,7 +64,6 @@ NODE     63 DSURFACE 2
 NODE     64 DSURFACE 2
 NODE     65 DSURFACE 2
 NODE     66 DSURFACE 2
------------------------------------------------DVOL-NODE TOPOLOGY
 -------------------------------------------------------NODE COORDS
 NODE         1 COORD -2.5000000000000000e-01 -3.0616169978683824e-17 -4.0000000000000000e+00
 NODE         2 COORD -1.2500000000000000e-01  2.1650635094610965e-01 -4.0000000000000000e+00
