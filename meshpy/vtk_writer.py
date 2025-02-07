@@ -34,7 +34,7 @@ import warnings
 import numpy as np
 import vtk
 
-from meshpy.conf import mpy
+from .conf import mpy
 
 
 def add_point_data_node_sets(point_data, nodes, *, extra_points=0):
