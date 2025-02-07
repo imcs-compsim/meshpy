@@ -12,6 +12,6 @@ runs:
       shell: bash
       run: |
         cd ${GITHUB_WORKSPACE}
-        ${{ inputs.python-exe }} -m venv python-testing-environment
-        source python-testing-environment/bin/activate
+        ${{ inputs.python-exe }} -m venv python-workflow-venv
+        source python-workflow-venv/bin/activate
         pip install --upgrade pip

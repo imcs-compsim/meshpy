@@ -1,9 +1,11 @@
 name: Build documentation
 
 on:
-  push:
-    branches:
-      - main
+  # Only build the documentation once the test suite has completed on the main branch (only after merged PR's)
+  workflow_run:
+    workflows: [Test suite]
+    types: [completed]
+    branches: [main]
 
 jobs:
   build_documentation:
@@ -20,11 +22,11 @@ jobs:
       - name: Install dependencies
         run: |
           cd ${GITHUB_WORKSPACE}
-          source python-testing-environment/bin/activate
+          source python-workflow-venv/bin/activate
           pip install -e .[CI-CD]
       - name: Build API documentation
         run: |
-          source python-testing-environment/bin/activate
+          source python-workflow-venv/bin/activate
           pdoc --output-dir api-documentation meshpy/
       - name: Upload API documentation artifact
         uses: actions/upload-artifact@v4

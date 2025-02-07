@@ -1,9 +1,9 @@
 name: Build and deploy website
 
 on:
-  # Only build and deploy the website once the testsuite is completed => coverage badge and report are necessary
+  # Only build and deploy the website once the documentation is built (and the test suite is completed => coverage report and badge are necessary)
   workflow_run:
-    workflows: [Test suite, Build documentation]
+    workflows: [Build documentation]
     types: [completed]
     branches: [main]
 

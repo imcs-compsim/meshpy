@@ -57,7 +57,7 @@ jobs:
       - name: Run the test suite
         uses: ./.github/actions/run_tests
         with:
-          source-command: "source python-testing-environment/bin/activate"
+          source-command: "source python-workflow-venv/bin/activate"
           install-command: "-e .[CI-CD]"
           additional-pytest-flags: "--CubitPy"
       - name: Upload test results on failure
@@ -87,7 +87,7 @@ jobs:
       - name: Run the test suite
         uses: ./.github/actions/run_tests
         with:
-          source-command: "source python-testing-environment/bin/activate"
+          source-command: "source python-workflow-venv/bin/activate"
           install-command: "-e .[CI-CD]"
           additional-pytest-flags: "--4C --ArborX"
       - name: Upload test results on failure
@@ -116,7 +116,7 @@ jobs:
       - name: Run the test suite
         uses: ./.github/actions/run_tests
         with:
-          source-command: "source python-testing-environment/bin/activate"
+          source-command: "source python-workflow-venv/bin/activate"
           install-command: "-e .[CI-CD]"
           additional-pytest-flags: "--performance-tests --exclude-standard-tests -s --no-cov"
       - name: Upload test results on failure
