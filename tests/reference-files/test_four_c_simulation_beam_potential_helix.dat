@@ -32,12 +32,10 @@ MAT 1 MAT_BeamReissnerElastHyper YOUNG 1000 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 
 --------------------------------------------------------------------------FUNCT1
 COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t
 --------------------------------------------------DESIGN POINT DIRICH CONDITIONS
-DPOINT 1
-E 1 - NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0
+E 1 NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0
 ------------------------------------DESIGN LINE BEAM POTENTIAL CHARGE CONDITIONS
-DLINE 2
-E 1 - POTLAW 1 VAL 1.0 FUNCT 1
-E 1 - POTLAW 2 VAL 2.0 FUNCT none
+E 1 POTLAW 1 VAL 1.0 FUNCT 1
+E 1 POTLAW 2 VAL 2.0 FUNCT none
 -------------------------------------------------------------DNODE-NODE TOPOLOGY
 NODE 1 DNODE 1
 -------------------------------------------------------------DLINE-NODE TOPOLOGY

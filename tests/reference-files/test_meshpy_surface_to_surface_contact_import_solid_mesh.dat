@@ -2,9 +2,8 @@
 MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 8.0 NUE 0.0 DENS 0.0
 MAT 2 MAT_Struct_StVenantKirchhoff YOUNG 1.0 NUE 0.45 DENS 0.0
 ----------------------------------------DESIGN SURF MORTAR CONTACT CONDITIONS 3D
-DSURF 2
-E 1 - 1 Slave
-E 2 - 1 Master
+E 1 1 Slave
+E 2 1 Master
 -------------------------------------------------------------DSURF-NODE TOPOLOGY
 NODE 1 DSURFACE 1
 NODE 4 DSURFACE 1

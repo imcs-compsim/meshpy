@@ -79,7 +79,7 @@ class BoundaryConditionBase(BaseMeshItemFull):
         ) or isinstance(bc_key, str):
             # Normal boundary condition (including beam-to-solid conditions).
             return BoundaryCondition(
-                int(split[1]) - 1, " ".join(split[3:]), bc_type=bc_key, **kwargs
+                int(split[1]) - 1, " ".join(split[2:]), bc_type=bc_key, **kwargs
             )
         elif bc_key is mpy.bc.point_coupling:
             # Coupling condition.
@@ -88,7 +88,7 @@ class BoundaryConditionBase(BaseMeshItemFull):
             return Coupling(
                 int(split[1]) - 1,
                 bc_key,
-                " ".join(split[3:]),
+                " ".join(split[2:]),
                 check_overlapping_nodes=False,
                 check_at_init=False,
                 **kwargs,
@@ -150,7 +150,7 @@ class BoundaryCondition(BoundaryConditionBase):
         else:
             dat_string = self.bc_string
 
-        return f"E {self.geometry_set.i_global} - {dat_string}"
+        return f"E {self.geometry_set.i_global} {dat_string}"
 
     def check(self):
         """Check for point Neumann boundaries that there is not a double Node

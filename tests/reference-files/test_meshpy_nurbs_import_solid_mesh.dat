@@ -4,19 +4,10 @@ RESTART      0
 SHAPEFCT     Nurbs
 ---------------------------------------------------------MATERIALS
 MAT 1 MAT_Struct_StVenantKirchhoff  YOUNG 10 NUE 0.0 DENS 0.0
-----------------------------------------------DESIGN POINT DIRICH CONDITIONS
-DPOINT                          0
 -----------------------------------------------DESIGN SURF DIRICH CONDITIONS
-DSURF 3
-E 5 - NUMDOF 3 ONOFF 1 1 1 VAL 0 0 0 FUNCT 0 0 0
-E 11 - NUMDOF 3 ONOFF 1 1 1 VAL 0 0 0 FUNCT 0 0 0
-E 17 - NUMDOF 3 ONOFF 1 1 1 VAL 0 0 0 FUNCT 0 0 0
------------------------------------------------DESIGN LINE DIRICH CONDITIONS
-DLINE                           0
-----------------------------------------------DESIGN LINE NEUMANN CONDITIONS
-DLINE                           0
------------------------------------------------DESIGN VOL NEUMANN CONDITIONS
-DVOL                            0
+E 5 NUMDOF 3 ONOFF 1 1 1 VAL 0 0 0 FUNCT 0 0 0
+E 11 NUMDOF 3 ONOFF 1 1 1 VAL 0 0 0 FUNCT 0 0 0
+E 17 NUMDOF 3 ONOFF 1 1 1 VAL 0 0 0 FUNCT 0 0 0
 -------------------------------------------------------DNODE-NODE TOPOLOGY
 NODE            1   DNODE   1
 NODE            3   DNODE   2

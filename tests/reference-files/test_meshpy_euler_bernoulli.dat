@@ -11,11 +11,9 @@ MAT 1 MAT_BeamKirchhoffTorsionFreeElastHyper YOUNG 1.0 DENS 1300000000.0 CROSSAR
 --------------------------------------------------------------------------FUNCT1
 COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t
 --------------------------------------------------DESIGN POINT DIRICH CONDITIONS
-DPOINT 1
-E 1 - NUMDOF 6 ONOFF 1 1 1 0 1 1 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0
+E 1 NUMDOF 6 ONOFF 1 1 1 0 1 1 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0
 -----------------------------------------------DESIGN POINT MOMENT EB CONDITIONS
-DPOINT 1
-E 2 - NUMDOF 6 ONOFF 0 0 0 0 0 1 VAL 0.0 0.0 0.0 0.0 0.0 7.8539816339744e-05 FUNCT 0 0 0 0 0 1
+E 2 NUMDOF 6 ONOFF 0 0 0 0 0 1 VAL 0.0 0.0 0.0 0.0 0.0 7.8539816339744e-05 FUNCT 0 0 0 0 0 1
 -------------------------------------------------------------DNODE-NODE TOPOLOGY
 NODE 1 DNODE 1
 NODE 17 DNODE 2

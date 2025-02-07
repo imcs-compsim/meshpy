@@ -3,11 +3,10 @@
 MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0 NUE 0 DENS 0
 
 ----------------------------------------DESIGN SURF DIRICH CONDITIONS
-DSURF 2
 // fix
-E 1 - NUMDOF 3 ONOFF 1 1 1 VAL 0 0 0 FUNCT 0 0 0
+E 1 NUMDOF 3 ONOFF 1 1 1 VAL 0 0 0 FUNCT 0 0 0
 // dirichlet_controlled
-E 2 - NUMDOF 3 ONOFF 1 0 0 VAL 0.5 0 0 FUNCT 1 0 0
+E 2 NUMDOF 3 ONOFF 1 0 0 VAL 0.5 0 0 FUNCT 1 0 0
 -----------------------------------------------DNODE-NODE TOPOLOGY
 -----------------------------------------------DLINE-NODE TOPOLOGY
 -----------------------------------------------DSURF-NODE TOPOLOGY

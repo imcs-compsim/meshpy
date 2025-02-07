@@ -298,12 +298,6 @@ class InputFile(Mesh):
             mpy.geo.surface,
         ): "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
     }
-    geometry_counter = {
-        mpy.geo.point: "DPOINT",
-        mpy.geo.line: "DLINE",
-        mpy.geo.surface: "DSURF",
-        mpy.geo.volume: "DVOL",
-    }
 
     # Sections that won't be exported to input file.
     skip_sections = [
@@ -497,8 +491,7 @@ class InputFile(Mesh):
                         (bc_key, geometry_key) = key
                         break
 
-                # The first line is the number of BCs and will be skipped.
-                for item, comments in section_data_comment[1:]:
+                for item, comments in section_data_comment:
                     if mpy.import_mesh_full:
                         self.boundary_conditions.append(
                             (bc_key, geometry_key),
@@ -611,9 +604,6 @@ class InputFile(Mesh):
                 self.add_section(
                     InputSectionMultiKey(section_name, section_data, **kwargs)
                 )
-            elif section_name in ("DESIGN DESCRIPTION",):
-                # Skip those sections as they won't be used!
-                pass
             else:
                 # Section is not in mesh, i.e. simulation parameters.
                 self.add_section(InputSection(section_name, section_data, **kwargs))
@@ -688,7 +678,6 @@ class InputFile(Mesh):
         dat_header=True,
         add_script_to_header=True,
         check_nox=True,
-        design_description=False,
     ):
         """Return the lines for the input file for the whole object.
 
@@ -703,10 +692,6 @@ class InputFile(Mesh):
             file. This is only in affect when dat_header==True.
         check_nox: bool
             If this is true, an error will be thrown if no nox file is set.
-        design_description: bool
-            If the design description should be output. This option exists for
-            backwards compatibility. The design description field in 4C was made
-            obsolete in October 2023.
         """
 
         # Perform some checks on the mesh.
@@ -864,14 +849,6 @@ class InputFile(Mesh):
             lines.append(get_section_string("FUNCT{}".format(i + 1)))
             lines.extend(funct.get_dat_lines())
 
-        # Add the design description.
-        if design_description:
-            lines.append(get_section_string("DESIGN DESCRIPTION"))
-            lines.append(f"NDPOINT {len(all_geometry_sets[mpy.geo.point])}".format())
-            lines.append(f"NDLINE {len(all_geometry_sets[mpy.geo.line])}")
-            lines.append(f"NDSURF {len(all_geometry_sets[mpy.geo.surface])}")
-            lines.append(f"NDVOL {len(all_geometry_sets[mpy.geo.volume])}")
-
         # If there are couplings in the mesh, set the link between the nodes
         # and elements, so the couplings can decide which DOFs they couple,
         # depending on the type of the connected beam element.
@@ -897,14 +874,7 @@ class InputFile(Mesh):
                     if isinstance(bc_key, str)
                     else self.boundary_condition_names[bc_key, geom_key]
                 )
-                get_section_dat(
-                    section_name,
-                    bc_list,
-                    header_lines=(
-                        f"{self.geometry_counter[geom_key]} "
-                        f"{len(all_boundary_conditions[bc_key, geom_key])}"
-                    ),
-                )
+                get_section_dat(section_name, bc_list)
 
         # Add additional element sections (e.g. STRUCTURE KNOTVECTORS)
         # We only need to to this on the "real" elements as the imported ones already have their

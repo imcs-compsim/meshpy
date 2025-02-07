@@ -57,20 +57,17 @@ SOLVER                                UMFPACK
 MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0e+09 NUE 0.0 DENS 7.80E-6
 MAT 2 MAT_BeamReissnerElastHyper YOUNG -1.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 3.141592653589793 SHEARCORR 1 MOMINPOL 1.5707963267948966 MOMIN2 0.7853981633974483 MOMIN3 0.7853981633974483
 --------------------------------------------------DESIGN POINT DIRICH CONDITIONS
-DPOINT 1
-E 1 - test
+E 1 test
 ---------------------------------------------------DESIGN SURF DIRICH CONDITIONS
-DSURF 2
 // load
-E 1 - NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0
+E 1 NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0
 // fix
 
 
 
-E 2 - NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0
+E 2 NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0
 -------------------------------------------------DESIGN POINT NEUMANN CONDITIONS
-DPOINT 1
-E 2 - test
+E 2 test
 -------------------------------------------------------------DNODE-NODE TOPOLOGY
 NODE 17 DNODE 1
 NODE 19 DNODE 2
