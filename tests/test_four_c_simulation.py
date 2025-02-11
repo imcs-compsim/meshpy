@@ -264,7 +264,7 @@ def test_four_c_simulation_beam_and_solid_tube(
     # Create the input file and read solid mesh data.
     mpy.import_mesh_full = full_import
     input_file = InputFile(description="Solid tube with beam tube")
-    input_file.read_dat(reference_file_directory / "4C_input_solid_tube.dat")
+    input_file.read_dat(reference_file_directory / "test_create_cubit_input_tube.dat")
 
     # Add options for beam_output.
     input_file.add(

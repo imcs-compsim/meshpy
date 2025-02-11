@@ -1137,7 +1137,7 @@ def create_beam_to_solid_conditions_model(reference_file_directory):
 
     # Create input file.
     input_file = InputFile(
-        dat_file=reference_file_directory / "test_meshpy_btsvm_coupling_solid_mesh.dat"
+        dat_file=reference_file_directory / "test_create_cubit_input_block.dat"
     )
 
     # Add beams to the model.
@@ -1532,7 +1532,7 @@ def test_meshpy_vtk_writer_solid(
     # Create the input file and read solid mesh data.
     input_file = InputFile()
     input_file.read_dat(
-        os.path.join(reference_file_directory, "4C_input_solid_tube.dat")
+        os.path.join(reference_file_directory, "test_create_cubit_input_tube.dat")
     )
 
     # Write VTK output.
@@ -1651,7 +1651,9 @@ def test_meshpy_cubitpy_import(
     input_file_cubit = InputFile(cubit=create_tube_cubit())
 
     # Load the file from the reference folder.
-    file_path_ref = os.path.join(reference_file_directory, "4C_input_solid_tube.dat")
+    file_path_ref = os.path.join(
+        reference_file_directory, "test_create_cubit_input_tube.dat"
+    )
     input_file_ref = InputFile(dat_file=file_path_ref)
 
     # Compare the input files.

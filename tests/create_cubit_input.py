@@ -25,7 +25,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""This script creates a solid input files with cubitpy."""
+"""This script creates solid input files with CubitPy which are then used in
+MeshPy testing."""
 
 import os
 
@@ -304,7 +305,9 @@ if __name__ == "__main__":
     dir_path = os.path.abspath(os.path.dirname(__file__))
 
     # Create the input file for the solid tube.
-    file_path = os.path.join(dir_path, "reference-files/4C_input_solid_tube.dat")
+    file_path = os.path.join(
+        dir_path, "reference-files/test_create_cubit_input_tube.dat"
+    )
     create_tube(file_path)
 
     # Create the input files for the solid cube.
