@@ -63,9 +63,7 @@ def generate_abaqus_beam(beam_type: str):
         raise ValueError(f"Got unexpected element_type {element_type}")
 
     # Define the class variable responsible for creating the nodes.
-    nodes_create = [[xi, True] for xi in np.linspace(-1, 1, num=n_nodes)]
-    nodes_create[0][1] = False
-    nodes_create[-1][1] = False
+    nodes_create = np.linspace(-1, 1, num=n_nodes)
 
     # Create the Abaqus beam class.
     return type(

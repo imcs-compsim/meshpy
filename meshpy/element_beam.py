@@ -48,11 +48,8 @@ from .vtk_writer import add_point_data_node_sets
 class Beam(Element):
     """A base class for a beam element."""
 
-    # A array that defines the creation of the nodes for this beam:
-    #    self.nodes_create = [
-    #        [ xi, is_middle_node ], # fist node
-    #        ...
-    #        ]
+    # A array that defines the parameter positions of the element nodes,
+    # in ascending order.
     nodes_create: Any = []
 
     # A list of valid material types for this element.
@@ -108,7 +105,7 @@ class Beam(Element):
         has_end_node = end_node is not None
 
         # Loop over local nodes.
-        for i, [xi, middle_node] in enumerate(self.nodes_create):
+        for i, xi in enumerate(self.nodes_create):
             # Get the position and rotation at xi
             pos, rot = beam_function(xi)
             if relative_twist is not None:
@@ -125,7 +122,8 @@ class Beam(Element):
             if (i > 0 or not has_start_node) and (
                 i < len(self.nodes_create) - 1 or not has_end_node
             ):
-                self.nodes.append(NodeCosserat(pos, rot, is_middle_node=middle_node))
+                is_middle_node = not (i == 0 or i == len(self.nodes_create) - 1)
+                self.nodes.append(NodeCosserat(pos, rot, is_middle_node=is_middle_node))
 
         # Get a list with the created nodes.
         if has_start_node:
@@ -332,7 +330,7 @@ class Beam(Element):
 class Beam3rHerm2Line3(Beam):
     """Represents a BEAM3R HERM2LINE3 element."""
 
-    nodes_create = [[-1, False], [0, True], [1, False]]
+    nodes_create = [-1, 0, 1]
     beam_type = mpy.beam.reissner
     valid_material = [MaterialReissner, MaterialReissnerElastoplastic]
 
@@ -362,7 +360,7 @@ class Beam3rLine2Line2(Beam):
     """Represents a Reissner beam with linear shapefunctions in the rotations
     as well as the displacements."""
 
-    nodes_create = [[-1, False], [1, False]]
+    nodes_create = [-1, 1]
     beam_type = mpy.beam.reissner
     valid_material = [MaterialReissner]
 
@@ -391,7 +389,7 @@ class Beam3rLine2Line2(Beam):
 class Beam3kClass(Beam):
     """Represents a Kirchhoff beam element."""
 
-    nodes_create = [[-1, False], [0, True], [1, False]]
+    nodes_create = [-1, 0, 1]
     beam_type = mpy.beam.kirchhoff
     valid_material = [MaterialKirchhoff]
 
@@ -460,7 +458,7 @@ def Beam3k(**kwargs_class):
 class Beam3eb(Beam):
     """Represents a Euler Bernoulli beam element."""
 
-    nodes_create = [[-1, False], [1, False]]
+    nodes_create = [-1, 1]
     beam_type = mpy.beam.euler_bernoulli
     valid_material = [MaterialEulerBernoulli]
 
