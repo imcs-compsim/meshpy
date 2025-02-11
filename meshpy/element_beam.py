@@ -122,7 +122,7 @@ class Beam(Element):
             if (i > 0 or not has_start_node) and (
                 i < len(self.nodes_create) - 1 or not has_end_node
             ):
-                is_middle_node = not (i == 0 or i == len(self.nodes_create) - 1)
+                is_middle_node = 0 < i < len(self.nodes_create) - 1
                 self.nodes.append(NodeCosserat(pos, rot, is_middle_node=is_middle_node))
 
         # Get a list with the created nodes.
