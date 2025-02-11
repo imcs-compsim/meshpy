@@ -108,7 +108,6 @@ def add_cube_plot(plotter, row, col, rotation, text, *, plot_outlines=True):
         )
 
     plotter.show_axes()
-    plotter.camera.zoom(2.0)
 
 
 class PyVistaPlotter:
