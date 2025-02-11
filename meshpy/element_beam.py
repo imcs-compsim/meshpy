@@ -48,7 +48,7 @@ from .vtk_writer import add_point_data_node_sets
 class Beam(Element):
     """A base class for a beam element."""
 
-    # A array that defines the parameter positions of the element nodes,
+    # An array that defines the parameter positions of the element nodes,
     # in ascending order.
     nodes_create: Any = []
 
