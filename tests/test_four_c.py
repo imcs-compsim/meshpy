@@ -170,7 +170,8 @@ def test_four_c_solid_shell_direction_detection(
     # Test the plates
     mpy.import_mesh_full = True
     mesh_block = InputFile(
-        dat_file=reference_file_directory / "4C_input_solid_shell_thickness_blocks.dat"
+        dat_file=reference_file_directory
+        / "test_create_cubit_input_solid_shell_blocks.dat"
     )
     # Add a beam element to check the function also works with beam elements
     mat = MaterialReissner()
@@ -186,7 +187,8 @@ def test_four_c_solid_shell_direction_detection(
 
     # Test the dome
     mesh_dome_original = InputFile(
-        dat_file=reference_file_directory / "4C_input_solid_shell_thickness_dome.dat"
+        dat_file=reference_file_directory
+        / "test_create_cubit_input_solid_shell_dome.dat"
     )
 
     # Test that the thickness version works
