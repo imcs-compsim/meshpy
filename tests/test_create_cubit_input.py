@@ -43,16 +43,15 @@ ASSERT_RESULTS_EQUAL_TOL = {"atol": 1e-13, "rtol": 1e-13}
 @pytest.mark.cubitpy
 def test_create_cubit_input_tube(
     tmp_path,
-    current_test_name,
     get_corresponding_reference_file_path,
     assert_results_equal,
 ):
     """Test that the solid tube reference file is up to date."""
 
-    file_path = tmp_path / (current_test_name + ".dat")
-    create_tube(file_path)
+    result_path = tmp_path / get_corresponding_reference_file_path().name
+    create_tube(result_path)
     assert_results_equal(
-        file_path, get_corresponding_reference_file_path(), **ASSERT_RESULTS_EQUAL_TOL
+        result_path, get_corresponding_reference_file_path(), **ASSERT_RESULTS_EQUAL_TOL
     )
 
 
@@ -77,37 +76,37 @@ def test_create_cubit_input_tutorial(
 @pytest.mark.cubitpy
 def test_create_cubit_input_block(
     tmp_path,
-    current_test_name,
     get_corresponding_reference_file_path,
     assert_results_equal,
 ):
     """Test that the solid block reference file is up to date."""
 
-    file_path = tmp_path / (current_test_name + ".dat")
-    create_block(file_path)
+    result_path = tmp_path / get_corresponding_reference_file_path().name
+    create_block(result_path)
     assert_results_equal(
-        file_path, get_corresponding_reference_file_path(), **ASSERT_RESULTS_EQUAL_TOL
+        result_path, get_corresponding_reference_file_path(), **ASSERT_RESULTS_EQUAL_TOL
     )
 
 
 @pytest.mark.cubitpy
 def test_create_cubit_input_solid_shell(
     tmp_path,
-    current_test_name,
     get_corresponding_reference_file_path,
     assert_results_equal,
 ):
     """Test that the solid shell reference files are up to date."""
 
-    file_path_blocks = tmp_path / (current_test_name + "_blocks.dat")
-    file_path_dome = tmp_path / (current_test_name + "_dome.dat")
-    create_solid_shell_meshes(file_path_blocks, file_path_dome)
-    assert_results_equal(
-        file_path_blocks,
-        get_corresponding_reference_file_path(additional_identifier="blocks"),
+    reference_path_blocks = get_corresponding_reference_file_path(
+        additional_identifier="blocks"
     )
+    reference_path_dome = get_corresponding_reference_file_path(
+        additional_identifier="dome"
+    )
+    result_path_blocks = tmp_path / reference_path_blocks.name
+    result_path_dome = tmp_path / reference_path_dome.name
+
+    create_solid_shell_meshes(result_path_blocks, result_path_dome)
+    assert_results_equal(result_path_blocks, reference_path_blocks)
     assert_results_equal(
-        file_path_dome,
-        get_corresponding_reference_file_path(additional_identifier="dome"),
-        **ASSERT_RESULTS_EQUAL_TOL,
+        result_path_dome, reference_path_dome, **ASSERT_RESULTS_EQUAL_TOL
     )
