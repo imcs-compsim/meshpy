@@ -162,7 +162,6 @@ def test_four_c_simulation_beam_potential_helix(
 def test_four_c_solid_shell_direction_detection(
     assert_results_equal,
     get_corresponding_reference_file_path,
-    reference_file_directory,
     tmp_path,
 ):
     """Test the solid shell direction detection functionality."""
@@ -170,8 +169,9 @@ def test_four_c_solid_shell_direction_detection(
     # Test the plates
     mpy.import_mesh_full = True
     mesh_block = InputFile(
-        dat_file=reference_file_directory
-        / "test_create_cubit_input_solid_shell_blocks.dat"
+        dat_file=get_corresponding_reference_file_path(
+            reference_file_base_name="test_create_cubit_input_solid_shell_blocks"
+        )
     )
     # Add a beam element to check the function also works with beam elements
     mat = MaterialReissner()
@@ -187,8 +187,9 @@ def test_four_c_solid_shell_direction_detection(
 
     # Test the dome
     mesh_dome_original = InputFile(
-        dat_file=reference_file_directory
-        / "test_create_cubit_input_solid_shell_dome.dat"
+        dat_file=get_corresponding_reference_file_path(
+            reference_file_base_name="test_create_cubit_input_solid_shell_dome"
+        )
     )
 
     # Test that the thickness version works
@@ -232,14 +233,10 @@ def test_four_c_solid_shell_direction_detection(
     )
 
     # Also test the visualization function
-    ref_file = (
-        reference_file_directory
-        / "test_four_c_solid_shell_direction_detection_dome_constant_direction.vtu"
+    ref_file = get_corresponding_reference_file_path(
+        additional_identifier="dome_constant_direction", extension="vtu"
     )
-    test_file = (
-        tmp_path
-        / "test_four_c_solid_shell_direction_detection_dome_constant_direction_result.vtu"
-    )
+    test_file = tmp_path / ref_file.name
 
     grid = get_visualization_third_parameter_direction_hex8(mesh_dome)
     grid.save(test_file)
