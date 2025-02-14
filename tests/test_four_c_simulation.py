@@ -633,7 +633,9 @@ def test_four_c_simulation_rotated_beam_axis(
 
     # Run the input file in 4C.
     run_four_c_test(tmp_path, "rotated_beam_axis", input_file)
-    run_four_c_test(tmp_path, "rotated_beam_axis", input_file, nox_xml_file="xml_name")
+    run_four_c_test(
+        tmp_path, "rotated_beam_axis", input_file, nox_xml_file="xml_name.xml"
+    )
 
 
 @pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
