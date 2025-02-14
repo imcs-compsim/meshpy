@@ -1670,7 +1670,7 @@ def test_meshpy_cubitpy_import(
 
     # Load the file from the reference folder.
     file_path_ref = get_corresponding_reference_file_path(
-        reference_file_base_name="test_create_cubit_input_tube.dat"
+        reference_file_base_name="test_create_cubit_input_tube"
     )
     input_file_ref = InputFile(dat_file=file_path_ref)
 
