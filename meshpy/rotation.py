@@ -71,7 +71,7 @@ class Rotation:
             self.q[0] = 1
         elif len(args) == 2:
             # Set from rotation axis and rotation angle.
-            axis = np.array(args[0])
+            axis = np.asarray(args[0])
             phi = args[1]
             norm = np.linalg.norm(axis)
             if norm < mpy.eps_quaternion:
@@ -95,9 +95,10 @@ class Rotation:
             error accumulation.
         """
         rotation = object.__new__(cls)
-        rotation.q = np.array(q, dtype=float)
-        if not normalized:
-            rotation.q /= np.linalg.norm(rotation.q)
+        if normalized:
+            rotation.q = np.array(q)
+        else:
+            rotation.q = np.asarray(q) / np.linalg.norm(q)
         if (not rotation.q.ndim == 1) or (not len(rotation.q) == 4):
             raise ValueError("Got quaternion array with unexpected dimensions")
         return rotation
@@ -154,7 +155,7 @@ class Rotation:
         """Create the object from a rotation vector."""
 
         q = np.zeros(4)
-        rotation_vector = np.array(rotation_vector)
+        rotation_vector = np.asarray(rotation_vector)
         phi = np.linalg.norm(rotation_vector)
         q[0] = np.cos(0.5 * phi)
         if phi < mpy.eps_quaternion:
@@ -199,7 +200,7 @@ class Rotation:
         return R
 
     def get_quaternion(self):
-        """Return the quaternion for this rotation, as tuple."""
+        """Return the quaternion for this rotation, as numpy array (copy)."""
 
         return np.array(self.q)
 
@@ -313,7 +314,7 @@ class Rotation:
             return Rotation.from_quaternion(added_rotation)
         elif isinstance(other, (list, np.ndarray)) and len(other) == 3:
             # Apply rotation to vector.
-            return np.dot(self.get_rotation_matrix(), np.array(other))
+            return np.dot(self.get_rotation_matrix(), np.asarray(other))
         raise NotImplementedError("Error, not implemented, does not make sense anyway!")
 
     def __eq__(self, other):
@@ -490,7 +491,7 @@ def smallest_rotation(q: Rotation, t):
 
     R_old = q.get_rotation_matrix()
     g1_old = R_old[:, 0]
-    g1 = np.array(t) / np.linalg.norm(t)
+    g1 = np.asarray(t) / np.linalg.norm(t)
 
     # Quaternion components of relative rotation
     q_rel = np.zeros(4)

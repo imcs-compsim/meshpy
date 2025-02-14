@@ -71,8 +71,8 @@ def _intersect_line_with_rectangle(
     """
 
     # Convert the input values to np.arrays.
-    start_line = np.array(start_line)
-    direction_line = np.array(direction_line)
+    start_line = np.asarray(start_line)
+    direction_line = np.asarray(direction_line)
 
     # Set definition for the boundary lines of the rectangle. The director is
     # chosen in a way, that the values [0, 1] for the line parameters alpha are
