@@ -38,7 +38,6 @@ from meshpy import (
     Coupling,
     GeometrySet,
     GeometrySetNodes,
-    InputFile,
     Mesh,
     NodeCosserat,
     mpy,
@@ -141,7 +140,7 @@ def beam_to_space_time(
     number_of_elements_in_time: int,
     *,
     time_start: float = 0.0,
-) -> Tuple[InputFile, GeometryName]:
+) -> Tuple[Mesh, GeometryName]:
     """Convert a MeshPy beam mesh to a surface space-time mesh.
 
     Args
@@ -159,10 +158,9 @@ def beam_to_space_time(
         Starting time for the space-time mesh. Can be used to create time slaps.
     Return
     ----
-    space_time_mesh: InputFile
+    space_time_mesh:
         The space time mesh. Be aware that translating / rotating this mesh
         might lead to unexpected results.
-        TODO: Return this as mesh. For now InputFile is better for performance reasons
     return_set:
         The nodes sets to be returned for the space time mesh:
             "start", "end", "left", "right", "surface"
@@ -307,14 +305,11 @@ def beam_to_space_time(
                 )
             )
 
-    # Create the new mesh with the nodes and elements
-    # TODO: Use the Mesh.add method once performance is improved there.
-    space_time_mesh = InputFile()
-    space_time_mesh.nodes = space_time_nodes
-    space_time_mesh.elements = space_time_elements
-    space_time_mesh.boundary_conditions[mpy.bc.point_coupling, mpy.geo.point] = (
-        space_time_couplings
-    )
+    # Create the new mesh and add all the mesh items
+    space_time_mesh = Mesh()
+    space_time_mesh.add(space_time_nodes)
+    space_time_mesh.add(space_time_elements)
+    space_time_mesh.add(space_time_couplings)
 
     # Create the element sets
     return_set = GeometryName()
