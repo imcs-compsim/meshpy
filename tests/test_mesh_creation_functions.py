@@ -28,8 +28,6 @@
 # SOFTWARE.
 """This script is used to test the mesh creation functions."""
 
-import os
-
 import autograd.numpy as npAD
 import numpy as np
 import pytest
@@ -49,6 +47,7 @@ from meshpy import (
 from meshpy.mesh_creation_functions import (
     create_beam_mesh_arc_at_node,
     create_beam_mesh_arc_segment_2d,
+    create_beam_mesh_arc_segment_via_axis,
     create_beam_mesh_arc_segment_via_rotation,
     create_beam_mesh_curve,
     create_beam_mesh_from_nurbs,
@@ -136,10 +135,37 @@ def create_testing_nurbs_curve():
     )
 
 
-def test_mesh_creation_functions_arc_segment(
+def test_mesh_creation_functions_arc_segment_via_axis(
     assert_results_equal, get_corresponding_reference_file_path
 ):
-    """Create a circular segment and compare it with the reference file."""
+    """Create a circular segment via the axis method and compare it with the
+    reference file."""
+
+    # Create mesh
+    input_file = InputFile()
+    mat = MaterialReissner()
+    radius = 2.0
+    beam_set = create_beam_mesh_arc_segment_via_axis(
+        input_file,
+        Beam3rHerm2Line3,
+        mat,
+        [0, 0, 1],
+        [0, radius, 0],
+        [0, 0, 0],
+        1.0,
+        n_el=3,
+    )
+    input_file.add(beam_set)
+
+    # Check the output.
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+
+
+def test_mesh_creation_functions_arc_segment_via_rotation(
+    assert_results_equal, get_corresponding_reference_file_path
+):
+    """Create a circular segment via the rotation method and compare it with
+    the reference file."""
 
     # Create input file.
     input_file = InputFile()
