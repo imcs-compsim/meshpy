@@ -27,10 +27,6 @@
 # SOFTWARE.
 """Test the functionality of the Cosserat curve module."""
 
-import json
-import os
-from pathlib import Path
-
 import numpy as np
 import pyvista as pv
 import quaternion
@@ -45,24 +41,26 @@ from meshpy.cosserat_curve.warping_along_cosserat_curve import (
 from meshpy.mesh_creation_functions import create_beam_mesh_helix
 
 
-def load_cosserat_curve_from_file(reference_file_directory):
+def load_cosserat_curve_from_file(get_corresponding_reference_file_path):
     """Load the centerline coordinates from the reference files and create the
     Cosserat curve."""
+    point_coordinates_file = get_corresponding_reference_file_path(
+        reference_file_base_name="test_cosserat_curve_centerline", extension="txt"
+    )
     coordinates = np.loadtxt(
-        os.path.join(reference_file_directory, "test_cosserat_curve_centerline.txt"),
-        comments="#",
-        delimiter=",",
-        unpack=False,
+        point_coordinates_file, comments="#", delimiter=",", unpack=False
     )
     return CosseratCurve(coordinates)
 
 
-def create_beam_solid_input_file(reference_file_directory):
+def create_beam_solid_input_file(get_corresponding_reference_file_path):
     """Create a beam and solid input file for testing purposes."""
 
     mpy.import_mesh_full = True
     mesh = InputFile(
-        dat_file=os.path.join(reference_file_directory, "test_cosserat_curve_mesh.dat")
+        dat_file=get_corresponding_reference_file_path(
+            reference_file_base_name="test_cosserat_curve_mesh"
+        )
     )
     create_beam_mesh_helix(
         mesh,
@@ -78,12 +76,10 @@ def create_beam_solid_input_file(reference_file_directory):
     return mesh
 
 
-def test_cosserat_curve_translate_and_rotate(
-    reference_file_directory, current_test_name
-):
+def test_cosserat_curve_translate_and_rotate(get_corresponding_reference_file_path):
     """Test that a curve can be loaded, rotated and transformed."""
 
-    curve = load_cosserat_curve_from_file(reference_file_directory)
+    curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
 
     # Translate the curve so that the start is at the origin
     curve.translate(-curve.centerline_interpolation(5.0))
@@ -104,7 +100,9 @@ def test_cosserat_curve_translate_and_rotate(
     def load_compare(name):
         """Load the compare files and return a numpy array."""
         return np.loadtxt(
-            os.path.join(reference_file_directory, f"{current_test_name}_{name}.txt")
+            get_corresponding_reference_file_path(
+                additional_identifier=name, extension="txt"
+            )
         )
 
     assert np.allclose(sol_half_pos, load_compare("pos_half_ref"), rtol=1e-14)
@@ -119,16 +117,14 @@ def test_cosserat_curve_translate_and_rotate(
 
 
 def test_cosserat_curve_vtk_representation(
-    tmp_path, reference_file_directory, current_test_name, assert_results_equal
+    tmp_path, get_corresponding_reference_file_path, assert_results_equal
 ):
     """Test the vtk representation of the Cosserat curve."""
 
-    reference_path = Path(
-        os.path.join(reference_file_directory, current_test_name + ".vtu")
-    )
-    result_path = Path(os.path.join(tmp_path, current_test_name + ".vtu"))
+    reference_path = get_corresponding_reference_file_path(extension="vtu")
+    result_path = tmp_path / reference_path.name
 
-    curve = load_cosserat_curve_from_file(reference_file_directory)
+    curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pv.UnstructuredGrid(curve.get_pyvista_polyline()).save(result_path)
 
     assert_results_equal(
@@ -139,11 +135,11 @@ def test_cosserat_curve_vtk_representation(
     )
 
 
-def test_cosserat_curve_project_point(reference_file_directory):
+def test_cosserat_curve_project_point(get_corresponding_reference_file_path):
     """Test that the project point function works as expected."""
 
     # Load the curve
-    curve = load_cosserat_curve_from_file(reference_file_directory)
+    curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
 
     # Translate the curve so that the start is at the origin
     curve.translate(-curve.centerline_interpolation(0.0))
@@ -156,20 +152,19 @@ def test_cosserat_curve_project_point(reference_file_directory):
     assert np.allclose(t_ref, curve.project_point([-5, 1, 1], t0=4.0), rtol=rtol)
 
 
-def test_cosserat_mesh_transformation(
-    reference_file_directory,
+def test_cosserat_curve_mesh_transformation(
     get_corresponding_reference_file_path,
     assert_results_equal,
 ):
     """Test that the get_mesh_transformation function works as expected."""
 
-    curve = load_cosserat_curve_from_file(reference_file_directory)
+    curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pos, rot = curve.get_centerline_position_and_rotation(0)
     rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
     curve.translate(-pos)
     curve.translate([1, 2, 3])
 
-    mesh = create_beam_solid_input_file(reference_file_directory)
+    mesh = create_beam_solid_input_file(get_corresponding_reference_file_path)
     pos, rot = get_mesh_transformation(
         curve,
         mesh.nodes,
@@ -188,14 +183,13 @@ def test_cosserat_mesh_transformation(
 
 
 def test_cosserat_curve_mesh_warp(
-    reference_file_directory,
     get_corresponding_reference_file_path,
     assert_results_equal,
 ):
     """Warp a balloon along a centerline."""
 
     # Load the curve
-    curve = load_cosserat_curve_from_file(reference_file_directory)
+    curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pos, rot = curve.get_centerline_position_and_rotation(0)
     rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
     curve.translate(-pos)
@@ -203,7 +197,7 @@ def test_cosserat_curve_mesh_warp(
 
     # Warp the mesh. The reference coordinate system is rotated such that z axis is the longitudinal direction,
     # and x and y are the first and second cross-section basis vectors respectively.
-    mesh = create_beam_solid_input_file(reference_file_directory)
+    mesh = create_beam_solid_input_file(get_corresponding_reference_file_path)
     warp_mesh_along_curve(
         mesh,
         curve,
@@ -217,21 +211,20 @@ def test_cosserat_curve_mesh_warp(
 
 
 def test_cosserat_curve_mesh_warp_transform_boundary_conditions(
-    reference_file_directory,
     get_corresponding_reference_file_path,
     assert_results_equal,
 ):
     """Test the transform boundary creation function."""
 
     # Load the curve
-    curve = load_cosserat_curve_from_file(reference_file_directory)
+    curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pos, rot = curve.get_centerline_position_and_rotation(0)
     rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
     curve.translate(-pos)
     curve.translate([1, 2, 3])
 
     # Load the mesh
-    mesh = create_beam_solid_input_file(reference_file_directory)
+    mesh = create_beam_solid_input_file(get_corresponding_reference_file_path)
 
     # Apply the transform boundary conditions
     create_transform_boundary_conditions(

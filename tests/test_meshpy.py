@@ -268,7 +268,6 @@ def test_meshpy_comments_in_solid(
 
 def test_meshpy_mesh_transformations_with_solid(
     assert_results_equal,
-    reference_file_directory,
     get_corresponding_reference_file_path,
 ):
     """Test the different mesh transformation methods in combination with solid
@@ -286,7 +285,9 @@ def test_meshpy_mesh_transformations_with_solid(
 
         # Create the mesh.
         mesh = InputFile(
-            dat_file=reference_file_directory / "4C_input_solid_cuboid.dat"
+            dat_file=get_corresponding_reference_file_path(
+                reference_file_base_name="4C_input_solid_cuboid"
+            )
         )
         mat = MaterialReissner(radius=0.05)
 
@@ -337,12 +338,11 @@ def test_meshpy_mesh_transformations_with_solid(
 
 def test_meshpy_fluid_element_section(
     assert_results_equal,
-    reference_file_directory,
     get_corresponding_reference_file_path,
 ):
     """Add beam elements to an input file containing fluid elements."""
     input_file = InputFile(
-        dat_file=reference_file_directory / "fluid_element_input.dat"
+        dat_file=get_corresponding_reference_file_path(additional_identifier="import")
     )
 
     beam_mesh = Mesh()
@@ -443,12 +443,16 @@ def test_meshpy_get_nodes_by_function():
         assert np.abs(1.0 - node.coordinates[0]) < 1e-10
 
 
-def test_meshpy_get_min_max_coordinates(reference_file_directory):
+def test_meshpy_get_min_max_coordinates(get_corresponding_reference_file_path):
     """Test if the get_min_max_coordinates function works properly."""
 
     # Create the mesh.
     mpy.import_mesh_full = True
-    mesh = InputFile(dat_file=reference_file_directory / "4C_input_solid_cuboid.dat")
+    mesh = InputFile(
+        dat_file=get_corresponding_reference_file_path(
+            reference_file_base_name="4C_input_solid_cuboid"
+        )
+    )
     mat = MaterialReissner(radius=0.05)
     create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 3, 4], n_el=10)
 
@@ -1132,12 +1136,14 @@ def test_meshpy_replace_nodes_geometry_set(
     assert_results_equal(mesh_ref, mesh_couple)
 
 
-def create_beam_to_solid_conditions_model(reference_file_directory):
+def create_beam_to_solid_conditions_model(get_corresponding_reference_file_path):
     """Create the input file for the beam-to-solid input conditions tests."""
 
     # Create input file.
     input_file = InputFile(
-        dat_file=reference_file_directory / "test_create_cubit_input_block.dat"
+        dat_file=get_corresponding_reference_file_path(
+            reference_file_base_name="test_create_cubit_input_block"
+        )
     )
 
     # Add beams to the model.
@@ -1176,7 +1182,6 @@ def create_beam_to_solid_conditions_model(reference_file_directory):
 @pytest.mark.parametrize("test_type", [None, "full"])
 def test_meshpy_beam_to_solid_conditions(
     test_type,
-    reference_file_directory,
     assert_results_equal,
     get_corresponding_reference_file_path,
 ):
@@ -1188,7 +1193,9 @@ def test_meshpy_beam_to_solid_conditions(
         mpy.import_mesh_full = False
 
     # Get the input file.
-    input_file = create_beam_to_solid_conditions_model(reference_file_directory)
+    input_file = create_beam_to_solid_conditions_model(
+        get_corresponding_reference_file_path
+    )
 
     # Check results
     assert_results_equal(
@@ -1405,7 +1412,9 @@ def test_meshpy_point_couplings(
     )
 
 
-def test_meshpy_vtk_writer(assert_results_equal, reference_file_directory, tmp_path):
+def test_meshpy_vtk_writer(
+    assert_results_equal, get_corresponding_reference_file_path, tmp_path
+):
     """Test the output created by the VTK writer."""
 
     # Initialize writer.
@@ -1463,8 +1472,8 @@ def test_meshpy_vtk_writer(assert_results_equal, reference_file_directory, tmp_p
     writer.complete_data()
 
     # Write to file.
-    ref_file = reference_file_directory / "test_meshpy_vtk_writer.vtu"
-    vtk_file = tmp_path / "test_meshpy_vtk_writer_result.vtu"
+    ref_file = get_corresponding_reference_file_path(extension="vtu")
+    vtk_file = tmp_path / ref_file.name
     writer.write_vtk(vtk_file, binary=False)
 
     # Compare the vtk files.
@@ -1472,7 +1481,7 @@ def test_meshpy_vtk_writer(assert_results_equal, reference_file_directory, tmp_p
 
 
 def test_meshpy_vtk_writer_beam(
-    assert_results_equal, reference_file_directory, tmp_path
+    assert_results_equal, get_corresponding_reference_file_path, tmp_path
 ):
     """Create a sample mesh and check the VTK output."""
 
@@ -1486,10 +1495,10 @@ def test_meshpy_vtk_writer_beam(
     )
 
     # Write VTK output, with coupling sets."""
-    ref_file = reference_file_directory / "test_meshpy_vtk_beam.vtu"
-    vtk_file = tmp_path / "test_meshpy_vtk_result_beam.vtu"
+    ref_file = get_corresponding_reference_file_path(extension="vtu")
+    vtk_file = tmp_path / ref_file.name
     mesh.write_vtk(
-        output_name="test_meshpy_vtk_result",
+        output_name="test_meshpy_vtk_writer",
         coupling_sets=True,
         output_directory=tmp_path,
         binary=False,
@@ -1497,10 +1506,12 @@ def test_meshpy_vtk_writer_beam(
     assert_results_equal(ref_file, vtk_file, atol=mpy.eps_pos)
 
     # Write VTK output, without coupling sets."""
-    ref_file = reference_file_directory / "test_meshpy_vtk_no_coupling_beam.vtu"
-    vtk_file = tmp_path / "test_meshpy_vtk_no_coupling_result_beam.vtu"
+    ref_file = get_corresponding_reference_file_path(
+        additional_identifier="no_coupling_beam", extension="vtu"
+    )
+    vtk_file = tmp_path / ref_file.name
     mesh.write_vtk(
-        output_name="test_meshpy_vtk_no_coupling_result",
+        output_name="test_meshpy_vtk_writer_beam_no_coupling",
         coupling_sets=False,
         output_directory=tmp_path,
         binary=False,
@@ -1508,10 +1519,12 @@ def test_meshpy_vtk_writer_beam(
     assert_results_equal(ref_file, vtk_file, atol=mpy.eps_pos)
 
     # Write VTK output, with coupling sets and additional points for visualization."""
-    ref_file = reference_file_directory / "test_meshpy_vtk_smooth_centerline_beam.vtu"
-    vtk_file = tmp_path / "test_meshpy_vtk_smooth_centerline_result_beam.vtu"
+    ref_file = get_corresponding_reference_file_path(
+        additional_identifier="smooth_centerline_beam", extension="vtu"
+    )
+    vtk_file = tmp_path / ref_file.name
     mesh.write_vtk(
-        output_name="test_meshpy_vtk_smooth_centerline_result",
+        output_name="test_meshpy_vtk_writer_beam_smooth_centerline",
         coupling_sets=True,
         output_directory=tmp_path,
         binary=False,
@@ -1521,7 +1534,7 @@ def test_meshpy_vtk_writer_beam(
 
 
 def test_meshpy_vtk_writer_solid(
-    assert_results_equal, reference_file_directory, tmp_path
+    assert_results_equal, get_corresponding_reference_file_path, tmp_path
 ):
     """Import a solid mesh and check the VTK output."""
 
@@ -1532,16 +1545,18 @@ def test_meshpy_vtk_writer_solid(
     # Create the input file and read solid mesh data.
     input_file = InputFile()
     input_file.read_dat(
-        os.path.join(reference_file_directory, "test_create_cubit_input_tube.dat")
+        get_corresponding_reference_file_path(
+            reference_file_base_name="test_create_cubit_input_tube"
+        )
     )
 
     # Write VTK output.
-    ref_file = reference_file_directory / "test_meshpy_vtk_solid.vtu"
-    vtk_file = tmp_path / "test_meshpy_vtk_result_solid.vtu"
-    if os.path.isfile(vtk_file):
+    ref_file = get_corresponding_reference_file_path(extension="vtu")
+    vtk_file = tmp_path / ref_file.name
+    if os.path.isfile(vtk_file):  # Todo: Can this check be removed?
         os.remove(vtk_file)
     input_file.write_vtk(
-        output_name="test_meshpy_vtk_result", output_directory=tmp_path, binary=False
+        output_name="test_meshpy_vtk_writer", output_directory=tmp_path, binary=False
     )
 
     # Compare the vtk files.
@@ -1549,7 +1564,7 @@ def test_meshpy_vtk_writer_solid(
 
 
 def test_meshpy_vtk_writer_solid_elements(
-    assert_results_equal, reference_file_directory, tmp_path
+    assert_results_equal, get_corresponding_reference_file_path, tmp_path
 ):
     """Import a solid mesh with all solid types and check the VTK output."""
 
@@ -1560,16 +1575,18 @@ def test_meshpy_vtk_writer_solid_elements(
     # Create the input file and read solid mesh data.
     input_file = InputFile()
     input_file.read_dat(
-        os.path.join(reference_file_directory, "4C_input_solid_elements.dat")
+        get_corresponding_reference_file_path(additional_identifier="import")
     )
 
     # Write VTK output.
-    ref_file = reference_file_directory / "test_meshpy_vtk_solid_elements.vtu"
-    vtk_file = tmp_path / "test_meshpy_vtk_elements_result_solid.vtu"
-    if os.path.isfile(vtk_file):
+    ref_file = get_corresponding_reference_file_path(
+        additional_identifier="solid", extension="vtu"
+    )
+    vtk_file = tmp_path / ref_file.name
+    if os.path.isfile(vtk_file):  # Todo: Can this check be removed?
         os.remove(vtk_file)
     input_file.write_vtk(
-        output_name="test_meshpy_vtk_elements_result",
+        output_name="test_meshpy_vtk_writer_solid_elements",
         output_directory=tmp_path,
         binary=False,
     )
@@ -1579,7 +1596,7 @@ def test_meshpy_vtk_writer_solid_elements(
 
 
 def test_meshpy_vtk_curve_cell_data(
-    assert_results_equal, reference_file_directory, tmp_path
+    assert_results_equal, get_corresponding_reference_file_path, tmp_path
 ):
     """Test that when creating a beam, cell data can be given.
 
@@ -1617,11 +1634,12 @@ def test_meshpy_vtk_curve_cell_data(
     )
 
     # Write VTK output, with coupling sets."""
-    ref_file = reference_file_directory / "test_meshpy_vtk_curve_cell_data.vtu"
-
-    vtk_file = tmp_path / "test_meshpy_vtk_curve_cell_data_result_beam.vtu"
+    ref_file = get_corresponding_reference_file_path(
+        additional_identifier="beam", extension="vtu"
+    )
+    vtk_file = tmp_path / ref_file.name
     mesh.write_vtk(
-        output_name="test_meshpy_vtk_curve_cell_data_result",
+        output_name="test_meshpy_vtk_curve_cell_data",
         output_directory=tmp_path,
         binary=False,
     )
@@ -1633,7 +1651,7 @@ def test_meshpy_vtk_curve_cell_data(
 @pytest.mark.cubitpy
 def test_meshpy_cubitpy_import(
     assert_results_equal,
-    reference_file_directory,
+    get_corresponding_reference_file_path,
     tmp_path,
 ):
     """Check that a import from a cubitpy object is the same as importing the
@@ -1651,8 +1669,8 @@ def test_meshpy_cubitpy_import(
     input_file_cubit = InputFile(cubit=create_tube_cubit())
 
     # Load the file from the reference folder.
-    file_path_ref = os.path.join(
-        reference_file_directory, "test_create_cubit_input_tube.dat"
+    file_path_ref = get_corresponding_reference_file_path(
+        reference_file_base_name="test_create_cubit_input_tube"
     )
     input_file_ref = InputFile(dat_file=file_path_ref)
 
@@ -1798,7 +1816,7 @@ def test_meshpy_check_multiple_node_penalty_coupling(
 
 
 def test_meshpy_check_double_elements(
-    assert_results_equal, reference_file_directory, tmp_path
+    assert_results_equal, get_corresponding_reference_file_path, tmp_path
 ):
     """Check if there are overlapping elements in a mesh."""
 
@@ -1822,10 +1840,12 @@ def test_meshpy_check_double_elements(
 
     # Check if the overlapping elements are written to the vtk output.
     warnings.filterwarnings("ignore")
-    ref_file = reference_file_directory / "test_meshpy_vtk_element_overlap.vtu"
-    vtk_file = tmp_path / "test_meshpy_vtk_element_overlap_result_beam.vtu"
+    ref_file = get_corresponding_reference_file_path(
+        additional_identifier="beam", extension="vtu"
+    )
+    vtk_file = tmp_path / ref_file.name
     mesh.write_vtk(
-        output_name="test_meshpy_vtk_element_overlap_result",
+        output_name="test_meshpy_check_double_elements",
         output_directory=tmp_path,
         binary=False,
         overlapping_elements=True,
@@ -1906,12 +1926,12 @@ def test_meshpy_userdefined_boundary_condition(
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-def test_meshpy_display_pyvista(reference_file_directory):
+def test_meshpy_display_pyvista(get_corresponding_reference_file_path):
     """Test that the display in pyvista function does not lead to errors.
 
     TODO: Add a check for the created visualziation
     """
 
     mpy.import_mesh_full = True
-    mesh = create_beam_to_solid_conditions_model(reference_file_directory)
+    mesh = create_beam_to_solid_conditions_model(get_corresponding_reference_file_path)
     _ = mesh.display_pyvista(resolution=3)

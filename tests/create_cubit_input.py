@@ -302,6 +302,11 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
 if __name__ == "__main__":
     # Execution part of script.
 
+    # Todo:
+    # The paths here are wrong! We have to think anyway if we want to keep this
+    # part of the script or just rely on the testing (which should be more than
+    # sufficient).
+
     dir_path = os.path.abspath(os.path.dirname(__file__))
 
     # Create the input file for the solid tube.

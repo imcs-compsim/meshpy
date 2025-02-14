@@ -135,7 +135,6 @@ def test_four_c_simulation_honeycomb_sphere(
     tmp_path,
     assert_results_equal,
     get_corresponding_reference_file_path,
-    reference_file_directory,
 ):
     """Create the same honeycomb mesh as defined in 4C/tests/input_files/beam3r
     _herm2lin3_static_point_coupling_BTSPH_contact_stent_honeycomb_stretch_r01_
@@ -150,7 +149,7 @@ def test_four_c_simulation_honeycomb_sphere(
     mpy.import_mesh_full = full_import
     input_file = InputFile(
         description="honeycomb beam in contact with sphere",
-        dat_file=reference_file_directory / "4C_input_honeycomb_sphere.dat",
+        dat_file=get_corresponding_reference_file_path(additional_identifier="import"),
     )
 
     # Modify the time step options.
@@ -257,14 +256,17 @@ def test_four_c_simulation_beam_and_solid_tube(
     tmp_path,
     assert_results_equal,
     get_corresponding_reference_file_path,
-    reference_file_directory,
 ):
     """Merge a solid tube with a beam tube and simulate them together."""
 
     # Create the input file and read solid mesh data.
     mpy.import_mesh_full = full_import
     input_file = InputFile(description="Solid tube with beam tube")
-    input_file.read_dat(reference_file_directory / "test_create_cubit_input_tube.dat")
+    input_file.read_dat(
+        get_corresponding_reference_file_path(
+            reference_file_base_name="test_create_cubit_input_tube"
+        )
+    )
 
     # Add options for beam_output.
     input_file.add(
