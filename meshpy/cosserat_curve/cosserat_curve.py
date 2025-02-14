@@ -266,7 +266,7 @@ class CosseratCurve(object):
         """
 
         # Get the points that are within the arc length of the given curve.
-        points_on_arc_length = np.array(points_on_arc_length)
+        points_on_arc_length = np.asarray(points_on_arc_length)
         points_in_bounds = np.logical_and(
             points_on_arc_length > self.point_arc_length[0],
             points_on_arc_length < self.point_arc_length[-1],

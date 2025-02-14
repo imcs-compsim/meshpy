@@ -81,7 +81,9 @@ def create_beam_mesh_line(
     """
 
     # Get geometrical values for this line.
-    direction = np.array(end_point) - np.array(start_point)
+    start_point = np.asarray(start_point)
+    end_point = np.asarray(end_point)
+    direction = end_point - start_point
     line_length = np.linalg.norm(direction)
     t1 = direction / line_length
 
@@ -169,7 +171,7 @@ def create_beam_mesh_arc_segment_via_rotation(
 
     # Convert the input to the one for create_beam_mesh_arc_segment_via_axis
     axis = axis_rotation * [0, 0, 1]
-    start_point = center + radius * (axis_rotation * np.array([0, -1, 0]))
+    start_point = center + radius * (axis_rotation * [0, -1, 0])
     return create_beam_mesh_arc_segment_via_axis(
         mesh, beam_object, material, axis, center, start_point, angle, **kwargs
     )
@@ -234,7 +236,11 @@ def create_beam_mesh_arc_segment_via_axis(
 
     # Shortest distance from the given point to the axis of rotation gives
     # the "center" of the arc
-    axis = np.array(axis) / np.linalg.norm(axis)
+    axis = np.asarray(axis)
+    axis_point = np.asarray(axis_point)
+    start_point = np.asarray(start_point)
+
+    axis = axis / np.linalg.norm(axis)
     diff = start_point - axis_point
     distance = diff - np.dot(np.dot(diff, axis), axis)
     radius = np.linalg.norm(distance)
@@ -444,7 +450,7 @@ def create_beam_mesh_arc_at_node(
     """
 
     # If the angle is negative, the normal is switched
-    arc_axis_normal = np.array(arc_axis_normal)
+    arc_axis_normal = np.asarray(arc_axis_normal)
     if angle < 0:
         arc_axis_normal = -1.0 * arc_axis_normal
 
@@ -554,9 +560,13 @@ def create_beam_mesh_helix(
         )
 
     # determine radius of helix
-    axis_vector = np.array(axis_vector) / np.linalg.norm(np.array(axis_vector))
+    axis_vector = np.asarray(axis_vector)
+    axis_point = np.asarray(axis_point)
+    start_point = np.asarray(start_point)
+
+    axis_vector = axis_vector / np.linalg.norm(axis_vector)
     origin = axis_point + np.dot(
-        np.dot((np.array(start_point) - np.array(axis_point)), axis_vector), axis_vector
+        np.dot(start_point - axis_point, axis_vector), axis_vector
     )
     start_point_origin_vec = start_point - origin
     radius = np.linalg.norm(start_point_origin_vec)

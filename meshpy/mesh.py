@@ -331,7 +331,7 @@ class Mesh:
         """
 
         # Normalize the normal vector.
-        normal_vector = np.array(normal_vector / np.linalg.norm(normal_vector))
+        normal_vector = np.asarray(normal_vector) / np.linalg.norm(normal_vector)
 
         # Get array with all quaternions and positions for the nodes.
         pos = get_nodal_coordinates(self.nodes)
@@ -892,7 +892,7 @@ class Mesh:
                 directors = [
                     finite_element_nodes.glyph(
                         geom=arrow,
-                        orient=f"base_vector_{i+1}",
+                        orient=f"base_vector_{i + 1}",
                         scale="cross_section_radius",
                         factor=director_radius_scaling_factor,
                     )
