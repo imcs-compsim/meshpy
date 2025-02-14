@@ -91,6 +91,13 @@ class VolumeElement(Element):
         )
 
 
+class VolumeWEDGE6(VolumeElement):
+    """A WEDGE6 volume element."""
+
+    vtk_cell_type = vtk.vtkWedge
+    vtk_topology = list(range(6))
+
+
 class VolumeHEX8(VolumeElement):
     """A HEX8 volume element."""
 
