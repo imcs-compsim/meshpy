@@ -31,6 +31,7 @@
 import datetime
 import os
 import re
+import subprocess
 import sys
 
 from meshpy.core.base_mesh_item import BaseMeshItemFull, BaseMeshItemString
@@ -42,7 +43,6 @@ from meshpy.core.geometry_set import GeometrySetNodes
 from meshpy.core.mesh import Mesh
 from meshpy.core.node import Node
 from meshpy.core.nurbs_patch import NURBSPatch
-from meshpy.utils.utils import get_git_data
 
 
 def get_section_string(section_name):
@@ -913,6 +913,27 @@ class InputFile(Mesh):
     def _get_header(self, add_script):
         """Return the header for the input file."""
 
+        def get_git_data(repo):
+            """Return the hash and date of the current git commit."""
+            out_sha = subprocess.run(
+                ["git", "rev-parse", "HEAD"],
+                cwd=repo,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+            )
+            out_date = subprocess.run(
+                ["git", "show", "-s", "--format=%ci"],
+                cwd=repo,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL,
+            )
+            if not out_sha.returncode + out_date.returncode == 0:
+                return None, None
+            else:
+                sha = out_sha.stdout.decode("ascii").strip()
+                date = out_date.stdout.decode("ascii").strip()
+                return sha, date
+
         headers = []
         end_text = None
 
@@ -935,10 +956,13 @@ class InputFile(Mesh):
         headers.append(script_header)
 
         # Header containing meshpy information.
+        meshpy_git_sha, meshpy_git_date = get_git_data(
+            os.path.dirname(os.path.realpath(__file__))
+        )
         headers.append(
             "// Input file created with meshpy\n"
-            f"// git sha:    {mpy.git_sha}\n"
-            f"// git date:   {mpy.git_date}\n"
+            f"// git sha:    {meshpy_git_sha}\n"
+            f"// git date:   {meshpy_git_date}\n"
         )
 
         # Check if cubitpy is loaded.

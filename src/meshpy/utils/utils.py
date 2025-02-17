@@ -28,9 +28,6 @@
 """This module implements some basic functions that are used in the meshpy
 application."""
 
-import os
-import subprocess
-
 import numpy as np
 
 from meshpy.core.conf import mpy
@@ -40,32 +37,6 @@ from meshpy.geometric_search.find_close_points import (
     find_close_points,
     point_partners_to_partner_indices,
 )
-
-
-def get_git_data(repo):
-    """Return the hash and date of the current git commit."""
-    out_sha = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=repo,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-    )
-    out_date = subprocess.run(
-        ["git", "show", "-s", "--format=%ci"],
-        cwd=repo,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-    )
-    if not out_sha.returncode + out_date.returncode == 0:
-        return None, None
-    else:
-        sha = out_sha.stdout.decode("ascii").strip()
-        date = out_date.stdout.decode("ascii").strip()
-        return sha, date
-
-
-# Set the git version in the global configuration object.
-mpy.git_sha, mpy.git_date = get_git_data(os.path.dirname(os.path.realpath(__file__)))
 
 
 def find_close_nodes(nodes, **kwargs):
