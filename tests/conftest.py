@@ -543,47 +543,6 @@ def handle_unequal_strings(
         child.communicate()
 
 
-def compare_strings_with_tolerance(
-    reference: str,
-    result: str,
-    rtol: Optional[float],
-    atol: Optional[float],
-    string_splitter=" ",
-    output=False,
-) -> Union[bool, Tuple[bool, str]]:
-    """Compare if two strings are identical within a given tolerance.
-
-    Args:
-        reference: The reference string.
-        result: The result string.
-        rtol: The relative tolerance.
-        atol: The absolute tolerance.
-        string_splitter: With which string the strings are split.
-        output: Flag, if string containing failed comparison should be returned
-
-    Returns:
-        bool: true if comparison is successful, raises AssertionError otherwise
-        bool, str: True if comparison is successful, False otherwise. If output
-        option is set, also return string containing information about failed
-        comparisons.
-    """
-
-    def get_return_values(flag, message):
-        """Get the data structure that shall be returned from this function."""
-        if output:
-            return flag, message
-        else:
-            return flag
-
-    try:
-        compare_strings_with_tolerance_assert(
-            reference, result, rtol, atol, string_splitter
-        )
-        return get_return_values(True, "")
-    except AssertionError as error:
-        return get_return_values(False, str(error))
-
-
 def compare_dicts(
     dict_1: dict,
     dict_2: dict,
