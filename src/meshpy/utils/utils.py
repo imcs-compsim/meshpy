@@ -29,9 +29,7 @@
 application."""
 
 import os
-import shutil
 import subprocess
-from pathlib import Path
 
 import numpy as np
 
@@ -132,44 +130,6 @@ def get_min_max_coordinates(nodes):
     min_max[:3] = np.min(coordinates, axis=0)
     min_max[3:] = np.max(coordinates, axis=0)
     return min_max
-
-
-def clean_simulation_directory(sim_dir, *, ask_before_clean=False):
-    """Clear the simulation directory. If it does not exist, it is created.
-    Optionally the user can be asked before a deletion of files.
-
-    Args
-    ----
-    sim_dir:
-        Path to a directory
-    ask_before_clean: bool
-        Flag which indicates whether the user must confirm removal of files and directories
-    """
-
-    # Check if simulation directory exists.
-    if os.path.exists(sim_dir):
-        if ask_before_clean:
-            print(f'Path "{sim_dir}" already exists')
-        while True:
-            if ask_before_clean:
-                answer = input("DELETE all contents? (y/n): ")
-            else:
-                answer = "y"
-            if answer.lower() == "y":
-                for filename in os.listdir(sim_dir):
-                    file_path = os.path.join(sim_dir, filename)
-                    try:
-                        if os.path.isfile(file_path) or os.path.islink(file_path):
-                            os.unlink(file_path)
-                        elif os.path.isdir(file_path):
-                            shutil.rmtree(file_path)
-                    except Exception as e:
-                        raise ValueError(f"Failed to delete {file_path}. Reason: {e}")
-                return
-            elif answer.lower() == "n":
-                raise ValueError("Directory is not deleted!")
-    else:
-        Path(sim_dir).mkdir(parents=True, exist_ok=True)
 
 
 def get_single_node(item, *, check_cosserat_node=False):
