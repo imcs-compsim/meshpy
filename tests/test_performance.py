@@ -44,7 +44,7 @@ from meshpy.geometric_search.find_close_points import (
     find_close_points,
 )
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
-from meshpy.utils.utils import find_close_nodes
+from meshpy.utils.nodes import find_close_nodes
 
 
 def create_solid_block(file_path, nx, ny, nz):

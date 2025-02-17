@@ -33,15 +33,14 @@ import numpy as np
 import vtk
 
 from meshpy.core.conf import mpy
-from meshpy.core.container import GeometryName
 from meshpy.core.coupling import Coupling
 from meshpy.core.element_beam import Beam3rHerm2Line3, Beam3rLine2Line2
 from meshpy.core.element_volume import VolumeElement
-from meshpy.core.geometry_set import GeometrySet, GeometrySetNodes
+from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetNodes
 from meshpy.core.inputfile_utils import get_coupled_nodes_to_master_map
 from meshpy.core.mesh import Mesh
 from meshpy.core.node import NodeCosserat
-from meshpy.utils.utils import get_nodal_coordinates
+from meshpy.utils.nodes import get_nodal_coordinates
 
 
 class NodeCosseratSpaceTime(NodeCosserat):

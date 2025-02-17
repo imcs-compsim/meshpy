@@ -34,10 +34,9 @@ plates.
 
 import numpy as np
 
-from meshpy.core.container import GeometryName
-from meshpy.core.geometry_set import GeometrySet
+from meshpy.core.geometry_set import GeometryName, GeometrySet
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
-from meshpy.utils.utils import check_node_by_coordinate
+from meshpy.utils.nodes import check_node_by_coordinate
 
 
 def _intersect_line_with_rectangle(

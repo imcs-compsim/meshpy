@@ -30,10 +30,11 @@ file."""
 
 import warnings
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull
+from meshpy.core.base_mesh_item import BaseMeshItemFull, BaseMeshItemString
 from meshpy.core.conf import mpy
+from meshpy.core.container import ContainerBase
 from meshpy.core.geometry_set import GeometrySet
-from meshpy.utils.utils import find_close_nodes
+from meshpy.utils.nodes import find_close_nodes
 
 
 class BoundaryConditionBase(BaseMeshItemFull):
@@ -188,3 +189,20 @@ class BoundaryCondition(BoundaryConditionBase):
                     "There are overlapping nodes in this point Neumann boundary, and it is not "
                     "specified on how to handle them!"
                 )
+
+
+class BoundaryConditionContainer(ContainerBase):
+    """A class to group boundary conditions together.
+
+    The key of the dictionary are (bc_type, geometry_type).
+    """
+
+    def __init__(self, *args, **kwargs):
+        """Initialize the container and create the default keys in the map."""
+        super().__init__(*args, **kwargs)
+
+        self.item_types = [BaseMeshItemString, BoundaryConditionBase]
+
+        for bc_key in mpy.bc:
+            for geometry_key in mpy.geo:
+                self[(bc_key, geometry_key)] = []

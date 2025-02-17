@@ -35,11 +35,13 @@ import subprocess
 import sys
 
 from meshpy.core.base_mesh_item import BaseMeshItemFull, BaseMeshItemString
-from meshpy.core.boundary_condition import BoundaryConditionBase
+from meshpy.core.boundary_condition import (
+    BoundaryConditionBase,
+    BoundaryConditionContainer,
+)
 from meshpy.core.conf import mpy
-from meshpy.core.container import BoundaryConditionContainer, GeometrySetContainer
 from meshpy.core.element import Element
-from meshpy.core.geometry_set import GeometrySetNodes
+from meshpy.core.geometry_set import GeometrySetContainer, GeometrySetNodes
 from meshpy.core.mesh import Mesh
 from meshpy.core.node import Node
 from meshpy.core.nurbs_patch import NURBSPatch

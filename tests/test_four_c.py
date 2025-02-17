@@ -50,7 +50,7 @@ from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_helix,
     create_beam_mesh_line,
 )
-from meshpy.utils.utils import is_node_on_plane
+from meshpy.utils.nodes import is_node_on_plane
 
 
 def test_four_c_material_numbering(

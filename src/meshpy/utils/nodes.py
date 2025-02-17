@@ -25,13 +25,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""This module implements some basic functions that are used in the meshpy
-application."""
+"""Helper functions to find, filter and interact with nodes."""
 
 import numpy as np
 
 from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet, GeometrySetBase
+from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetBase
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.geometric_search.find_close_points import (
     find_close_points,
@@ -222,8 +221,6 @@ def get_min_max_nodes(nodes, *, middle_nodes=False):
     middle_nodes: bool
         If this is true, middle nodes of a beam are also returned.
     """
-
-    from meshpy.core.container import GeometryName
 
     node_list = filter_nodes(nodes, middle_nodes=middle_nodes)
     geometry = GeometryName()

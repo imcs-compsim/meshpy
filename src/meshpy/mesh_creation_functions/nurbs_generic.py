@@ -30,8 +30,7 @@
 import numpy as np
 
 from meshpy.core.conf import mpy
-from meshpy.core.container import GeometryName
-from meshpy.core.geometry_set import GeometrySetNodes
+from meshpy.core.geometry_set import GeometryName, GeometrySetNodes
 from meshpy.core.node import ControlPoint
 from meshpy.core.nurbs_patch import NURBSSurface, NURBSVolume
 

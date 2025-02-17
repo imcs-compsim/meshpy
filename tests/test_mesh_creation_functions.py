@@ -61,7 +61,7 @@ from meshpy.mesh_creation_functions.beam_nurbs import (
 )
 from meshpy.mesh_creation_functions.beam_stent import create_beam_mesh_stent
 from meshpy.mesh_creation_functions.beam_wire import create_wire_fibers
-from meshpy.utils.utils import get_nodal_coordinates
+from meshpy.utils.nodes import get_nodal_coordinates
 
 
 def create_helix_function(

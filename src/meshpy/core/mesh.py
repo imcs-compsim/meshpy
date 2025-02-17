@@ -36,18 +36,16 @@ from typing import List
 import numpy as np
 import pyvista as pv
 
-from meshpy.core.boundary_condition import BoundaryConditionBase
-from meshpy.core.conf import mpy
-from meshpy.core.container import (
+from meshpy.core.boundary_condition import (
+    BoundaryConditionBase,
     BoundaryConditionContainer,
-    GeometryName,
-    GeometrySetContainer,
 )
+from meshpy.core.conf import mpy
 from meshpy.core.coupling import coupling_factory
 from meshpy.core.element import Element
 from meshpy.core.element_beam import Beam
 from meshpy.core.function import Function
-from meshpy.core.geometry_set import GeometrySetBase
+from meshpy.core.geometry_set import GeometryName, GeometrySetBase, GeometrySetContainer
 from meshpy.core.material import Material
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.core.rotation import Rotation, add_rotations, rotate_coordinates
@@ -57,7 +55,7 @@ from meshpy.geometric_search.find_close_points import (
     point_partners_to_partner_indices,
 )
 from meshpy.utils.environment import is_testing
-from meshpy.utils.utils import (
+from meshpy.utils.nodes import (
     filter_nodes,
     find_close_nodes,
     get_min_max_nodes,

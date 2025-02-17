@@ -35,7 +35,7 @@ import pyvista as pv
 
 from meshpy.core.element import Element
 from meshpy.core.element_volume import VolumeElement, VolumeHEX8
-from meshpy.utils.utils import get_nodal_coordinates
+from meshpy.utils.nodes import get_nodal_coordinates
 
 
 def shape_functions_hex8(xi1, xi2, xi3):
