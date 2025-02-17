@@ -68,7 +68,7 @@ repos:
       - id: mypy
         name: Run mypy (static type checker for python)
         args: ["--install-types", "--non-interactive", "--ignore-missing-imports", "--follow-imports=silent"]
-        exclude: ^website/
+        exclude: "^website/|^tutorial/"
   - repo: https://github.com/kynan/nbstripout
     rev: 0.8.1
     hooks:
