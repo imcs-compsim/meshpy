@@ -56,6 +56,7 @@ from meshpy.geometric_search.find_close_points import (
     find_close_points,
     point_partners_to_partner_indices,
 )
+from meshpy.utils.environment import is_testing
 from meshpy.utils.utils import (
     filter_nodes,
     find_close_nodes,
@@ -63,7 +64,6 @@ from meshpy.utils.utils import (
     get_nodal_coordinates,
     get_nodal_quaternions,
     get_nodes_by_function,
-    is_testing,
 )
 
 
