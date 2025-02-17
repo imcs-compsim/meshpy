@@ -45,6 +45,7 @@ def create_beam_mesh_function(
     n_el=None,
     l_el=None,
     interval_length=None,
+    node_positions_of_elements=None,
     add_sets=False,
     start_node=None,
     end_node=None,
@@ -84,6 +85,13 @@ def create_beam_mesh_function(
         created.
     interval_length:
         Total length of the interval. Is required when the option l_el is given.
+    node_positions_of_elements: [double]
+        A list of normalized positions (within [0,1] and in ascending order)
+        that define the boundaries of beam elements along the created curve.
+        The given values will be mapped to the actual `interval` given as an
+        argument to this function. These values specify where elements start
+        and end, additional internal nodes (such as midpoints in higher-order
+        elements) may be placed automatically.
     add_sets: bool
         If this is true the sets are added to the mesh and then displayed
         in eventual VTK output, even if they are not used for a boundary
@@ -109,17 +117,56 @@ def create_beam_mesh_function(
         with all nodes of the curve.
     """
 
-    # Get the number of elements
-    if n_el is None and l_el is None:
+    # Check for mutually exclusive parameters
+    n_given_arguments = sum(
+        1
+        for argument in [n_el, l_el, node_positions_of_elements]
+        if argument is not None
+    )
+    if n_given_arguments == 0:
+        # No arguments were given, use a single element per default
         n_el = 1
-    elif n_el is not None and l_el is None:
-        pass
-    elif n_el is None and l_el is not None:
-        if interval_length is None:
-            raise ValueError("The parameters l_el requires interval_length to be set")
-        n_el = max([1, round(interval_length / l_el)])
+    elif n_given_arguments > 1:
+        raise ValueError(
+            'The arguments "n_el", "l_el" and "node_positions_of_elements" are mutually exclusive'
+        )
+
+    # Cases where we have equally spaced elements
+    if n_el is not None or l_el is not None:
+        if l_el is not None:
+            # Calculate the number of elements in case a desired element length is provided
+            if interval_length is None:
+                raise ValueError(
+                    'The parameter "l_el" requires "interval_length" to be set.'
+                )
+            n_el = max([1, round(interval_length / l_el)])
+        interval_node_positions_of_elements = [
+            interval[0] + i_node * (interval[1] - interval[0]) / n_el
+            for i_node in range(n_el + 1)
+        ]
+    # A list for the element node positions was provided
     else:
-        raise ValueError("The parameters n_el and l_el are mutually exclusive")
+        # Check that the given positions are in ascending order and start with 1 and end with 0
+        for index, value, name in zip([0, -1], [0, 1], ["First", "Last"]):
+            if not np.isclose(
+                value,
+                node_positions_of_elements[index],
+                atol=1e-12,
+                rtol=0.0,
+            ):
+                raise ValueError(
+                    f"{name} entry of node_positions_of_elements must be {value}, got {node_positions_of_elements[index]}"
+                )
+        if not all(
+            x < y
+            for x, y in zip(node_positions_of_elements, node_positions_of_elements[1:])
+        ):
+            raise ValueError(
+                f"The given node_positions_of_elements must be in ascending order. Got {node_positions_of_elements}"
+            )
+        interval_node_positions_of_elements = interval[0] + (
+            interval[1] - interval[0]
+        ) * np.asarray(node_positions_of_elements)
 
     # Make sure the material is in the mesh.
     mesh.add_material(material)
@@ -203,27 +250,27 @@ def create_beam_mesh_function(
         relative_twist = None
 
     # Create the beams.
-    for i in range(n_el):
+    for i_el in range(len(interval_node_positions_of_elements) - 1):
         # If the beam is closed with itself, set the end node to be the
         # first node of the beam. This is done when the second element is
         # created, as the first node already exists here.
-        if i == 1 and close_beam:
+        if i_el == 1 and close_beam:
             end_node = nodes[0]
 
         # Get the function to create this beam element.
         function = function_generator(
-            interval[0] + i * (interval[1] - interval[0]) / n_el,
-            interval[0] + (i + 1) * (interval[1] - interval[0]) / n_el,
+            interval_node_positions_of_elements[i_el],
+            interval_node_positions_of_elements[i_el + 1],
         )
 
         # Set the start node for the created beam.
-        if start_node is not None or i > 0:
+        if start_node is not None or i_el > 0:
             first_node = nodes[-1]
         else:
             first_node = None
 
         # If an end node is given, set this one for the last element.
-        if end_node is not None and i == n_el - 1:
+        if end_node is not None and i_el == n_el - 1:
             last_node = end_node
         else:
             last_node = None

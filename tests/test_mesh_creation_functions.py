@@ -28,6 +28,8 @@
 # SOFTWARE.
 """This script is used to test the mesh creation functions."""
 
+import re
+
 import autograd.numpy as npAD
 import numpy as np
 import pytest
@@ -233,6 +235,71 @@ def test_mesh_creation_functions_arc_segment_2d(
 
     # Check the output.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
+
+
+def test_mesh_creation_functions_node_positions_of_elements_option(
+    assert_results_equal, get_corresponding_reference_file_path
+):
+    """Creates a line, a circular segments in 2D and a helix by setting the
+    node_positions_of_elements."""
+
+    # Create a mesh.
+    mesh = InputFile()
+
+    # Create and add material to mesh.
+    material = MaterialReissner()
+    mesh.add(material)
+
+    # Create a beam line with specified node_positions_of_elements.
+    create_beam_mesh_line(
+        mesh,
+        Beam3rHerm2Line3,
+        material,
+        [-1, -1, 0],
+        [-1, -1, 3],
+        node_positions_of_elements=[0, 0.1, 0.5, 0.9, 1.0],
+    )
+
+    # Create an arc segment similar to the equally spaced one,
+    # but based on the provided node_positions_of_elements.
+    create_beam_mesh_arc_segment_2d(
+        mesh,
+        Beam3rHerm2Line3,
+        material,
+        [1.0, 2.0, 0.0],
+        1.5,
+        np.pi * 0.25,
+        np.pi * (1.0 + 1.0 / 3.0),
+        node_positions_of_elements=[0.0, 0.2, 0.4, 0.6, 0.8, 1.0],
+    )
+
+    # Create a 2d segments with different element sizes.
+    create_beam_mesh_arc_segment_2d(
+        mesh,
+        Beam3rHerm2Line3,
+        material,
+        [1.0, 2.0, 0.0],
+        2.0,
+        np.pi * 0.25,
+        np.pi * (1.0 + 1.0 / 3.0),
+        node_positions_of_elements=[0, 1.0 / 3.0, 1.0],
+    )
+
+    # Create a helix with different node positions.
+    create_beam_mesh_helix(
+        mesh,
+        Beam3rHerm2Line3,
+        material,
+        [0.0, 0.0, 1.0],
+        [4.0, 4.0, 0.0],
+        [5.0, 5.0, 0.0],
+        height_helix=10.0,
+        turns=2.5 / np.pi,
+        node_positions_of_elements=[0, 1.0 / 3.0, 1],
+    )
+
+    # Check the output.
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
 def test_mesh_creation_functions_stent(
@@ -597,25 +664,79 @@ def test_mesh_creation_functions_element_length_option(
         rtol=1e-10,
     )
 
+
+def test_mesh_creation_functions_argument_checks():
+    """Test that wrong input values leads to failure."""
+
     # Check error messages for input parameters
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match='The arguments "n_el", "l_el" and "node_positions_of_elements" are mutually exclusive',
+    ):
         mesh = Mesh()
         # This should raise an error since we dont allow `n_el` and `l_el`
         # to be set at the same time.
         create_beam_mesh_line(
             mesh,
             Beam3rHerm2Line3,
-            mat,
+            MaterialReissner(),
             [1.0, 2.0, 0.0],
             [3.0, 4.0, 6.0],
             n_el=1,
-            l_el=l_el,
+            l_el=1.5,
         )
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match='The arguments "n_el", "l_el" and "node_positions_of_elements" are mutually exclusive',
+    ):
+        mesh = Mesh()
+        # This should raise an error because node_positions_of_elements can not be used with l_el.
+        create_beam_mesh_function(
+            mesh, l_el=1, node_positions_of_elements=[0.0, 0.5, 1.0]
+        )
+
+    with pytest.raises(
+        ValueError,
+        match='The arguments "n_el", "l_el" and "node_positions_of_elements" are mutually exclusive',
+    ):
+        mesh = Mesh()
+        # This should raise an error because node_positions_of_elements can not be used with n_el.
+        create_beam_mesh_function(
+            mesh, n_el=1, node_positions_of_elements=[0.0, 0.5, 1.0]
+        )
+
+    with pytest.raises(
+        ValueError, match='The parameter "l_el" requires "interval_length" to be set.'
+    ):
         mesh = Mesh()
         # This should raise an error because we set `l_el` but don't provide
         # `interval_length`.
-        return create_beam_mesh_function(mesh, interval=[0.0, 1.0], l_el=2.0)
+        create_beam_mesh_function(mesh, interval=[0.0, 1.0], l_el=2.0)
+
+    with pytest.raises(
+        ValueError,
+        match="First entry of node_positions_of_elements must be 0, got -1.0",
+    ):
+        mesh = Mesh()
+        # This should raise an error because the interval [0,1] is violated.
+        create_beam_mesh_function(mesh, node_positions_of_elements=[-1.0, 0.0, 1.0])
+
+    with pytest.raises(
+        ValueError, match="Last entry of node_positions_of_elements must be 1, got 2.0"
+    ):
+        mesh = Mesh()
+        # This should raise an error because the interval [0,1] is violated.
+        create_beam_mesh_function(mesh, node_positions_of_elements=[0.0, 1.0, 2.0])
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "The given node_positions_of_elements must be in ascending order. Got [0.0, 0.2, 0.1, 1.0]"
+        ),
+    ):
+        mesh = Mesh()
+        # This should raise an error because the interval is not ordered.
+        create_beam_mesh_function(mesh, node_positions_of_elements=[0.0, 0.2, 0.1, 1.0])
 
 
 def test_mesh_creation_functions_curve_3d_helix(
@@ -775,6 +896,17 @@ def test_mesh_creation_functions_curve_3d_curve_rotation(
         function_rotation=rotation,
     )
     input_file.add(sin_set)
+
+    # extend test case with different meshing strategy
+    create_beam_mesh_curve(
+        input_file,
+        Beam3rHerm2Line3,
+        mat,
+        curve,
+        [1.0, 2.5],
+        node_positions_of_elements=[0, 1.0 / 1.3, 1.0],
+        function_rotation=rotation,
+    )
 
     # Check the output.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
