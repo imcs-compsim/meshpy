@@ -30,7 +30,7 @@
 import numpy as np
 import pyvista as pv
 
-from meshpy.utils.utils import is_testing
+from meshpy.utils.environment import is_testing
 
 from .general_utils import reset_print_out
 

@@ -30,8 +30,9 @@ file."""
 
 import numpy as np
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull
+from meshpy.core.base_mesh_item import BaseMeshItemFull, BaseMeshItemString
 from meshpy.core.conf import mpy
+from meshpy.core.container import ContainerBase
 from meshpy.core.element_beam import Beam
 from meshpy.core.node import Node
 
@@ -336,3 +337,50 @@ class GeometrySetNodes(GeometrySetBase):
     def get_all_nodes(self):
         """Return all nodes associated with this set."""
         return list(self.nodes.keys())
+
+
+class GeometryName(dict):
+    """Group node geometry sets together.
+
+    This is mainly used for export from mesh functions. The sets can be
+    accessed by a unique name. There is no distinction between different
+    types of geometry, every name can only be used once -> use
+    meaningful names.
+    """
+
+    def __setitem__(self, key, value):
+        """Set a geometry set in this container."""
+
+        if not isinstance(key, str):
+            raise TypeError(f"Expected string, got {type(key)}!")
+        if isinstance(value, GeometrySetBase):
+            super().__setitem__(key, value)
+        else:
+            raise NotImplementedError("GeometryName can only store GeometrySets")
+
+
+class GeometrySetContainer(ContainerBase):
+    """A class to group geometry sets together with the key being the geometry
+    type."""
+
+    def __init__(self, *args, **kwargs):
+        """Initialize the container and create the default keys in the map."""
+        super().__init__(*args, **kwargs)
+
+        self.item_types = [BaseMeshItemString, GeometrySetBase]
+
+        for geometry_key in mpy.geo:
+            self[geometry_key] = []
+
+    def copy(self):
+        """When creating a copy of this object, all lists in this object will
+        be copied also."""
+
+        # Create a new geometry set container.
+        copy = GeometrySetContainer()
+
+        # Add a copy of every list from this container to the new one.
+        for geometry_key in mpy.geo:
+            copy[geometry_key] = self[geometry_key].copy()
+
+        return copy

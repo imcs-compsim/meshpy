@@ -35,7 +35,7 @@ from meshpy.core.conf import mpy
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
 from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_function
-from meshpy.utils.utils import get_single_node
+from meshpy.utils.nodes import get_single_node
 
 
 def create_beam_mesh_line(

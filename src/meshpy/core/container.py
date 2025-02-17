@@ -28,31 +28,6 @@
 """This module implements containers to manage boundary conditions and geometry
 sets in one object."""
 
-from meshpy.core.base_mesh_item import BaseMeshItemString
-from meshpy.core.boundary_condition import BoundaryConditionBase
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySetBase
-
-
-class GeometryName(dict):
-    """Group node geometry sets together.
-
-    This is mainly used for export from mesh functions. The sets can be
-    accessed by a unique name. There is no distinction between different
-    types of geometry, every name can only be used once -> use
-    meaningful names.
-    """
-
-    def __setitem__(self, key, value):
-        """Set a geometry set in this container."""
-
-        if not isinstance(key, str):
-            raise TypeError(f"Expected string, got {type(key)}!")
-        if isinstance(value, GeometrySetBase):
-            super().__setitem__(key, value)
-        else:
-            raise NotImplementedError("GeometryName can only store GeometrySets")
-
 
 class ContainerBase(dict):
     """A base class for containers to be used in MeshPy."""
@@ -89,47 +64,3 @@ class ContainerBase(dict):
         for key, items in container.items():
             for item in items:
                 self.append(key, item)
-
-
-class BoundaryConditionContainer(ContainerBase):
-    """A class to group boundary conditions together.
-
-    The key of the dictionary are (bc_type, geometry_type).
-    """
-
-    def __init__(self, *args, **kwargs):
-        """Initialize the container and create the default keys in the map."""
-        super().__init__(*args, **kwargs)
-
-        self.item_types = [BaseMeshItemString, BoundaryConditionBase]
-
-        for bc_key in mpy.bc:
-            for geometry_key in mpy.geo:
-                self[(bc_key, geometry_key)] = []
-
-
-class GeometrySetContainer(ContainerBase):
-    """A class to group geometry sets together with the key being the geometry
-    type."""
-
-    def __init__(self, *args, **kwargs):
-        """Initialize the container and create the default keys in the map."""
-        super().__init__(*args, **kwargs)
-
-        self.item_types = [BaseMeshItemString, GeometrySetBase]
-
-        for geometry_key in mpy.geo:
-            self[geometry_key] = []
-
-    def copy(self):
-        """When creating a copy of this object, all lists in this object will
-        be copied also."""
-
-        # Create a new geometry set container.
-        copy = GeometrySetContainer()
-
-        # Add a copy of every list from this container to the new one.
-        for geometry_key in mpy.geo:
-            copy[geometry_key] = self[geometry_key].copy()
-
-        return copy

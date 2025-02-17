@@ -30,9 +30,8 @@
 import numpy as np
 
 from meshpy.core.conf import mpy
-from meshpy.core.container import GeometryName
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.utils.utils import get_single_node
+from meshpy.core.geometry_set import GeometryName, GeometrySet
+from meshpy.utils.nodes import get_single_node
 
 
 def create_beam_mesh_function(

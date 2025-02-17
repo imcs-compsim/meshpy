@@ -39,7 +39,6 @@ import vtk
 
 from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
-from meshpy.core.container import GeometryName
 from meshpy.core.coupling import Coupling
 from meshpy.core.element_beam import (
     Beam,
@@ -49,7 +48,7 @@ from meshpy.core.element_beam import (
     Beam3rLine2Line2,
 )
 from meshpy.core.function import Function
-from meshpy.core.geometry_set import GeometrySet, GeometrySetNodes
+from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetNodes
 from meshpy.core.header_functions import (
     set_beam_to_solid_meshtying,
     set_header_static,
@@ -74,7 +73,7 @@ from meshpy.mesh_creation_functions.beam_basic_geometry import (
 )
 from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
-from meshpy.utils.utils import (
+from meshpy.utils.nodes import (
     get_min_max_coordinates,
     get_single_node,
 )

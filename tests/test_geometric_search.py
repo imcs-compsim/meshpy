@@ -48,7 +48,7 @@ from meshpy.geometric_search.find_close_points import (
 from meshpy.mesh_creation_functions.beam_honeycomb import (
     create_beam_mesh_honeycomb_flat,
 )
-from meshpy.utils.utils import filter_nodes, get_nodal_coordinates
+from meshpy.utils.nodes import filter_nodes, get_nodal_coordinates
 
 PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE = [
     "algorithm",

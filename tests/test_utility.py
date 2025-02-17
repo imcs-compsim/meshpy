@@ -28,7 +28,7 @@
 """Test utilities of MeshPy."""
 
 from meshpy.core.node import Node
-from meshpy.utils.utils import is_node_on_plane
+from meshpy.utils.nodes import is_node_on_plane
 
 
 def test_is_node_on_plane():

@@ -29,12 +29,11 @@
 
 import numpy as np
 
-from meshpy.core.container import GeometryName
-from meshpy.core.geometry_set import GeometrySet
+from meshpy.core.geometry_set import GeometryName, GeometrySet
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
-from meshpy.utils.utils import get_min_max_nodes
+from meshpy.utils.nodes import get_min_max_nodes
 
 
 def create_beam_mesh_honeycomb_flat(

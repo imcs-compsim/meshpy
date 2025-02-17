@@ -28,10 +28,12 @@
 """Provide a function that allows to run 4C."""
 
 import os
+import shutil
 import subprocess
 import sys
+from pathlib import Path
 
-from meshpy.utils.utils import get_env_variable
+from meshpy.utils.environment import get_env_variable
 
 
 def run_four_c(
@@ -135,3 +137,41 @@ def run_four_c(
         process.stderr.close()
         return_code = process.wait()
     return return_code
+
+
+def clean_simulation_directory(sim_dir, *, ask_before_clean=False):
+    """Clear the simulation directory. If it does not exist, it is created.
+    Optionally the user can be asked before a deletion of files.
+
+    Args
+    ----
+    sim_dir:
+        Path to a directory
+    ask_before_clean: bool
+        Flag which indicates whether the user must confirm removal of files and directories
+    """
+
+    # Check if simulation directory exists.
+    if os.path.exists(sim_dir):
+        if ask_before_clean:
+            print(f'Path "{sim_dir}" already exists')
+        while True:
+            if ask_before_clean:
+                answer = input("DELETE all contents? (y/n): ")
+            else:
+                answer = "y"
+            if answer.lower() == "y":
+                for filename in os.listdir(sim_dir):
+                    file_path = os.path.join(sim_dir, filename)
+                    try:
+                        if os.path.isfile(file_path) or os.path.islink(file_path):
+                            os.unlink(file_path)
+                        elif os.path.isdir(file_path):
+                            shutil.rmtree(file_path)
+                    except Exception as e:
+                        raise ValueError(f"Failed to delete {file_path}. Reason: {e}")
+                return
+            elif answer.lower() == "n":
+                raise ValueError("Directory is not deleted!")
+    else:
+        Path(sim_dir).mkdir(parents=True, exist_ok=True)

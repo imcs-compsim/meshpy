@@ -25,22 +25,35 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""This file contains utility functions for the examples in MeshPy."""
+"""Helper functions to interact with the MeshPy environment."""
 
-import sys
-
-import pyvista as pv
-
-from meshpy.utils.environment import is_mybinder
-
-# Store the default system out, so we can reset it after pyvista changes it
-stdout = sys.stdout
-
-# If we are on mybinder, set to server side rendering
-if is_mybinder():
-    pv.start_xvfb()
+import os
 
 
-def reset_print_out():
-    """PyVista changes the printout, this resets it to the default."""
-    sys.stdout = stdout
+def is_mybinder():
+    """Check if the current environment is running on mybinder."""
+    return "BINDER_LAUNCH_HOST" in os.environ.keys()
+
+
+def is_testing():
+    """Check if the current environment is a pytest testing run."""
+    return "PYTEST_CURRENT_TEST" in os.environ
+
+
+def get_env_variable(name, *, default="default_not_set"):
+    """Return the value of an environment variable.
+
+    Args
+    ----
+    name: str
+        Name of the environment variable
+    default:
+        Value to be returned if the given named environment variable does
+        not exist. If this is not set and the name is not in the env
+        variables, then an error will be thrown.
+    """
+    if name in os.environ.keys():
+        return os.environ[name]
+    elif default == "default_not_set":
+        raise ValueError(f"Environment variable {name} is not set")
+    return default

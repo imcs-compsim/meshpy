@@ -25,49 +25,17 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""This module implements some basic functions that are used in the meshpy
-application."""
-
-import os
-import shutil
-import subprocess
-from pathlib import Path
+"""Helper functions to find, filter and interact with nodes."""
 
 import numpy as np
 
 from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet, GeometrySetBase
+from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetBase
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.geometric_search.find_close_points import (
     find_close_points,
     point_partners_to_partner_indices,
 )
-
-
-def get_git_data(repo):
-    """Return the hash and date of the current git commit."""
-    out_sha = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
-        cwd=repo,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-    )
-    out_date = subprocess.run(
-        ["git", "show", "-s", "--format=%ci"],
-        cwd=repo,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.DEVNULL,
-    )
-    if not out_sha.returncode + out_date.returncode == 0:
-        return None, None
-    else:
-        sha = out_sha.stdout.decode("ascii").strip()
-        date = out_date.stdout.decode("ascii").strip()
-        return sha, date
-
-
-# Set the git version in the global configuration object.
-mpy.git_sha, mpy.git_date = get_git_data(os.path.dirname(os.path.realpath(__file__)))
 
 
 def find_close_nodes(nodes, **kwargs):
@@ -132,44 +100,6 @@ def get_min_max_coordinates(nodes):
     min_max[:3] = np.min(coordinates, axis=0)
     min_max[3:] = np.max(coordinates, axis=0)
     return min_max
-
-
-def clean_simulation_directory(sim_dir, *, ask_before_clean=False):
-    """Clear the simulation directory. If it does not exist, it is created.
-    Optionally the user can be asked before a deletion of files.
-
-    Args
-    ----
-    sim_dir:
-        Path to a directory
-    ask_before_clean: bool
-        Flag which indicates whether the user must confirm removal of files and directories
-    """
-
-    # Check if simulation directory exists.
-    if os.path.exists(sim_dir):
-        if ask_before_clean:
-            print(f'Path "{sim_dir}" already exists')
-        while True:
-            if ask_before_clean:
-                answer = input("DELETE all contents? (y/n): ")
-            else:
-                answer = "y"
-            if answer.lower() == "y":
-                for filename in os.listdir(sim_dir):
-                    file_path = os.path.join(sim_dir, filename)
-                    try:
-                        if os.path.isfile(file_path) or os.path.islink(file_path):
-                            os.unlink(file_path)
-                        elif os.path.isdir(file_path):
-                            shutil.rmtree(file_path)
-                    except Exception as e:
-                        raise ValueError(f"Failed to delete {file_path}. Reason: {e}")
-                return
-            elif answer.lower() == "n":
-                raise ValueError("Directory is not deleted!")
-    else:
-        Path(sim_dir).mkdir(parents=True, exist_ok=True)
 
 
 def get_single_node(item, *, check_cosserat_node=False):
@@ -292,8 +222,6 @@ def get_min_max_nodes(nodes, *, middle_nodes=False):
         If this is true, middle nodes of a beam are also returned.
     """
 
-    from meshpy.core.container import GeometryName
-
     node_list = filter_nodes(nodes, middle_nodes=middle_nodes)
     geometry = GeometryName()
 
@@ -353,37 +281,3 @@ def is_node_on_plane(
         )
 
     return distance < tol
-
-
-def get_env_variable(name, *, default="default_not_set"):
-    """Return the value of an environment variable.
-
-    Args
-    ----
-    name: str
-        Name of the environment variable
-    default:
-        Value to be returned if the given named environment variable does
-        not exist. If this is not set and the name is not in the env
-        variables, then an error will be thrown.
-    """
-    if name in os.environ.keys():
-        return os.environ[name]
-    elif default == "default_not_set":
-        raise ValueError(f"Environment variable {name} is not set")
-    return default
-
-
-def is_testing():
-    """Check if the current environment is a pytest testing run."""
-    return "PYTEST_CURRENT_TEST" in os.environ
-
-
-def is_testing_github():
-    """Check if the current environment is a testing action on GitHub."""
-    return "GITHUB_ACTION" in os.environ.keys()
-
-
-def is_mybinder():
-    """Check if the current environment is running on mybinder."""
-    return "BINDER_LAUNCH_HOST" in os.environ.keys()
