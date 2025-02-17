@@ -31,14 +31,18 @@ import numpy as np
 import pyvista as pv
 import quaternion
 
-from meshpy import Beam3rHerm2Line3, InputFile, MaterialReissner, Rotation, mpy
+from meshpy.core.conf import mpy
+from meshpy.core.element_beam import Beam3rHerm2Line3
+from meshpy.core.inputfile import InputFile
+from meshpy.core.material import MaterialReissner
+from meshpy.core.rotation import Rotation
 from meshpy.cosserat_curve.cosserat_curve import CosseratCurve
 from meshpy.cosserat_curve.warping_along_cosserat_curve import (
     create_transform_boundary_conditions,
     get_mesh_transformation,
     warp_mesh_along_curve,
 )
-from meshpy.mesh_creation_functions import create_beam_mesh_helix
+from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_helix
 
 
 def load_cosserat_curve_from_file(get_corresponding_reference_file_path):

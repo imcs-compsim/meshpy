@@ -41,7 +41,7 @@ repos:
     hooks:
       - id: bandit
         name: Run bandit (security linter for python)
-        args: ["-c", "pyproject.toml", "-r", "-ll", "meshpy/"]
+        args: ["-c", "pyproject.toml", "-r", "-ll", "src/meshpy/"]
         additional_dependencies: ["bandit[toml]"]
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v19.1.5
@@ -54,7 +54,7 @@ repos:
     hooks:
       - id: docformatter
         name: Run docformatter (formatter for docstrings)
-        args: ["--in-place", "--config=./pyproject.toml", "-r", "meshpy/"]
+        args: ["--in-place", "--config=./pyproject.toml", "-r", "src/meshpy/"]
   - repo: https://github.com/econchick/interrogate
     rev: 1.7.0
     hooks:

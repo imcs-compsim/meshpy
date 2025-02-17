@@ -9,7 +9,7 @@ runs:
         kokkos_dir: /opt/4C-dependencies/lib/cmake/Kokkos
       run: |
         cd ${GITHUB_WORKSPACE}
-        mkdir -p build/arborx
-        cd build/arborx
+        mkdir -p src/build/arborx
+        cd src/build/arborx
         cmake -DKokkos_DIR=${{ env.kokkos_dir }} ../../meshpy/geometric_search/src -G Ninja
         ninja

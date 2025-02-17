@@ -33,20 +33,18 @@ import warnings
 import numpy as np
 import pytest
 
-from meshpy import (
-    Beam3rHerm2Line3,
-    InputFile,
-    MaterialReissner,
-    Mesh,
-    Rotation,
-    mpy,
-)
+from meshpy.core.conf import mpy
+from meshpy.core.element_beam import Beam3rHerm2Line3
+from meshpy.core.inputfile import InputFile
+from meshpy.core.material import MaterialReissner
+from meshpy.core.mesh import Mesh
+from meshpy.core.rotation import Rotation
 from meshpy.geometric_search.find_close_points import (
     FindClosePointAlgorithm,
     find_close_points,
 )
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
-from meshpy.utility import find_close_nodes
+from meshpy.utils.utils import find_close_nodes
 
 
 def create_solid_block(file_path, nx, ny, nz):

@@ -29,21 +29,18 @@
 
 import numpy as np
 import pytest
-from meshpy_testing.test_performance import PerformanceTest
 
-from meshpy import (
-    Beam3rHerm2Line3,
-    Beam3rLine2Line2,
-    InputFile,
-    MaterialReissner,
-    Mesh,
-    mpy,
-)
+from meshpy.core.conf import mpy
+from meshpy.core.element_beam import Beam3rHerm2Line3, Beam3rLine2Line2
+from meshpy.core.inputfile import InputFile
+from meshpy.core.material import MaterialReissner
+from meshpy.core.mesh import Mesh
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_line,
 )
 from meshpy.space_time.beam_to_space_time import beam_to_space_time, mesh_to_data_arrays
+from tests.test_performance import PerformanceTest
 
 
 def get_name(beam_object):

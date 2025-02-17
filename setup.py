@@ -30,8 +30,6 @@ This script can be used to compile the cython code:
 > python setup.py build_ext --inplace
 """
 
-import os
-
 import numpy as np
 from Cython.Build import cythonize
 from setuptools import Extension, setup
@@ -39,7 +37,7 @@ from setuptools import Extension, setup
 extensions = [
     Extension(
         "meshpy.geometric_search.geometric_search_cython_lib",
-        [os.path.join("meshpy", "geometric_search", "geometric_search_cython_lib.pyx")],
+        ["src/meshpy/geometric_search/geometric_search_cython_lib.pyx"],
         include_dirs=[np.get_include()],
     )
 ]
@@ -47,7 +45,7 @@ extensions = [
 setup(
     ext_modules=cythonize(
         extensions,
-        build_dir=os.path.join("build", "cython_generated_code"),
+        build_dir="src/build/cython_generated_code",
         annotate=True,
     ),
 )

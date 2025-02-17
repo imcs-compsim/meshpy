@@ -33,28 +33,24 @@ import os
 import numpy as np
 import pytest
 
-from meshpy import (
-    Beam3rHerm2Line3,
-    BoundaryCondition,
-    Function,
-    GeometrySet,
-    InputFile,
-    InputSection,
-    MaterialReissner,
-    Mesh,
-    Rotation,
-    mpy,
-    set_header_static,
-    set_runtime_output,
-)
-from meshpy.four_c import (
+from meshpy.core.boundary_condition import BoundaryCondition
+from meshpy.core.conf import mpy
+from meshpy.core.element_beam import Beam3rHerm2Line3
+from meshpy.core.function import Function
+from meshpy.core.geometry_set import GeometrySet
+from meshpy.core.header_functions import set_header_static, set_runtime_output
+from meshpy.core.inputfile import InputFile, InputSection
+from meshpy.core.material import MaterialReissner
+from meshpy.core.mesh import Mesh
+from meshpy.core.rotation import Rotation
+from meshpy.four_c.dbc_monitor import (
     dbc_monitor_to_input,
     dbc_monitor_to_input_all_values,
-    run_four_c,
 )
+from meshpy.four_c.run_four_c import run_four_c
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
-from meshpy.utility import check_node_by_coordinate
+from meshpy.utils.utils import check_node_by_coordinate
 
 # We test all test cases in this file twice. Once we only run up to the first
 # call of 4C and compare the created input files, this allows to run some core
@@ -809,7 +805,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     )
 
     # Apply displacements to all nodes.
-    for i, node in enumerate(beam_set["line"].get_all_nodes()):
+    for _, node in enumerate(beam_set["line"].get_all_nodes()):
         # do not constraint middle nodes
         if not node.is_middle_node:
             # Set Dirichlet conditions at one end.
@@ -874,7 +870,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     monitor_db_path = tmp_path / initial_run_name / (initial_run_name + "_monitor_dbc")
 
     # Convert the Dirichlet conditions into Neuman conditions.
-    for root, dirs, file_names in os.walk(monitor_db_path):
+    for _, _, file_names in os.walk(monitor_db_path):
         for file_name in sorted(file_names):
             if "_monitor_dbc" in file_name:
                 dbc_monitor_to_input_all_values(
