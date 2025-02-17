@@ -31,7 +31,7 @@ import sys
 
 import pyvista as pv
 
-from meshpy.utility import is_mybinder
+from meshpy.utils.utils import is_mybinder
 
 # Store the default system out, so we can reset it after pyvista changes it
 stdout = sys.stdout

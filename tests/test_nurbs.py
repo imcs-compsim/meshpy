@@ -30,14 +30,11 @@
 
 import numpy as np
 
-from meshpy import (
-    InputFile,
-    MaterialString,
-    MaterialStVenantKirchhoff,
-    Rotation,
-)
-from meshpy.mesh_creation_functions import (
-    add_geomdl_nurbs_to_mesh,
+from meshpy.core.inputfile import InputFile
+from meshpy.core.material import MaterialString, MaterialStVenantKirchhoff
+from meshpy.core.rotation import Rotation
+from meshpy.mesh_creation_functions.nurbs_generic import add_geomdl_nurbs_to_mesh
+from meshpy.mesh_creation_functions.nurbs_geometries import (
     create_nurbs_brick,
     create_nurbs_flat_plate_2d,
     create_nurbs_hemisphere_surface,

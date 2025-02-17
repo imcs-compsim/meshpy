@@ -30,13 +30,14 @@
 
 import pytest
 
-from meshpy import InputFile, mpy
-from meshpy.header_functions import (
+from meshpy.core.conf import mpy
+from meshpy.core.header_functions import (
     get_comment,
     set_beam_to_solid_meshtying,
     set_header_static,
     set_runtime_output,
 )
+from meshpy.core.inputfile import InputFile
 
 
 def test_header_functions_static(

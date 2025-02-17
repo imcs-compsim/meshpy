@@ -30,13 +30,11 @@
 
 import numpy as np
 
-from meshpy import GeometrySet, Mesh, Rotation
-from meshpy.abaqus import (
-    AbaqusBeamMaterial,
-    AbaqusBeamNormalDefinition,
-    AbaqusInputFile,
-    generate_abaqus_beam,
-)
+from meshpy.abaqus.beam import AbaqusBeamMaterial, generate_abaqus_beam
+from meshpy.abaqus.input_file import AbaqusBeamNormalDefinition, AbaqusInputFile
+from meshpy.core.geometry_set import GeometrySet
+from meshpy.core.mesh import Mesh
+from meshpy.core.rotation import Rotation
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 
 

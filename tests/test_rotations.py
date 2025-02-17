@@ -30,8 +30,8 @@ meshpy module."""
 
 import numpy as np
 
-from meshpy import Rotation, mpy
-from meshpy.rotation import smallest_rotation
+from meshpy.core.conf import mpy
+from meshpy.core.rotation import Rotation, smallest_rotation
 
 
 def get_rotation_matrix(axis, alpha):

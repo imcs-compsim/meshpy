@@ -45,5 +45,18 @@ def test_notebooks(notebook_path):
     The notebook is run and it is checked that it runs through without
     any errors/assertions.
     """
-    with testbook(notebook_path, execute=True) as tb:
-        pass
+
+    with testbook(notebook_path) as tb:
+        # we do not define the examples as modules, therefore we need to add the
+        # examples folder to the current sys path so examples/utils can be imported
+        # within the notebooks correctly
+        tb.inject(
+            """
+            import sys
+            import os
+            sys.path.insert(0, os.path.abspath(os.path.join(os.getcwd(), "examples")))
+            """
+        )
+
+        # execute the notebook
+        tb.execute()

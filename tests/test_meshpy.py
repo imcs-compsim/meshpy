@@ -37,44 +37,47 @@ import numpy as np
 import pytest
 import vtk
 
-from meshpy import (
+from meshpy.core.boundary_condition import BoundaryCondition
+from meshpy.core.conf import mpy
+from meshpy.core.container import GeometryName
+from meshpy.core.coupling import Coupling
+from meshpy.core.element_beam import (
+    Beam,
     Beam3eb,
     Beam3k,
     Beam3rHerm2Line3,
     Beam3rLine2Line2,
-    BoundaryCondition,
-    Coupling,
-    Function,
-    InputFile,
-    InputSection,
+)
+from meshpy.core.function import Function
+from meshpy.core.geometry_set import GeometrySet, GeometrySetNodes
+from meshpy.core.header_functions import (
+    set_beam_to_solid_meshtying,
+    set_header_static,
+    set_runtime_output,
+)
+from meshpy.core.inputfile import InputFile, InputSection
+from meshpy.core.material import (
     MaterialBeam,
     MaterialEulerBernoulli,
     MaterialKirchhoff,
     MaterialReissner,
     MaterialReissnerElastoplastic,
     MaterialStVenantKirchhoff,
-    Mesh,
-    Rotation,
-    mpy,
-    set_beam_to_solid_meshtying,
-    set_header_static,
-    set_runtime_output,
 )
-from meshpy.container import GeometryName
-from meshpy.element_beam import Beam
-from meshpy.geometry_set import GeometrySet, GeometrySetNodes
+from meshpy.core.mesh import Mesh
+from meshpy.core.node import Node, NodeCosserat
+from meshpy.core.rotation import Rotation
+from meshpy.core.vtk_writer import VTKWriter
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_via_rotation,
     create_beam_mesh_line,
 )
 from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
-from meshpy.node import Node, NodeCosserat
-from meshpy.utility import (
+from meshpy.utils.utils import (
     get_min_max_coordinates,
     get_single_node,
 )
-from meshpy.vtk_writer import VTKWriter
 
 
 def create_test_mesh(mesh):
@@ -1658,7 +1661,7 @@ def test_meshpy_cubitpy_import(
     dat file."""
 
     # Load the mesh creation functions
-    from meshpy_testing.create_cubit_input import create_tube, create_tube_cubit
+    from tests.create_cubit_input import create_tube, create_tube_cubit
 
     # Create the input file and read the file.
     file_path = os.path.join(tmp_path, "test_cubitpy_import.dat")

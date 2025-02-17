@@ -29,20 +29,16 @@
 """This script is used to test the functionality of MeshPy for creating 4C
 input files."""
 
-import os
-
 import numpy as np
 
-from meshpy import (
-    Beam3rHerm2Line3,
-    BoundaryCondition,
-    Function,
-    GeometrySet,
-    InputFile,
-    MaterialReissner,
-    Rotation,
-    mpy,
-)
+from meshpy.core.boundary_condition import BoundaryCondition
+from meshpy.core.conf import mpy
+from meshpy.core.element_beam import Beam3rHerm2Line3
+from meshpy.core.function import Function
+from meshpy.core.geometry_set import GeometrySet
+from meshpy.core.inputfile import InputFile
+from meshpy.core.material import MaterialReissner
+from meshpy.core.rotation import Rotation
 from meshpy.four_c.beam_potential import BeamPotential
 from meshpy.four_c.dbc_monitor import linear_time_transformation
 from meshpy.four_c.locsys_condition import LocSysCondition
@@ -54,7 +50,7 @@ from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_helix,
     create_beam_mesh_line,
 )
-from meshpy.utility import is_node_on_plane
+from meshpy.utils.utils import is_node_on_plane
 
 
 def test_four_c_material_numbering(

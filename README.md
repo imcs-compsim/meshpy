@@ -5,8 +5,8 @@
 
 <div align="center">
 
-[![website](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/website.svg)](https://imcs-compsim.github.io/meshpy/)
-[![documentation](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/documentation.svg)](https://imcs-compsim.github.io/meshpy/api-documentation)
+[![website](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/badges/website.svg)](https://imcs-compsim.github.io/meshpy/)
+[![documentation](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/badges/documentation.svg)](https://imcs-compsim.github.io/meshpy/api-documentation)
 
 </div>
 
@@ -20,17 +20,17 @@
 
 <div align="center">
 
-[![Testing Linux/Ubuntu](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/testing_linux_ubuntu.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml?query=event%3Aschedule)
-[![Testing macOS](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/testing_macos.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml?query=event%3Aschedule)
-[![Testing Windows](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/testing_windows.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml?query=event%3Aschedule)
+[![Testing Linux/Ubuntu](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/badges/testing_linux_ubuntu.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml?query=event%3Aschedule)
+[![Testing macOS](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/badges/testing_macos.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml?query=event%3Aschedule)
+[![Testing Windows](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/badges/testing_windows.svg)](https://github.com/imcs-compsim/meshpy/actions/workflows/testing.yml?query=event%3Aschedule)
 
 </div>
 
 <div align="center">
 
-[![pre-commit](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/pre-commit.svg)](https://pre-commit.com/)
-[![ruff-formatter](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/ruff-formatter.svg)](https://docs.astral.sh/ruff/formatter)
-[![ruff-linter](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/badges/ruff-linter.svg)](https://docs.astral.sh/ruff/linter)
+[![pre-commit](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/badges/pre-commit.svg)](https://pre-commit.com/)
+[![ruff-formatter](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/badges/ruff-formatter.svg)](https://docs.astral.sh/ruff/formatter)
+[![ruff-linter](https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/badges/ruff-linter.svg)](https://docs.astral.sh/ruff/linter)
 
 </div>
 
@@ -56,22 +56,22 @@ MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulat
 ## Examples
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/honeycomb.png" width="350" title="Honeycomb structure under tension (simulated with 4C)">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/honeycomb.png" width="350" title="Honeycomb structure under tension (simulated with 4C)">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Honeycomb structure under tension (simulated with 4C)</p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/composite_plate.png" width="400" title="Fiber reinforced composite plate (simulated with 4C)">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/composite_plate.png" width="400" title="Fiber reinforced composite plate (simulated with 4C)">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforced composite plate (simulated with 4C)</p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/pressure_pipe.png" width="350" title="Fiber reinforced pipe under pressure (simulated with 4C)">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/pressure_pipe.png" width="350" title="Fiber reinforced pipe under pressure (simulated with 4C)">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforced pipe under pressure (simulated with 4C)</p>
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/utilities/doc/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate (simulated with 4C)">
+  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate (simulated with 4C)">
 </p>
 <p align="center" style="font-style: italic; color: gray;">Fiber reinforcements of a twisted plate (simulated with 4C)</p>
 
@@ -232,7 +232,7 @@ git submodule update --init
 To setup meshpy with ArborX, `cmake` and Kokkos are available on your system (the preferred variant is via [Spack](https://spack.io/)).
 Create a build directory
 ```bash
-mkdir -p <path_to_meshpy>/build/geometric_search
+mkdir -p <path_to_meshpy>/src/build/geometric_search
 ```
 Configure cmake and build the extension
 ```bash

@@ -1,29 +1,6 @@
 [build-system]
-requires = ["setuptools", "Cython", "numpy", "wheel"]
-
-
-[tool.setuptools]
-packages = [
-  "meshpy",
-  "meshpy.abaqus",
-  "meshpy.cosserat_curve",
-  "meshpy.examples",
-  "meshpy.four_c",
-  "meshpy.geometric_search",
-  "meshpy.mesh_creation_functions",
-  "meshpy.space_time",
-  "meshpy_testing",
-  "meshpy_tutorial"
-]
-
-[tool.setuptools.package-dir]
-meshpy_testing = "tests"
-meshpy_tutorial = "tutorial"
-"meshpy.examples" = "examples/utils"
-
-[tool.setuptools.package-data]
-"meshpy_tutorial" = ["4C_input_solid_tutorial.dat"]
-
+requires = ["setuptools", "wheel", "cython", "numpy"]
+build-backend = "setuptools.build_meta"
 
 [project]
 name = "MeshPy"
@@ -49,10 +26,15 @@ dependencies = [
   "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@main",
   "scipy",
   "splinepy",
+  "testbook",
   "vtk"
 ]
+
 dynamic = ["version"]
 
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["meshpy"]
 
 [project.optional-dependencies]
 CI-CD = [
@@ -66,7 +48,7 @@ CI-CD = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-p pytest_cov --cov-report=term --cov-report=html --cov-fail-under=90 --cov=meshpy/ --cov=tutorial/ --cov-append"
+addopts = "-p pytest_cov --cov-report=term --cov-report=html --cov-fail-under=90 --cov=src/meshpy/ --cov-append"
 markers = [
   "fourc: tests in combination with 4C",
   "arborx: tests in combination with ArborX",

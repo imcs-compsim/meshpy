@@ -34,7 +34,10 @@ import random
 import numpy as np
 import pytest
 
-from meshpy import Beam3rHerm2Line3, MaterialReissner, Mesh, Rotation
+from meshpy.core.element_beam import Beam3rHerm2Line3
+from meshpy.core.material import MaterialReissner
+from meshpy.core.mesh import Mesh
+from meshpy.core.rotation import Rotation
 from meshpy.geometric_search.find_close_points import (
     FindClosePointAlgorithm,
     find_close_points,
@@ -45,7 +48,7 @@ from meshpy.geometric_search.find_close_points import (
 from meshpy.mesh_creation_functions.beam_honeycomb import (
     create_beam_mesh_honeycomb_flat,
 )
-from meshpy.utility import filter_nodes, get_nodal_coordinates
+from meshpy.utils.utils import filter_nodes, get_nodal_coordinates
 
 PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE = [
     "algorithm",

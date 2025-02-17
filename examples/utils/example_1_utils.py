@@ -30,8 +30,9 @@
 import numpy as np
 import pyvista as pv
 
-from meshpy.examples.general_utils import reset_print_out
-from meshpy.utility import is_testing
+from meshpy.utils.utils import is_testing
+
+from .general_utils import reset_print_out
 
 
 def print_matrix(name, matrix):
