@@ -33,7 +33,7 @@ import shutil
 import subprocess
 from difflib import unified_diff
 from pathlib import Path
-from typing import Callable, Optional, Tuple, Union
+from typing import Callable, Optional, Union
 
 import numpy as np
 import pytest
@@ -43,7 +43,7 @@ from _pytest.config.argparsing import Parser
 from vtk_utils.compare_grids import compare_grids
 
 from meshpy.core.conf import mpy
-from meshpy.core.inputfile import InputFile
+from meshpy.four_c.input_file import InputFile
 
 
 def pytest_addoption(parser: Parser) -> None:

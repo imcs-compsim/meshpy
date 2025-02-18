@@ -37,7 +37,7 @@ from meshpy.core.header_functions import (
     set_header_static,
     set_runtime_output,
 )
-from meshpy.core.inputfile import InputFile
+from meshpy.four_c.input_file import InputFile
 
 
 def test_header_functions_static(
