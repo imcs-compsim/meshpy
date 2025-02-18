@@ -35,7 +35,6 @@ import pytest
 
 from meshpy.core.conf import mpy
 from meshpy.core.geometry_set import GeometrySet
-from meshpy.core.material import MaterialReissner
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.boundary_condition import BoundaryCondition
@@ -47,6 +46,7 @@ from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.function import Function
 from meshpy.four_c.header_functions import set_header_static, set_runtime_output
 from meshpy.four_c.input_file import InputFile, InputSection
+from meshpy.four_c.material import MaterialReissner
 from meshpy.four_c.run_four_c import run_four_c
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb

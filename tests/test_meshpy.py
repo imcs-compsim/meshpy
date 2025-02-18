@@ -41,14 +41,7 @@ from meshpy.core.conf import mpy
 from meshpy.core.coupling import Coupling
 from meshpy.core.element_beam import Beam
 from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetNodes
-from meshpy.core.material import (
-    MaterialBeam,
-    MaterialEulerBernoulli,
-    MaterialKirchhoff,
-    MaterialReissner,
-    MaterialReissnerElastoplastic,
-    MaterialStVenantKirchhoff,
-)
+from meshpy.core.material import MaterialBeam
 from meshpy.core.mesh import Mesh
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.core.rotation import Rotation
@@ -67,6 +60,13 @@ from meshpy.four_c.header_functions import (
     set_runtime_output,
 )
 from meshpy.four_c.input_file import InputFile, InputSection
+from meshpy.four_c.material import (
+    MaterialEulerBernoulli,
+    MaterialKirchhoff,
+    MaterialReissner,
+    MaterialReissnerElastoplastic,
+    MaterialStVenantKirchhoff,
+)
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_via_rotation,
     create_beam_mesh_line,
