@@ -27,6 +27,7 @@
 # SOFTWARE.
 """Helper functions to interact with the MeshPy environment."""
 
+import importlib.util
 import os
 
 
@@ -38,6 +39,30 @@ def is_mybinder():
 def is_testing():
     """Check if the current environment is a pytest testing run."""
     return "PYTEST_CURRENT_TEST" in os.environ
+
+
+def is_cython_available() -> bool:
+    """Check if Cython is installed.
+
+    Returns:
+        True if Cython is installed, False otherwise
+    """
+
+    if importlib.util.find_spec("cython") is None:
+        return False
+    return True
+
+
+def is_cubitpy_available() -> bool:
+    """Check if CubitPy is installed.
+
+    Returns:
+        True if CubitPy is installed, False otherwise
+    """
+
+    if importlib.util.find_spec("cubitpy") is None:
+        return False
+    return True
 
 
 def get_env_variable(name, *, default="default_not_set"):

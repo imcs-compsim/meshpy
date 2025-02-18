@@ -25,27 +25,31 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""
-This script can be used to compile the cython code:
-> python setup.py build_ext --inplace
-"""
+"""Test node utils of MeshPy."""
 
-import numpy as np
-from Cython.Build import cythonize
-from setuptools import Extension, setup
+from meshpy.core.node import Node
+from meshpy.utils.nodes import is_node_on_plane
 
-extensions = [
-    Extension(
-        "meshpy.geometric_search.geometric_search_cython_lib",
-        ["src/meshpy/geometric_search/geometric_search_cython_lib.pyx"],
-        include_dirs=[np.get_include()],
+
+def test_is_node_on_plane():
+    """Test if node on plane function works properly."""
+
+    # node on plane with origin_distance
+    node = Node([1.0, 1.0, 1.0])
+    assert is_node_on_plane(node, normal=[0.0, 0.0, 1.0], origin_distance=1.0)
+
+    # node on plane with point_on_plane
+    node = Node([1.0, 1.0, 1.0])
+    assert is_node_on_plane(
+        node, normal=[0.0, 0.0, 5.0], point_on_plane=[5.0, 5.0, 1.0]
     )
-]
 
-setup(
-    ext_modules=cythonize(
-        extensions,
-        build_dir="src/build/cython_generated_code",
-        annotate=True,
-    ),
-)
+    # node not on plane with origin_distance
+    node = Node([13.5, 14.5, 15.5])
+    assert not is_node_on_plane(node, normal=[0.0, 0.0, 1.0], origin_distance=5.0)
+
+    # node not on plane with point_on_plane
+    node = Node([13.5, 14.5, 15.5])
+    assert not is_node_on_plane(
+        node, normal=[0.0, 0.0, 5.0], point_on_plane=[5.0, 5.0, 1.0]
+    )

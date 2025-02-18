@@ -1,57 +1,68 @@
 [build-system]
-requires = ["setuptools", "wheel", "cython", "numpy"]
+requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
-
-[project]
-name = "MeshPy"
-authors = [
-  {name = "Ivo Steinbrecher", email = "ivo.steinbrecher@unibw.de"},
-]
-description = "MeshPy: A beam finite element input generator"
-readme = "README.md"
-license = {file = "LICENSE"}
-dependencies = [
-  "autograd",
-  "black==22.12.0",
-  "Cython",
-  "geomdl",
-  "ipykernel",
-  "notebook",
-  "numpy",
-  "numpy-quaternion",
-  "pre-commit",
-  "pytest",
-  "pytest-cov",
-  "pyvista",
-  "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@main",
-  "scipy",
-  "splinepy",
-  "testbook",
-  "vtk"
-]
-
-dynamic = ["version"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
 include = ["meshpy"]
 
+[project]
+name = "MeshPy"
+description = "MeshPy: A beam finite element input generator"
+authors = [{ name = "MeshPy Authors" }]
+readme = "README.md"
+license = {file = "LICENSE"}
+dependencies = [
+  "autograd",
+  "geomdl",
+  "ipykernel",
+  "notebook",
+  "numpy",
+  "numpy-quaternion",
+  "pyvista",
+  "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@main",
+  "scipy",
+  "splinepy",
+  "vtk"
+]
+
+dynamic = ["version"]
+
 [project.optional-dependencies]
-CI-CD = [
-  "coverage==7.4.4",
+cubitpy = ["cubitpy@git+https://github.com/imcs-compsim/cubitpy.git@main"]
+cython = ["cython"]
+dev = [
   "coverage-badge",
-  "cubitpy@git+https://github.com/imcs-compsim/cubitpy.git@main",
+  "coverage",
   "pdoc",
-  "setuptools", # Needed for coverage-badge
+  "pre-commit",
+  "pytest",
+  "pytest-cov",
   "testbook"
 ]
 
+[project.scripts]
+compile-cython = "meshpy.utils.compile_cython:main"
+
+[project.urls]
+Homepage = "https://imcs-compsim.github.io/meshpy/"
+Documentation = "https://imcs-compsim.github.io/meshpy/api-documentation/"
+Repository = "https://github.com/imcs-compsim/meshpy/"
+Issues = "https://github.com/imcs-compsim/meshpy/issues/"
+
+
+# tools
+
+[tool.coverage.run]
+omit = ["src/meshpy/utils/compile_cython.py"]
+
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-p pytest_cov --cov-report=term --cov-report=html --cov-fail-under=90 --cov=src/meshpy/ --cov-append"
+addopts = "-p pytest_cov --cov-report=term --cov-report=html --cov-fail-under=90 --cov=src/meshpy/"
 markers = [
   "fourc: tests in combination with 4C",
   "arborx: tests in combination with ArborX",
   "cubitpy: tests in combination with CubitPy",
+  "cython: tests in combination with Cython compiled code",
   "performance: performance tests of MeshPy"
 ]

@@ -30,11 +30,16 @@ MeshPy testing."""
 
 import os
 
-from cubitpy import CubitPy, cupy
-from cubitpy.mesh_creation_functions import create_brick, extrude_mesh_normal_to_surface
-
 from meshpy.core.conf import mpy
 from meshpy.four_c.input_file import InputFile
+from meshpy.utils.environment import is_cubitpy_available
+
+if is_cubitpy_available():
+    from cubitpy import CubitPy, cupy
+    from cubitpy.mesh_creation_functions import (
+        create_brick,
+        extrude_mesh_normal_to_surface,
+    )
 
 
 def create_tube_cubit_mesh(r, h, n_circumference, n_height):
