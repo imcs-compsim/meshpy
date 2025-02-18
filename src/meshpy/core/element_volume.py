@@ -25,7 +25,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""This module implements volume elements for the mesh."""
+"""This file defines the base volume element in MeshPy."""
 
 import numpy as np
 import vtk
@@ -171,20 +171,3 @@ class VolumeHEX27(VolumeElement):
         25,
         26,
     ]
-
-
-class SolidRigidSphere(VolumeElement):
-    """A rigid sphere solid element."""
-
-    def __init__(self, **kwargs):
-        """Initialize solid sphere object."""
-        VolumeElement.__init__(self, **kwargs)
-
-        # Set radius of sphere from input file.
-        arg_name = self.dat_post_nodes.split()[0]
-        if not arg_name == "RADIUS":
-            raise ValueError(
-                "The first argument after the node should be "
-                f'RADIUS, but it is "{arg_name}"!'
-            )
-        self.radius = float(self.dat_post_nodes.split()[1])
