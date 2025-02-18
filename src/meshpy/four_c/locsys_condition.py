@@ -27,8 +27,8 @@
 # SOFTWARE.
 """This file contains the wrapper for the LocSys condition for 4c."""
 
-from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
+from meshpy.four_c.boundary_condition import BoundaryCondition
 
 
 class LocSysCondition(BoundaryCondition):
