@@ -23,11 +23,13 @@
 input files."""
 
 import numpy as np
+import pytest
 
 from meshpy.core.conf import mpy
 from meshpy.core.geometry_set import GeometrySet
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.beam_potential import BeamPotential
+from meshpy.four_c.beam_to_beam_contact import add_beam_interaction_condition
 from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.dbc_monitor import linear_time_transformation
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
@@ -376,3 +378,98 @@ def test_linear_time_transformation_flip():
     )
     assert time_result.tolist() == time_trans.tolist()
     assert force_trans.tolist() == force_result.tolist()
+
+
+def test_meshpy_add_beam_interaction_condition():
+    """Ensure that the contact-boundary conditions ids are estimated
+    correctly."""
+
+    # Create the mesh.
+    mesh = InputFile()
+
+    # Create Material.
+    mat = MaterialReissner()
+
+    # Create a beam in x-axis.
+    beam_x = create_beam_mesh_line(
+        mesh,
+        Beam3rHerm2Line3,
+        mat,
+        [0, 0, 0],
+        [2, 0, 0],
+        n_el=3,
+    )
+
+    # Create a second beam in y-axis.
+    beam_y = create_beam_mesh_line(
+        mesh,
+        Beam3rHerm2Line3,
+        mat,
+        [0, 0, 0],
+        [0, 2, 0],
+        n_el=3,
+    )
+
+    # Add two contact node sets.
+    id = add_beam_interaction_condition(mesh, beam_x["line"], beam_y["line"])
+    assert id == 0
+
+    # Check if we can add the same set twice.
+    id = add_beam_interaction_condition(mesh, beam_x["line"], beam_x["line"])
+    assert id == 1
+
+    # Add some more functions to ensure that everything works as expected:
+    for node in mesh.nodes:
+        mesh.add(
+            BoundaryCondition(
+                GeometrySet(node),
+                "",
+                bc_type=mpy.bc.dirichlet,
+            )
+        )
+
+    # Add condition with higher id.
+    id = add_beam_interaction_condition(mesh, beam_x["line"], beam_x["line"], id=3)
+    assert id == 3
+
+    # Check if the id gap is filled automatically.
+    id = add_beam_interaction_condition(mesh, beam_x["line"], beam_y["line"])
+    assert id == 2
+
+
+def test_meshpy_beam_to_beam_contact(
+    assert_results_equal, get_corresponding_reference_file_path
+):
+    """Test the beam-to-beam contact boundary conditions."""
+
+    # Create the mesh.
+    mesh = InputFile()
+
+    # Create Material.
+    mat = MaterialReissner()
+
+    # Create a beam in x-axis.
+    beam_x = create_beam_mesh_line(
+        mesh,
+        Beam3rHerm2Line3,
+        mat,
+        [0, 0, 0],
+        [1, 0, 0],
+        n_el=2,
+    )
+
+    # Create a second beam in y-axis.
+    beam_y = create_beam_mesh_line(
+        mesh,
+        Beam3rHerm2Line3,
+        mat,
+        [0, 0, 0.5],
+        [1, 0, 0.5],
+        n_el=2,
+    )
+
+    # Add the beam-to-beam contact condition.
+    add_beam_interaction_condition(mesh, beam_x["line"], beam_y["line"])
+
+    # Compare with the reference solution.
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
