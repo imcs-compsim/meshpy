@@ -29,7 +29,7 @@
 an input file."""
 
 from meshpy.core.conf import mpy
-from meshpy.core.inputfile import InputSection
+from meshpy.four_c.inputfile import InputSection
 
 
 def get_yes_no(bool_var):
@@ -157,10 +157,7 @@ def set_runtime_output(
         # Set the beam to solid volume mesh tying runtime output options.
         input_file.add(
             InputSection(
-                (
-                    "BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/"
-                    "RUNTIME VTK OUTPUT"
-                ),
+                ("BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/RUNTIME VTK OUTPUT"),
                 """
             WRITE_OUTPUT                          yes
             NODAL_FORCES                          yes

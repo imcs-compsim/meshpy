@@ -37,8 +37,8 @@ from meshpy.core.coupling import Coupling
 from meshpy.core.element_beam import Beam3rHerm2Line3, Beam3rLine2Line2
 from meshpy.core.element_volume import VolumeElement
 from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetNodes
-from meshpy.core.inputfile_utils import get_coupled_nodes_to_master_map
 from meshpy.core.mesh import Mesh
+from meshpy.core.mesh_utils import get_coupled_nodes_to_master_map
 from meshpy.core.node import NodeCosserat
 from meshpy.utils.nodes import get_nodal_coordinates
 

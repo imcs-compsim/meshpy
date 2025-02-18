@@ -39,7 +39,6 @@ from meshpy.core.element_beam import Beam3rHerm2Line3
 from meshpy.core.function import Function
 from meshpy.core.geometry_set import GeometrySet
 from meshpy.core.header_functions import set_header_static, set_runtime_output
-from meshpy.core.inputfile import InputFile, InputSection
 from meshpy.core.material import MaterialReissner
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
@@ -47,6 +46,7 @@ from meshpy.four_c.dbc_monitor import (
     dbc_monitor_to_input,
     dbc_monitor_to_input_all_values,
 )
+from meshpy.four_c.inputfile import InputFile, InputSection
 from meshpy.four_c.run_four_c import run_four_c
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb

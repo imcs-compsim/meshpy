@@ -30,7 +30,7 @@ interaction potentials."""
 
 from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.header_functions import get_yes_no
-from meshpy.core.inputfile import InputSection
+from meshpy.four_c.inputfile import InputSection
 
 
 class BeamPotential:
@@ -147,8 +147,8 @@ class BeamPotential:
         """
 
         settings = f"""
-            POT_LAW_PREFACTOR                     {' '.join(map(str, self.pot_law_prefactor))}
-            POT_LAW_EXPONENT                      {' '.join(map(str, self.pot_law_exponent))}
+            POT_LAW_PREFACTOR                     {" ".join(map(str, self.pot_law_prefactor))}
+            POT_LAW_EXPONENT                      {" ".join(map(str, self.pot_law_exponent))}
             BEAMPOTENTIAL_TYPE              {potential_type}
             CUTOFF_RADIUS                   {cutoff_radius}
             STRATEGY                        {evaluation_strategy}
@@ -243,7 +243,7 @@ class BeamPotential:
 
             bc = BoundaryCondition(
                 geometry_set,
-                f"POTLAW {i+1} VAL {line_charge} FUNCT {{}}",
+                f"POTLAW {i + 1} VAL {line_charge} FUNCT {{}}",
                 bc_type="DESIGN LINE BEAM POTENTIAL CHARGE CONDITIONS",
                 format_replacement=[func],
             )

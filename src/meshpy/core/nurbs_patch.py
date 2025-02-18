@@ -78,7 +78,7 @@ class NURBSPatch(Element):
     def add_element_specific_section(self, sections):
         """Return additional information of the NURBS patch."""
 
-        from .inputfile import InputSectionMultiKey
+        from meshpy.four_c.inputfile import InputSectionMultiKey
 
         knotvectors_section = "STRUCTURE KNOTVECTORS"
 

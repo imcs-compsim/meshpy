@@ -34,8 +34,8 @@ import numpy as np
 
 from meshpy.core.conf import mpy
 from meshpy.core.geometry_set import GeometrySet
-from meshpy.core.inputfile_utils import get_coupled_nodes_to_master_map
 from meshpy.core.mesh import Mesh
+from meshpy.core.mesh_utils import get_coupled_nodes_to_master_map
 from meshpy.core.rotation import smallest_rotation
 
 # Format template for different number types.

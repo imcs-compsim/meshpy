@@ -25,8 +25,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-"""This module defines utility functions for creating input files from MeshPy
-meshes."""
+"""This module defines utility functions for meshes."""
 
 from typing import Dict, List, Tuple
 
