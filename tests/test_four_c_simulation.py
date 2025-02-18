@@ -770,10 +770,6 @@ def test_four_c_simulation_dbc_monitor_to_input(
     )
 
 
-# TODO remove
-@pytest.mark.skip(
-    reason="Upstream bug in 4C https://github.com/4C-multiphysics/4C/issues/385"
-)
 @pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
 def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_values(
     enforce_four_c,
