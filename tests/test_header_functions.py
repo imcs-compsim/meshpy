@@ -31,7 +31,7 @@
 import pytest
 
 from meshpy.core.conf import mpy
-from meshpy.core.header_functions import (
+from meshpy.four_c.header_functions import (
     get_comment,
     set_beam_to_solid_meshtying,
     set_header_static,

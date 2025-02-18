@@ -49,11 +49,6 @@ from meshpy.core.element_beam import (
 )
 from meshpy.core.function import Function
 from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetNodes
-from meshpy.core.header_functions import (
-    set_beam_to_solid_meshtying,
-    set_header_static,
-    set_runtime_output,
-)
 from meshpy.core.material import (
     MaterialBeam,
     MaterialEulerBernoulli,
@@ -66,6 +61,11 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.core.rotation import Rotation
 from meshpy.core.vtk_writer import VTKWriter
+from meshpy.four_c.header_functions import (
+    set_beam_to_solid_meshtying,
+    set_header_static,
+    set_runtime_output,
+)
 from meshpy.four_c.input_file import InputFile, InputSection
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_via_rotation,
