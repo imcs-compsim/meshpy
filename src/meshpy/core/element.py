@@ -57,14 +57,14 @@ class Element(BaseMeshItemFull):
         """
 
         # Import solid element classes for creation of the element.
-        from .element_volume import (
-            SolidRigidSphere,
+        from meshpy.core.element_volume import (
             VolumeHEX8,
             VolumeHEX20,
             VolumeHEX27,
             VolumeTET4,
             VolumeTET10,
         )
+        from meshpy.four_c.element_volume import SolidRigidSphere
 
         # Split up input line and get pre node string.
         line_split = input_line[0].split()

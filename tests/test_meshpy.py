@@ -40,13 +40,7 @@ import vtk
 from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
 from meshpy.core.coupling import Coupling
-from meshpy.core.element_beam import (
-    Beam,
-    Beam3eb,
-    Beam3k,
-    Beam3rHerm2Line3,
-    Beam3rLine2Line2,
-)
+from meshpy.core.element_beam import Beam
 from meshpy.core.function import Function
 from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetNodes
 from meshpy.core.material import (
@@ -61,6 +55,12 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.core.rotation import Rotation
 from meshpy.core.vtk_writer import VTKWriter
+from meshpy.four_c.element_beam import (
+    Beam3eb,
+    Beam3k,
+    Beam3rHerm2Line3,
+    Beam3rLine2Line2,
+)
 from meshpy.four_c.header_functions import (
     set_beam_to_solid_meshtying,
     set_header_static,

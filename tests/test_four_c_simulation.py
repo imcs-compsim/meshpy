@@ -35,7 +35,6 @@ import pytest
 
 from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
-from meshpy.core.element_beam import Beam3rHerm2Line3
 from meshpy.core.function import Function
 from meshpy.core.geometry_set import GeometrySet
 from meshpy.core.material import MaterialReissner
@@ -45,6 +44,7 @@ from meshpy.four_c.dbc_monitor import (
     dbc_monitor_to_input,
     dbc_monitor_to_input_all_values,
 )
+from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.header_functions import set_header_static, set_runtime_output
 from meshpy.four_c.input_file import InputFile, InputSection
 from meshpy.four_c.run_four_c import run_four_c
