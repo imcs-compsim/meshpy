@@ -40,7 +40,7 @@ from meshpy.core.material import MaterialReissner
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.beam_potential import BeamPotential
 from meshpy.four_c.dbc_monitor import linear_time_transformation
-from meshpy.four_c.inputfile import InputFile
+from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.locsys_condition import LocSysCondition
 from meshpy.four_c.solid_shell_thickness_direction import (
     get_visualization_third_parameter_direction_hex8,

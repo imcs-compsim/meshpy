@@ -43,7 +43,7 @@ from _pytest.config.argparsing import Parser
 from vtk_utils.compare_grids import compare_grids
 
 from meshpy.core.conf import mpy
-from meshpy.four_c.inputfile import InputFile
+from meshpy.four_c.input_file import InputFile
 
 
 def pytest_addoption(parser: Parser) -> None:

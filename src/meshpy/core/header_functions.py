@@ -29,7 +29,7 @@
 an input file."""
 
 from meshpy.core.conf import mpy
-from meshpy.four_c.inputfile import InputSection
+from meshpy.four_c.input_file import InputSection
 
 
 def get_yes_no(bool_var):

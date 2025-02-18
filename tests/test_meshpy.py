@@ -66,7 +66,7 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.core.rotation import Rotation
 from meshpy.core.vtk_writer import VTKWriter
-from meshpy.four_c.inputfile import InputFile, InputSection
+from meshpy.four_c.input_file import InputFile, InputSection
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_via_rotation,
     create_beam_mesh_line,

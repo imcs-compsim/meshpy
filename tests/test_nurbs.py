@@ -32,7 +32,7 @@ import numpy as np
 
 from meshpy.core.material import MaterialString, MaterialStVenantKirchhoff
 from meshpy.core.rotation import Rotation
-from meshpy.four_c.inputfile import InputFile
+from meshpy.four_c.input_file import InputFile
 from meshpy.mesh_creation_functions.nurbs_generic import add_geomdl_nurbs_to_mesh
 from meshpy.mesh_creation_functions.nurbs_geometries import (
     create_nurbs_brick,

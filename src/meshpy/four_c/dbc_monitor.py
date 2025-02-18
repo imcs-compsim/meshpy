@@ -38,7 +38,7 @@ from meshpy.core.function import Function
 from meshpy.core.function_utility import (
     create_linear_interpolation_function,
 )
-from meshpy.four_c.inputfile import InputFile
+from meshpy.four_c.input_file import InputFile
 
 
 def linear_time_transformation(

@@ -46,7 +46,7 @@ from meshpy.four_c.dbc_monitor import (
     dbc_monitor_to_input,
     dbc_monitor_to_input_all_values,
 )
-from meshpy.four_c.inputfile import InputFile, InputSection
+from meshpy.four_c.input_file import InputFile, InputSection
 from meshpy.four_c.run_four_c import run_four_c
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb

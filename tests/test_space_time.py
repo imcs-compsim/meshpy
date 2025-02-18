@@ -34,7 +34,7 @@ from meshpy.core.conf import mpy
 from meshpy.core.element_beam import Beam3rHerm2Line3, Beam3rLine2Line2
 from meshpy.core.material import MaterialReissner
 from meshpy.core.mesh import Mesh
-from meshpy.four_c.inputfile import InputFile
+from meshpy.four_c.input_file import InputFile
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_line,
