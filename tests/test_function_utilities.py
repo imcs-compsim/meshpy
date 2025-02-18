@@ -28,7 +28,7 @@
 """This script is used to test the functionality of the meshpy.function_utility
 module."""
 
-from meshpy.core.function_utility import (
+from meshpy.four_c.function_utility import (
     create_linear_interpolation_function,
     create_linear_interpolation_string,
 )

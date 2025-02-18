@@ -30,7 +30,7 @@ function."""
 
 import numpy as np
 
-from meshpy.core.function import Function
+from meshpy.four_c.function import Function
 
 
 def create_linear_interpolation_string(
