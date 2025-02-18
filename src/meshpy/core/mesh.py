@@ -44,12 +44,12 @@ from meshpy.core.conf import mpy
 from meshpy.core.coupling import coupling_factory
 from meshpy.core.element import Element
 from meshpy.core.element_beam import Beam
-from meshpy.core.function import Function
 from meshpy.core.geometry_set import GeometryName, GeometrySetBase, GeometrySetContainer
 from meshpy.core.material import Material
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.core.rotation import Rotation, add_rotations, rotate_coordinates
 from meshpy.core.vtk_writer import VTKWriter
+from meshpy.four_c.function import Function
 from meshpy.geometric_search.find_close_points import (
     find_close_points,
     point_partners_to_partner_indices,
