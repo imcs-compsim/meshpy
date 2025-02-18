@@ -34,11 +34,11 @@ import numpy as np
 import pytest
 
 from meshpy.core.conf import mpy
-from meshpy.core.material import MaterialReissner
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.material import MaterialReissner
 from meshpy.geometric_search.find_close_points import (
     FindClosePointAlgorithm,
     find_close_points,

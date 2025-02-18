@@ -31,7 +31,7 @@ import numpy as np
 
 from meshpy.core.conf import mpy
 from meshpy.core.element import Element
-from meshpy.core.material import MaterialString, MaterialStVenantKirchhoff
+from meshpy.four_c.material import MaterialString, MaterialStVenantKirchhoff
 
 
 class NURBSPatch(Element):

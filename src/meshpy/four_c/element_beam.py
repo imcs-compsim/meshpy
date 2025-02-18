@@ -33,7 +33,7 @@ import numpy as np
 
 from meshpy.core.conf import mpy
 from meshpy.core.element_beam import Beam
-from meshpy.core.material import (
+from meshpy.four_c.material import (
     MaterialEulerBernoulli,
     MaterialKirchhoff,
     MaterialReissner,
