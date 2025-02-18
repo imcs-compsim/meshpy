@@ -34,7 +34,6 @@ import numpy as np
 import quaternion
 from numpy.typing import NDArray
 
-from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
 from meshpy.core.function_utility import create_linear_interpolation_function
 from meshpy.core.geometry_set import GeometrySet
@@ -42,6 +41,7 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.core.rotation import Rotation
 from meshpy.cosserat_curve.cosserat_curve import CosseratCurve
+from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.geometric_search import find_close_points
 
 

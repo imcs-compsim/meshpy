@@ -28,7 +28,7 @@
 """This file includes functions to ease the creation of input files using beam
 interaction potentials."""
 
-from meshpy.core.boundary_condition import BoundaryCondition
+from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.header_functions import get_yes_no
 from meshpy.four_c.input_file import InputSection
 

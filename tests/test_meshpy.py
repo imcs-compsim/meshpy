@@ -37,7 +37,6 @@ import numpy as np
 import pytest
 import vtk
 
-from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
 from meshpy.core.coupling import Coupling
 from meshpy.core.element_beam import Beam
@@ -55,6 +54,7 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.core.rotation import Rotation
 from meshpy.core.vtk_writer import VTKWriter
+from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.element_beam import (
     Beam3eb,
     Beam3k,
