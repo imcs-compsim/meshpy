@@ -84,7 +84,7 @@ REPARTITIONSTRATEGY                   Everydt
 MODELEVALUATOR                        Standard
 ----------------------------------------------------------------BINNING STRATEGY
 BIN_SIZE_LOWER_BOUND                  0.69
-DOMAINBOUNDINGBOX 1 2 3 4 5 6
+DOMAINBOUNDINGBOX                     1 2 3 4 5 6
 ---------------------------------BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING
 CONSTRAINT_STRATEGY                   penalty
 PENALTY_PARAMETER                     None
