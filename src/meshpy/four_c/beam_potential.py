@@ -29,7 +29,7 @@
 interaction potentials."""
 
 from meshpy.core.boundary_condition import BoundaryCondition
-from meshpy.core.header_functions import get_yes_no
+from meshpy.four_c.header_functions import get_yes_no
 from meshpy.four_c.input_file import InputSection
 
 
