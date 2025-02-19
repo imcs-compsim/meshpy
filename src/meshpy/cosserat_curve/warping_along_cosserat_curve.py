@@ -43,6 +43,7 @@ from meshpy.cosserat_curve.cosserat_curve import CosseratCurve
 from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.function_utility import create_linear_interpolation_function
 from meshpy.geometric_search import find_close_points
+from meshpy.geometric_search.find_close_points import FindClosePointAlgorithm
 
 
 def get_arc_length_and_cross_section_coordinates(
@@ -138,7 +139,9 @@ def get_mesh_transformation(
         )
 
     # Get unique arc length points
-    has_partner, n_partner = find_close_points.find_close_points(arc_lengths)
+    has_partner, n_partner = find_close_points.find_close_points(
+        arc_lengths, algorithm=FindClosePointAlgorithm.kd_tree_scipy
+    )
     arc_lengths_unique = [None] * n_partner
     has_partner_total = [-2] * len(arc_lengths)
     for i in range(len(arc_lengths)):

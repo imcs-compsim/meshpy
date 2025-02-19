@@ -34,6 +34,7 @@ import pytest
 
 from meshpy.utils.environment import (
     get_env_variable,
+    is_arborx_available,
     is_cubitpy_available,
     is_cython_available,
     is_mybinder,
@@ -61,14 +62,14 @@ def test_is_testing() -> None:
         assert is_testing() is False
 
 
-def test_is_cython_available() -> None:
-    """Test is_cython_available function."""
+def test_is_arborx_available() -> None:
+    """Test is_arborx_available function."""
 
     with patch("importlib.util.find_spec", return_value=True):
-        assert is_cython_available() is True
+        assert is_arborx_available() is True
 
     with patch("importlib.util.find_spec", return_value=None):
-        assert is_cython_available() is False
+        assert is_arborx_available() is False
 
 
 def test_is_cubitpy_available() -> None:
@@ -79,6 +80,16 @@ def test_is_cubitpy_available() -> None:
 
     with patch("importlib.util.find_spec", return_value=None):
         assert is_cubitpy_available() is False
+
+
+def test_is_cython_available() -> None:
+    """Test is_cython_available function."""
+
+    with patch("importlib.util.find_spec", return_value=True):
+        assert is_cython_available() is True
+
+    with patch("importlib.util.find_spec", return_value=None):
+        assert is_cython_available() is False
 
 
 def test_get_env_variable() -> None:

@@ -41,14 +41,17 @@ def is_testing():
     return "PYTEST_CURRENT_TEST" in os.environ
 
 
-def is_cython_available() -> bool:
-    """Check if Cython is installed.
+def is_arborx_available() -> bool:
+    """Check if ArborX is installed.
 
     Returns:
-        True if Cython is installed, False otherwise
+        True if ArborX is installed, False otherwise
     """
 
-    if importlib.util.find_spec("cython") is None:
+    if (
+        importlib.util.find_spec("meshpy.geometric_search.geometric_search_arborx_lib")
+        is None
+    ):
         return False
     return True
 
@@ -61,6 +64,18 @@ def is_cubitpy_available() -> bool:
     """
 
     if importlib.util.find_spec("cubitpy") is None:
+        return False
+    return True
+
+
+def is_cython_available() -> bool:
+    """Check if Cython is installed.
+
+    Returns:
+        True if Cython is installed, False otherwise
+    """
+
+    if importlib.util.find_spec("cython") is None:
         return False
     return True
 
