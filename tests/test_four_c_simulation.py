@@ -73,7 +73,6 @@ def create_cantilever_model(n_steps, time_step=0.5):
         Time step size.
     """
 
-    mpy.set_default_values()
     input_file = InputFile()
     set_header_static(input_file, time_step=time_step, n_steps=n_steps)
     input_file.add("--IO\nOUTPUT_BIN yes\nSTRUCT_DISP yes", option_overwrite=True)
@@ -358,9 +357,6 @@ def test_four_c_simulation_honeycomb_variants(
 ):
     """Create a few different honeycomb structures."""
 
-    # Set default values for global parameters.
-    mpy.set_default_values()
-
     # Create input file.
     input_file = InputFile(description="Varieties of honeycomb")
 
@@ -528,9 +524,6 @@ def test_four_c_simulation_rotated_beam_axis(
     - The third case uses two nodes at the connection between the lines,
         and couples them with a coupling.
     """
-
-    # Set default values for global parameters.
-    mpy.set_default_values()
 
     # Create input file.
     input_file = InputFile(description="Rotation of beam along axis")

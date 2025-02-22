@@ -64,11 +64,8 @@ def test_cartesian_rotations():
     And compare with the rotation matrix.
     """
 
-    # Set default values for global parameters.
-    mpy.set_default_values()
-
     theta = 1.0
-    # Loop per directions.
+    # Loop per direction.
     for i in range(3):
         rot3D = get_rotation_matrix(i, theta)
         axis = np.zeros(3)
@@ -88,9 +85,6 @@ def test_cartesian_rotations():
 
 def test_euler_angles():
     """Create a rotation with Euler angles and compare to known results."""
-
-    # Set default values for global parameters.
-    mpy.set_default_values()
 
     # Euler angles.
     alpha = 1.1
@@ -138,9 +132,6 @@ def test_negative_angles():
     """Check if a rotation is created correctly if a negative angle or a large
     angle is given."""
 
-    # Set default values for global parameters.
-    mpy.set_default_values()
-
     vector = 10 * np.array([-1.234243, -2.334343, -1.123123])
     phi = -12.152101868665
     rot = Rotation(vector, phi)
@@ -155,9 +146,6 @@ def test_negative_angles():
 
 def test_inverse_rotation():
     """Test the inv() function for rotations."""
-
-    # Set default values for global parameters.
-    mpy.set_default_values()
 
     # Define test rotation.
     rot = Rotation([1, 2, 3], 2)
