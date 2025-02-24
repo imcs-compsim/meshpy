@@ -454,12 +454,45 @@ def test_find_close_points_binning_flat(algorithm):
 
 
 @pytest.mark.parametrize(*PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE)
-def test_find_close_points_dimension(algorithm):
+def test_find_close_points_single_dimension(algorithm):
+    """Test that the find_close_points function works properly with a 1D
+    dimensional array (internally a n x 1 array is required)"""
+
+    # Create array with coordinates
+    eps = 1e-10
+    coords = np.array(
+        [[0, 1, 2, 3 + eps, 4, 5, 3, 6, 7 + eps, 2, 8, 7 - eps, 9, 10, 10 + eps, 7]]
+    ).transpose()
+
+    # Expected results
+    has_partner_expected = [-1, -1, 0, 1, -1, -1, 1, -1, 2, 0, -1, 2, -1, 3, 3, 2]
+    partner_expected = 4
+
+    # Get results
+    has_partner, partner = find_close_points(coords, algorithm=algorithm, tol=10 * eps)
+
+    # Check the results
+    assert np.array_equal(has_partner_expected, has_partner)
+    assert partner_expected == partner
+
+    # Test unique IDs
+    unique_indices_ref = [0, 1, 2, 3, 4, 5, 7, 8, 10, 12, 13]
+    inverse_indices_ref = [0, 1, 2, 3, 4, 5, 3, 6, 7, 2, 8, 7, 9, 10, 10, 7]
+    assert_unique_id_coordinates(
+        coords,
+        has_partner,
+        partner,
+        algorithm,
+        10 * eps,
+        unique_indices_ref,
+        inverse_indices_ref,
+    )
+
+
+@pytest.mark.parametrize(*PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE)
+def test_find_close_points_multi_dimension(algorithm):
     """Test that the find_close_points function also works properly with
     multidimensional points."""
-
-    # Set the seed for the pseudo random numbers.
-    random.seed(0)
 
     # Create array with coordinates.
     coords = np.array(

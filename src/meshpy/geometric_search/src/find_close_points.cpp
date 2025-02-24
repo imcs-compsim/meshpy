@@ -159,10 +159,22 @@ namespace GeometricSearch
     {
         switch (coordinates.shape(1))
         {
+            case 1:
+                return find_close_points_template<1>(coordinates, tol);
+            case 2:
+                return find_close_points_template<2>(coordinates, tol);
             case 3:
                 return find_close_points_template<3>(coordinates, tol);
+            case 4:
+                return find_close_points_template<4>(coordinates, tol);
+            case 5:
+                return find_close_points_template<5>(coordinates, tol);
             case 6:
                 return find_close_points_template<6>(coordinates, tol);
+            case 7:
+                return find_close_points_template<7>(coordinates, tol);
+            case 8:
+                return find_close_points_template<8>(coordinates, tol);
             default:
                 throw std::out_of_range("Got unexpected number of spatial dimensions");
         }
