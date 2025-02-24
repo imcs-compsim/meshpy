@@ -47,6 +47,9 @@ from meshpy.core.node import Node
 from meshpy.core.nurbs_patch import NURBSPatch
 from meshpy.utils.environment import is_cubitpy_available
 
+if is_cubitpy_available():
+    import cubitpy
+
 
 def get_section_string(section_name):
     """Return the string for a section in the dat file."""
@@ -969,8 +972,6 @@ class InputFile(Mesh):
         )
 
         if is_cubitpy_available():
-            import cubitpy
-
             # Get git information about cubitpy.
             cubitpy_git_sha, cubitpy_git_date = get_git_data(
                 os.path.dirname(cubitpy.__file__)

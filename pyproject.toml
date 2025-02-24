@@ -2,14 +2,13 @@
 requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["meshpy"]
-
 [project]
 name = "MeshPy"
 description = "MeshPy: A beam finite element input generator"
-authors = [{ name = "MeshPy Authors" }]
+authors = [
+  {name = "Ivo Steinbrecher", email = "ivo.steinbrecher@unibw.de"},
+  {name = "MeshPy Authors"}
+]
 readme = "README.md"
 license = {file = "LICENSE"}
 dependencies = [
@@ -20,7 +19,6 @@ dependencies = [
   "numpy",
   "numpy-quaternion",
   "pyvista",
-  "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@main",
   "scipy",
   "splinepy",
   "vtk"
@@ -38,6 +36,7 @@ dev = [
   "pre-commit",
   "pytest",
   "pytest-cov",
+  "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@main",
   "testbook"
 ]
 
