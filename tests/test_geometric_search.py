@@ -66,7 +66,6 @@ PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE = [
 def assert_unique_id_coordinates(
     coords,
     point_partners,
-    n_partners,
     algorithm,
     tol,
     unique_indices_ref,
@@ -76,9 +75,7 @@ def assert_unique_id_coordinates(
     indices result in the original array."""
 
     # Get the array with the unique indices.
-    unique_indices, inverse_indices = point_partners_to_unique_indices(
-        point_partners, n_partners
-    )
+    unique_indices, inverse_indices = point_partners_to_unique_indices(point_partners)
     unique_points = coords[unique_indices]
 
     # In the unique indices there should be no partners.
@@ -346,7 +343,6 @@ def test_find_close_points_between_bins(algorithm):
     assert_unique_id_coordinates(
         coords,
         point_partners,
-        n_partners,
         algorithm,
         eps_medium,
         unique_indices_ref,
@@ -445,7 +441,6 @@ def test_find_close_points_binning_flat(algorithm):
         assert_unique_id_coordinates(
             coords,
             has_partners,
-            n_partner,
             algorithm,
             1e-5,
             unique_indices_ref,
@@ -481,7 +476,6 @@ def test_find_close_points_single_dimension(algorithm):
     assert_unique_id_coordinates(
         coords,
         has_partner,
-        partner,
         algorithm,
         10 * eps,
         unique_indices_ref,
@@ -539,7 +533,6 @@ def test_find_close_points_multi_dimension(algorithm):
     assert_unique_id_coordinates(
         coords,
         has_partner,
-        partner,
         algorithm,
         1e-5,
         unique_indices_ref,
