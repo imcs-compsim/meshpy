@@ -50,7 +50,7 @@ class FindClosePointAlgorithm(Enum):
     boundary_volume_hierarchy_arborx = auto()
 
 
-def point_partners_to_unique_indices(point_partners, n_partners):
+def point_partners_to_unique_indices(point_partners):
     """Convert the partner indices to lists that can be used for converting
     between the full and unique coordinates.
 
