@@ -117,7 +117,6 @@ def create_solid_block(file_path, nx, ny, nz):
 def load_solid(solid_file, full_import):
     """Load a solid into an input file."""
 
-    mpy.set_default_values()
     mpy.import_mesh_full = full_import
     InputFile(dat_file=solid_file)
 

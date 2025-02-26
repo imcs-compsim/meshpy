@@ -279,10 +279,7 @@ def test_meshpy_mesh_transformations_with_solid(
         """Create the line and wrap it with passing radius to the wrap
         function."""
 
-        # Set default values for global parameters.
-        mpy.set_default_values()
-
-        # Convert the solid mesh to meshpy objects.
+        # Set if we want to do a full import or not
         mpy.import_mesh_full = import_full
 
         # Create the mesh.

@@ -307,9 +307,6 @@ def test_mesh_creation_functions_stent(
 ):
     """Test the stent creation function."""
 
-    # Set default values for global parameters.
-    mpy.set_default_values()
-
     # Create input file.
     input_file = InputFile()
 
@@ -343,9 +340,6 @@ def test_mesh_creation_functions_fibers_in_rectangle(
 ):
     """Test the create_fibers_in_rectangle function."""
 
-    # Set default values for global parameters.
-    mpy.set_default_values()
-
     # Create input file.
     input_file = InputFile()
 
@@ -378,9 +372,6 @@ def test_mesh_creation_functions_fibers_in_rectangle_reference_point(
     """Test the create_fibers_in_rectangle function with using the
     reference_point option."""
 
-    # Set default values for global parameters.
-    mpy.set_default_values()
-
     # Create input file.
     input_file = InputFile()
 
@@ -411,9 +402,6 @@ def test_mesh_creation_functions_fibers_in_rectangle_return_set(
 ):
     """Test the set returned by the create_fibers_in_rectangle function."""
 
-    # Set default values for global parameters.
-    mpy.set_default_values()
-
     # Create input file.
     input_file = InputFile()
 
@@ -432,9 +420,6 @@ def test_mesh_creation_functions_wire(
     assert_results_equal, get_corresponding_reference_file_path
 ):
     """Test the create_wire_fibers function."""
-
-    # Set default values for global parameters.
-    mpy.set_default_values()
 
     # Create input file.
     input_file = InputFile()
