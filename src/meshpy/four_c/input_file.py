@@ -39,6 +39,10 @@ from meshpy.core.geometry_set import GeometrySetContainer, GeometrySetNodes
 from meshpy.core.mesh import Mesh
 from meshpy.core.node import Node
 from meshpy.core.nurbs_patch import NURBSPatch
+from meshpy.utils.environment import cubitpy_is_available
+
+if cubitpy_is_available():
+    import cubitpy
 
 
 def get_section_string(section_name):
@@ -961,11 +965,7 @@ class InputFile(Mesh):
             f"// git date:   {meshpy_git_date}\n"
         )
 
-        # Check if cubitpy is loaded.
-        if "cubitpy.cubitpy" in sys.modules.keys():
-            # Load cubitpy.
-            import cubitpy
-
+        if cubitpy_is_available():
             # Get git information about cubitpy.
             cubitpy_git_sha, cubitpy_git_date = get_git_data(
                 os.path.dirname(cubitpy.__file__)

@@ -38,14 +38,15 @@ from meshpy.geometric_search.find_close_points import (
     find_close_points,
 )
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
+from meshpy.utils.environment import cubitpy_is_available
 from meshpy.utils.nodes import find_close_nodes
+
+if cubitpy_is_available():
+    from cubitpy import CubitPy, cupy
 
 
 def create_solid_block(file_path, nx, ny, nz):
     """Create a solid block (1 x 1 x 1) with (nx * ny * nz) elements."""
-
-    # Initialize CubitPy. We do this here since otherwise the test framework will fail, even if we don't execute the CubitPy tests.
-    from cubitpy import CubitPy, cupy
 
     cubit = CubitPy()
 

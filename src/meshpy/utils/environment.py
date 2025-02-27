@@ -21,7 +21,20 @@
 # THE SOFTWARE.
 """Helper functions to interact with the MeshPy environment."""
 
+import importlib.util
 import os
+
+
+def cubitpy_is_available() -> bool:
+    """Check if CubitPy is installed.
+
+    Returns:
+        True if CubitPy is installed, False otherwise
+    """
+
+    if importlib.util.find_spec("cubitpy") is None:
+        return False
+    return True
 
 
 def is_mybinder():
