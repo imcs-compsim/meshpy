@@ -13,7 +13,6 @@ license = {file = "LICENSE"}
 dependencies = [
   "autograd",
   "black==22.12.0",
-  "Cython",
   "geomdl",
   "ipykernel",
   "notebook",
@@ -32,10 +31,6 @@ dependencies = [
 
 dynamic = ["version"]
 
-[tool.setuptools.packages.find]
-where = ["src"]
-include = ["meshpy"]
-
 [project.optional-dependencies]
 CI-CD = [
   "coverage==7.4.4",
@@ -48,7 +43,7 @@ CI-CD = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-p pytest_cov --cov-report=term --cov-report=html --cov-fail-under=90 --cov=src/meshpy/ --cov-append"
+addopts = "-p pytest_cov --cov-report=term --cov-report=html --cov-fail-under=90 --cov=src/meshpy/"
 markers = [
   "fourc: tests in combination with 4C",
   "arborx: tests in combination with ArborX",

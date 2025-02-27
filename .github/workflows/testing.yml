@@ -33,7 +33,15 @@ jobs:
       - name: Run the test suite
         uses: ./.github/actions/run_tests
         with:
-          install-command: "-e .[CI-CD]"
+          # Test coverage and editable install with Python 3.10, otherwise we use a
+          # non-editable installation and turn of coverage, because the coverage
+          # only works in editable mode.
+          install-command: >-
+            ${{ matrix.python-version == '3.10' && '-e .[CI-CD]' || '.[CI-CD]'}}
+          # The single space in the empty string is required, otherwise GitHub
+          # evaluates the if clause wrong.
+          additional-pytest-flags: >-
+            ${{ matrix.python-version == '3.10' && ' ' || '--no-cov' }}
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -58,8 +66,7 @@ jobs:
         uses: ./.github/actions/run_tests
         with:
           source-command: "source python-workflow-venv/bin/activate"
-          install-command: "-e .[CI-CD]"
-          additional-pytest-flags: "--CubitPy"
+          additional-pytest-flags: "--CubitPy --no-cov"
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -89,7 +96,7 @@ jobs:
         with:
           source-command: "source python-workflow-venv/bin/activate"
           install-command: "-e .[CI-CD]"
-          additional-pytest-flags: "--4C --ArborX"
+          additional-pytest-flags: "--4C --ArborX --cov-fail-under=93"
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -117,7 +124,6 @@ jobs:
         uses: ./.github/actions/run_tests
         with:
           source-command: "source python-workflow-venv/bin/activate"
-          install-command: "-e .[CI-CD]"
           additional-pytest-flags: "--performance-tests --exclude-standard-tests -s --no-cov"
       - name: Upload test results on failure
         if: failure()
