@@ -27,7 +27,7 @@ jobs:
       - name: Build API documentation
         run: |
           source python-workflow-venv/bin/activate
-          pdoc --output-dir api-documentation src/meshpy/
+          pdoc --math --output-dir api-documentation src/meshpy/
       - name: Upload API documentation artifact
         uses: actions/upload-artifact@v4
         with:
