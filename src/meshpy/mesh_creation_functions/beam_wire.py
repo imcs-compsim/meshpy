@@ -1,12 +1,6 @@
-# MeshPy: A beam finite element input generator
+# The MIT License (MIT)
 #
-# MIT License
-#
-# Copyright (c) 2018-2025
-#     Ivo Steinbrecher
-#     Institute for Mathematics and Computer-Based Simulation
-#     Universitaet der Bundeswehr Muenchen
-#     https://www.unibw.de/imcs-en
+# Copyright (c) 2018-2025 MeshPy Authors
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
@@ -23,8 +17,8 @@
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
 # AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
 """Create a steel wire."""
 
 import numpy as np
