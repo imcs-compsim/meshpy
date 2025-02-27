@@ -28,19 +28,10 @@
 """This file defines the interface to the ArborX geometric search
 functionality."""
 
-import os
-import sys
+from meshpy.utils.environment import is_arborx_available
 
-# Set path so ArborX binary will be found
-sys.path.append(os.path.dirname(__file__))
-
-# Import the ArborX wrapper
-try:
-    import geometric_search_arborx_lib
-
-    arborx_available = True
-except ImportError:
-    arborx_available = False
+if is_arborx_available():
+    from meshpy.geometric_search import geometric_search_arborx_lib  # type: ignore
 
 
 class KokkosScopeGuardWrapper:
@@ -56,14 +47,14 @@ class KokkosScopeGuardWrapper:
         geometric_search_arborx_lib.kokkos_finalize()
 
 
-if arborx_available:
+if is_arborx_available():
     # Create the scope guard
     kokkos_scope_guard_wrapper = KokkosScopeGuardWrapper()
 
 
 def find_close_points_arborx(point_coordinates, tol):
     """Call the ArborX implementation of find close_points."""
-    if arborx_available:
+    if is_arborx_available():
         return geometric_search_arborx_lib.find_close_points(point_coordinates, tol)
     else:
         raise ModuleNotFoundError("ArborX functionality is not available")

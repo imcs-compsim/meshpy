@@ -75,6 +75,13 @@ def pytest_addoption(parser: Parser) -> None:
     )
 
     parser.addoption(
+        "--Cython",
+        action="store_true",
+        default=False,
+        help="Execute standard and Cython based tests.",
+    )
+
+    parser.addoption(
         "--performance-tests",
         action="store_true",
         default=False,
@@ -97,6 +104,7 @@ def pytest_collection_modifyitems(config: Config, items: list) -> None:
         `pytest --4C`: Execute standard tests and tests with the `fourc` marker
         `pytest --ArborX`: Execute standard tests and tests with the `arborx` marker
         `pytest --CubitPy`: Execute standard tests and tests with the `cubitpy` marker
+        `pytest --Cython`: Execute standard tests and tests with the `cython` marker
         `pytest --performance-tests`: Execute standard tests and tests with the `performance` marker
         `pytest --exclude-standard-tests`: Execute tests with any other marker and exclude the standard unmarked tests
 
@@ -118,8 +126,8 @@ def pytest_collection_modifyitems(config: Config, items: list) -> None:
         ]
 
         for flag, marker in zip(
-            ["--4C", "--ArborX", "--CubitPy", "--performance-tests"],
-            ["fourc", "arborx", "cubitpy", "performance"],
+            ["--4C", "--ArborX", "--CubitPy", "--Cython", "--performance-tests"],
+            ["fourc", "arborx", "cubitpy", "cython", "performance"],
         ):
             if config.getoption(flag) and marker in markers:
                 selected_tests.append(item)

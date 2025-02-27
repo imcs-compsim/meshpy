@@ -54,7 +54,10 @@ PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE = [
     "algorithm",
     [
         FindClosePointAlgorithm.kd_tree_scipy,
-        FindClosePointAlgorithm.brute_force_cython,
+        pytest.param(
+            FindClosePointAlgorithm.brute_force_cython,
+            marks=pytest.mark.cython,
+        ),
         pytest.param(
             FindClosePointAlgorithm.boundary_volume_hierarchy_arborx,
             marks=pytest.mark.arborx,
