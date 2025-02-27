@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Test utilities of MeshPy."""
+"""Test node utils of MeshPy."""
 
 from meshpy.core.node import Node
 from meshpy.utils.nodes import is_node_on_plane
