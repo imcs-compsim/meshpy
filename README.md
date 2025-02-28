@@ -115,12 +115,12 @@ Feel free to leave a ⭐️ on [GitHub](https://github.com/imcs-compsim/meshpy).
 Popp, A., Mayr, M.: An approximate block factorization preconditioner
 for mixed-dimensional beam-solid interaction. Computer Methods in
 Applied Mechanics and Engineering. 431, 117256 (2024).
-https://doi.org/<https://doi.org/10.1016/j.cma.2024.117256></span>
+<https://doi.org/10.1016/j.cma.2024.117256></span>
 1. </span><span class="csl-right-inline">Hagmeyer, N., Mayr, M., Popp, A.:
 A fully coupled regularized mortar-type finite element approach for
 embedding one-dimensional fibers into three-dimensional fluid flow.
 International Journal for Numerical Methods in Engineering. 125, e7435
-(2024). https://doi.org/<https://doi.org/10.1002/nme.7435></span>
+(2024). <https://doi.org/10.1002/nme.7435></span>
 1. </span><span class="csl-right-inline">Steinbrecher, I., Popp, A., Meier,
 C.: Consistent coupling of positions and rotations for embedding 1D
 Cosserat beams into 3D solid volumes. Computational Mechanics. 69,
@@ -184,10 +184,10 @@ Install `meshpy` via `pip`
 pip install .
 ```
 
-If you intend to actively develop `meshpy`, install it in *editable mode*
+If you intend to actively develop `meshpy`, install it in *editable mode* and with all dependencies required for developing MeshPy.
 
 ```bash
-pip install -e .
+pip install -e ".[CI-CD]"
 ```
 
 If `cython` code is changed, it has to be recompiled. This can be done by running (in the root directory)
@@ -212,7 +212,7 @@ We can also run tests in combination with 4C
 ```bash
 # 4C Tests require a path to a 4C executable
 export MESHPY_FOUR_C_EXE=<path_to_4C>
-pytest --4C --performance-tests
+pytest --4C
 ```
 
 Finally, the base tests can be deactivated with `--exclude-standard-tests`.
