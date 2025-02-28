@@ -31,24 +31,21 @@ import os
 import autograd.numpy as npAD
 import numpy as np
 
-# Import the objects we need from meshpy.
-from meshpy import (
-    Beam3rHerm2Line3,
-    BoundaryCondition,
-    Function,
-    GeometrySet,
-    InputFile,
-    MaterialReissner,
-    Mesh,
-    Rotation,
-    mpy,
-)
-from meshpy.mesh_creation_functions import (
+from meshpy.core.conf import mpy
+from meshpy.core.geometry_set import GeometrySet
+from meshpy.core.mesh import Mesh
+from meshpy.core.rotation import Rotation
+from meshpy.four_c.boundary_condition import BoundaryCondition
+from meshpy.four_c.element_beam import Beam3rHerm2Line3
+from meshpy.four_c.function import Function
+from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.material import MaterialReissner
+from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_2d,
-    create_beam_mesh_curve,
     create_beam_mesh_line,
 )
-from meshpy.utility import get_single_node
+from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
+from meshpy.utils.nodes import get_single_node
 
 
 def meshpy_tutorial(base_dir, preview=False):
