@@ -96,11 +96,11 @@ class Coupling(BoundaryConditionBase):
             return
 
         nodes = self.geometry_set.get_points()
-        pos = np.zeros([len(nodes), 3])
+        diff = np.zeros([len(nodes), 3])
         for i, node in enumerate(nodes):
             # Get the difference to the first node
-            pos[i, :] = node.coordinates - nodes[0].coordinates
-        if np.linalg.norm(pos) > mpy.eps_pos:
+            diff[i, :] = node.coordinates - nodes[0].coordinates
+        if np.max(np.linalg.norm(diff, axis=1)) > mpy.eps_pos:
             raise ValueError(
                 "The nodes given to Coupling do not have the same position."
             )
