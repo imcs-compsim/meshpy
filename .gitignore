@@ -39,6 +39,9 @@ _site
 *.lock
 website/public/
 
+# Documentation
+api-documentation/
+
 # Don't ignore directory of Github workflows
 !.github
 !.pre-commit-config.yaml
