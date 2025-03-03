@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This module defines geometric search functionality.
+r"""This module defines geometric search functionality.
 
 This module contains functionality to find points close to each other in
 a point cloud. Currently, three different implementations for the actual
@@ -30,11 +30,16 @@ search algorithm are available (depending on your installation/setup):
   ($n<200$) this is the fastest algorithm since compared to the others
   it does not have any setup costs.
 
-- `kd_tree_scipy`: Uses a BVH implementation provided by scipy. This
-  scales with $\mathcal{O}(n\ \log{n})$.
+- `kd_tree_scipy`: Uses a
+  [bounding volume hierarchy (BVH)](https://en.wikipedia.org/wiki/Bounding_volume_hierarchy)
+  implementation provided by
+  [scipy](https://docs.scipy.org/doc/scipy/reference/generated/scipy.spatial.KDTree.html).
+  This scales with $\mathcal{O}(n\ \log{n})$.
 
-- `boundary_volume_hierarchy_arborx` : Uses a BVH implementation
-  provided by ArborX. This also scales with $\mathcal{O}(n\ \log{n})$
+- `boundary_volume_hierarchy_arborx` : Uses a
+  [bounding volume hierarchy (BVH)](https://en.wikipedia.org/wiki/Bounding_volume_hierarchy)
+  implementation provided by [ArborX](https://github.com/arborx/ArborX).
+  This also scales with $\mathcal{O}(n\ \log{n})$
   but due to a more optimised implementation is a few times faster
   than the scipy implementation.
 
