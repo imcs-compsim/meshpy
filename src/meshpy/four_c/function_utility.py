@@ -81,10 +81,10 @@ def create_linear_interpolation_function(
     return Function(f"{function_type} var\n" + variable_string)
 
 
-def ensure_length_of_function_array(
-    function_array: List[Function], length: int = 3
-) -> List[Function]:
-    """Performs size check of a function array and appends the function array to the given length, if a list with only one item is provided.
+def ensure_length_of_function_array(function_array: List, length: int = 3):
+    """Performs size check of a function array and appends the function array
+    to the given length, if a list with only one item is provided.
+
     Args:
         function_array: list with functions
         length: expected length of function array
@@ -95,7 +95,7 @@ def ensure_length_of_function_array(
 
     # extend items of function automatically if it is only provided once
     if len(function_array) == 1:
-        return function_array * length
+        function_array = function_array * length
 
     if len(function_array) != length:
         raise ValueError(
