@@ -41,6 +41,7 @@ class BoundaryCondition(Enum):
     neumann = auto()
     locsys = auto()
     moment_euler_bernoulli = auto()
+    beam_to_beam_contact = auto()
     beam_to_solid_volume_meshtying = auto()
     beam_to_solid_surface_meshtying = auto()
     beam_to_solid_surface_contact = auto()
