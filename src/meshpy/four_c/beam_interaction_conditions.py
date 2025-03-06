@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This file contains a function to add the beam-to-beam contact conditions for
+"""This file contains a function to add the beam interaction conditions for
 4C."""
 
 import re
@@ -38,7 +38,7 @@ def get_next_possible_id_for_boundary_condition(
     geometry_type: conf_typing.Geometry,
     regex_search_string: str,
     *,
-    group_idx=1,
+    group_idx: int = 1,
 ) -> int:
     """Returns the next possible id, which can be used for a boundary condition
     based on all previous added boundary conditions within a mesh.
@@ -60,8 +60,9 @@ def get_next_possible_id_for_boundary_condition(
     found_conditions = []
 
     # loop through every possible geometry and find the conditions
-    for bc_condition in mesh.boundary_conditions[(bc_type, geometry_type)]:
-        found_conditions.append(bc_condition)
+    if (bc_type, geometry_type) in mesh.boundary_conditions:
+        for bc_condition in mesh.boundary_conditions[(bc_type, geometry_type)]:
+            found_conditions.append(bc_condition)
 
     if not found_conditions:
         # return starting id, since no conditions of type has been added.
@@ -87,37 +88,39 @@ def get_next_possible_id_for_boundary_condition(
 
 def add_beam_interaction_condition(
     mesh: Mesh,
-    contact_set_1: GeometrySet,
-    contact_set_2: GeometrySet,
+    geometry_set_1: GeometrySet,
+    geometry_set_2: GeometrySet,
+    bc_type: conf_typing.BoundaryCondition,
+    *,
     id: Optional[int] = None,
 ) -> int:
-    """Adds a pair of beam-to-beam interaction/contact boundary conditions to
-    the given mesh and estimates automatically the id of them based on all
-    previously added beam- to-beam contact boundary conditions of the mesh.
+    """Adds a pair of beam interaction boundary conditions to the given mesh
+    and estimates automatically the id of them based on all previously added
+    boundary conditions of the mesh.
 
     Args:
         mesh: Mesh to which the boundary conditions will be added.
-        contact_set_1: GeometrySet 1 for contact boundary condition
-        contact_set_2: GeometrySet 2 for contact boundary condition
+        geometry_set_1: GeometrySet 1 for beam interaction boundary condition
+        geometry_set_2: GeometrySet 2 for beam interaction boundary condition
         id: id of the two conditions
 
     Returns:
-        id: used id of the two conditions.
+        id: Used id for the created condition.
     """
 
     condition_string = "COUPLING_ID "
     if id is None:
         id = get_next_possible_id_for_boundary_condition(
             mesh,
-            mpy.bc.beam_to_beam_contact,
-            contact_set_1.geometry_type,
+            bc_type,
+            geometry_set_1.geometry_type,
             regex_search_string=re.escape(condition_string) + r"(\d+)",
         )
 
         id_2 = get_next_possible_id_for_boundary_condition(
             mesh,
-            mpy.bc.beam_to_beam_contact,
-            contact_set_2.geometry_type,
+            bc_type,
+            geometry_set_2.geometry_type,
             regex_search_string=re.escape(condition_string) + r"(\d+)",
         )
 
@@ -127,12 +130,10 @@ def add_beam_interaction_condition(
             )
 
     # Creates the two conditions with the same ID.
-    for geometry_set in [contact_set_1, contact_set_2]:
+    for geometry_set in [geometry_set_1, geometry_set_2]:
         mesh.add(
             BoundaryCondition(
-                geometry_set,
-                bc_string=condition_string + str(id),
-                bc_type=mpy.bc.beam_to_beam_contact,
+                geometry_set, bc_string=condition_string + str(id), bc_type=bc_type
             )
         )
 

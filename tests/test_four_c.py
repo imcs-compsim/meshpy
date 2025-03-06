@@ -28,8 +28,8 @@ import pytest
 from meshpy.core.conf import mpy
 from meshpy.core.geometry_set import GeometrySet
 from meshpy.core.rotation import Rotation
+from meshpy.four_c.beam_interaction_conditions import add_beam_interaction_condition
 from meshpy.four_c.beam_potential import BeamPotential
-from meshpy.four_c.beam_to_beam_contact import add_beam_interaction_condition
 from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.dbc_monitor import linear_time_transformation
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
@@ -234,7 +234,7 @@ def test_four_c_solid_shell_direction_detection(
     assert_results_equal(ref_file, test_file)
 
 
-def test_meshpy_locsys_condition(
+def test_four_c_locsys_condition(
     assert_results_equal, get_corresponding_reference_file_path
 ):
     """Test case for point locsys condition for beams.
@@ -281,7 +281,7 @@ def test_meshpy_locsys_condition(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_linear_time_transformation_scaling():
+def test_four_c_linear_time_transformation_scaling():
     """Test the scaling of the interval for the function.
 
     Starts with a function within the interval [0,1] and transforms
@@ -331,7 +331,7 @@ def test_linear_time_transformation_scaling():
     assert force_trans.tolist() == force_result.tolist()
 
 
-def test_linear_time_transformation_flip():
+def test_four_c_linear_time_transformation_flip():
     """Test the flip flag option of linear_time_transformation to mirror the
     function."""
 
@@ -380,7 +380,7 @@ def test_linear_time_transformation_flip():
     assert force_trans.tolist() == force_result.tolist()
 
 
-def test_meshpy_add_beam_interaction_condition():
+def test_four_c_add_beam_interaction_condition():
     """Ensure that the contact-boundary conditions ids are estimated
     correctly."""
 
@@ -411,11 +411,15 @@ def test_meshpy_add_beam_interaction_condition():
     )
 
     # Add two contact node sets.
-    id = add_beam_interaction_condition(mesh, beam_x["line"], beam_y["line"])
+    id = add_beam_interaction_condition(
+        mesh, beam_x["line"], beam_y["line"], mpy.bc.beam_to_beam_contact
+    )
     assert id == 0
 
     # Check if we can add the same set twice.
-    id = add_beam_interaction_condition(mesh, beam_x["line"], beam_x["line"])
+    id = add_beam_interaction_condition(
+        mesh, beam_x["line"], beam_x["line"], mpy.bc.beam_to_beam_contact
+    )
     assert id == 1
 
     # Add some more functions to ensure that everything works as expected:
@@ -429,15 +433,19 @@ def test_meshpy_add_beam_interaction_condition():
         )
 
     # Add condition with higher id.
-    id = add_beam_interaction_condition(mesh, beam_x["line"], beam_x["line"], id=3)
+    id = add_beam_interaction_condition(
+        mesh, beam_x["line"], beam_x["line"], mpy.bc.beam_to_beam_contact, id=3
+    )
     assert id == 3
 
     # Check if the id gap is filled automatically.
-    id = add_beam_interaction_condition(mesh, beam_x["line"], beam_y["line"])
+    id = add_beam_interaction_condition(
+        mesh, beam_x["line"], beam_y["line"], mpy.bc.beam_to_beam_contact
+    )
     assert id == 2
 
 
-def test_meshpy_beam_to_beam_contact(
+def test_four_c_beam_to_beam_contact(
     assert_results_equal, get_corresponding_reference_file_path
 ):
     """Test the beam-to-beam contact boundary conditions."""
@@ -469,7 +477,87 @@ def test_meshpy_beam_to_beam_contact(
     )
 
     # Add the beam-to-beam contact condition.
-    add_beam_interaction_condition(mesh, beam_x["line"], beam_y["line"])
+    add_beam_interaction_condition(
+        mesh, beam_x["line"], beam_y["line"], mpy.bc.beam_to_beam_contact
+    )
 
     # Compare with the reference solution.
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
+
+
+def test_four_c_beam_to_solid(
+    get_corresponding_reference_file_path, assert_results_equal
+):
+    """Test that the automatic ID creation for beam-to-solid conditions
+    works."""
+
+    # Load a solid
+    mpy.import_mesh_full = True
+    input_file = InputFile(
+        dat_file=get_corresponding_reference_file_path(
+            reference_file_base_name="test_create_cubit_input_block"
+        )
+    )
+    input_file.boundary_conditions.clear()
+    surface_set = input_file.geometry_sets[mpy.geo.surface][0]
+    volume_set = input_file.geometry_sets[mpy.geo.volume][0]
+
+    # Add the beam
+    material = MaterialReissner()
+    beam_set_1 = create_beam_mesh_line(
+        input_file, Beam3rHerm2Line3, material, [0, 0, 0], [0, 0, 1], n_el=1
+    )
+    beam_set_2 = create_beam_mesh_line(
+        input_file, Beam3rHerm2Line3, material, [0, 1, 0], [0, 1, 1], n_el=2
+    )
+    add_beam_interaction_condition(
+        input_file,
+        volume_set,
+        beam_set_1["line"],
+        mpy.bc.beam_to_solid_volume_meshtying,
+    )
+    add_beam_interaction_condition(
+        input_file,
+        volume_set,
+        beam_set_2["line"],
+        mpy.bc.beam_to_solid_volume_meshtying,
+    )
+    add_beam_interaction_condition(
+        input_file,
+        surface_set,
+        beam_set_2["line"],
+        mpy.bc.beam_to_solid_surface_meshtying,
+    )
+    add_beam_interaction_condition(
+        input_file,
+        surface_set,
+        beam_set_1["line"],
+        mpy.bc.beam_to_solid_surface_meshtying,
+    )
+
+    # Check results
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+
+    # If we try to add this the IDs won't match, because the next volume ID for
+    # beam-to-surface coupling should be 0 (this one does not make sense, but
+    # this is checked in a later test) and the next line ID for beam-to-surface
+    # coupling is 2 (there are already two of these conditions).
+    with pytest.raises(ValueError):
+        add_beam_interaction_condition(
+            input_file,
+            volume_set,
+            beam_set_1["line"],
+            mpy.bc.beam_to_solid_surface_meshtying,
+        )
+
+    # If we add a wrong geometries to the mesh, the creation of the input file
+    # should fail, because there is no beam-to-surface contact section that
+    # contains a volume set.
+    with pytest.raises(KeyError):
+        add_beam_interaction_condition(
+            input_file,
+            volume_set,
+            beam_set_1["line"],
+            mpy.bc.beam_to_solid_surface_contact,
+        )
+        assert_results_equal(get_corresponding_reference_file_path(), input_file)
