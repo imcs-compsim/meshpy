@@ -26,6 +26,8 @@ import pytest
 from meshpy.core.conf import mpy
 from meshpy.four_c.header_functions import (
     get_comment,
+    set_beam_contact_runtime_output,
+    set_beam_contact_section,
     set_beam_to_solid_meshtying,
     set_header_static,
     set_runtime_output,
@@ -172,4 +174,29 @@ def test_header_functions_stress_output(
     set_runtime_output(input_file, output_stress_strain=True)
 
     # Check the output.
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+
+
+def test_header_functions_beam_interaction(
+    get_corresponding_reference_file_path, assert_results_equal
+):
+    """Test the beam-to-beam contact header function with default parameter."""
+    # Set default values for global parameters.
+    mpy.set_default_values()
+
+    # Create input file.
+    input_file = InputFile()
+
+    # Add Beam contact section to file.
+    set_beam_contact_section(
+        input_file,
+        binning_cutoff_radius=5,
+        binning_bounding_box=[-1, -2, -3, 1, 2, 3],
+        repartition_strategy="adaptive",
+    )
+
+    # Add per default the runtime output.
+    set_beam_contact_runtime_output(input_file)
+
+    # Compare the output.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
