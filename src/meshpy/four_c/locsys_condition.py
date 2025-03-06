@@ -21,8 +21,14 @@
 # THE SOFTWARE.
 """This file contains the wrapper for the LocSys condition for 4c."""
 
+from typing import List, Optional, Union
+
 from meshpy.core.conf import mpy
+from meshpy.core.geometry_set import GeometrySet
+from meshpy.core.rotation import Rotation
 from meshpy.four_c.boundary_condition import BoundaryCondition
+from meshpy.four_c.function import Function
+from meshpy.four_c.function_utility import ensure_length_of_function_array
 
 
 class LocSysCondition(BoundaryCondition):
@@ -34,25 +40,54 @@ class LocSysCondition(BoundaryCondition):
 
     def __init__(
         self,
-        geometry_set,
-        rotation,
+        geometry_set: GeometrySet,
+        rotation: Rotation,
+        *,
+        function_array: Optional[List[Union[Function, int]]] = None,
+        update_node_position: bool = False,
+        use_consistent_node_normal: bool = False,
         **kwargs,
     ):
         """Initialize the object.
 
-        Args
-        ----
-        geometry_set: GeometrySet
-            Geometry that this boundary condition acts on.
-        rotation: Rotation
-            Object that represents the rotation of the coordinate system.
+        Args:
+            geometry_set: Geometry that this boundary condition acts on
+            rotation: Object that represents the rotation of the coordinate system
+            function_array: List containing functions
+            update_node_position: Flag to enable the updated node position
+            use_consistent_node_normal: Flag to use a consistent node normal
         """
+
+        # Validate provided function array.
+        if function_array is None:
+            function_array = [0, 0, 0]
+        else:
+            function_array = ensure_length_of_function_array(function_array, 3)
+
+        condition_string = (
+            "ROTANGLE {} {} {} ".format(*rotation.get_rotation_vector())
+            + "FUNCT {} {} {} "
+            + f"USEUPDATEDNODEPOS {int(update_node_position)}"
+        )
+
+        # Append the condition string with consistent normal type for line and surface geometry
+        if (
+            geometry_set.geometry_type is mpy.geo.line
+            or geometry_set.geometry_type is mpy.geo.surface
+        ):
+            condition_string = (
+                condition_string
+                + f" USECONSISTENTNODENORMAL {int(use_consistent_node_normal)}"
+            )
+        elif use_consistent_node_normal:
+            raise ValueError(
+                "The keyword use_consistent_node_normal only works for line and surface geometries."
+            )
 
         super().__init__(
             geometry_set,
-            "ROTANGLE {} {} {} FUNCT 0 0 0 USEUPDATEDNODEPOS 0 USECONSISTENTNODENORMAL 0".format(
-                *rotation.get_rotation_vector()
-            ),
+            bc_string=condition_string,
             bc_type=mpy.bc.locsys,
+            format_replacement=function_array,
             **kwargs,
         )

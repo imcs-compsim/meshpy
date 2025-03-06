@@ -10,14 +10,24 @@
 MAT 1 MAT_BeamReissnerElastHyper YOUNG -1.0 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 3.141592653589793 SHEARCORR 1 MOMINPOL 1.5707963267948966 MOMIN2 0.7853981633974483 MOMIN3 0.7853981633974483
 --------------------------------------------------------------------------FUNCT1
 SYMBOLIC_FUNCTION_OF_SPACE_TIME t
+--------------------------------------------------------------------------FUNCT2
+SYMBOLIC_FUNCTION_OF_SPACE_TIME 2.0*t
 --------------------------------------------------DESIGN POINT DIRICH CONDITIONS
 E 1 NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0 0 0 0
 E 2 NUMDOF 9 ONOFF 1 0 0 0 0 0 0 0 0 VAL 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 1 0 0 0 0 0 0 0 0
 --------------------------------------------------DESIGN POINT LOCSYS CONDITIONS
-E 2 ROTANGLE 0.0 0.0 0.1 FUNCT 0 0 0 USEUPDATEDNODEPOS 0 USECONSISTENTNODENORMAL 0
+E 2 ROTANGLE 0.0 0.0 0.1 FUNCT 0 0 0 USEUPDATEDNODEPOS 0
+E 3 ROTANGLE 0.0 0.0 0.1 FUNCT 1 2 2 USEUPDATEDNODEPOS 1
+---------------------------------------------------DESIGN LINE LOCSYS CONDITIONS
+E 1 ROTANGLE 0.0 0.0 0.1 FUNCT 2 2 2 USEUPDATEDNODEPOS 1 USECONSISTENTNODENORMAL 1
 -------------------------------------------------------------DNODE-NODE TOPOLOGY
 NODE 1 DNODE 1
 NODE 3 DNODE 2
+NODE 1 DNODE 3
+-------------------------------------------------------------DLINE-NODE TOPOLOGY
+NODE 1 DLINE 1
+NODE 2 DLINE 1
+NODE 3 DLINE 1
 ---------------------------------------------------------------------NODE COORDS
 NODE 1 COORD 2.5 2.5 2.5
 NODE 2 COORD 3.5 2.5 2.5
