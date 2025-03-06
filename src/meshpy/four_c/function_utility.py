@@ -22,6 +22,8 @@
 """This module implements utility functions to create 4C space time
 function."""
 
+from typing import List
+
 import numpy as np
 
 from meshpy.four_c.function import Function
@@ -77,3 +79,26 @@ def create_linear_interpolation_function(
 
     variable_string = create_linear_interpolation_string(t, values, variable_name="var")
     return Function(f"{function_type} var\n" + variable_string)
+
+
+def ensure_length_of_function_array(function_array: List, length: int = 3):
+    """Performs size check of a function array and appends the function array
+    to the given length, if a list with only one item is provided.
+
+    Args:
+        function_array: list with functions
+        length: expected length of function array
+
+    Returns:
+        function_array: list with functions with provided length
+    """
+
+    # extend items of function automatically if it is only provided once
+    if len(function_array) == 1:
+        function_array = function_array * length
+
+    if len(function_array) != length:
+        raise ValueError(
+            f"The function array must have length {length} not {len(function_array)}."
+        )
+    return function_array

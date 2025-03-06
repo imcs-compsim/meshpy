@@ -32,6 +32,7 @@ from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.function import Function
 from meshpy.four_c.function_utility import (
     create_linear_interpolation_function,
+    ensure_length_of_function_array,
 )
 from meshpy.four_c.input_file import InputFile
 
@@ -176,15 +177,7 @@ def add_point_neuman_condition_to_input_file(
             f"The forces vector must have dimensions [3x1] not [{force.size}x1]"
         )
 
-    # repeat function automatically if it is only provided once
-    if len(function_array) == 1:
-        function_array.append(function_array[0])
-        function_array.append(function_array[0])
-
-    if len(function_array) != 3:
-        raise ValueError(
-            f"The function array must have length 3 not {len(function_array)}."
-        )
+    function_array = ensure_length_of_function_array(function_array, 3)
 
     # Add the function to the input file, if they are not previously added.
     for function in function_array:
