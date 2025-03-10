@@ -25,19 +25,21 @@ tolerance of each other will be considered as unique."""
 from enum import Enum as _Enum
 from enum import auto as _auto
 
-from meshpy.geometric_search.geometric_search_scipy import (
+from meshpy.geometric_search.scipy import (
     find_close_points_scipy as _find_close_points_scipy,
 )
 from meshpy.geometric_search.utils import arborx_is_available as _arborx_is_available
 from meshpy.geometric_search.utils import cython_is_available as _cython_is_available
 
 if _cython_is_available():
-    from meshpy.geometric_search.geometric_search_cython import (
-        find_close_points_brute_force_cython,
+    from meshpy.geometric_search.cython import (
+        find_close_points_brute_force_cython as _find_close_points_brute_force_cython,
     )
 
 if _arborx_is_available():
-    from meshpy.geometric_search.geometric_search_arborx import find_close_points_arborx
+    from meshpy.geometric_search.arborx import (
+        find_close_points_arborx as _find_close_points_arborx,
+    )
 
 
 class FindClosePointAlgorithm(_Enum):

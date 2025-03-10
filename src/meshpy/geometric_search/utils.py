@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 """Helper functions for the geometric search module."""
 
-import importlib.util
+from importlib.util import find_spec as _find_spec
 
 
 def arborx_is_available() -> bool:
@@ -31,10 +31,7 @@ def arborx_is_available() -> bool:
         True if ArborX is installed, False otherwise
     """
 
-    if (
-        importlib.util.find_spec("meshpy.geometric_search.geometric_search_arborx_lib")
-        is None
-    ):
+    if _find_spec("meshpy.geometric_search.arborx_lib") is None:
         return False
     return True
 
@@ -46,9 +43,6 @@ def cython_is_available() -> bool:
         True if Cython is installed, False otherwise
     """
 
-    if (
-        importlib.util.find_spec("meshpy.geometric_search.geometric_search_cython_lib")
-        is None
-    ):
+    if _find_spec("meshpy.geometric_search.cython_lib") is None:
         return False
     return True

@@ -19,44 +19,32 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This file defines the interface to the ArborX geometric search
+"""This file defines the interface to the Cython geometric search
 functionality."""
 
-from meshpy.geometric_search.utils import arborx_is_available as _arborx_is_available
+import warnings as _warnings
 
-if _arborx_is_available():
-    from meshpy.geometric_search.geometric_search_arborx_lib import (
+from meshpy.geometric_search.utils import cython_is_available as _cython_is_available
+
+if _cython_is_available():
+    from meshpy.geometric_search.cython_lib import (
         find_close_points as _find_close_points,
     )
-    from meshpy.geometric_search.geometric_search_arborx_lib import (
-        kokkos_finalize as _kokkos_finalize,
-    )
-    from meshpy.geometric_search.geometric_search_arborx_lib import (
-        kokkos_initialize as _kokkos_initialize,
-    )
 
 
-class KokkosScopeGuardWrapper:
-    """Wrap the initialize and finalize calls to Kokkos."""
-
-    def __init__(self):
-        """Call initialize when this object is created."""
-        _kokkos_initialize()
-
-    def __del__(self):
-        """Finalize Kokkos after this object goes out of scope, i.e., at the
-        end of this modules lifetime."""
-        _kokkos_finalize()
-
-
-if _arborx_is_available():
-    # Create the scope guard
-    kokkos_scope_guard_wrapper = KokkosScopeGuardWrapper()
-
-
-def find_close_points_arborx(point_coordinates, tol):
-    """Call the ArborX implementation of find close_points."""
-    if _arborx_is_available():
+def find_close_points_brute_force_cython(
+    point_coordinates, tol, *, n_points_performance_warning=5000
+):
+    """Call the Cython brute force implementation of find close_points."""
+    if _cython_is_available():
+        n_points = len(point_coordinates)
+        if n_points > n_points_performance_warning:
+            _warnings.warn(
+                "The function find_close_points is called with the brute force algorithm "
+                + f"with {n_points} points, for performance reasons other algorithms should be used!"
+            )
         return _find_close_points(point_coordinates, tol)
     else:
-        raise ModuleNotFoundError("ArborX functionality is not available")
+        raise ModuleNotFoundError(
+            "Cython geometric search functionality is not available"
+        )
