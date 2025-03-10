@@ -189,13 +189,18 @@ If you intend to actively develop `meshpy`, install it in *editable mode* and wi
 ```bash
 pip install -e .[dev]
 ```
-
 >Note: In some shells (e.g., `zsh`) quotation marks are required `pip install -e ".[dev]"`
 
 If `cython` code is changed, it has to be recompiled. This can be done by running (in the root directory)
 ```bash
 python setup.py build_ext --inplace
 ```
+
+If you intend to use CubitPy install the additional dependency with
+```bash
+pip install .[cubitpy]
+```
+>Note: This can also be combined with the development dependencies or an editable install with `pip install -e .[cubitpy,dev]`
 
 To check if everything worked as expected, run the standard tests with
 ```bash
@@ -208,7 +213,7 @@ These can be arbitrarily combined, for example
 pytest --CubitPy --performance-tests
 ```
 executes the standard tests, the CubitPy tests and the performance tests.
-Note: the reference time values for the performance tests might not suite your system.
+>Note: the reference time values for the performance tests might not suite your system.
 
 We can also run tests in combination with 4C
 ```bash
@@ -245,7 +250,7 @@ make -j4
 
 If the ArborX extension is working correctly can be checked by running the geometric search tests
 ```bash
-pytest --ArborX
+pytest --ArborX --exclude-standard-tests
 ```
 
 ## Contributing
@@ -273,8 +278,8 @@ A few things to keep in mind:
 ## Authors
 
 ### Maintainers <!-- omit from toc -->
-Ivo Steinbrecher (@isteinbrecher)
-David Rudlstorfer (@davidrudlstorfer)
+- Ivo Steinbrecher (@isteinbrecher)
+- David Rudlstorfer (@davidrudlstorfer)
 
 ### Contributors (in alphabetical order) <!-- omit from toc -->
 - Dao Viet Anh
