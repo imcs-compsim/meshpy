@@ -43,9 +43,10 @@ class NodeCosseratSpaceTime(NodeCosserat):
     We add the 4th dimension time as a class variable.
     """
 
-    def __init__(self, coordinates, rotation, time, **kwargs):
+    def __init__(self, coordinates, rotation, time, *, arc_length=None, **kwargs):
         super().__init__(coordinates, rotation, **kwargs)
         self.time = time
+        self.arc_length = arc_length
 
     def _get_dat(self):
         """Return the line that represents this node in the input file.
@@ -209,10 +210,33 @@ def beam_to_space_time(
         else:
             mesh_space_current_time = mesh_space_reference
 
-        space_time_nodes_to_add = [
-            NodeCosseratSpaceTime(node.coordinates, node.rotation, time)
-            for node in mesh_space_current_time.nodes
-        ]
+        # For some space-time formulations it is required that the
+        # pre-processing provides the arc-length along a beam filament.
+        # Since the basic space meshes here contain nodes that don't have the
+        # arc_length attribute by default, we have to do the following check
+        # and branching.
+        # TODO: Think if it makes sense to somehow add this as a member to the
+        # default Node object.
+        nodes_have_arc_length_attribute = {
+            hasattr(node, "arc_length") for node in mesh_space_current_time.nodes
+        }
+        if not len(nodes_have_arc_length_attribute) == 1:
+            raise ValueError(
+                "There are some nodes in the mesh with the arc_length attribute and "
+                "some without it. This is not supported."
+            )
+        if nodes_have_arc_length_attribute.pop():
+            space_time_nodes_to_add = [
+                NodeCosseratSpaceTime(
+                    node.coordinates, node.rotation, time, arc_length=node.arc_length
+                )
+                for node in mesh_space_current_time.nodes
+            ]
+        else:
+            space_time_nodes_to_add = [
+                NodeCosseratSpaceTime(node.coordinates, node.rotation, time)
+                for node in mesh_space_current_time.nodes
+            ]
         space_time_nodes.extend(space_time_nodes_to_add)
 
         if i_mesh_space == 0:
@@ -355,10 +379,25 @@ def mesh_to_data_arrays(mesh: Mesh):
                 [node.i_global for node in geometry_set.get_all_nodes()]
             )
 
-    return {
+    return_dict = {
         "coordinates": coordinates,
         "time": time,
         "connectivity": connectivity,
         "element_rotation_vectors": element_rotation_vectors,
         "node_sets": node_sets,
     }
+
+    # We assume that either all nodes have an arc_length or no one.
+    # This is checked in the beam_to_space_time function.
+    if mesh.nodes[0].arc_length is not None:
+        # The arc length is added as an "element" property, since the same
+        # node can have a different arc length depending on the element
+        # (similar to the rotation vectors).
+        arc_length = np.zeros((n_elements, n_nodes_per_element))
+        for i_element, element in enumerate(mesh.elements):
+            for i_node, node in enumerate(element.nodes):
+                connectivity[i_element, i_node] = node.i_global
+                arc_length[i_element, i_node] = node.arc_length
+        return_dict["arc_length"] = arc_length
+
+    return return_dict
