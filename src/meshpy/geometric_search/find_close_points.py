@@ -24,16 +24,16 @@ tolerance of each other will be considered as unique."""
 
 from enum import Enum, auto
 
-from meshpy.geometric_search.geometric_search_cython import cython_available
-from meshpy.geometric_search.geometric_search_scipy import find_close_points_scipy
+from meshpy.geometric_search.scipy import find_close_points_scipy
+from meshpy.geometric_search.utils import arborx_is_available, cython_is_available
 
-if cython_available:
-    from .geometric_search_cython import find_close_points_brute_force_cython
+if cython_is_available():
+    from meshpy.geometric_search.cython import (
+        find_close_points_brute_force_cython,
+    )
 
-from .geometric_search_arborx import arborx_available
-
-if arborx_available:
-    from .geometric_search_arborx import find_close_points_arborx
+if arborx_is_available():
+    from meshpy.geometric_search.arborx import find_close_points_arborx
 
 
 class FindClosePointAlgorithm(Enum):
@@ -135,10 +135,10 @@ def find_close_points(point_coordinates, *, algorithm=None, tol=1e-8, **kwargs):
 
     if algorithm is None:
         # Decide which algorithm to use
-        if n_points < 200 and cython_available:
+        if n_points < 200 and cython_is_available():
             # For around 200 points the brute force cython algorithm is the fastest one
             algorithm = FindClosePointAlgorithm.brute_force_cython
-        elif arborx_available:
+        elif arborx_is_available():
             # For general problems with n_points > 200 the ArborX implementation is the fastest one
             algorithm = FindClosePointAlgorithm.boundary_volume_hierarchy_arborx
         else:
