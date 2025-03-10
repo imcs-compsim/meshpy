@@ -51,7 +51,7 @@ MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulat
 - [Installation](#installation)
   - [Optional dependency on ArborX](#optional-dependency-on-arborx)
 - [Contributing](#contributing)
-- [Contributors](#contributors)
+- [Authors](#authors)
 
 ## Examples
 
@@ -187,8 +187,10 @@ pip install .
 If you intend to actively develop `meshpy`, install it in *editable mode* and with all dependencies required for developing MeshPy.
 
 ```bash
-pip install -e ".[CI-CD]"
+pip install -e .[dev]
 ```
+
+>Note: In some shells (e.g., `zsh`) quotation marks are required `pip install -e ".[dev]"`
 
 If `cython` code is changed, it has to be recompiled. This can be done by running (in the root directory)
 ```bash
@@ -268,10 +270,11 @@ A few things to keep in mind:
 - Feel free to add yourself to the contributors section in the [README.md](https://github.com/imcs-compsim/meshpy/blob/main/README.md) file.
 
 
-## Contributors
+## Authors
 
-### Main developer <!-- omit from toc -->
+### Maintainers <!-- omit from toc -->
 Ivo Steinbrecher (@isteinbrecher)
+David Rudlstorfer (@davidrudlstorfer)
 
 ### Contributors (in alphabetical order) <!-- omit from toc -->
 - Dao Viet Anh
@@ -280,4 +283,3 @@ Ivo Steinbrecher (@isteinbrecher)
 - Nora Hagmeyer (@NoraHagmeyer)
 - Matthias Mayr (@mayrmt)
 - Gabriela Loera (@eulovi)
-- David Rudlstorfer (@davidrudlstorfer)
