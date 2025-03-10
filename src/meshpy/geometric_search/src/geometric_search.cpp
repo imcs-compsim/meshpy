@@ -43,10 +43,10 @@ namespace GeometricSearch
 
 
 /**
- * @brief Construct the geometric_search_arborx_lib pybind11 module object
+ * @brief Construct the arborx_lib pybind11 module object
  *
  */
-PYBIND11_MODULE(geometric_search_arborx_lib, py_module)
+PYBIND11_MODULE(arborx_lib, py_module)
 {
     py_module.doc() = "Python wrapper for ArborX";
     py_module.def("kokkos_initialize", &GeometricSearch::kokkos_initialize, "Initialize Kokkos");

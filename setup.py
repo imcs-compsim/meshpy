@@ -30,8 +30,8 @@ from setuptools import Extension, setup
 
 extensions = [
     Extension(
-        "meshpy.geometric_search.geometric_search_cython_lib",
-        ["src/meshpy/geometric_search/geometric_search_cython_lib.pyx"],
+        "meshpy.geometric_search.cython_lib",
+        ["src/meshpy/geometric_search/cython_lib.pyx"],
         include_dirs=[np.get_include()],
     )
 ]

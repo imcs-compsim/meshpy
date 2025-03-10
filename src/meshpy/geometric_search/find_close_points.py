@@ -24,16 +24,16 @@ tolerance of each other will be considered as unique."""
 
 from enum import Enum, auto
 
-from meshpy.geometric_search.geometric_search_scipy import find_close_points_scipy
+from meshpy.geometric_search.scipy import find_close_points_scipy
 from meshpy.geometric_search.utils import arborx_is_available, cython_is_available
 
 if cython_is_available():
-    from meshpy.geometric_search.geometric_search_cython import (
+    from meshpy.geometric_search.cython import (
         find_close_points_brute_force_cython,
     )
 
 if arborx_is_available():
-    from meshpy.geometric_search.geometric_search_arborx import find_close_points_arborx
+    from meshpy.geometric_search.arborx import find_close_points_arborx
 
 
 class FindClosePointAlgorithm(Enum):

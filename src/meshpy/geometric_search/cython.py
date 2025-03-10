@@ -27,7 +27,7 @@ import warnings
 from meshpy.geometric_search.utils import cython_is_available
 
 if cython_is_available():
-    from meshpy.geometric_search.geometric_search_cython_lib import find_close_points
+    from meshpy.geometric_search.cython_lib import find_close_points
 
 
 def find_close_points_brute_force_cython(

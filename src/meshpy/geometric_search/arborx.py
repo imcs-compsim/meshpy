@@ -25,7 +25,7 @@ functionality."""
 from meshpy.geometric_search.utils import arborx_is_available
 
 if arborx_is_available():
-    from meshpy.geometric_search.geometric_search_arborx_lib import (
+    from meshpy.geometric_search.arborx_lib import (
         find_close_points,
         kokkos_finalize,
         kokkos_initialize,
