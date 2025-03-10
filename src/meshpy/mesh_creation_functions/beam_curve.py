@@ -21,7 +21,11 @@
 # THE SOFTWARE.
 """This file has functions to create a beam from a parametric curve."""
 
+import autograd.numpy as npAD
 import numpy as np
+import scipy.integrate as integrate
+import scipy.optimize as optimize
+from autograd import jacobian
 
 from meshpy.core.conf import mpy
 from meshpy.core.rotation import Rotation, smallest_rotation
@@ -89,12 +93,6 @@ def create_beam_mesh_curve(
         Set with the 'start' and 'end' node of the curve. Also a 'line' set
         with all nodes of the curve.
     """
-
-    # Packages for AD and numerical integration.
-    import autograd.numpy as npAD
-    import scipy.integrate as integrate
-    import scipy.optimize as optimize
-    from autograd import jacobian
 
     # Check size of position function
     if len(function(interval[0])) == 2:
