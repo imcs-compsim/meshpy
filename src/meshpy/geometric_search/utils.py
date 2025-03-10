@@ -19,30 +19,36 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This file defines the interface to the Cython geometric search
-functionality."""
+"""Helper functions for the geometric search module."""
 
-import warnings as _warnings
-
-from meshpy.geometric_search.utils import cython_is_available as _cython_is_available
-
-if _cython_is_available():
-    from meshpy.geometric_search.geometric_search_cython_lib import find_close_points
+import importlib.util
 
 
-def find_close_points_brute_force_cython(
-    point_coordinates, tol, *, n_points_performance_warning=5000
-):
-    """Call the Cython brute force implementation of find close_points."""
-    if _cython_is_available():
-        n_points = len(point_coordinates)
-        if n_points > n_points_performance_warning:
-            _warnings.warn(
-                "The function find_close_points is called with the brute force algorithm "
-                + f"with {n_points} points, for performance reasons other algorithms should be used!"
-            )
-        return find_close_points(point_coordinates, tol)
-    else:
-        raise ModuleNotFoundError(
-            "Cython geometric search functionality is not available"
-        )
+def arborx_is_available() -> bool:
+    """Check if ArborX is available.
+
+    Returns:
+        True if ArborX is installed, False otherwise
+    """
+
+    if (
+        importlib.util.find_spec("meshpy.geometric_search.geometric_search_arborx_lib")
+        is None
+    ):
+        return False
+    return True
+
+
+def cython_is_available() -> bool:
+    """Check if Cython is available.
+
+    Returns:
+        True if Cython is installed, False otherwise
+    """
+
+    if (
+        importlib.util.find_spec("meshpy.geometric_search.geometric_search_cython_lib")
+        is None
+    ):
+        return False
+    return True

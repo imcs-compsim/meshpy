@@ -19,30 +19,31 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This file defines the interface to the Cython geometric search
-functionality."""
+"""Test environment utils of MeshPy."""
 
-import warnings as _warnings
+from unittest.mock import patch
 
-from meshpy.geometric_search.utils import cython_is_available as _cython_is_available
+from meshpy.geometric_search.utils import (
+    arborx_is_available,
+    cython_is_available,
+)
 
-if _cython_is_available():
-    from meshpy.geometric_search.geometric_search_cython_lib import find_close_points
+
+def test_is_arborx_available() -> None:
+    """Test is_arborx_available function."""
+
+    with patch("meshpy.geometric_search.utils._find_spec", return_value=True):
+        assert arborx_is_available() is True
+
+    with patch("meshpy.geometric_search.utils._find_spec", return_value=None):
+        assert arborx_is_available() is False
 
 
-def find_close_points_brute_force_cython(
-    point_coordinates, tol, *, n_points_performance_warning=5000
-):
-    """Call the Cython brute force implementation of find close_points."""
-    if _cython_is_available():
-        n_points = len(point_coordinates)
-        if n_points > n_points_performance_warning:
-            _warnings.warn(
-                "The function find_close_points is called with the brute force algorithm "
-                + f"with {n_points} points, for performance reasons other algorithms should be used!"
-            )
-        return find_close_points(point_coordinates, tol)
-    else:
-        raise ModuleNotFoundError(
-            "Cython geometric search functionality is not available"
-        )
+def test_is_cython_available() -> None:
+    """Test is_cython_available function."""
+
+    with patch("meshpy.geometric_search.utils._find_spec", return_value=True):
+        assert cython_is_available() is True
+
+    with patch("meshpy.geometric_search.utils._find_spec", return_value=None):
+        assert cython_is_available() is False
