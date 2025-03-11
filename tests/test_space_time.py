@@ -168,8 +168,13 @@ def test_space_time_elbow(
 
 @pytest.mark.parametrize("beam_type", [Beam3rLine2Line2, Beam3rHerm2Line3])
 @pytest.mark.parametrize("couple_nodes", [False, True])
+@pytest.mark.parametrize("arc_length", [False, True])
 def test_space_time_varying_material_length(
-    beam_type, couple_nodes, assert_results_equal, get_corresponding_reference_file_path
+    beam_type,
+    couple_nodes,
+    arc_length,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
 ):
     """Create an elbow beam for the tests."""
 
@@ -177,12 +182,25 @@ def test_space_time_varying_material_length(
         """Create the beam mesh in space generator."""
         beam_radius = 0.05
         mat = MaterialReissner(youngs_modulus=100, radius=beam_radius, density=1)
-        mesh = Mesh()
         pos_y = 0.25 * (time - 1.7)
+
+        mesh_1 = Mesh()
         create_beam_mesh_line(
-            mesh, beam_type, mat, [np.sin(time), 0, 0], [2, pos_y, 0], n_el=3
+            mesh_1, beam_type, mat, [np.sin(time), 0, 0], [2, pos_y, 0], n_el=3
         )
-        create_beam_mesh_line(mesh, beam_type, mat, [2, pos_y, 0], [2, 3, 0], n_el=2)
+
+        mesh_2 = Mesh()
+        create_beam_mesh_line(mesh_2, beam_type, mat, [2, pos_y, 0], [2, 3, 0], n_el=2)
+
+        if arc_length:
+            for i_mesh, line_mesh in enumerate([mesh_1, mesh_2]):
+                for i_node, node in enumerate(line_mesh.nodes):
+                    # This is a dummy arc length here, simply to achieve float values that
+                    # are not matching at the corner node.
+                    node.arc_length = i_node / 4.0 + i_mesh
+
+        mesh = Mesh()
+        mesh.add(mesh_1, mesh_2)
         if couple_nodes:
             mesh.couple_nodes(coupling_dof_type=mpy.coupling_dof.fix)
         return mesh
@@ -196,7 +214,11 @@ def test_space_time_varying_material_length(
     space_time_mesh.add(return_set)
 
     # Check the mesh data arrays
-    additional_identifier = get_name(beam_type) + ("_coupling" if couple_nodes else "")
+    additional_identifier = (
+        get_name(beam_type)
+        + ("_coupling" if couple_nodes else "")
+        + ("_arc_length" if arc_length else "")
+    )
     mesh_data_arrays = mesh_to_data_arrays(space_time_mesh)
     assert_results_equal(
         get_corresponding_reference_file_path(
