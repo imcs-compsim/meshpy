@@ -27,6 +27,7 @@ import autograd.numpy as npAD
 import numpy as np
 import pytest
 import splinepy
+from autograd import jacobian
 
 from meshpy.core.conf import mpy
 from meshpy.core.mesh import Mesh
@@ -838,9 +839,6 @@ def test_mesh_creation_functions_curve_3d_curve_rotation(
     assert_results_equal, get_corresponding_reference_file_path
 ):
     """Create a line from a parametric curve and prescribe the rotation."""
-
-    # AD.
-    from autograd import jacobian
 
     # Create input file.
     input_file = InputFile()
