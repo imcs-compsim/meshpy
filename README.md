@@ -49,6 +49,8 @@ MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulat
 - [How to cite MeshPy?](#how-to-cite-meshpy)
 - [Work that uses MeshPy](#work-that-uses-meshpy)
 - [Installation](#installation)
+  - [Python environment](#python-environment)
+  - [Install MeshPy from source](#install-meshpy-from-source)
 - [Optional dependencies](#optional-dependencies)
   - [4C](#4c)
   - [CubitPy](#cubitpy)
@@ -155,9 +157,9 @@ interaction, <https://athene-forschung.unibw.de/143755>, (2022)</span>
 
 ## Installation
 
-MeshPy is tested with, and supports Python versions `3.9-3.12`.
-Other versions of Python might lead to issues.
-It is recommended to use a Python environment container such as [Conda](https://anaconda.org/anaconda/conda)/[Miniforge](https://conda-forge.org/download/) or [venv](https://docs.python.org/3/library/venv.html).
+### Python environment
+
+MeshPy is tested with, and supports Python versions 3.9-3.12. It is recommended to use a virtual Python environment such as [Conda](https://anaconda.org/anaconda/conda)/[Miniforge](https://conda-forge.org/download/) or [venv](https://docs.python.org/3/library/venv.html).
 - A [Conda](https://anaconda.org/anaconda/conda)/[Miniforge](https://conda-forge.org/download/) environment can be created and loaded with
   ```bash
   # Create the environment (this only has to be done once)
@@ -174,25 +176,24 @@ It is recommended to use a Python environment container such as [Conda](https://
   source <path-to-env-folder>/meshpy-env/bin/activate
   ```
 
-From now on, we assume that the previously created environment is loaded.
-To install MeshPy go to the repository root directory
+### Install MeshPy from source
+
+You can install MeshPy directly from the source:
 ```bash
-cd <path_to_meshpy>
+git clone git@github.com:imcs-compsim/meshpy.git
+cd meshpy
+# Install MeshPy in the basic variant
+pip install -e .
+# Install MeshPy in the development variant
+pip install -e ".[dev]" # Quotation marks are required for some shells
 ```
 
-Install MeshPy via `pip`
+Now you are able to use MeshPy. A good way to get started is by going through the examples
 ```bash
-pip install .
+jupyter notebook examples/
 ```
 
-If you intend to actively develop MeshPy, install it in *editable mode* and with all dependencies required for developing MeshPy
-
-```bash
-pip install -e .[dev]
-```
-> Note: In some shells (e.g., `zsh`) quotation marks are required `pip install -e ".[dev]"`
-
-To check if everything worked as expected, run the standard test suite with (in the root directory)
+You can also run the MeshPy test suite to check that everything worked as expected (requires MeshPy to be installed with the `[dev]` dependencies)
 ```bash
 pytest
 ```
@@ -201,12 +202,7 @@ pytest
 
 ### [4C](https://www.4c-multiphysics.org)
 
-MeshPy can run 4C simulations directly from within a Python script, allowing for full control over arbitrarily complex simulation workflows. Fore more information, please have a look at the `meshpy.four_c.run_four_c` module. The MeshPy test suite including the 4C tests can be run with (in the root directory)
-```bash
-# 4C Tests require a path to a 4C executable
-export MESHPY_FOUR_C_EXE=<path_to_4C>
-pytest --4C
-```
+MeshPy can run 4C simulations directly from within a Python script, allowing for full control over arbitrarily complex simulation workflows. Fore more information, please have a look at the `meshpy.four_c.run_four_c` module.
 
 ### [CubitPy](https://github.com/imcs-compsim/cubitpy)
 
@@ -214,13 +210,7 @@ CubitPy is a Python library that contains utility functions extending the Cubit/
 
 CubitPy can be installed as an optional dependency with:
 ```bash
-pip install .[cubitpy]
-```
-The MeshPy test suite including the CubitPy tests can be run with (in the root directory)
-```bash
-# CubitPy Tests require a path to a Cubit/Coreform installation
-export CUBIT_ROOT=<path_to_4C>
-pytest --CubitPy
+pip install -e .[cubitpy]
 ```
 
 ### [ArborX](https://github.com/arborx/ArborX) geometric search
@@ -242,10 +232,7 @@ cd <path_to_meshpy>/build/geometric_search
 cmake ../../meshpy/geometric_search/src/
 make -j4
 ```
-The MeshPy test suite including the ArborX tests can be run with (in the root directory)
-```bash
-pytest --ArborX
-```
+> Note: Currently ArborX only works if MeshPy is installed in _editable_ mode.
 
 ## Developing MeshPy
 
@@ -258,14 +245,19 @@ MeshPy provides a flexible testing system where additional tests can be enabled 
  - `--CubitPy`: Runs tests for CubitPy integration
  - `--performance-tests`: Includes performance tests
 
-These flags can be combined arbitrarily; for example, to run the 4C and ArborX tests but exclude the default test suite, use:
+These flags can be combined arbitrarily; for example, to run the 4C, CubitPy, and ArborX tests but exclude the default test suite, use:
 ```bash
-pytest --4C --ArborX --exclude-standard-tests
+# 4C Tests require a path to a 4C executable
+export MESHPY_FOUR_C_EXE=<path_to_4C>
+# CubitPy Tests require a path to a Cubit/Coreform installation
+export CUBIT_ROOT=<path_to_Cubit_or_Coreform>
+
+pytest --4C --ArborX --CubitPy --exclude-standard-tests
 ```
 
 ### Cython geometric search
 
-Some performance critical geometric search algorithms in MeshPy are written in [Cython](https://cython.readthedocs.io/en/stable/index.html). If Cython code is changed, it has to be recompiled. This can be done by running (in the root directory)
+Some performance critical geometric search algorithms in MeshPy are written in [Cython](https://cython.readthedocs.io/en/stable/index.html). If Cython code is changed, it has to be recompiled. This can be done by running
 ```bash
 python setup.py build_ext --inplace
 ```
@@ -280,16 +272,16 @@ Depending on the topic and amount of changes you also might want to open an [iss
 To merge your changes into the MeshPy repository, create a pull request to the `main` branch.
 A few things to keep in mind:
 - It is highly encouraged to add tests covering the functionality of your changes, see the test suite in `tests/`.
-- To maintain high code quality, MeshPy uses a number of different pre-commit hooks to check committed code. Make sure to set up the pre-commit hooks before committing your changes (run in the repository root folder):
+- To maintain high code quality, MeshPy uses a number of different pre-commit hooks to check committed code. Make sure to set up the pre-commit hooks before committing your changes
   ```bash
   pre-commit install
   ```
 - Check that you did not break anything by running the MeshPy tests.
-  For most changes it should be sufficient to run the standard test suite (run in the repository root folder):
+  For most changes it should be sufficient to run the standard test suite:
   ```bash
   pytest
   ```
-- Feel free to add yourself to the contributors section in the [README.md](https://github.com/imcs-compsim/meshpy/blob/main/README.md) file.
+- Feel free to add yourself to the authors section in the [README.md](https://github.com/imcs-compsim/meshpy/blob/main/README.md) file.
 
 
 ## Authors
