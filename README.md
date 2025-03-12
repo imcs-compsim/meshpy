@@ -56,6 +56,7 @@ MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulat
   - [CubitPy](#cubitpy)
   - [ArborX geometric search](#arborx-geometric-search)
 - [Developing MeshPy](#developing-meshpy)
+  - [Coding guidelines](#coding-guidelines)
   - [Testing](#testing)
   - [Cython geometric search](#cython-geometric-search)
 - [Contributing](#contributing)
@@ -235,6 +236,10 @@ make -j4
 > Note: Currently ArborX only works if MeshPy is installed in _editable_ mode.
 
 ## Developing MeshPy
+
+### Coding guidelines
+
+- When working on MeshPy, use a leading underscore (`_`) to indicate functions, classes, and variables that are intended for internal use only. This is a coding convention rather than an enforced rule, so apply it where it improves code clarity, especially for functions that check consistency or modify internal states.
 
 ### Testing
 
