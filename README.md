@@ -111,6 +111,12 @@ Feel free to leave a ⭐️ on [GitHub](https://github.com/imcs-compsim/meshpy).
 
 ### Peer-reviewed articles <!-- omit from toc -->
 
+1. </span><span class="csl-right-inline">Datz, J.C., Steinbrecher, I.,
+Meier, C., Engel, L.C., Popp, A., Pfaller, M.R., Schunkert, H., Wall, W.A.:
+Patient-specific coronary angioplasty simulations — A mixed-dimensional
+finite element modeling approach. Computers in Biology and Medicine. 189,
+109914 (2025).
+<https://doi.org/10.1016/j.compbiomed.2025.109914></span>
 1. </span><span class="csl-right-inline">Firmbach, M., Steinbrecher, I.,
 Popp, A., Mayr, M.: An approximate block factorization preconditioner
 for mixed-dimensional beam-solid interaction. Computer Methods in
