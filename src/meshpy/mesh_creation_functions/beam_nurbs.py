@@ -21,10 +21,12 @@
 # THE SOFTWARE.
 """Create a beam filament from a NURBS curve represented with splinepy."""
 
-import numpy as np
+import numpy as _np
 
-from meshpy.core.conf import mpy
-from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
+from meshpy.core.conf import mpy as _mpy
+from meshpy.mesh_creation_functions.beam_curve import (
+    create_beam_mesh_curve as _create_beam_mesh_curve,
+)
 
 
 def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
@@ -57,11 +59,11 @@ def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
     """
 
     if tol is None:
-        tol = mpy.eps_pos
+        tol = _mpy.eps_pos
 
     knot_vector = curve.knot_vectors[0]
-    curve_start = np.min(knot_vector)
-    curve_end = np.max(knot_vector)
+    curve_start = _np.min(knot_vector)
+    curve_end = _np.max(knot_vector)
 
     def eval_r(t):
         """Evaluate the position along the curve."""
@@ -77,15 +79,15 @@ def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
 
         if curve_start <= t <= curve_end:
             return eval_r(t)
-        elif t < curve_start and np.abs(t - curve_start) < tol:
+        elif t < curve_start and _np.abs(t - curve_start) < tol:
             diff = t - curve_start
             return eval_r(curve_start) + diff * eval_rp(curve_start)
-        elif t > curve_end and np.abs(t - curve_end) < tol:
+        elif t > curve_end and _np.abs(t - curve_end) < tol:
             diff = t - curve_end
             return eval_r(curve_end) + diff * eval_rp(curve_end)
         raise ValueError(
             "Can not evaluate the curve function outside of the interval (plus tolerances).\n"
-            f"Abs diff start: {np.abs(curve_start - t)}\nAbs diff end: {np.abs(t - curve_end)}"
+            f"Abs diff start: {_np.abs(curve_start - t)}\nAbs diff end: {_np.abs(t - curve_end)}"
         )
 
     def jacobian(t):
@@ -148,7 +150,7 @@ def create_beam_mesh_from_nurbs(
     ) = get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=tol)
 
     # Create the beams
-    return create_beam_mesh_curve(
+    return _create_beam_mesh_curve(
         mesh,
         beam_object,
         material,

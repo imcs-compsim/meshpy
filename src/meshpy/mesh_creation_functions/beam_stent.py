@@ -21,16 +21,19 @@
 # THE SOFTWARE.
 """This file has functions to create a stent according to Auricchio 2012."""
 
-import numpy as np
+import numpy as _np
 
-from meshpy.core.geometry_set import GeometryName, GeometrySet
-from meshpy.core.mesh import Mesh
-from meshpy.core.rotation import Rotation
+from meshpy.core.geometry_set import GeometryName as _GeometryName
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.core.rotation import Rotation as _Rotation
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
-    create_beam_mesh_arc_segment_via_rotation,
-    create_beam_mesh_line,
+    create_beam_mesh_arc_segment_via_rotation as _create_beam_mesh_arc_segment_via_rotation,
 )
-from meshpy.utils.nodes import get_min_max_nodes
+from meshpy.mesh_creation_functions.beam_basic_geometry import (
+    create_beam_mesh_line as _create_beam_mesh_line,
+)
+from meshpy.utils.nodes import get_min_max_nodes as _get_min_max_nodes
 
 
 def create_stent_cell(
@@ -41,7 +44,7 @@ def create_stent_cell(
     fac_bottom=0.6,
     fac_neck=0.55,
     fac_radius=0.36,
-    alpha=0.46 * np.pi,
+    alpha=0.46 * _np.pi,
     S1=True,
     S2=True,
     S3=True,
@@ -80,17 +83,17 @@ def create_stent_cell(
         A mesh with this structure
     """
 
-    mesh = Mesh()
+    mesh = _Mesh()
 
     def add_line(pointa, pointb, n_el_line):
         """Shortcut to add line."""
-        return create_beam_mesh_line(
+        return _create_beam_mesh_line(
             mesh, beam_object, material, pointa, pointb, n_el=n_el_line
         )
 
     def add_segment(center, axis_rotation, radius, angle, n_el_segment):
         """Shortcut to add arc segment."""
-        return create_beam_mesh_arc_segment_via_rotation(
+        return _create_beam_mesh_arc_segment_via_rotation(
             mesh,
             beam_object,
             material,
@@ -107,20 +110,20 @@ def create_stent_cell(
     radius = width * fac_radius
 
     if S1:
-        neck_point = np.array([-neck_width, height * 0.5, 0])
-        d = (height * 0.5 / np.tan(alpha) + bottom_width - neck_width) / np.sin(alpha)
-        CM = np.array([-np.sin(alpha), -np.cos(alpha), 0]) * (d - radius)
-        MO = np.array([np.cos(alpha), -np.sin(alpha), 0]) * np.sqrt(
+        neck_point = _np.array([-neck_width, height * 0.5, 0])
+        d = (height * 0.5 / _np.tan(alpha) + bottom_width - neck_width) / _np.sin(alpha)
+        CM = _np.array([-_np.sin(alpha), -_np.cos(alpha), 0]) * (d - radius)
+        MO = _np.array([_np.cos(alpha), -_np.sin(alpha), 0]) * _np.sqrt(
             radius**2 - (d - radius) ** 2
         )
-        S1_angle = np.pi / 2 + np.arcsin((d - radius) / radius)
+        S1_angle = _np.pi / 2 + _np.arcsin((d - radius) / radius)
         S1_center1 = CM + MO + neck_point
-        S1_axis_rotation1 = Rotation([0, 0, 1], 2 * np.pi - S1_angle - alpha)
+        S1_axis_rotation1 = _Rotation([0, 0, 1], 2 * _np.pi - S1_angle - alpha)
         add_segment(S1_center1, S1_axis_rotation1, radius, S1_angle, n_el)
         add_line([-bottom_width, 0, 0], mesh.nodes[-1].coordinates, 2 * n_el)
 
         S1_center2 = 2 * neck_point - S1_center1
-        S1_axis_rotation2 = Rotation([0, 0, 1], np.pi - alpha - S1_angle)
+        S1_axis_rotation2 = _Rotation([0, 0, 1], _np.pi - alpha - S1_angle)
 
         add_segment(S1_center2, S1_axis_rotation2, radius, S1_angle, n_el)
         add_line(
@@ -128,20 +131,20 @@ def create_stent_cell(
         )
 
     if S3:
-        S3_radius = (width - bottom_width + height * 0.5 / np.tan(alpha)) * np.tan(
+        S3_radius = (width - bottom_width + height * 0.5 / _np.tan(alpha)) * _np.tan(
             alpha / 2
         )
-        S3_center = [-width, height * 0.5, 0] + S3_radius * np.array([0, 1, 0])
-        S3_axis_rotation = Rotation()
-        S3_angle = np.pi - alpha
+        S3_center = [-width, height * 0.5, 0] + S3_radius * _np.array([0, 1, 0])
+        S3_axis_rotation = _Rotation()
+        S3_angle = _np.pi - alpha
         add_segment(S3_center, S3_axis_rotation, S3_radius, S3_angle, n_el)
         add_line(mesh.nodes[-1].coordinates, [-bottom_width, height, 0], 2 * n_el)
 
     if S2:
-        S2_radius = (height * 0.5 / np.tan(alpha) + top_width) * np.tan(alpha * 0.5)
-        S2_center = [0, height * 0.5, 0] - S2_radius * np.array([0, 1, 0])
-        S2_angle = np.pi - alpha
-        S2_axis_rotation = Rotation([0, 0, 1], np.pi)
+        S2_radius = (height * 0.5 / _np.tan(alpha) + top_width) * _np.tan(alpha * 0.5)
+        S2_center = [0, height * 0.5, 0] - S2_radius * _np.array([0, 1, 0])
+        S2_angle = _np.pi - alpha
+        S2_axis_rotation = _Rotation([0, 0, 1], _np.pi)
         add_segment(S2_center, S2_axis_rotation, S2_radius, S2_angle, 2 * n_el)
         add_line(mesh.nodes[-1].coordinates, [-top_width, 0, 0], 2 * n_el)
 
@@ -177,7 +180,7 @@ def create_stent_column(
         A mesh with this structure.
     """
 
-    mesh_column = Mesh()
+    mesh_column = _Mesh()
     for i in range(n_height):
         S1 = True
         S2 = True
@@ -242,7 +245,7 @@ def create_beam_mesh_stent_flat(
         A mesh with this structure
     """
 
-    mesh_flat = Mesh()
+    mesh_flat = _Mesh()
     width = width_flat / n_column / 2
     height = height_flat / n_height
     column_mesh = create_stent_column(
@@ -255,7 +258,7 @@ def create_beam_mesh_stent_flat(
 
     for i in range(n_column // 2):
         for j in range(n_height - 1):
-            create_beam_mesh_line(
+            _create_beam_mesh_line(
                 mesh_flat,
                 beam_object,
                 material,
@@ -263,7 +266,7 @@ def create_beam_mesh_stent_flat(
                 [4 * i * width, (j + 1) * height, 0],
                 n_el=2 * n_el,
             )
-        create_beam_mesh_line(
+        _create_beam_mesh_line(
             mesh_flat,
             beam_object,
             material,
@@ -324,15 +327,15 @@ def create_beam_mesh_stent(
 
     # Set the Parameter for other functions
     height_flat = length
-    width_flat = np.pi * diameter
+    width_flat = _np.pi * diameter
     n_height = n_axis
     n_column = n_circumference
 
     mesh_stent = create_beam_mesh_stent_flat(
         beam_object, material, width_flat, height_flat, n_height, n_column, **kwargs
     )
-    mesh_stent.rotate(Rotation([1, 0, 0], np.pi / 2))
-    mesh_stent.rotate(Rotation([0, 0, 1], np.pi / 2))
+    mesh_stent.rotate(_Rotation([1, 0, 0], _np.pi / 2))
+    mesh_stent.rotate(_Rotation([0, 0, 1], _np.pi / 2))
     mesh_stent.translate([diameter / 2, 0, 0])
     mesh_stent.wrap_around_cylinder()
 
@@ -343,13 +346,13 @@ def create_beam_mesh_stent(
     mesh_stent.couple_nodes(nodes=stent_nodes)
 
     # Get min and max nodes of the honeycomb.
-    min_max_nodes = get_min_max_nodes(stent_nodes)
+    min_max_nodes = _get_min_max_nodes(stent_nodes)
 
     # Return the geometry set.
-    return_set = GeometryName()
+    return_set = _GeometryName()
     return_set["top"] = min_max_nodes["z_max"]
     return_set["bottom"] = min_max_nodes["z_min"]
-    return_set["all"] = GeometrySet(mesh_stent.elements)
+    return_set["all"] = _GeometrySet(mesh_stent.elements)
 
     mesh.add_mesh(mesh_stent)
 

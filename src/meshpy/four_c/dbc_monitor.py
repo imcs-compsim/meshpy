@@ -22,19 +22,21 @@
 """This function converts the DBC monitor log files to Neumann input
 sections."""
 
-from typing import Optional
+from typing import Optional as _Optional
 
-import numpy as np
+import numpy as _np
 
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.four_c.boundary_condition import BoundaryCondition
-from meshpy.four_c.function import Function
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
+from meshpy.four_c.function import Function as _Function
 from meshpy.four_c.function_utility import (
-    create_linear_interpolation_function,
-    ensure_length_of_function_array,
+    create_linear_interpolation_function as _create_linear_interpolation_function,
 )
-from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.function_utility import (
+    ensure_length_of_function_array as _ensure_length_of_function_array,
+)
+from meshpy.four_c.input_file import InputFile as _InputFile
 
 
 def linear_time_transformation(
@@ -45,9 +47,9 @@ def linear_time_transformation(
 
     Args
     ----
-    time: np.array
+    time: _np.array
         array with time values
-    values: np.array
+    values: _np.array
         corresponding values to time
     time_span: [list] with 2 or 3 entries:
         time_span[0:2] defines the time interval to which the initial time interval should be scaled.
@@ -60,12 +62,12 @@ def linear_time_transformation(
 
     # flip values if desired and adjust time
     if flip is True:
-        values = np.flipud(values)
-        time = np.flip(-time) + time[-1]
+        values = _np.flipud(values)
+        time = _np.flip(-time) + time[-1]
 
     # transform time to interval
-    min_t = np.min(time)
-    max_t = np.max(time)
+    min_t = _np.min(time)
+    max_t = _np.max(time)
 
     # scaling/transforming the time into the user defined time
     time = time_span[0] + (time - min_t) * (time_span[1] - time_span[0]) / (
@@ -75,21 +77,21 @@ def linear_time_transformation(
     # ensure that start time is valid
     if valid_start_and_end_point and time[0] > 0.0:
         # add starting time 0
-        time = np.append(0.0, time)
+        time = _np.append(0.0, time)
 
         # add first coordinate again at the beginning of the array
         if len(values.shape) == 1:
-            values = np.append(values[0], values)
+            values = _np.append(values[0], values)
         else:
-            values = np.append(values[0], values).reshape(
+            values = _np.append(values[0], values).reshape(
                 values.shape[0] + 1, values.shape[1]
             )
 
     # repeat last value at provided time point
     if valid_start_and_end_point and len(time_span) > 2:
         if time_span[2] > time_span[1]:
-            time = np.append(time, time_span[2])
-            values = np.append(values, values[-1]).reshape(
+            time = _np.append(time, time_span[2])
+            values = _np.append(values, values[-1]).reshape(
                 values.shape[0] + 1, values.shape[1]
             )
     if not valid_start_and_end_point and len(time_span) > 2:
@@ -139,17 +141,17 @@ def read_dbc_monitor_file(file_path):
     # Get the monitor data.
     data = []
     for line in lines[start_line:]:
-        data.append(np.fromstring(line, dtype=float, sep=" "))
-    data = np.array(data)
+        data.append(_np.fromstring(line, dtype=float, sep=" "))
+    data = _np.array(data)
 
     return nodes, data[:, 1], data[:, 4:7], data[:, 7:]
 
 
 def add_point_neuman_condition_to_input_file(
-    input_file: InputFile,
+    input_file: _InputFile,
     nodes: list[int],
-    function_array: list[Function],
-    force: np.ndarray,
+    function_array: list[_Function],
+    force: _np.ndarray,
     *,
     n_dof: int = 3,
 ):
@@ -165,7 +167,7 @@ def add_point_neuman_condition_to_input_file(
         list containing the ids of the nodes for the condition
     function_array: [function]
         list with functions
-    force: [np.ndarray]
+    force: [_np.ndarray]
         values to scale the function array with
     n_dof: int
         Number of DOFs per node.
@@ -177,7 +179,7 @@ def add_point_neuman_condition_to_input_file(
             f"The forces vector must have dimensions [3x1] not [{force.size}x1]"
         )
 
-    function_array = ensure_length_of_function_array(function_array, 3)
+    function_array = _ensure_length_of_function_array(function_array, 3)
 
     # Add the function to the input file, if they are not previously added.
     for function in function_array:
@@ -185,31 +187,31 @@ def add_point_neuman_condition_to_input_file(
 
     # Create GeometrySet with nodes.
     mesh_nodes = [input_file.nodes[i_node] for i_node in nodes]
-    geo = GeometrySet(mesh_nodes)
+    geo = _GeometrySet(mesh_nodes)
 
     # Create the Boundary Condition.
     extra_dof_zero = " 0" * (n_dof - 3)
-    bc = BoundaryCondition(
+    bc = _BoundaryCondition(
         geo,
         (
             "NUMDOF {n_dof} ONOFF 1 1 1{edz} VAL {data[0]} {data[1]} {data[2]}"
             "{edz} FUNCT {{}} {{}} {{}}{edz}"
         ).format(n_dof=n_dof, data=force, edz=extra_dof_zero),
-        bc_type=mpy.bc.neumann,
+        bc_type=_mpy.bc.neumann,
         format_replacement=function_array,
     )
     input_file.add(bc)
 
 
 def dbc_monitor_to_input_all_values(
-    input_file: InputFile,
+    input_file: _InputFile,
     file_path: str,
     *,
     steps: list[int] = [],
     time_span: list[int] = [0, 1, 2],
-    type: Optional[str] = "linear",
+    type: _Optional[str] = "linear",
     flip_time_values: bool = False,
-    functions: list[Function] = [],
+    functions: list[_Function] = [],
     **kwargs,
 ):
     """Extracts all the force values of the monitored Dirichlet boundary
@@ -297,12 +299,12 @@ def dbc_monitor_to_input_all_values(
         )
 
         # remove first element since it is duplicated zero
-        np.delete(time2, 0)
-        np.delete(force2, 0)
+        _np.delete(time2, 0)
+        _np.delete(force2, 0)
 
         # add the respective force
-        time = np.concatenate((time1, time2[1:]))
-        force = np.concatenate((force1, force2[1:]), axis=0)
+        time = _np.concatenate((time1, time2[1:]))
+        force = _np.concatenate((force1, force2[1:]), axis=0)
 
     else:
         raise ValueError(
@@ -315,7 +317,7 @@ def dbc_monitor_to_input_all_values(
     if not type == "linear":
         for dim in range(force.shape[1]):
             # create a linear function with the force values per dimension
-            fun = create_linear_interpolation_function(
+            fun = _create_linear_interpolation_function(
                 time, force[:, dim], function_type="SYMBOLIC_FUNCTION_OF_TIME"
             )
 
@@ -326,7 +328,7 @@ def dbc_monitor_to_input_all_values(
             functions.append(fun)
 
         # now set forces to 1 since the force values are already extracted in the function's values
-        force = np.zeros_like(force) + 1.0
+        force = _np.zeros_like(force) + 1.0
 
     elif len(functions) != 3:
         raise ValueError("Please provide functions with ")
@@ -338,11 +340,11 @@ def dbc_monitor_to_input_all_values(
 
 
 def dbc_monitor_to_input(
-    input_file: InputFile,
+    input_file: _InputFile,
     file_path: str,
     *,
     step: int = -1,
-    function: Function,
+    function: _Function,
     **kwargs,
 ):
     """Converts the last value of a Dirichlet boundary condition monitor log to

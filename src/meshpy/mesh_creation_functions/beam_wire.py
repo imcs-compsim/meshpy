@@ -21,11 +21,14 @@
 # THE SOFTWARE.
 """Create a steel wire."""
 
-import numpy as np
+import numpy as _np
 
-from meshpy.core.geometry_set import GeometryName, GeometrySet
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
-from meshpy.utils.nodes import check_node_by_coordinate
+from meshpy.core.geometry_set import GeometryName as _GeometryName
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.mesh_creation_functions.beam_basic_geometry import (
+    create_beam_mesh_line as _create_beam_mesh_line,
+)
+from meshpy.utils.nodes import check_node_by_coordinate as _check_node_by_coordinate
 
 
 def create_wire_fibers(
@@ -72,7 +75,7 @@ def create_wire_fibers(
     def create_line(pos_yz):
         """Create a line starting at the yz-plane with the 2D coordinates
         pos_yz."""
-        create_beam_mesh_line(
+        _create_beam_mesh_line(
             mesh,
             beam_object,
             material,
@@ -86,10 +89,10 @@ def create_wire_fibers(
 
     # Create the filaments in the layers.
     for i_angle in range(6):
-        angle = i_angle * np.pi / 3.0
-        direction_radial = np.array([np.cos(angle), np.sin(angle)])
-        angle = i_angle * np.pi / 3.0 + 2.0 * np.pi / 3.0
-        direction_tangential = np.array([np.cos(angle), np.sin(angle)])
+        angle = i_angle * _np.pi / 3.0
+        direction_radial = _np.array([_np.cos(angle), _np.sin(angle)])
+        angle = i_angle * _np.pi / 3.0 + 2.0 * _np.pi / 3.0
+        direction_tangential = _np.array([_np.cos(angle), _np.sin(angle)])
         for i_layer in range(layers):
             for i_tangent in range(i_layer + 1):
                 pos = (
@@ -103,10 +106,10 @@ def create_wire_fibers(
                 create_line(pos)
 
     # Create the sets to return.
-    return_set = GeometryName()
-    start_nodes = mesh.get_nodes_by_function(check_node_by_coordinate, 0, 0.0)
-    end_nodes = mesh.get_nodes_by_function(check_node_by_coordinate, 0, length)
-    return_set["start"] = GeometrySet(start_nodes)
-    return_set["end"] = GeometrySet(end_nodes)
-    return_set["all"] = GeometrySet(mesh.elements)
+    return_set = _GeometryName()
+    start_nodes = mesh.get_nodes_by_function(_check_node_by_coordinate, 0, 0.0)
+    end_nodes = mesh.get_nodes_by_function(_check_node_by_coordinate, 0, length)
+    return_set["start"] = _GeometrySet(start_nodes)
+    return_set["end"] = _GeometrySet(end_nodes)
+    return_set["all"] = _GeometrySet(mesh.elements)
     return return_set

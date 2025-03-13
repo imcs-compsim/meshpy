@@ -22,15 +22,18 @@
 """This module defines the class that is used to create an input file for
 Abaqus."""
 
-from enum import Enum, auto
+from enum import Enum as _Enum
+from enum import auto as _auto
 
-import numpy as np
+import numpy as _np
 
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.core.mesh import Mesh
-from meshpy.core.mesh_utils import get_coupled_nodes_to_master_map
-from meshpy.core.rotation import smallest_rotation
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.core.mesh_utils import (
+    get_coupled_nodes_to_master_map as _get_coupled_nodes_to_master_map,
+)
+from meshpy.core.rotation import smallest_rotation as _smallest_rotation
 
 # Format template for different number types.
 F_INT = "{:6d}"
@@ -73,16 +76,16 @@ def get_set_lines(set_type, items, name):
     return lines
 
 
-class AbaqusBeamNormalDefinition(Enum):
+class AbaqusBeamNormalDefinition(_Enum):
     """Enum for different ways to define the beam cross-section normal."""
 
-    smallest_rotation_of_triad_at_first_node = auto()
+    smallest_rotation_of_triad_at_first_node = _auto()
 
 
 class AbaqusInputFile(object):
     """This class represents an Abaqus input file."""
 
-    def __init__(self, mesh: Mesh):
+    def __init__(self, mesh: _Mesh):
         """Initialize the input file.
 
         Args
@@ -117,7 +120,7 @@ class AbaqusInputFile(object):
         """Generate the string for the Abaqus input file."""
 
         # Perform some checks on the mesh.
-        if mpy.check_overlapping_elements:
+        if _mpy.check_overlapping_elements:
             self.mesh.check_overlapping_elements()
 
         # Assign global indices to all materials
@@ -128,7 +131,9 @@ class AbaqusInputFile(object):
 
         # Add the lines to the input file
         input_file_lines = []
-        input_file_lines.extend(["** " + line for line in mpy.input_file_meshpy_header])
+        input_file_lines.extend(
+            ["** " + line for line in _mpy.input_file_meshpy_header]
+        )
         input_file_lines.extend(self.get_nodes_lines())
         input_file_lines.extend(self.get_element_lines())
         input_file_lines.extend(self.get_material_lines())
@@ -150,7 +155,7 @@ class AbaqusInputFile(object):
 
         def normalize(vector):
             """Normalize a vector."""
-            return vector / np.linalg.norm(vector)
+            return vector / _np.linalg.norm(vector)
 
         # Reset possibly existing data stored in the elements
         # element.n1_orientation_node: list(float)
@@ -185,7 +190,7 @@ class AbaqusInputFile(object):
                 t = normalize(node_2 - node_1)
 
                 rotation = element.nodes[0].rotation
-                cross_section_rotation = smallest_rotation(rotation, t)
+                cross_section_rotation = _smallest_rotation(rotation, t)
 
                 element.n1_position = node_1 + cross_section_rotation * [0.0, 1.0, 0.0]
                 element.n2[0] = cross_section_rotation * [0.0, 0.0, 1.0]
@@ -199,7 +204,7 @@ class AbaqusInputFile(object):
         # Internally in Abaqus, coupled nodes are a single node with different normals for the
         # connected element. Therefore, for nodes which are coupled to each other, we keep the
         # same global ID while still keeping the individual nodes in MeshPy.
-        _, unique_nodes = get_coupled_nodes_to_master_map(
+        _, unique_nodes = _get_coupled_nodes_to_master_map(
             self.mesh, assign_i_global=True
         )
 
@@ -295,19 +300,19 @@ class AbaqusInputFile(object):
         """Add lines to the input file that represent node and element sets."""
 
         input_file_lines = []
-        for point_set in self.mesh.geometry_sets[mpy.geo.point]:
+        for point_set in self.mesh.geometry_sets[_mpy.geo.point]:
             if point_set.name is None:
                 raise ValueError("Sets added to the mesh have to have a valid name!")
             input_file_lines.extend(
                 get_set_lines("Nset", point_set.get_points(), point_set.name)
             )
-        for line_set in self.mesh.geometry_sets[mpy.geo.line]:
+        for line_set in self.mesh.geometry_sets[_mpy.geo.line]:
             if line_set.name is None:
                 raise ValueError("Sets added to the mesh have to have a valid name!")
-            if isinstance(line_set, GeometrySet):
+            if isinstance(line_set, _GeometrySet):
                 input_file_lines.extend(
                     get_set_lines(
-                        "Elset", line_set.geometry_objects[mpy.geo.line], line_set.name
+                        "Elset", line_set.geometry_objects[_mpy.geo.line], line_set.name
                     )
                 )
             else:

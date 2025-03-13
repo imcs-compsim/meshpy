@@ -21,12 +21,12 @@
 # THE SOFTWARE.
 """This file implements basic classes to manage materials in MeshPy."""
 
-import numpy as np
+import numpy as _np
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull
+from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
 
 
-class Material(BaseMeshItemFull):
+class Material(_BaseMeshItemFull):
     """Base class for all materials."""
 
     def __init__(self, data=None, **kwargs):
@@ -75,8 +75,8 @@ class MaterialBeam(Material):
     def calc_area_stiffness(self):
         """Calculate the relevant stiffness terms and the area for the given
         beam."""
-        area = 4 * self.radius**2 * np.pi * 0.25
-        mom2 = self.radius**4 * np.pi * 0.25
+        area = 4 * self.radius**2 * _np.pi * 0.25
+        mom2 = self.radius**4 * _np.pi * 0.25
         mom3 = mom2
         polar = mom2 + mom3
         return area, mom2, mom3, polar

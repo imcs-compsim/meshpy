@@ -22,10 +22,12 @@
 """This module defines functions that can be used to add header information to
 an input file."""
 
-from typing import List, Optional, Union
+from typing import List as _List
+from typing import Union as _Union
 
-from meshpy.core.conf import mpy
-from meshpy.four_c.input_file import InputFile, InputSection
+from meshpy.core.conf import mpy as _mpy
+from meshpy.four_c.input_file import InputFile as _InputFile
+from meshpy.four_c.input_file import InputSection as _InputSection
 
 
 def get_yes_no(bool_var):
@@ -109,7 +111,7 @@ def set_runtime_output(
 
     # Set the basic runtime output options.
     input_file.add(
-        InputSection(
+        _InputSection(
             "IO/RUNTIME VTK OUTPUT",
             f"""
         OUTPUT_DATA_FORMAT        binary
@@ -121,7 +123,7 @@ def set_runtime_output(
 
     # Set the structure runtime output options.
     input_file.add(
-        InputSection(
+        _InputSection(
             "IO/RUNTIME VTK OUTPUT/STRUCTURE",
             f"""
         OUTPUT_STRUCTURE                {get_yes_no(output_solid)}
@@ -136,7 +138,7 @@ def set_runtime_output(
 
     # Set the beam runtime output options.
     input_file.add(
-        InputSection(
+        _InputSection(
             "IO/RUNTIME VTK OUTPUT/BEAMS",
             f"""
         OUTPUT_BEAMS                    yes
@@ -152,7 +154,7 @@ def set_runtime_output(
     if btsvmt_output:
         # Set the beam to solid volume mesh tying runtime output options.
         input_file.add(
-            InputSection(
+            _InputSection(
                 ("BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/RUNTIME VTK OUTPUT"),
                 """
             WRITE_OUTPUT                          yes
@@ -169,7 +171,7 @@ def set_runtime_output(
     if btss_output:
         # Set the beam to solid surface coupling runtime output options.
         input_file.add(
-            InputSection(
+            _InputSection(
                 "BEAM INTERACTION/BEAM TO SOLID SURFACE/RUNTIME VTK OUTPUT",
                 """
             WRITE_OUTPUT                          yes
@@ -240,12 +242,12 @@ def set_beam_to_solid_meshtying(
 
     # Set the beam contact options.
     input_file.add(
-        InputSection(
+        _InputSection(
             "BEAM INTERACTION", "REPARTITIONSTRATEGY Everydt", option_overwrite=True
         )
     )
     input_file.add(
-        InputSection("BEAM CONTACT", "MODELEVALUATOR Standard", option_overwrite=True)
+        _InputSection("BEAM CONTACT", "MODELEVALUATOR Standard", option_overwrite=True)
     )
 
     set_binning_strategy_section(
@@ -255,10 +257,10 @@ def set_beam_to_solid_meshtying(
     )
 
     # Add the beam to solid volume mesh tying options.
-    if interaction_type == mpy.beam_to_solid.volume_meshtying:
-        bts = InputSection("BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING")
-    elif interaction_type == mpy.beam_to_solid.surface_meshtying:
-        bts = InputSection("BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING")
+    if interaction_type == _mpy.beam_to_solid.volume_meshtying:
+        bts = _InputSection("BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING")
+    elif interaction_type == _mpy.beam_to_solid.surface_meshtying:
+        bts = _InputSection("BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING")
         if coupling_type is not None:
             bts.add(f"COUPLING_TYPE {coupling_type}")
     else:
@@ -372,7 +374,7 @@ def set_header_static(
 
     # Set the parameters for a static analysis.
     input_file.add(
-        InputSection(
+        _InputSection(
             "PROBLEM TYPE",
             """
         PROBLEMTYPE Structure
@@ -382,7 +384,7 @@ def set_header_static(
         )
     )
     input_file.add(
-        InputSection(
+        _InputSection(
             "IO",
             f"""
         OUTPUT_BIN     {get_yes_no(write_bin)}
@@ -413,7 +415,7 @@ def set_header_static(
         total_time = time_step * n_steps
 
     input_file.add(
-        InputSection(
+        _InputSection(
             "STRUCTURAL DYNAMIC",
             f"""
         LINEAR_SOLVER     1
@@ -433,7 +435,7 @@ def set_header_static(
         )
     )
     input_file.add(
-        InputSection(
+        _InputSection(
             "SOLVER 1",
             """
         NAME              Structure_Solver
@@ -492,7 +494,7 @@ def set_header_static(
         """
 
     input_file.add(
-        InputSection(
+        _InputSection(
             "STRUCT NOX/Printing",
             """
         Error                           = Yes
@@ -515,9 +517,9 @@ def set_header_static(
 
 
 def set_binning_strategy_section(
-    input_file: InputFile,
-    binning_bounding_box: Union[List[int], None] = None,
-    binning_cutoff_radius: Union[float, None] = None,
+    input_file: _InputFile,
+    binning_bounding_box: _Union[_List[int], None] = None,
+    binning_cutoff_radius: _Union[float, None] = None,
     *,
     option_overwrite: bool = False,
 ):
@@ -542,7 +544,7 @@ def set_binning_strategy_section(
         )
 
         input_file.add(
-            InputSection(
+            _InputSection(
                 "BINNING STRATEGY",
                 f"""
             BIN_SIZE_LOWER_BOUND    {binning_cutoff_radius}
@@ -560,7 +562,7 @@ def set_binning_strategy_section(
 
 
 def set_beam_interaction_section(
-    inputfile: InputFile,
+    inputfile: _InputFile,
     *,
     repartition_strategy: str = "everydt",
     search_strategy: str = "bounding_volume_hierarchy",
@@ -584,7 +586,7 @@ def set_beam_interaction_section(
     """
 
     inputfile.add(
-        InputSection(
+        _InputSection(
             "BEAM INTERACTION",
             f"""
         REPARTITIONSTRATEGY                   {repartition_strategy}
@@ -596,7 +598,7 @@ def set_beam_interaction_section(
 
 
 def set_beam_contact_runtime_output(
-    inputfile: InputFile,
+    inputfile: _InputFile,
     *,
     every_iteration: bool = False,
     option_overwrite: bool = False,
@@ -613,7 +615,7 @@ def set_beam_contact_runtime_output(
     """
 
     inputfile.add(
-        InputSection(
+        _InputSection(
             "BEAM CONTACT/RUNTIME VTK OUTPUT",
             f"""
             VTK_OUTPUT_BEAM_CONTACT               yes
@@ -628,7 +630,7 @@ def set_beam_contact_runtime_output(
 
 
 def set_beam_contact_section(
-    input_file: InputFile,
+    input_file: _InputFile,
     *,
     interaction_strategy: str = "penalty",
     btb_penalty: float = 0,
@@ -694,14 +696,14 @@ def set_beam_contact_section(
         raise ValueError("Please provide lower and upper value of BEAMS_PARSHIFTANGLE.")
 
     input_file.add(
-        InputSection(
+        _InputSection(
             "BEAM INTERACTION/BEAM TO BEAM CONTACT",
             f"""STRATEGY   {interaction_strategy}""",
             option_overwrite=option_overwrite,
         )
     )
     input_file.add(
-        InputSection(
+        _InputSection(
             "BEAM CONTACT",
             f"""MODELEVALUATOR                  Standard
         BEAMS_STRATEGY                  Penalty

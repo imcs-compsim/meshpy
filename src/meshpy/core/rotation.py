@@ -21,16 +21,16 @@
 # THE SOFTWARE.
 """This module defines a class that represents a rotation in 3D."""
 
-import copy
+import copy as _copy
 
-import numpy as np
+import numpy as _np
 
-from meshpy.core.conf import mpy
+from meshpy.core.conf import mpy as _mpy
 
 
 def skew_matrix(vector):
     """Return the skew matrix for the vector."""
-    skew = np.zeros([3, 3])
+    skew = _np.zeros([3, 3])
     skew[0, 1] = -vector[2]
     skew[0, 2] = vector[1]
     skew[1, 0] = vector[2]
@@ -58,20 +58,20 @@ class Rotation:
                 Create a rotation around the vector axis with the angle phi.
         """
 
-        self.q = np.zeros(4)
+        self.q = _np.zeros(4)
 
         if len(args) == 0:
             # Identity element.
             self.q[0] = 1
         elif len(args) == 2:
             # Set from rotation axis and rotation angle.
-            axis = np.asarray(args[0])
+            axis = _np.asarray(args[0])
             phi = args[1]
-            norm = np.linalg.norm(axis)
-            if norm < mpy.eps_quaternion:
+            norm = _np.linalg.norm(axis)
+            if norm < _mpy.eps_quaternion:
                 raise ValueError("The rotation axis can not be a zero vector!")
-            self.q[0] = np.cos(0.5 * phi)
-            self.q[1:] = np.sin(0.5 * phi) * axis / norm
+            self.q[0] = _np.cos(0.5 * phi)
+            self.q[1:] = _np.sin(0.5 * phi) * axis / norm
         else:
             raise ValueError(f"The given arguments {args} are invalid!")
 
@@ -90,9 +90,9 @@ class Rotation:
         """
         rotation = object.__new__(cls)
         if normalized:
-            rotation.q = np.array(q)
+            rotation.q = _np.array(q)
         else:
-            rotation.q = np.asarray(q) / np.linalg.norm(q)
+            rotation.q = _np.asarray(q) / _np.linalg.norm(q)
         if (not rotation.q.ndim == 1) or (not len(rotation.q) == 4):
             raise ValueError("Got quaternion array with unexpected dimensions")
         return rotation
@@ -106,13 +106,13 @@ class Rotation:
             direction-cosine matrix”
         """
 
-        q = np.zeros(4)
-        trace = np.trace(R)
+        q = _np.zeros(4)
+        trace = _np.trace(R)
         values = [R[i, i] for i in range(3)]
         values.append(trace)
-        arg_max = np.argmax(values)
+        arg_max = _np.argmax(values)
         if arg_max == 3:
-            q[0] = np.sqrt(trace + 1) * 0.5
+            q[0] = _np.sqrt(trace + 1) * 0.5
             q[1] = (R[2, 1] - R[1, 2]) / (4 * q[0])
             q[2] = (R[0, 2] - R[2, 0]) / (4 * q[0])
             q[3] = (R[1, 0] - R[0, 1]) / (4 * q[0])
@@ -120,7 +120,7 @@ class Rotation:
             i_index = arg_max
             j_index = (i_index + 1) % 3
             k_index = (i_index + 2) % 3
-            q_i = np.sqrt(R[i_index, i_index] * 0.5 + (1 - trace) * 0.25)
+            q_i = _np.sqrt(R[i_index, i_index] * 0.5 + (1 - trace) * 0.25)
             q[0] = (R[k_index, j_index] - R[j_index, k_index]) / (4 * q_i)
             q[i_index + 1] = q_i
             q[j_index + 1] = (R[j_index, i_index] + R[i_index, j_index]) / (4 * q_i)
@@ -136,27 +136,27 @@ class Rotation:
         the cross product.
         """
 
-        t1_normal = t1 / np.linalg.norm(t1)
-        t2_ortho = t2 - t1_normal * np.dot(t1_normal, t2)
-        t2_normal = t2_ortho / np.linalg.norm(t2_ortho)
-        t3_normal = np.cross(t1_normal, t2_normal)
+        t1_normal = t1 / _np.linalg.norm(t1)
+        t2_ortho = t2 - t1_normal * _np.dot(t1_normal, t2)
+        t2_normal = t2_ortho / _np.linalg.norm(t2_ortho)
+        t3_normal = _np.cross(t1_normal, t2_normal)
 
-        R = np.transpose([t1_normal, t2_normal, t3_normal])
+        R = _np.transpose([t1_normal, t2_normal, t3_normal])
         return cls.from_rotation_matrix(R)
 
     @classmethod
     def from_rotation_vector(cls, rotation_vector):
         """Create the object from a rotation vector."""
 
-        q = np.zeros(4)
-        rotation_vector = np.asarray(rotation_vector)
-        phi = np.linalg.norm(rotation_vector)
-        q[0] = np.cos(0.5 * phi)
-        if phi < mpy.eps_quaternion:
+        q = _np.zeros(4)
+        rotation_vector = _np.asarray(rotation_vector)
+        phi = _np.linalg.norm(rotation_vector)
+        q[0] = _np.cos(0.5 * phi)
+        if phi < _mpy.eps_quaternion:
             # This is the Taylor series expansion of sin(phi/2)/phi around phi=0
             q[1:] = 0.5 * rotation_vector
         else:
-            q[1:] = np.sin(0.5 * phi) / phi * rotation_vector
+            q[1:] = _np.sin(0.5 * phi) / phi * rotation_vector
         return cls.from_quaternion(q)
 
     def check(self):
@@ -174,7 +174,7 @@ class Rotation:
     def check_quaternion_constraint(self):
         """We want to check that q.q = 1."""
 
-        if np.abs(1 - np.linalg.norm(self.q)) > mpy.eps_quaternion:
+        if _np.abs(1 - _np.linalg.norm(self.q)) > _mpy.eps_quaternion:
             raise ValueError(
                 f"The rotation object is corrupted. q.q does not equal 1! q={self.q}"
             )
@@ -186,9 +186,9 @@ class Rotation:
         """
         q_skew = skew_matrix(self.q[1:])
         R = (
-            (self.q[0] ** 2 - np.dot(self.q[1:], self.q[1:])) * np.eye(3)
+            (self.q[0] ** 2 - _np.dot(self.q[1:], self.q[1:])) * _np.eye(3)
             + 2 * self.q[0] * q_skew
-            + 2 * ([self.q[1:]] * np.transpose([self.q[1:]]))
+            + 2 * ([self.q[1:]] * _np.transpose([self.q[1:]]))
         )
 
         return R
@@ -196,22 +196,22 @@ class Rotation:
     def get_quaternion(self):
         """Return the quaternion for this rotation, as numpy array (copy)."""
 
-        return np.array(self.q)
+        return _np.array(self.q)
 
     def get_rotation_vector(self):
         """Return the rotation vector for this object."""
 
         self.check()
 
-        norm = np.linalg.norm(self.q[1:])
-        phi = 2 * np.arctan2(norm, self.q[0])
+        norm = _np.linalg.norm(self.q[1:])
+        phi = 2 * _np.arctan2(norm, self.q[0])
 
-        if phi < mpy.eps_quaternion:
+        if phi < _mpy.eps_quaternion:
             # For small angles return the Taylor series expansion of phi/sin(phi/2)
             scale_factor = 2
         else:
-            scale_factor = phi / np.sin(phi / 2)
-            if np.abs(np.abs(phi) - np.pi) < mpy.eps_quaternion:
+            scale_factor = phi / _np.sin(phi / 2)
+            if _np.abs(_np.abs(phi) - _np.pi) < _mpy.eps_quaternion:
                 # For rotations of exactly +-pi, numerical issues might occur, resulting in
                 # a rotation vector that is non-deterministic. The result is correct, but
                 # the sign can switch due to different implementation of basic underlying
@@ -220,7 +220,7 @@ class Rotation:
                 # for a rotation angle of +-pi, the first component of the rotation axis
                 # that is not 0 is positive.
                 for i_dir in range(3):
-                    if np.abs(self.q[1 + i_dir]) > mpy.eps_quaternion:
+                    if _np.abs(self.q[1 + i_dir]) > _mpy.eps_quaternion:
                         if self.q[1 + i_dir] < 0:
                             scale_factor *= -1
                         break
@@ -234,27 +234,27 @@ class Rotation:
         """
 
         omega = self.get_rotation_vector()
-        omega_norm = np.linalg.norm(omega)
+        omega_norm = _np.linalg.norm(omega)
 
         # We have to take the inverse of the the rotation angle here, therefore,
         # we have a branch for small angles where the singularity is not present.
-        if omega_norm**2 > mpy.eps_quaternion:
+        if omega_norm**2 > _mpy.eps_quaternion:
             # Taken from Jelenic and Crisfield (1999) Equation (2.5)
             omega_dir = omega / omega_norm
             omega_skew = skew_matrix(omega)
             transformation_matrix = (
-                np.outer(omega_dir, omega_dir)
+                _np.outer(omega_dir, omega_dir)
                 - 0.5 * omega_skew
                 + 0.5
                 * omega_norm
-                / np.tan(0.5 * omega_norm)
-                * (np.identity(3) - np.outer(omega_dir, omega_dir))
+                / _np.tan(0.5 * omega_norm)
+                * (_np.identity(3) - _np.outer(omega_dir, omega_dir))
             )
         else:
             # This is the constant part of the Taylor series expansion. If this
             # function is used with automatic differentiation, higher order
             # terms have to be added!
-            transformation_matrix = np.identity(3)
+            transformation_matrix = _np.identity(3)
         return transformation_matrix
 
     def get_transformation_matrix_inv(self):
@@ -266,24 +266,25 @@ class Rotation:
         """
 
         omega = self.get_rotation_vector()
-        omega_norm = np.linalg.norm(omega)
+        omega_norm = _np.linalg.norm(omega)
 
         # We have to take the inverse of the the rotation angle here, therefore,
         # we have a branch for small angles where the singularity is not present.
-        if omega_norm**2 > mpy.eps_quaternion:
+        if omega_norm**2 > _mpy.eps_quaternion:
             # Taken from Jelenic and Crisfield (1999) Equation (2.5)
             omega_dir = omega / omega_norm
             omega_skew = skew_matrix(omega)
             transformation_matrix_inverse = (
-                (1.0 - np.sin(omega_norm) / omega_norm) * np.outer(omega_dir, omega_dir)
-                + np.sin(omega_norm) / omega_norm * np.identity(3)
-                + (1.0 - np.cos(omega_norm)) / omega_norm**2 * omega_skew
+                (1.0 - _np.sin(omega_norm) / omega_norm)
+                * _np.outer(omega_dir, omega_dir)
+                + _np.sin(omega_norm) / omega_norm * _np.identity(3)
+                + (1.0 - _np.cos(omega_norm)) / omega_norm**2 * omega_skew
             )
         else:
             # This is the constant part of the Taylor series expansion. If this
             # function is used with automatic differentiation, higher order
             # terms have to be added!
-            transformation_matrix_inverse = np.identity(3)
+            transformation_matrix_inverse = _np.identity(3)
         return transformation_matrix_inverse
 
     def inv(self):
@@ -302,13 +303,13 @@ class Rotation:
             p = self.q
             q = other.q
             # Add the rotations.
-            added_rotation = np.zeros_like(self.q)
-            added_rotation[0] = p[0] * q[0] - np.dot(p[1:], q[1:])
-            added_rotation[1:] = p[0] * q[1:] + q[0] * p[1:] + np.cross(p[1:], q[1:])
+            added_rotation = _np.zeros_like(self.q)
+            added_rotation[0] = p[0] * q[0] - _np.dot(p[1:], q[1:])
+            added_rotation[1:] = p[0] * q[1:] + q[0] * p[1:] + _np.cross(p[1:], q[1:])
             return Rotation.from_quaternion(added_rotation)
-        elif isinstance(other, (list, np.ndarray)) and len(other) == 3:
+        elif isinstance(other, (list, _np.ndarray)) and len(other) == 3:
             # Apply rotation to vector.
-            return np.dot(self.get_rotation_matrix(), np.asarray(other))
+            return _np.dot(self.get_rotation_matrix(), _np.asarray(other))
         raise NotImplementedError("Error, not implemented, does not make sense anyway!")
 
     def __eq__(self, other):
@@ -316,8 +317,8 @@ class Rotation:
 
         if isinstance(other, Rotation):
             return bool(
-                (np.linalg.norm(self.q - other.q) < mpy.eps_quaternion)
-                or (np.linalg.norm(self.q + other.q) < mpy.eps_quaternion)
+                (_np.linalg.norm(self.q - other.q) < _mpy.eps_quaternion)
+                or (_np.linalg.norm(self.q + other.q) < _mpy.eps_quaternion)
             )
         else:
             return object.__eq__(self, other)
@@ -331,8 +332,8 @@ class Rotation:
         return " ".join(
             [
                 (
-                    mpy.dat_precision.format(component + 0)
-                    if np.abs(component) >= mpy.eps_quaternion
+                    _mpy.dat_precision.format(component + 0)
+                    if _np.abs(component) >= _mpy.eps_quaternion
                     else "0"
                 )
                 for component in rotation_vector
@@ -341,7 +342,7 @@ class Rotation:
 
     def copy(self):
         """Return a deep copy of this object."""
-        return copy.deepcopy(self)
+        return _copy.deepcopy(self)
 
     def __str__(self):
         """String representation of object."""
@@ -355,16 +356,16 @@ def add_rotations(rotation_21, rotation_10):
 
     Args
     ----
-    rotation_10: np.ndarray
+    rotation_10: _np.ndarray
         Array with the dimensions n x 4 or 4 x 1.
         The first rotation that is applied.
-    rotation_21: np.ndarray
+    rotation_21: _np.ndarray
         Array with the dimensions n x 4 or 4 x 1.
         The second rotation that is applied.
 
     Return
     ----
-    rot_new: np.ndarray
+    rot_new: _np.ndarray
         Array with the dimensions n x 4.
         This array contains the new quaternions.
     """
@@ -373,16 +374,16 @@ def add_rotations(rotation_21, rotation_10):
     if isinstance(rotation_10, Rotation):
         rot1 = rotation_10.get_quaternion().transpose()
     else:
-        rot1 = np.transpose(rotation_10)
+        rot1 = _np.transpose(rotation_10)
     if isinstance(rotation_21, Rotation):
         rot2 = rotation_21.get_quaternion().transpose()
     else:
-        rot2 = np.transpose(rotation_21)
+        rot2 = _np.transpose(rotation_21)
 
     if rot1.size > rot2.size:
-        rotnew = np.zeros_like(rot1)
+        rotnew = _np.zeros_like(rot1)
     else:
-        rotnew = np.zeros_like(rot2)
+        rotnew = _np.zeros_like(rot2)
 
     # Multiply the two rotations (code is taken from /utility/rotation.nb).
     rotnew[0] = (
@@ -406,7 +407,7 @@ def rotate_coordinates(coordinates, rotation, *, origin=None):
 
     Args
     ----
-    coordinates: np.array
+    coordinates: _np.array
         Array of 3D coordinates to be rotated
     rotation: Rotation, list(quaternions) (nx4)
         The rotation that will be applied to the coordinates. Can also be an
@@ -424,25 +425,25 @@ def rotate_coordinates(coordinates, rotation, *, origin=None):
         origin = [0.0, 0.0, 0.0]
 
     # New position array
-    coordinates_new = np.zeros_like(coordinates)
+    coordinates_new = _np.zeros_like(coordinates)
 
     # Evaluate the new positions using the numpy data structure
     # (code is taken from /utility/rotation.nb)
     rotation = rotation.transpose()
 
-    q0_q0 = np.square(rotation[0])
+    q0_q0 = _np.square(rotation[0])
     q0_q1_2 = 2.0 * rotation[0] * rotation[1]
     q0_q2_2 = 2.0 * rotation[0] * rotation[2]
     q0_q3_2 = 2.0 * rotation[0] * rotation[3]
 
-    q1_q1 = np.square(rotation[1])
+    q1_q1 = _np.square(rotation[1])
     q1_q2_2 = 2.0 * rotation[1] * rotation[2]
     q1_q3_2 = 2.0 * rotation[1] * rotation[3]
 
-    q2_q2 = np.square(rotation[2])
+    q2_q2 = _np.square(rotation[2])
     q2_q3_2 = 2.0 * rotation[2] * rotation[3]
 
-    q3_q3 = np.square(rotation[3])
+    q3_q3 = _np.square(rotation[3])
 
     coordinates_new[:, 0] = (
         (q0_q0 + q1_q1 - q2_q2 - q3_q3) * (coordinates[:, 0] - origin[0])
@@ -485,15 +486,15 @@ def smallest_rotation(q: Rotation, t):
 
     R_old = q.get_rotation_matrix()
     g1_old = R_old[:, 0]
-    g1 = np.asarray(t) / np.linalg.norm(t)
+    g1 = _np.asarray(t) / _np.linalg.norm(t)
 
     # Quaternion components of relative rotation
-    q_rel = np.zeros(4)
+    q_rel = _np.zeros(4)
 
     # The scalar quaternion part is cos(alpha/2) this is equal to
-    q_rel[0] = np.linalg.norm(0.5 * (g1_old + g1))
+    q_rel[0] = _np.linalg.norm(0.5 * (g1_old + g1))
 
     # Vector part of the quaternion is sin(alpha/2)*axis
-    q_rel[1:] = np.cross(g1_old, g1) / (2.0 * q_rel[0])
+    q_rel[1:] = _np.cross(g1_old, g1) / (2.0 * q_rel[0])
 
     return Rotation.from_quaternion(q_rel) * q

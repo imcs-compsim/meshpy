@@ -22,7 +22,7 @@
 """This file defines the interface to the Scipy spatial geometric search
 functionality."""
 
-from scipy.spatial import KDTree
+from scipy.spatial import KDTree as _KDTree
 
 
 def pairs_to_partner_list(pairs, n_points):
@@ -58,6 +58,6 @@ def pairs_to_partner_list(pairs, n_points):
 def find_close_points_scipy(point_coordinates, tol):
     """Call the Scipy implementation of find close_points."""
 
-    kd_tree = KDTree(point_coordinates)
+    kd_tree = _KDTree(point_coordinates)
     pairs = kd_tree.query_pairs(r=tol, output_type="ndarray")
     return pairs_to_partner_list(pairs, len(point_coordinates))

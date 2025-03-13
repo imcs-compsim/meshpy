@@ -22,11 +22,11 @@
 """This module implements utility functions to create 4C space time
 function."""
 
-from typing import List
+from typing import List as _List
 
-import numpy as np
+import numpy as _np
 
-from meshpy.four_c.function import Function
+from meshpy.four_c.function import Function as _Function
 
 
 def create_linear_interpolation_string(
@@ -52,11 +52,11 @@ def create_linear_interpolation_string(
 
     t = t.copy()
     f = values.copy()
-    t_max = np.max(t)
-    t = np.insert(t, 0, -1000.0, axis=0)
-    t = np.append(t, [t_max + 1000.0])
-    f = np.insert(f, 0, f[0], axis=0)
-    f = np.append(f, f[-1])
+    t_max = _np.max(t)
+    t = _np.insert(t, 0, -1000.0, axis=0)
+    t = _np.append(t, [t_max + 1000.0])
+    f = _np.insert(f, 0, f[0], axis=0)
+    f = _np.append(f, f[-1])
     times = " ".join(map(str, t))
     values = " ".join(map(str, f))
     return (
@@ -78,10 +78,10 @@ def create_linear_interpolation_function(
     """
 
     variable_string = create_linear_interpolation_string(t, values, variable_name="var")
-    return Function(f"{function_type} var\n" + variable_string)
+    return _Function(f"{function_type} var\n" + variable_string)
 
 
-def ensure_length_of_function_array(function_array: List, length: int = 3):
+def ensure_length_of_function_array(function_array: _List, length: int = 3):
     """Performs size check of a function array and appends the function array
     to the given length, if a list with only one item is provided.
 

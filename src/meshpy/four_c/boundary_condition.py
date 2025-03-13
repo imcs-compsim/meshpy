@@ -21,15 +21,17 @@
 # THE SOFTWARE.
 """This module implements a class to handle boundary conditions in 4C."""
 
-import warnings
+import warnings as _warnings
 
-from meshpy.core.boundary_condition import BoundaryConditionBase
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.utils.nodes import find_close_nodes
+from meshpy.core.boundary_condition import (
+    BoundaryConditionBase as _BoundaryConditionBase,
+)
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.utils.nodes import find_close_nodes as _find_close_nodes
 
 
-class BoundaryCondition(BoundaryConditionBase):
+class BoundaryCondition(_BoundaryConditionBase):
     """This object represents a Dirichlet, Neumann or beam-to-solid boundary
     condition."""
 
@@ -61,7 +63,7 @@ class BoundaryCondition(BoundaryConditionBase):
             conditions do contain nodes at the same spatial positions.
         """
 
-        BoundaryConditionBase.__init__(self, geometry_set, bc_type=bc_type, **kwargs)
+        _BoundaryConditionBase.__init__(self, geometry_set, bc_type=bc_type, **kwargs)
         self.bc_string = bc_string
         self.format_replacement = format_replacement
         self.double_nodes = double_nodes
@@ -93,15 +95,15 @@ class BoundaryCondition(BoundaryConditionBase):
             # In the case of solid imports this is a integer at initialization.
             return
 
-        if self.double_nodes is mpy.double_nodes.keep:
+        if self.double_nodes is _mpy.double_nodes.keep:
             return
 
         if (
-            self.bc_type == mpy.bc.neumann
-            and self.geometry_set.geometry_type == mpy.geo.point
+            self.bc_type == _mpy.bc.neumann
+            and self.geometry_set.geometry_type == _mpy.geo.point
         ):
             my_nodes = self.geometry_set.get_points()
-            partners = find_close_nodes(my_nodes)
+            partners = _find_close_nodes(my_nodes)
             # Create a list with nodes that will not be kept in the set.
             double_node_list = []
             for node_list in partners:
@@ -110,14 +112,14 @@ class BoundaryCondition(BoundaryConditionBase):
                         double_node_list.append(node)
             if (
                 len(double_node_list) > 0
-                and self.double_nodes is mpy.double_nodes.remove
+                and self.double_nodes is _mpy.double_nodes.remove
             ):
                 # Create the a new geometry set with the unique nodes.
-                self.geometry_set = GeometrySet(
+                self.geometry_set = _GeometrySet(
                     [node for node in my_nodes if (node not in double_node_list)]
                 )
             elif len(double_node_list) > 0:
-                warnings.warn(
+                _warnings.warn(
                     "There are overlapping nodes in this point Neumann boundary, and it is not "
                     "specified on how to handle them!"
                 )

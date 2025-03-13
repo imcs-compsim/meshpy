@@ -21,8 +21,8 @@
 # THE SOFTWARE.
 """Helper functions to interact with the MeshPy environment."""
 
-import importlib.util
-import os
+import os as _os
+from importlib.util import find_spec as _find_spec
 
 
 def cubitpy_is_available() -> bool:
@@ -32,19 +32,19 @@ def cubitpy_is_available() -> bool:
         True if CubitPy is installed, False otherwise
     """
 
-    if importlib.util.find_spec("cubitpy") is None:
+    if _find_spec("cubitpy") is None:
         return False
     return True
 
 
 def is_mybinder():
     """Check if the current environment is running on mybinder."""
-    return "BINDER_LAUNCH_HOST" in os.environ.keys()
+    return "BINDER_LAUNCH_HOST" in _os.environ.keys()
 
 
 def is_testing():
     """Check if the current environment is a pytest testing run."""
-    return "PYTEST_CURRENT_TEST" in os.environ
+    return "PYTEST_CURRENT_TEST" in _os.environ
 
 
 def get_env_variable(name, *, default="default_not_set"):
@@ -59,8 +59,8 @@ def get_env_variable(name, *, default="default_not_set"):
         not exist. If this is not set and the name is not in the env
         variables, then an error will be thrown.
     """
-    if name in os.environ.keys():
-        return os.environ[name]
+    if name in _os.environ.keys():
+        return _os.environ[name]
     elif default == "default_not_set":
         raise ValueError(f"Environment variable {name} is not set")
     return default

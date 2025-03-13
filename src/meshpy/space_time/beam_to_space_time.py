@@ -21,23 +21,34 @@
 # THE SOFTWARE.
 """Convert a MeshPy beam to a space time surface mesh."""
 
-from typing import Callable, Dict, List, Tuple, Type, Union, cast
+from typing import Callable as _Callable
+from typing import Dict as _Dict
+from typing import List as _List
+from typing import Tuple as _Tuple
+from typing import Type as _Type
+from typing import Union as _Union
+from typing import cast as _cast
 
-import numpy as np
-import vtk
+import numpy as _np
+import vtk as _vtk
 
-from meshpy.core.conf import mpy
-from meshpy.core.coupling import Coupling
-from meshpy.core.element_volume import VolumeElement
-from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetNodes
-from meshpy.core.mesh import Mesh
-from meshpy.core.mesh_utils import get_coupled_nodes_to_master_map
-from meshpy.core.node import NodeCosserat
-from meshpy.four_c.element_beam import Beam3rHerm2Line3, Beam3rLine2Line2
-from meshpy.utils.nodes import get_nodal_coordinates
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.coupling import Coupling as _Coupling
+from meshpy.core.element_volume import VolumeElement as _VolumeElement
+from meshpy.core.geometry_set import GeometryName as _GeometryName
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.geometry_set import GeometrySetNodes as _GeometrySetNodes
+from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.core.mesh_utils import (
+    get_coupled_nodes_to_master_map as _get_coupled_nodes_to_master_map,
+)
+from meshpy.core.node import NodeCosserat as _NodeCosserat
+from meshpy.four_c.element_beam import Beam3rHerm2Line3 as _Beam3rHerm2Line3
+from meshpy.four_c.element_beam import Beam3rLine2Line2 as _Beam3rLine2Line2
+from meshpy.utils.nodes import get_nodal_coordinates as _get_nodal_coordinates
 
 
-class NodeCosseratSpaceTime(NodeCosserat):
+class NodeCosseratSpaceTime(_NodeCosserat):
     """A Cosserat node in space-time.
 
     We add the 4th dimension time as a class variable.
@@ -62,8 +73,8 @@ class NodeCosseratSpaceTime(NodeCosserat):
         coordinate_string = " ".join(
             [
                 (
-                    mpy.dat_precision.format(component + 0)
-                    if np.abs(component) >= mpy.eps_pos
+                    _mpy.dat_precision.format(component + 0)
+                    if _np.abs(component) >= _mpy.eps_pos
                     else "0"
                 )
                 for component in space_time_coordinates
@@ -72,7 +83,7 @@ class NodeCosseratSpaceTime(NodeCosserat):
         return f"NODE {self.i_global} COORD {coordinate_string}"
 
 
-class SpaceTimeElement(VolumeElement):
+class SpaceTimeElement(_VolumeElement):
     """A general beam space-time surface element."""
 
     def __init__(
@@ -111,7 +122,7 @@ class SpaceTimeElement(VolumeElement):
 class SpaceTimeElementQuad4(SpaceTimeElement):
     """A space-time element with 4 nodes."""
 
-    vtk_cell_type = vtk.vtkQuad
+    vtk_cell_type = _vtk.vtkQuad
     vtk_topology = list(range(4))
     four_c_name = "QUAD4"
 
@@ -119,18 +130,18 @@ class SpaceTimeElementQuad4(SpaceTimeElement):
 class SpaceTimeElementQuad9(SpaceTimeElement):
     """A space-time element with 9 nodes."""
 
-    vtk_cell_type = vtk.vtkQuadraticQuad
+    vtk_cell_type = _vtk.vtkQuadraticQuad
     vtk_topology = list(range(9))
     four_c_name = "QUAD9"
 
 
 def beam_to_space_time(
-    mesh_space_or_generator: Union[Mesh, Callable[[float], Mesh]],
+    mesh_space_or_generator: _Union[_Mesh, _Callable[[float], _Mesh]],
     time_duration: float,
     number_of_elements_in_time: int,
     *,
     time_start: float = 0.0,
-) -> Tuple[Mesh, GeometryName]:
+) -> _Tuple[_Mesh, _GeometryName]:
     """Convert a MeshPy beam mesh to a surface space-time mesh.
 
     Args
@@ -173,14 +184,14 @@ def beam_to_space_time(
     # Calculate global mesh properties
     number_of_nodes_in_space = len(mesh_space_reference.nodes)
     number_of_elements_in_space = len(mesh_space_reference.elements)
-    space_time_element_type: Union[
-        Type[SpaceTimeElementQuad4], Type[SpaceTimeElementQuad9]
+    space_time_element_type: _Union[
+        _Type[SpaceTimeElementQuad4], _Type[SpaceTimeElementQuad9]
     ]
-    if element_type == Beam3rLine2Line2:
+    if element_type == _Beam3rLine2Line2:
         number_of_copies_in_time = number_of_elements_in_time + 1
         time_increment_between_nodes = time_duration / number_of_elements_in_time
         space_time_element_type = SpaceTimeElementQuad4
-    elif element_type == Beam3rHerm2Line3:
+    elif element_type == _Beam3rHerm2Line3:
         number_of_copies_in_time = 2 * number_of_elements_in_time + 1
         time_increment_between_nodes = time_duration / (2 * number_of_elements_in_time)
         space_time_element_type = SpaceTimeElementQuad9
@@ -301,14 +312,14 @@ def beam_to_space_time(
     # Add joints to the space time mesh
     space_time_couplings = []
     for coupling in mesh_space_reference.boundary_conditions[
-        mpy.bc.point_coupling, mpy.geo.point
+        _mpy.bc.point_coupling, _mpy.geo.point
     ]:
         for i_mesh_space in range(number_of_copies_in_time):
             coupling_node_ids = [
                 node.i_global for node in coupling.geometry_set.get_points()
             ]
             space_time_couplings.append(
-                Coupling(
+                _Coupling(
                     [
                         space_time_nodes[node_id + number_of_nodes_in_space]
                         for node_id in coupling_node_ids
@@ -319,23 +330,23 @@ def beam_to_space_time(
             )
 
     # Create the new mesh and add all the mesh items
-    space_time_mesh = Mesh()
+    space_time_mesh = _Mesh()
     space_time_mesh.add(space_time_nodes)
     space_time_mesh.add(space_time_elements)
     space_time_mesh.add(space_time_couplings)
 
     # Create the element sets
-    return_set = GeometryName()
-    return_set["start"] = GeometrySet(start_nodes)
-    return_set["end"] = GeometrySet(end_nodes)
-    return_set["left"] = GeometrySet(left_nodes)
-    return_set["right"] = GeometrySet(right_nodes)
-    return_set["surface"] = GeometrySetNodes(mpy.geo.surface, space_time_mesh.nodes)
+    return_set = _GeometryName()
+    return_set["start"] = _GeometrySet(start_nodes)
+    return_set["end"] = _GeometrySet(end_nodes)
+    return_set["left"] = _GeometrySet(left_nodes)
+    return_set["right"] = _GeometrySet(right_nodes)
+    return_set["surface"] = _GeometrySetNodes(_mpy.geo.surface, space_time_mesh.nodes)
 
     return space_time_mesh, return_set
 
 
-def mesh_to_data_arrays(mesh: Mesh):
+def mesh_to_data_arrays(mesh: _Mesh):
     """Get the relevant data arrays from the space time mesh."""
 
     element_types = list(set([type(element) for element in mesh.elements]))
@@ -349,17 +360,17 @@ def mesh_to_data_arrays(mesh: Mesh):
             f"Expected either SpaceTimeElementQuad4 or SpaceTimeElementQuad9, got {element_types[0]}"
         )
 
-    _, raw_unique_nodes = get_coupled_nodes_to_master_map(mesh, assign_i_global=True)
-    unique_nodes = cast(List[NodeCosseratSpaceTime], raw_unique_nodes)
+    _, raw_unique_nodes = _get_coupled_nodes_to_master_map(mesh, assign_i_global=True)
+    unique_nodes = _cast(_List[NodeCosseratSpaceTime], raw_unique_nodes)
 
     n_nodes = len(unique_nodes)
     n_elements = len(mesh.elements)
     n_nodes_per_element = len(mesh.elements[0].nodes)
 
-    coordinates = get_nodal_coordinates(unique_nodes)
-    time = np.zeros(n_nodes)
-    connectivity = np.zeros((n_elements, n_nodes_per_element), dtype=int)
-    element_rotation_vectors = np.zeros((n_elements, n_nodes_per_element, 3))
+    coordinates = _get_nodal_coordinates(unique_nodes)
+    time = _np.zeros(n_nodes)
+    connectivity = _np.zeros((n_elements, n_nodes_per_element), dtype=int)
+    element_rotation_vectors = _np.zeros((n_elements, n_nodes_per_element, 3))
 
     for i_node, node in enumerate(unique_nodes):
         time[i_node] = node.time
@@ -372,10 +383,10 @@ def mesh_to_data_arrays(mesh: Mesh):
             )
 
     geometry_sets = mesh.get_unique_geometry_sets()
-    node_sets: Dict[str, List] = {}
+    node_sets: _Dict[str, _List] = {}
     for value in geometry_sets.values():
         for geometry_set in value:
-            node_sets[str(len(node_sets) + 1)] = np.array(
+            node_sets[str(len(node_sets) + 1)] = _np.array(
                 [node.i_global for node in geometry_set.get_all_nodes()]
             )
 
@@ -393,7 +404,7 @@ def mesh_to_data_arrays(mesh: Mesh):
         # The arc length is added as an "element" property, since the same
         # node can have a different arc length depending on the element
         # (similar to the rotation vectors).
-        arc_length = np.zeros((n_elements, n_nodes_per_element))
+        arc_length = _np.zeros((n_elements, n_nodes_per_element))
         for i_element, element in enumerate(mesh.elements):
             for i_node, node in enumerate(element.nodes):
                 connectivity[i_element, i_node] = node.i_global

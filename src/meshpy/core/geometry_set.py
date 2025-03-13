@@ -22,24 +22,25 @@
 """This module implements a basic class to manage geometry in the input
 file."""
 
-import numpy as np
+import numpy as _np
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull, BaseMeshItemString
-from meshpy.core.conf import mpy
-from meshpy.core.container import ContainerBase
-from meshpy.core.element_beam import Beam
-from meshpy.core.node import Node
+from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
+from meshpy.core.base_mesh_item import BaseMeshItemString as _BaseMeshItemString
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.container import ContainerBase as _ContainerBase
+from meshpy.core.element_beam import Beam as _Beam
+from meshpy.core.node import Node as _Node
 
 
-class GeometrySetBase(BaseMeshItemFull):
+class GeometrySetBase(_BaseMeshItemFull):
     """Base class for a geometry set."""
 
     # Node set names for the input file file.
     geometry_set_names = {
-        mpy.geo.point: "DNODE",
-        mpy.geo.line: "DLINE",
-        mpy.geo.surface: "DSURFACE",
-        mpy.geo.volume: "DVOL",
+        _mpy.geo.point: "DNODE",
+        _mpy.geo.line: "DLINE",
+        _mpy.geo.surface: "DSURFACE",
+        _mpy.geo.volume: "DVOL",
     }
 
     def __init__(self, geometry_type, name=None, **kwargs):
@@ -127,7 +128,7 @@ class GeometrySetBase(BaseMeshItemFull):
         if len(nodes) == 0:
             raise ValueError("Writing empty geometry sets is not supported")
         nodes_id = [node.i_global for node in nodes]
-        sort_indices = np.argsort(nodes_id)
+        sort_indices = _np.argsort(nodes_id)
         nodes = [nodes[i] for i in sort_indices]
 
         return [
@@ -144,7 +145,7 @@ class GeometrySet(GeometrySetBase):
 
         Args
         ----
-        geometry: List or single Geometry/GeometrySet
+        geometry: _List or single Geometry/GeometrySet
             Geometries associated with this set. Empty geometries (i.e., no given)
             are not supported.
         """
@@ -158,7 +159,7 @@ class GeometrySet(GeometrySetBase):
         super().__init__(geometry_type, **kwargs)
 
         self.geometry_objects = {}
-        for geo in mpy.geo:
+        for geo in _mpy.geo:
             self.geometry_objects[geo] = {}
         self.add(geometry)
 
@@ -166,10 +167,10 @@ class GeometrySet(GeometrySetBase):
     def _get_geometry_type(item):
         """Return the geometry type of a given item."""
 
-        if isinstance(item, Node):
-            return mpy.geo.point
-        elif isinstance(item, Beam):
-            return mpy.geo.line
+        if isinstance(item, _Node):
+            return _mpy.geo.point
+        elif isinstance(item, _Beam):
+            return _mpy.geo.line
         elif isinstance(item, GeometrySet):
             return item.geometry_type
         raise TypeError(f"Got unexpected type {type(item)}")
@@ -200,8 +201,8 @@ class GeometrySet(GeometrySetBase):
 
         For non-point sets an empty dict is returned.
         """
-        if self.geometry_type is mpy.geo.point:
-            return self.geometry_objects[mpy.geo.point]
+        if self.geometry_type is _mpy.geo.point:
+            return self.geometry_objects[_mpy.geo.point]
         else:
             return {}
 
@@ -210,8 +211,8 @@ class GeometrySet(GeometrySetBase):
 
         Only in case this is a point set something is returned here.
         """
-        if self.geometry_type is mpy.geo.point:
-            return list(self.geometry_objects[mpy.geo.point].keys())
+        if self.geometry_type is _mpy.geo.point:
+            return list(self.geometry_objects[_mpy.geo.point].keys())
         else:
             raise TypeError(
                 "The function get_points can only be called for point sets."
@@ -225,11 +226,11 @@ class GeometrySet(GeometrySetBase):
         set.
         """
 
-        if self.geometry_type is mpy.geo.point:
-            return list(self.geometry_objects[mpy.geo.point].keys())
-        elif self.geometry_type is mpy.geo.line:
+        if self.geometry_type is _mpy.geo.point:
+            return list(self.geometry_objects[_mpy.geo.point].keys())
+        elif self.geometry_type is _mpy.geo.line:
             nodes = []
-            for element in self.geometry_objects[mpy.geo.line].keys():
+            for element in self.geometry_objects[_mpy.geo.line].keys():
                 nodes.extend(element.nodes)
             # Remove duplicates while preserving order
             return list(dict.fromkeys(nodes))
@@ -298,7 +299,7 @@ class GeometrySetNodes(GeometrySetBase):
             # Nodes are added.
             for item in value:
                 self.add(item)
-        elif isinstance(value, (int, Node)):
+        elif isinstance(value, (int, _Node)):
             self.nodes[value] = None
         elif isinstance(value, GeometrySetNodes):
             # Add all nodes from this geometry set.
@@ -320,7 +321,7 @@ class GeometrySetNodes(GeometrySetBase):
 
     def get_points(self):
         """Return nodes explicitly associated with this set."""
-        if self.geometry_type is mpy.geo.point:
+        if self.geometry_type is _mpy.geo.point:
             return self.get_all_nodes()
         else:
             raise TypeError(
@@ -353,7 +354,7 @@ class GeometryName(dict):
             raise NotImplementedError("GeometryName can only store GeometrySets")
 
 
-class GeometrySetContainer(ContainerBase):
+class GeometrySetContainer(_ContainerBase):
     """A class to group geometry sets together with the key being the geometry
     type."""
 
@@ -361,9 +362,9 @@ class GeometrySetContainer(ContainerBase):
         """Initialize the container and create the default keys in the map."""
         super().__init__(*args, **kwargs)
 
-        self.item_types = [BaseMeshItemString, GeometrySetBase]
+        self.item_types = [_BaseMeshItemString, GeometrySetBase]
 
-        for geometry_key in mpy.geo:
+        for geometry_key in _mpy.geo:
             self[geometry_key] = []
 
     def copy(self):
@@ -374,7 +375,7 @@ class GeometrySetContainer(ContainerBase):
         copy = GeometrySetContainer()
 
         # Add a copy of every list from this container to the new one.
-        for geometry_key in mpy.geo:
+        for geometry_key in _mpy.geo:
             copy[geometry_key] = self[geometry_key].copy()
 
         return copy

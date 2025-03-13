@@ -22,9 +22,9 @@
 """This file includes functions to ease the creation of input files using beam
 interaction potentials."""
 
-from meshpy.four_c.boundary_condition import BoundaryCondition
-from meshpy.four_c.header_functions import get_yes_no
-from meshpy.four_c.input_file import InputSection
+from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
+from meshpy.four_c.header_functions import get_yes_no as _get_yes_no
+from meshpy.four_c.input_file import InputSection as _InputSection
 
 
 class BeamPotential:
@@ -46,15 +46,15 @@ class BeamPotential:
         ----
         input_file:
             Input file of current problem setup.
-        pot_law_prefactors: float, int, np.array, list
+        pot_law_prefactors: float, int, _np.array, list
             Prefactors of a potential law in form of a power law. Same number
             of prefactors and exponents/line charge densities/functions must be
             provided!
-        pot_law_exponent: float, int, np.array, list
+        pot_law_exponent: float, int, _np.array, list
             Exponents of a potential law in form of a power law. Same number
             of exponents and prefactors/line charge densities/functions must be
             provided!
-        pot_law_line_charge_density: float, int, np.array, list
+        pot_law_line_charge_density: float, int, _np.array, list
             Line charge densities of a potential law in form of a power law.
             Same number of line charge densities and prefactors/exponents/functions
             must be provided!
@@ -149,7 +149,7 @@ class BeamPotential:
             NUM_INTEGRATION_SEGMENTS        {integration_segments}
             NUM_GAUSSPOINTS                 {gauss_points}
             POTENTIAL_REDUCTION_LENGTH      {potential_reduction_length}
-            AUTOMATIC_DIFFERENTIATION       {get_yes_no(automatic_differentiation)}"""
+            AUTOMATIC_DIFFERENTIATION       {_get_yes_no(automatic_differentiation)}"""
 
         if regularization_type is not None:
             settings += f"""
@@ -160,7 +160,7 @@ class BeamPotential:
             settings += f"\nCHOICE_MASTER_SLAVE             {choice_master_slave}"
 
         self.input_file.add(
-            InputSection(
+            _InputSection(
                 "BEAM POTENTIAL",
                 settings,
                 option_overwrite=option_overwrite,
@@ -204,16 +204,16 @@ class BeamPotential:
         """
 
         self.input_file.add(
-            InputSection(
+            _InputSection(
                 "BEAM POTENTIAL/RUNTIME VTK OUTPUT",
                 f"""
-            VTK_OUTPUT_BEAM_POTENTIAL           {get_yes_no(output_beam_potential)}
+            VTK_OUTPUT_BEAM_POTENTIAL           {_get_yes_no(output_beam_potential)}
             INTERVAL_STEPS                      {interval_steps}
-            EVERY_ITERATION                     {get_yes_no(every_iteration)}
-            FORCES                              {get_yes_no(forces)}
-            MOMENTS                             {get_yes_no(moments)}
-            WRITE_UIDS                          {get_yes_no(uids)}
-            WRITE_FORCE_MOMENT_PER_ELEMENTPAIR  {get_yes_no(per_ele_pair)}""",
+            EVERY_ITERATION                     {_get_yes_no(every_iteration)}
+            FORCES                              {_get_yes_no(forces)}
+            MOMENTS                             {_get_yes_no(moments)}
+            WRITE_UIDS                          {_get_yes_no(uids)}
+            WRITE_FORCE_MOMENT_PER_ELEMENTPAIR  {_get_yes_no(per_ele_pair)}""",
                 option_overwrite=option_overwrite,
             )
         )
@@ -235,7 +235,7 @@ class BeamPotential:
             if func != "none":
                 self.input_file.add(func)
 
-            bc = BoundaryCondition(
+            bc = _BoundaryCondition(
                 geometry_set,
                 f"POTLAW {i + 1} VAL {line_charge} FUNCT {{}}",
                 bc_type="DESIGN LINE BEAM POTENTIAL CHARGE CONDITIONS",
