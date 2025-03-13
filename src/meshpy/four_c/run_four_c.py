@@ -27,7 +27,7 @@ import subprocess  # nosec B404
 import sys
 from pathlib import Path
 
-from meshpy.utils.environment import get_env_variable
+from meshpy.utils.environment import get_env_variable as _get_env_variable
 
 
 def run_four_c(
@@ -81,11 +81,11 @@ def run_four_c(
 
     # Fist get all needed parameters
     if four_c_exe is None:
-        four_c_exe = get_env_variable("MESHPY_FOUR_C_EXE")
+        four_c_exe = _get_env_variable("MESHPY_FOUR_C_EXE")
     if mpi_command is None:
-        mpi_command = get_env_variable("MESHPY_MPI_COMMAND", default="mpirun")
+        mpi_command = _get_env_variable("MESHPY_MPI_COMMAND", default="mpirun")
     if n_proc is None:
-        n_proc = get_env_variable("MESHPY_MPI_NUM_PROC", default="1")
+        n_proc = _get_env_variable("MESHPY_MPI_NUM_PROC", default="1")
 
     # Setup paths and actual command to run
     os.makedirs(output_dir, exist_ok=True)

@@ -23,14 +23,14 @@
 
 from typing import Dict, List, Tuple
 
-from meshpy.core.conf import mpy
-from meshpy.core.mesh import Mesh
-from meshpy.core.node import Node
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.core.node import Node as _Node
 
 
 def get_coupled_nodes_to_master_map(
-    mesh: Mesh, *, assign_i_global: bool = False
-) -> Tuple[Dict[Node, Node], List[Node]]:
+    mesh: _Mesh, *, assign_i_global: bool = False
+) -> Tuple[Dict[_Node, _Node], List[_Node]]:
     """Get a mapping of nodes in a mesh that should be "replaced" because they
     are coupled via a joint.
 
@@ -57,8 +57,8 @@ def get_coupled_nodes_to_master_map(
 
     # Get a dictionary that maps the "replaced" nodes to the "master" ones
     replaced_node_to_master_map = {}
-    for coupling in mesh.boundary_conditions[mpy.bc.point_coupling, mpy.geo.point]:
-        if coupling.coupling_dof_type is not mpy.coupling_dof.fix:
+    for coupling in mesh.boundary_conditions[_mpy.bc.point_coupling, _mpy.geo.point]:
+        if coupling.coupling_dof_type is not _mpy.coupling_dof.fix:
             raise ValueError(
                 "This function is only implemented for rigid joints at the DOFs"
             )

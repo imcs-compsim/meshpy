@@ -30,8 +30,10 @@ import quaternion
 from numpy.typing import NDArray
 from scipy import integrate, interpolate, optimize
 
-from meshpy.core.conf import mpy
-from meshpy.core.rotation import Rotation, rotate_coordinates, smallest_rotation
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.rotation import Rotation as _Rotation
+from meshpy.core.rotation import rotate_coordinates as _rotate_coordinates
+from meshpy.core.rotation import smallest_rotation as _smallest_rotation
 
 
 def get_piecewise_linear_arc_length_along_points(coordinates: np.ndarray) -> np.ndarray:
@@ -103,14 +105,14 @@ def get_quaternions_along_curve(
     # Get the reference rotation
     t0 = centerline_interpolation_derivative(point_arc_length[0])
     min_projection = np.argmin(np.abs([np.dot(basis(i), t0) for i in range(3)]))
-    last_rotation = Rotation.from_basis(t0, basis(min_projection))
+    last_rotation = _Rotation.from_basis(t0, basis(min_projection))
 
     # Get the rotation vectors along the curve. They are calculated with smallest rotation mappings.
     n_points = len(point_arc_length)
     quaternions = np.zeros(n_points, dtype=quaternion.quaternion)
     quaternions[0] = last_rotation.q
     for i in range(1, n_points):
-        rotation = smallest_rotation(
+        rotation = _smallest_rotation(
             last_rotation,
             centerline_interpolation_derivative(point_arc_length[i]),
         )
@@ -137,8 +139,8 @@ def get_relative_distance_and_rotations(
         )
         relative_distances[i_segment] = np.linalg.norm(relative_distance_local)
 
-        smallest_relative_rotation_onto_distance = smallest_rotation(
-            Rotation(),
+        smallest_relative_rotation_onto_distance = _smallest_rotation(
+            _Rotation(),
             relative_distance_local,
         )
         relative_distances_rotation[i_segment] = quaternion.from_float_array(
@@ -223,11 +225,13 @@ class CosseratCurve(object):
         self.coordinates += vector
         self.set_centerline_interpolation()
 
-    def rotate(self, rotation: Rotation, *, origin=None):
+    def rotate(self, rotation: _Rotation, *, origin=None):
         """Rotate the curve and the quaternions."""
 
         self.quaternions = quaternion.from_float_array(rotation.q) * self.quaternions
-        self.coordinates = rotate_coordinates(self.coordinates, rotation, origin=origin)
+        self.coordinates = _rotate_coordinates(
+            self.coordinates, rotation, origin=origin
+        )
         self.set_centerline_interpolation()
 
     def get_centerline_position_and_rotation(
@@ -273,7 +277,7 @@ class CosseratCurve(object):
             self.point_arc_length[-1],
         ]
 
-        if factor < (1.0 - mpy.eps_quaternion):
+        if factor < (1.0 - _mpy.eps_quaternion):
             coordinates = np.zeros_like(self.coordinates)
             quaternions = np.zeros_like(self.quaternions)
             coordinates[0] = self.coordinates[0]
@@ -369,7 +373,7 @@ class CosseratCurve(object):
             length = arc_length - self.point_arc_length[index]
             r = sol_r[index]
             q = sol_q[index]
-            sol_r_final[i] = r + Rotation.from_quaternion(
+            sol_r_final[i] = r + _Rotation.from_quaternion(
                 quaternion.as_float_array(q)
             ) * [length, 0, 0]
             sol_q_final[i] = q

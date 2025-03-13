@@ -24,10 +24,14 @@ tolerance of each other will be considered as unique."""
 
 from enum import Enum, auto
 
-from meshpy.geometric_search.geometric_search_cython import cython_available
-from meshpy.geometric_search.geometric_search_scipy import find_close_points_scipy
+from meshpy.geometric_search.geometric_search_cython import (
+    cython_available as _cython_available,
+)
+from meshpy.geometric_search.geometric_search_scipy import (
+    find_close_points_scipy as _find_close_points_scipy,
+)
 
-if cython_available:
+if _cython_available:
     from .geometric_search_cython import find_close_points_brute_force_cython
 
 from .geometric_search_arborx import arborx_available
@@ -135,7 +139,7 @@ def find_close_points(point_coordinates, *, algorithm=None, tol=1e-8, **kwargs):
 
     if algorithm is None:
         # Decide which algorithm to use
-        if n_points < 200 and cython_available:
+        if n_points < 200 and _cython_available:
             # For around 200 points the brute force cython algorithm is the fastest one
             algorithm = FindClosePointAlgorithm.brute_force_cython
         elif arborx_available:
@@ -148,7 +152,7 @@ def find_close_points(point_coordinates, *, algorithm=None, tol=1e-8, **kwargs):
 
     # Get list of closest pairs
     if algorithm is FindClosePointAlgorithm.kd_tree_scipy:
-        has_partner, n_partner = find_close_points_scipy(
+        has_partner, n_partner = _find_close_points_scipy(
             point_coordinates, tol, **kwargs
         )
     elif algorithm is FindClosePointAlgorithm.brute_force_cython:

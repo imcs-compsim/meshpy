@@ -23,9 +23,10 @@
 
 import numpy as np
 
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometryName, GeometrySet
-from meshpy.utils.nodes import get_single_node
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.geometry_set import GeometryName as _GeometryName
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.utils.nodes import get_single_node as _get_single_node
 
 
 def create_beam_mesh_function(
@@ -187,7 +188,7 @@ def create_beam_mesh_function(
 
         if rotation_node == rotation_function:
             return None
-        elif not mpy.allow_beam_rotation:
+        elif not _mpy.allow_beam_rotation:
             # The settings do not allow for a rotation of the beam
             raise ValueError(
                 "Given nodal rotation does not match with given rotation function!"
@@ -196,7 +197,7 @@ def create_beam_mesh_function(
             # Evaluate the relative rotation
             # First check if the first basis vector is the same
             relative_basis_1 = rotation_node.inv() * rotation_function * [1, 0, 0]
-            if np.linalg.norm(relative_basis_1 - [1, 0, 0]) < mpy.eps_quaternion:
+            if np.linalg.norm(relative_basis_1 - [1, 0, 0]) < _mpy.eps_quaternion:
                 # Calculate the relative rotation
                 return rotation_function.inv() * rotation_node
             else:
@@ -211,7 +212,7 @@ def create_beam_mesh_function(
 
     # If a start node is given, set this as the first node for this beam.
     if start_node is not None:
-        start_node = get_single_node(start_node, check_cosserat_node=True)
+        start_node = _get_single_node(start_node, check_cosserat_node=True)
         nodes = [start_node]
         check_given_node(start_node)
         _, start_rotation = function_over_whole_interval(-1.0)
@@ -222,7 +223,7 @@ def create_beam_mesh_function(
     if end_node is True:
         close_beam = True
     elif end_node is not None:
-        end_node = get_single_node(end_node, check_cosserat_node=True)
+        end_node = _get_single_node(end_node, check_cosserat_node=True)
         check_given_node(end_node)
         _, end_rotation = function_over_whole_interval(1.0)
         relative_twist_end = get_relative_twist(end_node.rotation, end_rotation)
@@ -306,10 +307,10 @@ def create_beam_mesh_function(
     end_node.is_end_node = True
 
     # Create geometry sets that will be returned.
-    return_set = GeometryName()
-    return_set["start"] = GeometrySet(nodes[0])
-    return_set["end"] = GeometrySet(end_node)
-    return_set["line"] = GeometrySet(elements)
+    return_set = _GeometryName()
+    return_set["start"] = _GeometrySet(nodes[0])
+    return_set["end"] = _GeometrySet(end_node)
+    return_set["line"] = _GeometrySet(elements)
     if add_sets:
         mesh.add(return_set)
     return return_set

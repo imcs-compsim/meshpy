@@ -25,22 +25,22 @@ import warnings
 
 import numpy as np
 
-from meshpy.core.conf import mpy
-from meshpy.core.element_beam import Beam
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.element_beam import Beam as _Beam
+from meshpy.four_c.material import MaterialEulerBernoulli as _MaterialEulerBernoulli
+from meshpy.four_c.material import MaterialKirchhoff as _MaterialKirchhoff
+from meshpy.four_c.material import MaterialReissner as _MaterialReissner
 from meshpy.four_c.material import (
-    MaterialEulerBernoulli,
-    MaterialKirchhoff,
-    MaterialReissner,
-    MaterialReissnerElastoplastic,
+    MaterialReissnerElastoplastic as _MaterialReissnerElastoplastic,
 )
 
 
-class Beam3rHerm2Line3(Beam):
+class Beam3rHerm2Line3(_Beam):
     """Represents a BEAM3R HERM2LINE3 element."""
 
     nodes_create = [-1, 0, 1]
-    beam_type = mpy.beam.reissner
-    valid_material = [MaterialReissner, MaterialReissnerElastoplastic]
+    beam_type = _mpy.beam.reissner
+    valid_material = [_MaterialReissner, _MaterialReissnerElastoplastic]
 
     coupling_fix_string = "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0"
     coupling_joint_string = "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0"
@@ -64,13 +64,13 @@ class Beam3rHerm2Line3(Beam):
         )
 
 
-class Beam3rLine2Line2(Beam):
+class Beam3rLine2Line2(_Beam):
     """Represents a Reissner beam with linear shapefunctions in the rotations
     as well as the displacements."""
 
     nodes_create = [-1, 1]
-    beam_type = mpy.beam.reissner
-    valid_material = [MaterialReissner]
+    beam_type = _mpy.beam.reissner
+    valid_material = [_MaterialReissner]
 
     coupling_fix_string = "NUMDOF 6 ONOFF 1 1 1 1 1 1"
     coupling_joint_string = "NUMDOF 6 ONOFF 1 1 1 0 0 0"
@@ -94,18 +94,18 @@ class Beam3rLine2Line2(Beam):
         )
 
 
-class Beam3kClass(Beam):
+class Beam3kClass(_Beam):
     """Represents a Kirchhoff beam element."""
 
     nodes_create = [-1, 0, 1]
-    beam_type = mpy.beam.kirchhoff
-    valid_material = [MaterialKirchhoff]
+    beam_type = _mpy.beam.kirchhoff
+    valid_material = [_MaterialKirchhoff]
 
     coupling_fix_string = "NUMDOF 7 ONOFF 1 1 1 1 1 1 0"
     coupling_joint_string = "NUMDOF 7 ONOFF 1 1 1 0 0 0 0"
 
     def __init__(self, *, weak=True, rotvec=True, is_fad=True, **kwargs):
-        Beam.__init__(self, **kwargs)
+        _Beam.__init__(self, **kwargs)
 
         # Set the parameters for this beam.
         self.weak = weak
@@ -163,12 +163,12 @@ def Beam3k(**kwargs_class):
     return create_class
 
 
-class Beam3eb(Beam):
+class Beam3eb(_Beam):
     """Represents a Euler Bernoulli beam element."""
 
     nodes_create = [-1, 1]
-    beam_type = mpy.beam.euler_bernoulli
-    valid_material = [MaterialEulerBernoulli]
+    beam_type = _mpy.beam.euler_bernoulli
+    valid_material = [_MaterialEulerBernoulli]
 
     def _get_dat(self):
         """Return the line for the input file."""
@@ -182,7 +182,7 @@ class Beam3eb(Beam):
             )
         direction = self.nodes[1].coordinates - self.nodes[0].coordinates
         t1 = self.nodes[0].rotation * [1, 0, 0]
-        if np.linalg.norm(direction / np.linalg.norm(direction) - t1) >= mpy.eps_pos:
+        if np.linalg.norm(direction / np.linalg.norm(direction) - t1) >= _mpy.eps_pos:
             raise ValueError(
                 "The rotations do not match the direction of the Euler Bernoulli beam!"
             )

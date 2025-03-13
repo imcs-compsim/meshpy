@@ -24,11 +24,11 @@
 import numpy as np
 import vtk
 
-from meshpy.core.element import Element
-from meshpy.core.vtk_writer import add_point_data_node_sets
+from meshpy.core.element import Element as _Element
+from meshpy.core.vtk_writer import add_point_data_node_sets as _add_point_data_node_sets
 
 
-class VolumeElement(Element):
+class VolumeElement(_Element):
     """A base class for a volume element."""
 
     # This class variables stores the information about the element shape in
@@ -74,7 +74,7 @@ class VolumeElement(Element):
             coordinates[i, :] = node.coordinates
 
         # Add the node sets connected to this element.
-        add_point_data_node_sets(point_data, self.nodes)
+        _add_point_data_node_sets(point_data, self.nodes)
 
         # Add cell to writer.
         indices = vtk_writer_solid.add_points(coordinates, point_data=point_data)

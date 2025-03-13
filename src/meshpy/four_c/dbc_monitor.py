@@ -26,15 +26,17 @@ from typing import Optional
 
 import numpy as np
 
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.four_c.boundary_condition import BoundaryCondition
-from meshpy.four_c.function import Function
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
+from meshpy.four_c.function import Function as _Function
 from meshpy.four_c.function_utility import (
-    create_linear_interpolation_function,
-    ensure_length_of_function_array,
+    create_linear_interpolation_function as _create_linear_interpolation_function,
 )
-from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.function_utility import (
+    ensure_length_of_function_array as _ensure_length_of_function_array,
+)
+from meshpy.four_c.input_file import InputFile as _InputFile
 
 
 def linear_time_transformation(
@@ -146,9 +148,9 @@ def read_dbc_monitor_file(file_path):
 
 
 def add_point_neuman_condition_to_input_file(
-    input_file: InputFile,
+    input_file: _InputFile,
     nodes: list[int],
-    function_array: list[Function],
+    function_array: list[_Function],
     force: np.ndarray,
     *,
     n_dof: int = 3,
@@ -177,7 +179,7 @@ def add_point_neuman_condition_to_input_file(
             f"The forces vector must have dimensions [3x1] not [{force.size}x1]"
         )
 
-    function_array = ensure_length_of_function_array(function_array, 3)
+    function_array = _ensure_length_of_function_array(function_array, 3)
 
     # Add the function to the input file, if they are not previously added.
     for function in function_array:
@@ -185,31 +187,31 @@ def add_point_neuman_condition_to_input_file(
 
     # Create GeometrySet with nodes.
     mesh_nodes = [input_file.nodes[i_node] for i_node in nodes]
-    geo = GeometrySet(mesh_nodes)
+    geo = _GeometrySet(mesh_nodes)
 
     # Create the Boundary Condition.
     extra_dof_zero = " 0" * (n_dof - 3)
-    bc = BoundaryCondition(
+    bc = _BoundaryCondition(
         geo,
         (
             "NUMDOF {n_dof} ONOFF 1 1 1{edz} VAL {data[0]} {data[1]} {data[2]}"
             "{edz} FUNCT {{}} {{}} {{}}{edz}"
         ).format(n_dof=n_dof, data=force, edz=extra_dof_zero),
-        bc_type=mpy.bc.neumann,
+        bc_type=_mpy.bc.neumann,
         format_replacement=function_array,
     )
     input_file.add(bc)
 
 
 def dbc_monitor_to_input_all_values(
-    input_file: InputFile,
+    input_file: _InputFile,
     file_path: str,
     *,
     steps: list[int] = [],
     time_span: list[int] = [0, 1, 2],
     type: Optional[str] = "linear",
     flip_time_values: bool = False,
-    functions: list[Function] = [],
+    functions: list[_Function] = [],
     **kwargs,
 ):
     """Extracts all the force values of the monitored Dirichlet boundary
@@ -315,7 +317,7 @@ def dbc_monitor_to_input_all_values(
     if not type == "linear":
         for dim in range(force.shape[1]):
             # create a linear function with the force values per dimension
-            fun = create_linear_interpolation_function(
+            fun = _create_linear_interpolation_function(
                 time, force[:, dim], function_type="SYMBOLIC_FUNCTION_OF_TIME"
             )
 
@@ -338,11 +340,11 @@ def dbc_monitor_to_input_all_values(
 
 
 def dbc_monitor_to_input(
-    input_file: InputFile,
+    input_file: _InputFile,
     file_path: str,
     *,
     step: int = -1,
-    function: Function,
+    function: _Function,
     **kwargs,
 ):
     """Converts the last value of a Dirichlet boundary condition monitor log to

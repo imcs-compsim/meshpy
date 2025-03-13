@@ -28,9 +28,12 @@ plates.
 
 import numpy as np
 
-from meshpy.core.geometry_set import GeometryName, GeometrySet
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
-from meshpy.utils.nodes import check_node_by_coordinate
+from meshpy.core.geometry_set import GeometryName as _GeometryName
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.mesh_creation_functions.beam_basic_geometry import (
+    create_beam_mesh_line as _create_beam_mesh_line,
+)
+from meshpy.utils.nodes import check_node_by_coordinate as _check_node_by_coordinate
 
 
 def _intersect_line_with_rectangle(
@@ -203,7 +206,7 @@ def create_fibers_in_rectangle(
                     # Calculate the number of elements in this fiber.
                     fiber_nel = int(np.round(fiber_length / fiber_element_length))
                     fiber_nel = np.max([fiber_nel, 1])
-                    create_beam_mesh_line(
+                    _create_beam_mesh_line(
                         mesh,
                         beam_object,
                         material,
@@ -215,18 +218,18 @@ def create_fibers_in_rectangle(
                 # The current search position is already outside of the rectangle, no need to continue.
                 break
 
-    return_set = GeometryName()
-    return_set["north"] = GeometrySet(
-        mesh.get_nodes_by_function(check_node_by_coordinate, 1, width),
+    return_set = _GeometryName()
+    return_set["north"] = _GeometrySet(
+        mesh.get_nodes_by_function(_check_node_by_coordinate, 1, width),
     )
-    return_set["east"] = GeometrySet(
-        mesh.get_nodes_by_function(check_node_by_coordinate, 0, length),
+    return_set["east"] = _GeometrySet(
+        mesh.get_nodes_by_function(_check_node_by_coordinate, 0, length),
     )
-    return_set["south"] = GeometrySet(
-        mesh.get_nodes_by_function(check_node_by_coordinate, 1, 0)
+    return_set["south"] = _GeometrySet(
+        mesh.get_nodes_by_function(_check_node_by_coordinate, 1, 0)
     )
-    return_set["west"] = GeometrySet(
-        mesh.get_nodes_by_function(check_node_by_coordinate, 0, 0)
+    return_set["west"] = _GeometrySet(
+        mesh.get_nodes_by_function(_check_node_by_coordinate, 0, 0)
     )
-    return_set["all"] = GeometrySet(mesh.elements)
+    return_set["all"] = _GeometrySet(mesh.elements)
     return return_set

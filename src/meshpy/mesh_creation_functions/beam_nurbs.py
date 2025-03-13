@@ -23,8 +23,10 @@
 
 import numpy as np
 
-from meshpy.core.conf import mpy
-from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
+from meshpy.core.conf import mpy as _mpy
+from meshpy.mesh_creation_functions.beam_curve import (
+    create_beam_mesh_curve as _create_beam_mesh_curve,
+)
 
 
 def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
@@ -57,7 +59,7 @@ def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
     """
 
     if tol is None:
-        tol = mpy.eps_pos
+        tol = _mpy.eps_pos
 
     knot_vector = curve.knot_vectors[0]
     curve_start = np.min(knot_vector)
@@ -148,7 +150,7 @@ def create_beam_mesh_from_nurbs(
     ) = get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=tol)
 
     # Create the beams
-    return create_beam_mesh_curve(
+    return _create_beam_mesh_curve(
         mesh,
         beam_object,
         material,

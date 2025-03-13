@@ -23,12 +23,15 @@
 
 import numpy as np
 
-from meshpy.core.boundary_condition import BoundaryConditionBase
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet, GeometrySetBase
+from meshpy.core.boundary_condition import (
+    BoundaryConditionBase as _BoundaryConditionBase,
+)
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.geometry_set import GeometrySetBase as _GeometrySetBase
 
 
-class Coupling(BoundaryConditionBase):
+class Coupling(_BoundaryConditionBase):
     """Represents a coupling between geometries in 4C."""
 
     def __init__(
@@ -64,10 +67,10 @@ class Coupling(BoundaryConditionBase):
         if isinstance(geometry, int):
             # This is the case if the boundary condition is read from an existing dat file
             pass
-        elif isinstance(geometry, GeometrySetBase):
+        elif isinstance(geometry, _GeometrySetBase):
             pass
         elif isinstance(geometry, list):
-            geometry = GeometrySet(geometry)
+            geometry = _GeometrySet(geometry)
         else:
             raise TypeError(
                 f"Coupling expects a GeometrySetBase item, got {type(geometry)}"
@@ -75,8 +78,8 @@ class Coupling(BoundaryConditionBase):
 
         # Couplings only work for point sets
         if (
-            isinstance(geometry, GeometrySetBase)
-            and geometry.geometry_type is not mpy.geo.point
+            isinstance(geometry, _GeometrySetBase)
+            and geometry.geometry_type is not _mpy.geo.point
         ):
             raise TypeError("Couplings are only implemented for point sets.")
 
@@ -100,7 +103,7 @@ class Coupling(BoundaryConditionBase):
         for i, node in enumerate(nodes):
             # Get the difference to the first node
             diff[i, :] = node.coordinates - nodes[0].coordinates
-        if np.max(np.linalg.norm(diff, axis=1)) > mpy.eps_pos:
+        if np.max(np.linalg.norm(diff, axis=1)) > _mpy.eps_pos:
             raise ValueError(
                 "The nodes given to Coupling do not have the same position."
             )
@@ -128,7 +131,7 @@ class Coupling(BoundaryConditionBase):
                             f'another one is of type "{element.beam_type}"! They have to be '
                             "of the same kind."
                         )
-                    if beam_type is mpy.beam.kirchhoff and element.rotvec is False:
+                    if beam_type is _mpy.beam.kirchhoff and element.rotvec is False:
                         raise ValueError(
                             "Couplings for Kirchhoff beams and rotvec==False not yet implemented."
                         )
@@ -161,7 +164,7 @@ def coupling_factory(geometry, coupling_type, coupling_dof_type, **kwargs):
     of the coupling.
     """
 
-    if coupling_type is mpy.bc.point_coupling_penalty:
+    if coupling_type is _mpy.bc.point_coupling_penalty:
         # Penalty point couplings in 4C can only contain two nodes. In this case
         # we expect the given geometry to be a list of nodes.
         main_node = geometry[0]

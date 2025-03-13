@@ -23,16 +23,19 @@
 
 import numpy as np
 
-from meshpy.core.conf import mpy
-from meshpy.core.element import Element
-from meshpy.four_c.material import MaterialString, MaterialStVenantKirchhoff
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.element import Element as _Element
+from meshpy.four_c.material import MaterialString as _MaterialString
+from meshpy.four_c.material import (
+    MaterialStVenantKirchhoff as _MaterialStVenantKirchhoff,
+)
 
 
-class NURBSPatch(Element):
+class NURBSPatch(_Element):
     """A base class for a NURBS patch."""
 
     # A list of valid material types for this element
-    valid_material = [MaterialString, MaterialStVenantKirchhoff]
+    valid_material = [_MaterialString, _MaterialStVenantKirchhoff]
 
     def __init__(
         self,
@@ -73,12 +76,14 @@ class NURBSPatch(Element):
         """Return additional information of the NURBS patch."""
 
         # TODO: This is a circular import, which should be resolved
-        from meshpy.four_c.input_file import InputSectionMultiKey
+        from meshpy.four_c.input_file import (
+            InputSectionMultiKey as _InputSectionMultiKey,
+        )
 
         knotvectors_section = "STRUCTURE KNOTVECTORS"
 
         if knotvectors_section not in sections.keys():
-            sections[knotvectors_section] = InputSectionMultiKey(knotvectors_section)
+            sections[knotvectors_section] = _InputSectionMultiKey(knotvectors_section)
 
         section = sections[knotvectors_section]
         section.add(f"NURBS_DIMENSION {self.get_nurbs_dimension()}")
@@ -101,13 +106,13 @@ class NURBSPatch(Element):
                         self.knot_vectors[dir_manifold][i]
                         - self.knot_vectors[dir_manifold][i + 1]
                     )
-                    > mpy.eps_knot_vector
+                    > _mpy.eps_knot_vector
                 ) or (
                     abs(
                         self.knot_vectors[dir_manifold][num_knotvectors - 2 - i]
                         - self.knot_vectors[dir_manifold][num_knotvectors - 1 - i]
                     )
-                    > mpy.eps_knot_vector
+                    > _mpy.eps_knot_vector
                 ):
                     knotvector_type = "Periodic"
                     break
@@ -132,7 +137,7 @@ class NURBSPatch(Element):
                         self.knot_vectors[i_dir][i_knot]
                         - self.knot_vectors[i_dir][i_knot + 1]
                     )
-                    > mpy.eps_knot_vector
+                    > _mpy.eps_knot_vector
                 ):
                     num_elements_dir[i_dir] += 1
 

@@ -23,12 +23,17 @@
 
 import numpy as np
 
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetBase
-from meshpy.core.node import Node, NodeCosserat
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.geometry_set import GeometryName as _GeometryName
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.geometry_set import GeometrySetBase as _GeometrySetBase
+from meshpy.core.node import Node as _Node
+from meshpy.core.node import NodeCosserat as _NodeCosserat
 from meshpy.geometric_search.find_close_points import (
-    find_close_points,
-    point_partners_to_partner_indices,
+    find_close_points as _find_close_points,
+)
+from meshpy.geometric_search.find_close_points import (
+    point_partners_to_partner_indices as _point_partners_to_partner_indices,
 )
 
 
@@ -54,13 +59,13 @@ def find_close_nodes(nodes, **kwargs):
     coords = np.zeros([len(nodes), 3])
     for i, node in enumerate(nodes):
         coords[i, :] = node.coordinates
-    partner_indices = point_partners_to_partner_indices(
-        *find_close_points(coords, **kwargs)
+    partner_indices = _point_partners_to_partner_indices(
+        *_find_close_points(coords, **kwargs)
     )
     return [[nodes[i] for i in partners] for partners in partner_indices]
 
 
-def check_node_by_coordinate(node, axis, value, eps=mpy.eps_pos):
+def check_node_by_coordinate(node, axis, value, eps=_mpy.eps_pos):
     """Check if the node is at a certain coordinate value.
 
     Args
@@ -107,9 +112,9 @@ def get_single_node(item, *, check_cosserat_node=False):
     check_cosserat: bool
         If a check should be performed, that the given node is a CosseratNode.
     """
-    if isinstance(item, Node):
+    if isinstance(item, _Node):
         node = item
-    elif isinstance(item, GeometrySetBase):
+    elif isinstance(item, _GeometrySetBase):
         # Check if there is only one node in the set
         nodes = item.get_points()
         if len(nodes) == 1:
@@ -121,7 +126,7 @@ def get_single_node(item, *, check_cosserat_node=False):
             f'The given object can be node or GeometrySet got "{type(item)}"!'
         )
 
-    if check_cosserat_node and not isinstance(node, NodeCosserat):
+    if check_cosserat_node and not isinstance(node, _NodeCosserat):
         raise TypeError("Expected a NodeCosserat object.")
 
     return node
@@ -179,7 +184,7 @@ def get_nodal_quaternions(nodes):
     """
     quaternions = np.zeros([len(nodes), 4])
     for i, node in enumerate(nodes):
-        if isinstance(node, NodeCosserat):
+        if isinstance(node, _NodeCosserat):
             quaternions[i, :] = node.rotation.get_quaternion()
         else:
             # For the case of nodes that belong to solid elements,
@@ -217,27 +222,27 @@ def get_min_max_nodes(nodes, *, middle_nodes=False):
     """
 
     node_list = filter_nodes(nodes, middle_nodes=middle_nodes)
-    geometry = GeometryName()
+    geometry = _GeometryName()
 
     pos = get_nodal_coordinates(node_list)
     for i, direction in enumerate(["x", "y", "z"]):
         # Check if there is more than one value in dimension.
         min_max = [np.min(pos[:, i]), np.max(pos[:, i])]
-        if np.abs(min_max[1] - min_max[0]) >= mpy.eps_pos:
+        if np.abs(min_max[1] - min_max[0]) >= _mpy.eps_pos:
             for j, text in enumerate(["min", "max"]):
                 # get all nodes with the min / max coordinate
                 min_max_nodes = []
                 for index, value in enumerate(
-                    np.abs(pos[:, i] - min_max[j]) < mpy.eps_pos
+                    np.abs(pos[:, i] - min_max[j]) < _mpy.eps_pos
                 ):
                     if value:
                         min_max_nodes.append(node_list[index])
-                geometry[f"{direction}_{text}"] = GeometrySet(min_max_nodes)
+                geometry[f"{direction}_{text}"] = _GeometrySet(min_max_nodes)
     return geometry
 
 
 def is_node_on_plane(
-    node, *, normal=None, origin_distance=None, point_on_plane=None, tol=mpy.eps_pos
+    node, *, normal=None, origin_distance=None, point_on_plane=None, tol=_mpy.eps_pos
 ):
     """Query if a node lies on a plane defined by a point_on_plane or the
     origin distance.

@@ -23,10 +23,10 @@
 
 import numpy as np
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull
+from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
 
 
-class Material(BaseMeshItemFull):
+class Material(_BaseMeshItemFull):
     """Base class for all materials."""
 
     def __init__(self, data=None, **kwargs):

@@ -29,27 +29,31 @@ import shutil
 import subprocess  # nosec B404
 import sys
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull, BaseMeshItemString
+from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
+from meshpy.core.base_mesh_item import BaseMeshItemString as _BaseMeshItemString
 from meshpy.core.boundary_condition import (
-    BoundaryConditionBase,
-    BoundaryConditionContainer,
+    BoundaryConditionBase as _BoundaryConditionBase,
 )
-from meshpy.core.conf import mpy
-from meshpy.core.element import Element
-from meshpy.core.geometry_set import GeometrySetContainer, GeometrySetNodes
-from meshpy.core.mesh import Mesh
-from meshpy.core.node import Node
-from meshpy.core.nurbs_patch import NURBSPatch
-from meshpy.utils.environment import cubitpy_is_available
+from meshpy.core.boundary_condition import (
+    BoundaryConditionContainer as _BoundaryConditionContainer,
+)
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.element import Element as _Element
+from meshpy.core.geometry_set import GeometrySetContainer as _GeometrySetContainer
+from meshpy.core.geometry_set import GeometrySetNodes as _GeometrySetNodes
+from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.core.node import Node as _Node
+from meshpy.core.nurbs_patch import NURBSPatch as _NURBSPatch
+from meshpy.utils.environment import cubitpy_is_available as _cubitpy_is_available
 
-if cubitpy_is_available():
+if _cubitpy_is_available():
     import cubitpy
 
 
 def get_section_string(section_name):
     """Return the string for a section in the dat file."""
     return (
-        "".join(["-" for _i in range(mpy.dat_len_section - len(section_name))])
+        "".join(["-" for _i in range(_mpy.dat_len_section - len(section_name))])
         + section_name
     )
 
@@ -238,69 +242,69 @@ class InputSectionMultiKey(InputSection):
         self.data[len(self.data)] = option
 
 
-class InputFile(Mesh):
+class InputFile(_Mesh):
     """An item that represents a complete 4C input file."""
 
     # Define the names of sections and boundary conditions in the input file.
     geometry_set_names = {
-        mpy.geo.point: "DNODE-NODE TOPOLOGY",
-        mpy.geo.line: "DLINE-NODE TOPOLOGY",
-        mpy.geo.surface: "DSURF-NODE TOPOLOGY",
-        mpy.geo.volume: "DVOL-NODE TOPOLOGY",
+        _mpy.geo.point: "DNODE-NODE TOPOLOGY",
+        _mpy.geo.line: "DLINE-NODE TOPOLOGY",
+        _mpy.geo.surface: "DSURF-NODE TOPOLOGY",
+        _mpy.geo.volume: "DVOL-NODE TOPOLOGY",
     }
     boundary_condition_names = {
-        (mpy.bc.dirichlet, mpy.geo.point): "DESIGN POINT DIRICH CONDITIONS",
-        (mpy.bc.dirichlet, mpy.geo.line): "DESIGN LINE DIRICH CONDITIONS",
-        (mpy.bc.dirichlet, mpy.geo.surface): "DESIGN SURF DIRICH CONDITIONS",
-        (mpy.bc.dirichlet, mpy.geo.volume): "DESIGN VOL DIRICH CONDITIONS",
-        (mpy.bc.locsys, mpy.geo.point): "DESIGN POINT LOCSYS CONDITIONS",
-        (mpy.bc.locsys, mpy.geo.line): "DESIGN LINE LOCSYS CONDITIONS",
-        (mpy.bc.locsys, mpy.geo.surface): "DESIGN SURF LOCSYS CONDITIONS",
-        (mpy.bc.locsys, mpy.geo.volume): "DESIGN VOL LOCSYS CONDITIONS",
-        (mpy.bc.neumann, mpy.geo.point): "DESIGN POINT NEUMANN CONDITIONS",
-        (mpy.bc.neumann, mpy.geo.line): "DESIGN LINE NEUMANN CONDITIONS",
-        (mpy.bc.neumann, mpy.geo.surface): "DESIGN SURF NEUMANN CONDITIONS",
-        (mpy.bc.neumann, mpy.geo.volume): "DESIGN VOL NEUMANN CONDITIONS",
+        (_mpy.bc.dirichlet, _mpy.geo.point): "DESIGN POINT DIRICH CONDITIONS",
+        (_mpy.bc.dirichlet, _mpy.geo.line): "DESIGN LINE DIRICH CONDITIONS",
+        (_mpy.bc.dirichlet, _mpy.geo.surface): "DESIGN SURF DIRICH CONDITIONS",
+        (_mpy.bc.dirichlet, _mpy.geo.volume): "DESIGN VOL DIRICH CONDITIONS",
+        (_mpy.bc.locsys, _mpy.geo.point): "DESIGN POINT LOCSYS CONDITIONS",
+        (_mpy.bc.locsys, _mpy.geo.line): "DESIGN LINE LOCSYS CONDITIONS",
+        (_mpy.bc.locsys, _mpy.geo.surface): "DESIGN SURF LOCSYS CONDITIONS",
+        (_mpy.bc.locsys, _mpy.geo.volume): "DESIGN VOL LOCSYS CONDITIONS",
+        (_mpy.bc.neumann, _mpy.geo.point): "DESIGN POINT NEUMANN CONDITIONS",
+        (_mpy.bc.neumann, _mpy.geo.line): "DESIGN LINE NEUMANN CONDITIONS",
+        (_mpy.bc.neumann, _mpy.geo.surface): "DESIGN SURF NEUMANN CONDITIONS",
+        (_mpy.bc.neumann, _mpy.geo.volume): "DESIGN VOL NEUMANN CONDITIONS",
         (
-            mpy.bc.moment_euler_bernoulli,
-            mpy.geo.point,
+            _mpy.bc.moment_euler_bernoulli,
+            _mpy.geo.point,
         ): "DESIGN POINT MOMENT EB CONDITIONS",
         (
-            mpy.bc.beam_to_solid_volume_meshtying,
-            mpy.geo.line,
+            _mpy.bc.beam_to_solid_volume_meshtying,
+            _mpy.geo.line,
         ): "BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING LINE",
         (
-            mpy.bc.beam_to_solid_volume_meshtying,
-            mpy.geo.volume,
+            _mpy.bc.beam_to_solid_volume_meshtying,
+            _mpy.geo.volume,
         ): "BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING VOLUME",
         (
-            mpy.bc.beam_to_solid_surface_meshtying,
-            mpy.geo.line,
+            _mpy.bc.beam_to_solid_surface_meshtying,
+            _mpy.geo.line,
         ): "BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING LINE",
         (
-            mpy.bc.beam_to_solid_surface_meshtying,
-            mpy.geo.surface,
+            _mpy.bc.beam_to_solid_surface_meshtying,
+            _mpy.geo.surface,
         ): "BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING SURFACE",
         (
-            mpy.bc.beam_to_solid_surface_contact,
-            mpy.geo.line,
+            _mpy.bc.beam_to_solid_surface_contact,
+            _mpy.geo.line,
         ): "BEAM INTERACTION/BEAM TO SOLID SURFACE CONTACT LINE",
         (
-            mpy.bc.beam_to_solid_surface_contact,
-            mpy.geo.surface,
+            _mpy.bc.beam_to_solid_surface_contact,
+            _mpy.geo.surface,
         ): "BEAM INTERACTION/BEAM TO SOLID SURFACE CONTACT SURFACE",
-        (mpy.bc.point_coupling, mpy.geo.point): "DESIGN POINT COUPLING CONDITIONS",
+        (_mpy.bc.point_coupling, _mpy.geo.point): "DESIGN POINT COUPLING CONDITIONS",
         (
-            mpy.bc.beam_to_beam_contact,
-            mpy.geo.line,
+            _mpy.bc.beam_to_beam_contact,
+            _mpy.geo.line,
         ): "BEAM INTERACTION/BEAM TO BEAM CONTACT CONDITIONS",
         (
-            mpy.bc.point_coupling_penalty,
-            mpy.geo.point,
+            _mpy.bc.point_coupling_penalty,
+            _mpy.geo.point,
         ): "DESIGN POINT PENALTY COUPLING CONDITIONS",
         (
             "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
-            mpy.geo.surface,
+            _mpy.geo.surface,
         ): "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
     }
 
@@ -344,8 +348,8 @@ class InputFile(Mesh):
         self.dat_nodes = []
         self.dat_elements = []
         self.dat_elements_fluid = []
-        self.dat_geometry_sets = GeometrySetContainer()
-        self.dat_boundary_conditions = BoundaryConditionContainer()
+        self.dat_geometry_sets = _GeometrySetContainer()
+        self.dat_boundary_conditions = _BoundaryConditionContainer()
 
         # Contents of NOX xml file.
         self.nox_xml = None
@@ -401,7 +405,7 @@ class InputFile(Mesh):
         # Add the lines to this input file.
         self._add_dat_lines(dat_lines)
 
-        if mpy.import_mesh_full:
+        if _mpy.import_mesh_full:
             # If the solid mesh is imported as objects, link the relevant data
             # after the import.
 
@@ -497,17 +501,17 @@ class InputFile(Mesh):
                         break
 
                 for item, comments in section_data_comment:
-                    if mpy.import_mesh_full:
+                    if _mpy.import_mesh_full:
                         self.boundary_conditions.append(
                             (bc_key, geometry_key),
-                            BoundaryConditionBase.from_dat(
+                            _BoundaryConditionBase.from_dat(
                                 bc_key, item, comments=comments
                             ),
                         )
                     else:
                         self.dat_boundary_conditions.append(
                             (bc_key, geometry_key),
-                            BaseMeshItemString(item, comments=comments),
+                            _BaseMeshItemString(item, comments=comments),
                         )
 
             def add_set(section_header, section_data_comment):
@@ -527,15 +531,15 @@ class InputFile(Mesh):
                             geometry_key = key
                             break
 
-                    if mpy.import_mesh_full:
+                    if _mpy.import_mesh_full:
                         self.geometry_sets[geometry_key].append(
-                            GeometrySetNodes.from_dat(
+                            _GeometrySetNodes.from_dat(
                                 geometry_key, dat_list, comments=comments
                             )
                         )
                     else:
                         self.dat_geometry_sets[geometry_key].append(
-                            BaseMeshItemString(dat_list, comments=comments)
+                            _BaseMeshItemString(dat_list, comments=comments)
                         )
 
                 if len(section_data_comment) > 0:
@@ -571,7 +575,7 @@ class InputFile(Mesh):
 
             def add_line(self_list, line):
                 """Add the line to self_list, and handle comments."""
-                self_list.append(BaseMeshItemString(line[0], comments=line[1]))
+                self_list.append(_BaseMeshItemString(line[0], comments=line[1]))
 
             # Check if the section contains mesh data that has to be added to
             # specific lists.
@@ -581,26 +585,26 @@ class InputFile(Mesh):
                     add_line(self.materials, line)
             elif section_name == "NODE COORDS":
                 for line in section_data_comment:
-                    if mpy.import_mesh_full:
-                        self.nodes.append(Node.from_dat(line))
+                    if _mpy.import_mesh_full:
+                        self.nodes.append(_Node.from_dat(line))
                     else:
                         add_line(self.dat_nodes, line)
             elif section_name == "STRUCTURE ELEMENTS":
                 for line in section_data_comment:
-                    if mpy.import_mesh_full:
-                        self.elements.append(Element.from_dat(line))
+                    if _mpy.import_mesh_full:
+                        self.elements.append(_Element.from_dat(line))
                     else:
                         add_line(self.dat_elements, line)
             elif section_name == "FLUID ELEMENTS":
                 for line in section_data_comment:
-                    if mpy.import_mesh_full:
+                    if _mpy.import_mesh_full:
                         raise NotImplementedError(
                             "Fluid elements in combination with mpy.import_mesh_full == True is "
                             "not yet implemented!"
                         )
                     add_line(self.dat_elements_fluid, line)
             elif section_name.startswith("FUNCT"):
-                self.functions.append(BaseMeshItemFull(section_data))
+                self.functions.append(_BaseMeshItemFull(section_data))
             elif section_name in self.boundary_condition_names.values():
                 add_bc(section_name, section_data_comment)
             elif section_name.endswith("TOPOLOGY"):
@@ -700,7 +704,7 @@ class InputFile(Mesh):
         """
 
         # Perform some checks on the mesh.
-        if mpy.check_overlapping_elements:
+        if _mpy.check_overlapping_elements:
             self.check_overlapping_elements()
 
         # List that will contain all input lines.
@@ -709,7 +713,7 @@ class InputFile(Mesh):
         # Add header to the input file.
         end_text = None
 
-        lines.extend(["// " + line for line in mpy.input_file_meshpy_header])
+        lines.extend(["// " + line for line in _mpy.input_file_meshpy_header])
         if header:
             header_text, end_text = self._get_header(add_script_to_header)
             lines.append(header_text)
@@ -762,7 +766,7 @@ class InputFile(Mesh):
                 # As a NURBS patch can be defined with more elements, an offset is applied to the
                 # rest of the items
                 item.i_global = i + 1
-                if isinstance(item, NURBSPatch):
+                if isinstance(item, _NURBSPatch):
                     item.n_nurbs_patch = i_nurbs_patch + 1
                     offset = item.get_number_elements()
                     i += offset
@@ -784,7 +788,7 @@ class InputFile(Mesh):
             # Get the maximum material index in materials imported from a string
             max_material_id = 0
             for material in material_list:
-                if isinstance(material, BaseMeshItemString):
+                if isinstance(material, _BaseMeshItemString):
                     for dat_line in material.get_dat_lines():
                         if dat_line.startswith("MAT "):
                             max_material_id = max(
@@ -794,7 +798,7 @@ class InputFile(Mesh):
             # Set the material id in all MeshPy materials
             i_material = max_material_id + 1
             for material in material_list:
-                if not isinstance(material, BaseMeshItemString):
+                if not isinstance(material, _BaseMeshItemString):
                     material.i_global = i_material
                     i_material += 1
 
@@ -806,10 +810,10 @@ class InputFile(Mesh):
         all_nodes = self.dat_nodes + self.nodes
         all_elements_structure = self.dat_elements + self.elements
         all_elements = self.dat_elements_fluid + all_elements_structure
-        all_geometry_sets = GeometrySetContainer()
+        all_geometry_sets = _GeometrySetContainer()
         all_geometry_sets.extend(self.dat_geometry_sets)
         all_geometry_sets.extend(mesh_sets)
-        all_boundary_conditions = BoundaryConditionContainer()
+        all_boundary_conditions = _BoundaryConditionContainer()
         all_boundary_conditions.extend(self.dat_boundary_conditions)
         all_boundary_conditions.extend(self.boundary_conditions)
 
@@ -859,14 +863,14 @@ class InputFile(Mesh):
         # depending on the type of the connected beam element.
         def get_number_of_coupling_conditions(key):
             """Return the number of coupling conditions in the mesh."""
-            if (key, mpy.geo.point) in all_boundary_conditions.keys():
-                return len(all_boundary_conditions[key, mpy.geo.point])
+            if (key, _mpy.geo.point) in all_boundary_conditions.keys():
+                return len(all_boundary_conditions[key, _mpy.geo.point])
             else:
                 return 0
 
         if (
-            get_number_of_coupling_conditions(mpy.bc.point_coupling)
-            + get_number_of_coupling_conditions(mpy.bc.point_coupling_penalty)
+            get_number_of_coupling_conditions(_mpy.bc.point_coupling)
+            + get_number_of_coupling_conditions(_mpy.bc.point_coupling_penalty)
             > 0
         ):
             self.set_node_links()
@@ -973,7 +977,7 @@ class InputFile(Mesh):
             f"// git date:   {meshpy_git_date}\n"
         )
 
-        if cubitpy_is_available():
+        if _cubitpy_is_available():
             # Get git information about cubitpy.
             cubitpy_git_sha, cubitpy_git_date = get_git_data(
                 os.path.dirname(cubitpy.__file__)
@@ -987,7 +991,7 @@ class InputFile(Mesh):
                     f"// git date:   {cubitpy_git_date}\n"
                 )
 
-        string_line = "// " + "".join(["-" for _i in range(mpy.dat_len_section - 3)])
+        string_line = "// " + "".join(["-" for _i in range(_mpy.dat_len_section - 3)])
 
         # If needed, append the contents of the script.
         if add_script:

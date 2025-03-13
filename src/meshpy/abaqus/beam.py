@@ -24,8 +24,8 @@ used with MeshPy."""
 
 import numpy as np
 
-from meshpy.core.element_beam import Beam
-from meshpy.core.material import MaterialBeam
+from meshpy.core.element_beam import Beam as _Beam
+from meshpy.core.material import MaterialBeam as _MaterialBeam
 
 
 def generate_abaqus_beam(beam_type: str):
@@ -62,7 +62,7 @@ def generate_abaqus_beam(beam_type: str):
     # Create the Abaqus beam class.
     return type(
         "BeamAbaqus" + beam_type,
-        (Beam,),
+        (_Beam,),
         {
             "beam_type": beam_type,
             "nodes_create": nodes_create,
@@ -71,7 +71,7 @@ def generate_abaqus_beam(beam_type: str):
     )
 
 
-class AbaqusBeamMaterial(MaterialBeam):
+class AbaqusBeamMaterial(_MaterialBeam):
     """A class representing an Abaqus beam material."""
 
     def __init__(self, name: str):
