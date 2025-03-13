@@ -257,6 +257,27 @@ pytest
 ### Coding guidelines
 
 - When working on MeshPy, use a leading underscore (`_`) to indicate functions, classes, and variables that are intended for internal use only. This is a coding convention rather than an enforced rule, so apply it where it improves code clarity, especially for functions that check consistency or modify internal states.
+- To avoid ambiguous or incorrect imports when using MeshPy as a library, internal imports must follow a strict aliasing convention as illustrated below:
+  ```python
+  # Not OK
+  import numpy  # No alias
+  import numpy as np  # Missing leading underscore
+  from numpy.linalg import norm  # No alias
+  from meshpy.core.mesh import Mesh as _BeamMesh  # MeshPy imports have to be aliased with the same name — should be `_Mesh`
+
+  # OK
+  import numpy as _np
+  import sys as _sys
+  from numpy.linalg import norm as _norm
+
+  from meshpy.core.conf import mpy as _mpy
+  import meshpy.core.conf as _conf
+  from meshpy.core.mesh import Mesh as _Mesh
+  from meshpy.core.node import Node as _Node, NodeCosserat as _NodeCosserat
+
+  import _module_with_leading_underscore  # Structures that already start with `_` are fine as-is
+  from module import _structure_with_leading_underscore  # Structures that already start with `_` are fine as-is
+  ```
 
 ### Testing
 
@@ -293,6 +314,7 @@ If you contribute actual code, fork the repository and make the changes in a fea
 Depending on the topic and amount of changes you also might want to open an [issue](https://github.com/imcs-compsim/meshpy/issues).
 To merge your changes into the MeshPy repository, create a pull request to the `main` branch.
 A few things to keep in mind:
+- Read our [coding guidelines](#coding-guidelines).
 - It is highly encouraged to add tests covering the functionality of your changes, see the test suite in `tests/`.
 - To maintain high code quality, MeshPy uses a number of different pre-commit hooks to check committed code. Make sure to set up the pre-commit hooks before committing your changes
   ```bash
