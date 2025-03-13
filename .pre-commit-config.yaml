@@ -43,6 +43,14 @@ repos:
         name: Run bandit (security linter for python)
         args: ["--configfile", "pyproject.toml", "--exclude", "tests/*"]
         additional_dependencies: ["bandit[toml]"]
+  - repo: local
+    hooks:
+      - id: check-imports
+        name: Check Python Imports
+        entry: python3 check_imports.py
+        files: ^src/meshpy.*\.py$
+        language: system
+        types: [python]
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: v19.1.5
     hooks:
