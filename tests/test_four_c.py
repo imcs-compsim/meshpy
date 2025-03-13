@@ -34,6 +34,7 @@ from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.dbc_monitor import linear_time_transformation
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.function import Function
+from meshpy.four_c.function_utility import create_linear_interpolation_function
 from meshpy.four_c.header_functions import (
     set_beam_contact_runtime_output,
     set_beam_contact_section,
@@ -655,11 +656,12 @@ def test_four_c_beam_to_beam_contact_example(
         n_el=n_ele,
     )
 
+    t = [0, 1, 1000.0]
+    disp_values = [0.0, h + r_beam, h + r_beam]
+
     # Create a linear interpolation function with the displacement.
-    fun = Function(
-        "SYMBOLIC_FUNCTION_OF_SPACE_TIME -disp\n"
-        f"VARIABLE 0 NAME disp TYPE linearinterpolation NUMPOINTS 3 TIMES 0 1 1000.0 VALUES 0.0 {h+r_beam} {h+r_beam}"
-    )
+    fun = create_linear_interpolation_function(t, disp_values)
+
     mesh.add(fun)
 
     # Apply Dirichlet conditions at starting and end node to displace the beam endings.
@@ -694,12 +696,14 @@ def test_four_c_beam_to_beam_contact_example(
         mesh,
         btb_penalty=50,
         penalty_regularization_g0=r_beam * 0.02,
-        binning_cutoff_radius=5,
-        binning_bounding_box=[-3, -3, -3, 3, 3, 3],
+        binning_parameters={
+            "binning_cutoff_radius": 5,
+            "binning_bounding_box": [-3, -3, -3, 3, 3, 3],
+        },
     )
 
     # Add normal runtime output.
-    set_runtime_output(input_file=mesh)
+    set_runtime_output(mesh)
 
     # Add special runtime output for beam interaction.
     set_beam_contact_runtime_output(mesh, every_iteration=False)

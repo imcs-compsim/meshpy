@@ -115,8 +115,8 @@ XML File                            = NOT_DEFINED
 -----------------------------------------------------------------------MATERIALS
 MAT 1 MAT_BeamReissnerElastHyper YOUNG 1 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.031415926535897934 SHEARCORR 1 MOMINPOL 0.00015707963267948968 MOMIN2 7.853981633974484e-05 MOMIN3 7.853981633974484e-05
 --------------------------------------------------------------------------FUNCT1
-SYMBOLIC_FUNCTION_OF_SPACE_TIME -disp
-VARIABLE 0 NAME disp TYPE linearinterpolation NUMPOINTS 3 TIMES 0 1 1000.0 VALUES 0.0 0.35 0.35
+SYMBOLIC_FUNCTION_OF_SPACE_TIME var
+VARIABLE 0 NAME var TYPE linearinterpolation NUMPOINTS 5 TIMES -1000.0 0.0 1.0 1000.0 2000.0 VALUES 0.0 0.0 0.35 0.35 0.35
 --------------------------------------------------DESIGN POINT DIRICH CONDITIONS
 E 1 NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0
 E 2 NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0
