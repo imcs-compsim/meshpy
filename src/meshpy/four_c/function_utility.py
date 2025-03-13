@@ -26,7 +26,7 @@ from typing import List
 
 import numpy as np
 
-from meshpy.four_c.function import Function
+from meshpy.four_c.function import Function as _Function
 
 
 def create_linear_interpolation_string(
@@ -78,7 +78,7 @@ def create_linear_interpolation_function(
     """
 
     variable_string = create_linear_interpolation_string(t, values, variable_name="var")
-    return Function(f"{function_type} var\n" + variable_string)
+    return _Function(f"{function_type} var\n" + variable_string)
 
 
 def ensure_length_of_function_array(function_array: List, length: int = 3):

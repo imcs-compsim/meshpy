@@ -27,9 +27,12 @@ import scipy.integrate as integrate
 import scipy.optimize as optimize
 from autograd import jacobian
 
-from meshpy.core.conf import mpy
-from meshpy.core.rotation import Rotation, smallest_rotation
-from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_function
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.rotation import Rotation as _Rotation
+from meshpy.core.rotation import smallest_rotation as _smallest_rotation
+from meshpy.mesh_creation_functions.beam_generic import (
+    create_beam_mesh_function as _create_beam_mesh_function,
+)
 
 
 def create_beam_mesh_curve(
@@ -180,7 +183,7 @@ def create_beam_mesh_curve(
                     t2_temp = [0, 0, 1]
                 else:
                     t2_temp = [0, 1, 0]
-                self.last_triad = Rotation.from_basis(r_prime, t2_temp)
+                self.last_triad = _Rotation.from_basis(r_prime, t2_temp)
 
         def _reset_start_values(self):
             """Reset the stored start values for the next Newton iteration."""
@@ -196,7 +199,7 @@ def create_beam_mesh_curve(
 
             # In case the interval is not continuous with the last one, we reset the start
             # values for the Newton iteration here
-            if length_a < self.S_start_newton - mpy.eps_pos:
+            if length_a < self.S_start_newton - _mpy.eps_pos:
                 self._reset_start_values()
 
             # Length of the beam element in physical space.
@@ -232,11 +235,11 @@ def create_beam_mesh_curve(
                     if is_3d_curve:
                         # Create the next triad via the smallest rotation mapping based
                         # on the last triad.
-                        rot = smallest_rotation(self.last_triad, r_prime)
+                        rot = _smallest_rotation(self.last_triad, r_prime)
                         self.last_triad = rot.copy()
                     else:
                         # The rotation simplifies in the 2d case.
-                        rot = Rotation([0, 0, 1], np.arctan2(r_prime[1], r_prime[0]))
+                        rot = _Rotation([0, 0, 1], np.arctan2(r_prime[1], r_prime[0]))
 
                 # Set start values for the next iteration
                 self.t_start_newton = t
@@ -252,7 +255,7 @@ def create_beam_mesh_curve(
     length = S(interval[1])
 
     # Create the beam in the mesh
-    created_sets = create_beam_mesh_function(
+    created_sets = _create_beam_mesh_function(
         mesh,
         beam_object=beam_object,
         material=material,

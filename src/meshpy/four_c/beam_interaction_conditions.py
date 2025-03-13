@@ -25,17 +25,16 @@
 import re
 from typing import Optional
 
-import meshpy.core.conf as conf_typing
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.core.mesh import Mesh
-from meshpy.four_c.boundary_condition import BoundaryCondition
+import meshpy.core.conf as _conf_typing
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
 
 
 def get_next_possible_id_for_boundary_condition(
-    mesh: Mesh,
-    bc_type: conf_typing.BoundaryCondition,
-    geometry_type: conf_typing.Geometry,
+    mesh: _Mesh,
+    bc_type: _conf_typing.BoundaryCondition,
+    geometry_type: _conf_typing.Geometry,
     regex_search_string: str,
     *,
     group_idx: int = 1,
@@ -87,10 +86,10 @@ def get_next_possible_id_for_boundary_condition(
 
 
 def add_beam_interaction_condition(
-    mesh: Mesh,
-    geometry_set_1: GeometrySet,
-    geometry_set_2: GeometrySet,
-    bc_type: conf_typing.BoundaryCondition,
+    mesh: _Mesh,
+    geometry_set_1: _GeometrySet,
+    geometry_set_2: _GeometrySet,
+    bc_type: _conf_typing.BoundaryCondition,
     *,
     id: Optional[int] = None,
 ) -> int:
@@ -132,7 +131,7 @@ def add_beam_interaction_condition(
     # Creates the two conditions with the same ID.
     for geometry_set in [geometry_set_1, geometry_set_2]:
         mesh.add(
-            BoundaryCondition(
+            _BoundaryCondition(
                 geometry_set, bc_string=condition_string + str(id), bc_type=bc_type
             )
         )

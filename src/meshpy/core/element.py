@@ -21,10 +21,10 @@
 # THE SOFTWARE.
 """This module implements the class that represents one element in the Mesh."""
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull
+from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
 
 
-class Element(BaseMeshItemFull):
+class Element(_BaseMeshItemFull):
     """A base class for an FEM element in the mesh."""
 
     def __init__(self, nodes=None, material=None, **kwargs):
@@ -51,14 +51,12 @@ class Element(BaseMeshItemFull):
         """
 
         # Import solid element classes for creation of the element.
-        from meshpy.core.element_volume import (
-            VolumeHEX8,
-            VolumeHEX20,
-            VolumeHEX27,
-            VolumeTET4,
-            VolumeTET10,
-        )
-        from meshpy.four_c.element_volume import SolidRigidSphere
+        from meshpy.core.element_volume import VolumeHEX8 as _VolumeHEX8
+        from meshpy.core.element_volume import VolumeHEX20 as _VolumeHEX20
+        from meshpy.core.element_volume import VolumeHEX27 as _VolumeHEX27
+        from meshpy.core.element_volume import VolumeTET4 as _VolumeTET4
+        from meshpy.core.element_volume import VolumeTET10 as _VolumeTET10
+        from meshpy.four_c.element_volume import SolidRigidSphere as _SolidRigidSphere
 
         # Split up input line and get pre node string.
         line_split = input_line[0].split()
@@ -83,42 +81,42 @@ class Element(BaseMeshItemFull):
         n_nodes = len(element_nodes)
         match n_nodes:
             case 8:
-                return VolumeHEX8(
+                return _VolumeHEX8(
                     nodes=element_nodes,
                     dat_pre_nodes=dat_pre_nodes,
                     dat_post_nodes=dat_post_nodes,
                     comments=input_line[1],
                 )
             case 4:
-                return VolumeTET4(
+                return _VolumeTET4(
                     nodes=element_nodes,
                     dat_pre_nodes=dat_pre_nodes,
                     dat_post_nodes=dat_post_nodes,
                     comments=input_line[1],
                 )
             case 10:
-                return VolumeTET10(
+                return _VolumeTET10(
                     nodes=element_nodes,
                     dat_pre_nodes=dat_pre_nodes,
                     dat_post_nodes=dat_post_nodes,
                     comments=input_line[1],
                 )
             case 20:
-                return VolumeHEX20(
+                return _VolumeHEX20(
                     nodes=element_nodes,
                     dat_pre_nodes=dat_pre_nodes,
                     dat_post_nodes=dat_post_nodes,
                     comments=input_line[1],
                 )
             case 27:
-                return VolumeHEX27(
+                return _VolumeHEX27(
                     nodes=element_nodes,
                     dat_pre_nodes=dat_pre_nodes,
                     dat_post_nodes=dat_post_nodes,
                     comments=input_line[1],
                 )
             case 1:
-                return SolidRigidSphere(
+                return _SolidRigidSphere(
                     nodes=element_nodes,
                     dat_pre_nodes=dat_pre_nodes,
                     dat_post_nodes=dat_post_nodes,

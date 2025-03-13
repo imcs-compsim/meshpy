@@ -31,32 +31,39 @@ import numpy as np
 import pyvista as pv
 
 from meshpy.core.boundary_condition import (
-    BoundaryConditionBase,
-    BoundaryConditionContainer,
+    BoundaryConditionBase as _BoundaryConditionBase,
 )
-from meshpy.core.conf import mpy
-from meshpy.core.coupling import coupling_factory
-from meshpy.core.element import Element
-from meshpy.core.element_beam import Beam
-from meshpy.core.geometry_set import GeometryName, GeometrySetBase, GeometrySetContainer
-from meshpy.core.material import Material
-from meshpy.core.node import Node, NodeCosserat
-from meshpy.core.rotation import Rotation, add_rotations, rotate_coordinates
-from meshpy.core.vtk_writer import VTKWriter
-from meshpy.four_c.function import Function
+from meshpy.core.boundary_condition import (
+    BoundaryConditionContainer as _BoundaryConditionContainer,
+)
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.coupling import coupling_factory as _coupling_factory
+from meshpy.core.element import Element as _Element
+from meshpy.core.element_beam import Beam as _Beam
+from meshpy.core.geometry_set import GeometryName as _GeometryName
+from meshpy.core.geometry_set import GeometrySetBase as _GeometrySetBase
+from meshpy.core.geometry_set import GeometrySetContainer as _GeometrySetContainer
+from meshpy.core.material import Material as _Material
+from meshpy.core.node import Node as _Node
+from meshpy.core.node import NodeCosserat as _NodeCosserat
+from meshpy.core.rotation import Rotation as _Rotation
+from meshpy.core.rotation import add_rotations as _add_rotations
+from meshpy.core.rotation import rotate_coordinates as _rotate_coordinates
+from meshpy.core.vtk_writer import VTKWriter as _VTKWriter
+from meshpy.four_c.function import Function as _Function
 from meshpy.geometric_search.find_close_points import (
-    find_close_points,
-    point_partners_to_partner_indices,
+    find_close_points as _find_close_points,
 )
-from meshpy.utils.environment import is_testing
-from meshpy.utils.nodes import (
-    filter_nodes,
-    find_close_nodes,
-    get_min_max_nodes,
-    get_nodal_coordinates,
-    get_nodal_quaternions,
-    get_nodes_by_function,
+from meshpy.geometric_search.find_close_points import (
+    point_partners_to_partner_indices as _point_partners_to_partner_indices,
 )
+from meshpy.utils.environment import is_testing as _is_testing
+from meshpy.utils.nodes import filter_nodes as _filter_nodes
+from meshpy.utils.nodes import find_close_nodes as _find_close_nodes
+from meshpy.utils.nodes import get_min_max_nodes as _get_min_max_nodes
+from meshpy.utils.nodes import get_nodal_coordinates as _get_nodal_coordinates
+from meshpy.utils.nodes import get_nodal_quaternions as _get_nodal_quaternions
+from meshpy.utils.nodes import get_nodes_by_function as _get_nodes_by_function
 
 
 class Mesh:
@@ -70,8 +77,8 @@ class Mesh:
         self.elements = []
         self.materials = []
         self.functions = []
-        self.geometry_sets = GeometrySetContainer()
-        self.boundary_conditions = BoundaryConditionContainer()
+        self.geometry_sets = _GeometrySetContainer()
+        self.boundary_conditions = _BoundaryConditionContainer()
 
     @staticmethod
     def get_base_mesh_item_type(item):
@@ -86,13 +93,13 @@ class Mesh:
 
         for cls in (
             Mesh,
-            Function,
-            BoundaryConditionBase,
-            Material,
-            Node,
-            Element,
-            GeometrySetBase,
-            GeometryName,
+            _Function,
+            _BoundaryConditionBase,
+            _Material,
+            _Node,
+            _Element,
+            _GeometrySetBase,
+            _GeometryName,
         ):
             if isinstance(item, cls):
                 return cls
@@ -116,13 +123,13 @@ class Mesh:
 
                 base_type_to_method_map = {
                     Mesh: self.add_mesh,
-                    Function: self.add_function,
-                    BoundaryConditionBase: self.add_bc,
-                    Material: self.add_material,
-                    Node: self.add_node,
-                    Element: self.add_element,
-                    GeometrySetBase: self.add_geometry_set,
-                    GeometryName: self.add_geometry_name,
+                    _Function: self.add_function,
+                    _BoundaryConditionBase: self.add_bc,
+                    _Material: self.add_material,
+                    _Node: self.add_node,
+                    _Element: self.add_element,
+                    _GeometrySetBase: self.add_geometry_set,
+                    _GeometryName: self.add_geometry_name,
                     list: self.add_list,
                 }
                 if base_type in base_type_to_method_map:
@@ -235,9 +242,9 @@ class Mesh:
                         "The added list contains entries already existing in the Mesh"
                     )
 
-            if list_type == Node:
+            if list_type == _Node:
                 extend_internal_list(self.nodes, add_list)
-            elif list_type == Element:
+            elif list_type == _Element:
                 extend_internal_list(self.elements, add_list)
             else:
                 for item in add_list:
@@ -290,8 +297,8 @@ class Mesh:
             for bc in bc_list:
                 # Check if sets from couplings should be added.
                 is_coupling = bc_key in (
-                    mpy.bc.point_coupling,
-                    bc_key == mpy.bc.point_coupling_penalty,
+                    _mpy.bc.point_coupling,
+                    bc_key == _mpy.bc.point_coupling_penalty,
                 )
                 if (is_coupling and coupling_sets) or (not is_coupling):
                     # Only add set if it is not already in the container.
@@ -347,18 +354,18 @@ class Mesh:
         """
 
         # Get array with all quaternions for the nodes.
-        rot1 = get_nodal_quaternions(self.nodes)
+        rot1 = _get_nodal_quaternions(self.nodes)
 
         # Apply the rotation to the rotation of all nodes.
-        rot_new = add_rotations(rotation, rot1)
+        rot_new = _add_rotations(rotation, rot1)
 
         if not only_rotate_triads:
             # Get array with all positions for the nodes.
-            pos = get_nodal_coordinates(self.nodes)
-            pos_new = rotate_coordinates(pos, rotation, origin=origin)
+            pos = _get_nodal_coordinates(self.nodes)
+            pos_new = _rotate_coordinates(pos, rotation, origin=origin)
 
         for i, node in enumerate(self.nodes):
-            if isinstance(node, NodeCosserat):
+            if isinstance(node, _NodeCosserat):
                 node.rotation.q = rot_new[i, :]
             if not only_rotate_triads:
                 node.coordinates = pos_new[i, :]
@@ -396,8 +403,8 @@ class Mesh:
         normal_vector = np.asarray(normal_vector) / np.linalg.norm(normal_vector)
 
         # Get array with all quaternions and positions for the nodes.
-        pos = get_nodal_coordinates(self.nodes)
-        rot1 = get_nodal_quaternions(self.nodes)
+        pos = _get_nodal_coordinates(self.nodes)
+        rot1 = _get_nodal_quaternions(self.nodes)
 
         # Check if origin has to be added.
         if origin is not None:
@@ -425,18 +432,18 @@ class Mesh:
         rot2[:, 1:] = np.cross(e3, normal_vector)
 
         # Add to the existing rotations.
-        rot_new = add_rotations(rot2, rot1)
+        rot_new = _add_rotations(rot2, rot1)
 
         if flip_beams:
             # To achieve the flip, the triads are rotated with the angle pi
             # around the e2 axis.
-            rot_flip = Rotation([0, 1, 0], np.pi)
-            rot_new = add_rotations(rot_new, rot_flip)
+            rot_flip = _Rotation([0, 1, 0], np.pi)
+            rot_new = _add_rotations(rot_new, rot_flip)
 
         # For solid elements we need to adapt the connectivity to avoid negative Jacobians.
         # For beam elements this is optional.
         for element in self.elements:
-            if isinstance(element, Beam):
+            if isinstance(element, _Beam):
                 if flip_beams:
                     element.flip()
             else:
@@ -445,7 +452,7 @@ class Mesh:
         # Set the new positions and rotations.
         for i, node in enumerate(self.nodes):
             node.coordinates = pos_new[i, :]
-            if isinstance(node, NodeCosserat):
+            if isinstance(node, _NodeCosserat):
                 node.rotation.q = rot_new[i, :]
 
     def wrap_around_cylinder(self, radius=None, advanced_warning=True):
@@ -467,14 +474,14 @@ class Mesh:
             cases (up to 100,000 elements) this check can be left activated.
         """
 
-        pos = get_nodal_coordinates(self.nodes)
+        pos = _get_nodal_coordinates(self.nodes)
         quaternions = np.zeros([len(self.nodes), 4])
 
         # The x coordinate is the radius, the y coordinate the arc length.
         points_x = pos[:, 0].copy()
 
         # Check if all points are on the same y-z plane.
-        if np.abs(np.min(points_x) - np.max(points_x)) > mpy.eps_pos:
+        if np.abs(np.min(points_x) - np.max(points_x)) > _mpy.eps_pos:
             # The points are not all on the y-z plane, get the reference
             # radius.
             if radius is not None:
@@ -496,7 +503,7 @@ class Mesh:
                                     - element_coordinates[0, 0]
                                 )
                             )
-                            < mpy.eps_pos
+                            < _mpy.eps_pos
                         )
                         is_xz = (
                             np.max(
@@ -505,7 +512,7 @@ class Mesh:
                                     - element_coordinates[0, 1]
                                 )
                             )
-                            < mpy.eps_pos
+                            < _mpy.eps_pos
                         )
                         if not (is_yz or is_xz):
                             element_warning.append(i_element)
@@ -528,7 +535,7 @@ class Mesh:
                 )
             radius_phi = radius
             radius_points = points_x
-        elif radius is None or np.abs(points_x[0] - radius) < mpy.eps_pos:
+        elif radius is None or np.abs(points_x[0] - radius) < _mpy.eps_pos:
             radius_points = radius_phi = points_x[0]
         else:
             raise ValueError(
@@ -562,8 +569,8 @@ class Mesh:
         *,
         nodes=None,
         reuse_matching_nodes=False,
-        coupling_type=mpy.bc.point_coupling,
-        coupling_dof_type=mpy.coupling_dof.fix,
+        coupling_type=_mpy.bc.point_coupling,
+        coupling_dof_type=_mpy.coupling_dof.fix,
     ):
         """Search through nodes and connect all nodes with the same
         coordinates.
@@ -588,7 +595,10 @@ class Mesh:
         """
 
         # Check that a coupling BC is given.
-        if coupling_type not in (mpy.bc.point_coupling, mpy.bc.point_coupling_penalty):
+        if coupling_type not in (
+            _mpy.bc.point_coupling,
+            _mpy.bc.point_coupling_penalty,
+        ):
             raise ValueError(
                 "Only coupling conditions can be applied in 'couple_nodes'!"
             )
@@ -599,8 +609,8 @@ class Mesh:
             node_list = self.nodes
         else:
             node_list = nodes
-        node_list = filter_nodes(node_list, middle_nodes=False)
-        partner_nodes = find_close_nodes(node_list)
+        node_list = _filter_nodes(node_list, middle_nodes=False)
+        partner_nodes = _find_close_nodes(node_list)
         if len(partner_nodes) == 0:
             # If no partner nodes were found, end this function.
             return
@@ -621,7 +631,7 @@ class Mesh:
                 # Get array with rotation vectors.
                 rotation_vectors = np.zeros([len(node_list), 3])
                 for i, node in enumerate(node_list):
-                    if isinstance(node, NodeCosserat):
+                    if isinstance(node, _NodeCosserat):
                         rotation_vectors[i, :] = node.rotation.get_rotation_vector()
                     else:
                         # For the case of nodes that belong to solid elements,
@@ -630,14 +640,14 @@ class Mesh:
 
                 # Use find close points function to find nodes with the
                 # same rotation.
-                partners, n_partners = find_close_points(
-                    rotation_vectors, tol=mpy.eps_quaternion
+                partners, n_partners = _find_close_points(
+                    rotation_vectors, tol=_mpy.eps_quaternion
                 )
 
                 # Check if nodes with the same rotations were found.
                 if n_partners == 0:
                     self.add(
-                        coupling_factory(node_list, coupling_type, coupling_dof_type)
+                        _coupling_factory(node_list, coupling_type, coupling_dof_type)
                     )
                 else:
                     # There are nodes that need to be combined.
@@ -672,7 +682,7 @@ class Mesh:
                     # Add the coupling nodes.
                     if len(coupling_nodes) > 1:
                         self.add(
-                            coupling_factory(
+                            _coupling_factory(
                                 coupling_nodes, coupling_type, coupling_dof_type
                             )
                         )
@@ -686,7 +696,7 @@ class Mesh:
         else:
             # Connect close nodes with a coupling.
             for node_list in partner_nodes:
-                self.add(coupling_factory(node_list, coupling_type, coupling_dof_type))
+                self.add(_coupling_factory(node_list, coupling_type, coupling_dof_type))
 
     def unlink_nodes(self):
         """Delete the linked arrays and global indices in all nodes."""
@@ -695,12 +705,12 @@ class Mesh:
 
     def get_nodes_by_function(self, *args, **kwargs):
         """Return all nodes for which the function evaluates to true."""
-        return get_nodes_by_function(self.nodes, *args, **kwargs)
+        return _get_nodes_by_function(self.nodes, *args, **kwargs)
 
     def get_min_max_nodes(self, *args, **kwargs):
         """Return a geometry set with the max and min nodes in all
         directions."""
-        return get_min_max_nodes(self.nodes, *args, **kwargs)
+        return _get_min_max_nodes(self.nodes, *args, **kwargs)
 
     def check_overlapping_elements(self, raise_error=True):
         """Check if there are overlapping elements in the mesh.
@@ -722,8 +732,8 @@ class Mesh:
             coordinates[i, :] = node.coordinates
 
         # Check if there are double entries in the coordinates.
-        has_partner, partner = find_close_points(coordinates)
-        partner_indices = point_partners_to_partner_indices(has_partner, partner)
+        has_partner, partner = _find_close_points(coordinates)
+        partner_indices = _point_partners_to_partner_indices(has_partner, partner)
         if partner > 0:
             if raise_error:
                 raise ValueError(
@@ -757,8 +767,8 @@ class Mesh:
         """
 
         # Object to store VKT data (and write it to file)
-        vtk_writer_beam = VTKWriter()
-        vtk_writer_solid = VTKWriter()
+        vtk_writer_beam = _VTKWriter()
+        vtk_writer_solid = _VTKWriter()
 
         # Get the set numbers of the mesh
         mesh_sets = self.get_unique_geometry_sets(
@@ -771,7 +781,7 @@ class Mesh:
 
         # Set the mpy value.
         digits = len(str(max_sets))
-        mpy.vtk_node_set_format = "{:0" + str(digits) + "}"
+        _mpy.vtk_node_set_format = "{:0" + str(digits) + "}"
 
         if overlapping_elements:
             # Check for overlapping elements.
@@ -968,7 +978,7 @@ class Mesh:
             solid_grid = pv.UnstructuredGrid(vtk_writer_solid.grid).clean()
             plotter.add_mesh(solid_grid, color="white", show_edges=True, opacity=0.5)
 
-        if not is_testing():
+        if not _is_testing():
             plotter.show()
         else:
             return plotter
