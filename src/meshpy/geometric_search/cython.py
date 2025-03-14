@@ -19,27 +19,30 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""
-This script can be used to compile the cython code:
-> python setup.py build_ext --inplace
-"""
+"""This file defines the interface to the Cython geometric search
+functionality."""
 
-import numpy as np
-from Cython.Build import cythonize
-from setuptools import Extension, setup
+import warnings
 
-extensions = [
-    Extension(
-        "meshpy.geometric_search.cython_lib",
-        ["src/meshpy/geometric_search/cython_lib.pyx"],
-        include_dirs=[np.get_include()],
-    )
-]
+from meshpy.geometric_search.utils import cython_is_available
 
-setup(
-    ext_modules=cythonize(
-        extensions,
-        build_dir="src/build/cython_generated_code",
-        annotate=True,
-    ),
-)
+if cython_is_available():
+    from meshpy.geometric_search.cython_lib import find_close_points
+
+
+def find_close_points_brute_force_cython(
+    point_coordinates, tol, *, n_points_performance_warning=5000
+):
+    """Call the Cython brute force implementation of find close_points."""
+    if cython_is_available():
+        n_points = len(point_coordinates)
+        if n_points > n_points_performance_warning:
+            warnings.warn(
+                "The function find_close_points is called with the brute force algorithm "
+                + f"with {n_points} points, for performance reasons other algorithms should be used!"
+            )
+        return find_close_points(point_coordinates, tol)
+    else:
+        raise ModuleNotFoundError(
+            "Cython geometric search functionality is not available"
+        )

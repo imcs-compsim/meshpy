@@ -49,7 +49,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -O3 -fvisibility=hidden")
 
 # Setup arborxpy
-set(module_name "geometric_search_arborx_lib")
+set(module_name "arborx_lib")
 set(target_name "${module_name}")
 add_definitions("-DPYTHON_MODULE_NAME")
 set(PYTHON_MODULE_NAME "${target_name}")

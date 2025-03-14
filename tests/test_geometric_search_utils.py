@@ -19,38 +19,31 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This file defines the interface to the Cython geometric search
-functionality."""
+"""Test environment utils of MeshPy."""
 
-import os
-import sys
-import warnings
+from unittest.mock import patch
 
-# Set path so the Cython binary will be found
-sys.path.append(os.path.dirname(__file__))
-
-# Try to import the Cython module
-try:
-    import geometric_search_cython_lib
-
-    cython_available = True
-except ImportError:
-    cython_available = False
+from meshpy.geometric_search.utils import (
+    arborx_is_available,
+    cython_is_available,
+)
 
 
-def find_close_points_brute_force_cython(
-    point_coordinates, tol, *, n_points_performance_warning=5000
-):
-    """Call the Cython brute force implementation of find close_points."""
-    if cython_available:
-        n_points = len(point_coordinates)
-        if n_points > n_points_performance_warning:
-            warnings.warn(
-                "The function find_close_points is called with the brute force algorithm "
-                + f"with {n_points} points, for performance reasons other algorithms should be used!"
-            )
-        return geometric_search_cython_lib.find_close_points(point_coordinates, tol)
-    else:
-        raise ModuleNotFoundError(
-            "Cython geometric search functionality is not available"
-        )
+def test_is_arborx_available() -> None:
+    """Test is_arborx_available function."""
+
+    with patch("importlib.util.find_spec", return_value=True):
+        assert arborx_is_available() is True
+
+    with patch("importlib.util.find_spec", return_value=None):
+        assert arborx_is_available() is False
+
+
+def test_is_cython_available() -> None:
+    """Test is_cython_available function."""
+
+    with patch("importlib.util.find_spec", return_value=True):
+        assert cython_is_available() is True
+
+    with patch("importlib.util.find_spec", return_value=None):
+        assert cython_is_available() is False
