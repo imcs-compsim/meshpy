@@ -26,7 +26,10 @@ import pytest
 from meshpy.core.conf import mpy
 from meshpy.four_c.header_functions import (
     get_comment,
+    set_beam_contact_runtime_output,
+    set_beam_contact_section,
     set_beam_to_solid_meshtying,
+    set_binning_strategy_section,
     set_header_static,
     set_runtime_output,
 )
@@ -45,20 +48,21 @@ def test_header_functions_static(
     # Set the header.
     set_header_static(input_file, time_step=0.1, n_steps=17, load_lin=True)
     set_runtime_output(input_file, output_triad=False)
+
+    set_binning_strategy_section(
+        input_file, binning_bounding_box=[1, 2, 3, 4, 5, 6], binning_cutoff_radius=0.69
+    )
+
     set_beam_to_solid_meshtying(
         input_file,
         mpy.beam_to_solid.volume_meshtying,
         contact_discretization="mortar",
-        binning_bounding_box=[1, 2, 3, 4, 5, 6],
-        binning_cutoff_radius=0.69,
     )
 
     set_beam_to_solid_meshtying(
         input_file,
         mpy.beam_to_solid.surface_meshtying,
         contact_discretization="gp",
-        binning_bounding_box=[1, 2, 3, 4, 5, 6],
-        binning_cutoff_radius=0.69,
         segmentation_search_points=6,
         coupling_type="consistent_fad",
     )
@@ -133,8 +137,10 @@ def test_header_functions_static_prestress(
         input_file,
         mpy.beam_to_solid.volume_meshtying,
         contact_discretization="mortar",
-        binning_bounding_box=[1, 2, 3, 4, 5, 6],
-        binning_cutoff_radius=0.69,
+        binning_parameters={
+            "binning_bounding_box": [1, 2, 3, 4, 5, 6],
+            "binning_cutoff_radius": 0.69,
+        },
         couple_restart=True,
     )
 
@@ -172,4 +178,29 @@ def test_header_functions_stress_output(
     set_runtime_output(input_file, output_stress_strain=True)
 
     # Check the output.
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+
+
+def test_header_functions_beam_interaction(
+    get_corresponding_reference_file_path, assert_results_equal
+):
+    """Test the beam-to-beam contact header function with default parameter."""
+
+    # Create input file.
+    input_file = InputFile()
+
+    # Add Beam contact section to file.
+    set_beam_contact_section(
+        input_file,
+        binning_parameters={
+            "binning_cutoff_radius": 5,
+            "binning_bounding_box": [-1, -2, -3, 1, 2, 3],
+        },
+        beam_interaction_parameters={"repartition_strategy": "adaptive"},
+    )
+
+    # Add per default the runtime output.
+    set_beam_contact_runtime_output(input_file)
+
+    # Compare the output.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)

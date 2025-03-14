@@ -78,13 +78,13 @@ MORTAR_LAMBDA_CONTINUOUS_SEGMENTS     5
 SEGMENTATION                          yes
 INTEGRATION_POINTS                    yes
 AVERAGED_NORMALS                      yes
+----------------------------------------------------------------BINNING STRATEGY
+BIN_SIZE_LOWER_BOUND                  0.69
+DOMAINBOUNDINGBOX                     1 2 3 4 5 6
 ----------------------------------------------------------------BEAM INTERACTION
 REPARTITIONSTRATEGY                   Everydt
 --------------------------------------------------------------------BEAM CONTACT
 MODELEVALUATOR                        Standard
-----------------------------------------------------------------BINNING STRATEGY
-BIN_SIZE_LOWER_BOUND                  0.69
-DOMAINBOUNDINGBOX 1 2 3 4 5 6
 ---------------------------------BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING
 CONSTRAINT_STRATEGY                   penalty
 PENALTY_PARAMETER                     None
