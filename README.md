@@ -179,25 +179,27 @@ MeshPy is tested with, and supports Python versions 3.9-3.12. It is recommended 
 
 ### Install MeshPy from source
 
-You can install MeshPy directly from the source:
-```bash
-git clone git@github.com:imcs-compsim/meshpy.git
-cd meshpy
-# Install MeshPy in the basic variant
-pip install -e .
-# Install MeshPy in the development variant
-pip install -e ".[dev]" # Quotation marks are required for some shells
-```
-
+You can either install MeshPy directly from the source in a non-editable and editable fashion like:
+- Non-editable:
+  This allows you to use MeshPy, but changing the source code will not have any effect on the installed package
+  ```bash
+  git clone git@github.com:imcs-compsim/meshpy.git
+  cd meshpy
+  pip install .
+  ```
+- Editable:
+  This allows you to change the source code without reinstalling the module
+  ```bash
+  git clone git@github.com:imcs-compsim/meshpy.git
+  cd meshpy
+  pip install -e .
+  ```
 Now you are able to use MeshPy. A good way to get started is by going through the examples
 ```bash
 jupyter notebook examples/
 ```
+If you also want to execute the associated test suite check out our [development](#developing-meshpy) section.
 
-You can also run the MeshPy test suite to check that everything worked as expected (requires MeshPy to be installed with the `[dev]` dependencies)
-```bash
-pytest
-```
 
 ## Optional dependencies
 
@@ -236,6 +238,15 @@ make -j4
 > Note: Currently ArborX only works if MeshPy is installed in _editable_ mode.
 
 ## Developing MeshPy
+
+If you want to actively develop MeshPy or run the test suite, you must install MeshPy in _editable_ (`-e`) mode and with our optional developer dependencies (`[dev]`) like
+```bash
+pip install -e ".[dev]" # Quotation marks are required for some shells
+```
+You can now run the MeshPy test suite to check that everything worked as expected
+```bash
+pytest
+```
 
 ### Coding guidelines
 
