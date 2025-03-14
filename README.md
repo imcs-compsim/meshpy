@@ -257,6 +257,8 @@ pytest
 ### Coding guidelines
 
 - When working on MeshPy, use a leading underscore (`_`) to indicate functions, classes, and variables that are intended for internal use only. This is a coding convention rather than an enforced rule, so apply it where it improves code clarity, especially for functions that check consistency or modify internal states.
+- To prevent wrong imports when using MeshPy as a library, MeshPy internal imports should always be done with an alias and have a leading underscore, e.g.,
+  - `from meshpy.core.mesh import Mesh as _Mesh`
 
 ### Testing
 

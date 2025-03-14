@@ -21,10 +21,11 @@
 # THE SOFTWARE.
 """This file implements materials for 4C beams and solids."""
 
-from meshpy.core.material import Material, MaterialBeam
+from meshpy.core.material import Material as _Material
+from meshpy.core.material import MaterialBeam as _MaterialBeam
 
 
-class MaterialReissner(MaterialBeam):
+class MaterialReissner(_MaterialBeam):
     """Holds material definition for Reissner beams."""
 
     def __init__(self, shear_correction=1, **kwargs):
@@ -111,7 +112,7 @@ class MaterialReissnerElastoplastic(MaterialReissner):
         )
 
 
-class MaterialKirchhoff(MaterialBeam):
+class MaterialKirchhoff(_MaterialBeam):
     """Holds material definition for Kirchhoff beams."""
 
     def __init__(self, is_fad=False, **kwargs):
@@ -163,7 +164,7 @@ class MaterialKirchhoff(MaterialBeam):
         return string
 
 
-class MaterialEulerBernoulli(MaterialBeam):
+class MaterialEulerBernoulli(_MaterialBeam):
     """Holds material definition for Euler Bernoulli beams."""
 
     def __init__(self, **kwargs):
@@ -196,7 +197,7 @@ class MaterialEulerBernoulli(MaterialBeam):
         )
 
 
-class MaterialString(Material):
+class MaterialString(_Material):
     """Holds material definition that is defined by a string."""
 
     def __init__(self, material_string, **kwargs):
@@ -209,7 +210,7 @@ class MaterialString(Material):
         return string.format(self.i_global, self.material_string)
 
 
-class MaterialSolid(Material):
+class MaterialSolid(_Material):
     """Base class for a material for solids."""
 
     def __init__(

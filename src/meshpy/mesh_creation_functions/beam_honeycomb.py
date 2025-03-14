@@ -23,11 +23,14 @@
 
 import numpy as np
 
-from meshpy.core.geometry_set import GeometryName, GeometrySet
-from meshpy.core.mesh import Mesh
-from meshpy.core.rotation import Rotation
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
-from meshpy.utils.nodes import get_min_max_nodes
+from meshpy.core.geometry_set import GeometryName as _GeometryName
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.core.rotation import Rotation as _Rotation
+from meshpy.mesh_creation_functions.beam_basic_geometry import (
+    create_beam_mesh_line as _create_beam_mesh_line,
+)
+from meshpy.utils.nodes import get_min_max_nodes as _get_min_max_nodes
 
 
 def create_beam_mesh_honeycomb_flat(
@@ -84,7 +87,7 @@ def create_beam_mesh_honeycomb_flat(
 
     def add_line(pointa, pointb):
         """Shortcut to add line."""
-        return create_beam_mesh_line(
+        return _create_beam_mesh_line(
             mesh_honeycomb, beam_object, material, pointa, pointb, n_el=n_el
         )
 
@@ -98,7 +101,7 @@ def create_beam_mesh_honeycomb_flat(
     zig_zag_y = ny * a * sin30 * 0.5
 
     # Create the honeycomb structure
-    mesh_honeycomb = Mesh()
+    mesh_honeycomb = _Mesh()
     origin = np.array([0, a * 0.5 * sin30, 0])
     for i_height in range(n_height + 1):
         # Start point for this zig-zag line.
@@ -144,15 +147,15 @@ def create_beam_mesh_honeycomb_flat(
         mesh_honeycomb.couple_nodes(nodes=honeycomb_nodes)
 
     # Get min and max nodes of the honeycomb.
-    min_max_nodes = get_min_max_nodes(honeycomb_nodes)
+    min_max_nodes = _get_min_max_nodes(honeycomb_nodes)
 
     # Return the geometry set.
-    return_set = GeometryName()
+    return_set = _GeometryName()
     return_set["north"] = min_max_nodes["y_max"]
     return_set["east"] = min_max_nodes["x_max"]
     return_set["south"] = min_max_nodes["y_min"]
     return_set["west"] = min_max_nodes["x_min"]
-    return_set["all"] = GeometrySet(mesh_honeycomb.elements)
+    return_set["all"] = _GeometrySet(mesh_honeycomb.elements)
 
     mesh.add(mesh_honeycomb)
     if add_sets:
@@ -215,7 +218,7 @@ def create_beam_mesh_honeycomb(
         width = diameter * np.pi / n_circumference
         closed_width = False
         closed_height = closed_top
-        rotation = Rotation([0, 0, 1], np.pi / 2) * Rotation([1, 0, 0], np.pi / 2)
+        rotation = _Rotation([0, 0, 1], np.pi / 2) * _Rotation([1, 0, 0], np.pi / 2)
         n_height = n_axis
         n_width = n_circumference
     else:
@@ -229,14 +232,14 @@ def create_beam_mesh_honeycomb(
         width = 2 * r * np.cos(np.pi / 6)
         closed_width = closed_top
         closed_height = False
-        rotation = Rotation([0, 1, 0], -0.5 * np.pi)
+        rotation = _Rotation([0, 1, 0], -0.5 * np.pi)
         n_height = n_circumference - 1
         n_width = n_axis
 
     # Create the flat mesh, do not create couplings, as they will be added
     # later in this function, where also the diameter nodes will be
     # connected.
-    mesh_temp = Mesh()
+    mesh_temp = _Mesh()
     honeycomb_sets = create_beam_mesh_honeycomb_flat(
         mesh_temp,
         beam_object,
@@ -260,7 +263,7 @@ def create_beam_mesh_honeycomb(
     mesh_temp.couple_nodes(nodes=honeycomb_nodes)
 
     # Return the geometry set'
-    return_set = GeometryName()
+    return_set = _GeometryName()
     return_set["all"] = honeycomb_sets["all"]
     if vertical:
         return_set["top"] = honeycomb_sets["north"]

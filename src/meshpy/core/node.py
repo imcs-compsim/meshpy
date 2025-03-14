@@ -23,11 +23,11 @@
 
 import numpy as np
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull
-from meshpy.core.conf import mpy
+from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
+from meshpy.core.conf import mpy as _mpy
 
 
-class Node(BaseMeshItemFull):
+class Node(_BaseMeshItemFull):
     """This object represents one node in the mesh."""
 
     def __init__(self, coordinates, *, is_middle_node=False, **kwargs):
@@ -110,8 +110,8 @@ class Node(BaseMeshItemFull):
         coordinate_string = " ".join(
             [
                 (
-                    mpy.dat_precision.format(component + 0)
-                    if np.abs(component) >= mpy.eps_pos
+                    _mpy.dat_precision.format(component + 0)
+                    if np.abs(component) >= _mpy.eps_pos
                     else "0"
                 )
                 for component in self.coordinates
@@ -165,8 +165,8 @@ class ControlPoint(Node):
         coordinate_string = " ".join(
             [
                 (
-                    mpy.dat_precision.format(component + 0)
-                    if np.abs(component) >= mpy.eps_pos
+                    _mpy.dat_precision.format(component + 0)
+                    if np.abs(component) >= _mpy.eps_pos
                     else "0"
                 )
                 for component in self.coordinates

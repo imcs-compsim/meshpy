@@ -26,13 +26,13 @@ from typing import Any, Optional
 import numpy as np
 import vtk
 
-from meshpy.core.conf import mpy
-from meshpy.core.element import Element
-from meshpy.core.node import NodeCosserat
-from meshpy.core.vtk_writer import add_point_data_node_sets
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.element import Element as _Element
+from meshpy.core.node import NodeCosserat as _NodeCosserat
+from meshpy.core.vtk_writer import add_point_data_node_sets as _add_point_data_node_sets
 
 
-class Beam(Element):
+class Beam(_Element):
     """A base class for a beam element."""
 
     # An array that defines the parameter positions of the element nodes,
@@ -79,7 +79,7 @@ class Beam(Element):
             """Check if the given node matches with the position and
             rotation."""
 
-            if np.linalg.norm(pos - node.coordinates) > mpy.eps_pos:
+            if np.linalg.norm(pos - node.coordinates) > _mpy.eps_pos:
                 raise ValueError(
                     f"{name} position does not match with function! Got {pos} from function but "
                     + f"given node value is {node.coordinates}"
@@ -110,7 +110,9 @@ class Beam(Element):
                 i < len(self.nodes_create) - 1 or not has_end_node
             ):
                 is_middle_node = 0 < i < len(self.nodes_create) - 1
-                self.nodes.append(NodeCosserat(pos, rot, is_middle_node=is_middle_node))
+                self.nodes.append(
+                    _NodeCosserat(pos, rot, is_middle_node=is_middle_node)
+                )
 
         # Get a list with the created nodes.
         if has_start_node:
@@ -130,11 +132,11 @@ class Beam(Element):
         """Return the string to couple this beam to another beam."""
 
         match coupling_dof_type:
-            case mpy.coupling_dof.joint:
+            case _mpy.coupling_dof.joint:
                 if cls.coupling_joint_string is None:
                     raise ValueError(f"Joint coupling is not implemented for {cls}")
                 return cls.coupling_joint_string
-            case mpy.coupling_dof.fix:
+            case _mpy.coupling_dof.fix:
                 if cls.coupling_fix_string is None:
                     raise ValueError("Fix coupling is not implemented for {cls}")
                 return cls.coupling_fix_string
@@ -305,7 +307,7 @@ class Beam(Element):
                 ] = np.arange(index_first_point, index_last_point)
 
         # Get the point data sets and add everything to the output file.
-        add_point_data_node_sets(
+        _add_point_data_node_sets(
             point_data, self.nodes, extra_points=n_additional_points
         )
         indices = vtk_writer_beam.add_points(coordinates, point_data=point_data)

@@ -23,10 +23,12 @@
 
 import numpy as np
 
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometryName, GeometrySetNodes
-from meshpy.core.node import ControlPoint
-from meshpy.core.nurbs_patch import NURBSSurface, NURBSVolume
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.geometry_set import GeometryName as _GeometryName
+from meshpy.core.geometry_set import GeometrySetNodes as _GeometrySetNodes
+from meshpy.core.node import ControlPoint as _ControlPoint
+from meshpy.core.nurbs_patch import NURBSSurface as _NURBSSurface
+from meshpy.core.nurbs_patch import NURBSVolume as _NURBSVolume
 
 
 def add_geomdl_nurbs_to_mesh(
@@ -92,9 +94,9 @@ def add_geomdl_nurbs_to_mesh(
     manifold_dim = len(geomdl_obj.knotvector)
 
     if manifold_dim == 2:
-        nurbs_object = NURBSSurface
+        nurbs_object = _NURBSSurface
     elif manifold_dim == 3:
-        nurbs_object = NURBSVolume
+        nurbs_object = _NURBSVolume
     else:
         raise NotImplementedError(
             "Error, not implemented for a NURBS {}!".format(type(geomdl_obj))
@@ -135,7 +137,7 @@ def create_control_points_surface(geomdl_obj):
                 geomdl_obj.ctrlpts2d[dir_u][dir_v][2] / weight,
             ]
 
-            control_points.append(ControlPoint(coord, weight))
+            control_points.append(_ControlPoint(coord, weight))
 
     return control_points
 
@@ -164,7 +166,7 @@ def create_control_points_volume(geomdl_obj):
                     geomdl_obj.ctrlptsw[cp_id][2] / weight,
                 ]
 
-                control_points.append(ControlPoint(coord, weight))
+                control_points.append(_ControlPoint(coord, weight))
 
     return control_points
 
@@ -195,59 +197,59 @@ def create_geometry_sets(element):
 
         if nurbs_dimension == 2:
             # Vertex 1 is positioned on u = 0, v = 0
-            return_set["vertex_u_min_v_min"] = GeometrySetNodes(
-                mpy.geo.point, nodes=element.nodes[0]
+            return_set["vertex_u_min_v_min"] = _GeometrySetNodes(
+                _mpy.geo.point, nodes=element.nodes[0]
             )
 
             # Vertex 2 is positioned on u = 1, v = 0
-            return_set["vertex_u_max_v_min"] = GeometrySetNodes(
-                mpy.geo.point, nodes=element.nodes[num_cps_uvw[0] - 1]
+            return_set["vertex_u_max_v_min"] = _GeometrySetNodes(
+                _mpy.geo.point, nodes=element.nodes[num_cps_uvw[0] - 1]
             )
 
             # Vertex 3 is positioned on u = 0, v = 1
-            return_set["vertex_u_min_v_max"] = GeometrySetNodes(
-                mpy.geo.point,
+            return_set["vertex_u_min_v_max"] = _GeometrySetNodes(
+                _mpy.geo.point,
                 nodes=element.nodes[num_cps_uvw[0] * (num_cps_uvw[1] - 1)],
             )
 
             # Vertex 4 is positioned on u = 1, v = 1
-            return_set["vertex_u_max_v_max"] = GeometrySetNodes(
-                mpy.geo.point, nodes=element.nodes[num_cps_uvw[0] * num_cps_uvw[1] - 1]
+            return_set["vertex_u_max_v_max"] = _GeometrySetNodes(
+                _mpy.geo.point, nodes=element.nodes[num_cps_uvw[0] * num_cps_uvw[1] - 1]
             )
 
         elif nurbs_dimension == 3:
             # Vertex 1 is positioned on u = 0, v = 0, w =
-            return_set["vertex_u_min_v_min_w_min"] = GeometrySetNodes(
-                mpy.geo.point, nodes=element.nodes[0]
+            return_set["vertex_u_min_v_min_w_min"] = _GeometrySetNodes(
+                _mpy.geo.point, nodes=element.nodes[0]
             )
 
             # Vertex 2 is positioned on u = 1, v = 0, w = 0
-            return_set["vertex_u_max_v_min_w_min"] = GeometrySetNodes(
-                mpy.geo.point, nodes=element.nodes[num_cps_uvw[0] - 1]
+            return_set["vertex_u_max_v_min_w_min"] = _GeometrySetNodes(
+                _mpy.geo.point, nodes=element.nodes[num_cps_uvw[0] - 1]
             )
 
             # Vertex 3 is positioned on u = 0, v = 1, w = 0
-            return_set["vertex_u_min_v_max_w_min"] = GeometrySetNodes(
-                mpy.geo.point,
+            return_set["vertex_u_min_v_max_w_min"] = _GeometrySetNodes(
+                _mpy.geo.point,
                 nodes=element.nodes[num_cps_uvw[0] * (num_cps_uvw[1] - 1)],
             )
 
             # Vertex 4 is positioned on u = 1, v = 1, w = 0
-            return_set["vertex_u_max_v_max_w_min"] = GeometrySetNodes(
-                mpy.geo.point, nodes=element.nodes[num_cps_uvw[0] * num_cps_uvw[1] - 1]
+            return_set["vertex_u_max_v_max_w_min"] = _GeometrySetNodes(
+                _mpy.geo.point, nodes=element.nodes[num_cps_uvw[0] * num_cps_uvw[1] - 1]
             )
 
             # Vertex 5 is positioned on u = 0, v = 0, w = 1
-            return_set["vertex_u_min_v_min_w_max"] = GeometrySetNodes(
-                mpy.geo.point,
+            return_set["vertex_u_min_v_min_w_max"] = _GeometrySetNodes(
+                _mpy.geo.point,
                 nodes=element.nodes[
                     num_cps_uvw[0] * num_cps_uvw[1] * (num_cps_uvw[2] - 1)
                 ],
             )
 
             # Vertex 6 is positioned on u = 1, v = 0, w = 1
-            return_set["vertex_u_max_v_min_w_max"] = GeometrySetNodes(
-                mpy.geo.point,
+            return_set["vertex_u_max_v_min_w_max"] = _GeometrySetNodes(
+                _mpy.geo.point,
                 nodes=element.nodes[
                     num_cps_uvw[0] * num_cps_uvw[1] * (num_cps_uvw[2] - 1)
                     + (num_cps_uvw[0] - 1)
@@ -255,8 +257,8 @@ def create_geometry_sets(element):
             )
 
             # Vertex 7 is positioned on u = 0, v = 1, w = 1
-            return_set["vertex_u_min_v_max_w_max"] = GeometrySetNodes(
-                mpy.geo.point,
+            return_set["vertex_u_min_v_max_w_max"] = _GeometrySetNodes(
+                _mpy.geo.point,
                 nodes=element.nodes[
                     num_cps_uvw[0] * num_cps_uvw[1] * (num_cps_uvw[2] - 1)
                     + num_cps_uvw[0] * (num_cps_uvw[1] - 1)
@@ -264,8 +266,8 @@ def create_geometry_sets(element):
             )
 
             # Vertex 8 is positioned on u = 1, v = 1, w = 1
-            return_set["vertex_u_max_v_max_w_max"] = GeometrySetNodes(
-                mpy.geo.point,
+            return_set["vertex_u_max_v_max_w_max"] = _GeometrySetNodes(
+                _mpy.geo.point,
                 nodes=element.nodes[
                     num_cps_uvw[0] * num_cps_uvw[1] * num_cps_uvw[2] - 1
                 ],
@@ -306,8 +308,8 @@ def create_geometry_sets(element):
                             + i_along_dir * factor_dir
                         )
                     set_name = f"line_{name_dir[i_dir]}_{name_other_dir[index]}"
-                    return_set[set_name] = GeometrySetNodes(
-                        mpy.geo.line,
+                    return_set[set_name] = _GeometrySetNodes(
+                        _mpy.geo.line,
                         nodes=[element.nodes[i_node] for i_node in cp_indices],
                     )
 
@@ -398,41 +400,41 @@ def create_geometry_sets(element):
                 control_points_line_8.append(element.nodes[cpgid_l8])
 
             # Create geometric sets for lines
-            return_set["line_v_min_w_min"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_1
+            return_set["line_v_min_w_min"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_1
             )
-            return_set["line_u_max_w_min"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_2
+            return_set["line_u_max_w_min"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_2
             )
-            return_set["line_v_max_w_min"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_3
+            return_set["line_v_max_w_min"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_3
             )
-            return_set["line_u_min_w_min"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_4
+            return_set["line_u_min_w_min"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_4
             )
-            return_set["line_u_min_v_min"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_5
+            return_set["line_u_min_v_min"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_5
             )
-            return_set["line_u_max_v_min"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_6
+            return_set["line_u_max_v_min"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_6
             )
-            return_set["line_u_min_v_max"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_7
+            return_set["line_u_min_v_max"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_7
             )
-            return_set["line_u_max_v_max"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_8
+            return_set["line_u_max_v_max"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_8
             )
-            return_set["line_v_min_w_max"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_9
+            return_set["line_v_min_w_max"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_9
             )
-            return_set["line_u_max_w_max"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_10
+            return_set["line_u_max_w_max"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_10
             )
-            return_set["line_v_max_w_max"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_11
+            return_set["line_v_max_w_max"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_11
             )
-            return_set["line_u_min_w_max"] = GeometrySetNodes(
-                mpy.geo.line, nodes=control_points_line_12
+            return_set["line_u_min_w_max"] = _GeometrySetNodes(
+                _mpy.geo.line, nodes=control_points_line_12
             )
 
         else:
@@ -454,8 +456,8 @@ def create_geometry_sets(element):
             )
 
             # Create geometric sets for surfaces
-            return_set["surf"] = GeometrySetNodes(
-                mpy.geo.surface, nodes=control_points_surface_1
+            return_set["surf"] = _GeometrySetNodes(
+                _mpy.geo.surface, nodes=control_points_surface_1
             )
 
         elif nurbs_dimension == 3:
@@ -510,23 +512,23 @@ def create_geometry_sets(element):
                     )
 
             # Create geometric sets for surfaces
-            return_set["surf_w_min"] = GeometrySetNodes(
-                mpy.geo.surface, nodes=control_points_surface_1
+            return_set["surf_w_min"] = _GeometrySetNodes(
+                _mpy.geo.surface, nodes=control_points_surface_1
             )
-            return_set["surf_w_max"] = GeometrySetNodes(
-                mpy.geo.surface, nodes=control_points_surface_2
+            return_set["surf_w_max"] = _GeometrySetNodes(
+                _mpy.geo.surface, nodes=control_points_surface_2
             )
-            return_set["surf_v_min"] = GeometrySetNodes(
-                mpy.geo.surface, nodes=control_points_surface_3
+            return_set["surf_v_min"] = _GeometrySetNodes(
+                _mpy.geo.surface, nodes=control_points_surface_3
             )
-            return_set["surf_u_max"] = GeometrySetNodes(
-                mpy.geo.surface, nodes=control_points_surface_4
+            return_set["surf_u_max"] = _GeometrySetNodes(
+                _mpy.geo.surface, nodes=control_points_surface_4
             )
-            return_set["surf_v_max"] = GeometrySetNodes(
-                mpy.geo.surface, nodes=control_points_surface_5
+            return_set["surf_v_max"] = _GeometrySetNodes(
+                _mpy.geo.surface, nodes=control_points_surface_5
             )
-            return_set["surf_u_min"] = GeometrySetNodes(
-                mpy.geo.surface, nodes=control_points_surface_6
+            return_set["surf_u_min"] = _GeometrySetNodes(
+                _mpy.geo.surface, nodes=control_points_surface_6
             )
 
         else:
@@ -552,8 +554,8 @@ def create_geometry_sets(element):
             )
 
             # Create geometric sets for surfaces
-            return_set["vol"] = GeometrySetNodes(
-                mpy.geo.volume, nodes=control_points_volume_1
+            return_set["vol"] = _GeometrySetNodes(
+                _mpy.geo.volume, nodes=control_points_volume_1
             )
 
         else:
@@ -564,7 +566,7 @@ def create_geometry_sets(element):
             )
 
     # Create return set
-    return_set = GeometryName()
+    return_set = _GeometryName()
 
     # Get the number of control points on each parametric direction that define the patch
     num_cps_uvw = get_num_cps_uvw(element.knot_vectors)

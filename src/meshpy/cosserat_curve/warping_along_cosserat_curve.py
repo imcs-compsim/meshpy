@@ -28,19 +28,24 @@ import numpy as np
 import quaternion
 from numpy.typing import NDArray
 
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.core.mesh import Mesh
-from meshpy.core.node import Node, NodeCosserat
-from meshpy.core.rotation import Rotation
-from meshpy.cosserat_curve.cosserat_curve import CosseratCurve
-from meshpy.four_c.boundary_condition import BoundaryCondition
-from meshpy.four_c.function_utility import create_linear_interpolation_function
-from meshpy.geometric_search import find_close_points
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.core.node import Node as _Node
+from meshpy.core.node import NodeCosserat as _NodeCosserat
+from meshpy.core.rotation import Rotation as _Rotation
+from meshpy.cosserat_curve.cosserat_curve import CosseratCurve as _CosseratCurve
+from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
+from meshpy.four_c.function_utility import (
+    create_linear_interpolation_function as _create_linear_interpolation_function,
+)
+from meshpy.geometric_search.find_close_points import (
+    find_close_points as _find_close_points,
+)
 
 
 def get_arc_length_and_cross_section_coordinates(
-    coordinates: np.ndarray, origin: np.ndarray, reference_rotation: Rotation
+    coordinates: np.ndarray, origin: np.ndarray, reference_rotation: _Rotation
 ) -> Tuple[float, np.ndarray]:
     """Return the arc length and the cross section coordinates for a coordinate
     system defined by the reference rotation and the origin.
@@ -63,11 +68,11 @@ def get_arc_length_and_cross_section_coordinates(
 
 
 def get_mesh_transformation(
-    curve: CosseratCurve,
-    nodes: list[Node],
+    curve: _CosseratCurve,
+    nodes: list[_Node],
     *,
     origin=[0.0, 0.0, 0.0],
-    reference_rotation=Rotation(),
+    reference_rotation=_Rotation(),
     n_steps: int = 10,
     initial_configuration: bool = True,
     **kwargs,
@@ -132,7 +137,7 @@ def get_mesh_transformation(
         )
 
     # Get unique arc length points
-    has_partner, n_partner = find_close_points.find_close_points(arc_lengths)
+    has_partner, n_partner = _find_close_points(arc_lengths)
     arc_lengths_unique = [None] * n_partner
     has_partner_total = [-2] * len(arc_lengths)
     for i in range(len(arc_lengths)):
@@ -174,7 +179,7 @@ def get_mesh_transformation(
 
     # Loop over nodes and map them to the new configuration
     for i_node, node in enumerate(nodes):
-        if not isinstance(node, Node):
+        if not isinstance(node, _Node):
             raise TypeError(
                 "All nodes in the mesh have to be derived from the base Node object"
             )
@@ -185,7 +190,7 @@ def get_mesh_transformation(
         # Check that the arc length coordinates match
         if (
             np.abs(arc_lengths[i_node] - arc_lengths_sorted[node_unique_id])
-            > mpy.eps_pos
+            > _mpy.eps_pos
         ):
             raise ValueError("Arc lengths do not match")
 
@@ -231,10 +236,10 @@ def get_mesh_transformation(
 
 
 def create_transform_boundary_conditions(
-    mesh: Mesh,
-    curve: CosseratCurve,
+    mesh: _Mesh,
+    curve: _CosseratCurve,
     *,
-    nodes: Optional[list[Node]] = None,
+    nodes: Optional[list[_Node]] = None,
     t_end: float = 1.0,
     n_steps: int = 10,
     n_dof_per_node: int = 3,
@@ -283,7 +288,7 @@ def create_transform_boundary_conditions(
             ]
         )
         fun_pos = [
-            create_linear_interpolation_function(
+            _create_linear_interpolation_function(
                 time_values, displacement_values[:, i_dir]
             )
             for i_dir in range(3)
@@ -292,21 +297,21 @@ def create_transform_boundary_conditions(
             mesh.add(fun)
         additional_dof = "0 " * (n_dof_per_node - 3)
         mesh.add(
-            BoundaryCondition(
-                GeometrySet(node),
+            _BoundaryCondition(
+                _GeometrySet(node),
                 "NUMDOF {4} ONOFF 1 1 1 {3}VAL 1.0 1.0 1.0 {3}FUNCT {0} {1} {2} {3}TAG monitor_reaction",
                 format_replacement=fun_pos + [additional_dof, n_dof_per_node],
-                bc_type=mpy.bc.dirichlet,
+                bc_type=_mpy.bc.dirichlet,
             )
         )
 
 
 def warp_mesh_along_curve(
-    mesh: Mesh,
-    curve: CosseratCurve,
+    mesh: _Mesh,
+    curve: _CosseratCurve,
     *,
     origin=[0.0, 0.0, 0.0],
-    reference_rotation=Rotation(),
+    reference_rotation=_Rotation(),
 ) -> None:
     """Warp an existing mesh along the given curve.
 
@@ -326,15 +331,15 @@ def warp_mesh_along_curve(
 
     # Loop over nodes and map them to the new configuration
     for i_node, node in enumerate(mesh.nodes):
-        if not isinstance(node, Node):
+        if not isinstance(node, _Node):
             raise TypeError(
                 "All nodes in the mesh have to be derived from the base Node object"
             )
 
         new_pos = pos[0, i_node]
         node.coordinates = new_pos
-        if isinstance(node, NodeCosserat):
+        if isinstance(node, _NodeCosserat):
             node.rotation = (
-                Rotation.from_quaternion(quaternion.as_float_array(rot[0, i_node]))
+                _Rotation.from_quaternion(quaternion.as_float_array(rot[0, i_node]))
                 * node.rotation
             )

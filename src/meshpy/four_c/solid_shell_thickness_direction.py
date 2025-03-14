@@ -27,9 +27,10 @@ from typing import List
 import numpy as np
 import pyvista as pv
 
-from meshpy.core.element import Element
-from meshpy.core.element_volume import VolumeElement, VolumeHEX8
-from meshpy.utils.nodes import get_nodal_coordinates
+from meshpy.core.element import Element as _Element
+from meshpy.core.element_volume import VolumeElement as _VolumeElement
+from meshpy.core.element_volume import VolumeHEX8 as _VolumeHEX8
+from meshpy.utils.nodes import get_nodal_coordinates as _get_nodal_coordinates
 
 
 def shape_functions_hex8(xi1, xi2, xi3):
@@ -89,7 +90,7 @@ def get_hex8_element_center_and_jacobian_mapping(element):
     """Return the center of a hex8 element and the Jacobian mapping for that
     point."""
 
-    nodal_coordinates = get_nodal_coordinates(element.nodes)
+    nodal_coordinates = _get_nodal_coordinates(element.nodes)
     if not len(nodal_coordinates) == 8:
         raise ValueError(f"Expected 8 nodes, got {len(nodal_coordinates)}")
 
@@ -161,7 +162,7 @@ def get_reordering_index_director_projection(
 
 
 def set_solid_shell_thickness_direction(
-    elements: List[Element],
+    elements: List[_Element],
     *,
     selection_type="thickness",
     director=None,
@@ -173,7 +174,7 @@ def set_solid_shell_thickness_direction(
 
     Args:
     ----
-    elements: List[Element]
+    elements:
         A list containing all elements that should be checked
     selection_type:
         The type of algorithm that shall be used to select the thickness direction
@@ -196,7 +197,7 @@ def set_solid_shell_thickness_direction(
         raise ValueError("Expected a non empty element list")
 
     for element in elements:
-        is_hex8 = isinstance(element, VolumeHEX8)
+        is_hex8 = isinstance(element, _VolumeHEX8)
         if is_hex8:
             is_solid_shell = "SOLIDSH8" in element.dat_pre_nodes  # type: ignore[attr-defined]
 
@@ -257,10 +258,10 @@ def get_visualization_third_parameter_direction_hex8(mesh):
 
     cell_thickness_direction = []
     for element in mesh.elements:
-        if isinstance(element, VolumeHEX8):
+        if isinstance(element, _VolumeHEX8):
             _, jacobian_center = get_hex8_element_center_and_jacobian_mapping(element)
             cell_thickness_direction.append(jacobian_center[2])
-        elif isinstance(element, VolumeElement):
+        elif isinstance(element, _VolumeElement):
             cell_thickness_direction.append([0, 0, 0])
 
     if not len(cell_thickness_direction) == pv_solid.number_of_cells:

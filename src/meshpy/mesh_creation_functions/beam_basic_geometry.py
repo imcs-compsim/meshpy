@@ -25,11 +25,13 @@ import warnings
 
 import numpy as np
 
-from meshpy.core.conf import mpy
-from meshpy.core.mesh import Mesh
-from meshpy.core.rotation import Rotation
-from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_function
-from meshpy.utils.nodes import get_single_node
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.core.rotation import Rotation as _Rotation
+from meshpy.mesh_creation_functions.beam_generic import (
+    create_beam_mesh_function as _create_beam_mesh_function,
+)
+from meshpy.utils.nodes import get_single_node as _get_single_node
 
 
 def create_beam_mesh_line(
@@ -85,11 +87,11 @@ def create_beam_mesh_line(
     # The tolerance is used here to ensure that round-off changes in the last digits of
     # the floating point values don't switch the case. This increases the robustness in
     # testing.
-    if abs(np.dot(t1, [0, 0, 1])) < abs(np.dot(t1, [0, 1, 0])) - mpy.eps_quaternion:
+    if abs(np.dot(t1, [0, 0, 1])) < abs(np.dot(t1, [0, 1, 0])) - _mpy.eps_quaternion:
         t2 = [0, 0, 1]
     else:
         t2 = [0, 1, 0]
-    rotation = Rotation.from_basis(t1, t2)
+    rotation = _Rotation.from_basis(t1, t2)
 
     def get_beam_geometry(parameter_a, parameter_b):
         """Return a function for the position along the beams axis."""
@@ -104,7 +106,7 @@ def create_beam_mesh_line(
         return beam_function
 
     # Create the beam in the mesh
-    return create_beam_mesh_function(
+    return _create_beam_mesh_function(
         mesh,
         beam_object=beam_object,
         material=material,
@@ -244,11 +246,11 @@ def create_beam_mesh_arc_segment_via_axis(
     if start_node is None:
         tangent = np.cross(axis, distance)
         tangent /= np.linalg.norm(tangent)
-        start_rotation = Rotation.from_rotation_matrix(
+        start_rotation = _Rotation.from_rotation_matrix(
             np.transpose(np.array([tangent, -distance / radius, axis]))
         )
     else:
-        start_rotation = get_single_node(start_node).rotation
+        start_rotation = _get_single_node(start_node).rotation
 
     def get_beam_geometry(alpha, beta):
         """Return a function for the position and rotation along the beam
@@ -258,7 +260,7 @@ def create_beam_mesh_arc_segment_via_axis(
             """Return a point and the triad on the beams axis for a given
             parameter coordinate xi."""
             phi = 0.5 * (xi + 1) * (beta - alpha) + alpha
-            arc_rotation = Rotation(axis, phi)
+            arc_rotation = _Rotation(axis, phi)
             rot = arc_rotation * start_rotation
             pos = center + arc_rotation * distance
             return (pos, rot)
@@ -266,7 +268,7 @@ def create_beam_mesh_arc_segment_via_axis(
         return beam_function
 
     # Create the beam in the mesh
-    return create_beam_mesh_function(
+    return _create_beam_mesh_function(
         mesh,
         beam_object=beam_object,
         material=material,
@@ -320,13 +322,13 @@ def create_beam_mesh_arc_segment_2d(
     """
 
     # The center point has to be on the x-y plane.
-    if np.abs(center[2]) > mpy.eps_pos:
+    if np.abs(center[2]) > _mpy.eps_pos:
         raise ValueError("The z-value of center has to be 0!")
 
     # Check if the beam is in clockwise or counter clockwise direction.
     angle = phi_end - phi_start
     axis = np.array([0, 0, 1])
-    start_point = center + radius * (Rotation(axis, phi_start) * [1, 0, 0])
+    start_point = center + radius * (_Rotation(axis, phi_start) * [1, 0, 0])
 
     counter_clockwise = np.sign(angle) == 1
     if not counter_clockwise:
@@ -386,7 +388,7 @@ def create_beam_mesh_line_at_node(
         raise ValueError("Length has to be positive!")
 
     # Create the line starting from the given node
-    start_node = get_single_node(start_node, check_cosserat_node=True)
+    start_node = _get_single_node(start_node, check_cosserat_node=True)
     tangent = start_node.rotation * [1, 0, 0]
     start_position = start_node.coordinates
     end_position = start_position + tangent * length
@@ -449,9 +451,9 @@ def create_beam_mesh_arc_at_node(
         arc_axis_normal = -1.0 * arc_axis_normal
 
     # The normal has to be perpendicular to the start point tangent
-    start_node = get_single_node(start_node, check_cosserat_node=True)
+    start_node = _get_single_node(start_node, check_cosserat_node=True)
     tangent = start_node.rotation * [1, 0, 0]
-    if np.abs(np.dot(tangent, arc_axis_normal)) > mpy.eps_pos:
+    if np.abs(np.dot(tangent, arc_axis_normal)) > _mpy.eps_pos:
         raise ValueError(
             "The normal has to be perpendicular to the tangent in the start node!"
         )
@@ -566,7 +568,7 @@ def create_beam_mesh_helix(
     radius = np.linalg.norm(start_point_origin_vec)
 
     # create temporary mesh to not alter original mesh
-    mesh_temp = Mesh()
+    mesh_temp = _Mesh()
 
     # return line if radius of helix is 0, helix angle is np.pi/2 or turns is 0
     if (
@@ -653,8 +655,8 @@ def create_beam_mesh_helix(
 
     # rotate and translate simple helix to align with necessary axis and starting point
     mesh_temp.rotate(
-        Rotation.from_basis(start_point_origin_vec, axis_vector)
-        * Rotation([1, 0, 0], -np.pi * 0.5)
+        _Rotation.from_basis(start_point_origin_vec, axis_vector)
+        * _Rotation([1, 0, 0], -np.pi * 0.5)
     )
     mesh_temp.translate(-mesh_temp.nodes[0].coordinates + start_point)
 

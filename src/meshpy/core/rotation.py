@@ -25,7 +25,7 @@ import copy
 
 import numpy as np
 
-from meshpy.core.conf import mpy
+from meshpy.core.conf import mpy as _mpy
 
 
 def skew_matrix(vector):
@@ -68,7 +68,7 @@ class Rotation:
             axis = np.asarray(args[0])
             phi = args[1]
             norm = np.linalg.norm(axis)
-            if norm < mpy.eps_quaternion:
+            if norm < _mpy.eps_quaternion:
                 raise ValueError("The rotation axis can not be a zero vector!")
             self.q[0] = np.cos(0.5 * phi)
             self.q[1:] = np.sin(0.5 * phi) * axis / norm
@@ -152,7 +152,7 @@ class Rotation:
         rotation_vector = np.asarray(rotation_vector)
         phi = np.linalg.norm(rotation_vector)
         q[0] = np.cos(0.5 * phi)
-        if phi < mpy.eps_quaternion:
+        if phi < _mpy.eps_quaternion:
             # This is the Taylor series expansion of sin(phi/2)/phi around phi=0
             q[1:] = 0.5 * rotation_vector
         else:
@@ -174,7 +174,7 @@ class Rotation:
     def check_quaternion_constraint(self):
         """We want to check that q.q = 1."""
 
-        if np.abs(1 - np.linalg.norm(self.q)) > mpy.eps_quaternion:
+        if np.abs(1 - np.linalg.norm(self.q)) > _mpy.eps_quaternion:
             raise ValueError(
                 f"The rotation object is corrupted. q.q does not equal 1! q={self.q}"
             )
@@ -206,12 +206,12 @@ class Rotation:
         norm = np.linalg.norm(self.q[1:])
         phi = 2 * np.arctan2(norm, self.q[0])
 
-        if phi < mpy.eps_quaternion:
+        if phi < _mpy.eps_quaternion:
             # For small angles return the Taylor series expansion of phi/sin(phi/2)
             scale_factor = 2
         else:
             scale_factor = phi / np.sin(phi / 2)
-            if np.abs(np.abs(phi) - np.pi) < mpy.eps_quaternion:
+            if np.abs(np.abs(phi) - np.pi) < _mpy.eps_quaternion:
                 # For rotations of exactly +-pi, numerical issues might occur, resulting in
                 # a rotation vector that is non-deterministic. The result is correct, but
                 # the sign can switch due to different implementation of basic underlying
@@ -220,7 +220,7 @@ class Rotation:
                 # for a rotation angle of +-pi, the first component of the rotation axis
                 # that is not 0 is positive.
                 for i_dir in range(3):
-                    if np.abs(self.q[1 + i_dir]) > mpy.eps_quaternion:
+                    if np.abs(self.q[1 + i_dir]) > _mpy.eps_quaternion:
                         if self.q[1 + i_dir] < 0:
                             scale_factor *= -1
                         break
@@ -238,7 +238,7 @@ class Rotation:
 
         # We have to take the inverse of the the rotation angle here, therefore,
         # we have a branch for small angles where the singularity is not present.
-        if omega_norm**2 > mpy.eps_quaternion:
+        if omega_norm**2 > _mpy.eps_quaternion:
             # Taken from Jelenic and Crisfield (1999) Equation (2.5)
             omega_dir = omega / omega_norm
             omega_skew = skew_matrix(omega)
@@ -270,7 +270,7 @@ class Rotation:
 
         # We have to take the inverse of the the rotation angle here, therefore,
         # we have a branch for small angles where the singularity is not present.
-        if omega_norm**2 > mpy.eps_quaternion:
+        if omega_norm**2 > _mpy.eps_quaternion:
             # Taken from Jelenic and Crisfield (1999) Equation (2.5)
             omega_dir = omega / omega_norm
             omega_skew = skew_matrix(omega)
@@ -316,8 +316,8 @@ class Rotation:
 
         if isinstance(other, Rotation):
             return bool(
-                (np.linalg.norm(self.q - other.q) < mpy.eps_quaternion)
-                or (np.linalg.norm(self.q + other.q) < mpy.eps_quaternion)
+                (np.linalg.norm(self.q - other.q) < _mpy.eps_quaternion)
+                or (np.linalg.norm(self.q + other.q) < _mpy.eps_quaternion)
             )
         else:
             return object.__eq__(self, other)
@@ -331,8 +331,8 @@ class Rotation:
         return " ".join(
             [
                 (
-                    mpy.dat_precision.format(component + 0)
-                    if np.abs(component) >= mpy.eps_quaternion
+                    _mpy.dat_precision.format(component + 0)
+                    if np.abs(component) >= _mpy.eps_quaternion
                     else "0"
                 )
                 for component in rotation_vector
