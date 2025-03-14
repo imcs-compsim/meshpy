@@ -61,9 +61,8 @@ def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
     if tol is None:
         tol = _mpy.eps_pos
 
-    knot_vector = curve.knot_vectors[0]
-    curve_start = _np.min(knot_vector)
-    curve_end = _np.max(knot_vector)
+    curve_start = curve.parametric_bounds[0][0]
+    curve_end = curve.parametric_bounds[1][0]
 
     def eval_r(t):
         """Evaluate the position along the curve."""
