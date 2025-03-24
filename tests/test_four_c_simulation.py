@@ -30,6 +30,7 @@ from meshpy.core.conf import mpy
 from meshpy.core.geometry_set import GeometrySet
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
+from meshpy.four_c.beam_interaction_conditions import add_beam_interaction_condition
 from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.dbc_monitor import (
     dbc_monitor_to_input,
@@ -37,7 +38,13 @@ from meshpy.four_c.dbc_monitor import (
 )
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.function import Function
-from meshpy.four_c.header_functions import set_header_static, set_runtime_output
+from meshpy.four_c.function_utility import create_linear_interpolation_function
+from meshpy.four_c.header_functions import (
+    set_beam_contact_runtime_output,
+    set_beam_contact_section,
+    set_header_static,
+    set_runtime_output,
+)
 from meshpy.four_c.input_file import InputFile, InputSection
 from meshpy.four_c.material import MaterialReissner
 from meshpy.four_c.run_four_c import run_four_c
@@ -947,3 +954,140 @@ def test_four_c_simulation_cantilever_convergence(
     }
     for key in results_ref.keys():
         assert abs(results[key] - results_ref[key]) < 1e-12
+
+
+@pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
+def test_four_c_simulation_beam_to_beam_contact_example(
+    enforce_four_c,
+    tmp_path,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
+):
+    """Small test example to show how a beam contact example with beam penalty
+    contact can be set up.
+
+    The test case consists of two beams: one beam is allocated along the x-axis and
+    the other beam is located along the y-axis.
+    The beam along the y-axis is placed above the other beam by an additional offset in z-Directions.
+    Due to prescribed displacements at the tips of beam in y-axis, the two beams get in contact around the origin.
+    """
+
+    # Define Parameters for example
+    l_beam = 2
+    r_beam = 0.1
+    n_ele = 11
+    h = 0.25
+
+    # Set up mesh and material.
+    beam_to_beam_contact_simulation = InputFile()
+    mat = MaterialReissner(radius=0.1, youngs_modulus=1)
+
+    # Create a beam in x-axis.
+    beam_x = create_beam_mesh_line(
+        beam_to_beam_contact_simulation,
+        Beam3rHerm2Line3,
+        mat,
+        [-l_beam / 2, 0, 0],
+        [l_beam / 2, 0, 0],
+        n_el=n_ele,
+    )
+
+    # Apply Dirichlet condition to start and end nodes of beam 1:
+    for set_name in ["start", "end"]:
+        beam_to_beam_contact_simulation.add(
+            BoundaryCondition(
+                beam_x[set_name],
+                "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+                bc_type=mpy.bc.dirichlet,
+            )
+        )
+
+    # Create a second beam in y-axis.
+    beam_y = create_beam_mesh_line(
+        beam_to_beam_contact_simulation,
+        Beam3rHerm2Line3,
+        mat,
+        [0, -l_beam / 2, h],
+        [0, l_beam / 2, h],
+        n_el=n_ele,
+    )
+
+    t = [0, 1, 1000.0]
+    disp_values = [0.0, -h - r_beam, -h - r_beam]
+
+    # Create a linear interpolation function with the displacement.
+    fun = create_linear_interpolation_function(t, disp_values)
+
+    beam_to_beam_contact_simulation.add(fun)
+
+    # Apply Dirichlet conditions at starting and end node to displace the beam endings.
+    for set_name in ["start", "end"]:
+        beam_to_beam_contact_simulation.add(
+            BoundaryCondition(
+                beam_y[set_name],
+                "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 1 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0",
+                bc_type=mpy.bc.dirichlet,
+                format_replacement=[fun],
+            )
+        )
+
+    # Create a beam to beam contact boundary condition factory.
+    add_beam_interaction_condition(
+        beam_to_beam_contact_simulation,
+        beam_x["line"],
+        beam_y["line"],
+        mpy.bc.beam_to_beam_contact,
+    )
+
+    # Add the standard,static header.
+    set_header_static(
+        beam_to_beam_contact_simulation,
+        time_step=0.05,
+        n_steps=24,
+        total_time=1.2,
+        write_stress="Yes",
+        tol_residuum=1e-5,
+        tol_increment=1e-5,
+    )
+
+    # Set the parameters for beam to beam contact.
+    set_beam_contact_section(
+        beam_to_beam_contact_simulation,
+        btb_penalty=50,
+        penalty_regularization_g0=r_beam * 0.02,
+        binning_parameters={
+            "binning_cutoff_radius": 5,
+            "binning_bounding_box": [-3, -3, -3, 3, 3, 3],
+        },
+    )
+
+    # Add normal runtime output.
+    set_runtime_output(beam_to_beam_contact_simulation)
+
+    # Add special runtime output for beam interaction.
+    set_beam_contact_runtime_output(
+        beam_to_beam_contact_simulation, every_iteration=False
+    )
+
+    # Compare with the reference solution.
+    assert_results_equal(
+        get_corresponding_reference_file_path(), beam_to_beam_contact_simulation
+    )
+
+    beam_to_beam_contact_simulation.add(
+        InputSection(
+            "RESULT DESCRIPTION",
+            """STRUCTURE DIS structure NODE 12 QUANTITY dispx VALUE -2.78205406266063848e+00 TOLERANCE 1e-8
+                        STRUCTURE DIS structure NODE 12 QUANTITY dispy VALUE 0e+00 TOLERANCE 1e-8
+                        STRUCTURE DIS structure NODE 12 QUANTITY dispz VALUE 0e+0 TOLERANCE 1e-8""",
+        ),
+    )
+
+    # Check if we still have to actually run 4C.
+    if not enforce_four_c:
+        return
+
+    initial_run_name = "beam_to_beam_contact_simulation"
+    run_four_c_test(
+        tmp_path, initial_run_name, beam_to_beam_contact_simulation, n_proc=1
+    )
