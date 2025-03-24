@@ -22,8 +22,10 @@
 """This module defines functions that can be used to add header information to
 an input file."""
 
+from typing import List, Optional, Union
+
 from meshpy.core.conf import mpy
-from meshpy.four_c.input_file import InputSection
+from meshpy.four_c.input_file import InputFile, InputSection
 
 
 def get_yes_no(bool_var):
@@ -199,8 +201,7 @@ def set_beam_to_solid_meshtying(
     n_integration_points_circ=None,
     penalty_parameter=None,
     coupling_type=None,
-    binning_bounding_box=None,
-    binning_cutoff_radius=None,
+    binning_parameters: dict = {},
     option_overwrite=False,
 ):
     """Set the beam to solid meshtying options.
@@ -230,10 +231,8 @@ def set_beam_to_solid_meshtying(
         Penalty parameter for contact enforcement.
     coupling_type: str
         Type of coupling for beam-to-surface coupling.
-    binning_bounding_box: [float]
-        List with the limits of the bounding box.
-    binning_cutoff_radius: float
-        Maximal influence radius of pair elements.
+    binning_parameters:
+        Keyword parameters for the binning section
     option_overwrite: bool
         If existing options should be overwritten. If this is false and an
         option is already defined, and error will be thrown.
@@ -249,26 +248,11 @@ def set_beam_to_solid_meshtying(
         InputSection("BEAM CONTACT", "MODELEVALUATOR Standard", option_overwrite=True)
     )
 
-    # Set the binning strategy.
-    if (binning_bounding_box is not None) and binning_cutoff_radius is not None:
-        bounding_box_string = " ".join([str(val) for val in binning_bounding_box])
-        input_file.add(
-            InputSection(
-                "BINNING STRATEGY",
-                f"""
-            BIN_SIZE_LOWER_BOUND {binning_cutoff_radius}
-            DOMAINBOUNDINGBOX {bounding_box_string}
-            """,
-                option_overwrite=True,
-            )
-        )
-    elif (binning_bounding_box is not None) or binning_cutoff_radius is not None:
-        raise ValueError(
-            (
-                f"Binning bounding box ({binning_bounding_box}) and binning cutoff radius "
-                f"({binning_cutoff_radius}) both have to be set or none of them."
-            )
-        )
+    set_binning_strategy_section(
+        input_file,
+        option_overwrite=option_overwrite,
+        **binning_parameters,
+    )
 
     # Add the beam to solid volume mesh tying options.
     if interaction_type == mpy.beam_to_solid.volume_meshtying:
@@ -528,3 +512,225 @@ def set_header_static(
 
     # Set the xml content in the input file.
     input_file.nox_xml = nox_xml
+
+
+def set_binning_strategy_section(
+    input_file: InputFile,
+    binning_bounding_box: Union[List[int], None] = None,
+    binning_cutoff_radius: Union[float, None] = None,
+    *,
+    option_overwrite: bool = False,
+):
+    """Set binning strategy in section of the input file.
+
+    Args
+    ----
+    input_file:
+        Input file that the options will be added to.
+    binning_bounding_box:
+        List with the limits of the bounding box.
+    binning_cutoff_radius:
+        Maximal influence radius of pair elements.
+    option_overwrite:
+        If existing options should be overwritten. If this is false and an
+        option is already defined, and error will be thrown.
+    """
+
+    if binning_bounding_box is not None and binning_cutoff_radius is not None:
+        binning_bounding_box_string = " ".join(
+            [str(val) for val in binning_bounding_box]
+        )
+
+        input_file.add(
+            InputSection(
+                "BINNING STRATEGY",
+                f"""
+            BIN_SIZE_LOWER_BOUND    {binning_cutoff_radius}
+            DOMAINBOUNDINGBOX                     {binning_bounding_box_string}
+            """,
+                option_overwrite=option_overwrite,
+            )
+        )
+    elif [binning_bounding_box, binning_cutoff_radius].count(None) == 2:
+        return
+    else:
+        raise ValueError(
+            f"The variables binning_bounding_box {binning_bounding_box} and binning_cutoff_radius {binning_cutoff_radius} must both be set."
+        )
+
+
+def set_beam_interaction_section(
+    inputfile: InputFile,
+    *,
+    repartition_strategy: str = "everydt",
+    search_strategy: str = "bounding_volume_hierarchy",
+    option_overwrite: bool = False,
+):
+    """Set beam interaction section in input file.
+
+    Args
+    ----
+    input_file:
+        Input file that the options will be added to.
+    repartition_strategy:
+        Type of employed repartitioning strategy
+        Options: "adaptive" or "everydt"
+    search_strategy:
+        Type of search strategy used for finding coupling pairs.
+        Options: "bruteforce_with_binning", "bounding_volume_hierarchy"
+    option_overwrite:
+        If existing options should be overwritten. If this is false and an
+        option is already defined, and error will be thrown.
+    """
+
+    inputfile.add(
+        InputSection(
+            "BEAM INTERACTION",
+            f"""
+        REPARTITIONSTRATEGY                   {repartition_strategy}
+        SEARCH_STRATEGY                       {search_strategy}
+        """,
+            option_overwrite=option_overwrite,
+        )
+    )
+
+
+def set_beam_contact_runtime_output(
+    inputfile: InputFile,
+    *,
+    every_iteration: bool = False,
+    option_overwrite: bool = False,
+):
+    """Output the beam-to-beam contact forces and gaps with runtime output.
+
+    input_file:
+        Input file that the options will be added to.
+    every_iteration:
+        If output at every Newton iteration should be written.
+    option_overwrite:
+        If existing options should be overwritten. If this is false and an
+        option is already defined, and error will be thrown.
+    """
+
+    inputfile.add(
+        InputSection(
+            "BEAM CONTACT/RUNTIME VTK OUTPUT",
+            f"""
+            VTK_OUTPUT_BEAM_CONTACT               yes
+            EVERY_ITERATION                       {get_yes_no(every_iteration)}
+            INTERVAL_STEPS                        1
+            CONTACT_FORCES                        yes
+            GAPS                                  yes
+        """,
+            option_overwrite=option_overwrite,
+        )
+    )
+
+
+def set_beam_contact_section(
+    input_file: InputFile,
+    *,
+    interaction_strategy: str = "penalty",
+    btb_penalty: float = 0,
+    btb_line_penalty: float = 0,
+    per_shift_angle: list[float] = [70, 80],
+    par_shift_angle: list[float] = [70, 80],
+    b_seg_angle: float = 12,
+    num_integration: int = 5,
+    penalty_law: str = "LinPosQuadPen",
+    penalty_regularization_g0: float = 0,
+    penalty_regularization_f0: float = 0,
+    penalty_regularization_c0: float = 0,
+    binning_parameters: dict = {},
+    beam_interaction_parameters: dict = {},
+    option_overwrite: bool = False,
+):
+    """Set default beam contact section, for more and updated details see
+    respective input file within 4C. Parameters for set_binning_strategy and
+    set_beam_interaction may be forwarded as keyword arguments.
+
+    Args
+    ----
+    input_file:
+        Input file that the options will be added to.
+    interaction_strategy:
+        Type of employed solving strategy
+        Options: "none", "penalty" or "gmshonly"
+    btb_penalty: double
+        Penalty parameter for beam-to-beam point contact
+    btb_line_penalty:
+        Penalty parameter per unit length for beam-to-beam line contact
+    per_shift_angle:
+        Lower and upper shift angle (in degrees) for penalty scaling of large-angle-contact
+    par_shift_angle:
+        Lower and upper shift angle (in degrees) for penalty scaling of small-angle-contact
+    b_seg_angle:
+        Maximal angle deviation allowed for contact search segmentation
+    num_integration:
+        Number of integration intervals per element
+    option_overwrite: bool
+        If existing options should be overwritten. If this is false and an
+        option is already defined, and error will be thrown.
+    penalty_law:
+        Penalty Law Options: "LinPen", "QuadPen", "LinNegQuadPen", "LinPosQuadPen", "LinPosCubPen", "LinPosDoubleQuadPen", "LinPosExpPen"
+    penalty_regularization_g0:
+        First penalty regularization parameter G0
+    penalty_regularization_f0:
+        Second penalty regularization parameter F0
+    penalty_regularization_c0:
+        Third penalty regularization parameter C0
+    binning_parameters:
+        Keyword parameters for the binning section
+    beam_interaction_parameters:
+        Keyword parameters for the beam-contact section
+    """
+
+    if len(per_shift_angle) != 2:
+        raise ValueError(
+            "Please provide lower and upper value of BEAMS_PERPSHIFTANGLE."
+        )
+
+    if len(par_shift_angle) != 2:
+        raise ValueError("Please provide lower and upper value of BEAMS_PARSHIFTANGLE.")
+
+    input_file.add(
+        InputSection(
+            "BEAM INTERACTION/BEAM TO BEAM CONTACT",
+            f"""STRATEGY   {interaction_strategy}""",
+            option_overwrite=option_overwrite,
+        )
+    )
+    input_file.add(
+        InputSection(
+            "BEAM CONTACT",
+            f"""MODELEVALUATOR                  Standard
+        BEAMS_STRATEGY                  Penalty
+        BEAMS_BTBPENALTYPARAM           {btb_penalty}
+        BEAMS_BTBLINEPENALTYPARAM       {btb_line_penalty}
+        BEAMS_SEGCON                    Yes
+        BEAMS_PERPSHIFTANGLE1           {per_shift_angle[0]}
+        BEAMS_PERPSHIFTANGLE2           {per_shift_angle[1]}
+        BEAMS_PARSHIFTANGLE1            {par_shift_angle[0]}
+        BEAMS_PARSHIFTANGLE2            {par_shift_angle[1]}
+        BEAMS_SEGANGLE                  {b_seg_angle}
+        BEAMS_NUMINTEGRATIONINTERVAL    {num_integration}
+        BEAMS_PENALTYLAW                {penalty_law}
+        BEAMS_PENREGPARAM_G0            {penalty_regularization_g0}
+        BEAMS_PENREGPARAM_F0            {penalty_regularization_f0}
+        BEAMS_PENREGPARAM_C0            {penalty_regularization_c0}
+        BEAMS_MAXDISISCALEFAC           -1.0
+        BEAMS_MAXDELTADISSCALEFAC       -1.0
+        """,
+            option_overwrite=option_overwrite,
+        )
+    )
+
+    # beam contact needs a binning strategy
+    set_binning_strategy_section(
+        input_file, option_overwrite=option_overwrite, **binning_parameters
+    )
+
+    # beam contact needs interaction strategy
+    set_beam_interaction_section(
+        input_file, option_overwrite=option_overwrite, **beam_interaction_parameters
+    )
