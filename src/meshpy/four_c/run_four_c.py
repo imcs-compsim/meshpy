@@ -23,7 +23,7 @@
 
 import os
 import shutil
-import subprocess
+import subprocess  # nosec B404
 import sys
 from pathlib import Path
 
@@ -110,7 +110,7 @@ def run_four_c(
     # Actually run the command
     with open(log_file, "w") as stdout_file, open(error_file, "w") as stderr_file:
         process = subprocess.Popen(
-            command,
+            command,  # nosec B603
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=output_dir,
