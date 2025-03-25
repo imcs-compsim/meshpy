@@ -25,7 +25,8 @@
 import datetime
 import os
 import re
-import subprocess
+import shutil
+import subprocess  # nosec B404
 import sys
 
 from meshpy.core.base_mesh_item import BaseMeshItemFull, BaseMeshItemString
@@ -919,14 +920,17 @@ class InputFile(Mesh):
 
         def get_git_data(repo):
             """Return the hash and date of the current git commit."""
-            out_sha = subprocess.run(
-                ["git", "rev-parse", "HEAD"],
+            git = shutil.which("git")
+            if git is None:
+                raise RuntimeError("Git executable not found")
+            out_sha = subprocess.run(  # nosec B603
+                [git, "rev-parse", "HEAD"],
                 cwd=repo,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL,
             )
-            out_date = subprocess.run(
-                ["git", "show", "-s", "--format=%ci"],
+            out_date = subprocess.run(  # nosec B603
+                [git, "show", "-s", "--format=%ci"],
                 cwd=repo,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.DEVNULL,
