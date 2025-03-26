@@ -37,10 +37,10 @@ from meshpy.utils.environment import (
 def test_is_cubitpy_available() -> None:
     """Test is_cubitpy_available function."""
 
-    with patch("importlib.util.find_spec", return_value=True):
+    with patch("meshpy.utils.environment._find_spec", return_value=True):
         assert cubitpy_is_available() is True
 
-    with patch("importlib.util.find_spec", return_value=None):
+    with patch("meshpy.utils.environment._find_spec", return_value=None):
         assert cubitpy_is_available() is False
 
 
