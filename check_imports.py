@@ -22,7 +22,7 @@
 """Check that the MeshPy internal imports adhere to our coding guidelines."""
 
 import ast
-import sys
+import sys as _sys
 from pathlib import Path
 
 
@@ -37,7 +37,7 @@ def get_import_details_from_code(code):
         dict: Dictionary where:
             - Keys are module names.
             - Values are:
-                - None for normal imports (e.g., `import os`).
+                - None for normal imports (e.g., `import os as _os`).
                 - A list of tuples for `from module import ...` with (original name, alias or None).
     """
 
@@ -70,10 +70,10 @@ def check_imports(file_path):
 
     return_value = True
     for module, explicit_imports in imports.items():
-        if module.startswith("meshpy"):
+        if True:
             if explicit_imports is None:
                 # We don't allow direct imports of MeshPy, e.g., import meshpy.core
-                print(f"Don't directly import MeshPy modules: {module}")
+                print(f"Don't directly import modules: {module}")
                 return_value = False
             elif isinstance(explicit_imports, list):
                 for name, alias in explicit_imports:
@@ -88,24 +88,33 @@ def check_imports(file_path):
                     else:
                         # We don't imports of MeshPy objects without an alias, e.g., from meshpy.core.mesh import Mesh
                         print(
-                            f"MeshPy imports have to have an alias (with a leading underscore): from {module} import {name}"
+                            f"MeshPy imports have to have an alias (with a leading underscore): from {module} import {name} alias {alias}"
                         )
                         return_value = False
             else:
-                # We allow this as it helps for some type hints
-                if module == "meshpy.core.conf":
-                    continue
-                print(
-                    f"Don't directly import MeshPy modules: {module} as {explicit_imports}"
-                )
-                return_value = False
+                if module.startswith("meshpy"):
+                    if module.split(".") == "_" + explicit_imports:
+                        print(
+                            f"Don't directly import Meshpy modules: {module} as {explicit_imports}"
+                        )
+                        return_value = False
+                elif module.startswith("_"):
+                    pass
+                else:
+                    if explicit_imports.startswith("_"):
+                        pass
+                    else:
+                        print(
+                            f"Don't directly import modules without alias with underscore: {module} as {explicit_imports}"
+                        )
+                        return_value = False
     return return_value
 
 
 def main():
     """Runs check_imports on all staged Python files."""
 
-    files_to_check = [Path(f) for f in sys.argv[1:] if f.endswith(".py")]
+    files_to_check = [Path(f) for f in _sys.argv[1:] if f.endswith(".py")]
 
     if not files_to_check:
         return 0
@@ -116,7 +125,7 @@ def main():
         if not check_imports(file_path):
             exit_code = 1
 
-    sys.exit(exit_code)
+    _sys.exit(exit_code)
 
 
 if __name__ == "__main__":
