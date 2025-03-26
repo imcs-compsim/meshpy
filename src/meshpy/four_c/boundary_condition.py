@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 """This module implements a class to handle boundary conditions in 4C."""
 
-import warnings
+import warnings as _warnings
 
 from meshpy.core.boundary_condition import (
     BoundaryConditionBase as _BoundaryConditionBase,

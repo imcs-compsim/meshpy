@@ -21,10 +21,16 @@
 # THE SOFTWARE.
 """Convert a MeshPy beam to a space time surface mesh."""
 
-from typing import Callable, Dict, List, Tuple, Type, Union, cast
+from typing import Callable as _Callable
+from typing import Dict as _Dict
+from typing import List as _List
+from typing import Tuple as _Tuple
+from typing import Type as _Type
+from typing import Union as _Union
+from typing import cast as _cast
 
-import numpy as np
-import vtk
+import numpy as _np
+import vtk as _vtk
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.coupling import Coupling as _Coupling
@@ -68,7 +74,7 @@ class NodeCosseratSpaceTime(_NodeCosserat):
             [
                 (
                     _mpy.dat_precision.format(component + 0)
-                    if np.abs(component) >= _mpy.eps_pos
+                    if _np.abs(component) >= _mpy.eps_pos
                     else "0"
                 )
                 for component in space_time_coordinates
@@ -116,7 +122,7 @@ class SpaceTimeElement(_VolumeElement):
 class SpaceTimeElementQuad4(SpaceTimeElement):
     """A space-time element with 4 nodes."""
 
-    vtk_cell_type = vtk.vtkQuad
+    vtk_cell_type = _vtk.vtkQuad
     vtk_topology = list(range(4))
     four_c_name = "QUAD4"
 
@@ -124,18 +130,18 @@ class SpaceTimeElementQuad4(SpaceTimeElement):
 class SpaceTimeElementQuad9(SpaceTimeElement):
     """A space-time element with 9 nodes."""
 
-    vtk_cell_type = vtk.vtkQuadraticQuad
+    vtk_cell_type = _vtk.vtkQuadraticQuad
     vtk_topology = list(range(9))
     four_c_name = "QUAD9"
 
 
 def beam_to_space_time(
-    mesh_space_or_generator: Union[_Mesh, Callable[[float], _Mesh]],
+    mesh_space_or_generator: _Union[_Mesh, _Callable[[float], _Mesh]],
     time_duration: float,
     number_of_elements_in_time: int,
     *,
     time_start: float = 0.0,
-) -> Tuple[_Mesh, _GeometryName]:
+) -> _Tuple[_Mesh, _GeometryName]:
     """Convert a MeshPy beam mesh to a surface space-time mesh.
 
     Args
@@ -178,8 +184,8 @@ def beam_to_space_time(
     # Calculate global mesh properties
     number_of_nodes_in_space = len(mesh_space_reference.nodes)
     number_of_elements_in_space = len(mesh_space_reference.elements)
-    space_time_element_type: Union[
-        Type[SpaceTimeElementQuad4], Type[SpaceTimeElementQuad9]
+    space_time_element_type: _Union[
+        _Type[SpaceTimeElementQuad4], _Type[SpaceTimeElementQuad9]
     ]
     if element_type == _Beam3rLine2Line2:
         number_of_copies_in_time = number_of_elements_in_time + 1
@@ -355,16 +361,16 @@ def mesh_to_data_arrays(mesh: _Mesh):
         )
 
     _, raw_unique_nodes = _get_coupled_nodes_to_master_map(mesh, assign_i_global=True)
-    unique_nodes = cast(List[NodeCosseratSpaceTime], raw_unique_nodes)
+    unique_nodes = _cast(_List[NodeCosseratSpaceTime], raw_unique_nodes)
 
     n_nodes = len(unique_nodes)
     n_elements = len(mesh.elements)
     n_nodes_per_element = len(mesh.elements[0].nodes)
 
     coordinates = _get_nodal_coordinates(unique_nodes)
-    time = np.zeros(n_nodes)
-    connectivity = np.zeros((n_elements, n_nodes_per_element), dtype=int)
-    element_rotation_vectors = np.zeros((n_elements, n_nodes_per_element, 3))
+    time = _np.zeros(n_nodes)
+    connectivity = _np.zeros((n_elements, n_nodes_per_element), dtype=int)
+    element_rotation_vectors = _np.zeros((n_elements, n_nodes_per_element, 3))
 
     for i_node, node in enumerate(unique_nodes):
         time[i_node] = node.time
@@ -377,10 +383,10 @@ def mesh_to_data_arrays(mesh: _Mesh):
             )
 
     geometry_sets = mesh.get_unique_geometry_sets()
-    node_sets: Dict[str, List] = {}
+    node_sets: _Dict[str, _List] = {}
     for value in geometry_sets.values():
         for geometry_set in value:
-            node_sets[str(len(node_sets) + 1)] = np.array(
+            node_sets[str(len(node_sets) + 1)] = _np.array(
                 [node.i_global for node in geometry_set.get_all_nodes()]
             )
 
@@ -398,7 +404,7 @@ def mesh_to_data_arrays(mesh: _Mesh):
         # The arc length is added as an "element" property, since the same
         # node can have a different arc length depending on the element
         # (similar to the rotation vectors).
-        arc_length = np.zeros((n_elements, n_nodes_per_element))
+        arc_length = _np.zeros((n_elements, n_nodes_per_element))
         for i_element, element in enumerate(mesh.elements):
             for i_node, node in enumerate(element.nodes):
                 connectivity[i_element, i_node] = node.i_global

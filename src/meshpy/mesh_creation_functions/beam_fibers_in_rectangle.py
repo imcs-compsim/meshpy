@@ -26,7 +26,7 @@ This can for example be used to create fiber reinforced composite
 plates.
 """
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
@@ -67,8 +67,8 @@ def _intersect_line_with_rectangle(
     """
 
     # Convert the input values to np.arrays.
-    start_line = np.asarray(start_line)
-    direction_line = np.asarray(direction_line)
+    start_line = _np.asarray(start_line)
+    direction_line = _np.asarray(direction_line)
 
     # Set definition for the boundary lines of the rectangle. The director is
     # chosen in a way, that the values [0, 1] for the line parameters alpha are
@@ -82,18 +82,18 @@ def _intersect_line_with_rectangle(
     ]
     # Convert to numpy arrays.
     boundary_lines = [
-        [np.array(item) for item in boundary] for boundary in boundary_lines
+        [_np.array(item) for item in boundary] for boundary in boundary_lines
     ]
 
     # Loop over the boundaries.
     alpha_list = []
     for start_boundary, direction_boundary in boundary_lines:
         # Set up the linear system to solve the intersection problem.
-        A = np.transpose(np.array([direction_line, -direction_boundary]))
+        A = _np.transpose(_np.array([direction_line, -direction_boundary]))
 
         # Check if the system is solvable.
-        if np.abs(np.linalg.det(A)) > 1e-10:
-            alpha = np.linalg.solve(A, start_boundary - start_line)
+        if _np.abs(_np.linalg.det(A)) > 1e-10:
+            alpha = _np.linalg.solve(A, start_boundary - start_line)
             if 0 <= alpha[1] and alpha[1] <= 1:
                 alpha_list.append(alpha[0])
 
@@ -154,7 +154,7 @@ def create_fibers_in_rectangle(
     """
 
     if reference_point is None:
-        reference_point = 0.5 * np.array([length, width])
+        reference_point = 0.5 * _np.array([length, width])
     else:
         if (
             reference_point[0] < 0.0
@@ -170,17 +170,17 @@ def create_fibers_in_rectangle(
         raise ValueError("fiber_element_length_min must be positive!")
 
     # Get the fiber angle in rad.
-    fiber_angle = angle * np.pi / 180.0
-    sin = np.sin(fiber_angle)
-    cos = np.cos(fiber_angle)
+    fiber_angle = angle * _np.pi / 180.0
+    sin = _np.sin(fiber_angle)
+    cos = _np.cos(fiber_angle)
 
     # Direction and normal vector of the fibers.
-    fiber_direction = np.array([cos, sin])
-    fiber_normal = np.array([-sin, cos])
+    fiber_direction = _np.array([cos, sin])
+    fiber_normal = _np.array([-sin, cos])
 
     # Get an upper bound of the number of fibers in this layer.
-    diagonal = np.sqrt(length**2 + width**2)
-    fiber_n_max = int(np.ceil(diagonal / fiber_normal_distance)) + 1
+    diagonal = _np.sqrt(length**2 + width**2)
+    fiber_n_max = int(_np.ceil(diagonal / fiber_normal_distance)) + 1
 
     # Go in both directions from the start point.
     for direction_sign, n_start in [[-1, 1], [1, 0]]:
@@ -198,20 +198,20 @@ def create_fibers_in_rectangle(
 
             if projection_found:
                 # Calculate the length of the line.
-                fiber_length = np.linalg.norm(end - start)
+                fiber_length = _np.linalg.norm(end - start)
 
                 # Create the beams if the length is not smaller than the fiber
                 # distance.
                 if fiber_length >= fiber_element_length_min:
                     # Calculate the number of elements in this fiber.
-                    fiber_nel = int(np.round(fiber_length / fiber_element_length))
-                    fiber_nel = np.max([fiber_nel, 1])
+                    fiber_nel = int(_np.round(fiber_length / fiber_element_length))
+                    fiber_nel = _np.max([fiber_nel, 1])
                     _create_beam_mesh_line(
                         mesh,
                         beam_object,
                         material,
-                        np.append(start, 0.0),
-                        np.append(end, 0.0),
+                        _np.append(start, 0.0),
+                        _np.append(end, 0.0),
                         n_el=fiber_nel,
                     )
             else:

@@ -22,7 +22,7 @@
 """This module implements a basic class to manage geometry in the input
 file."""
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
 from meshpy.core.base_mesh_item import BaseMeshItemString as _BaseMeshItemString
@@ -35,7 +35,7 @@ from meshpy.core.node import Node as _Node
 class GeometrySetBase(_BaseMeshItemFull):
     """Base class for a geometry set."""
 
-    # _Node set names for the input file file.
+    # Node set names for the input file file.
     geometry_set_names = {
         _mpy.geo.point: "DNODE",
         _mpy.geo.line: "DLINE",
@@ -128,7 +128,7 @@ class GeometrySetBase(_BaseMeshItemFull):
         if len(nodes) == 0:
             raise ValueError("Writing empty geometry sets is not supported")
         nodes_id = [node.i_global for node in nodes]
-        sort_indices = np.argsort(nodes_id)
+        sort_indices = _np.argsort(nodes_id)
         nodes = [nodes[i] for i in sort_indices]
 
         return [
@@ -145,7 +145,7 @@ class GeometrySet(GeometrySetBase):
 
         Args
         ----
-        geometry: List or single Geometry/GeometrySet
+        geometry: _List or single Geometry/GeometrySet
             Geometries associated with this set. Empty geometries (i.e., no given)
             are not supported.
         """

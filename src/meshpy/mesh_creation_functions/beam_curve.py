@@ -21,11 +21,11 @@
 # THE SOFTWARE.
 """This file has functions to create a beam from a parametric curve."""
 
-import autograd.numpy as npAD
-import numpy as np
-import scipy.integrate as integrate
-import scipy.optimize as optimize
-from autograd import jacobian
+import autograd.numpy as _npAD
+import numpy as _np
+import scipy.integrate as _integrate
+import scipy.optimize as _optimize
+from autograd import jacobian as _jacobian
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.rotation import Rotation as _Rotation
@@ -112,9 +112,9 @@ def create_beam_mesh_curve(
         is_rot_funct = True
 
     # Check that the position is an np.array
-    if not isinstance(function(float(interval[0])), np.ndarray):
+    if not isinstance(function(float(interval[0])), _np.ndarray):
         raise TypeError(
-            "Function must be of type np.ndarray, got {}!".format(
+            "Function must be of type _np.ndarray, got {}!".format(
                 type(function(float(interval[0])))
             )
         )
@@ -122,7 +122,7 @@ def create_beam_mesh_curve(
     # Get the derivative of the position function and the increment along
     # the curve.
     if function_derivative is None:
-        rp = jacobian(function)
+        rp = _jacobian(function)
     else:
         rp = function_derivative
 
@@ -137,7 +137,7 @@ def create_beam_mesh_curve(
 
     def ds(t):
         """Increment along the curve."""
-        return npAD.linalg.norm(rp(t))
+        return _npAD.linalg.norm(rp(t))
 
     def S(t, start_t=None, start_S=None):
         """Function that integrates the length until a parameter value.
@@ -153,7 +153,7 @@ def create_beam_mesh_curve(
             sS = start_S
         else:
             raise ValueError("Input parameters are wrong!")
-        return integrate.quad(ds, st, t)[0] + sS
+        return _integrate.quad(ds, st, t)[0] + sS
 
     def get_t_along_curve(arc_length, t0, **kwargs):
         """Calculate the parameter t where the length along the curve is
@@ -161,7 +161,7 @@ def create_beam_mesh_curve(
 
         t0 is the start point for the Newton iteration.
         """
-        t_root = optimize.newton(lambda t: S(t, **kwargs) - arc_length, t0, fprime=ds)
+        t_root = _optimize.newton(lambda t: S(t, **kwargs) - arc_length, t0, fprime=ds)
         return t_root
 
     class BeamFunctions:
@@ -179,7 +179,7 @@ def create_beam_mesh_curve(
 
             if is_3d_curve:
                 r_prime = rp(float(interval[0]))
-                if abs(np.dot(r_prime, [0, 0, 1])) < abs(np.dot(r_prime, [0, 1, 0])):
+                if abs(_np.dot(r_prime, [0, 0, 1])) < abs(_np.dot(r_prime, [0, 1, 0])):
                     t2_temp = [0, 0, 1]
                 else:
                     t2_temp = [0, 1, 0]
@@ -224,7 +224,7 @@ def create_beam_mesh_curve(
                 if is_3d_curve:
                     pos = function(t)
                 else:
-                    pos = np.zeros(3)
+                    pos = _np.zeros(3)
                     pos[:2] = function(t)
 
                 # Rotation at xi.
@@ -239,7 +239,7 @@ def create_beam_mesh_curve(
                         self.last_triad = rot.copy()
                     else:
                         # The rotation simplifies in the 2d case.
-                        rot = _Rotation([0, 0, 1], np.arctan2(r_prime[1], r_prime[0]))
+                        rot = _Rotation([0, 0, 1], _np.arctan2(r_prime[1], r_prime[0]))
 
                 # Set start values for the next iteration
                 self.t_start_newton = t

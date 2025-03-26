@@ -79,9 +79,9 @@ class BoundaryConditionBase(_BaseMeshItemFull):
             )
         elif bc_key is _mpy.bc.point_coupling:
             # Coupling condition.
-            from .coupling import Coupling
+            from meshpy.core.coupling import Coupling as _Coupling
 
-            return Coupling(
+            return _Coupling(
                 int(split[1]) - 1,
                 bc_key,
                 " ".join(split[2:]),

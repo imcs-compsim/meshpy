@@ -21,9 +21,9 @@
 # THE SOFTWARE.
 """This file has functions to create basic geometry items with meshpy."""
 
-import warnings
+import warnings as _warnings
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.mesh import Mesh as _Mesh
@@ -47,7 +47,7 @@ def create_beam_mesh_line(
         Class of beam that will be used for this line.
     material: Material
         Material for this line.
-    start_point, end_point: np.array, list
+    start_point, end_point: _np.array, list
         3D-coordinates for the start and end point of the line.
 
     **kwargs (for all of them look into create_beam_mesh_function)
@@ -77,17 +77,17 @@ def create_beam_mesh_line(
     """
 
     # Get geometrical values for this line.
-    start_point = np.asarray(start_point)
-    end_point = np.asarray(end_point)
+    start_point = _np.asarray(start_point)
+    end_point = _np.asarray(end_point)
     direction = end_point - start_point
-    line_length = np.linalg.norm(direction)
+    line_length = _np.linalg.norm(direction)
     t1 = direction / line_length
 
     # Check if the z or y axis are larger projected onto the direction.
     # The tolerance is used here to ensure that round-off changes in the last digits of
     # the floating point values don't switch the case. This increases the robustness in
     # testing.
-    if abs(np.dot(t1, [0, 0, 1])) < abs(np.dot(t1, [0, 1, 0])) - _mpy.eps_quaternion:
+    if abs(_np.dot(t1, [0, 0, 1])) < abs(_np.dot(t1, [0, 1, 0])) - _mpy.eps_quaternion:
         t2 = [0, 0, 1]
     else:
         t2 = [0, 1, 0]
@@ -136,7 +136,7 @@ def create_beam_mesh_arc_segment_via_rotation(
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
-    center: np.array, list
+    center: _np.array, list
         Center of the arc.
     axis_rotation: Rotation
         This rotation defines the spatial orientation of the arc.
@@ -198,11 +198,11 @@ def create_beam_mesh_arc_segment_via_axis(
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
-    axis: np.array, list
+    axis: _np.array, list
         Rotation axis of the arc.
-    axis_point: np.array, list
+    axis_point: _np.array, list
         Point lying on the rotation axis. Does not have to be the center of the arc.
-    start_point: np.array, list
+    start_point: _np.array, list
         Start point of the arc.
     angle: float
         The central angle of this segment in radians.
@@ -232,22 +232,22 @@ def create_beam_mesh_arc_segment_via_axis(
 
     # Shortest distance from the given point to the axis of rotation gives
     # the "center" of the arc
-    axis = np.asarray(axis)
-    axis_point = np.asarray(axis_point)
-    start_point = np.asarray(start_point)
+    axis = _np.asarray(axis)
+    axis_point = _np.asarray(axis_point)
+    start_point = _np.asarray(start_point)
 
-    axis = axis / np.linalg.norm(axis)
+    axis = axis / _np.linalg.norm(axis)
     diff = start_point - axis_point
-    distance = diff - np.dot(np.dot(diff, axis), axis)
-    radius = np.linalg.norm(distance)
+    distance = diff - _np.dot(_np.dot(diff, axis), axis)
+    radius = _np.linalg.norm(distance)
     center = start_point - distance
 
     # Get the rotation at the start
     if start_node is None:
-        tangent = np.cross(axis, distance)
-        tangent /= np.linalg.norm(tangent)
+        tangent = _np.cross(axis, distance)
+        tangent /= _np.linalg.norm(tangent)
         start_rotation = _Rotation.from_rotation_matrix(
-            np.transpose(np.array([tangent, -distance / radius, axis]))
+            _np.transpose(_np.array([tangent, -distance / radius, axis]))
         )
     else:
         start_rotation = _get_single_node(start_node).rotation
@@ -293,7 +293,7 @@ def create_beam_mesh_arc_segment_2d(
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
-    center: np.array, list
+    center: _np.array, list
         Center of the arc. If the z component is not 0, an error will be
         thrown.
     radius: float
@@ -322,15 +322,15 @@ def create_beam_mesh_arc_segment_2d(
     """
 
     # The center point has to be on the x-y plane.
-    if np.abs(center[2]) > _mpy.eps_pos:
+    if _np.abs(center[2]) > _mpy.eps_pos:
         raise ValueError("The z-value of center has to be 0!")
 
     # Check if the beam is in clockwise or counter clockwise direction.
     angle = phi_end - phi_start
-    axis = np.array([0, 0, 1])
+    axis = _np.array([0, 0, 1])
     start_point = center + radius * (_Rotation(axis, phi_start) * [1, 0, 0])
 
-    counter_clockwise = np.sign(angle) == 1
+    counter_clockwise = _np.sign(angle) == 1
     if not counter_clockwise:
         # If the beam is not in counter clockwise direction, we have to flip
         # the rotation axis.
@@ -343,7 +343,7 @@ def create_beam_mesh_arc_segment_2d(
         axis,
         center,
         start_point,
-        np.abs(angle),
+        _np.abs(angle),
         **kwargs,
     )
 
@@ -362,7 +362,7 @@ def create_beam_mesh_line_at_node(
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
-    start_node: np.array, list
+    start_node: _np.array, list
         Point where the arc will continue.
     length: float
         Length of the line.
@@ -418,7 +418,7 @@ def create_beam_mesh_arc_at_node(
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
-    start_node: np.array, list
+    start_node: _np.array, list
         Point where the arc will continue.
     arc_axis_normal: 3d-vector
         Rotation axis for the created arc.
@@ -446,21 +446,21 @@ def create_beam_mesh_arc_at_node(
     """
 
     # If the angle is negative, the normal is switched
-    arc_axis_normal = np.asarray(arc_axis_normal)
+    arc_axis_normal = _np.asarray(arc_axis_normal)
     if angle < 0:
         arc_axis_normal = -1.0 * arc_axis_normal
 
     # The normal has to be perpendicular to the start point tangent
     start_node = _get_single_node(start_node, check_cosserat_node=True)
     tangent = start_node.rotation * [1, 0, 0]
-    if np.abs(np.dot(tangent, arc_axis_normal)) > _mpy.eps_pos:
+    if _np.abs(_np.dot(tangent, arc_axis_normal)) > _mpy.eps_pos:
         raise ValueError(
             "The normal has to be perpendicular to the tangent in the start node!"
         )
 
     # Get the center of the arc
-    center_direction = np.cross(tangent, arc_axis_normal)
-    center_direction *= 1.0 / np.linalg.norm(center_direction)
+    center_direction = _np.cross(tangent, arc_axis_normal)
+    center_direction *= 1.0 / _np.linalg.norm(center_direction)
     center = start_node.coordinates - center_direction * radius
 
     return create_beam_mesh_arc_segment_via_axis(
@@ -470,7 +470,7 @@ def create_beam_mesh_arc_at_node(
         arc_axis_normal,
         center,
         start_node.coordinates,
-        np.abs(angle),
+        _np.abs(angle),
         start_node=start_node,
         **kwargs,
     )
@@ -503,12 +503,12 @@ def create_beam_mesh_helix(
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
-    axis_vector: np.array, list
+    axis_vector: _np.array, list
         Vector for the orientation of the helical center axis.
-    axis_point: np.array, list
+    axis_point: _np.array, list
         Point lying on the helical center axis. Does not need to align with
         bottom plane of helix.
-    start_point: np.array, list
+    start_point: _np.array, list
         Start point of the helix. Defines the radius.
     helix_angle: float
         Angle of the helix (synonyms in literature: twist angle or pitch
@@ -544,37 +544,37 @@ def create_beam_mesh_helix(
             " must be provided!"
         )
 
-    if helix_angle is not None and np.isclose(np.sin(helix_angle), 0.0):
+    if helix_angle is not None and _np.isclose(_np.sin(helix_angle), 0.0):
         raise ValueError(
             "Helix angle of helix is 0 degrees! "
             + "Change angle for feasible helix geometry!"
         )
 
-    if height_helix is not None and np.isclose(height_helix, 0.0):
+    if height_helix is not None and _np.isclose(height_helix, 0.0):
         raise ValueError(
             "Height of helix is 0! Change height for feasible helix geometry!"
         )
 
     # determine radius of helix
-    axis_vector = np.asarray(axis_vector)
-    axis_point = np.asarray(axis_point)
-    start_point = np.asarray(start_point)
+    axis_vector = _np.asarray(axis_vector)
+    axis_point = _np.asarray(axis_point)
+    start_point = _np.asarray(start_point)
 
-    axis_vector = axis_vector / np.linalg.norm(axis_vector)
-    origin = axis_point + np.dot(
-        np.dot(start_point - axis_point, axis_vector), axis_vector
+    axis_vector = axis_vector / _np.linalg.norm(axis_vector)
+    origin = axis_point + _np.dot(
+        _np.dot(start_point - axis_point, axis_vector), axis_vector
     )
     start_point_origin_vec = start_point - origin
-    radius = np.linalg.norm(start_point_origin_vec)
+    radius = _np.linalg.norm(start_point_origin_vec)
 
     # create temporary mesh to not alter original mesh
     mesh_temp = _Mesh()
 
-    # return line if radius of helix is 0, helix angle is np.pi/2 or turns is 0
+    # return line if radius of helix is 0, helix angle is pi/2 or turns is 0
     if (
-        np.isclose(radius, 0)
-        or (helix_angle is not None and np.isclose(np.cos(helix_angle), 0.0))
-        or (turns is not None and np.isclose(turns, 0.0))
+        _np.isclose(radius, 0)
+        or (helix_angle is not None and _np.isclose(_np.cos(helix_angle), 0.0))
+        or (turns is not None and _np.isclose(turns, 0.0))
     ):
         if height_helix is None:
             raise ValueError(
@@ -591,8 +591,8 @@ def create_beam_mesh_helix(
             )
 
         if helix_angle is not None and height_helix is not None:
-            end_point = start_point + height_helix * axis_vector * np.sign(
-                np.sin(helix_angle)
+            end_point = start_point + height_helix * axis_vector * _np.sign(
+                _np.sin(helix_angle)
             )
         elif height_helix is not None and turns is not None:
             end_point = start_point + height_helix * axis_vector
@@ -613,31 +613,31 @@ def create_beam_mesh_helix(
 
     # generate simple helix
     if helix_angle and height_helix:
-        end_point = np.array(
+        end_point = _np.array(
             [
                 radius,
-                np.sign(np.sin(helix_angle)) * height_helix / np.tan(helix_angle),
-                np.sign(np.sin(helix_angle)) * height_helix,
+                _np.sign(_np.sin(helix_angle)) * height_helix / _np.tan(helix_angle),
+                _np.sign(_np.sin(helix_angle)) * height_helix,
             ]
         )
     elif helix_angle and turns:
-        end_point = np.array(
+        end_point = _np.array(
             [
                 radius,
-                np.sign(np.cos(helix_angle)) * 2 * np.pi * radius * turns,
-                np.sign(np.cos(helix_angle))
+                _np.sign(_np.cos(helix_angle)) * 2 * _np.pi * radius * turns,
+                _np.sign(_np.cos(helix_angle))
                 * 2
-                * np.pi
+                * _np.pi
                 * radius
-                * np.abs(turns)
-                * np.tan(helix_angle),
+                * _np.abs(turns)
+                * _np.tan(helix_angle),
             ]
         )
     elif height_helix and turns:
-        end_point = np.array(
+        end_point = _np.array(
             [
                 radius,
-                2 * np.pi * radius * turns,
+                2 * _np.pi * radius * turns,
                 height_helix,
             ]
         )
@@ -656,7 +656,7 @@ def create_beam_mesh_helix(
     # rotate and translate simple helix to align with necessary axis and starting point
     mesh_temp.rotate(
         _Rotation.from_basis(start_point_origin_vec, axis_vector)
-        * _Rotation([1, 0, 0], -np.pi * 0.5)
+        * _Rotation([1, 0, 0], -_np.pi * 0.5)
     )
     mesh_temp.translate(-mesh_temp.nodes[0].coordinates + start_point)
 

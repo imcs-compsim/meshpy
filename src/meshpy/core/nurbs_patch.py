@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 """This module implements NURBS patches for the mesh."""
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.element import Element as _Element
@@ -128,7 +128,7 @@ class NURBSPatch(_Element):
         """Get the number of elements in this patch by checking the amount of
         nonzero knot spans in the knot vector."""
 
-        num_elements_dir = np.zeros(len(self.knot_vectors), dtype=int)
+        num_elements_dir = _np.zeros(len(self.knot_vectors), dtype=int)
 
         for i_dir in range(len(self.knot_vectors)):
             for i_knot in range(len(self.knot_vectors[i_dir]) - 1):
@@ -141,7 +141,7 @@ class NURBSPatch(_Element):
                 ):
                     num_elements_dir[i_dir] += 1
 
-        total_num_elements = np.prod(num_elements_dir)
+        total_num_elements = _np.prod(num_elements_dir)
 
         return total_num_elements
 

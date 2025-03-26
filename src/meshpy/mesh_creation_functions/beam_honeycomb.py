@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 """This file has functions to create a honeycomb beam mesh."""
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
@@ -92,17 +92,17 @@ def create_beam_mesh_honeycomb_flat(
         )
 
     # Geometrical shortcuts.
-    sin30 = np.sin(np.pi / 6)
-    cos30 = np.sin(2 * np.pi / 6)
+    sin30 = _np.sin(_np.pi / 6)
+    cos30 = _np.sin(2 * _np.pi / 6)
     a = width * 0.5 / cos30
-    nx = np.array([1.0, 0.0, 0.0])
-    ny = np.array([0.0, 1.0, 0.0])
+    nx = _np.array([1.0, 0.0, 0.0])
+    ny = _np.array([0.0, 1.0, 0.0])
     zig_zag_x = nx * width * 0.5
     zig_zag_y = ny * a * sin30 * 0.5
 
     # Create the honeycomb structure
     mesh_honeycomb = _Mesh()
-    origin = np.array([0, a * 0.5 * sin30, 0])
+    origin = _np.array([0, a * 0.5 * sin30, 0])
     for i_height in range(n_height + 1):
         # Start point for this zig-zag line.
         base_row = origin + (2 * zig_zag_y + a * ny) * i_height
@@ -215,10 +215,10 @@ def create_beam_mesh_honeycomb(
 
     # Calculate the input values for the flat honeycomb mesh.
     if vertical:
-        width = diameter * np.pi / n_circumference
+        width = diameter * _np.pi / n_circumference
         closed_width = False
         closed_height = closed_top
-        rotation = _Rotation([0, 0, 1], np.pi / 2) * _Rotation([1, 0, 0], np.pi / 2)
+        rotation = _Rotation([0, 0, 1], _np.pi / 2) * _Rotation([1, 0, 0], _np.pi / 2)
         n_height = n_axis
         n_width = n_circumference
     else:
@@ -227,12 +227,12 @@ def create_beam_mesh_honeycomb(
                 "There has to be an even number of elements along the diameter in horizontal mode. "
                 "Given: {}!".format(n_circumference)
             )
-        H = diameter * np.pi / n_circumference
-        r = H / (1 + np.sin(np.pi / 6))
-        width = 2 * r * np.cos(np.pi / 6)
+        H = diameter * _np.pi / n_circumference
+        r = H / (1 + _np.sin(_np.pi / 6))
+        width = 2 * r * _np.cos(_np.pi / 6)
         closed_width = closed_top
         closed_height = False
-        rotation = _Rotation([0, 1, 0], -0.5 * np.pi)
+        rotation = _Rotation([0, 1, 0], -0.5 * _np.pi)
         n_height = n_circumference - 1
         n_width = n_axis
 

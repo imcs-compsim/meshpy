@@ -22,9 +22,10 @@
 """This module defines the class that is used to create an input file for
 Abaqus."""
 
-from enum import Enum, auto
+from enum import Enum as _Enum
+from enum import auto as _auto
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
@@ -75,10 +76,10 @@ def get_set_lines(set_type, items, name):
     return lines
 
 
-class AbaqusBeamNormalDefinition(Enum):
+class AbaqusBeamNormalDefinition(_Enum):
     """Enum for different ways to define the beam cross-section normal."""
 
-    smallest_rotation_of_triad_at_first_node = auto()
+    smallest_rotation_of_triad_at_first_node = _auto()
 
 
 class AbaqusInputFile(object):
@@ -154,7 +155,7 @@ class AbaqusInputFile(object):
 
         def normalize(vector):
             """Normalize a vector."""
-            return vector / np.linalg.norm(vector)
+            return vector / _np.linalg.norm(vector)
 
         # Reset possibly existing data stored in the elements
         # element.n1_orientation_node: list(float)

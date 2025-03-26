@@ -21,7 +21,9 @@
 # THE SOFTWARE.
 """This module defines utility functions for meshes."""
 
-from typing import Dict, List, Tuple
+from typing import Dict as _Dict
+from typing import List as _List
+from typing import Tuple as _Tuple
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.mesh import Mesh as _Mesh
@@ -30,7 +32,7 @@ from meshpy.core.node import Node as _Node
 
 def get_coupled_nodes_to_master_map(
     mesh: _Mesh, *, assign_i_global: bool = False
-) -> Tuple[Dict[_Node, _Node], List[_Node]]:
+) -> _Tuple[_Dict[_Node, _Node], _List[_Node]]:
     """Get a mapping of nodes in a mesh that should be "replaced" because they
     are coupled via a joint.
 

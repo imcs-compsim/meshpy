@@ -22,7 +22,8 @@
 """Find unique points in a point cloud, i.e., points that are within a certain
 tolerance of each other will be considered as unique."""
 
-from enum import Enum, auto
+from enum import Enum as _Enum
+from enum import auto as _auto
 
 from meshpy.geometric_search.geometric_search_cython import (
     cython_available as _cython_available,
@@ -32,20 +33,24 @@ from meshpy.geometric_search.geometric_search_scipy import (
 )
 
 if _cython_available:
-    from .geometric_search_cython import find_close_points_brute_force_cython
+    from .geometric_search_cython import (
+        find_close_points_brute_force_cython as _find_close_points_brute_force_cython,
+    )
 
 from .geometric_search_arborx import arborx_available
 
 if arborx_available:
-    from .geometric_search_arborx import find_close_points_arborx
+    from .geometric_search_arborx import (
+        find_close_points_arborx as _find_close_points_arborx,
+    )
 
 
-class FindClosePointAlgorithm(Enum):
+class FindClosePointAlgorithm(_Enum):
     """Enum for different find_close_point algorithms."""
 
-    kd_tree_scipy = auto()
-    brute_force_cython = auto()
-    boundary_volume_hierarchy_arborx = auto()
+    kd_tree_scipy = _auto()
+    brute_force_cython = _auto()
+    boundary_volume_hierarchy_arborx = _auto()
 
 
 def point_partners_to_unique_indices(point_partners):
@@ -114,7 +119,7 @@ def find_close_points(point_coordinates, *, algorithm=None, tol=1e-8, **kwargs):
 
     Args
     ----
-    point_coordinates: np.array(n_points x n_dim)
+    point_coordinates: _np.array(n_points x n_dim)
         Point coordinates that are checked for partners. The number of spatial dimensions
         does not have to be equal to 3.
     algorithm: FindClosePointAlgorithm
@@ -156,11 +161,11 @@ def find_close_points(point_coordinates, *, algorithm=None, tol=1e-8, **kwargs):
             point_coordinates, tol, **kwargs
         )
     elif algorithm is FindClosePointAlgorithm.brute_force_cython:
-        has_partner, n_partner = find_close_points_brute_force_cython(
+        has_partner, n_partner = _find_close_points_brute_force_cython(
             point_coordinates, tol, **kwargs
         )
     elif algorithm is FindClosePointAlgorithm.boundary_volume_hierarchy_arborx:
-        has_partner, n_partner = find_close_points_arborx(
+        has_partner, n_partner = _find_close_points_arborx(
             point_coordinates, tol, **kwargs
         )
     else:

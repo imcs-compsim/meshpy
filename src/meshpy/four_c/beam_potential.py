@@ -46,15 +46,15 @@ class BeamPotential:
         ----
         input_file:
             Input file of current problem setup.
-        pot_law_prefactors: float, int, np.array, list
+        pot_law_prefactors: float, int, _np.array, list
             Prefactors of a potential law in form of a power law. Same number
             of prefactors and exponents/line charge densities/functions must be
             provided!
-        pot_law_exponent: float, int, np.array, list
+        pot_law_exponent: float, int, _np.array, list
             Exponents of a potential law in form of a power law. Same number
             of exponents and prefactors/line charge densities/functions must be
             provided!
-        pot_law_line_charge_density: float, int, np.array, list
+        pot_law_line_charge_density: float, int, _np.array, list
             Line charge densities of a potential law in form of a power law.
             Same number of line charge densities and prefactors/exponents/functions
             must be provided!

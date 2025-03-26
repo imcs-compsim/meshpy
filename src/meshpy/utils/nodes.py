@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 """Helper functions to find, filter and interact with nodes."""
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometryName as _GeometryName
@@ -56,7 +56,7 @@ def find_close_nodes(nodes, **kwargs):
         to each other.
     """
 
-    coords = np.zeros([len(nodes), 3])
+    coords = _np.zeros([len(nodes), 3])
     for i, node in enumerate(nodes):
         coords[i, :] = node.coordinates
     partner_indices = _point_partners_to_partner_indices(
@@ -80,7 +80,7 @@ def check_node_by_coordinate(node, axis, value, eps=_mpy.eps_pos):
     eps: float
         Tolerance to check for equality.
     """
-    return np.abs(node.coordinates[axis] - value) < eps
+    return _np.abs(node.coordinates[axis] - value) < eps
 
 
 def get_min_max_coordinates(nodes):
@@ -92,12 +92,12 @@ def get_min_max_coordinates(nodes):
     min_max_coordinates:
         [min_x, min_y, min_z, max_x, max_y, max_z]
     """
-    coordinates = np.zeros([len(nodes), 3])
+    coordinates = _np.zeros([len(nodes), 3])
     for i, node in enumerate(nodes):
         coordinates[i, :] = node.coordinates
-    min_max = np.zeros(6)
-    min_max[:3] = np.min(coordinates, axis=0)
-    min_max[3:] = np.max(coordinates, axis=0)
+    min_max = _np.zeros(6)
+    min_max[:3] = _np.min(coordinates, axis=0)
+    min_max[3:] = _np.max(coordinates, axis=0)
     return min_max
 
 
@@ -160,10 +160,10 @@ def get_nodal_coordinates(nodes):
 
     Return
     ----
-    pos: np.array
+    pos: _np.array
         Numpy array with all the positions of the nodes.
     """
-    coordinates = np.zeros([len(nodes), 3])
+    coordinates = _np.zeros([len(nodes), 3])
     for i, node in enumerate(nodes):
         coordinates[i, :] = node.coordinates
     return coordinates
@@ -179,10 +179,10 @@ def get_nodal_quaternions(nodes):
 
     Return
     ----
-    pos: np.array
+    pos: _np.array
         Numpy array with all the positions of the nodes.
     """
-    quaternions = np.zeros([len(nodes), 4])
+    quaternions = _np.zeros([len(nodes), 4])
     for i, node in enumerate(nodes):
         if isinstance(node, _NodeCosserat):
             quaternions[i, :] = node.rotation.get_quaternion()
@@ -227,13 +227,13 @@ def get_min_max_nodes(nodes, *, middle_nodes=False):
     pos = get_nodal_coordinates(node_list)
     for i, direction in enumerate(["x", "y", "z"]):
         # Check if there is more than one value in dimension.
-        min_max = [np.min(pos[:, i]), np.max(pos[:, i])]
-        if np.abs(min_max[1] - min_max[0]) >= _mpy.eps_pos:
+        min_max = [_np.min(pos[:, i]), _np.max(pos[:, i])]
+        if _np.abs(min_max[1] - min_max[0]) >= _mpy.eps_pos:
             for j, text in enumerate(["min", "max"]):
                 # get all nodes with the min / max coordinate
                 min_max_nodes = []
                 for index, value in enumerate(
-                    np.abs(pos[:, i] - min_max[j]) < _mpy.eps_pos
+                    _np.abs(pos[:, i] - min_max[j]) < _mpy.eps_pos
                 ):
                     if value:
                         min_max_nodes.append(node_list[index])
@@ -251,12 +251,12 @@ def is_node_on_plane(
     ----
     node:
         Check if this node coincides with the defined plane.
-    normal: np.array, list
+    normal: _np.array, list
         Normal vector of defined plane.
     origin_distance: float
         Distance between origin and defined plane. Mutually exclusive with
         point_on_plane.
-    point_on_plane: np.array, list
+    point_on_plane: _np.array, list
         Point on defined plane. Mutually exclusive with origin_distance.
     tol: float
         Tolerance of evaluation if point coincides with plane
@@ -272,11 +272,11 @@ def is_node_on_plane(
         raise ValueError("Only provide origin_distance OR point_on_plane!")
 
     if origin_distance is not None:
-        projection = np.dot(node.coordinates, normal) / np.linalg.norm(normal)
-        distance = np.abs(projection - origin_distance)
+        projection = _np.dot(node.coordinates, normal) / _np.linalg.norm(normal)
+        distance = _np.abs(projection - origin_distance)
     elif point_on_plane is not None:
-        distance = np.abs(
-            np.dot(point_on_plane - node.coordinates, normal) / np.linalg.norm(normal)
+        distance = _np.abs(
+            _np.dot(point_on_plane - node.coordinates, normal) / _np.linalg.norm(normal)
         )
 
     return distance < tol

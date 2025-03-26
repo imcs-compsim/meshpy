@@ -22,15 +22,15 @@
 """This file defines the interface to the ArborX geometric search
 functionality."""
 
-import os
-import sys
+import os as _os
+import sys as _sys
 
 # Set path so ArborX binary will be found
-sys.path.append(os.path.dirname(__file__))
+_sys.path.append(_os.path.dirname(__file__))
 
 # Import the ArborX wrapper
 try:
-    import geometric_search_arborx_lib
+    import geometric_search_arborx_lib as _geometric_search_arborx_lib
 
     arborx_available = True
 except ImportError:
@@ -42,12 +42,12 @@ class KokkosScopeGuardWrapper:
 
     def __init__(self):
         """Call initialize when this object is created."""
-        geometric_search_arborx_lib.kokkos_initialize()
+        _geometric_search_arborx_lib.kokkos_initialize()
 
     def __del__(self):
         """Finalize Kokkos after this object goes out of scope, i.e., at the
         end of this modules lifetime."""
-        geometric_search_arborx_lib.kokkos_finalize()
+        _geometric_search_arborx_lib.kokkos_finalize()
 
 
 if arborx_available:
@@ -58,6 +58,6 @@ if arborx_available:
 def find_close_points_arborx(point_coordinates, tol):
     """Call the ArborX implementation of find close_points."""
     if arborx_available:
-        return geometric_search_arborx_lib.find_close_points(point_coordinates, tol)
+        return _geometric_search_arborx_lib.find_close_points(point_coordinates, tol)
     else:
         raise ModuleNotFoundError("ArborX functionality is not available")

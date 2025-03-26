@@ -21,9 +21,9 @@
 # THE SOFTWARE.
 """This file implements beam elements for 4C."""
 
-import warnings
+import warnings as _warnings
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.element_beam import Beam as _Beam
@@ -114,7 +114,7 @@ class Beam3kClass(_Beam):
 
         # Show warning when not using rotvec.
         if not rotvec:
-            warnings.warn(
+            _warnings.warn(
                 "Use rotvec=False with caution, especially when applying the boundary conditions "
                 "and couplings."
             )
@@ -182,7 +182,7 @@ class Beam3eb(_Beam):
             )
         direction = self.nodes[1].coordinates - self.nodes[0].coordinates
         t1 = self.nodes[0].rotation * [1, 0, 0]
-        if np.linalg.norm(direction / np.linalg.norm(direction) - t1) >= _mpy.eps_pos:
+        if _np.linalg.norm(direction / _np.linalg.norm(direction) - t1) >= _mpy.eps_pos:
             raise ValueError(
                 "The rotations do not match the direction of the Euler Bernoulli beam!"
             )

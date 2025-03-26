@@ -22,9 +22,9 @@
 """This function converts the DBC monitor log files to Neumann input
 sections."""
 
-from typing import Optional
+from typing import Optional as _Optional
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
@@ -47,9 +47,9 @@ def linear_time_transformation(
 
     Args
     ----
-    time: np.array
+    time: _np.array
         array with time values
-    values: np.array
+    values: _np.array
         corresponding values to time
     time_span: [list] with 2 or 3 entries:
         time_span[0:2] defines the time interval to which the initial time interval should be scaled.
@@ -62,12 +62,12 @@ def linear_time_transformation(
 
     # flip values if desired and adjust time
     if flip is True:
-        values = np.flipud(values)
-        time = np.flip(-time) + time[-1]
+        values = _np.flipud(values)
+        time = _np.flip(-time) + time[-1]
 
     # transform time to interval
-    min_t = np.min(time)
-    max_t = np.max(time)
+    min_t = _np.min(time)
+    max_t = _np.max(time)
 
     # scaling/transforming the time into the user defined time
     time = time_span[0] + (time - min_t) * (time_span[1] - time_span[0]) / (
@@ -77,21 +77,21 @@ def linear_time_transformation(
     # ensure that start time is valid
     if valid_start_and_end_point and time[0] > 0.0:
         # add starting time 0
-        time = np.append(0.0, time)
+        time = _np.append(0.0, time)
 
         # add first coordinate again at the beginning of the array
         if len(values.shape) == 1:
-            values = np.append(values[0], values)
+            values = _np.append(values[0], values)
         else:
-            values = np.append(values[0], values).reshape(
+            values = _np.append(values[0], values).reshape(
                 values.shape[0] + 1, values.shape[1]
             )
 
     # repeat last value at provided time point
     if valid_start_and_end_point and len(time_span) > 2:
         if time_span[2] > time_span[1]:
-            time = np.append(time, time_span[2])
-            values = np.append(values, values[-1]).reshape(
+            time = _np.append(time, time_span[2])
+            values = _np.append(values, values[-1]).reshape(
                 values.shape[0] + 1, values.shape[1]
             )
     if not valid_start_and_end_point and len(time_span) > 2:
@@ -141,8 +141,8 @@ def read_dbc_monitor_file(file_path):
     # Get the monitor data.
     data = []
     for line in lines[start_line:]:
-        data.append(np.fromstring(line, dtype=float, sep=" "))
-    data = np.array(data)
+        data.append(_np.fromstring(line, dtype=float, sep=" "))
+    data = _np.array(data)
 
     return nodes, data[:, 1], data[:, 4:7], data[:, 7:]
 
@@ -151,7 +151,7 @@ def add_point_neuman_condition_to_input_file(
     input_file: _InputFile,
     nodes: list[int],
     function_array: list[_Function],
-    force: np.ndarray,
+    force: _np.ndarray,
     *,
     n_dof: int = 3,
 ):
@@ -167,7 +167,7 @@ def add_point_neuman_condition_to_input_file(
         list containing the ids of the nodes for the condition
     function_array: [function]
         list with functions
-    force: [np.ndarray]
+    force: [_np.ndarray]
         values to scale the function array with
     n_dof: int
         Number of DOFs per node.
@@ -209,7 +209,7 @@ def dbc_monitor_to_input_all_values(
     *,
     steps: list[int] = [],
     time_span: list[int] = [0, 1, 2],
-    type: Optional[str] = "linear",
+    type: _Optional[str] = "linear",
     flip_time_values: bool = False,
     functions: list[_Function] = [],
     **kwargs,
@@ -299,12 +299,12 @@ def dbc_monitor_to_input_all_values(
         )
 
         # remove first element since it is duplicated zero
-        np.delete(time2, 0)
-        np.delete(force2, 0)
+        _np.delete(time2, 0)
+        _np.delete(force2, 0)
 
         # add the respective force
-        time = np.concatenate((time1, time2[1:]))
-        force = np.concatenate((force1, force2[1:]), axis=0)
+        time = _np.concatenate((time1, time2[1:]))
+        force = _np.concatenate((force1, force2[1:]), axis=0)
 
     else:
         raise ValueError(
@@ -328,7 +328,7 @@ def dbc_monitor_to_input_all_values(
             functions.append(fun)
 
         # now set forces to 1 since the force values are already extracted in the function's values
-        force = np.zeros_like(force) + 1.0
+        force = _np.zeros_like(force) + 1.0
 
     elif len(functions) != 3:
         raise ValueError("Please provide functions with ")

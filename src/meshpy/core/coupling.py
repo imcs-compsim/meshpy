@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 """This module implements a class to couple geometry together."""
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.boundary_condition import (
     BoundaryConditionBase as _BoundaryConditionBase,
@@ -99,11 +99,11 @@ class Coupling(_BoundaryConditionBase):
             return
 
         nodes = self.geometry_set.get_points()
-        diff = np.zeros([len(nodes), 3])
+        diff = _np.zeros([len(nodes), 3])
         for i, node in enumerate(nodes):
             # Get the difference to the first node
             diff[i, :] = node.coordinates - nodes[0].coordinates
-        if np.max(np.linalg.norm(diff, axis=1)) > _mpy.eps_pos:
+        if _np.max(_np.linalg.norm(diff, axis=1)) > _mpy.eps_pos:
             raise ValueError(
                 "The nodes given to Coupling do not have the same position."
             )

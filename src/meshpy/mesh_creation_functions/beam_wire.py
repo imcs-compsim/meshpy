@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 """Create a steel wire."""
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
@@ -89,10 +89,10 @@ def create_wire_fibers(
 
     # Create the filaments in the layers.
     for i_angle in range(6):
-        angle = i_angle * np.pi / 3.0
-        direction_radial = np.array([np.cos(angle), np.sin(angle)])
-        angle = i_angle * np.pi / 3.0 + 2.0 * np.pi / 3.0
-        direction_tangential = np.array([np.cos(angle), np.sin(angle)])
+        angle = i_angle * _np.pi / 3.0
+        direction_radial = _np.array([_np.cos(angle), _np.sin(angle)])
+        angle = i_angle * _np.pi / 3.0 + 2.0 * _np.pi / 3.0
+        direction_tangential = _np.array([_np.cos(angle), _np.sin(angle)])
         for i_layer in range(layers):
             for i_tangent in range(i_layer + 1):
                 pos = (

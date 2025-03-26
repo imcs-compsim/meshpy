@@ -21,7 +21,9 @@
 # THE SOFTWARE.
 """This file contains the wrapper for the LocSys condition for 4c."""
 
-from typing import List, Optional, Union
+from typing import List as _List
+from typing import Optional as _Optional
+from typing import Union as _Union
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
@@ -45,7 +47,7 @@ class LocSysCondition(_BoundaryCondition):
         geometry_set: _GeometrySet,
         rotation: _Rotation,
         *,
-        function_array: Optional[List[Union[_Function, int]]] = None,
+        function_array: _Optional[_List[_Union[_Function, int]]] = None,
         update_node_position: bool = False,
         use_consistent_node_normal: bool = False,
         **kwargs,
@@ -55,7 +57,7 @@ class LocSysCondition(_BoundaryCondition):
         Args:
             geometry_set: Geometry that this boundary condition acts on
             rotation: Object that represents the rotation of the coordinate system
-            function_array: List containing functions
+            function_array: _List containing functions
             update_node_position: Flag to enable the updated node position
             use_consistent_node_normal: Flag to use a consistent node normal
         """

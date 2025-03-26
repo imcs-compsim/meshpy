@@ -22,11 +22,12 @@
 """This file contains functionality to warp an existing mesh along a 1D
 curve."""
 
-from typing import Optional, Tuple
+from typing import Optional as _Optional
+from typing import Tuple as _Tuple
 
-import numpy as np
-import quaternion
-from numpy.typing import NDArray
+import numpy as _np
+import quaternion as _quaternion
+from numpy.typing import NDArray as _NDArray
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
@@ -45,8 +46,8 @@ from meshpy.geometric_search.find_close_points import (
 
 
 def get_arc_length_and_cross_section_coordinates(
-    coordinates: np.ndarray, origin: np.ndarray, reference_rotation: _Rotation
-) -> Tuple[float, np.ndarray]:
+    coordinates: _np.ndarray, origin: _np.ndarray, reference_rotation: _Rotation
+) -> _Tuple[float, _np.ndarray]:
     """Return the arc length and the cross section coordinates for a coordinate
     system defined by the reference rotation and the origin.
 
@@ -76,7 +77,7 @@ def get_mesh_transformation(
     n_steps: int = 10,
     initial_configuration: bool = True,
     **kwargs,
-) -> Tuple[np.ndarray, NDArray[quaternion.quaternion]]:
+) -> _Tuple[_np.ndarray, _NDArray[_quaternion.quaternion]]:
     """Generate a list of positions for each node that describe the
     transformation of the nodes from the given configuration to the Cosserat
     curve.
@@ -103,7 +104,7 @@ def get_mesh_transformation(
 
     Return
     ----
-    positions: list(np.array(n_nodes x 3))
+    positions: list(_np.array(n_nodes x 3))
         A list for each time step containing the position of all nodes for that time step
     relative_rotations: list(list(Rotation))
         A list for each time step containing the relative rotations for all nodes at that
@@ -111,22 +112,22 @@ def get_mesh_transformation(
     """
 
     # Define the factors for which we will generate the positions and rotations
-    factors = np.linspace(0.0, 1.0, n_steps + 1)
+    factors = _np.linspace(0.0, 1.0, n_steps + 1)
     if initial_configuration:
         n_output_steps = n_steps + 1
     else:
         n_output_steps = n_steps
-        factors = np.delete(factors, 0)
+        factors = _np.delete(factors, 0)
 
     # Create output arrays
     n_nodes = len(nodes)
-    positions = np.zeros((n_output_steps, n_nodes, 3))
-    relative_rotations = np.zeros(
-        (n_output_steps, n_nodes), dtype=quaternion.quaternion
+    positions = _np.zeros((n_output_steps, n_nodes, 3))
+    relative_rotations = _np.zeros(
+        (n_output_steps, n_nodes), dtype=_quaternion.quaternion
     )
 
     # Get all arc lengths and cross section positions
-    arc_lengths = np.zeros((n_nodes, 1))
+    arc_lengths = _np.zeros((n_nodes, 1))
     cross_section_coordinates = [None] * n_nodes
     for i_node, node in enumerate(nodes):
         (
@@ -151,8 +152,8 @@ def get_mesh_transformation(
             has_partner_total[i] = partner_id
 
     n_total = len(arc_lengths_unique)
-    arc_lengths_unique = np.array(arc_lengths_unique)
-    arc_lengths_sorted_index = np.argsort(arc_lengths_unique)
+    arc_lengths_unique = _np.array(arc_lengths_unique)
+    arc_lengths_sorted_index = _np.argsort(arc_lengths_unique)
     arc_lengths_sorted = arc_lengths_unique[arc_lengths_sorted_index]
     arc_lengths_sorted_index_inv = [-2 for i in range(n_total)]
     for i in range(n_total):
@@ -189,7 +190,7 @@ def get_mesh_transformation(
 
         # Check that the arc length coordinates match
         if (
-            np.abs(arc_lengths[i_node] - arc_lengths_sorted[node_unique_id])
+            _np.abs(arc_lengths[i_node] - arc_lengths_sorted[node_unique_id])
             > _mpy.eps_pos
         ):
             raise ValueError("Arc lengths do not match")
@@ -197,7 +198,7 @@ def get_mesh_transformation(
         # Create the functions that describe the deformation
         for i_step, factor in enumerate(factors):
             centerline_pos = positions_for_all_steps[i_step][node_unique_id]
-            centerline_relative_pos = quaternion.rotate_vectors(
+            centerline_relative_pos = _quaternion.rotate_vectors(
                 curve_start_rot.conjugate(), centerline_pos - curve_start_pos
             )
             centerline_rotation = quaternions_for_all_steps[i_step][node_unique_id]
@@ -205,18 +206,18 @@ def get_mesh_transformation(
                 curve_start_rot.conjugate() * centerline_rotation
             )
 
-            rigid_body_rotation_for_factor = quaternion.slerp_evaluate(
-                quaternion.from_float_array(reference_rotation.q),
+            rigid_body_rotation_for_factor = _quaternion.slerp_evaluate(
+                _quaternion.from_float_array(reference_rotation.q),
                 rigid_body_rotation,
                 factor,
             )
 
             current_pos = (
-                quaternion.rotate_vectors(
+                _quaternion.rotate_vectors(
                     rigid_body_rotation_for_factor,
                     (
                         centerline_relative_pos
-                        + quaternion.rotate_vectors(
+                        + _quaternion.rotate_vectors(
                             centerline_relative_rotation, cross_section_position
                         )
                     ),
@@ -229,7 +230,7 @@ def get_mesh_transformation(
             relative_rotations[i_step, i_node] = (
                 rigid_body_rotation_for_factor
                 * centerline_relative_rotation
-                * quaternion.from_float_array(reference_rotation.q).conjugate()
+                * _quaternion.from_float_array(reference_rotation.q).conjugate()
             )
 
     return positions, relative_rotations
@@ -239,7 +240,7 @@ def create_transform_boundary_conditions(
     mesh: _Mesh,
     curve: _CosseratCurve,
     *,
-    nodes: Optional[list[_Node]] = None,
+    nodes: _Optional[list[_Node]] = None,
     t_end: float = 1.0,
     n_steps: int = 10,
     n_dof_per_node: int = 3,
@@ -272,7 +273,7 @@ def create_transform_boundary_conditions(
     if nodes is None:
         nodes = mesh.nodes
 
-    time_values = np.linspace(0.0, t_end, n_steps + 1)
+    time_values = _np.linspace(0.0, t_end, n_steps + 1)
 
     # Get positions and rotations for each step
     positions, _ = get_mesh_transformation(curve, nodes, n_steps=n_steps, **kwargs)
@@ -281,7 +282,7 @@ def create_transform_boundary_conditions(
     for i_node, node in enumerate(nodes):
         # Create the functions that describe the deformation
         reference_position = node.coordinates
-        displacement_values = np.array(
+        displacement_values = _np.array(
             [
                 positions[i_step][i_node] - reference_position
                 for i_step in range(n_steps + 1)
@@ -340,6 +341,6 @@ def warp_mesh_along_curve(
         node.coordinates = new_pos
         if isinstance(node, _NodeCosserat):
             node.rotation = (
-                _Rotation.from_quaternion(quaternion.as_float_array(rot[0, i_node]))
+                _Rotation.from_quaternion(_quaternion.as_float_array(rot[0, i_node]))
                 * node.rotation
             )

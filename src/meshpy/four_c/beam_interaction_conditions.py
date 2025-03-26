@@ -22,10 +22,10 @@
 """This file contains a function to add the beam interaction conditions for
 4C."""
 
-import re
-from typing import Optional
+import re as _re
+from typing import Optional as _Optional
 
-import meshpy.core.conf as _conf_typing
+import meshpy.core.conf as _conf
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
 from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
@@ -33,8 +33,8 @@ from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondi
 
 def get_next_possible_id_for_boundary_condition(
     mesh: _Mesh,
-    bc_type: _conf_typing.BoundaryCondition,
-    geometry_type: _conf_typing.Geometry,
+    bc_type: _conf.BoundaryCondition,
+    geometry_type: _conf.Geometry,
     regex_search_string: str,
     *,
     group_idx: int = 1,
@@ -71,7 +71,7 @@ def get_next_possible_id_for_boundary_condition(
 
         # compare string of each condition with input and store existing ids
         for bc in found_conditions:
-            match = re.search(regex_search_string, bc.bc_string)
+            match = _re.search(regex_search_string, bc.bc_string)
             if match is None:
                 raise ValueError(
                     "The string provided "
@@ -89,9 +89,9 @@ def add_beam_interaction_condition(
     mesh: _Mesh,
     geometry_set_1: _GeometrySet,
     geometry_set_2: _GeometrySet,
-    bc_type: _conf_typing.BoundaryCondition,
+    bc_type: _conf.BoundaryCondition,
     *,
-    id: Optional[int] = None,
+    id: _Optional[int] = None,
 ) -> int:
     """Adds a pair of beam interaction boundary conditions to the given mesh
     and estimates automatically the id of them based on all previously added
@@ -113,14 +113,14 @@ def add_beam_interaction_condition(
             mesh,
             bc_type,
             geometry_set_1.geometry_type,
-            regex_search_string=re.escape(condition_string) + r"(\d+)",
+            regex_search_string=_re.escape(condition_string) + r"(\d+)",
         )
 
         id_2 = get_next_possible_id_for_boundary_condition(
             mesh,
             bc_type,
             geometry_set_2.geometry_type,
-            regex_search_string=re.escape(condition_string) + r"(\d+)",
+            regex_search_string=_re.escape(condition_string) + r"(\d+)",
         )
 
         if not id == id_2:

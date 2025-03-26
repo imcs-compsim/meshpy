@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 """This module implements the class that represents one node in the Mesh."""
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
 from meshpy.core.conf import mpy as _mpy
@@ -34,7 +34,7 @@ class Node(_BaseMeshItemFull):
         super().__init__(data=None, **kwargs)
 
         # Coordinates of this node.
-        self.coordinates = np.array(coordinates)
+        self.coordinates = _np.array(coordinates)
 
         # If this node is at the end of a line or curve (by default only those
         # nodes are checked for overlapping nodes).
@@ -111,7 +111,7 @@ class Node(_BaseMeshItemFull):
             [
                 (
                     _mpy.dat_precision.format(component + 0)
-                    if np.abs(component) >= _mpy.eps_pos
+                    if _np.abs(component) >= _mpy.eps_pos
                     else "0"
                 )
                 for component in self.coordinates
@@ -166,7 +166,7 @@ class ControlPoint(Node):
             [
                 (
                     _mpy.dat_precision.format(component + 0)
-                    if np.abs(component) >= _mpy.eps_pos
+                    if _np.abs(component) >= _mpy.eps_pos
                     else "0"
                 )
                 for component in self.coordinates

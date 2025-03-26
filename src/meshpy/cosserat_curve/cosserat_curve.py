@@ -22,13 +22,15 @@
 """Define a Cosserat curve object that can be used to describe warping of
 curve-like objects."""
 
-from typing import Tuple
+from typing import Tuple as _Tuple
 
-import numpy as np
-import pyvista as pv
-import quaternion
-from numpy.typing import NDArray
-from scipy import integrate, interpolate, optimize
+import numpy as _np
+import pyvista as _pv
+import quaternion as _quaternion
+from numpy.typing import NDArray as _NDArray
+from scipy import integrate as _integrate
+from scipy import interpolate as _interpolate
+from scipy import optimize as _optimize
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.rotation import Rotation as _Rotation
@@ -36,7 +38,9 @@ from meshpy.core.rotation import rotate_coordinates as _rotate_coordinates
 from meshpy.core.rotation import smallest_rotation as _smallest_rotation
 
 
-def get_piecewise_linear_arc_length_along_points(coordinates: np.ndarray) -> np.ndarray:
+def get_piecewise_linear_arc_length_along_points(
+    coordinates: _np.ndarray,
+) -> _np.ndarray:
     """Return the accumulated distance between the points.
 
     Args
@@ -46,16 +50,16 @@ def get_piecewise_linear_arc_length_along_points(coordinates: np.ndarray) -> np.
     """
 
     n_points = len(coordinates)
-    point_distance = np.linalg.norm(coordinates[1:] - coordinates[:-1], axis=1)
-    point_arc_length = np.zeros(n_points)
+    point_distance = _np.linalg.norm(coordinates[1:] - coordinates[:-1], axis=1)
+    point_arc_length = _np.zeros(n_points)
     for i in range(1, n_points):
         point_arc_length[i] = point_arc_length[i - 1] + point_distance[i - 1]
     return point_arc_length
 
 
 def get_spline_interpolation(
-    coordinates: np.ndarray, point_arc_length: np.ndarray
-) -> interpolate.BSpline:
+    coordinates: _np.ndarray, point_arc_length: _np.ndarray
+) -> _interpolate.BSpline:
     """Get a spline interpolation of the given points.
 
     Args
@@ -72,15 +76,15 @@ def get_spline_interpolation(
     """
 
     # Interpolate coordinates along arc length
-    centerline_interpolation = interpolate.make_interp_spline(
+    centerline_interpolation = _interpolate.make_interp_spline(
         point_arc_length, coordinates
     )
     return centerline_interpolation
 
 
 def get_quaternions_along_curve(
-    centerline: interpolate.BSpline, point_arc_length: np.ndarray
-) -> NDArray[quaternion.quaternion]:
+    centerline: _interpolate.BSpline, point_arc_length: _np.ndarray
+) -> _NDArray[_quaternion.quaternion]:
     """Get the quaternions along the curve based on smallest rotation mappings.
 
     The initial rotation will be calculated based on the largest projection of the initial tangent
@@ -98,18 +102,18 @@ def get_quaternions_along_curve(
 
     def basis(i):
         """Return the i-th Cartesian basis vector."""
-        basis = np.zeros([3])
+        basis = _np.zeros([3])
         basis[i] = 1.0
         return basis
 
     # Get the reference rotation
     t0 = centerline_interpolation_derivative(point_arc_length[0])
-    min_projection = np.argmin(np.abs([np.dot(basis(i), t0) for i in range(3)]))
+    min_projection = _np.argmin(_np.abs([_np.dot(basis(i), t0) for i in range(3)]))
     last_rotation = _Rotation.from_basis(t0, basis(min_projection))
 
     # Get the rotation vectors along the curve. They are calculated with smallest rotation mappings.
     n_points = len(point_arc_length)
-    quaternions = np.zeros(n_points, dtype=quaternion.quaternion)
+    quaternions = _np.zeros(n_points, dtype=_quaternion.quaternion)
     quaternions[0] = last_rotation.q
     for i in range(1, n_points):
         rotation = _smallest_rotation(
@@ -122,28 +126,30 @@ def get_quaternions_along_curve(
 
 
 def get_relative_distance_and_rotations(
-    coordinates: np.ndarray, quaternions: NDArray[quaternion.quaternion]
-) -> Tuple[np.ndarray, NDArray[quaternion.quaternion], NDArray[quaternion.quaternion]]:
+    coordinates: _np.ndarray, quaternions: _NDArray[_quaternion.quaternion]
+) -> _Tuple[
+    _np.ndarray, _NDArray[_quaternion.quaternion], _NDArray[_quaternion.quaternion]
+]:
     """Get relative distances and rotations that can be used to evaluate
     "intermediate" states of the Cosserat curve."""
 
     n_points = len(coordinates)
-    relative_distances = np.zeros(n_points - 1)
-    relative_distances_rotation = np.zeros(n_points - 1, dtype=quaternion.quaternion)
-    relative_rotations = np.zeros(n_points - 1, dtype=quaternion.quaternion)
+    relative_distances = _np.zeros(n_points - 1)
+    relative_distances_rotation = _np.zeros(n_points - 1, dtype=_quaternion.quaternion)
+    relative_rotations = _np.zeros(n_points - 1, dtype=_quaternion.quaternion)
 
     for i_segment in range(n_points - 1):
         relative_distance = coordinates[i_segment + 1] - coordinates[i_segment]
-        relative_distance_local = quaternion.rotate_vectors(
+        relative_distance_local = _quaternion.rotate_vectors(
             quaternions[i_segment].conjugate(), relative_distance
         )
-        relative_distances[i_segment] = np.linalg.norm(relative_distance_local)
+        relative_distances[i_segment] = _np.linalg.norm(relative_distance_local)
 
         smallest_relative_rotation_onto_distance = _smallest_rotation(
             _Rotation(),
             relative_distance_local,
         )
-        relative_distances_rotation[i_segment] = quaternion.from_float_array(
+        relative_distances_rotation[i_segment] = _quaternion.from_float_array(
             smallest_relative_rotation_onto_distance.q
         )
 
@@ -157,7 +163,7 @@ def get_relative_distance_and_rotations(
 class CosseratCurve(object):
     """Represent a Cosserat curve in space."""
 
-    def __init__(self, point_coordinates: np.ndarray):
+    def __init__(self, point_coordinates: _np.ndarray):
         """Initialize the Cosserat curve based on points in 3D space.
 
         Args
@@ -182,15 +188,15 @@ class CosseratCurve(object):
 
         def ds(t):
             """Arc length along interpolated spline."""
-            return np.linalg.norm(centerline_interpolation_piecewise_linear_p(t))
+            return _np.linalg.norm(centerline_interpolation_piecewise_linear_p(t))
 
         # Integrate the arc length along the interpolated centerline, this will result
         # in a more accurate centerline arc length
-        self.point_arc_length = np.zeros(self.n_points)
+        self.point_arc_length = _np.zeros(self.n_points)
         for i in range(len(point_arc_length_piecewise_linear) - 1):
             self.point_arc_length[i + 1] = (
                 self.point_arc_length[i]
-                + integrate.quad(
+                + _integrate.quad(
                     ds,
                     point_arc_length_piecewise_linear[i],
                     point_arc_length_piecewise_linear[i + 1],
@@ -228,7 +234,7 @@ class CosseratCurve(object):
     def rotate(self, rotation: _Rotation, *, origin=None):
         """Rotate the curve and the quaternions."""
 
-        self.quaternions = quaternion.from_float_array(rotation.q) * self.quaternions
+        self.quaternions = _quaternion.from_float_array(rotation.q) * self.quaternions
         self.coordinates = _rotate_coordinates(
             self.coordinates, rotation, origin=origin
         )
@@ -236,7 +242,7 @@ class CosseratCurve(object):
 
     def get_centerline_position_and_rotation(
         self, arc_length: float, **kwargs
-    ) -> Tuple[np.ndarray, NDArray[quaternion.quaternion]]:
+    ) -> _Tuple[_np.ndarray, _NDArray[_quaternion.quaternion]]:
         """Return the position and rotation at a given centerline arc
         length."""
         pos, rot = self.get_centerline_positions_and_rotations([arc_length])
@@ -244,7 +250,7 @@ class CosseratCurve(object):
 
     def get_centerline_positions_and_rotations(
         self, points_on_arc_length, *, factor=1.0
-    ) -> Tuple[np.ndarray, NDArray[quaternion.quaternion]]:
+    ) -> _Tuple[_np.ndarray, _NDArray[_quaternion.quaternion]]:
         """Return the position and rotation at given centerline arc lengths.
 
         If the points are outside of the valid interval, a linear extrapolation will be
@@ -264,13 +270,13 @@ class CosseratCurve(object):
         """
 
         # Get the points that are within the arc length of the given curve.
-        points_on_arc_length = np.asarray(points_on_arc_length)
-        points_in_bounds = np.logical_and(
+        points_on_arc_length = _np.asarray(points_on_arc_length)
+        points_in_bounds = _np.logical_and(
             points_on_arc_length > self.point_arc_length[0],
             points_on_arc_length < self.point_arc_length[-1],
         )
-        index_in_bound = np.where(points_in_bounds == True)[0]
-        index_out_of_bound = np.where(points_in_bounds == False)[0]
+        index_in_bound = _np.where(points_in_bounds == True)[0]
+        index_out_of_bound = _np.where(points_in_bounds == False)[0]
         points_on_arc_length_in_bound = [
             self.point_arc_length[0],
             *points_on_arc_length[index_in_bound],
@@ -278,13 +284,13 @@ class CosseratCurve(object):
         ]
 
         if factor < (1.0 - _mpy.eps_quaternion):
-            coordinates = np.zeros_like(self.coordinates)
-            quaternions = np.zeros_like(self.quaternions)
+            coordinates = _np.zeros_like(self.coordinates)
+            quaternions = _np.zeros_like(self.quaternions)
             coordinates[0] = self.coordinates[0]
             quaternions[0] = self.quaternions[0]
             for i_segment in range(self.n_points - 1):
-                relative_distance_rotation = quaternion.slerp_evaluate(
-                    quaternion.quaternion(1),
+                relative_distance_rotation = _quaternion.slerp_evaluate(
+                    _quaternion.quaternion(1),
                     self.relative_distances_rotation[i_segment],
                     factor,
                 )
@@ -299,7 +305,7 @@ class CosseratCurve(object):
                     - self.point_arc_length[i_segment]
                 )
                 coordinates[i_segment + 1] = (
-                    quaternion.rotate_vectors(
+                    _quaternion.rotate_vectors(
                         quaternions[i_segment] * relative_distance_rotation,
                         [relative_distance, 0, 0],
                     )
@@ -307,8 +313,8 @@ class CosseratCurve(object):
                 )
                 quaternions[i_segment + 1] = quaternions[
                     i_segment
-                ] * quaternion.slerp_evaluate(
-                    quaternion.quaternion(1),
+                ] * _quaternion.slerp_evaluate(
+                    _quaternion.quaternion(1),
                     self.relative_rotations[i_segment],
                     factor,
                 )
@@ -316,9 +322,9 @@ class CosseratCurve(object):
             coordinates = self.coordinates
             quaternions = self.quaternions
 
-        sol_r = np.zeros([len(points_on_arc_length_in_bound), 3])
-        sol_q = np.zeros(
-            len(points_on_arc_length_in_bound), dtype=quaternion.quaternion
+        sol_r = _np.zeros([len(points_on_arc_length_in_bound), 3])
+        sol_q = _np.zeros(
+            len(points_on_arc_length_in_bound), dtype=_quaternion.quaternion
         )
         for i_point, centerline_arc_length in enumerate(points_on_arc_length_in_bound):
             if (
@@ -347,15 +353,15 @@ class CosseratCurve(object):
                 sol_r[i_point] = get_spline_interpolation(
                     coordinates, self.point_arc_length
                 )(centerline_arc_length)
-                sol_q[i_point] = quaternion.as_float_array(
-                    quaternion.slerp_evaluate(q1, q2, xi)
+                sol_q[i_point] = _quaternion.as_float_array(
+                    _quaternion.slerp_evaluate(q1, q2, xi)
                 )
             else:
                 raise ValueError("Centerline value out of bounds")
 
         # Set the already computed results in the final data structures
-        sol_r_final = np.zeros([len(points_on_arc_length), 3])
-        sol_q_final = np.zeros(len(points_on_arc_length), dtype=quaternion.quaternion)
+        sol_r_final = _np.zeros([len(points_on_arc_length), 3])
+        sol_q_final = _np.zeros(len(points_on_arc_length), dtype=_quaternion.quaternion)
         if len(index_in_bound) > 0:
             sol_r_final[index_in_bound] = sol_r[index_in_bound - index_in_bound[0] + 1]
             sol_q_final[index_in_bound] = sol_q[index_in_bound - index_in_bound[0] + 1]
@@ -374,7 +380,7 @@ class CosseratCurve(object):
             r = sol_r[index]
             q = sol_q[index]
             sol_r_final[i] = r + _Rotation.from_quaternion(
-                quaternion.as_float_array(q)
+                _quaternion.as_float_array(q)
             ) * [length, 0, 0]
             sol_q_final[i] = q
 
@@ -391,33 +397,33 @@ class CosseratCurve(object):
             """Function to find the root of."""
             r = self.centerline_interpolation(t)
             rp = centerline_interpolation_p(t)
-            return np.dot(r - p, rp)
+            return _np.dot(r - p, rp)
 
         def fp(t):
             """Derivative of the Function to find the root of."""
             r = self.centerline_interpolation(t)
             rp = centerline_interpolation_p(t)
             rpp = centerline_interpolation_pp(t)
-            return np.dot(rp, rp) + np.dot(r - p, rpp)
+            return _np.dot(rp, rp) + _np.dot(r - p, rpp)
 
         if t0 is None:
             t0 = 0.0
 
-        return optimize.newton(f, t0, fprime=fp)
+        return _optimize.newton(f, t0, fprime=fp)
 
-    def get_pyvista_polyline(self) -> pv.PolyData:
+    def get_pyvista_polyline(self) -> _pv.PolyData:
         """Create a pyvista (vtk) representation of the curve with the
         evaluated triad basis vectors."""
 
-        poly_line = pv.PolyData()
+        poly_line = _pv.PolyData()
         poly_line.points = self.coordinates
-        cell = np.arange(0, self.n_points, dtype=int)
-        cell = np.insert(cell, 0, self.n_points)
+        cell = _np.arange(0, self.n_points, dtype=int)
+        cell = _np.insert(cell, 0, self.n_points)
         poly_line.lines = cell
 
-        rotation_matrices = np.zeros((len(self.quaternions), 3, 3))
+        rotation_matrices = _np.zeros((len(self.quaternions), 3, 3))
         for i_quaternion, q in enumerate(self.quaternions):
-            R = quaternion.as_rotation_matrix(q)
+            R = _quaternion.as_rotation_matrix(q)
             rotation_matrices[i_quaternion] = R
 
         for i_dir in range(3):

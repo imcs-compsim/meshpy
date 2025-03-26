@@ -22,7 +22,9 @@
 """This module defines functions that can be used to add header information to
 an input file."""
 
-from typing import List, Optional, Union
+from typing import List as _List
+from typing import Optional as _Optional
+from typing import Union as _Union
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.four_c.input_file import InputFile as _InputFile
@@ -517,8 +519,8 @@ def set_header_static(
 
 def set_binning_strategy_section(
     input_file: _InputFile,
-    binning_bounding_box: Union[List[int], None] = None,
-    binning_cutoff_radius: Union[float, None] = None,
+    binning_bounding_box: _Union[_List[int], None] = None,
+    binning_cutoff_radius: _Union[float, None] = None,
     *,
     option_overwrite: bool = False,
 ):

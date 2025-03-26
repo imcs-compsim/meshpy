@@ -21,7 +21,7 @@
 # THE SOFTWARE.
 """Generic function used to create all beams within meshpy."""
 
-import numpy as np
+import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometryName as _GeometryName
@@ -142,7 +142,7 @@ def create_beam_mesh_function(
     else:
         # Check that the given positions are in ascending order and start with 1 and end with 0
         for index, value, name in zip([0, -1], [0, 1], ["First", "Last"]):
-            if not np.isclose(
+            if not _np.isclose(
                 value,
                 node_positions_of_elements[index],
                 atol=1e-12,
@@ -160,7 +160,7 @@ def create_beam_mesh_function(
             )
         interval_node_positions_of_elements = interval[0] + (
             interval[1] - interval[0]
-        ) * np.asarray(node_positions_of_elements)
+        ) * _np.asarray(node_positions_of_elements)
 
     # Make sure the material is in the mesh.
     mesh.add_material(material)
@@ -197,7 +197,7 @@ def create_beam_mesh_function(
             # Evaluate the relative rotation
             # First check if the first basis vector is the same
             relative_basis_1 = rotation_node.inv() * rotation_function * [1, 0, 0]
-            if np.linalg.norm(relative_basis_1 - [1, 0, 0]) < _mpy.eps_quaternion:
+            if _np.linalg.norm(relative_basis_1 - [1, 0, 0]) < _mpy.eps_quaternion:
                 # Calculate the relative rotation
                 return rotation_function.inv() * rotation_node
             else:

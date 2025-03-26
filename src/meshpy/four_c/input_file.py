@@ -22,12 +22,12 @@
 """This module defines the classes that are used to create an input file for
 4C."""
 
-import datetime
-import os
-import re
-import shutil
-import subprocess  # nosec B404
-import sys
+import datetime as _datetime
+import os as _os
+import re as _re
+import shutil as _shutil
+import subprocess as _subprocess  # nosec B404
+import sys as _sys
 
 from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
 from meshpy.core.base_mesh_item import BaseMeshItemString as _BaseMeshItemString
@@ -47,7 +47,7 @@ from meshpy.core.nurbs_patch import NURBSPatch as _NURBSPatch
 from meshpy.utils.environment import cubitpy_is_available as _cubitpy_is_available
 
 if _cubitpy_is_available():
-    import cubitpy
+    import cubitpy as _cubitpy
 
 
 def get_section_string(section_name):
@@ -469,7 +469,7 @@ class InputFile(_Mesh):
         else:
             # Extract the name of the section.
             name = section_line.strip()
-            start = re.search(r"[^-]", name).start()
+            start = _re.search(r"[^-]", name).start()
             section_name = name[start:]
 
             def group_input_comments(section_data):
@@ -664,14 +664,14 @@ class InputFile(_Mesh):
             if nox_xml_file is None:
                 # Get the name of the xml file.
                 self._nox_xml_file = (
-                    os.path.splitext(os.path.basename(file_path))[0] + ".xml"
+                    _os.path.splitext(_os.path.basename(file_path))[0] + ".xml"
                 )
             else:
                 self._nox_xml_file = nox_xml_file
 
             # Write the xml file to the disc.
             with open(
-                os.path.join(os.path.dirname(file_path), self._nox_xml_file), "w"
+                _os.path.join(_os.path.dirname(file_path), self._nox_xml_file), "w"
             ) as xml_file:
                 xml_file.write(self.nox_xml)
 
@@ -957,8 +957,8 @@ class InputFile(_Mesh):
         headers.append(model_header)
 
         # Get information about the script.
-        script_path = os.path.realpath(sys.argv[0])
-        script_git_sha, script_git_date = get_git_data(os.path.dirname(script_path))
+        script_path = _os.path.realpath(_sys.argv[0])
+        script_git_sha, script_git_date = get_git_data(_os.path.dirname(script_path))
         script_header = "// Script used to create input file:\n"
         script_header += f"// path:       {script_path}\n"
         if script_git_sha is not None:
@@ -969,7 +969,7 @@ class InputFile(_Mesh):
 
         # Header containing meshpy information.
         meshpy_git_sha, meshpy_git_date = get_git_data(
-            os.path.dirname(os.path.realpath(__file__))
+            _os.path.dirname(_os.path.realpath(__file__))
         )
         headers.append(
             "// Input file created with meshpy\n"
@@ -980,7 +980,7 @@ class InputFile(_Mesh):
         if _cubitpy_is_available():
             # Get git information about cubitpy.
             cubitpy_git_sha, cubitpy_git_date = get_git_data(
-                os.path.dirname(cubitpy.__file__)
+                _os.path.dirname(cubitpy.__file__)
             )
 
             if cubitpy_git_sha is not None:
