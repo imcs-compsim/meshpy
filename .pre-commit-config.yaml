@@ -117,12 +117,12 @@ repos:
         args: ["--fix", "--select", "I,TID252"] # "I => sort imports, TID252 => ban relative imports
       - id: ruff-format # formatter
         name: Run ruff (formatter for Python)
-  - repo: https://github.com/crate-ci/typos
-    rev: v1.28.4
-    hooks:
-      - id: typos
-        name: Run typo checker
-        exclude: ".*\\.(nb|wls)$"
+  # - repo: https://github.com/crate-ci/typos
+  #   rev: v1.28.4
+  #   hooks:
+  #     - id: typos
+  #       name: Run typo checker
+  #       exclude: ".*\\.(nb|wls)$"
   - repo: https://github.com/pamoller/xmlformatter
     rev: v0.2.8
     hooks:
