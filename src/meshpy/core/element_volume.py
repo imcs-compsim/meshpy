@@ -21,14 +21,14 @@
 # THE SOFTWARE.
 """This file defines the base volume element in MeshPy."""
 
-import numpy as np
-import vtk
+import numpy as _np
+import vtk as _vtk
 
-from meshpy.core.element import Element
-from meshpy.core.vtk_writer import add_point_data_node_sets
+from meshpy.core.element import Element as _Element
+from meshpy.core.vtk_writer import add_point_data_node_sets as _add_point_data_node_sets
 
 
-class VolumeElement(Element):
+class VolumeElement(_Element):
     """A base class for a volume element."""
 
     # This class variables stores the information about the element shape in
@@ -69,12 +69,12 @@ class VolumeElement(Element):
         point_data = {}
 
         # Array with nodal coordinates.
-        coordinates = np.zeros([len(self.nodes), 3])
+        coordinates = _np.zeros([len(self.nodes), 3])
         for i, node in enumerate(self.nodes):
             coordinates[i, :] = node.coordinates
 
         # Add the node sets connected to this element.
-        add_point_data_node_sets(point_data, self.nodes)
+        _add_point_data_node_sets(point_data, self.nodes)
 
         # Add cell to writer.
         indices = vtk_writer_solid.add_points(coordinates, point_data=point_data)
@@ -86,28 +86,28 @@ class VolumeElement(Element):
 class VolumeHEX8(VolumeElement):
     """A HEX8 volume element."""
 
-    vtk_cell_type = vtk.vtkHexahedron
+    vtk_cell_type = _vtk.vtkHexahedron
     vtk_topology = list(range(8))
 
 
 class VolumeTET4(VolumeElement):
     """A TET4 volume element."""
 
-    vtk_cell_type = vtk.vtkTetra
+    vtk_cell_type = _vtk.vtkTetra
     vtk_topology = list(range(4))
 
 
 class VolumeTET10(VolumeElement):
     """A TET10 volume element."""
 
-    vtk_cell_type = vtk.vtkQuadraticTetra
+    vtk_cell_type = _vtk.vtkQuadraticTetra
     vtk_topology = list(range(10))
 
 
 class VolumeHEX20(VolumeElement):
     """A HEX20 volume element."""
 
-    vtk_cell_type = vtk.vtkQuadraticHexahedron
+    vtk_cell_type = _vtk.vtkQuadraticHexahedron
     vtk_topology = [
         0,
         1,
@@ -135,7 +135,7 @@ class VolumeHEX20(VolumeElement):
 class VolumeHEX27(VolumeElement):
     """A HEX27 volume element."""
 
-    vtk_cell_type = vtk.vtkTriQuadraticHexahedron
+    vtk_cell_type = _vtk.vtkTriQuadraticHexahedron
     vtk_topology = [
         0,
         1,

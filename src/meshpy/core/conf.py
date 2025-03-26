@@ -22,90 +22,91 @@
 """This module defines a global object that manages all kind of stuff regarding
 meshpy."""
 
-from enum import Enum, auto
+from enum import Enum as _Enum
+from enum import auto as _auto
 
 
-class Geometry(Enum):
+class Geometry(_Enum):
     """Enum for geometry types."""
 
-    point = auto()
-    line = auto()
-    surface = auto()
-    volume = auto()
+    point = _auto()
+    line = _auto()
+    surface = _auto()
+    volume = _auto()
 
 
-class BoundaryCondition(Enum):
+class BoundaryCondition(_Enum):
     """Enum for boundary condition types."""
 
-    dirichlet = auto()
-    neumann = auto()
-    locsys = auto()
-    moment_euler_bernoulli = auto()
-    beam_to_beam_contact = auto()
-    beam_to_solid_volume_meshtying = auto()
-    beam_to_solid_surface_meshtying = auto()
-    beam_to_solid_surface_contact = auto()
-    point_coupling = auto()
-    point_coupling_penalty = auto()
+    dirichlet = _auto()
+    neumann = _auto()
+    locsys = _auto()
+    moment_euler_bernoulli = _auto()
+    beam_to_beam_contact = _auto()
+    beam_to_solid_volume_meshtying = _auto()
+    beam_to_solid_surface_meshtying = _auto()
+    beam_to_solid_surface_contact = _auto()
+    point_coupling = _auto()
+    point_coupling_penalty = _auto()
 
 
-class BeamType(Enum):
+class BeamType(_Enum):
     """Enum for beam types."""
 
-    reissner = auto()
-    kirchhoff = auto()
-    euler_bernoulli = auto()
+    reissner = _auto()
+    kirchhoff = _auto()
+    euler_bernoulli = _auto()
 
 
-class CouplingDofType(Enum):
+class CouplingDofType(_Enum):
     """Enum for coupling types."""
 
-    fix = auto()
-    joint = auto()
+    fix = _auto()
+    joint = _auto()
 
 
-class BeamToSolidInteractionType(Enum):
+class BeamToSolidInteractionType(_Enum):
     """Enum for beam-to-solid interaction types."""
 
-    volume_meshtying = auto()
-    surface_meshtying = auto()
+    volume_meshtying = _auto()
+    surface_meshtying = _auto()
 
 
-class DoubleNodes(Enum):
+class DoubleNodes(_Enum):
     """Enum for handing double nodes in Neumann conditions."""
 
-    remove = auto()
-    keep = auto()
+    remove = _auto()
+    keep = _auto()
 
 
-class GeometricSearchAlgorithm(Enum):
+class GeometricSearchAlgorithm(_Enum):
     """Enum for VTK value types."""
 
-    automatic = auto()
-    brute_force_cython = auto()
-    binning_cython = auto()
-    boundary_volume_hierarchy_arborx = auto()
+    automatic = _auto()
+    brute_force_cython = _auto()
+    binning_cython = _auto()
+    boundary_volume_hierarchy_arborx = _auto()
 
 
-class VTKGeometry(Enum):
+class VTKGeometry(_Enum):
     """Enum for VTK geometry types (for now cells and points)."""
 
-    point = auto()
-    cell = auto()
+    point = _auto()
+    cell = _auto()
 
 
-class VTKTensor(Enum):
+class VTKTensor(_Enum):
     """Enum for VTK tensor types."""
 
-    scalar = auto()
-    vector = auto()
+    scalar = _auto()
+    vector = _auto()
 
 
-class VTKType(Enum):
+class VTKType(_Enum):
     """Enum for VTK value types."""
 
-    int = auto()
-    float = auto()
+    int = _auto()
+    float = _auto()
 
 
 class MeshPy(object):

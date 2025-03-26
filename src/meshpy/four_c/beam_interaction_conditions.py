@@ -22,20 +22,19 @@
 """This file contains a function to add the beam interaction conditions for
 4C."""
 
-import re
-from typing import Optional
+import re as _re
+from typing import Optional as _Optional
 
-import meshpy.core.conf as conf_typing
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.core.mesh import Mesh
-from meshpy.four_c.boundary_condition import BoundaryCondition
+import meshpy.core.conf as _conf
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
 
 
 def get_next_possible_id_for_boundary_condition(
-    mesh: Mesh,
-    bc_type: conf_typing.BoundaryCondition,
-    geometry_type: conf_typing.Geometry,
+    mesh: _Mesh,
+    bc_type: _conf.BoundaryCondition,
+    geometry_type: _conf.Geometry,
     regex_search_string: str,
     *,
     group_idx: int = 1,
@@ -72,7 +71,7 @@ def get_next_possible_id_for_boundary_condition(
 
         # compare string of each condition with input and store existing ids
         for bc in found_conditions:
-            match = re.search(regex_search_string, bc.bc_string)
+            match = _re.search(regex_search_string, bc.bc_string)
             if match is None:
                 raise ValueError(
                     "The string provided "
@@ -87,12 +86,12 @@ def get_next_possible_id_for_boundary_condition(
 
 
 def add_beam_interaction_condition(
-    mesh: Mesh,
-    geometry_set_1: GeometrySet,
-    geometry_set_2: GeometrySet,
-    bc_type: conf_typing.BoundaryCondition,
+    mesh: _Mesh,
+    geometry_set_1: _GeometrySet,
+    geometry_set_2: _GeometrySet,
+    bc_type: _conf.BoundaryCondition,
     *,
-    id: Optional[int] = None,
+    id: _Optional[int] = None,
 ) -> int:
     """Adds a pair of beam interaction boundary conditions to the given mesh
     and estimates automatically the id of them based on all previously added
@@ -114,14 +113,14 @@ def add_beam_interaction_condition(
             mesh,
             bc_type,
             geometry_set_1.geometry_type,
-            regex_search_string=re.escape(condition_string) + r"(\d+)",
+            regex_search_string=_re.escape(condition_string) + r"(\d+)",
         )
 
         id_2 = get_next_possible_id_for_boundary_condition(
             mesh,
             bc_type,
             geometry_set_2.geometry_type,
-            regex_search_string=re.escape(condition_string) + r"(\d+)",
+            regex_search_string=_re.escape(condition_string) + r"(\d+)",
         )
 
         if not id == id_2:
@@ -132,7 +131,7 @@ def add_beam_interaction_condition(
     # Creates the two conditions with the same ID.
     for geometry_set in [geometry_set_1, geometry_set_2]:
         mesh.add(
-            BoundaryCondition(
+            _BoundaryCondition(
                 geometry_set, bc_string=condition_string + str(id), bc_type=bc_type
             )
         )

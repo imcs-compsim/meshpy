@@ -22,12 +22,13 @@
 """This module implements a class to represent boundary conditions in
 MeshPy."""
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull, BaseMeshItemString
-from meshpy.core.conf import mpy
-from meshpy.core.container import ContainerBase
+from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
+from meshpy.core.base_mesh_item import BaseMeshItemString as _BaseMeshItemString
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.container import ContainerBase as _ContainerBase
 
 
-class BoundaryConditionBase(BaseMeshItemFull):
+class BoundaryConditionBase(_BaseMeshItemFull):
     """This is a base object, which represents one boundary condition in the
     input file, e.g. Dirichlet, Neumann, coupling or beam-to-solid."""
 
@@ -61,24 +62,26 @@ class BoundaryConditionBase(BaseMeshItemFull):
         split = line.split()
 
         if bc_key in (
-            mpy.bc.dirichlet,
-            mpy.bc.neumann,
-            mpy.bc.locsys,
-            mpy.bc.beam_to_solid_surface_meshtying,
-            mpy.bc.beam_to_solid_surface_contact,
-            mpy.bc.beam_to_solid_volume_meshtying,
+            _mpy.bc.dirichlet,
+            _mpy.bc.neumann,
+            _mpy.bc.locsys,
+            _mpy.bc.beam_to_solid_surface_meshtying,
+            _mpy.bc.beam_to_solid_surface_contact,
+            _mpy.bc.beam_to_solid_volume_meshtying,
         ) or isinstance(bc_key, str):
             # Normal boundary condition (including beam-to-solid conditions).
-            from meshpy.four_c.boundary_condition import BoundaryCondition
+            from meshpy.four_c.boundary_condition import (
+                BoundaryCondition as _BoundaryCondition,
+            )
 
-            return BoundaryCondition(
+            return _BoundaryCondition(
                 int(split[1]) - 1, " ".join(split[2:]), bc_type=bc_key, **kwargs
             )
-        elif bc_key is mpy.bc.point_coupling:
+        elif bc_key is _mpy.bc.point_coupling:
             # Coupling condition.
-            from .coupling import Coupling
+            from meshpy.core.coupling import Coupling as _Coupling
 
-            return Coupling(
+            return _Coupling(
                 int(split[1]) - 1,
                 bc_key,
                 " ".join(split[2:]),
@@ -89,7 +92,7 @@ class BoundaryConditionBase(BaseMeshItemFull):
         raise ValueError("Got unexpected boundary condition!")
 
 
-class BoundaryConditionContainer(ContainerBase):
+class BoundaryConditionContainer(_ContainerBase):
     """A class to group boundary conditions together.
 
     The key of the dictionary are (bc_type, geometry_type).
@@ -99,8 +102,8 @@ class BoundaryConditionContainer(ContainerBase):
         """Initialize the container and create the default keys in the map."""
         super().__init__(*args, **kwargs)
 
-        self.item_types = [BaseMeshItemString, BoundaryConditionBase]
+        self.item_types = [_BaseMeshItemString, BoundaryConditionBase]
 
-        for bc_key in mpy.bc:
-            for geometry_key in mpy.geo:
+        for bc_key in _mpy.bc:
+            for geometry_key in _mpy.geo:
                 self[(bc_key, geometry_key)] = []

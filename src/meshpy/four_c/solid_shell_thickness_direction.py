@@ -22,19 +22,20 @@
 """This function allows to reorder the connectivity of solid shell elements
 such that the solid shell direction is correctly represented."""
 
-from typing import List
+from typing import List as _List
 
-import numpy as np
-import pyvista as pv
+import numpy as _np
+import pyvista as _pv
 
-from meshpy.core.element import Element
-from meshpy.core.element_volume import VolumeElement, VolumeHEX8
-from meshpy.utils.nodes import get_nodal_coordinates
+from meshpy.core.element import Element as _Element
+from meshpy.core.element_volume import VolumeElement as _VolumeElement
+from meshpy.core.element_volume import VolumeHEX8 as _VolumeHEX8
+from meshpy.utils.nodes import get_nodal_coordinates as _get_nodal_coordinates
 
 
 def shape_functions_hex8(xi1, xi2, xi3):
     """Return the shape functions for a hex8 element."""
-    shape_functions = np.zeros(8)
+    shape_functions = _np.zeros(8)
     one_over_eight = 0.125
     shape_functions[0] = one_over_eight * (1 - xi1) * (1 - xi2) * (1 - xi3)
     shape_functions[1] = one_over_eight * (1 + xi1) * (1 - xi2) * (1 - xi3)
@@ -49,7 +50,7 @@ def shape_functions_hex8(xi1, xi2, xi3):
 
 def shape_functions_derivative_hex8(xi1, xi2, xi3):
     """Return the derivative of the shape functions for a hex8 element."""
-    derivatives = np.zeros((3, 8))
+    derivatives = _np.zeros((3, 8))
     one_over_eight = 0.125
 
     # Derivatives with respect to xi1
@@ -89,15 +90,15 @@ def get_hex8_element_center_and_jacobian_mapping(element):
     """Return the center of a hex8 element and the Jacobian mapping for that
     point."""
 
-    nodal_coordinates = get_nodal_coordinates(element.nodes)
+    nodal_coordinates = _get_nodal_coordinates(element.nodes)
     if not len(nodal_coordinates) == 8:
         raise ValueError(f"Expected 8 nodes, got {len(nodal_coordinates)}")
 
     N = shape_functions_hex8(0, 0, 0)
     dN = shape_functions_derivative_hex8(0, 0, 0)
 
-    reference_position_center = np.dot(N, nodal_coordinates)
-    jacobian_center = np.dot(dN, nodal_coordinates)
+    reference_position_center = _np.dot(N, nodal_coordinates)
+    jacobian_center = _np.dot(dN, nodal_coordinates)
 
     return reference_position_center, jacobian_center
 
@@ -113,9 +114,9 @@ def get_reordering_index_thickness(jacobian, *, identify_threshold=None):
 
     # The direction with the smallest parameter derivative is the thickness direction
     parameter_derivative_norms = [
-        np.linalg.norm(parameter_direction) for parameter_direction in jacobian
+        _np.linalg.norm(parameter_direction) for parameter_direction in jacobian
     ]
-    thickness_direction = np.argmin(parameter_derivative_norms)
+    thickness_direction = _np.argmin(parameter_derivative_norms)
 
     if identify_threshold is not None:
         # Check that the minimal parameter direction is at least a given factor
@@ -127,7 +128,7 @@ def get_reordering_index_thickness(jacobian, *, identify_threshold=None):
             for i in range(3)
             if not i == thickness_direction
         ]
-        if np.min(relative_difference) < 1.5:
+        if _np.min(relative_difference) < 1.5:
             raise ValueError("Could not uniquely identify the thickness direction.")
 
     return thickness_direction
@@ -142,9 +143,9 @@ def get_reordering_index_director_projection(
 
     projections = []
     for parameter_director in jacobian:
-        parameter_director = parameter_director / np.linalg.norm(parameter_director)
-        projections.append(np.abs(np.dot(director, parameter_director)))
-    thickness_direction = np.argmax(projections)
+        parameter_director = parameter_director / _np.linalg.norm(parameter_director)
+        projections.append(_np.abs(_np.dot(director, parameter_director)))
+    thickness_direction = _np.argmax(projections)
 
     if identify_threshold is not None:
         # Check that the maximal dot product is at least a given factor larger than
@@ -154,14 +155,14 @@ def get_reordering_index_director_projection(
         relative_difference = [
             projections[i] / max_norm for i in range(3) if not i == thickness_direction
         ]
-        if np.max(relative_difference) > 1.0 / identify_threshold:
+        if _np.max(relative_difference) > 1.0 / identify_threshold:
             raise ValueError("Could not uniquely identify the thickness direction.")
 
     return thickness_direction
 
 
 def set_solid_shell_thickness_direction(
-    elements: List[Element],
+    elements: _List[_Element],
     *,
     selection_type="thickness",
     director=None,
@@ -173,7 +174,7 @@ def set_solid_shell_thickness_direction(
 
     Args:
     ----
-    elements: List[Element]
+    elements:
         A list containing all elements that should be checked
     selection_type:
         The type of algorithm that shall be used to select the thickness direction
@@ -196,7 +197,7 @@ def set_solid_shell_thickness_direction(
         raise ValueError("Expected a non empty element list")
 
     for element in elements:
-        is_hex8 = isinstance(element, VolumeHEX8)
+        is_hex8 = isinstance(element, _VolumeHEX8)
         if is_hex8:
             is_solid_shell = "SOLIDSH8" in element.dat_pre_nodes  # type: ignore[attr-defined]
 
@@ -253,14 +254,14 @@ def get_visualization_third_parameter_direction_hex8(mesh):
     for hex8 elements."""
 
     vtk_solid = mesh.get_vtk_representation()[1].grid
-    pv_solid = pv.UnstructuredGrid(vtk_solid)
+    pv_solid = _pv.UnstructuredGrid(vtk_solid)
 
     cell_thickness_direction = []
     for element in mesh.elements:
-        if isinstance(element, VolumeHEX8):
+        if isinstance(element, _VolumeHEX8):
             _, jacobian_center = get_hex8_element_center_and_jacobian_mapping(element)
             cell_thickness_direction.append(jacobian_center[2])
-        elif isinstance(element, VolumeElement):
+        elif isinstance(element, _VolumeElement):
             cell_thickness_direction.append([0, 0, 0])
 
     if not len(cell_thickness_direction) == pv_solid.number_of_cells:
@@ -288,7 +289,7 @@ def visualize_third_parameter_direction_hex8(mesh):
         orient="thickness_direction", scale="thickness_direction", factor=5
     )
 
-    plotter = pv.Plotter()
+    plotter = _pv.Plotter()
     plotter.renderer.add_axes()
     plotter.add_mesh(grid, color="white", show_edges=True, opacity=0.5)
     plotter.add_mesh(thickness_direction, color="red")

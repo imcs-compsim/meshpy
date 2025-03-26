@@ -21,9 +21,10 @@
 # THE SOFTWARE.
 """This file has functions to create NURBS geometries using Geomdl."""
 
-import numpy as np
-from geomdl import NURBS, operations
-from geomdl import compatibility as compat
+import numpy as _np
+from geomdl import NURBS as _NURBS
+from geomdl import compatibility as _compat
+from geomdl import operations as _operations
 
 
 def create_nurbs_hollow_cylinder_segment_2d(
@@ -56,13 +57,13 @@ def create_nurbs_hollow_cylinder_segment_2d(
         raise ValueError(
             "The external radius should be larger than the internal radius of a hollow cylinder."
         )
-    if (angle > np.pi) or (angle < 0):
+    if (angle > _np.pi) or (angle < 0):
         raise ValueError(
             "The following algorithm for creating a hollow cylinder section is only valid for 0 < angle <= pi."
         )
 
     # Create a NURBS surface instance
-    surf = NURBS.Surface()
+    surf = _NURBS.Surface()
 
     # Set degrees
     surf.degree_u = 2
@@ -80,7 +81,7 @@ def create_nurbs_hollow_cylinder_segment_2d(
 
     # Obtaining the control points that define the external arc of the hollow cylinder
     cp_ext1 = [radius_out, 0.0, 0.0]
-    cp_ext3 = [radius_out * np.cos(angle), radius_out * np.sin(angle), 0.0]
+    cp_ext3 = [radius_out * _np.cos(angle), radius_out * _np.sin(angle), 0.0]
     cp_ext2 = [
         radius_out,
         -(cp_ext3[0] / cp_ext3[1]) * (radius_out - cp_ext3[0]) + cp_ext3[1],
@@ -89,7 +90,7 @@ def create_nurbs_hollow_cylinder_segment_2d(
 
     # Obtaining the control points that define the internal arc of the hollow cylinder
     cp_int1 = [radius_in, 0.0, 0.0]
-    cp_int3 = [radius_in * np.cos(angle), radius_in * np.sin(angle), 0.0]
+    cp_int3 = [radius_in * _np.cos(angle), radius_in * _np.sin(angle), 0.0]
     cp_int2 = [
         radius_in,
         -(cp_int3[0] / cp_int3[1]) * (radius_in - cp_int3[0]) + cp_int3[1],
@@ -115,18 +116,18 @@ def create_nurbs_hollow_cylinder_segment_2d(
 
     weights = [
         1.0,
-        np.cos(angle / 2),
+        _np.cos(angle / 2),
         1.0,
         1.0,
-        np.cos(angle / 2),
+        _np.cos(angle / 2),
         1.0,
         1.0,
-        np.cos(angle / 2),
+        _np.cos(angle / 2),
         1.0,
     ]
 
-    t_ctrlptsw = compat.combine_ctrlpts_weights(ctrlpts, weights)
-    n_ctrlptsw = compat.flip_ctrlpts_u(t_ctrlptsw, p_size_u, p_size_v)
+    t_ctrlptsw = _compat.combine_ctrlpts_weights(ctrlpts, weights)
+    n_ctrlptsw = _compat.flip_ctrlpts_u(t_ctrlptsw, p_size_u, p_size_v)
 
     surf.ctrlpts_size_u = p_size_u
     surf.ctrlpts_size_v = p_size_v
@@ -162,7 +163,7 @@ def create_nurbs_flat_plate_2d(width, length, *, n_ele_u=1, n_ele_v=1):
     """
 
     # Create a NURBS surface instance
-    surf = NURBS.Surface()
+    surf = _NURBS.Surface()
 
     # Set degrees
     surf.degree_u = 2
@@ -186,8 +187,8 @@ def create_nurbs_flat_plate_2d(width, length, *, n_ele_u=1, n_ele_v=1):
 
     weights = [1.0] * 9
 
-    t_ctrlptsw = compat.combine_ctrlpts_weights(ctrlpts, weights)
-    n_ctrlptsw = compat.flip_ctrlpts_u(t_ctrlptsw, p_size_u, p_size_v)
+    t_ctrlptsw = _compat.combine_ctrlpts_weights(ctrlpts, weights)
+    n_ctrlptsw = _compat.flip_ctrlpts_u(t_ctrlptsw, p_size_u, p_size_v)
 
     surf.ctrlpts_size_u = p_size_u
     surf.ctrlpts_size_v = p_size_v
@@ -223,7 +224,7 @@ def create_nurbs_sphere_surface(radius, n_ele_u=1, n_ele_v=1):
     """
 
     # Create a NURBS surface instance
-    surf = NURBS.Surface()
+    surf = _NURBS.Surface()
 
     # Set degrees
     surf.degree_u = 2
@@ -235,79 +236,91 @@ def create_nurbs_sphere_surface(radius, n_ele_u=1, n_ele_v=1):
 
     dummy = 6.0 * (
         5.0 / 12.0
-        + 0.5 * np.sqrt(2.0 / 3.0)
-        - 0.25 / np.sqrt(3.0)
-        - 0.5 * np.sqrt(2.0 / 3.0) * np.sqrt(3.0) / 2.0
+        + 0.5 * _np.sqrt(2.0 / 3.0)
+        - 0.25 / _np.sqrt(3.0)
+        - 0.5 * _np.sqrt(2.0 / 3.0) * _np.sqrt(3.0) / 2.0
     )
 
     ctrlpts = [
         [
-            2.0 * radius / np.sqrt(6.0) * -np.sin(1.0 / 4.0 * np.pi),
-            -radius / np.sqrt(3.0),
-            2.0 * radius / np.sqrt(6.0) * np.cos(1.0 / 4.0 * np.pi),
+            2.0 * radius / _np.sqrt(6.0) * -_np.sin(1.0 / 4.0 * _np.pi),
+            -radius / _np.sqrt(3.0),
+            2.0 * radius / _np.sqrt(6.0) * _np.cos(1.0 / 4.0 * _np.pi),
         ],
         [
-            radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.cos(1.0 / 4.0 * np.pi)
-            + radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * -np.sin(1.0 / 4.0 * np.pi),
-            -np.sqrt(3.0) / 2 * radius,
-            radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.cos(1.0 / 4.0 * np.pi)
-            + radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.sin(1.0 / 4.0 * np.pi),
+            radius * _np.sqrt(3.0) / (_np.sqrt(2.0) * 2.0) * _np.cos(1.0 / 4.0 * _np.pi)
+            + radius
+            * _np.sqrt(3.0)
+            / (_np.sqrt(2.0) * 2.0)
+            * -_np.sin(1.0 / 4.0 * _np.pi),
+            -_np.sqrt(3.0) / 2 * radius,
+            radius * _np.sqrt(3.0) / (_np.sqrt(2.0) * 2.0) * _np.cos(1.0 / 4.0 * _np.pi)
+            + radius
+            * _np.sqrt(3.0)
+            / (_np.sqrt(2.0) * 2.0)
+            * _np.sin(1.0 / 4.0 * _np.pi),
         ],
         [
-            2.0 * radius / np.sqrt(6.0) * np.cos(1.0 / 4.0 * np.pi),
-            -radius / np.sqrt(3.0),
-            2.0 * radius / np.sqrt(6.0) * np.sin(1.0 / 4.0 * np.pi),
+            2.0 * radius / _np.sqrt(6.0) * _np.cos(1.0 / 4.0 * _np.pi),
+            -radius / _np.sqrt(3.0),
+            2.0 * radius / _np.sqrt(6.0) * _np.sin(1.0 / 4.0 * _np.pi),
         ],
         [
-            radius * np.sqrt(6.0) / 2.0 * -np.sin(1.0 / 4.0 * np.pi),
+            radius * _np.sqrt(6.0) / 2.0 * -_np.sin(1.0 / 4.0 * _np.pi),
             0.0,
-            radius * np.sqrt(6.0) / 2.0 * np.cos(1.0 / 4.0 * np.pi),
+            radius * _np.sqrt(6.0) / 2.0 * _np.cos(1.0 / 4.0 * _np.pi),
         ],
         [
-            radius * dummy * np.sqrt(2.0) / 2.0 * np.cos(1.0 / 4.0 * np.pi)
-            + radius * dummy * np.sqrt(2.0) / 2.0 * -np.sin(1.0 / 4.0 * np.pi),
+            radius * dummy * _np.sqrt(2.0) / 2.0 * _np.cos(1.0 / 4.0 * _np.pi)
+            + radius * dummy * _np.sqrt(2.0) / 2.0 * -_np.sin(1.0 / 4.0 * _np.pi),
             0.0,
-            radius * dummy * np.sqrt(2.0) / 2.0 * np.cos(1.0 / 4.0 * np.pi)
-            + radius * dummy * np.sqrt(2.0) / 2.0 * np.sin(1.0 / 4.0 * np.pi),
+            radius * dummy * _np.sqrt(2.0) / 2.0 * _np.cos(1.0 / 4.0 * _np.pi)
+            + radius * dummy * _np.sqrt(2.0) / 2.0 * _np.sin(1.0 / 4.0 * _np.pi),
         ],
         [
-            radius * np.sqrt(6.0) / 2.0 * np.cos(1.0 / 4.0 * np.pi),
+            radius * _np.sqrt(6.0) / 2.0 * _np.cos(1.0 / 4.0 * _np.pi),
             0.0,
-            radius * np.sqrt(6.0) / 2.0 * np.sin(1.0 / 4.0 * np.pi),
+            radius * _np.sqrt(6.0) / 2.0 * _np.sin(1.0 / 4.0 * _np.pi),
         ],
         [
-            2.0 * radius / np.sqrt(6.0) * -np.sin(1.0 / 4.0 * np.pi),
-            2.0 * radius / np.sqrt(6.0) * np.cos(1.0 / 4.0 * np.pi),
-            radius / np.sqrt(3.0),
+            2.0 * radius / _np.sqrt(6.0) * -_np.sin(1.0 / 4.0 * _np.pi),
+            2.0 * radius / _np.sqrt(6.0) * _np.cos(1.0 / 4.0 * _np.pi),
+            radius / _np.sqrt(3.0),
         ],
         [
-            radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.cos(1.0 / 4.0 * np.pi)
-            + radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * -np.sin(1.0 / 4.0 * np.pi),
-            np.sqrt(3.0) / 2 * radius,
-            radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.cos(1.0 / 4.0 * np.pi)
-            + radius * np.sqrt(3.0) / (np.sqrt(2.0) * 2.0) * np.sin(1.0 / 4.0 * np.pi),
+            radius * _np.sqrt(3.0) / (_np.sqrt(2.0) * 2.0) * _np.cos(1.0 / 4.0 * _np.pi)
+            + radius
+            * _np.sqrt(3.0)
+            / (_np.sqrt(2.0) * 2.0)
+            * -_np.sin(1.0 / 4.0 * _np.pi),
+            _np.sqrt(3.0) / 2 * radius,
+            radius * _np.sqrt(3.0) / (_np.sqrt(2.0) * 2.0) * _np.cos(1.0 / 4.0 * _np.pi)
+            + radius
+            * _np.sqrt(3.0)
+            / (_np.sqrt(2.0) * 2.0)
+            * _np.sin(1.0 / 4.0 * _np.pi),
         ],
         [
-            2.0 * radius / np.sqrt(6.0) * np.cos(1.0 / 4.0 * np.pi),
-            radius / np.sqrt(3.0),
-            2.0 * radius / np.sqrt(6.0) * np.sin(1.0 / 4.0 * np.pi),
+            2.0 * radius / _np.sqrt(6.0) * _np.cos(1.0 / 4.0 * _np.pi),
+            radius / _np.sqrt(3.0),
+            2.0 * radius / _np.sqrt(6.0) * _np.sin(1.0 / 4.0 * _np.pi),
         ],
     ]
 
     weights = [
         1.0,
-        2.0 / np.sqrt(6.0),
+        2.0 / _np.sqrt(6.0),
         1.0,
-        2.0 / np.sqrt(6.0),
+        2.0 / _np.sqrt(6.0),
         2.0 / 3.0,
-        2.0 / np.sqrt(6.0),
+        2.0 / _np.sqrt(6.0),
         1.0,
-        2.0 / np.sqrt(6.0),
+        2.0 / _np.sqrt(6.0),
         1.0,
     ]
 
-    t_ctrlptsw = compat.combine_ctrlpts_weights(ctrlpts, weights)
-    n_ctrlptsw = compat.flip_ctrlpts_u(t_ctrlptsw, p_size_u, p_size_v)
+    t_ctrlptsw = _compat.combine_ctrlpts_weights(ctrlpts, weights)
+    n_ctrlptsw = _compat.flip_ctrlpts_u(t_ctrlptsw, p_size_u, p_size_v)
 
     surf.ctrlpts_size_u = p_size_u
     surf.ctrlpts_size_v = p_size_v
@@ -350,31 +363,31 @@ def create_nurbs_hemisphere_surface(radius, n_ele_uv=1):
 
     # Create a temporary section by rotating and translating the
     # first section of the hemisphere
-    temp_hemisphere = operations.rotate(hemisphere_1, 90, axis=1)
-    temp_hemisphere = operations.translate(
+    temp_hemisphere = _operations.rotate(hemisphere_1, 90, axis=1)
+    temp_hemisphere = _operations.translate(
         temp_hemisphere,
-        (0, 0, -2.0 * radius / np.sqrt(6.0) * np.sin(1.0 / 4.0 * np.pi) * 2),
+        (0, 0, -2.0 * radius / _np.sqrt(6.0) * _np.sin(1.0 / 4.0 * _np.pi) * 2),
     )
 
     # To create the hemisphere it is necessary to split the temporary
     # sphere section in two pieces. This split is done in u = 0.5. After
     # the split, the second surface is taken as it will be
     # adjacent to the first section of the sphere
-    cut_section_sphere = operations.split_surface_u(temp_hemisphere, param=0.5)
+    cut_section_sphere = _operations.split_surface_u(temp_hemisphere, param=0.5)
     hemisphere_2 = cut_section_sphere[1]
 
-    translation_component = radius * np.sin(1.0 / 4.0 * np.pi) * 2
+    translation_component = radius * _np.sin(1.0 / 4.0 * _np.pi) * 2
     # Create the third section. Rotate and translate it accordingly
-    hemisphere_3 = operations.rotate(hemisphere_2, 90, axis=2)
-    hemisphere_3 = operations.translate(hemisphere_3, (translation_component, 0, 0))
+    hemisphere_3 = _operations.rotate(hemisphere_2, 90, axis=2)
+    hemisphere_3 = _operations.translate(hemisphere_3, (translation_component, 0, 0))
 
     # Create the forth section. Rotate and translate it accordingly
-    hemisphere_4 = operations.rotate(hemisphere_3, 90, axis=2)
-    hemisphere_4 = operations.translate(hemisphere_4, (0, translation_component, 0))
+    hemisphere_4 = _operations.rotate(hemisphere_3, 90, axis=2)
+    hemisphere_4 = _operations.translate(hemisphere_4, (0, translation_component, 0))
 
     # Create the fifth section. Rotate and translate it accordingly
-    hemisphere_5 = operations.rotate(hemisphere_4, 90, axis=2)
-    hemisphere_5 = operations.translate(hemisphere_5, (-translation_component, 0, 0))
+    hemisphere_5 = _operations.rotate(hemisphere_4, 90, axis=2)
+    hemisphere_5 = _operations.translate(hemisphere_5, (-translation_component, 0, 0))
 
     patches = [hemisphere_1, hemisphere_2, hemisphere_3, hemisphere_4, hemisphere_5]
     for patch in patches:
@@ -412,10 +425,10 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
     """
 
     # Create four NURBS surface instances. These are the base patches of the torus.
-    surf_1 = NURBS.Surface()
-    surf_2 = NURBS.Surface()
-    surf_3 = NURBS.Surface()
-    surf_4 = NURBS.Surface()
+    surf_1 = _NURBS.Surface()
+    surf_2 = _NURBS.Surface()
+    surf_3 = _NURBS.Surface()
+    surf_4 = _NURBS.Surface()
     base_surfs = [surf_1, surf_2, surf_3, surf_4]
 
     # Define control points and set them to the surfaces
@@ -475,20 +488,20 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
 
     weights = [
         1.0,
-        np.sqrt(2) / 2,
+        _np.sqrt(2) / 2,
         1.0,
-        np.sqrt(2) / 2,
+        _np.sqrt(2) / 2,
         0.5,
-        np.sqrt(2) / 2,
+        _np.sqrt(2) / 2,
         1.0,
-        np.sqrt(2) / 2,
+        _np.sqrt(2) / 2,
         1.0,
     ]
 
-    t_ctrlptsw1 = compat.combine_ctrlpts_weights(ctrlpts_surf1, weights)
-    t_ctrlptsw2 = compat.combine_ctrlpts_weights(ctrlpts_surf2, weights)
-    t_ctrlptsw3 = compat.combine_ctrlpts_weights(ctrlpts_surf3, weights)
-    t_ctrlptsw4 = compat.combine_ctrlpts_weights(ctrlpts_surf4, weights)
+    t_ctrlptsw1 = _compat.combine_ctrlpts_weights(ctrlpts_surf1, weights)
+    t_ctrlptsw2 = _compat.combine_ctrlpts_weights(ctrlpts_surf2, weights)
+    t_ctrlptsw3 = _compat.combine_ctrlpts_weights(ctrlpts_surf3, weights)
+    t_ctrlptsw4 = _compat.combine_ctrlpts_weights(ctrlpts_surf4, weights)
 
     t_ctrlpts_surfs = [t_ctrlptsw1, t_ctrlptsw2, t_ctrlptsw3, t_ctrlptsw4]
 
@@ -546,20 +559,20 @@ def create_nurbs_torus_surface(radius_torus, radius_circle, *, n_ele_u=1, n_ele_
     for transform1, transform2, transform3, transform4 in zip(
         transform_surf1, transform_surf2, transform_surf3, transform_surf4
     ):
-        new_surf1 = operations.translate(surf_1, transform1[0])
-        new_surf1 = operations.rotate(new_surf1, transform1[1], axis=transform1[2])
+        new_surf1 = _operations.translate(surf_1, transform1[0])
+        new_surf1 = _operations.rotate(new_surf1, transform1[1], axis=transform1[2])
         surfaces_torus.append(new_surf1)
 
-        new_surf2 = operations.translate(surf_2, transform2[0])
-        new_surf2 = operations.rotate(new_surf2, transform2[1], axis=transform2[2])
+        new_surf2 = _operations.translate(surf_2, transform2[0])
+        new_surf2 = _operations.rotate(new_surf2, transform2[1], axis=transform2[2])
         surfaces_torus.append(new_surf2)
 
-        new_surf3 = operations.translate(surf_3, transform3[0])
-        new_surf3 = operations.rotate(new_surf3, transform3[1], axis=transform3[2])
+        new_surf3 = _operations.translate(surf_3, transform3[0])
+        new_surf3 = _operations.rotate(new_surf3, transform3[1], axis=transform3[2])
         surfaces_torus.append(new_surf3)
 
-        new_surf4 = operations.translate(surf_4, transform4[0])
-        new_surf4 = operations.rotate(new_surf4, transform4[1], axis=transform4[2])
+        new_surf4 = _operations.translate(surf_4, transform4[0])
+        new_surf4 = _operations.rotate(new_surf4, transform4[1], axis=transform4[2])
         surfaces_torus.append(new_surf4)
 
     return surfaces_torus
@@ -591,7 +604,7 @@ def create_nurbs_brick(width, length, height, *, n_ele_u=1, n_ele_v=1, n_ele_w=1
     """
 
     # Create a NURBS volume instance
-    vol = NURBS.Volume()
+    vol = _NURBS.Volume()
 
     # Set degrees
     vol.degree_u = 2
@@ -639,7 +652,7 @@ def create_nurbs_brick(width, length, height, *, n_ele_u=1, n_ele_v=1, n_ele_w=1
     vol.ctrlpts_size_v = cp_size_v
     vol.ctrlpts_size_w = cp_size_w
 
-    t_ctrlptsw = compat.combine_ctrlpts_weights(ctrlpts, weights)
+    t_ctrlptsw = _compat.combine_ctrlpts_weights(ctrlpts, weights)
 
     vol.set_ctrlpts(t_ctrlptsw, cp_size_u, cp_size_v, cp_size_w)
 
@@ -674,9 +687,9 @@ def do_uniform_knot_refinement_surface(surf, n_ele_u, n_ele_v):
     size_of_knotvector_v = 1 / n_ele_v
 
     for i in range(1, n_ele_u):
-        operations.insert_knot(surf, [size_of_knotvector_u * i, None], [1, 0])
+        _operations.insert_knot(surf, [size_of_knotvector_u * i, None], [1, 0])
     for j in range(1, n_ele_v):
-        operations.insert_knot(surf, [None, size_of_knotvector_v * j], [0, 1])
+        _operations.insert_knot(surf, [None, size_of_knotvector_v * j], [0, 1])
 
 
 def do_uniform_knot_refinement_volume(vol, n_ele_u, n_ele_v, n_ele_w):
@@ -704,8 +717,8 @@ def do_uniform_knot_refinement_volume(vol, n_ele_u, n_ele_v, n_ele_w):
     size_of_knotvector_w = 1 / n_ele_w
 
     for i in range(1, n_ele_u):
-        operations.insert_knot(vol, [size_of_knotvector_u * i, None, None], [1, 0, 0])
+        _operations.insert_knot(vol, [size_of_knotvector_u * i, None, None], [1, 0, 0])
     for j in range(1, n_ele_v):
-        operations.insert_knot(vol, [None, size_of_knotvector_v * j, None], [0, 1, 0])
+        _operations.insert_knot(vol, [None, size_of_knotvector_v * j, None], [0, 1, 0])
     for k in range(1, n_ele_w):
-        operations.insert_knot(vol, [None, None, size_of_knotvector_w * k], [0, 0, 1])
+        _operations.insert_knot(vol, [None, None, size_of_knotvector_w * k], [0, 0, 1])

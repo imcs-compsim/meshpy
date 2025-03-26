@@ -22,10 +22,10 @@
 """This file provides functions to create Abaqus beam element classes to be
 used with MeshPy."""
 
-import numpy as np
+import numpy as _np
 
-from meshpy.core.element_beam import Beam
-from meshpy.core.material import MaterialBeam
+from meshpy.core.element_beam import Beam as _Beam
+from meshpy.core.material import MaterialBeam as _MaterialBeam
 
 
 def generate_abaqus_beam(beam_type: str):
@@ -57,12 +57,12 @@ def generate_abaqus_beam(beam_type: str):
         raise ValueError(f"Got unexpected element_type {element_type}")
 
     # Define the class variable responsible for creating the nodes.
-    nodes_create = np.linspace(-1, 1, num=n_nodes)
+    nodes_create = _np.linspace(-1, 1, num=n_nodes)
 
     # Create the Abaqus beam class.
     return type(
         "BeamAbaqus" + beam_type,
-        (Beam,),
+        (_Beam,),
         {
             "beam_type": beam_type,
             "nodes_create": nodes_create,
@@ -71,7 +71,7 @@ def generate_abaqus_beam(beam_type: str):
     )
 
 
-class AbaqusBeamMaterial(MaterialBeam):
+class AbaqusBeamMaterial(_MaterialBeam):
     """A class representing an Abaqus beam material."""
 
     def __init__(self, name: str):

@@ -21,17 +21,21 @@
 # THE SOFTWARE.
 """This file contains the wrapper for the LocSys condition for 4c."""
 
-from typing import List, Optional, Union
+from typing import List as _List
+from typing import Optional as _Optional
+from typing import Union as _Union
 
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.core.rotation import Rotation
-from meshpy.four_c.boundary_condition import BoundaryCondition
-from meshpy.four_c.function import Function
-from meshpy.four_c.function_utility import ensure_length_of_function_array
+from meshpy.core.conf import mpy as _mpy
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.rotation import Rotation as _Rotation
+from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
+from meshpy.four_c.function import Function as _Function
+from meshpy.four_c.function_utility import (
+    ensure_length_of_function_array as _ensure_length_of_function_array,
+)
 
 
-class LocSysCondition(BoundaryCondition):
+class LocSysCondition(_BoundaryCondition):
     """This object represents a locsys condition in 4C.
 
     It allows to rotate the local coordinate system used to apply
@@ -40,10 +44,10 @@ class LocSysCondition(BoundaryCondition):
 
     def __init__(
         self,
-        geometry_set: GeometrySet,
-        rotation: Rotation,
+        geometry_set: _GeometrySet,
+        rotation: _Rotation,
         *,
-        function_array: Optional[List[Union[Function, int]]] = None,
+        function_array: _Optional[_List[_Union[_Function, int]]] = None,
         update_node_position: bool = False,
         use_consistent_node_normal: bool = False,
         **kwargs,
@@ -53,7 +57,7 @@ class LocSysCondition(BoundaryCondition):
         Args:
             geometry_set: Geometry that this boundary condition acts on
             rotation: Object that represents the rotation of the coordinate system
-            function_array: List containing functions
+            function_array: _List containing functions
             update_node_position: Flag to enable the updated node position
             use_consistent_node_normal: Flag to use a consistent node normal
         """
@@ -62,7 +66,7 @@ class LocSysCondition(BoundaryCondition):
         if function_array is None:
             function_array = [0, 0, 0]
         else:
-            function_array = ensure_length_of_function_array(function_array, 3)
+            function_array = _ensure_length_of_function_array(function_array, 3)
 
         condition_string = (
             "ROTANGLE {} {} {} ".format(*rotation.get_rotation_vector())
@@ -72,8 +76,8 @@ class LocSysCondition(BoundaryCondition):
 
         # Append the condition string with consistent normal type for line and surface geometry
         if (
-            geometry_set.geometry_type is mpy.geo.line
-            or geometry_set.geometry_type is mpy.geo.surface
+            geometry_set.geometry_type is _mpy.geo.line
+            or geometry_set.geometry_type is _mpy.geo.surface
         ):
             condition_string = (
                 condition_string
@@ -87,7 +91,7 @@ class LocSysCondition(BoundaryCondition):
         super().__init__(
             geometry_set,
             bc_string=condition_string,
-            bc_type=mpy.bc.locsys,
+            bc_type=_mpy.bc.locsys,
             format_replacement=function_array,
             **kwargs,
         )

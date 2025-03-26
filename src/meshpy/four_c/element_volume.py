@@ -21,15 +21,15 @@
 # THE SOFTWARE.
 """This file implements volume elements for 4C."""
 
-from meshpy.core.element_volume import VolumeElement
+from meshpy.core.element_volume import VolumeElement as _VolumeElement
 
 
-class SolidRigidSphere(VolumeElement):
+class SolidRigidSphere(_VolumeElement):
     """A rigid sphere solid element."""
 
     def __init__(self, **kwargs):
         """Initialize solid sphere object."""
-        VolumeElement.__init__(self, **kwargs)
+        _VolumeElement.__init__(self, **kwargs)
 
         # Set radius of sphere from input file.
         arg_name = self.dat_post_nodes.split()[0]
