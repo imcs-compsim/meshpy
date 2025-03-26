@@ -1,0 +1,12 @@
+cff-version: 1.2.0
+message: "Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as follows."
+authors:
+  - family-names: Steinbrecher
+    given-names: I.
+  - family-names: Popp
+    given-names: A.
+title: "MeshPy - A general purpose 3D beam finite element input generator"
+date-released: "2021"
+url: "https://imcs-compsim.github.io/meshpy"
+identifier: "MeshPyWebsite"
+license: ""
