@@ -19,27 +19,30 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""
-This script can be used to compile the cython code:
-> python setup.py build_ext --inplace
-"""
+"""Helper functions for the geometric search module."""
 
-import numpy as np
-from Cython.Build import cythonize
-from setuptools import Extension, setup
+from importlib.util import find_spec as _find_spec
 
-extensions = [
-    Extension(
-        "meshpy.geometric_search.cython_lib",
-        ["src/meshpy/geometric_search/cython_lib.pyx"],
-        include_dirs=[np.get_include()],
-    )
-]
 
-setup(
-    ext_modules=cythonize(
-        extensions,
-        build_dir="src/build/cython_generated_code",
-        annotate=True,
-    ),
-)
+def arborx_is_available() -> bool:
+    """Check if ArborX is available.
+
+    Returns:
+        True if ArborX is installed, False otherwise
+    """
+
+    if _find_spec("meshpy.geometric_search.arborx_lib") is None:
+        return False
+    return True
+
+
+def cython_is_available() -> bool:
+    """Check if Cython is available.
+
+    Returns:
+        True if Cython is installed, False otherwise
+    """
+
+    if _find_spec("meshpy.geometric_search.cython_lib") is None:
+        return False
+    return True

@@ -22,34 +22,28 @@
 """This file defines the interface to the Cython geometric search
 functionality."""
 
-import os as _os
-import sys as _sys
 import warnings as _warnings
 
-# Set path so the Cython binary will be found
-_sys.path.append(_os.path.dirname(__file__))
+from meshpy.geometric_search.utils import cython_is_available as _cython_is_available
 
-# Try to import the Cython module
-try:
-    import geometric_search_cython_lib as _geometric_search_cython_lib
-
-    cython_available = True
-except ImportError:
-    cython_available = False
+if _cython_is_available():
+    from meshpy.geometric_search.cython_lib import (
+        find_close_points as _find_close_points,
+    )
 
 
 def find_close_points_brute_force_cython(
     point_coordinates, tol, *, n_points_performance_warning=5000
 ):
     """Call the Cython brute force implementation of find close_points."""
-    if cython_available:
+    if _cython_is_available():
         n_points = len(point_coordinates)
         if n_points > n_points_performance_warning:
             _warnings.warn(
                 "The function find_close_points is called with the brute force algorithm "
                 + f"with {n_points} points, for performance reasons other algorithms should be used!"
             )
-        return _geometric_search_cython_lib.find_close_points(point_coordinates, tol)
+        return _find_close_points(point_coordinates, tol)
     else:
         raise ModuleNotFoundError(
             "Cython geometric search functionality is not available"
