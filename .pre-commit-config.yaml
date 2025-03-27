@@ -127,3 +127,13 @@ repos:
       - id: yamlfmt
         name: Run yamlfmt
         args: ["-formatter", "retain_line_breaks_single=true"]
+  # Custom hooks
+  - repo: local
+    hooks:
+      - id: check-imports
+        name: Check Python Imports
+        entry: python3 utils/check_python_imports.py
+        files: ^src/meshpy.*\.py$
+        language: system
+        types: [python]
+        require_serial: true # Necessary to print opening and closing message only once

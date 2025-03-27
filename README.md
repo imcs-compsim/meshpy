@@ -266,17 +266,26 @@ pytest
   # Not OK
   import numpy  # No alias
   import numpy as np  # Missing leading underscore
+
+  from numpy import *  # Wildcard imports
+  from numpy import _core  # We don't allow the import of private functionality
   from numpy.linalg import norm  # No alias
-  from meshpy.core.mesh import Mesh as _BeamMesh  # MeshPy imports have to be aliased with the same name — should be `_Mesh`
+  from numpy import sin as sin2  # Missing leading underscore
+  from meshpy.core.mesh import Mesh as _BeamMesh  # MeshPy imports have to be aliased with the same name, i.e., should be `_Mesh` (imports from third party libraries can be renamed)
 
   # OK
   import numpy as _np
   import sys as _sys
+
   from pathlib import Path as _Path
+
+  from math import sin as _math_sin
+  from numpy import sin as _np_sin
 
   import meshpy.core.conf as _conf
   from meshpy.core.mesh import Mesh as _Mesh
-  from meshpy.core.node import Node as _Node, NodeCosserat as _NodeCosserat
+  from meshpy.core.node import Node as _Node
+  from meshpy.core.node import NodeCosserat as _NodeCosserat
   ```
   </details>
 
