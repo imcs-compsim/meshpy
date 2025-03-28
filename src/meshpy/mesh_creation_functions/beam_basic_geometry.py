@@ -34,16 +34,14 @@ from meshpy.mesh_creation_functions.beam_generic import (
 from meshpy.utils.nodes import get_single_node as _get_single_node
 
 
-def create_beam_mesh_line(
-    mesh, beam_object, material, start_point, end_point, **kwargs
-):
+def create_beam_mesh_line(mesh, beam_class, material, start_point, end_point, **kwargs):
     """Generate a straight line of beam elements.
 
     Args
     ----
     mesh: Mesh
         Mesh that the line will be added to.
-    beam_object: Beam
+    beam_class: Beam
         Class of beam that will be used for this line.
     material: Material
         Material for this line.
@@ -108,7 +106,7 @@ def create_beam_mesh_line(
     # Create the beam in the mesh
     return _create_beam_mesh_function(
         mesh,
-        beam_object=beam_object,
+        beam_class=beam_class,
         material=material,
         function_generator=get_beam_geometry,
         interval=[0.0, 1.0],
@@ -118,7 +116,7 @@ def create_beam_mesh_line(
 
 
 def create_beam_mesh_arc_segment_via_rotation(
-    mesh, beam_object, material, center, axis_rotation, radius, angle, **kwargs
+    mesh, beam_class, material, center, axis_rotation, radius, angle, **kwargs
 ):
     """Generate a circular segment of beam elements.
 
@@ -132,7 +130,7 @@ def create_beam_mesh_arc_segment_via_rotation(
     ----
     mesh: Mesh
         Mesh that the arc segment will be added to.
-    beam_object: Beam
+    beam_class: Beam
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
@@ -169,13 +167,13 @@ def create_beam_mesh_arc_segment_via_rotation(
     axis = axis_rotation * [0, 0, 1]
     start_point = center + radius * (axis_rotation * [0, -1, 0])
     return create_beam_mesh_arc_segment_via_axis(
-        mesh, beam_object, material, axis, center, start_point, angle, **kwargs
+        mesh, beam_class, material, axis, center, start_point, angle, **kwargs
     )
 
 
 def create_beam_mesh_arc_segment_via_axis(
     mesh,
-    beam_object,
+    beam_class,
     material,
     axis,
     axis_point,
@@ -194,7 +192,7 @@ def create_beam_mesh_arc_segment_via_axis(
     ----
     mesh: Mesh
         Mesh that the arc segment will be added to.
-    beam_object: Beam
+    beam_class: Beam
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
@@ -270,7 +268,7 @@ def create_beam_mesh_arc_segment_via_axis(
     # Create the beam in the mesh
     return _create_beam_mesh_function(
         mesh,
-        beam_object=beam_object,
+        beam_class=beam_class,
         material=material,
         function_generator=get_beam_geometry,
         interval=[0.0, angle],
@@ -281,7 +279,7 @@ def create_beam_mesh_arc_segment_via_axis(
 
 
 def create_beam_mesh_arc_segment_2d(
-    mesh, beam_object, material, center, radius, phi_start, phi_end, **kwargs
+    mesh, beam_class, material, center, radius, phi_start, phi_end, **kwargs
 ):
     """Generate a circular segment of beam elements in the x-y plane.
 
@@ -289,7 +287,7 @@ def create_beam_mesh_arc_segment_2d(
     ----
     mesh: Mesh
         Mesh that the arc segment will be added to.
-    beam_object: Beam
+    beam_class: Beam
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
@@ -338,7 +336,7 @@ def create_beam_mesh_arc_segment_2d(
 
     return create_beam_mesh_arc_segment_via_axis(
         mesh,
-        beam_object,
+        beam_class,
         material,
         axis,
         center,
@@ -349,7 +347,7 @@ def create_beam_mesh_arc_segment_2d(
 
 
 def create_beam_mesh_line_at_node(
-    mesh, beam_object, material, start_node, length, **kwargs
+    mesh, beam_class, material, start_node, length, **kwargs
 ):
     """Generate a straight line at a given node. The tangent will be the same
     as at that node.
@@ -358,7 +356,7 @@ def create_beam_mesh_line_at_node(
     ----
     mesh: Mesh
         Mesh that the arc segment will be added to.
-    beam_object: Beam
+    beam_class: Beam
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
@@ -388,14 +386,14 @@ def create_beam_mesh_line_at_node(
         raise ValueError("Length has to be positive!")
 
     # Create the line starting from the given node
-    start_node = _get_single_node(start_node, check_cosserat_node=True)
+    start_node = _get_single_node(start_node)
     tangent = start_node.rotation * [1, 0, 0]
     start_position = start_node.coordinates
     end_position = start_position + tangent * length
 
     return create_beam_mesh_line(
         mesh,
-        beam_object,
+        beam_class,
         material,
         start_position,
         end_position,
@@ -405,7 +403,7 @@ def create_beam_mesh_line_at_node(
 
 
 def create_beam_mesh_arc_at_node(
-    mesh, beam_object, material, start_node, arc_axis_normal, radius, angle, **kwargs
+    mesh, beam_class, material, start_node, arc_axis_normal, radius, angle, **kwargs
 ):
     """Generate a circular segment starting at a given node. The arc will be
     tangent to the given node.
@@ -414,7 +412,7 @@ def create_beam_mesh_arc_at_node(
     ----
     mesh: Mesh
         Mesh that the arc segment will be added to.
-    beam_object: Beam
+    beam_class: Beam
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
@@ -451,7 +449,7 @@ def create_beam_mesh_arc_at_node(
         arc_axis_normal = -1.0 * arc_axis_normal
 
     # The normal has to be perpendicular to the start point tangent
-    start_node = _get_single_node(start_node, check_cosserat_node=True)
+    start_node = _get_single_node(start_node)
     tangent = start_node.rotation * [1, 0, 0]
     if _np.abs(_np.dot(tangent, arc_axis_normal)) > _mpy.eps_pos:
         raise ValueError(
@@ -465,7 +463,7 @@ def create_beam_mesh_arc_at_node(
 
     return create_beam_mesh_arc_segment_via_axis(
         mesh,
-        beam_object,
+        beam_class,
         material,
         arc_axis_normal,
         center,
@@ -478,7 +476,7 @@ def create_beam_mesh_arc_at_node(
 
 def create_beam_mesh_helix(
     mesh,
-    beam_object,
+    beam_class,
     material,
     axis_vector,
     axis_point,
@@ -499,7 +497,7 @@ def create_beam_mesh_helix(
     ----
     mesh: Mesh
         Mesh that the helical segment will be added to.
-    beam_object: Beam
+    beam_class: Beam
         Class of beam that will be used for this line.
     material: Material
         Material for this segment.
@@ -599,7 +597,7 @@ def create_beam_mesh_helix(
 
         line_sets = create_beam_mesh_line(
             mesh_temp,
-            beam_object,
+            beam_class,
             material,
             start_point=start_point,
             end_point=end_point,
@@ -644,7 +642,7 @@ def create_beam_mesh_helix(
 
     helix_sets = create_beam_mesh_line(
         mesh_temp,
-        beam_object,
+        beam_class,
         material,
         start_point=[radius, 0, 0],
         end_point=end_point,

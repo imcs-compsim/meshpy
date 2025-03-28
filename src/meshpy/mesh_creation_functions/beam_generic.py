@@ -21,30 +21,42 @@
 # THE SOFTWARE.
 """Generic function used to create all beams within meshpy."""
 
+from typing import Callable as _Callable
+from typing import Dict as _Dict
+from typing import List as _List
+from typing import Optional as _Optional
+from typing import Tuple as _Tuple
+from typing import Type as _Type
+from typing import Union as _Union
+
 import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
+from meshpy.core.element_beam import Beam as _Beam
 from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.material import MaterialBeam as _MaterialBeam
+from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.core.node import NodeCosserat as _NodeCosserat
 from meshpy.utils.nodes import get_single_node as _get_single_node
 
 
 def create_beam_mesh_function(
-    mesh,
+    mesh: _Mesh,
     *,
-    beam_object=None,
-    material=None,
-    function_generator=None,
-    interval=None,
-    n_el=None,
-    l_el=None,
-    interval_length=None,
-    node_positions_of_elements=None,
-    add_sets=False,
-    start_node=None,
-    end_node=None,
-    vtk_cell_data=None,
-):
+    beam_class: _Type[_Beam],
+    material: _MaterialBeam,
+    function_generator: _Callable,
+    interval: _Tuple[float, float],
+    n_el: _Optional[int] = None,
+    l_el: _Optional[float] = None,
+    interval_length: _Optional[float] = None,
+    node_positions_of_elements: _Optional[_List[float]] = None,
+    start_node: _Optional[_Union[_NodeCosserat, _GeometrySet]] = None,
+    end_node: _Optional[_Union[_NodeCosserat, _GeometrySet]] = None,
+    close_beam: _Optional[bool] = False,
+    vtk_cell_data: _Optional[_Dict[str, _Tuple]] = None,
+) -> _GeometryName:
     """Generic beam creation function.
 
     Remark for given start and/or end nodes:
@@ -53,61 +65,57 @@ def create_beam_mesh_function(
         the same (for axi-symmetric beam cross-sections) but the nodes can
         be reused.
 
-    Args
-    ----
-    mesh: Mesh
-        Mesh that the created beam(s) should be added to.
-    beam_object: Beam
-        Class of beam that will be used for this line.
-    material: Material
-        Material for this line.
-    function_generator: function that returns function
-        The function_generator has to take two variables, point_a and
-        point_b (both within the interval) and return a function(xi) that
-        calculates the position and rotation along the beam, where
-        point_a -> xi = -1 and point_b -> xi = 1.
-    interval: [start end]
-        Start and end values for interval that will be used to create the
-        beam.
-    n_el: int
-        Number of equally spaced beam elements along the line. Defaults to 1.
-        Mutually exclusive with l_el
-    l_el: float
-        Desired length of beam elements. This requires the option interval_length
-        to be set. Mutually exclusive with n_el. Be aware, that this length
-        might not be achieved, if the elements are warped after they are
-        created.
-    interval_length:
-        Total length of the interval. Is required when the option l_el is given.
-    node_positions_of_elements: [double]
-        A list of normalized positions (within [0,1] and in ascending order)
-        that define the boundaries of beam elements along the created curve.
-        The given values will be mapped to the actual `interval` given as an
-        argument to this function. These values specify where elements start
-        and end, additional internal nodes (such as midpoints in higher-order
-        elements) may be placed automatically.
-    add_sets: bool
-        If this is true the sets are added to the mesh and then displayed
-        in eventual VTK output, even if they are not used for a boundary
-        condition or coupling.
-    start_node: Node, GeometrySet
-        Node to use as the first node for this line. Use this if the line
-        is connected to other lines (angles have to be the same, otherwise
-        connections should be used). If a geometry set is given, it can
-        contain one, and one node only.
-    end_node: Node, GeometrySet, bool
-        If this is a Node or GeometrySet, the last node of the created beam
-        is set to that node.
-        If it is True the created beam is closed within itself.
-    vtk_cell_data: {cell_data_name (str): cell_data_value (float)}
-        With this argument, a vtk cell data can be set for the elements
-        created within this function. This can be used to check which
-        elements are created by which function.
+    Args:
+        mesh:
+            Mesh that the created beam(s) should be added to.
+        beam_class:
+            Class of beam that will be used for this line.
+        material:
+            Material for this line.
+        function_generator:
+            The function_generator has to take two variables, point_a and
+            point_b (both within the interval) and return a function(xi) that
+            calculates the position and rotation along the beam, where
+            point_a -> xi = -1 and point_b -> xi = 1.
+        interval:
+            Start and end values for interval that will be used to create the
+            beam.
+        n_el:
+            Number of equally spaced beam elements along the line. Defaults to 1.
+            Mutually exclusive with l_el
+        l_el:
+            Desired length of beam elements. This requires the option interval_length
+            to be set. Mutually exclusive with n_el. Be aware, that this length
+            might not be achieved, if the elements are warped after they are
+            created.
+        interval_length:
+            Total length of the interval. Is required when the option l_el is given.
+        node_positions_of_elements:
+            A list of normalized positions (within [0,1] and in ascending order)
+            that define the boundaries of beam elements along the created curve.
+            The given values will be mapped to the actual `interval` given as an
+            argument to this function. These values specify where elements start
+            and end, additional internal nodes (such as midpoints in higher-order
+            elements) may be placed automatically.
+        start_node:
+            Node to use as the first node for this line. Use this if the line
+            is connected to other lines (angles have to be the same, otherwise
+            connections should be used). If a geometry set is given, it can
+            contain one, and one node only.
+        end_node:
+            If this is a Node or GeometrySet, the last node of the created beam
+            is set to that node.
+            If it is True the created beam is closed within itself.
+        close_beam:
+            If it is True the created beam is closed within itself (mutually
+            exclusive with end_node).
+        vtk_cell_data:
+            With this argument, a vtk cell data can be set for the elements
+            created within this function. This can be used to check which
+            elements are created by which function.
 
-    Return
-    ----
-    return_set: GeometryName
-        Set with the 'start' and 'end' node of the curve. Also a 'line' set
+    Returns:
+        Geometry sets with the 'start' and 'end' node of the curve. Also a 'line' set
         with all nodes of the curve.
     """
 
@@ -125,6 +133,11 @@ def create_beam_mesh_function(
             'The arguments "n_el", "l_el" and "node_positions_of_elements" are mutually exclusive'
         )
 
+    if close_beam and end_node is not None:
+        raise ValueError(
+            'The arguments "close_beam" and "end_node" are mutually exclusive'
+        )
+
     # Cases where we have equally spaced elements
     if n_el is not None or l_el is not None:
         if l_el is not None:
@@ -134,12 +147,15 @@ def create_beam_mesh_function(
                     'The parameter "l_el" requires "interval_length" to be set.'
                 )
             n_el = max([1, round(interval_length / l_el)])
+        elif n_el is None:
+            raise ValueError("n_el should not be None at this point")
+
         interval_node_positions_of_elements = [
             interval[0] + i_node * (interval[1] - interval[0]) / n_el
             for i_node in range(n_el + 1)
         ]
     # A list for the element node positions was provided
-    else:
+    elif node_positions_of_elements is not None:
         # Check that the given positions are in ascending order and start with 1 and end with 0
         for index, value, name in zip([0, -1], [0, 1], ["First", "Last"]):
             if not _np.isclose(
@@ -161,6 +177,9 @@ def create_beam_mesh_function(
         interval_node_positions_of_elements = interval[0] + (
             interval[1] - interval[0]
         ) * _np.asarray(node_positions_of_elements)
+
+    # We need to make sure we have the number of elements for the case a given end node
+    n_el = len(interval_node_positions_of_elements) - 1
 
     # Make sure the material is in the mesh.
     mesh.add_material(material)
@@ -212,18 +231,15 @@ def create_beam_mesh_function(
 
     # If a start node is given, set this as the first node for this beam.
     if start_node is not None:
-        start_node = _get_single_node(start_node, check_cosserat_node=True)
+        start_node = _get_single_node(start_node)
         nodes = [start_node]
         check_given_node(start_node)
         _, start_rotation = function_over_whole_interval(-1.0)
         relative_twist_start = get_relative_twist(start_node.rotation, start_rotation)
 
     # If an end node is given, check what behavior is wanted.
-    close_beam = False
-    if end_node is True:
-        close_beam = True
-    elif end_node is not None:
-        end_node = _get_single_node(end_node, check_cosserat_node=True)
+    if end_node is not None:
+        end_node = _get_single_node(end_node)
         check_given_node(end_node)
         _, end_rotation = function_over_whole_interval(1.0)
         relative_twist_end = get_relative_twist(end_node.rotation, end_rotation)
@@ -269,7 +285,7 @@ def create_beam_mesh_function(
         else:
             last_node = None
 
-        element = beam_object(material=material)
+        element = beam_class(material=material)
         elements.append(element)
         nodes.extend(
             element.create_beam(
@@ -311,6 +327,5 @@ def create_beam_mesh_function(
     return_set["start"] = _GeometrySet(nodes[0])
     return_set["end"] = _GeometrySet(end_node)
     return_set["line"] = _GeometrySet(elements)
-    if add_sets:
-        mesh.add(return_set)
+
     return return_set

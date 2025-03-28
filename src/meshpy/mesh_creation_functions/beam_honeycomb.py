@@ -35,7 +35,7 @@ from meshpy.utils.nodes import get_min_max_nodes as _get_min_max_nodes
 
 def create_beam_mesh_honeycomb_flat(
     mesh,
-    beam_object,
+    beam_class,
     material,
     width,
     n_width,
@@ -54,8 +54,8 @@ def create_beam_mesh_honeycomb_flat(
     ----
     mesh: Mesh
         Mesh that the honeycomb will be added to.
-    beam_object: Beam
-        Object that will be used to create the beam elements.
+    beam_class: Beam
+        Class that will be used to create the beam elements.
     material: Material
         Material for the beam.
     width: float
@@ -88,7 +88,7 @@ def create_beam_mesh_honeycomb_flat(
     def add_line(pointa, pointb):
         """Shortcut to add line."""
         return _create_beam_mesh_line(
-            mesh_honeycomb, beam_object, material, pointa, pointb, n_el=n_el
+            mesh_honeycomb, beam_class, material, pointa, pointb, n_el=n_el
         )
 
     # Geometrical shortcuts.
@@ -165,7 +165,7 @@ def create_beam_mesh_honeycomb_flat(
 
 def create_beam_mesh_honeycomb(
     mesh,
-    beam_object,
+    beam_class,
     material,
     diameter,
     n_circumference,
@@ -183,8 +183,8 @@ def create_beam_mesh_honeycomb(
     ----
     mesh: Mesh
         Mesh that the honeycomb will be added to.
-    beam_object: Beam
-        Object that will be used to create the beam elements.
+    beam_class: Beam
+        Class that will be used to create the beam elements.
     material: Material
         Material for the beam.
     diameter: float
@@ -242,7 +242,7 @@ def create_beam_mesh_honeycomb(
     mesh_temp = _Mesh()
     honeycomb_sets = create_beam_mesh_honeycomb_flat(
         mesh_temp,
-        beam_object,
+        beam_class,
         material,
         width,
         n_width,

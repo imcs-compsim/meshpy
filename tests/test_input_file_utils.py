@@ -31,13 +31,13 @@ from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_
 def test_input_file_utils_get_coupled_nodes_to_master_map():
     """Test the get_coupled_nodes_to_master_map function."""
 
-    beam_object = Beam3rLine2Line2
+    beam_class = Beam3rLine2Line2
     mat = MaterialReissner(radius=0.1)
     mesh = Mesh()
-    create_beam_mesh_line(mesh, beam_object, mat, [0, 0, 0], [1, 0, 0])
-    create_beam_mesh_line(mesh, beam_object, mat, [1, 0, 0], [1, 1, 0])
-    create_beam_mesh_line(mesh, beam_object, mat, [1, 1, 0], [2, 0, 0])
-    create_beam_mesh_line(mesh, beam_object, mat, [1, 0, 0], [2, 0, 0])
+    create_beam_mesh_line(mesh, beam_class, mat, [0, 0, 0], [1, 0, 0])
+    create_beam_mesh_line(mesh, beam_class, mat, [1, 0, 0], [1, 1, 0])
+    create_beam_mesh_line(mesh, beam_class, mat, [1, 1, 0], [2, 0, 0])
+    create_beam_mesh_line(mesh, beam_class, mat, [1, 0, 0], [2, 0, 0])
 
     mesh.couple_nodes()
 

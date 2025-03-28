@@ -647,6 +647,8 @@ def test_mesh_creation_functions_element_length_option(
 def test_mesh_creation_functions_argument_checks():
     """Test that wrong input values leads to failure."""
 
+    dummy_arg = "dummy"
+
     # Check error messages for input parameters
     with pytest.raises(
         ValueError,
@@ -670,8 +672,15 @@ def test_mesh_creation_functions_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because node_positions_of_elements can not be used with l_el.
+
         create_beam_mesh_function(
-            mesh, l_el=1, node_positions_of_elements=[0.0, 0.5, 1.0]
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            l_el=1,
+            node_positions_of_elements=[0.0, 0.5, 1.0],
         )
 
     with pytest.raises(
@@ -681,7 +690,13 @@ def test_mesh_creation_functions_argument_checks():
         mesh = Mesh()
         # This should raise an error because node_positions_of_elements can not be used with n_el.
         create_beam_mesh_function(
-            mesh, n_el=1, node_positions_of_elements=[0.0, 0.5, 1.0]
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            n_el=1,
+            node_positions_of_elements=[0.0, 0.5, 1.0],
         )
 
     with pytest.raises(
@@ -690,7 +705,14 @@ def test_mesh_creation_functions_argument_checks():
         mesh = Mesh()
         # This should raise an error because we set `l_el` but don't provide
         # `interval_length`.
-        create_beam_mesh_function(mesh, interval=[0.0, 1.0], l_el=2.0)
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=[0, 1],
+            l_el=2.0,
+        )
 
     with pytest.raises(
         ValueError,
@@ -698,14 +720,28 @@ def test_mesh_creation_functions_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because the interval [0,1] is violated.
-        create_beam_mesh_function(mesh, node_positions_of_elements=[-1.0, 0.0, 1.0])
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            node_positions_of_elements=[-1.0, 0.0, 1.0],
+        )
 
     with pytest.raises(
         ValueError, match="Last entry of node_positions_of_elements must be 1, got 2.0"
     ):
         mesh = Mesh()
         # This should raise an error because the interval [0,1] is violated.
-        create_beam_mesh_function(mesh, node_positions_of_elements=[0.0, 1.0, 2.0])
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            node_positions_of_elements=[0.0, 1.0, 2.0],
+        )
 
     with pytest.raises(
         ValueError,
@@ -715,7 +751,33 @@ def test_mesh_creation_functions_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because the interval is not ordered.
-        create_beam_mesh_function(mesh, node_positions_of_elements=[0.0, 0.2, 0.1, 1.0])
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            node_positions_of_elements=[0.0, 0.2, 0.1, 1.0],
+        )
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            'The arguments "close_beam" and "end_node" are mutually exclusive'
+        ),
+    ):
+        mesh = Mesh()
+        # This should raise an error because the interval is not ordered.
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            n_el=1,
+            close_beam=True,
+            end_node=dummy_arg,
+        )
 
 
 def test_mesh_creation_functions_curve_3d_helix(

@@ -37,7 +37,7 @@ from meshpy.mesh_creation_functions.beam_generic import (
 
 def create_beam_mesh_curve(
     mesh,
-    beam_object,
+    beam_class,
     material,
     function,
     interval,
@@ -55,7 +55,7 @@ def create_beam_mesh_curve(
     ----
     mesh: Mesh
         Mesh that the curve will be added to.
-    beam_object: Beam
+    beam_class: Beam
         Class of beam that will be used for this line.
     material: Material
         Material for this line.
@@ -257,7 +257,7 @@ def create_beam_mesh_curve(
     # Create the beam in the mesh
     created_sets = _create_beam_mesh_function(
         mesh,
-        beam_object=beam_object,
+        beam_class=beam_class,
         material=material,
         function_generator=BeamFunctions(),
         interval=[0.0, length],
