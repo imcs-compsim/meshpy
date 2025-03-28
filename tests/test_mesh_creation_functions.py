@@ -675,7 +675,7 @@ def test_mesh_creation_functions_argument_checks():
 
         create_beam_mesh_function(
             mesh,
-            beam_object=dummy_arg,
+            beam_class=dummy_arg,
             material=dummy_arg,
             function_generator=dummy_arg,
             interval=dummy_arg,
@@ -691,7 +691,7 @@ def test_mesh_creation_functions_argument_checks():
         # This should raise an error because node_positions_of_elements can not be used with n_el.
         create_beam_mesh_function(
             mesh,
-            beam_object=dummy_arg,
+            beam_class=dummy_arg,
             material=dummy_arg,
             function_generator=dummy_arg,
             interval=dummy_arg,
@@ -707,7 +707,7 @@ def test_mesh_creation_functions_argument_checks():
         # `interval_length`.
         create_beam_mesh_function(
             mesh,
-            beam_object=dummy_arg,
+            beam_class=dummy_arg,
             material=dummy_arg,
             function_generator=dummy_arg,
             interval=[0, 1],
@@ -722,7 +722,7 @@ def test_mesh_creation_functions_argument_checks():
         # This should raise an error because the interval [0,1] is violated.
         create_beam_mesh_function(
             mesh,
-            beam_object=dummy_arg,
+            beam_class=dummy_arg,
             material=dummy_arg,
             function_generator=dummy_arg,
             interval=dummy_arg,
@@ -736,7 +736,7 @@ def test_mesh_creation_functions_argument_checks():
         # This should raise an error because the interval [0,1] is violated.
         create_beam_mesh_function(
             mesh,
-            beam_object=dummy_arg,
+            beam_class=dummy_arg,
             material=dummy_arg,
             function_generator=dummy_arg,
             interval=dummy_arg,
@@ -753,7 +753,7 @@ def test_mesh_creation_functions_argument_checks():
         # This should raise an error because the interval is not ordered.
         create_beam_mesh_function(
             mesh,
-            beam_object=dummy_arg,
+            beam_class=dummy_arg,
             material=dummy_arg,
             function_generator=dummy_arg,
             interval=dummy_arg,
@@ -770,7 +770,7 @@ def test_mesh_creation_functions_argument_checks():
         # This should raise an error because the interval is not ordered.
         create_beam_mesh_function(
             mesh,
-            beam_object=dummy_arg,
+            beam_class=dummy_arg,
             material=dummy_arg,
             function_generator=dummy_arg,
             interval=dummy_arg,

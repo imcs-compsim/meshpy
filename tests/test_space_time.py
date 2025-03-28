@@ -37,11 +37,11 @@ from meshpy.space_time.beam_to_space_time import beam_to_space_time, mesh_to_dat
 from tests.test_performance import PerformanceTest
 
 
-def get_name(beam_object):
+def get_name(beam_class):
     """Return the identifier for the given beam object."""
-    if beam_object == Beam3rLine2Line2:
+    if beam_class == Beam3rLine2Line2:
         return "linear"
-    elif beam_object == Beam3rHerm2Line3:
+    elif beam_class == Beam3rHerm2Line3:
         return "quadratic"
     else:
         raise TypeError("Got unexpected beam element")

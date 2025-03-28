@@ -32,7 +32,7 @@ from meshpy.utils.nodes import check_node_by_coordinate as _check_node_by_coordi
 
 
 def create_wire_fibers(
-    mesh, beam_object, material, length, *, radius=None, layers=1, n_el=1
+    mesh, beam_class, material, length, *, radius=None, layers=1, n_el=1
 ):
     """Create a steel wire consisting of multiple filaments. The wire will be
     oriented in x-direction.
@@ -41,7 +41,7 @@ def create_wire_fibers(
     ----
     mesh: Mesh
         Mesh that the line will be added to.
-    beam_object: Beam
+    beam_class: Beam
         Class of beam that will be used for this line.
     material: Material
         Material for this line.
@@ -77,7 +77,7 @@ def create_wire_fibers(
         pos_yz."""
         _create_beam_mesh_line(
             mesh,
-            beam_object,
+            beam_class,
             material,
             [0.0, pos_yz[0], pos_yz[1]],
             [length, pos_yz[0], pos_yz[1]],

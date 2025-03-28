@@ -829,7 +829,7 @@ def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_fil
             arg_angle = np.pi
             arg_n_el = n_el
         return {
-            "beam_object": Beam3rHerm2Line3,
+            "beam_class": Beam3rHerm2Line3,
             "material": mat,
             "center": [0, 0, 0],
             "axis_rotation": Rotation([0, 0, 1], arg_rot_angle),
@@ -857,7 +857,7 @@ def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_fil
             arg_interval = [np.pi, 2 * np.pi]
             arg_n_el = n_el
         return {
-            "beam_object": Beam3rHerm2Line3,
+            "beam_class": Beam3rHerm2Line3,
             "material": mat,
             "function": circle_function,
             "interval": arg_interval,

@@ -37,7 +37,7 @@ from meshpy.utils.nodes import get_min_max_nodes as _get_min_max_nodes
 
 
 def create_stent_cell(
-    beam_object,
+    beam_class,
     material,
     width,
     height,
@@ -54,8 +54,8 @@ def create_stent_cell(
 
     Args
     ----
-    beam_object: Beam
-        Object that will be used to create the beam elements.
+    beam_class: Beam
+        Class that will be used to create the beam elements.
     material: Material
         Material for the beam.
     width: float
@@ -88,14 +88,14 @@ def create_stent_cell(
     def add_line(pointa, pointb, n_el_line):
         """Shortcut to add line."""
         return _create_beam_mesh_line(
-            mesh, beam_object, material, pointa, pointb, n_el=n_el_line
+            mesh, beam_class, material, pointa, pointb, n_el=n_el_line
         )
 
     def add_segment(center, axis_rotation, radius, angle, n_el_segment):
         """Shortcut to add arc segment."""
         return _create_beam_mesh_arc_segment_via_rotation(
             mesh,
-            beam_object,
+            beam_class,
             material,
             center,
             axis_rotation,
@@ -153,15 +153,15 @@ def create_stent_cell(
 
 
 def create_stent_column(
-    beam_object, material, width, height, n_height, n_el=1, **kwargs
+    beam_class, material, width, height, n_height, n_el=1, **kwargs
 ):
     """Create a column of completed cells. A completed cell consists of one
     cell, that is created with the create cell function and it's reflection.
 
     Args
     ----
-    beam_object: Beam
-        Object that will be used to create the beam elements.
+    beam_class: Beam
+        Class that will be used to create the beam elements.
     material: Material
         Material for the beam.
     width: float
@@ -197,7 +197,7 @@ def create_stent_column(
         if i == n_height - 2:
             S3 = False
         unit_cell = create_stent_cell(
-            beam_object,
+            beam_class,
             material,
             width,
             height,
@@ -218,14 +218,14 @@ def create_stent_column(
 
 
 def create_beam_mesh_stent_flat(
-    beam_object, material, width_flat, height_flat, n_height, n_column, n_el=1, **kwargs
+    beam_class, material, width_flat, height_flat, n_height, n_column, n_el=1, **kwargs
 ):
     """Create a flat stent structure on the x-y plane.
 
     Args
     ----
-    beam_object: Beam
-        Object that will be used to create the beam elements.
+    beam_class: Beam
+        Class that will be used to create the beam elements.
     material: Material
         Material for the beam.
     width_flat: float
@@ -249,7 +249,7 @@ def create_beam_mesh_stent_flat(
     width = width_flat / n_column / 2
     height = height_flat / n_height
     column_mesh = create_stent_column(
-        beam_object, material, width, height, n_height, n_el=n_el, **kwargs
+        beam_class, material, width, height, n_height, n_el=n_el, **kwargs
     )
     for i in range(n_column):
         column_copy = column_mesh.copy()
@@ -260,7 +260,7 @@ def create_beam_mesh_stent_flat(
         for j in range(n_height - 1):
             _create_beam_mesh_line(
                 mesh_flat,
-                beam_object,
+                beam_class,
                 material,
                 [4 * i * width, j * height, 0],
                 [4 * i * width, (j + 1) * height, 0],
@@ -268,7 +268,7 @@ def create_beam_mesh_stent_flat(
             )
         _create_beam_mesh_line(
             mesh_flat,
-            beam_object,
+            beam_class,
             material,
             [(4 * i + 2) * width, 0, 0],
             [(4 * i + 2) * width, height, 0],
@@ -279,7 +279,7 @@ def create_beam_mesh_stent_flat(
 
 def create_beam_mesh_stent(
     mesh,
-    beam_object,
+    beam_class,
     material,
     length,
     diameter,
@@ -295,8 +295,8 @@ def create_beam_mesh_stent(
     ----
     mesh: Mesh
         Mesh that the stent will be added to.
-    beam_object: Beam
-        Object that will be used to create the beam elements.
+    beam_class: Beam
+        Class that will be used to create the beam elements.
     material: Material
         Material for the beam.
     length: float
@@ -332,7 +332,7 @@ def create_beam_mesh_stent(
     n_column = n_circumference
 
     mesh_stent = create_beam_mesh_stent_flat(
-        beam_object, material, width_flat, height_flat, n_height, n_column, **kwargs
+        beam_class, material, width_flat, height_flat, n_height, n_column, **kwargs
     )
     mesh_stent.rotate(_Rotation([1, 0, 0], _np.pi / 2))
     mesh_stent.rotate(_Rotation([0, 0, 1], _np.pi / 2))

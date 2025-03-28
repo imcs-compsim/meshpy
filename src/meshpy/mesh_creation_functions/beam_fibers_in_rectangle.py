@@ -113,7 +113,7 @@ def _intersect_line_with_rectangle(
 
 def create_fibers_in_rectangle(
     mesh,
-    beam_object,
+    beam_class,
     material,
     length,
     width,
@@ -130,8 +130,8 @@ def create_fibers_in_rectangle(
     ----
     mesh: Mesh
         Mesh that the fibers will be added to.
-    beam_object: Beam
-        Object that will be used to create the beam elements.
+    beam_class: Beam
+        Class that will be used to create the beam elements.
     material: Material
         Material for the beam.
     length: float
@@ -208,7 +208,7 @@ def create_fibers_in_rectangle(
                     fiber_nel = _np.max([fiber_nel, 1])
                     _create_beam_mesh_line(
                         mesh,
-                        beam_object,
+                        beam_class,
                         material,
                         _np.append(start, 0.0),
                         _np.append(end, 0.0),

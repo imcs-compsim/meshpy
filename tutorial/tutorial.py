@@ -71,9 +71,9 @@ def meshpy_tutorial(base_dir, preview=False):
     # Each mesh creation function returns certain geometry sets, where boundary
     # conditions can be applied or points can be coupled.
     mat = MaterialReissner(youngs_modulus=1.0, radius=0.02)
-    beam_object = Beam3rHerm2Line3
+    beam_class = Beam3rHerm2Line3
     beam_set_1 = create_beam_mesh_line(
-        mesh, beam_object, mat, [0, 0, 0], [0, 0.5, 0], n_el=5
+        mesh, beam_class, mat, [0, 0, 0], [0, 0.5, 0], n_el=5
     )
 
     # We now add a second line, extending the first one and we give the end
@@ -83,7 +83,7 @@ def meshpy_tutorial(base_dir, preview=False):
     # i.e. corners have to be coupled via coupling conditions.
     create_beam_mesh_line(
         mesh,
-        beam_object,
+        beam_class,
         mat,
         [0, 0.5, 0],
         [0, 1.0, 0],
@@ -121,7 +121,7 @@ def meshpy_tutorial(base_dir, preview=False):
     # Now lets add a new mesh and create a circular segment.
     mesh_arc = Mesh()
     beam_set_arc = create_beam_mesh_arc_segment_2d(
-        mesh_arc, beam_object, mat, [0, 0, 0], 1, 0, np.pi / 3.0, n_el=3
+        mesh_arc, beam_class, mat, [0, 0, 0], 1, 0, np.pi / 3.0, n_el=3
     )
 
     # Opening it in ParaView, will show the arc.
@@ -155,7 +155,7 @@ def meshpy_tutorial(base_dir, preview=False):
 
     mesh_sin = Mesh()
     beam_set_sin = create_beam_mesh_curve(
-        mesh_sin, beam_object, mat, beam_sinus, [0, 2.0 * np.pi], n_el=10
+        mesh_sin, beam_class, mat, beam_sinus, [0, 2.0 * np.pi], n_el=10
     )
     mesh_sin.write_vtk("step_5", base_dir)
 
@@ -174,7 +174,7 @@ def meshpy_tutorial(base_dir, preview=False):
     # the arc.
     start = get_single_node(beam_set_arc["end"]).coordinates
     create_beam_mesh_line(
-        mesh_honeycomb, beam_object, mat, start, start + [0, 1, 0], n_el=1
+        mesh_honeycomb, beam_class, mat, start, start + [0, 1, 0], n_el=1
     )
 
     # Half of the honeycomb is now complete.

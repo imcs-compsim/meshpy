@@ -44,7 +44,7 @@ from meshpy.utils.nodes import get_single_node as _get_single_node
 def create_beam_mesh_function(
     mesh: _Mesh,
     *,
-    beam_object: _Type[_Beam],
+    beam_class: _Type[_Beam],
     material: _MaterialBeam,
     function_generator: _Callable,
     interval: _Tuple[float, float],
@@ -68,7 +68,7 @@ def create_beam_mesh_function(
     Args:
         mesh:
             Mesh that the created beam(s) should be added to.
-        beam_object:
+        beam_class:
             Class of beam that will be used for this line.
         material:
             Material for this line.
@@ -285,7 +285,7 @@ def create_beam_mesh_function(
         else:
             last_node = None
 
-        element = beam_object(material=material)
+        element = beam_class(material=material)
         elements.append(element)
         nodes.extend(
             element.create_beam(

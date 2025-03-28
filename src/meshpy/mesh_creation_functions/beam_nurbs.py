@@ -110,7 +110,7 @@ def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
 
 
 def create_beam_mesh_from_nurbs(
-    mesh, beam_object, material, curve, *, tol=None, **kwargs
+    mesh, beam_class, material, curve, *, tol=None, **kwargs
 ):
     """Generate a beam from a NURBS curve.
 
@@ -118,7 +118,7 @@ def create_beam_mesh_from_nurbs(
     ----
     mesh: Mesh
         Mesh that the curve will be added to.
-    beam_object: Beam
+    beam_class: Beam
         Class of beam that will be used for this line.
     material: Material
         Material for this line.
@@ -152,7 +152,7 @@ def create_beam_mesh_from_nurbs(
     # Create the beams
     return _create_beam_mesh_curve(
         mesh,
-        beam_object,
+        beam_class,
         material,
         function,
         [curve_start, curve_end],
