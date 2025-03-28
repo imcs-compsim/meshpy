@@ -124,11 +124,14 @@ class NodeCosserat(Node):
     """This object represents a Cosserat node in the mesh, i.e., it contains
     three positions and three rotations."""
 
-    def __init__(self, coordinates, rotation, **kwargs):
+    def __init__(self, coordinates, rotation, *, arc_length=None, **kwargs):
         super().__init__(coordinates, **kwargs)
 
         # Rotation of this node.
         self.rotation = rotation.copy()
+
+        # Arc length along the filament that this beam is a part of
+        self.arc_length = arc_length
 
     def rotate(self, rotation, *, origin=None, only_rotate_triads=False):
         """Rotate this node.

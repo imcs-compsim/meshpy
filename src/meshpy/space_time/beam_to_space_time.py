@@ -54,10 +54,9 @@ class NodeCosseratSpaceTime(_NodeCosserat):
     We add the 4th dimension time as a class variable.
     """
 
-    def __init__(self, coordinates, rotation, time, *, arc_length=None, **kwargs):
+    def __init__(self, coordinates, rotation, time, **kwargs):
         super().__init__(coordinates, rotation, **kwargs)
         self.time = time
-        self.arc_length = arc_length
 
     def _get_dat(self):
         """Return the line that represents this node in the input file.
