@@ -21,6 +21,8 @@
 # THE SOFTWARE.
 """Helper functions to find, filter and interact with nodes."""
 
+from typing import Union as _Union
+
 import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
@@ -101,16 +103,15 @@ def get_min_max_coordinates(nodes):
     return min_max
 
 
-def get_single_node(item, *, check_cosserat_node=False):
-    """Function to get a single node from the input variable. This function
-    accepts a Node object as well as a GeometrySet object.
+def get_single_node(item: _Union[_Node, _GeometrySetBase]) -> _NodeCosserat:
+    """Function to get a single node from the input item.
 
-    Args
-    ----
-    item:
-        This can be a GeometrySet with exactly one node or a single node object.
-    check_cosserat: bool
-        If a check should be performed, that the given node is a CosseratNode.
+    Args:
+        item: This can be a GeometrySet with exactly one node or a single node object.
+
+    Returns:
+        If a single node, or a Geometry set (point set) containing a single node
+        is given, that node is returned, otherwise an error is raised.
     """
     if isinstance(item, _Node):
         node = item
@@ -126,7 +127,7 @@ def get_single_node(item, *, check_cosserat_node=False):
             f'The given object can be node or GeometrySet got "{type(item)}"!'
         )
 
-    if check_cosserat_node and not isinstance(node, _NodeCosserat):
+    if not isinstance(node, _NodeCosserat):
         raise TypeError("Expected a NodeCosserat object.")
 
     return node

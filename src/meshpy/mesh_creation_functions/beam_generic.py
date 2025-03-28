@@ -207,7 +207,7 @@ def create_beam_mesh_function(
 
     # If a start node is given, set this as the first node for this beam.
     if start_node is not None:
-        start_node = _get_single_node(start_node, check_cosserat_node=True)
+        start_node = _get_single_node(start_node)
         nodes = [start_node]
         check_given_node(start_node)
         _, start_rotation = function_over_whole_interval(-1.0)
@@ -218,7 +218,7 @@ def create_beam_mesh_function(
     if end_node is True:
         close_beam = True
     elif end_node is not None:
-        end_node = _get_single_node(end_node, check_cosserat_node=True)
+        end_node = _get_single_node(end_node)
         check_given_node(end_node)
         _, end_rotation = function_over_whole_interval(1.0)
         relative_twist_end = get_relative_twist(end_node.rotation, end_rotation)
