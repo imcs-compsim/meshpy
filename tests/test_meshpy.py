@@ -769,15 +769,15 @@ def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_fil
         if additional_rotation is not None:
             start_rotation = additional_rotation * Rotation([0, 0, 1], np.pi * 0.5)
             input_file.add(NodeCosserat([R, 0, 0], start_rotation))
-            function(
+            beam_sets = function(
                 input_file,
                 start_node=input_file.nodes[0],
                 end_node=True,
-                add_sets=True,
                 **(argument_list),
             )
         else:
-            function(input_file, end_node=True, add_sets=True, **(argument_list))
+            beam_sets = function(input_file, end_node=True, **(argument_list))
+        input_file.add(beam_sets)
         return input_file
 
     def two_half_circles_closed(function, argument_list, additional_rotation=None):

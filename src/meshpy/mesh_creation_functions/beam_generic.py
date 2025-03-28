@@ -40,7 +40,6 @@ def create_beam_mesh_function(
     l_el=None,
     interval_length=None,
     node_positions_of_elements=None,
-    add_sets=False,
     start_node=None,
     end_node=None,
     vtk_cell_data=None,
@@ -86,10 +85,6 @@ def create_beam_mesh_function(
         argument to this function. These values specify where elements start
         and end, additional internal nodes (such as midpoints in higher-order
         elements) may be placed automatically.
-    add_sets: bool
-        If this is true the sets are added to the mesh and then displayed
-        in eventual VTK output, even if they are not used for a boundary
-        condition or coupling.
     start_node: Node, GeometrySet
         Node to use as the first node for this line. Use this if the line
         is connected to other lines (angles have to be the same, otherwise
@@ -311,6 +306,5 @@ def create_beam_mesh_function(
     return_set["start"] = _GeometrySet(nodes[0])
     return_set["end"] = _GeometrySet(end_node)
     return_set["line"] = _GeometrySet(elements)
-    if add_sets:
-        mesh.add(return_set)
+
     return return_set
