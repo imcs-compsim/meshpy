@@ -22,6 +22,7 @@
 """This script is used to test the creation of Abaqus input files."""
 
 import numpy as np
+import pytest
 
 from meshpy.abaqus.beam import AbaqusBeamMaterial, generate_abaqus_beam
 from meshpy.abaqus.input_file import AbaqusBeamNormalDefinition, AbaqusInputFile
@@ -30,8 +31,22 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 
+PYTEST_ABAQUS_NORMAL_DEFINITION_PARAMETRIZE = [
+    ("normal_definition", "additional_identifier"),
+    [
+        (AbaqusBeamNormalDefinition.normal, "normal"),
+        (AbaqusBeamNormalDefinition.normal_and_extra_node, "normal_and_extra_node"),
+    ],
+]
 
-def test_abaqus_helix(assert_results_equal, get_corresponding_reference_file_path):
+
+@pytest.mark.parametrize(*PYTEST_ABAQUS_NORMAL_DEFINITION_PARAMETRIZE)
+def test_abaqus_helix(
+    normal_definition,
+    additional_identifier,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
+):
     """Create a helix and check the created Abaqus input file."""
 
     # Helix parameters
@@ -67,16 +82,22 @@ def test_abaqus_helix(assert_results_equal, get_corresponding_reference_file_pat
 
     input_file = AbaqusInputFile(mesh)
     assert_results_equal(
-        get_corresponding_reference_file_path(extension="inp"),
-        input_file.get_input_file_string(
-            AbaqusBeamNormalDefinition.smallest_rotation_of_triad_at_first_node
+        get_corresponding_reference_file_path(
+            additional_identifier=additional_identifier, extension="inp"
         ),
+        input_file.get_input_file_string(normal_definition),
         string_splitter=",",
         atol=1e-14,
     )
 
 
-def test_abaqus_frame(assert_results_equal, get_corresponding_reference_file_path):
+@pytest.mark.parametrize(*PYTEST_ABAQUS_NORMAL_DEFINITION_PARAMETRIZE)
+def test_abaqus_frame(
+    normal_definition,
+    additional_identifier,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
+):
     """Create a frame out of connected beams with different materials."""
 
     mesh = Mesh()
@@ -98,10 +119,10 @@ def test_abaqus_frame(assert_results_equal, get_corresponding_reference_file_pat
 
     input_file = AbaqusInputFile(mesh)
     assert_results_equal(
-        get_corresponding_reference_file_path(extension="inp"),
-        input_file.get_input_file_string(
-            AbaqusBeamNormalDefinition.smallest_rotation_of_triad_at_first_node
+        get_corresponding_reference_file_path(
+            additional_identifier=additional_identifier, extension="inp"
         ),
+        input_file.get_input_file_string(normal_definition),
         string_splitter=",",
         atol=1e-15,
     )

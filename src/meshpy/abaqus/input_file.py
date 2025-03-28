@@ -77,9 +77,17 @@ def get_set_lines(set_type, items, name):
 
 
 class AbaqusBeamNormalDefinition(_Enum):
-    """Enum for different ways to define the beam cross-section normal."""
+    """Enum for different ways to define the beam cross-section normal.
 
-    smallest_rotation_of_triad_at_first_node = _auto()
+    For more information see the Abaqus documentation on: "Beam element cross-section orientation"
+    and the function `AbaqusInputFile.calculate_cross_section_normal_data`.
+    """
+
+    normal_and_extra_node = _auto()
+    """Create an extra node and the nodal normal information for each node."""
+
+    normal = _auto()
+    """Create the nodal normal information for each node."""
 
 
 class AbaqusInputFile(object):
@@ -99,7 +107,7 @@ class AbaqusInputFile(object):
         self,
         file_path,
         *,
-        normal_definition=AbaqusBeamNormalDefinition.smallest_rotation_of_triad_at_first_node,
+        normal_definition=AbaqusBeamNormalDefinition.normal_and_extra_node,
     ):
         """Write the ASCII input file to disk.
 
@@ -176,8 +184,8 @@ class AbaqusInputFile(object):
             element.n2 = [None for i_node in range(len(element.nodes))]
 
         if (
-            normal_definition
-            == AbaqusBeamNormalDefinition.smallest_rotation_of_triad_at_first_node
+            normal_definition == AbaqusBeamNormalDefinition.normal
+            or normal_definition == AbaqusBeamNormalDefinition.normal_and_extra_node
         ):
             # In this case we take the beam tangent from the first to the second node
             # and calculate an ortho-normal triad based on this direction. We do this
@@ -192,7 +200,15 @@ class AbaqusInputFile(object):
                 rotation = element.nodes[0].rotation
                 cross_section_rotation = _smallest_rotation(rotation, t)
 
-                element.n1_position = node_1 + cross_section_rotation * [0.0, 1.0, 0.0]
+                if (
+                    normal_definition
+                    == AbaqusBeamNormalDefinition.normal_and_extra_node
+                ):
+                    element.n1_position = node_1 + cross_section_rotation * [
+                        0.0,
+                        1.0,
+                        0.0,
+                    ]
                 element.n2[0] = cross_section_rotation * [0.0, 0.0, 1.0]
         else:
             raise ValueError(f"Got unexpected normal_definition {normal_definition}")
