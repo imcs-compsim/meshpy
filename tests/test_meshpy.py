@@ -772,11 +772,11 @@ def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_fil
             beam_sets = function(
                 input_file,
                 start_node=input_file.nodes[0],
-                end_node=True,
+                close_beam=True,
                 **(argument_list),
             )
         else:
-            beam_sets = function(input_file, end_node=True, **(argument_list))
+            beam_sets = function(input_file, close_beam=True, **(argument_list))
         input_file.add(beam_sets)
         return input_file
 
