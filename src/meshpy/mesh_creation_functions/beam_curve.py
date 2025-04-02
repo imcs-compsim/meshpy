@@ -246,7 +246,7 @@ def create_beam_mesh_curve(
                 self.S_start_newton = S
 
                 # Return the needed values for beam creation.
-                return (pos, rot)
+                return (pos, rot, S)
 
             return get_beam_position_and_rotation_at_xi
 

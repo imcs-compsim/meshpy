@@ -22,6 +22,8 @@
 """This file defines the base beam element in MeshPy."""
 
 from typing import Any as _Any
+from typing import Callable as _Callable
+from typing import List as _List
 from typing import Optional as _Optional
 
 import numpy as _np
@@ -30,6 +32,7 @@ import vtk as _vtk
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.element import Element as _Element
 from meshpy.core.node import NodeCosserat as _NodeCosserat
+from meshpy.core.rotation import Rotation as _Rotation
 from meshpy.core.vtk_writer import add_point_data_node_sets as _add_point_data_node_sets
 
 
@@ -51,34 +54,46 @@ class Beam(_Element):
         super().__init__(nodes=nodes, material=material)
 
     def create_beam(
-        self, beam_function, *, start_node=None, end_node=None, relative_twist=None
-    ):
+        self,
+        beam_function: _Callable,
+        *,
+        start_node: _Optional[_NodeCosserat] = None,
+        end_node: _Optional[_NodeCosserat] = None,
+        relative_twist: _Optional[_Rotation] = None,
+        set_nodal_arc_length: bool = False,
+        nodal_arc_length_offset: _Optional[float] = None,
+    ) -> _List[_NodeCosserat]:
         """Create the nodes for this beam element. The function returns a list
         with the created nodes.
 
         In the case of start_node and end_node, it is checked, that the
         function and the node have the same coordinates and rotations.
 
-        Args
-        ----
-        beam_function: function(xi)
-            Returns the position and rotation of the beam along the local
-            coordinate xi.
-        start_node: Node
-            If this argument is given, this is the node of the beam at xi=-1.
-        end_node: Node
-            If this argument is given, this is the node of the beam at xi=1.
-        relative_twist: Rotation
-            Apply this relative rotation to all created nodes. This can be used to
-            "twist" the created beam to match the rotation of given nodes.
+        Args:
+            beam_function: function(xi)
+                Returns the position, rotation and (optionally) arc length of the
+                beam along the local coordinate xi. If no arc lengths is provided,
+                the returned value should simply be None.
+            start_node: Node
+                If this argument is given, this is the node of the beam at xi=-1.
+            end_node: Node
+                If this argument is given, this is the node of the beam at xi=1.
+            relative_twist: Rotation
+                Apply this relative rotation to all created nodes. This can be used to
+                "twist" the created beam to match the rotation of given nodes.
+            set_nodal_arc_length:
+                Flag if the arc length in the created nodes should be set.
+            nodal_arc_length_offset:
+                Offset of the stored nodal arc length w.r.t. to the one generated
+                by the function.
         """
 
         if len(self.nodes) > 0:
             raise ValueError("The beam should not have any local nodes yet!")
 
-        def check_node(node, pos, rot, name):
-            """Check if the given node matches with the position and
-            rotation."""
+        def check_node(node, pos, rot, arc_length, name):
+            """Check if the given node matches with the position and rotation
+            and optionally also the arc length."""
 
             if _np.linalg.norm(pos - node.coordinates) > _mpy.eps_pos:
                 raise ValueError(
@@ -88,23 +103,32 @@ class Beam(_Element):
             if not node.rotation == rot:
                 raise ValueError(f"{name} rotation does not match with function!")
 
+            if arc_length is not None:
+                if _np.abs(node.arc_length - arc_length) > _mpy.eps_pos:
+                    raise ValueError(
+                        f"Arc lengths don't match, got {node.arc_length} and {arc_length}"
+                    )
+
         # Flags if nodes are given
         has_start_node = start_node is not None
         has_end_node = end_node is not None
 
         # Loop over local nodes.
+        arc_length = None
         for i, xi in enumerate(self.nodes_create):
             # Get the position and rotation at xi
-            pos, rot = beam_function(xi)
+            pos, rot, arc_length_from_function = beam_function(xi)
             if relative_twist is not None:
                 rot = rot * relative_twist
+            if set_nodal_arc_length:
+                arc_length = arc_length_from_function + nodal_arc_length_offset
 
             # Check if the position and rotation match existing nodes
             if i == 0 and has_start_node:
-                check_node(start_node, pos, rot, "start_node")
+                check_node(start_node, pos, rot, arc_length, "start_node")
                 self.nodes = [start_node]
             elif (i == len(self.nodes_create) - 1) and has_end_node:
-                check_node(end_node, pos, rot, "end_node")
+                check_node(end_node, pos, rot, arc_length, "end_node")
 
             # Create the node
             if (i > 0 or not has_start_node) and (
@@ -112,7 +136,9 @@ class Beam(_Element):
             ):
                 is_middle_node = 0 < i < len(self.nodes_create) - 1
                 self.nodes.append(
-                    _NodeCosserat(pos, rot, is_middle_node=is_middle_node)
+                    _NodeCosserat(
+                        pos, rot, is_middle_node=is_middle_node, arc_length=arc_length
+                    )
                 )
 
         # Get a list with the created nodes.
