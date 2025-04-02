@@ -51,7 +51,13 @@ class Beam(_Element):
         super().__init__(nodes=nodes, material=material)
 
     def create_beam(
-        self, beam_function, *, start_node=None, end_node=None, relative_twist=None
+        self,
+        beam_function,
+        *,
+        arc_length_function=None,
+        start_node=None,
+        end_node=None,
+        relative_twist=None,
     ):
         """Create the nodes for this beam element. The function returns a list
         with the created nodes.
@@ -59,26 +65,28 @@ class Beam(_Element):
         In the case of start_node and end_node, it is checked, that the
         function and the node have the same coordinates and rotations.
 
-        Args
-        ----
-        beam_function: function(xi)
-            Returns the position and rotation of the beam along the local
-            coordinate xi.
-        start_node: Node
-            If this argument is given, this is the node of the beam at xi=-1.
-        end_node: Node
-            If this argument is given, this is the node of the beam at xi=1.
-        relative_twist: Rotation
-            Apply this relative rotation to all created nodes. This can be used to
-            "twist" the created beam to match the rotation of given nodes.
+        Args:
+            beam_function: function(xi)
+                Returns the position and rotation of the beam along the local
+                coordinate xi.
+            arc_length_function:
+                A function to return the arc length along the created beam filament.
+                This function can simply return none if no arc lengths is provided.
+            start_node: Node
+                If this argument is given, this is the node of the beam at xi=-1.
+            end_node: Node
+                If this argument is given, this is the node of the beam at xi=1.
+            relative_twist: Rotation
+                Apply this relative rotation to all created nodes. This can be used to
+                "twist" the created beam to match the rotation of given nodes.
         """
 
         if len(self.nodes) > 0:
             raise ValueError("The beam should not have any local nodes yet!")
 
-        def check_node(node, pos, rot, name):
-            """Check if the given node matches with the position and
-            rotation."""
+        def check_node(node, pos, rot, name, arc_length):
+            """Check if the given node matches with the position and rotation
+            and optionally also the arc length."""
 
             if _np.linalg.norm(pos - node.coordinates) > _mpy.eps_pos:
                 raise ValueError(
@@ -88,23 +96,32 @@ class Beam(_Element):
             if not node.rotation == rot:
                 raise ValueError(f"{name} rotation does not match with function!")
 
+            if arc_length is not None:
+                if _np.abs(node.arc_length - arc_length) > _mpy.eps_pos:
+                    raise ValueError(
+                        f"Arc lengths don't match, got {node.arc_length} and {arc_length}"
+                    )
+
         # Flags if nodes are given
         has_start_node = start_node is not None
         has_end_node = end_node is not None
 
         # Loop over local nodes.
+        arc_length = None
         for i, xi in enumerate(self.nodes_create):
             # Get the position and rotation at xi
             pos, rot = beam_function(xi)
+            if arc_length_function is not None:
+                arc_length = arc_length_function(xi)
             if relative_twist is not None:
                 rot = rot * relative_twist
 
             # Check if the position and rotation match existing nodes
             if i == 0 and has_start_node:
-                check_node(start_node, pos, rot, "start_node")
+                check_node(start_node, pos, rot, "start_node", arc_length)
                 self.nodes = [start_node]
             elif (i == len(self.nodes_create) - 1) and has_end_node:
-                check_node(end_node, pos, rot, "end_node")
+                check_node(end_node, pos, rot, "end_node", arc_length)
 
             # Create the node
             if (i > 0 or not has_start_node) and (
@@ -112,7 +129,9 @@ class Beam(_Element):
             ):
                 is_middle_node = 0 < i < len(self.nodes_create) - 1
                 self.nodes.append(
-                    _NodeCosserat(pos, rot, is_middle_node=is_middle_node)
+                    _NodeCosserat(
+                        pos, rot, is_middle_node=is_middle_node, arc_length=arc_length
+                    )
                 )
 
         # Get a list with the created nodes.

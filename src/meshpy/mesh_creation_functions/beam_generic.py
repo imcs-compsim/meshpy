@@ -51,6 +51,8 @@ def create_beam_mesh_function(
     n_el: _Optional[int] = None,
     l_el: _Optional[float] = None,
     interval_length: _Optional[float] = None,
+    set_nodal_arc_length: _Optional[bool] = False,
+    nodal_arc_length_start: _Optional[float] = None,
     node_positions_of_elements: _Optional[_List[float]] = None,
     start_node: _Optional[_Union[_NodeCosserat, _GeometrySet]] = None,
     end_node: _Optional[_Union[_NodeCosserat, _GeometrySet]] = None,
@@ -77,6 +79,11 @@ def create_beam_mesh_function(
             point_b (both within the interval) and return a function(xi) that
             calculates the position and rotation along the beam, where
             point_a -> xi = -1 and point_b -> xi = 1.
+
+            The the Jacobian of the returned position field should be a unit
+            vector. Otherwise, the nodes may be spaced in an undesired way
+            or the stored arc length along the filament is wrong. All standard
+            mesh creation functions in MeshPy fulfill this property.
         interval:
             Start and end values for interval that will be used to create the
             beam.
@@ -90,6 +97,14 @@ def create_beam_mesh_function(
             created.
         interval_length:
             Total length of the interval. Is required when the option l_el is given.
+        set_nodal_arc_length:
+            Flag if the arc length along the beam filament is set in the created nodes.
+            This requires the parameter interval_length to be set. It is ensured that
+            the arc length is consistent with possible given start/end nodes.
+        nodal_arc_length_start:
+            Initial arc length for the first node on the filament. Defaults to 0 or
+            arc length set in the start node or the arc length in the end node minus
+            total length (such that the arc length at the end node matches.
         node_positions_of_elements:
             A list of normalized positions (within [0,1] and in ascending order)
             that define the boundaries of beam elements along the created curve.
@@ -138,6 +153,21 @@ def create_beam_mesh_function(
             'The arguments "close_beam" and "end_node" are mutually exclusive'
         )
 
+    if set_nodal_arc_length:
+        if interval_length is None:
+            raise ValueError(
+                "The flag 'set_nodal_arc_length' requires 'interval_length' to be set."
+            )
+        if close_beam:
+            raise ValueError(
+                "The flags 'set_nodal_arc_length' and 'close_beam' are mutually exclusive."
+            )
+    elif nodal_arc_length_start is not None:
+        raise ValueError(
+            'Providing the argument "nodal_arc_length_start" without setting '
+            '"set_nodal_arc_length" to True does not make sense.'
+        )
+
     # Cases where we have equally spaced elements
     if n_el is not None or l_el is not None:
         if l_el is not None:
@@ -150,13 +180,10 @@ def create_beam_mesh_function(
         elif n_el is None:
             raise ValueError("n_el should not be None at this point")
 
-        interval_node_positions_of_elements = [
-            interval[0] + i_node * (interval[1] - interval[0]) / n_el
-            for i_node in range(n_el + 1)
-        ]
+        node_positions_of_elements = [i_node / n_el for i_node in range(n_el + 1)]
     # A list for the element node positions was provided
     elif node_positions_of_elements is not None:
-        # Check that the given positions are in ascending order and start with 1 and end with 0
+        # Check that the given positions are in ascending order and start with 0 and end with 1
         for index, value, name in zip([0, -1], [0, 1], ["First", "Last"]):
             if not _np.isclose(
                 value,
@@ -174,9 +201,11 @@ def create_beam_mesh_function(
             raise ValueError(
                 f"The given node_positions_of_elements must be in ascending order. Got {node_positions_of_elements}"
             )
-        interval_node_positions_of_elements = interval[0] + (
-            interval[1] - interval[0]
-        ) * _np.asarray(node_positions_of_elements)
+
+    # Get the scale the node positions to the interval coordinates
+    interval_node_positions_of_elements = interval[0] + (
+        interval[1] - interval[0]
+    ) * _np.asarray(node_positions_of_elements)
 
     # We need to make sure we have the number of elements for the case a given end node
     n_el = len(interval_node_positions_of_elements) - 1
@@ -244,6 +273,21 @@ def create_beam_mesh_function(
         _, end_rotation = function_over_whole_interval(1.0)
         relative_twist_end = get_relative_twist(end_node.rotation, end_rotation)
 
+    # Get the start value for the arc length functionality
+    if set_nodal_arc_length:
+        if nodal_arc_length_start is not None:
+            # Let's use the given value, if it does not match with possible given
+            # start or end nodes, the check in the create beam function will detect
+            # that.
+            pass
+        elif start_node is not None and start_node.arc_length is not None:
+            nodal_arc_length_start = start_node.arc_length
+        elif end_node is not None and end_node.arc_length is not None:
+            nodal_arc_length_start = end_node.arc_length - interval_length
+        else:
+            # Default value
+            nodal_arc_length_start = 0.0
+
     # Check if a relative twist has to be applied
     if relative_twist_start is not None and relative_twist_end is not None:
         if relative_twist_start == relative_twist_end:
@@ -260,7 +304,7 @@ def create_beam_mesh_function(
         relative_twist = None
 
     # Create the beams.
-    for i_el in range(len(interval_node_positions_of_elements) - 1):
+    for i_el in range(n_el):
         # If the beam is closed with itself, set the end node to be the
         # first node of the beam. This is done when the second element is
         # created, as the first node already exists here.
@@ -285,6 +329,26 @@ def create_beam_mesh_function(
         else:
             last_node = None
 
+        # Get the function to create the arc length along the beam
+        arc_length_function: _Optional[_Callable] = None
+        if set_nodal_arc_length:
+
+            def arc_length_function(xi):
+                """A function to return the filament arc length within the
+                interval of the currently created beam element."""
+
+                interval_a = node_positions_of_elements[i_el]
+                interval_b = node_positions_of_elements[i_el + 1]
+                element_start_in_space = interval_a * interval_length
+                element_end_in_space = interval_b * interval_length
+                return (
+                    0.5
+                    * (
+                        (1.0 - xi) * element_start_in_space
+                        + (1.0 + xi) * element_end_in_space
+                    )
+                ) + nodal_arc_length_start
+
         element = beam_class(material=material)
         elements.append(element)
         nodes.extend(
@@ -293,6 +357,7 @@ def create_beam_mesh_function(
                 start_node=first_node,
                 end_node=last_node,
                 relative_twist=relative_twist,
+                arc_length_function=arc_length_function,
             )
         )
 
