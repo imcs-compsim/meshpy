@@ -855,6 +855,283 @@ def test_mesh_creation_functions_argument_checks():
         )
 
 
+@pytest.mark.parametrize(
+    "basic_creation_function",
+    ["line", "arc"],
+)
+def test_mesh_creation_functions_arc_length(
+    basic_creation_function, assert_results_equal
+):
+    """Test that the arc length can be stored in the nodes when creating a
+    filament."""
+
+    node_positions_of_elements = [0, 0.25, 1]
+    mat = MaterialReissner()
+    offset = 3.0
+    if basic_creation_function == "line":
+        length = 2.5
+        start_pos = [0, 0, 0]
+        end_pos = [length, 0, 0]
+        start_rot = Rotation()
+        end_rot = Rotation()
+
+        def create_beam(mesh, **kwargs):
+            """Wrapper for the common arguments in the call to create the
+            line."""
+
+            create_beam_mesh_line(
+                mesh,
+                Beam3rHerm2Line3,
+                mat,
+                start_pos,
+                end_pos,
+                node_positions_of_elements=node_positions_of_elements,
+                **kwargs,
+            )
+    elif basic_creation_function == "arc":
+        length = np.pi * 0.5
+        start_pos = [0, 1, 0]
+        end_pos = [-1, 0, 0]
+        start_rot = Rotation([0, 0, 1], np.pi)
+        end_rot = Rotation([0, 0, 1], 1.5 * np.pi)
+
+        def create_beam(mesh, **kwargs):
+            """Wrapper for the common arguments in the call to create the
+            arc."""
+
+            create_beam_mesh_arc_segment_2d(
+                mesh,
+                Beam3rHerm2Line3,
+                mat,
+                [0, 0, 0],
+                1.0,
+                np.pi * 0.5,
+                np.pi,
+                node_positions_of_elements=node_positions_of_elements,
+                **kwargs,
+            )
+
+    arc_length_ref = np.array([0, 0.125, 0.25, 0.625, 1.0]) * length
+    arc_length_offset_ref = arc_length_ref + offset
+
+    def get_start_and_end_node(*, arc_length_start=None, arc_length_end=None):
+        """Return the explicitly created start and end node."""
+        start_node = NodeCosserat(start_pos, start_rot, arc_length=arc_length_start)
+        end_node = NodeCosserat(end_pos, end_rot, arc_length=arc_length_end)
+        return (start_node, end_node)
+
+    def check_arc_length(mesh, arc_length_ref):
+        """Compare the arc lengths of the nodes in mesh with reference
+        values."""
+        arc_length_from_mesh = np.array([node.arc_length for node in mesh.nodes])
+        assert_results_equal(
+            {"arc_length": arc_length_from_mesh}, {"arc_length": arc_length_ref}
+        )
+
+    # Standard arc length calculation
+    mesh = Mesh()
+    create_beam(mesh, set_nodal_arc_length=True)
+    check_arc_length(mesh, arc_length_ref)
+
+    # Standard arc length calculation with offset
+    mesh = Mesh()
+    create_beam(mesh, set_nodal_arc_length=True, nodal_arc_length_offset=offset)
+    check_arc_length(mesh, arc_length_offset_ref)
+
+    # Arc length calculation based on start node
+    mesh = Mesh()
+    start_node, _ = get_start_and_end_node(arc_length_start=offset)
+    mesh.add(start_node)
+    create_beam(mesh, set_nodal_arc_length=True, start_node=start_node)
+    check_arc_length(mesh, arc_length_offset_ref)
+
+    # Arc length calculation based on end node
+    mesh = Mesh()
+    _, end_node = get_start_and_end_node(arc_length_end=offset + length)
+    mesh.add(end_node)
+    create_beam(mesh, set_nodal_arc_length=True, end_node=end_node)
+    # The nodes are in different order here, so we need to reorder the reference result
+    check_arc_length(
+        mesh, [arc_length_offset_ref[-1]] + arc_length_offset_ref.tolist()[:-1]
+    )
+
+    # Arc length calculation based on start and end node (if the values don't
+    # match an error will be raised)
+    mesh = Mesh()
+    start_node, end_node = get_start_and_end_node(
+        arc_length_start=offset, arc_length_end=offset + length
+    )
+    mesh.add(start_node, end_node)
+    create_beam(
+        mesh, set_nodal_arc_length=True, start_node=start_node, end_node=end_node
+    )
+    # The nodes are in different order here, so we need to reorder the reference result
+    check_arc_length(
+        mesh,
+        [arc_length_offset_ref[0]]
+        + [arc_length_offset_ref[-1]]
+        + arc_length_offset_ref.tolist()[1:-1],
+    )
+
+    # Arc length calculation based on all possible parameters (if the values don't
+    # match an error will be raised)
+    mesh = Mesh()
+    start_node, end_node = get_start_and_end_node(
+        arc_length_start=offset, arc_length_end=offset + length
+    )
+    mesh.add(start_node, end_node)
+    create_beam(
+        mesh,
+        set_nodal_arc_length=True,
+        start_node=start_node,
+        end_node=end_node,
+        nodal_arc_length_offset=offset,
+    )
+    # The nodes are in different order here, so we need to reorder the reference result
+    check_arc_length(
+        mesh,
+        [arc_length_offset_ref[0]]
+        + [arc_length_offset_ref[-1]]
+        + arc_length_offset_ref.tolist()[1:-1],
+    )
+
+
+def test_mesh_creation_functions_arc_length_argument_checks():
+    """Test that wrong input values leads to failure."""
+
+    dummy_arg = "dummy"
+
+    # Check error messages for input parameters
+    with pytest.raises(
+        ValueError,
+        match='The arguments "n_el", "l_el" and "node_positions_of_elements" are mutually exclusive',
+    ):
+        mesh = Mesh()
+        # This should raise an error since we dont allow `n_el` and `l_el`
+        # to be set at the same time.
+        create_beam_mesh_line(
+            mesh,
+            Beam3rHerm2Line3,
+            MaterialReissner(),
+            [1.0, 2.0, 0.0],
+            [3.0, 4.0, 6.0],
+            n_el=1,
+            l_el=1.5,
+        )
+    with pytest.raises(
+        ValueError,
+        match='The arguments "n_el", "l_el" and "node_positions_of_elements" are mutually exclusive',
+    ):
+        mesh = Mesh()
+        # This should raise an error because node_positions_of_elements can not be used with l_el.
+
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            l_el=1,
+            node_positions_of_elements=[0.0, 0.5, 1.0],
+        )
+
+    with pytest.raises(
+        ValueError,
+        match='The arguments "n_el", "l_el" and "node_positions_of_elements" are mutually exclusive',
+    ):
+        mesh = Mesh()
+        # This should raise an error because node_positions_of_elements can not be used with n_el.
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            n_el=1,
+            node_positions_of_elements=[0.0, 0.5, 1.0],
+        )
+
+    with pytest.raises(
+        ValueError, match='The parameter "l_el" requires "interval_length" to be set.'
+    ):
+        mesh = Mesh()
+        # This should raise an error because we set `l_el` but don't provide
+        # `interval_length`.
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=[0, 1],
+            l_el=2.0,
+        )
+
+    with pytest.raises(
+        ValueError,
+        match="First entry of node_positions_of_elements must be 0, got -1.0",
+    ):
+        mesh = Mesh()
+        # This should raise an error because the interval [0,1] is violated.
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            node_positions_of_elements=[-1.0, 0.0, 1.0],
+        )
+
+    with pytest.raises(
+        ValueError, match="Last entry of node_positions_of_elements must be 1, got 2.0"
+    ):
+        mesh = Mesh()
+        # This should raise an error because the interval [0,1] is violated.
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            node_positions_of_elements=[0.0, 1.0, 2.0],
+        )
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "The given node_positions_of_elements must be in ascending order. Got [0.0, 0.2, 0.1, 1.0]"
+        ),
+    ):
+        mesh = Mesh()
+        # This should raise an error because the interval is not ordered.
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            node_positions_of_elements=[0.0, 0.2, 0.1, 1.0],
+        )
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            'The arguments "close_beam" and "end_node" are mutually exclusive'
+        ),
+    ):
+        mesh = Mesh()
+        # This should raise an error because the interval is not ordered.
+        create_beam_mesh_function(
+            mesh,
+            beam_class=dummy_arg,
+            material=dummy_arg,
+            function_generator=dummy_arg,
+            interval=dummy_arg,
+            n_el=1,
+            close_beam=True,
+            end_node=dummy_arg,
+        )
+
+
 def test_mesh_creation_functions_curve_3d_helix(
     assert_results_equal, get_corresponding_reference_file_path
 ):
