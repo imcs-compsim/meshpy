@@ -186,18 +186,25 @@ def test_space_time_varying_material_length(
 
         mesh_1 = Mesh()
         create_beam_mesh_line(
-            mesh_1, beam_type, mat, [np.sin(time), 0, 0], [2, pos_y, 0], n_el=3
+            mesh_1,
+            beam_type,
+            mat,
+            [np.sin(time), 0, 0],
+            [2, pos_y, 0],
+            n_el=3,
+            set_nodal_arc_length=arc_length,
         )
 
         mesh_2 = Mesh()
-        create_beam_mesh_line(mesh_2, beam_type, mat, [2, pos_y, 0], [2, 3, 0], n_el=2)
-
-        if arc_length:
-            for i_mesh, line_mesh in enumerate([mesh_1, mesh_2]):
-                for i_node, node in enumerate(line_mesh.nodes):
-                    # This is a dummy arc length here, simply to achieve float values that
-                    # are not matching at the corner node.
-                    node.arc_length = i_node / 4.0 + i_mesh
+        create_beam_mesh_line(
+            mesh_2,
+            beam_type,
+            mat,
+            [2, pos_y, 0],
+            [2, 3, 0],
+            n_el=2,
+            set_nodal_arc_length=arc_length,
+        )
 
         mesh = Mesh()
         mesh.add(mesh_1, mesh_2)
