@@ -99,7 +99,11 @@ def create_beam_mesh_line(mesh, beam_class, material, start_point, end_point, **
             coordinate xi."""
             point_a = start_point + parameter_a * direction
             point_b = start_point + parameter_b * direction
-            return (0.5 * (1 - xi) * point_a + 0.5 * (1 + xi) * point_b, rotation)
+            pos = 0.5 * (1 - xi) * point_a + 0.5 * (1 + xi) * point_b
+            arc_length = (
+                0.5 * (1 - xi) * parameter_a + 0.5 * (1 + xi) * parameter_b
+            ) * line_length
+            return (pos, rotation, arc_length)
 
         return beam_function
 
@@ -258,7 +262,7 @@ def create_beam_mesh_arc_segment_via_axis(
             arc_rotation = _Rotation(axis, phi)
             rot = arc_rotation * start_rotation
             pos = center + arc_rotation * distance
-            return (pos, rot)
+            return (pos, rot, phi * radius)
 
         return beam_function
 
