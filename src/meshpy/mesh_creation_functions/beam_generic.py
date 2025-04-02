@@ -194,7 +194,7 @@ def create_beam_mesh_function(
         if node not in mesh.nodes:
             raise ValueError("The given node is not in the current mesh")
 
-    def get_relative_twist(rotation_node, rotation_function):
+    def get_relative_twist(rotation_node, rotation_function, name):
         """Check if the rotation at a node and the one returned by the function
         match.
 
@@ -210,7 +210,7 @@ def create_beam_mesh_function(
         elif not _mpy.allow_beam_rotation:
             # The settings do not allow for a rotation of the beam
             raise ValueError(
-                "Given nodal rotation does not match with given rotation function!"
+                f"Given rotation of the {name} node does not match with given rotation function!"
             )
         else:
             # Evaluate the relative rotation
@@ -221,7 +221,7 @@ def create_beam_mesh_function(
                 return rotation_function.inv() * rotation_node
             else:
                 raise ValueError(
-                    "The tangent of the start node does not match with the given function!"
+                    f"The tangent of the {name} node does not match with the given function!"
                 )
 
     # Position and rotation at the start and end of the interval
@@ -235,14 +235,16 @@ def create_beam_mesh_function(
         nodes = [start_node]
         check_given_node(start_node)
         _, start_rotation = function_over_whole_interval(-1.0)
-        relative_twist_start = get_relative_twist(start_node.rotation, start_rotation)
+        relative_twist_start = get_relative_twist(
+            start_node.rotation, start_rotation, "start"
+        )
 
     # If an end node is given, check what behavior is wanted.
     if end_node is not None:
         end_node = _get_single_node(end_node)
         check_given_node(end_node)
         _, end_rotation = function_over_whole_interval(1.0)
-        relative_twist_end = get_relative_twist(end_node.rotation, end_rotation)
+        relative_twist_end = get_relative_twist(end_node.rotation, end_rotation, "end")
 
     # Check if a relative twist has to be applied
     if relative_twist_start is not None and relative_twist_end is not None:

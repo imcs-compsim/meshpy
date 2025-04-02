@@ -179,8 +179,6 @@ def create_beam_mesh_arc_segment_via_axis(
     axis_point,
     start_point,
     angle,
-    *,
-    start_node=None,
     **kwargs,
 ):
     """Generate a circular segment of beam elements.
@@ -241,14 +239,13 @@ def create_beam_mesh_arc_segment_via_axis(
     center = start_point - distance
 
     # Get the rotation at the start
-    if start_node is None:
-        tangent = _np.cross(axis, distance)
-        tangent /= _np.linalg.norm(tangent)
-        start_rotation = _Rotation.from_rotation_matrix(
-            _np.transpose(_np.array([tangent, -distance / radius, axis]))
-        )
-    else:
-        start_rotation = _get_single_node(start_node).rotation
+    # No need to check the start node here, as eventual rotation offsets in
+    # tangential direction will be covered by the create beam functionality.
+    tangent = _np.cross(axis, distance)
+    tangent /= _np.linalg.norm(tangent)
+    start_rotation = _Rotation.from_rotation_matrix(
+        _np.transpose(_np.array([tangent, -distance / radius, axis]))
+    )
 
     def get_beam_geometry(alpha, beta):
         """Return a function for the position and rotation along the beam
@@ -273,7 +270,6 @@ def create_beam_mesh_arc_segment_via_axis(
         function_generator=get_beam_geometry,
         interval=[0.0, angle],
         interval_length=angle * radius,
-        start_node=start_node,
         **kwargs,
     )
 
