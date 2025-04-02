@@ -155,6 +155,81 @@ def test_mesh_creation_functions_arc_segment_via_axis(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
+def test_mesh_creation_functions_arc_segment_start_end_node(
+    assert_results_equal, get_corresponding_reference_file_path
+):
+    """Check that if start end nodes with non-matching positions or tangents
+    are provided we get an error."""
+
+    angle = 1.0
+    radius = 2.0
+    start_node_pos = [0, 0, 0]
+    start_node_rot = Rotation()
+    end_node_pos = radius * np.array([np.sin(angle), 1.0 - np.cos(angle), 0])
+    end_node_rot = Rotation([0, 0, 1], angle)
+
+    def create_beam(*, start_node=None, end_node=None):
+        """This is the base function we use to generate the beam in this test
+        case."""
+        input_file = InputFile()
+        mat = MaterialReissner()
+        if start_node is not None:
+            input_file.add(start_node)
+        if end_node is not None:
+            input_file.add(end_node)
+        create_beam_mesh_arc_segment_via_axis(
+            input_file,
+            Beam3rHerm2Line3,
+            mat,
+            [0, 0, 1],
+            [0, radius, 0],
+            [0, 0, 0],
+            angle,
+            n_el=3,
+            start_node=start_node,
+            end_node=end_node,
+        )
+        return input_file
+
+    # This should work as expected, as all the values match.
+    start_node = NodeCosserat(start_node_pos, start_node_rot)
+    end_node = NodeCosserat(end_node_pos, end_node_rot)
+    input_file = create_beam(start_node=start_node, end_node=end_node)
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+
+    # Create with start node where the position does not match.
+    with pytest.raises(
+        ValueError,
+        match="start_node position does not match with function!",
+    ):
+        start_node = NodeCosserat([0, 1, 0], start_node_rot)
+        create_beam(start_node=start_node)
+
+    # Create with start node where the rotation does not match.
+    with pytest.raises(
+        ValueError,
+        match="The tangent of the start node does not match with the given function!",
+    ):
+        start_node = NodeCosserat(start_node_pos, Rotation([1, 2, 3], np.pi / 3))
+        create_beam(start_node=start_node)
+
+    # Create with end node where the position does not match.
+    with pytest.raises(
+        ValueError,
+        match="end_node position does not match with function!",
+    ):
+        end_node = NodeCosserat([0, 0, 0], end_node_rot)
+        create_beam(end_node=end_node)
+
+    # Create with end node where the rotation does not match.
+    with pytest.raises(
+        ValueError,
+        match="The tangent of the end node does not match with the given function!",
+    ):
+        end_node = NodeCosserat(end_node_pos, Rotation([1, 2, 3], np.pi / 3))
+        create_beam(end_node=end_node)
+
+
 def test_mesh_creation_functions_arc_segment_via_rotation(
     assert_results_equal, get_corresponding_reference_file_path
 ):
