@@ -1,0 +1,45 @@
+PROBLEM TYPE:
+  PROBLEMTYPE: "Structure"
+IO:
+  OUTPUT_BIN: false
+  STRUCT_DISP: false
+  VERBOSITY: "Standard"
+STRUCTURAL DYNAMIC:
+  INT_STRATEGY: "Standard"
+  DYNAMICTYPE: "Statics"
+  PRESTRESS: "MULF"
+  PRESTRESSTIME: 1
+  TIMESTEP: 0.1
+  NUMSTEP: 17
+  MAXTIME: 1.7000000000000002
+  LOADLIN: true
+  PREDICT: "TangDis"
+  LINEAR_SOLVER: 1
+SOLVER 1:
+  SOLVER: "Superlu"
+  NAME: "Structure_Solver"
+STRUCT NOX/Printing:
+  Error: true
+  Inner Iteration: false
+  Details: true
+  Linear Solver Details: true
+  Test Details: true
+BEAM INTERACTION:
+  REPARTITIONSTRATEGY: "Everydt"
+BEAM CONTACT:
+  MODELEVALUATOR: "Standard"
+BINNING STRATEGY:
+  BIN_SIZE_LOWER_BOUND: 0.69
+  DOMAINBOUNDINGBOX: "1 2 3 4 5 6"
+BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING:
+  CONTACT_DISCRETIZATION: mortar
+  CONSTRAINT_STRATEGY: penalty
+  GEOMETRY_PAIR_SEGMENTATION_SEARCH_POINTS: 2
+  COUPLE_RESTART_STATE: true
+BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING:
+  CONTACT_DISCRETIZATION: gauss_point_to_segment
+  CONSTRAINT_STRATEGY: penalty
+  GEOMETRY_PAIR_STRATEGY: gauss_point_projection_without_boundary_segmentation
+  GEOMETRY_PAIR_SEGMENTATION_SEARCH_POINTS: 2
+STRUCT NOX/Status Test:
+  XML File: "/home/rudlstorfer/01_work/01_workspace/meshpy/tests/reference-files/NOT_DEFINED"

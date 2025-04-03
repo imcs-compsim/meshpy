@@ -1,0 +1,17 @@
+MATERIALS:
+  - MAT: 1
+    MAT_Struct_StVenantKirchhoff:
+      YOUNG: 1e+09
+      NUE: 0
+      DENS: 7.8e-06
+NODE COORDS:
+  - NODE 1 COORD -0.5 -1 1.5
+  - NODE 2 COORD -0.5 -1 -1.5
+  - NODE 3 COORD -0.5 1 -1.5
+  - NODE 4 COORD -0.5 1 1.5
+  - NODE 5 COORD 0.5 -1 1.5
+  - NODE 6 COORD 0.5 -1 -1.5
+  - NODE 7 COORD 0.5 1 -1.5
+  - NODE 8 COORD 0.5 1 1.5
+STRUCTURE ELEMENTS:
+  - 1 SOLIDH8 HEX8 1 2 3 4 5 6 7 8 MAT 1 KINEM nonlinear EAS none

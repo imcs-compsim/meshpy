@@ -1,0 +1,25 @@
+PROBLEM TYPE:
+  PROBLEMTYPE: "Structure"
+IO:
+  OUTPUT_BIN: false
+  STRUCT_DISP: false
+  VERBOSITY: "Standard"
+STRUCTURAL DYNAMIC:
+  INT_STRATEGY: "Standard"
+  DYNAMICTYPE: "Statics"
+  TIMESTEP: 0.01
+  NUMSTEP: 17
+  MAXTIME: 0.17
+  PREDICT: "TangDis"
+  LINEAR_SOLVER: 1
+SOLVER 1:
+  SOLVER: "Superlu"
+  NAME: "Structure_Solver"
+STRUCT NOX/Printing:
+  Error: true
+  Inner Iteration: false
+  Details: true
+  Linear Solver Details: true
+  Test Details: true
+STRUCT NOX/Status Test:
+  XML File: "/home/rudlstorfer/01_work/01_workspace/meshpy/tests/reference-files/NOT_DEFINED"
