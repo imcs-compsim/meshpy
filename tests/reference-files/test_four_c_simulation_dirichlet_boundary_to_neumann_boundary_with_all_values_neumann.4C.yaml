@@ -1,0 +1,398 @@
+PROBLEM TYPE:
+  PROBLEMTYPE: "Structure"
+IO:
+  VERBOSITY: "Standard"
+STRUCTURAL DYNAMIC:
+  INT_STRATEGY: "Standard"
+  DYNAMICTYPE: "Statics"
+  TIMESTEP: 0.1
+  NUMSTEP: 10
+  MAXTIME: 1
+  PREDICT: "TangDis"
+  LINEAR_SOLVER: 1
+SOLVER 1:
+  SOLVER: "Superlu"
+  NAME: "Structure_Solver"
+STRUCT NOX/Printing:
+  Error: true
+  Inner Iteration: false
+  Details: true
+  Linear Solver Details: true
+  Test Details: true
+RESULT DESCRIPTION:
+  - STRUCTURE:
+      DIS: "structure"
+      NODE: 21
+      QUANTITY: "dispx"
+      VALUE: 0
+      TOLERANCE: 1e-10
+  - STRUCTURE:
+      DIS: "structure"
+      NODE: 21
+      QUANTITY: "dispy"
+      VALUE: 0
+      TOLERANCE: 1e-10
+  - STRUCTURE:
+      DIS: "structure"
+      NODE: 21
+      QUANTITY: "dispz"
+      VALUE: 0
+      TOLERANCE: 1e-10
+STRUCT NOX/Status Test:
+  XML File: "/home/rudlstorfer/01_work/01_workspace/meshpy/tests/reference-files/NOT_DEFINED"
+MATERIALS:
+  - MAT: 1
+    MAT_BeamReissnerElastHyper:
+      YOUNG: 100
+      POISSONRATIO: 0
+      DENS: 0
+      CROSSAREA: 0.031415926535897934
+      SHEARCORR: 1
+      MOMINPOL: 0.00015707963267948968
+      MOMIN2: 7.853981633974484e-05
+      MOMIN3: 7.853981633974484e-05
+FUNCT1:
+  - COMPONENT: 0
+    SYMBOLIC_FUNCTION_OF_SPACE_TIME: "t"
+FUNCT2:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, 0.012830383649, 0.047396413819, 0.094314807345, 0.14348620733, 0.18738384202, 0.14348620733, 0.094314807345, 0.047396413819, 0.012830383649, -0, -0]
+FUNCT3:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0]
+FUNCT4:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, 0.083888704307, 0.17963541199, 0.29402702506, 0.42743081443, 0.57570730073, 0.42743081443, 0.29402702506, 0.17963541199, 0.083888704307, -0, -0]
+FUNCT5:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, 0.014777768342, 0.057420912906, 0.12348440982, 0.20716162375, 0.30258545717, 0.20716162375, 0.12348440982, 0.057420912906, 0.014777768342, -0, -0]
+FUNCT6:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0]
+FUNCT7:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, 0.00070411303783, 0.0099935204444, 0.03474773231, 0.079377320168, 0.14602327318, 0.079377320168, 0.03474773231, 0.0099935204444, 0.00070411303783, -0, -0]
+FUNCT8:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0.013662987684, -0.053424735928, -0.11588817894, -0.19623973937, -0.28918706029, -0.19623973937, -0.11588817894, -0.053424735928, -0.013662987684, -0, -0]
+FUNCT9:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0]
+FUNCT10:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, 0.0097518757623, 0.025928601702, 0.054235220136, 0.099056034977, 0.16315665405, 0.099056034977, 0.054235220136, 0.025928601702, 0.0097518757623, -0, -0]
+FUNCT11:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0.02135631173, -0.080326009878, -0.16418230518, -0.25810566557, -0.34979772429, -0.25810566557, -0.16418230518, -0.080326009878, -0.02135631173, -0, -0]
+FUNCT12:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0]
+FUNCT13:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, 0.0077838238826, 0.03658820048, 0.10069696741, 0.20504074762, 0.3469219192, 0.20504074762, 0.10069696741, 0.03658820048, 0.0077838238826, -0, -0]
+FUNCT14:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -1.581733013e-06, -5.643460682e-06, -1.0865150873e-05, -1.6245999409e-05, -2.1169543385e-05, -1.6245999409e-05, -1.0865150873e-05, -5.643460682e-06, -1.581733013e-06, -0, -0]
+FUNCT15:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0]
+FUNCT16:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, 4.5824455161e-05, 8.0482892686e-05, 9.8191109257e-05, 9.9787270071e-05, 9.003348128e-05, 9.9787270071e-05, 9.8191109257e-05, 8.0482892686e-05, 4.5824455161e-05, -0, -0]
+FUNCT17:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, 0.021389158285, 0.080440097944, 0.16438943419, 0.25838833254, 0.35012782817, 0.25838833254, 0.16438943419, 0.080440097944, 0.021389158285, -0, -0]
+FUNCT18:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0]
+FUNCT19:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0.0080509194826, -0.037076466066, -0.10132895369, -0.2057291075, -0.34758850386, -0.2057291075, -0.10132895369, -0.037076466066, -0.0080509194826, -0, -0]
+FUNCT20:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, 0.013408656749, 0.052514776235, 0.114165032, 0.19377868461, 0.28620033269, 0.19377868461, 0.114165032, 0.052514776235, 0.013408656749, -0, -0]
+FUNCT21:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0]
+FUNCT22:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0.0080793213803, -0.022873945099, -0.050259822306, -0.094642533019, -0.15870758842, -0.094642533019, -0.050259822306, -0.022873945099, -0.0080793213803, -0, -0]
+FUNCT23:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0.013408526544, -0.052514405628, -0.11416455644, -0.19377831124, -0.2862001772, -0.19377831124, -0.11416455644, -0.052514405628, -0.013408526544, -0, -0]
+FUNCT24:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0]
+FUNCT25:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0.0080808125722, -0.022876240481, -0.050262129153, -0.09464440094, -0.15870892488, -0.09464440094, -0.050262129153, -0.022876240481, -0.0080808125722, -0, -0]
+FUNCT26:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0.021389566713, -0.080441157031, -0.16439048409, -0.25838853043, -0.35012677188, -0.25838853043, -0.16439048409, -0.080441157031, -0.021389566713, -0, -0]
+FUNCT27:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0]
+FUNCT28:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0.008043389725, -0.037064269196, -0.10131562299, -0.20571703597, -0.34757868181, -0.20571703597, -0.10131562299, -0.037064269196, -0.008043389725, -0, -0]
+FUNCT29:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, 0.033737747312, 0.12893159241, 0.27026614288, 0.43915171627, 0.61900073795, 0.43915171627, 0.27026614288, 0.12893159241, 0.033737747312, -0, -0]
+FUNCT30:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0, -0]
+FUNCT31:
+  - SYMBOLIC_FUNCTION_OF_TIME: "var"
+  - VARIABLE: 0
+    NAME: "var"
+    TYPE: "linearinterpolation"
+    NUMPOINTS: 13
+    TIMES: [-1000, 0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1, 1001]
+    VALUES: [-0, -0, 0.016124016109, 0.059940221879, 0.15157746231, 0.30036120432, 0.50628744608, 0.30036120432, 0.15157746231, 0.059940221879, 0.016124016109, -0, -0]
+DESIGN POINT DIRICH CONDITIONS:
+  - E: 1
+    NUMDOF: 9
+    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+DESIGN POINT NEUMANN CONDITIONS:
+  - E: 2
+    NUMDOF: 9
+    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    VAL: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    FUNCT: [2, 3, 4, 0, 0, 0, 0, 0, 0]
+  - E: 3
+    NUMDOF: 9
+    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    VAL: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    FUNCT: [5, 6, 7, 0, 0, 0, 0, 0, 0]
+  - E: 4
+    NUMDOF: 9
+    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    VAL: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    FUNCT: [8, 9, 10, 0, 0, 0, 0, 0, 0]
+  - E: 5
+    NUMDOF: 9
+    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    VAL: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    FUNCT: [11, 12, 13, 0, 0, 0, 0, 0, 0]
+  - E: 6
+    NUMDOF: 9
+    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    VAL: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    FUNCT: [14, 15, 16, 0, 0, 0, 0, 0, 0]
+  - E: 7
+    NUMDOF: 9
+    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    VAL: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    FUNCT: [17, 18, 19, 0, 0, 0, 0, 0, 0]
+  - E: 8
+    NUMDOF: 9
+    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    VAL: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    FUNCT: [20, 21, 22, 0, 0, 0, 0, 0, 0]
+  - E: 9
+    NUMDOF: 9
+    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    VAL: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    FUNCT: [23, 24, 25, 0, 0, 0, 0, 0, 0]
+  - E: 10
+    NUMDOF: 9
+    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    VAL: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    FUNCT: [26, 27, 28, 0, 0, 0, 0, 0, 0]
+  - E: 11
+    NUMDOF: 9
+    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    VAL: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    FUNCT: [29, 30, 31, 0, 0, 0, 0, 0, 0]
+DNODE-NODE TOPOLOGY:
+  - NODE 1 DNODE 1
+  - NODE 3 DNODE 2
+  - NODE 5 DNODE 3
+  - NODE 7 DNODE 4
+  - NODE 9 DNODE 5
+  - NODE 11 DNODE 6
+  - NODE 13 DNODE 7
+  - NODE 15 DNODE 8
+  - NODE 17 DNODE 9
+  - NODE 19 DNODE 10
+  - NODE 21 DNODE 11
+NODE COORDS:
+  - NODE 1 COORD 0 0 0
+  - NODE 2 COORD 0.1 0 0
+  - NODE 3 COORD 0.2 0 0
+  - NODE 4 COORD 0.3 0 0
+  - NODE 5 COORD 0.4 0 0
+  - NODE 6 COORD 0.5 0 0
+  - NODE 7 COORD 0.6 0 0
+  - NODE 8 COORD 0.7 0 0
+  - NODE 9 COORD 0.8 0 0
+  - NODE 10 COORD 0.9 0 0
+  - NODE 11 COORD 1 0 0
+  - NODE 12 COORD 1.1 0 0
+  - NODE 13 COORD 1.2 0 0
+  - NODE 14 COORD 1.3 0 0
+  - NODE 15 COORD 1.4 0 0
+  - NODE 16 COORD 1.5 0 0
+  - NODE 17 COORD 1.6 0 0
+  - NODE 18 COORD 1.7 0 0
+  - NODE 19 COORD 1.8 0 0
+  - NODE 20 COORD 1.9 0 0
+  - NODE 21 COORD 2 0 0
+STRUCTURE ELEMENTS:
+  - 1 BEAM3R HERM2LINE3 1 3 2 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
+  - 2 BEAM3R HERM2LINE3 3 5 4 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
+  - 3 BEAM3R HERM2LINE3 5 7 6 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
+  - 4 BEAM3R HERM2LINE3 7 9 8 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
+  - 5 BEAM3R HERM2LINE3 9 11 10 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
+  - 6 BEAM3R HERM2LINE3 11 13 12 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
+  - 7 BEAM3R HERM2LINE3 13 15 14 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
+  - 8 BEAM3R HERM2LINE3 15 17 16 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
+  - 9 BEAM3R HERM2LINE3 17 19 18 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
+  - 10 BEAM3R HERM2LINE3 19 21 20 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
