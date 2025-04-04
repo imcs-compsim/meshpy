@@ -84,7 +84,7 @@ class VolumeElement(_Element):
 class VolumeWEDGE6(VolumeElement):
     """A WEDGE6 volume element."""
 
-    vtk_cell_type = vtk.vtkWedge
+    vtk_cell_type = _vtk.vtkWedge
     vtk_topology = list(range(6))
 
 
