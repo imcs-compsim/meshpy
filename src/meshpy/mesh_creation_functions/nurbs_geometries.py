@@ -142,28 +142,28 @@ def create_nurbs_hollow_cylinder_segment_2d(
 
 
 def create_nurbs_cylindrical_shell_sector(
-    radius:float, angle:float, length:float, *, n_ele_u:int=1, n_ele_v:int=1
-):
+    radius: float, angle: float, length: float, *, n_ele_u: int = 1, n_ele_v: int = 1
+) -> _NURBS.Surface:
     """Creates a patch of a surface of a 3-dimensional sector of a cylindrical
     shell. The center of such cylindrical shell sector is located in [0, 0, 0]
 
     Args
     ----
-    radius: float
+    radius:
         cylindrical shell radius
-    angle: float
+    angle:
         angle of the cylindrical shell (radians)
-    length: float
+    length:
         length of the cylindrical shell
-    n_ele_u: int
+    n_ele_u:
         number of elements in the parametric u-direction
-    n_ele_v: int
+    n_ele_v:
         number of elements in the parametric v-direction
 
 
     Return
     ----
-    surf: geomdl object
+    surf:
         geomdl object that contains the surface information
     """
 

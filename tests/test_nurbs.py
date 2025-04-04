@@ -217,13 +217,11 @@ def test_nurbs_cylindrical_shell_sector(
     mat = MaterialStVenantKirchhoff()
 
     # Create patch set
-    element_description = "dummy"
-
     patch_set = add_geomdl_nurbs_to_mesh(
         input_file,
         surf_obj,
         material=mat,
-        element_description=element_description,
+        element_description="dummy",
     )
 
     input_file.add(patch_set)
