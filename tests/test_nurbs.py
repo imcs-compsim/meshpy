@@ -201,7 +201,7 @@ def test_nurbs_translate_nurbs_surface(
 
 
 def test_nurbs_cylindrical_shell_sector(
-        assert_results_equal, get_corresponding_reference_file_path
+    assert_results_equal, get_corresponding_reference_file_path
 ):
     """Test the creation of a 3-dimensional cylindrical shell sector."""
 
@@ -217,9 +217,7 @@ def test_nurbs_cylindrical_shell_sector(
     mat = MaterialStVenantKirchhoff()
 
     # Create patch set
-    element_description = (
-        "dummy"
-    )
+    element_description = "dummy"
 
     patch_set = add_geomdl_nurbs_to_mesh(
         input_file,
@@ -233,7 +231,7 @@ def test_nurbs_cylindrical_shell_sector(
     # Compare with the reference file
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
-    
+
 def test_nurbs_couple_nurbs_meshes(
     assert_results_equal, get_corresponding_reference_file_path
 ):
