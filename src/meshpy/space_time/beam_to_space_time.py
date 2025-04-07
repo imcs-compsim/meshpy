@@ -43,8 +43,6 @@ from meshpy.core.mesh_utils import (
     get_coupled_nodes_to_master_map as _get_coupled_nodes_to_master_map,
 )
 from meshpy.core.node import NodeCosserat as _NodeCosserat
-from meshpy.four_c.element_beam import Beam3rHerm2Line3 as _Beam3rHerm2Line3
-from meshpy.four_c.element_beam import Beam3rLine2Line2 as _Beam3rLine2Line2
 from meshpy.utils.nodes import get_nodal_coordinates as _get_nodal_coordinates
 
 
@@ -58,64 +56,12 @@ class NodeCosseratSpaceTime(_NodeCosserat):
         super().__init__(coordinates, rotation, **kwargs)
         self.time = time
 
-    def _get_dat(self):
-        """Return the line that represents this node in the input file.
-
-        For now, we add time to the z-dimension. In the future, we could
-        add the time to the element description, similar to the rotation
-        vectors
-        """
-
-        space_time_coordinates = self.coordinates.copy()
-        space_time_coordinates[2] += self.time
-
-        coordinate_string = " ".join(
-            [
-                (
-                    _mpy.dat_precision.format(component + 0)
-                    if _np.abs(component) >= _mpy.eps_pos
-                    else "0"
-                )
-                for component in space_time_coordinates
-            ]
-        )
-        return f"NODE {self.i_global} COORD {coordinate_string}"
-
 
 class SpaceTimeElement(_VolumeElement):
     """A general beam space-time surface element."""
 
-    def __init__(
-        self,
-        nodes,
-        *,
-        dat_pre_nodes="DUMMY",
-        dat_post_nodes="POST_DUMMY",
-        **kwargs,
-    ):
-        super().__init__(
-            nodes=nodes,
-            dat_pre_nodes=dat_pre_nodes,
-            dat_post_nodes=dat_post_nodes,
-            **kwargs,
-        )
-
-    def _get_dat(self):
-        """Return the dat line for this element."""
-
-        # String with the node ids.
-        nodes_string = ""
-        for node in self.nodes:
-            nodes_string += f"{node.i_global} "
-
-        # Rotation vector string
-        rotation_vectors = []
-        for node in self.nodes:
-            rotation_vectors.extend(node.rotation.get_rotation_vector())
-        rotation_vectors = map(str, rotation_vectors)
-
-        # Return the dat line.
-        return f"{self.i_global} {self.dat_pre_nodes} {self.four_c_name} {nodes_string} {self.dat_post_nodes} {' '.join(rotation_vectors)}"
+    def __init__(self, nodes, **kwargs):
+        super().__init__(nodes=nodes, **kwargs)
 
 
 class SpaceTimeElementQuad4(SpaceTimeElement):
@@ -123,7 +69,6 @@ class SpaceTimeElementQuad4(SpaceTimeElement):
 
     vtk_cell_type = _vtk.vtkQuad
     vtk_topology = list(range(4))
-    four_c_name = "QUAD4"
 
 
 class SpaceTimeElementQuad9(SpaceTimeElement):
@@ -131,7 +76,6 @@ class SpaceTimeElementQuad9(SpaceTimeElement):
 
     vtk_cell_type = _vtk.vtkQuadraticQuad
     vtk_topology = list(range(9))
-    four_c_name = "QUAD9"
 
 
 def beam_to_space_time(
@@ -143,27 +87,26 @@ def beam_to_space_time(
 ) -> _Tuple[_Mesh, _GeometryName]:
     """Convert a MeshPy beam mesh to a surface space-time mesh.
 
-    Args
-    ----
-    mesh_space_or_generator:
-        Either a fixed spatial Mesh object or a function that returns the
-        spatial mesh for a given time. If this is a generator, the topology
-        of the mesh at the initial time is chosen for all times, only the
-        positions and rotations are updated.
-    time_duration:
-        Total time increment to be solved with the space-time mesh
-    number_of_elements_in_time:
-        Number of elements in time direction
-    time_start:
-        Starting time for the space-time mesh. Can be used to create time slaps.
-    Return
-    ----
-    space_time_mesh:
-        The space time mesh. Be aware that translating / rotating this mesh
-        might lead to unexpected results.
-    return_set:
-        The nodes sets to be returned for the space time mesh:
-            "start", "end", "left", "right", "surface"
+    Args:
+        mesh_space_or_generator:
+            Either a fixed spatial Mesh object or a function that returns the
+            spatial mesh for a given time. If this is a generator, the topology
+            of the mesh at the initial time is chosen for all times, only the
+            positions and rotations are updated.
+        time_duration:
+            Total time increment to be solved with the space-time mesh
+        number_of_elements_in_time:
+            Number of elements in time direction
+        time_start:
+            Starting time for the space-time mesh. Can be used to create time slaps.
+    Returns:
+        Tuple (space_time_mesh, return_set)
+        - space_time_mesh:
+            The space time mesh. Be aware that translating / rotating this mesh
+            might lead to unexpected results.
+        - return_set:
+            The nodes sets to be returned for the space time mesh:
+                "start", "end", "left", "right", "surface"
     """
 
     # Get the "reference" spatial mesh
@@ -186,11 +129,11 @@ def beam_to_space_time(
     space_time_element_type: _Union[
         _Type[SpaceTimeElementQuad4], _Type[SpaceTimeElementQuad9]
     ]
-    if element_type == _Beam3rLine2Line2:
+    if len(element_type.nodes_create) == 2:
         number_of_copies_in_time = number_of_elements_in_time + 1
         time_increment_between_nodes = time_duration / number_of_elements_in_time
         space_time_element_type = SpaceTimeElementQuad4
-    elif element_type == _Beam3rHerm2Line3:
+    elif len(element_type.nodes_create) == 3:
         number_of_copies_in_time = 2 * number_of_elements_in_time + 1
         time_increment_between_nodes = time_duration / (2 * number_of_elements_in_time)
         space_time_element_type = SpaceTimeElementQuad9
