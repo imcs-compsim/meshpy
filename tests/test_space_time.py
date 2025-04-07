@@ -27,7 +27,6 @@ import pytest
 from meshpy.core.conf import mpy
 from meshpy.core.mesh import Mesh
 from meshpy.four_c.element_beam import Beam3rHerm2Line3, Beam3rLine2Line2
-from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.material import MaterialReissner
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_2d,
@@ -47,9 +46,6 @@ def get_name(beam_class):
         raise TypeError("Got unexpected beam element")
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize("beam_type", [Beam3rLine2Line2, Beam3rHerm2Line3])
 def test_space_time_straight(
     beam_type, assert_results_equal, get_corresponding_reference_file_path
@@ -68,18 +64,8 @@ def test_space_time_straight(
     # Add all sets to the mesh
     space_time_mesh.add(return_set)
 
-    # Check the dat file
-    space_time_input_file = InputFile()
-    space_time_input_file.add(space_time_mesh)
-    additional_identifier = get_name(beam_type)
-    assert_results_equal(
-        get_corresponding_reference_file_path(
-            additional_identifier=additional_identifier
-        ),
-        space_time_input_file,
-    )
-
     # Check the mesh data arrays
+    additional_identifier = get_name(beam_type)
     mesh_data_arrays = mesh_to_data_arrays(space_time_mesh)
     assert_results_equal(
         get_corresponding_reference_file_path(
@@ -89,9 +75,6 @@ def test_space_time_straight(
     )
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize("beam_type", [Beam3rLine2Line2, Beam3rHerm2Line3])
 def test_space_time_curved(
     beam_type, assert_results_equal, get_corresponding_reference_file_path
@@ -112,20 +95,8 @@ def test_space_time_curved(
     # Add all sets to the mesh
     space_time_mesh.add(return_set)
 
-    # Check the dat file
-    space_time_input_file = InputFile()
-    space_time_input_file.add(space_time_mesh)
-    additional_identifier = get_name(beam_type)
-    assert_results_equal(
-        get_corresponding_reference_file_path(
-            additional_identifier=additional_identifier
-        ),
-        space_time_input_file,
-        rtol=1e-12,
-        atol=1e-12,
-    )
-
     # Check the mesh data arrays
+    additional_identifier = get_name(beam_type)
     mesh_data_arrays = mesh_to_data_arrays(space_time_mesh)
     assert_results_equal(
         get_corresponding_reference_file_path(
