@@ -27,7 +27,7 @@ import shutil
 import subprocess
 from difflib import unified_diff
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Callable, Dict, Optional, Union
 
 import numpy as np
 import pytest
@@ -721,3 +721,35 @@ def compare_lists(
             raise AssertionError(
                 f"Comparison of values for the key failed. {item_1} {item_2}\n\n{list_1} {list_2}"
             )
+
+
+@pytest.fixture(scope="function")
+def get_bc_dict() -> Callable:
+    """Return a function to create a dummy definition for a boundary condition
+    in 4C.
+
+    Returns:
+        A function to create a dummy boundary condition definition.
+    """
+
+    def _get_bc_dict(*, identifier=None, num_dof: int = 3) -> Dict:
+        """Return a dummy definition for a boundary condition in 4C that can be
+        used for testing purposes.
+
+        Args:
+            identifier: Any value, will be written to the value for the first DOF. This can be used to create multiple boundary conditions and distinguish them in the input file.
+            num_dof: Number of degrees of freedom constrained by this boundary condition.
+        """
+
+        val = [0] * num_dof
+        if identifier is not None:
+            val[0] = identifier
+
+        return {
+            "NUMDOF": num_dof,
+            "ONOFF": [1] * num_dof,
+            "VAL": val,
+            "FUNCT": [0] * num_dof,
+        }
+
+    return _get_bc_dict
