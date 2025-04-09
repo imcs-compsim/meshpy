@@ -39,7 +39,7 @@ RESULT DESCRIPTION:
       VALUE: 0
       TOLERANCE: 1e-10
 STRUCT NOX/Status Test:
-  XML File: "/home/rudlstorfer/01_work/01_workspace/meshpy/tests/reference-files/NOT_DEFINED"
+  XML File: "NOT_DEFINED"
 MATERIALS:
   - MAT: 1
     MAT_BeamReissnerElastHyper:
