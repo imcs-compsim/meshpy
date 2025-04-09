@@ -25,17 +25,17 @@ import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.element import Element as _Element
-from meshpy.four_c.material import MaterialString as _MaterialString
 from meshpy.four_c.material import (
     MaterialStVenantKirchhoff as _MaterialStVenantKirchhoff,
 )
+from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 class NURBSPatch(_Element):
     """A base class for a NURBS patch."""
 
     # A list of valid material types for this element
-    valid_material = [_MaterialString, _MaterialStVenantKirchhoff]
+    valid_material = [_MaterialStVenantKirchhoff]
 
     def __init__(
         self,
@@ -72,28 +72,26 @@ class NURBSPatch(_Element):
             )
         return n_knots
 
-    def add_element_specific_section(self, sections):
-        """Return additional information of the NURBS patch."""
+    def dump_element_specific_section(self, yaml_dict):
+        """Set the knot vectors of the NURBS patch in the input file."""
 
-        # TODO: This is a circular import, which should be resolved
-        from meshpy.four_c.input_file import (
-            InputSectionMultiKey as _InputSectionMultiKey,
-        )
+        if _fourcipp_is_available():
+            raise ValueError("Port this functionality to not use the legacy format.")
 
         knotvectors_section = "STRUCTURE KNOTVECTORS"
 
-        if knotvectors_section not in sections.keys():
-            sections[knotvectors_section] = _InputSectionMultiKey(knotvectors_section)
+        if knotvectors_section not in yaml_dict.keys():
+            yaml_dict[knotvectors_section] = []
 
-        section = sections[knotvectors_section]
-        section.add(f"NURBS_DIMENSION {self.get_nurbs_dimension()}")
-        section.add("BEGIN NURBSPATCH")
-        section.add(f"ID {self.n_nurbs_patch}")
+        section = yaml_dict[knotvectors_section]
+        section.append(f"NURBS_DIMENSION {self.get_nurbs_dimension()}")
+        section.append("BEGIN NURBSPATCH")
+        section.append(f"ID {self.n_nurbs_patch}")
 
         for dir_manifold in range(len(self.knot_vectors)):
             num_knotvectors = len(self.knot_vectors[dir_manifold])
-            section.add(f"NUMKNOTS {num_knotvectors}")
-            section.add(f"DEGREE {self.polynomial_orders[dir_manifold]}")
+            section.append(f"NUMKNOTS {num_knotvectors}")
+            section.append(f"DEGREE {self.polynomial_orders[dir_manifold]}")
 
             # Check the type of knot vector, in case that the multiplicity of the first and last
             # knot vectors is not p + 1, then it is a closed (periodic) knot vector, otherwise it
@@ -117,12 +115,12 @@ class NURBSPatch(_Element):
                     knotvector_type = "Periodic"
                     break
 
-            section.add(f"TYPE {knotvector_type}")
+            section.append(f"TYPE {knotvector_type}")
 
             for knot_vector_val in self.knot_vectors[dir_manifold]:
-                section.add(f"{knot_vector_val}")
+                section.append(knot_vector_val)
 
-        section.add("END NURBSPATCH")
+        section.append("END NURBSPATCH")
 
     def get_number_elements(self):
         """Get the number of elements in this patch by checking the amount of
@@ -165,8 +163,12 @@ class NURBSSurface(NURBSPatch):
             element_string = "WALLNURBS"
         super().__init__(*args, element_string, **kwargs)
 
-    def _get_dat(self):
-        """Return the lines with elements for the input file."""
+    def dump_to_list(self):
+        """Return a list with all the element definitions contained in this
+        patch."""
+
+        if _fourcipp_is_available():
+            raise ValueError("Port this functionality to not use the legacy format.")
 
         # Check the material
         self._check_material()
@@ -209,10 +211,9 @@ class NURBSSurface(NURBSPatch):
             ):
                 element_cps_ids = get_ids_ctrlpts_surface(knot_span_u, knot_span_v)
 
-                string_cps = ""
-                for i in element_cps_ids:
-                    cp = self.nodes[i]
-                    string_cps += f"{cp.i_global} "
+                string_cps = " ".join(
+                    [str(self.nodes[i].i_global) for i in element_cps_ids]
+                )
 
                 patch_elements.append(
                     "{} {} NURBS{} {} MAT {} {}".format(
@@ -238,8 +239,12 @@ class NURBSVolume(NURBSPatch):
             raise ValueError("element_string is not yet implemented for NURBS volumes")
         super().__init__(*args, element_string, **kwargs)
 
-    def _get_dat(self):
-        """Return the lines with elements for the input file."""
+    def dump_to_list(self):
+        """Return a list with all the element definitions contained in this
+        patch."""
+
+        if _fourcipp_is_available():
+            raise ValueError("Port this functionality to not use the legacy format.")
 
         # Check the material
         self._check_material()
@@ -297,10 +302,9 @@ class NURBSVolume(NURBSPatch):
                         knot_span_u, knot_span_v, knot_span_w
                     )
 
-                    string_cps = ""
-                    for i in element_cps_ids:
-                        cp = self.nodes[i]
-                        string_cps += f"{cp.i_global} "
+                    string_cps = " ".join(
+                        [str(self.nodes[i].i_global) for i in element_cps_ids]
+                    )
 
                     num_cp_in_element = (
                         (self.polynomial_orders[0] + 1)

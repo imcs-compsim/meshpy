@@ -34,8 +34,8 @@ class MaterialReissner(_MaterialBeam):
         # Shear factor for Reissner beam.
         self.shear_correction = shear_correction
 
-    def _get_dat(self):
-        """Return the line for this material."""
+    def dump_to_list(self):
+        """Return a list with the (single) item representing this material."""
         if (
             self.area is None
             and self.mom2 is None
@@ -59,22 +59,20 @@ class MaterialReissner(_MaterialBeam):
                 "by the user, or a circular cross-section will be assumed. "
                 "A combination is not possible"
             )
-        string = "MAT {} {} YOUNG {} POISSONRATIO {} DENS {} CROSSAREA {} "
-        string += "SHEARCORR {} MOMINPOL {} MOMIN2 {} MOMIN3 {}"
+
+        data = {
+            "YOUNG": self.youngs_modulus,
+            "POISSONRATIO": self.nu,
+            "DENS": self.density,
+            "CROSSAREA": area,
+            "SHEARCORR": self.shear_correction,
+            "MOMINPOL": polar,
+            "MOMIN2": mom2,
+            "MOMIN3": mom3,
+        }
         if self.interaction_radius is not None:
-            string += f" INTERACTIONRADIUS {self.interaction_radius}"
-        return string.format(
-            self.i_global,
-            self.material_string,
-            self.youngs_modulus,
-            self.nu,
-            self.density,
-            area,
-            self.shear_correction,
-            polar,
-            mom2,
-            mom3,
-        )
+            data["INTERACTIONRADIUS"] = self.interaction_radius
+        return [{"MAT": self.i_global, self.material_string: data}]
 
 
 class MaterialReissnerElastoplastic(MaterialReissner):
@@ -101,15 +99,14 @@ class MaterialReissnerElastoplastic(MaterialReissner):
         self.isohardening_modulus_moment = isohardening_modulus_moment
         self.torsion_plasticity = torsion_plasticity
 
-    def _get_dat(self):
-        """Return the line for this material."""
-        super_dat = super()._get_dat()
-        string = super_dat + " YIELDM {} ISOHARDM {} TORSIONPLAST {}"
-        return string.format(
-            self.yield_moment,
-            self.isohardening_modulus_moment,
-            1 if self.torsion_plasticity else 0,
-        )
+    def dump_to_list(self):
+        """Return a list with the (single) item representing this material."""
+        super_list = super().dump_to_list()
+        mat_dict = super_list[0][self.material_string]
+        mat_dict["YIELDM"] = self.yield_moment
+        mat_dict["ISOHARDM"] = self.isohardening_modulus_moment
+        mat_dict["TORSIONPLAST"] = self.torsion_plasticity
+        return super_list
 
 
 class MaterialKirchhoff(_MaterialBeam):
@@ -119,8 +116,8 @@ class MaterialKirchhoff(_MaterialBeam):
         super().__init__(material_string="MAT_BeamKirchhoffElastHyper", **kwargs)
         self.is_fad = is_fad
 
-    def _get_dat(self):
-        """Return the line for this material."""
+    def dump_to_list(self):
+        """Return a list with the (single) item representing this material."""
         if (
             self.area is None
             and self.mom2 is None
@@ -144,24 +141,19 @@ class MaterialKirchhoff(_MaterialBeam):
                 "by the user, or a circular cross-section will be assumed. "
                 "A combination is not possible"
             )
-        string = "MAT {} {} YOUNG {} SHEARMOD {} DENS {} CROSSAREA {} "
-        string += "MOMINPOL {} MOMIN2 {} MOMIN3 {} FAD {}"
-        string = string.format(
-            self.i_global,
-            self.material_string,
-            self.youngs_modulus,
-            self.youngs_modulus / (2.0 * (1.0 + self.nu)),
-            self.density,
-            area,
-            polar,
-            mom2,
-            mom3,
-            # TODO: replace this with a common utils function
-            "yes" if self.is_fad else "no",
-        )
+        data = {
+            "YOUNG": self.youngs_modulus,
+            "SHEARMOD": self.youngs_modulus / (2.0 * (1.0 + self.nu)),
+            "DENS": self.density,
+            "CROSSAREA": area,
+            "MOMINPOL": polar,
+            "MOMIN2": mom2,
+            "MOMIN3": mom3,
+            "FAD": self.is_fad,
+        }
         if self.interaction_radius is not None:
-            string += f" INTERACTIONRADIUS {self.interaction_radius}"
-        return string
+            data["INTERACTIONRADIUS"] = self.interaction_radius
+        return [{"MAT": self.i_global, self.material_string: data}]
 
 
 class MaterialEulerBernoulli(_MaterialBeam):
@@ -172,8 +164,8 @@ class MaterialEulerBernoulli(_MaterialBeam):
             material_string="MAT_BeamKirchhoffTorsionFreeElastHyper", **kwargs
         )
 
-    def _get_dat(self):
-        """Return the line for this material."""
+    def dump_to_list(self):
+        """Return a list with the (single) item representing this material."""
         area, mom2, _mom3, _polar = self.calc_area_stiffness()
         if self.area is None and self.mom2 is None:
             area, mom2, _mom3, _polar = self.calc_area_stiffness()
@@ -186,28 +178,13 @@ class MaterialEulerBernoulli(_MaterialBeam):
                 "by the user, or a circular cross-section will be assumed. "
                 "A combination is not possible"
             )
-        string = "MAT {} {} YOUNG {} DENS {} CROSSAREA {} MOMIN {}"
-        return string.format(
-            self.i_global,
-            self.material_string,
-            self.youngs_modulus,
-            self.density,
-            area,
-            mom2,
-        )
-
-
-class MaterialString(_Material):
-    """Holds material definition that is defined by a string."""
-
-    def __init__(self, material_string, **kwargs):
-        super().__init__(**kwargs)
-        self.material_string = material_string
-
-    def _get_dat(self):
-        """Return the line for this material."""
-        string = "MAT {} {}"
-        return string.format(self.i_global, self.material_string)
+        data = {
+            "YOUNG": self.youngs_modulus,
+            "DENS": self.density,
+            "CROSSAREA": area,
+            "MOMIN": mom2,
+        }
+        return [{"MAT": self.i_global, self.material_string: data}]
 
 
 class MaterialSolid(_Material):
@@ -224,21 +201,23 @@ class MaterialSolid(_Material):
         self.nu = nu
         self.density = density
 
+    def dump_to_list(self):
+        """Return a list with the (single) item representing this material."""
+
+        return [
+            {
+                "MAT": self.i_global,
+                self.material_string: {
+                    "YOUNG": self.youngs_modulus,
+                    "NUE": self.nu,
+                    "DENS": self.density,
+                },
+            }
+        ]
+
 
 class MaterialStVenantKirchhoff(MaterialSolid):
     """Holds material definition for StVenant Kirchhoff solids."""
 
     def __init__(self, **kwargs):
         super().__init__(material_string="MAT_Struct_StVenantKirchhoff", **kwargs)
-
-    def _get_dat(self):
-        """Return the line for this material."""
-
-        string = "MAT {} {} YOUNG {} NUE {} DENS {}"
-        return string.format(
-            self.i_global,
-            self.material_string,
-            self.youngs_modulus,
-            self.nu,
-            self.density,
-        )

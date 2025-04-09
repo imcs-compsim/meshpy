@@ -22,7 +22,10 @@
 """This module implements a class to handle boundary conditions in 4C."""
 
 import warnings as _warnings
+from typing import Dict as _Dict
+from typing import Optional as _Optional
 
+import meshpy.core.conf as _conf
 from meshpy.core.boundary_condition import (
     BoundaryConditionBase as _BoundaryConditionBase,
 )
@@ -37,55 +40,38 @@ class BoundaryCondition(_BoundaryConditionBase):
 
     def __init__(
         self,
-        geometry_set,
-        bc_string,
+        geometry_set: _GeometrySet,
+        bc_dict: _Dict,
         *,
-        format_replacement=None,
-        bc_type=None,
-        double_nodes=None,
+        bc_type: _Optional[_conf.BoundaryCondition] = None,
+        double_nodes: _Optional[_conf.DoubleNodes] = None,
         **kwargs,
     ):
         """Initialize the object.
 
-        Args
-        ----
-        geometry_set: GeometrySet
-            Geometry that this boundary condition acts on.
-        bc_string: str
-            Text that will be displayed in the input file for this boundary
-            condition.
-        format_replacement: str, list
-            Replacement with the str.format() function for bc_string.
-        bc_type: mpy.boundary
-            Type of the boundary condition.
-        double_nodes: mpy.double_nodes
-            Depending on this parameter, it will be checked if point Neumann
-            conditions do contain nodes at the same spatial positions.
+        Args:
+            geometry_set:
+                Geometry that this boundary condition acts on.
+            bc_dict:
+                Dictionary defining this boundary condition in the input file.
+            bc_type:
+                Type of the boundary condition.
+            double_nodes:
+                Depending on this parameter, it will be checked if point Neumann
+                conditions do contain nodes at the same spatial positions.
         """
 
         _BoundaryConditionBase.__init__(self, geometry_set, bc_type=bc_type, **kwargs)
-        self.bc_string = bc_string
-        self.format_replacement = format_replacement
+        self.bc_dict = bc_dict
         self.double_nodes = double_nodes
 
         # Check the parameters for this object.
         self.check()
 
-    def _get_dat(self):
-        """Add the content of this object to the list of lines.
-
-        Args:
-        ----
-        lines: list(str)
-            The contents of this object will be added to the end of lines.
-        """
-
-        if self.format_replacement is not None:
-            dat_string = self.bc_string.format(*self.format_replacement)
-        else:
-            dat_string = self.bc_string
-
-        return f"E {self.geometry_set.i_global} {dat_string}"
+    def dump_to_list(self):
+        """Return a list with the (single) item representing this boundary
+        condition."""
+        return [{"E": self.geometry_set.i_global, **self.bc_dict}]
 
     def check(self):
         """Check for point Neumann boundaries that there is not a double Node

@@ -36,23 +36,21 @@ class VolumeElement(_Element):
     vtk_cell_type = None
     vtk_topology: list = []
 
-    def __init__(self, nodes=None, dat_pre_nodes="", dat_post_nodes="", **kwargs):
+    def __init__(self, nodes=None, string_pre_nodes="", string_post_nodes="", **kwargs):
         super().__init__(nodes=nodes, material=None, **kwargs)
-        self.dat_pre_nodes = dat_pre_nodes
-        self.dat_post_nodes = dat_post_nodes
+        self.string_pre_nodes = string_pre_nodes
+        self.string_post_nodes = string_post_nodes
 
-    def _get_dat(self):
-        """Return the dat line for this element."""
+    def dump_to_list(self):
+        """Return a list with the items representing this object (usually a
+        single item)."""
 
         # String with the node ids.
-        nodes_string = ""
-        for node in self.nodes:
-            nodes_string += f"{node.i_global} "
+        nodes_string = " ".join(str(node.i_global) for node in self.nodes)
 
-        # Return the dat line.
-        return (
-            f"{self.i_global} {self.dat_pre_nodes} {nodes_string} {self.dat_post_nodes}"
-        )
+        return [
+            f"{self.i_global} {self.string_pre_nodes} {nodes_string} {self.string_post_nodes}"
+        ]
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid, **kwargs):
         """Add the representation of this element to the VTK writer as a

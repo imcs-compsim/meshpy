@@ -37,6 +37,18 @@ def cubitpy_is_available() -> bool:
     return True
 
 
+def fourcipp_is_available() -> bool:
+    """Check if FourCIPP is installed.
+
+    Returns:
+        True if FourCIPP is installed, False otherwise
+    """
+
+    if _find_spec("fourcipp") is None:
+        return False
+    return True
+
+
 def is_mybinder():
     """Check if the current environment is running on mybinder."""
     return "BINDER_LAUNCH_HOST" in _os.environ.keys()

@@ -50,16 +50,13 @@ class BoundaryConditionBase(_BaseMeshItemFull):
         self.geometry_set = geometry_set
 
     @classmethod
-    def from_dat(cls, bc_key, line, **kwargs):
+    def from_dict(cls, geometry_sets, bc_key, bc_dict):
         """This function acts as a factory and creates the correct boundary
-        condition object from a line in the dat file.
+        condition object from a dictionary parsed from an input file."""
 
-        The geometry set is passed as integer (0 based index) and will
-        be connected after the whole input file is parsed.
-        """
-
-        # Split up the input line.
-        split = line.split()
+        geometry_set_id = int(bc_dict["E"]) - 1
+        geometry_set = geometry_sets[geometry_set_id]
+        del bc_dict["E"]
 
         if bc_key in (
             _mpy.bc.dirichlet,
@@ -74,22 +71,25 @@ class BoundaryConditionBase(_BaseMeshItemFull):
                 BoundaryCondition as _BoundaryCondition,
             )
 
-            return _BoundaryCondition(
-                int(split[1]) - 1, " ".join(split[2:]), bc_type=bc_key, **kwargs
+            boundary_condition = _BoundaryCondition(
+                geometry_set, bc_dict, bc_type=bc_key
             )
         elif bc_key is _mpy.bc.point_coupling:
             # Coupling condition.
             from meshpy.core.coupling import Coupling as _Coupling
 
-            return _Coupling(
-                int(split[1]) - 1,
+            boundary_condition = _Coupling(
+                geometry_set,
                 bc_key,
-                " ".join(split[2:]),
+                bc_dict,
                 check_overlapping_nodes=False,
                 check_at_init=False,
-                **kwargs,
             )
-        raise ValueError("Got unexpected boundary condition!")
+        else:
+            raise ValueError("Got unexpected boundary condition!")
+
+        boundary_condition.check()
+        return boundary_condition
 
 
 class BoundaryConditionContainer(_ContainerBase):

@@ -25,6 +25,7 @@ import numpy as _np
 
 from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
 from meshpy.core.conf import mpy as _mpy
+from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 class Node(_BaseMeshItemFull):
@@ -53,14 +54,20 @@ class Node(_BaseMeshItemFull):
         self.master_node = None
 
     @classmethod
-    def from_dat(cls, input_line):
-        """Create the Node object from a line in the input file."""
+    def from_legacy_string(cls, input_line):
+        """Create the Node object from a legacy string."""
+
+        if _fourcipp_is_available():
+            raise ValueError(
+                "Port this functionality to create the node from the dict "
+                "representing the node, not the legacy string."
+            )
 
         # Split up the input line.
-        line_split = input_line[0].split()
+        line_split = input_line.split()
 
         # Convert the node coordinates into a Node object.
-        return cls([float(line_split[i]) for i in range(3, 6)], comments=input_line[1])
+        return cls([float(line_split[i]) for i in range(3, 6)])
 
     def get_master_node(self):
         """Return the master node of this node.
@@ -104,8 +111,13 @@ class Node(_BaseMeshItemFull):
         """Don't do anything for a standard node, as this node can not be
         rotated."""
 
-    def _get_dat(self):
-        """Return the line that represents this node in the input file."""
+    def dump_to_list(self):
+        """Return a list with the legacy string representing this node."""
+
+        if _fourcipp_is_available():
+            raise ValueError(
+                "Port this functionality to create a dict, not the legacy string."
+            )
 
         coordinate_string = " ".join(
             [
@@ -117,7 +129,7 @@ class Node(_BaseMeshItemFull):
                 for component in self.coordinates
             ]
         )
-        return f"NODE {self.i_global} COORD {coordinate_string}"
+        return [f"NODE {self.i_global} COORD {coordinate_string}"]
 
 
 class NodeCosserat(Node):
@@ -162,8 +174,14 @@ class ControlPoint(Node):
         # Weight of this node
         self.weight = weight
 
-    def _get_dat(self):
-        """Return the line that represents this node in the input file."""
+    def dump_to_list(self):
+        """Return a list with the legacy string representing this control
+        point."""
+
+        if _fourcipp_is_available():
+            raise ValueError(
+                "Port this functionality to create a dict, not the legacy string."
+            )
 
         coordinate_string = " ".join(
             [
@@ -175,4 +193,4 @@ class ControlPoint(Node):
                 for component in self.coordinates
             ]
         )
-        return f"CP {self.i_global} COORD {coordinate_string} {self.weight}"
+        return [f"CP {self.i_global} COORD {coordinate_string} {self.weight}"]

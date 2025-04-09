@@ -68,21 +68,18 @@ class LocSysCondition(_BoundaryCondition):
         else:
             function_array = _ensure_length_of_function_array(function_array, 3)
 
-        condition_string = (
-            "ROTANGLE {} {} {} ".format(*rotation.get_rotation_vector())
-            + "FUNCT {} {} {} "
-            + f"USEUPDATEDNODEPOS {int(update_node_position)}"
-        )
+        condition_dict = {
+            "ROTANGLE": rotation.get_rotation_vector().tolist(),
+            "FUNCT": function_array,
+            "USEUPDATEDNODEPOS": int(update_node_position),
+        }
 
         # Append the condition string with consistent normal type for line and surface geometry
         if (
             geometry_set.geometry_type is _mpy.geo.line
             or geometry_set.geometry_type is _mpy.geo.surface
         ):
-            condition_string = (
-                condition_string
-                + f" USECONSISTENTNODENORMAL {int(use_consistent_node_normal)}"
-            )
+            condition_dict["USECONSISTENTNODENORMAL"] = int(use_consistent_node_normal)
         elif use_consistent_node_normal:
             raise ValueError(
                 "The keyword use_consistent_node_normal only works for line and surface geometries."
@@ -90,8 +87,7 @@ class LocSysCondition(_BoundaryCondition):
 
         super().__init__(
             geometry_set,
-            bc_string=condition_string,
+            bc_dict=condition_dict,
             bc_type=_mpy.bc.locsys,
-            format_replacement=function_array,
             **kwargs,
         )
