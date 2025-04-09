@@ -22,8 +22,6 @@
 """This module implements a basic class to manage functions in the 4C input
 file."""
 
-import yaml as _yaml
-
 from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
 
 
@@ -48,18 +46,3 @@ class Function(_BaseMeshItemFull):
     def dump_to_list(self):
         """Return a list with the items representing this function."""
         return self.function_list
-
-
-def function_representer(dumper, data: Function):
-    """Define how the Function object should be dumped.
-
-    Since the only time we have the function object in the list to dump
-    is when it is referred to in a BC, we only have to return the global
-    index here.
-    """
-    if data.i_global is None:
-        raise IndexError("The function does not have a global index!")
-    return dumper.represent_int(data.i_global)
-
-
-_yaml.add_representer(Function, function_representer)

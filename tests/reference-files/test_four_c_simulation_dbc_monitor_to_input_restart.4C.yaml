@@ -1,6 +1,10 @@
 PROBLEM TYPE:
   PROBLEMTYPE: "Structure"
 IO:
+  OUTPUT_BIN: true
+  STRUCT_DISP: true
+  STRUCT_STRESS: "no"
+  STRUCT_STRAIN: "no"
   VERBOSITY: "Standard"
 STRUCTURAL DYNAMIC:
   INT_STRATEGY: "Standard"
@@ -10,6 +14,9 @@ STRUCTURAL DYNAMIC:
   MAXTIME: 10.5
   PREDICT: "TangDis"
   LINEAR_SOLVER: 1
+  PRESTRESS: "none"
+  PRESTRESSTIME: 0
+  LOADLIN: false
 SOLVER 1:
   SOLVER: "Superlu"
   NAME: "Structure_Solver"
@@ -25,19 +32,19 @@ RESULT DESCRIPTION:
       NODE: 21
       QUANTITY: "dispx"
       VALUE: -0.4099883075660667
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 21
       QUANTITY: "dispy"
       VALUE: 0.9930750984278164
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 21
       QUANTITY: "dispz"
       VALUE: 0.6620500656185498
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
 STRUCT NOX/Status Test:
   XML File: "NOT_DEFINED"
 MATERIALS:

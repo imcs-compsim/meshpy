@@ -118,7 +118,7 @@ def run_four_c_test(tmp_path, name, mesh, n_proc=2, restart=[None, None], **kwar
     os.makedirs(testing_dir, exist_ok=True)
 
     # Create input file.
-    input_file = os.path.join(testing_dir, name + ".dat")
+    input_file = os.path.join(testing_dir, name + ".4C.yaml")
     mesh.write_input_file(input_file, add_script_to_header=False, **kwargs)
 
     return_code = run_four_c(
@@ -764,8 +764,17 @@ def test_four_c_simulation_dbc_monitor_to_input(
         )
     )
     function_nbc = Function(
-        """SYMBOLIC_FUNCTION_OF_TIME nbc_value\nVARIABLE 0 NAME nbc_value TYPE linearinterpolation NUMPOINTS 2 """
-        "TIMES 1.0 11.0 VALUES 1.0 0.0"
+        [
+            {"SYMBOLIC_FUNCTION_OF_TIME": "nbc_value"},
+            {
+                "VARIABLE": 0,
+                "NAME": "nbc_value",
+                "TYPE": "linearinterpolation",
+                "NUMPOINTS": 2,
+                "TIMES": [1, 11],
+                "VALUES": [1, 0],
+            },
+        ]
     )
     restart_simulation.add(function_nbc)
 
@@ -795,13 +804,11 @@ def test_four_c_simulation_dbc_monitor_to_input(
             initial_run_name + " is not yet implemented for this test case."
         )
 
-    restart_simulation.add(
-        """--RESULT DESCRIPTION
-        STRUCTURE DIS structure NODE 21 QUANTITY dispx VALUE -4.09988307566066690e-01 TOLERANCE 1e-10
-        STRUCTURE DIS structure NODE 21 QUANTITY dispy VALUE  9.93075098427816383e-01 TOLERANCE 1e-10
-        STRUCTURE DIS structure NODE 21 QUANTITY dispz VALUE  6.62050065618549843e-01 TOLERANCE 1e-10
-        """
-    )
+    displacements = [
+        [-4.09988307566066690e-01, 9.93075098427816383e-01, 6.62050065618549843e-01]
+    ]
+    nodes = [21]
+    add_result_description(restart_simulation, displacements, nodes)
 
     # Check the input file of the restart simulation
     assert_results_equal(
@@ -958,13 +965,9 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                     n_dof=9,
                 )
 
-    force_simulation.add(
-        """--RESULT DESCRIPTION
-        STRUCTURE DIS structure NODE 21 QUANTITY dispx VALUE 0.0 TOLERANCE 1e-10
-        STRUCTURE DIS structure NODE 21 QUANTITY dispy VALUE 0.0 TOLERANCE 1e-10
-        STRUCTURE DIS structure NODE 21 QUANTITY dispz VALUE 0.0 TOLERANCE 1e-10
-        """
-    )
+    displacements = [[0.0, 0.0, 0.0]]
+    nodes = [21]
+    add_result_description(force_simulation, displacements, nodes)
 
     # Compare the input file of the restart simulation.
     assert_results_equal(
@@ -1002,21 +1005,30 @@ def test_four_c_simulation_cantilever_convergence(
         input_file.add(
             BoundaryCondition(
                 beam_set["start"],
-                (
-                    "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0"
-                ),
+                {
+                    "NUMDOF": 9,
+                    "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                    "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                },
                 bc_type=mpy.bc.dirichlet,
             )
         )
-        fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+        fun = Function(
+            [
+                {"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"},
+            ]
+        )
         input_file.add(
             fun,
             BoundaryCondition(
                 beam_set["end"],
-                (
-                    "NUMDOF 9 ONOFF 0 0 1 0 0 0 0 0 0 VAL 0 0 -{} 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0"
-                ),
-                format_replacement=[0.5, fun],
+                {
+                    "NUMDOF": 9,
+                    "ONOFF": [0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    "VAL": [0, 0, -0.5, 0, 0, 0, 0, 0, 0],
+                    "FUNCT": [0, 0, fun, 0, 0, 0, 0, 0, 0],
+                },
                 bc_type=mpy.bc.dirichlet,
             ),
         )
@@ -1172,7 +1184,9 @@ def test_four_c_simulation_beam_to_beam_contact_example(
 
     displacements = [[-2.78205406266063848e00, 0, 0]]
     nodes = [12]
-    add_result_description(beam_to_beam_contact_simulation, displacements, nodes)
+    add_result_description(
+        beam_to_beam_contact_simulation, displacements, nodes, tol=1e-8
+    )
 
     # Check if we still have to actually run 4C.
     if not enforce_four_c:

@@ -39,6 +39,7 @@ from vtk_utils.compare_grids import compare_grids
 
 from meshpy.core.conf import mpy
 from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -346,32 +347,11 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             def get_dictionary(data) -> dict:
                 """Get the dictionary representation of the data object."""
                 if isinstance(data, InputFile):
-                    # BIG TODO: It can happen that we write some numpy scalars to the dict returned by
-                    # get_dict_to_dump. If we dont do anything about that we will get a pickle of that
-                    # numpy object instead of the "actual" representation of the item. We will likely
-                    # need one central place where we define how to dump our created dictionaries to
-                    # yaml and define these functions there (along with Function, GeometrySet and Material - maybe even node).
-                    def numpy_float_representer(dumper, value):
-                        """Converter for numpy float to yaml."""
-                        return dumper.represent_float(float(value))
-
-                    def numpy_int_representer(dumper, value):
-                        """Converter for numpy int to yaml."""
-                        return dumper.represent_int(int(value))
-
-                    def numpy_bool_representer(dumper, value):
-                        """Converter for numpy bool to yaml."""
-                        return dumper.represent_bool(bool(value))
-
-                    yaml.add_representer(np.float32, numpy_float_representer)
-                    yaml.add_representer(np.float64, numpy_float_representer)
-                    yaml.add_representer(np.int32, numpy_int_representer)
-                    yaml.add_representer(np.int64, numpy_int_representer)
-                    yaml.add_representer(np.bool_, numpy_bool_representer)
-
                     return yaml.safe_load(
                         yaml.dump(
-                            data.get_dict_to_dump(check_nox=False), width=float("inf")
+                            data.get_dict_to_dump(check_nox=False),
+                            Dumper=_MeshPyDumper,
+                            width=float("inf"),
                         )
                     )
                 if isinstance(data, dict):

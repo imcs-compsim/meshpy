@@ -195,10 +195,10 @@ def add_point_neuman_condition_to_input_file(
         {
             "NUMDOF": n_dof,
             "ONOFF": [1, 1, 1] + [0] * (n_dof - 3),
-            "VAL": force + [0] * (n_dof - 3),
+            "VAL": force.tolist() + [0] * (n_dof - 3),
+            "FUNCT": function_array + [0] * (n_dof - 3),
         },
         bc_type=_mpy.bc.neumann,
-        format_replacement=function_array,
     )
     input_file.add(bc)
 

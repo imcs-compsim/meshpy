@@ -315,9 +315,9 @@ def set_header_static(
     tol_increment=1e-10,
     load_lin=False,
     write_bin=False,
-    write_stress=False,
-    write_strain=False,
-    prestress=None,
+    write_stress="no",
+    write_strain="no",
+    prestress="none",
     prestress_time=0,
     option_overwrite=False,
 ):
