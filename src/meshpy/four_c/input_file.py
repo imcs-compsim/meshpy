@@ -48,7 +48,6 @@ from meshpy.core.geometry_set import GeometrySetNodes as _GeometrySetNodes
 from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.core.node import Node as _Node
 from meshpy.core.nurbs_patch import NURBSPatch as _NURBSPatch
-from meshpy.four_c.function import Function as _Function
 from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
 from meshpy.utils.environment import cubitpy_is_available as _cubitpy_is_available
 from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
