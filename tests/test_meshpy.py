@@ -48,11 +48,12 @@ from meshpy.four_c.element_beam import (
 )
 from meshpy.four_c.function import Function
 from meshpy.four_c.header_functions import (
+    add_result_description,
     set_beam_to_solid_meshtying,
     set_header_static,
     set_runtime_output,
 )
-from meshpy.four_c.input_file import InputFile, InputSection
+from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.material import (
     MaterialEulerBernoulli,
     MaterialKirchhoff,
@@ -236,12 +237,12 @@ def test_meshpy_mesh_reflection(origin, flip, assert_results_equal):
     assert_results_equal(mesh_ref, mesh)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize("full_import", [[True, "full"], [False, None]])
 def test_meshpy_comments_in_solid(
-    assert_results_equal, get_corresponding_reference_file_path, full_import
+    get_bc_dict,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
+    full_import,
 ):
     """Check if comments in the solid file are handled correctly if they are
     inside a mesh section."""
@@ -249,24 +250,26 @@ def test_meshpy_comments_in_solid(
     # Convert the solid mesh to meshpy objects.
     mpy.import_mesh_full = full_import[0]
     solid_file = get_corresponding_reference_file_path(additional_identifier="initial")
-    mesh = InputFile(dat_file=solid_file)
+    mesh = InputFile(yaml_file=solid_file)
 
     # Add one element with BCs.
     mat = MaterialReissner()
     sets = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 2, 3])
-    mesh.add(BoundaryCondition(sets["start"], "test", bc_type=mpy.bc.dirichlet))
-    mesh.add(BoundaryCondition(sets["end"], "test", bc_type=mpy.bc.neumann))
-
-    # Compare the output of the mesh.
-    assert_results_equal(
-        get_corresponding_reference_file_path(additional_identifier=full_import[1]),
-        mesh,
+    mesh.add(
+        BoundaryCondition(
+            sets["start"], get_bc_dict(identifier=1), bc_type=mpy.bc.dirichlet
+        )
+    )
+    mesh.add(
+        BoundaryCondition(
+            sets["end"], get_bc_dict(identifier=2), bc_type=mpy.bc.neumann
+        )
     )
 
+    # Compare the output of the mesh.
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
+
 def test_meshpy_mesh_transformations_with_solid(
     assert_results_equal,
     get_corresponding_reference_file_path,
@@ -283,7 +286,7 @@ def test_meshpy_mesh_transformations_with_solid(
 
         # Create the mesh.
         mesh = InputFile(
-            dat_file=get_corresponding_reference_file_path(
+            yaml_file=get_corresponding_reference_file_path(
                 reference_file_base_name="4C_input_solid_cuboid"
             )
         )
@@ -334,16 +337,13 @@ def test_meshpy_mesh_transformations_with_solid(
         )
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_fluid_element_section(
     assert_results_equal,
     get_corresponding_reference_file_path,
 ):
     """Add beam elements to an input file containing fluid elements."""
     input_file = InputFile(
-        dat_file=get_corresponding_reference_file_path(additional_identifier="import")
+        yaml_file=get_corresponding_reference_file_path(additional_identifier="import")
     )
 
     beam_mesh = Mesh()
@@ -359,38 +359,6 @@ def test_meshpy_fluid_element_section(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
-def test_meshpy_domain_geometry_sets(
-    assert_results_equal, get_corresponding_reference_file_path
-):
-    """Add geometry set based on a 4C internal domain."""
-
-    input_file = InputFile()
-
-    input_file.add(
-        """
-    -----------------------------------------------FLUID DOMAIN
-    LOWER_BOUND     -1.5 -0.5 -0.5
-    UPPER_BOUND     1.5 0.5 0.5
-    INTERVALS       48 16 16
-    ELEMENTS        FLUID HEX8 MAT 1 NA Euler
-    PARTITION       structured
-    -----------------------------------------------DLINE-NODE TOPOLOGY
-    EDGE fluid y+ z+ DLINE 1
-    -----------------------------------------------DSURF-NODE TOPOLOGY
-    SIDE fluid z+ DSURFACE 1
-    """
-    )
-
-    # Compare the output of the mesh.
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
-
-
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_wrap_cylinder_not_on_same_plane(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -450,16 +418,13 @@ def test_meshpy_get_nodes_by_function():
         assert np.abs(1.0 - node.coordinates[0]) < 1e-10
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_get_min_max_coordinates(get_corresponding_reference_file_path):
     """Test if the get_min_max_coordinates function works properly."""
 
     # Create the mesh.
     mpy.import_mesh_full = True
     mesh = InputFile(
-        dat_file=get_corresponding_reference_file_path(
+        yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="4C_input_solid_cuboid"
         )
     )
@@ -472,9 +437,6 @@ def test_meshpy_get_min_max_coordinates(get_corresponding_reference_file_path):
     assert np.linalg.norm(min_max - ref_solution) < 1e-10
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_geometry_sets(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -501,11 +463,8 @@ def test_meshpy_geometry_sets(
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_unique_ordering_of_get_all_nodes_for_line_condition(
-    assert_results_equal, get_corresponding_reference_file_path
+    get_bc_dict, assert_results_equal, get_corresponding_reference_file_path
 ):
     """This test ensures that the ordering of the nodes returned from the
     function get_all_nodes is unique for line sets."""
@@ -523,7 +482,7 @@ def test_meshpy_unique_ordering_of_get_all_nodes_for_line_condition(
         input_file.add(
             BoundaryCondition(
                 GeometrySet(node),
-                node.coordinates[0],
+                get_bc_dict(identifier=node.coordinates[0]),
                 bc_type=mpy.bc.dirichlet,
             )
         )
@@ -535,9 +494,6 @@ def test_meshpy_unique_ordering_of_get_all_nodes_for_line_condition(
     )
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_reissner_beam(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -565,7 +521,7 @@ def test_meshpy_reissner_beam(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_meshpy_reissner_elasto_plastic():
+def test_meshpy_reissner_elasto_plastic(assert_results_equal):
     """Test the elasto plastic Reissner beam material."""
 
     kwargs = {
@@ -578,21 +534,35 @@ def test_meshpy_reissner_elasto_plastic():
         "torsion_plasticity": False,
     }
 
-    ref_string = "MAT 69 MAT_BeamReissnerElastPlastic YOUNG 1000 POISSONRATIO 0.0 DENS 0.0 CROSSAREA 0.031415926535897934 SHEARCORR 0.8333333333333334 MOMINPOL 0.00015707963267948968 MOMIN2 7.853981633974484e-05 MOMIN3 7.853981633974484e-05 INTERACTIONRADIUS 2.0 YIELDM 2.3 ISOHARDM 4.5 TORSIONPLAST "
+    ref_dict = {
+        "MAT": 69,
+        "MAT_BeamReissnerElastPlastic": {
+            "YOUNG": 1000,
+            "POISSONRATIO": 0.0,
+            "DENS": 0.0,
+            "CROSSAREA": 0.031415926535897934,
+            "SHEARCORR": 0.8333333333333334,
+            "MOMINPOL": 0.00015707963267948968,
+            "MOMIN2": 7.853981633974484e-05,
+            "MOMIN3": 7.853981633974484e-05,
+            "INTERACTIONRADIUS": 2.0,
+            "YIELDM": 2.3,
+            "ISOHARDM": 4.5,
+            "TORSIONPLAST": False,
+        },
+    }
 
     mat = MaterialReissnerElastoplastic(**kwargs)
     mat.i_global = 69
-    assert mat.get_dat_lines() == [ref_string + "0"]
+    assert_results_equal(mat.dump_to_list(), [ref_dict])
 
+    ref_dict["MAT_BeamReissnerElastPlastic"]["TORSIONPLAST"] = True
     kwargs["torsion_plasticity"] = True
     mat = MaterialReissnerElastoplastic(**kwargs)
     mat.i_global = 69
-    assert mat.get_dat_lines() == [ref_string + "1"]
+    assert_results_equal(mat.dump_to_list(), [ref_dict])
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_kirchhoff_beam(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -649,7 +619,7 @@ def test_meshpy_kirchhoff_beam(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_meshpy_kirchhoff_material():
+def test_meshpy_kirchhoff_material(assert_results_equal):
     """Test the Kirchhoff Love beam material."""
 
     def set_stiff(material):
@@ -661,29 +631,69 @@ def test_meshpy_kirchhoff_material():
 
     material = MaterialKirchhoff(youngs_modulus=1000, is_fad=True)
     set_stiff(material)
-    assert (
-        " ".join(material.get_dat_lines())
-        == "MAT None MAT_BeamKirchhoffElastHyper YOUNG 1000 SHEARMOD 500.0 DENS 0.0 CROSSAREA 2.0 MOMINPOL 5.0 MOMIN2 3.0 MOMIN3 4.0 FAD yes"
+    assert_results_equal(
+        material.dump_to_list(),
+        [
+            {
+                "MAT": None,
+                "MAT_BeamKirchhoffElastHyper": {
+                    "YOUNG": 1000,
+                    "SHEARMOD": 500.0,
+                    "DENS": 0.0,
+                    "CROSSAREA": 2.0,
+                    "MOMINPOL": 5.0,
+                    "MOMIN2": 3.0,
+                    "MOMIN3": 4.0,
+                    "FAD": True,
+                },
+            }
+        ],
     )
 
     material = MaterialKirchhoff(youngs_modulus=1000, is_fad=False)
     set_stiff(material)
-    assert (
-        " ".join(material.get_dat_lines())
-        == "MAT None MAT_BeamKirchhoffElastHyper YOUNG 1000 SHEARMOD 500.0 DENS 0.0 CROSSAREA 2.0 MOMINPOL 5.0 MOMIN2 3.0 MOMIN3 4.0 FAD no"
+    assert_results_equal(
+        material.dump_to_list(),
+        [
+            {
+                "MAT": None,
+                "MAT_BeamKirchhoffElastHyper": {
+                    "YOUNG": 1000,
+                    "SHEARMOD": 500.0,
+                    "DENS": 0.0,
+                    "CROSSAREA": 2.0,
+                    "MOMINPOL": 5.0,
+                    "MOMIN2": 3.0,
+                    "MOMIN3": 4.0,
+                    "FAD": False,
+                },
+            }
+        ],
     )
 
     material = MaterialKirchhoff(youngs_modulus=1000, interaction_radius=1.1)
     set_stiff(material)
-    assert (
-        " ".join(material.get_dat_lines())
-        == "MAT None MAT_BeamKirchhoffElastHyper YOUNG 1000 SHEARMOD 500.0 DENS 0.0 CROSSAREA 2.0 MOMINPOL 5.0 MOMIN2 3.0 MOMIN3 4.0 FAD no INTERACTIONRADIUS 1.1"
+    assert_results_equal(
+        material.dump_to_list(),
+        [
+            {
+                "MAT": None,
+                "MAT_BeamKirchhoffElastHyper": {
+                    "YOUNG": 1000,
+                    "SHEARMOD": 500.0,
+                    "DENS": 0.0,
+                    "CROSSAREA": 2.0,
+                    "MOMINPOL": 5.0,
+                    "MOMIN2": 3.0,
+                    "MOMIN3": 4.0,
+                    "FAD": False,
+                    "INTERACTIONRADIUS": 1.1,
+                },
+            }
+        ],
     )
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_euler_bernoulli(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -692,7 +702,7 @@ def test_meshpy_euler_bernoulli(
 
     # Create the input file and add function and material.
     input_file = InputFile()
-    fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+    fun = Function([{"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"}])
     input_file.add(fun)
     mat = MaterialEulerBernoulli(youngs_modulus=1.0, density=1.3e9)
 
@@ -709,16 +719,25 @@ def test_meshpy_euler_bernoulli(
     input_file.add(
         BoundaryCondition(
             beam_set["start"],
-            "NUMDOF 6 ONOFF 1 1 1 0 1 1 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0",
+            {
+                "NUMDOF": 6,
+                "ONOFF": [1, 1, 1, 0, 1, 1],
+                "VAL": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
+                "FUNCT": [0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
     input_file.add(
         BoundaryCondition(
             beam_set["end"],
-            "NUMDOF 6 ONOFF 0 0 0 0 0 1 VAL 0.0 0.0 0.0 0.0 0.0 7.8539816339744e-05 FUNCT 0 0 0 0 0 {}",
+            {
+                "NUMDOF": 6,
+                "ONOFF": [0, 0, 0, 0, 0, 1],
+                "VAL": [0.0, 0.0, 0.0, 0.0, 0.0, 7.8539816339744e-05],
+                "FUNCT": [0, 0, 0, 0, 0, fun],
+            },
             bc_type=mpy.bc.moment_euler_bernoulli,
-            format_replacement=[fun],
         )
     )
 
@@ -728,22 +747,25 @@ def test_meshpy_euler_bernoulli(
     # Test consistency checks.
     rot = Rotation([1, 2, 3], 2.3434)
     input_file.nodes[-1].rotation = rot
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="The two nodal rotations in Euler Bernoulli beams must be the same",
+    ):
         # This raises an error because not all rotation in the beams are
         # the same.
-        input_file.get_string(header=False)
+        input_file.get_dict_to_dump()
 
     for node in input_file.nodes:
         node.rotation = rot
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        ValueError,
+        match="The rotations do not match the direction of the Euler Bernoulli beam",
+    ):
         # This raises an error because the rotations do not match the
         # director between the nodes.
-        input_file.get_string(header=False)
+        input_file.get_dict_to_dump()
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_file_path):
     """
     Create a circle with different methods.
@@ -1007,7 +1029,7 @@ def test_geometry_set_get_geometry_objects():
 
 @pytest.mark.parametrize("use_nodal_geometry_sets", [True, False])
 def test_meshpy_replace_nodes_geometry_set(
-    use_nodal_geometry_sets, assert_results_equal
+    get_bc_dict, use_nodal_geometry_sets, assert_results_equal
 ):
     """Test case for coupling of nodes, and reusing the identical nodes."""
 
@@ -1157,22 +1179,24 @@ def test_meshpy_replace_nodes_geometry_set(
     mesh_couple.add(node_set_1_couple)
 
     # Add BCs.
-    mesh_ref.add(BoundaryCondition(node_set_2_ref, "BC1", bc_type=mpy.bc.neumann))
-    mesh_couple.add(BoundaryCondition(node_set_2_couple, "BC1", bc_type=mpy.bc.neumann))
+    mesh_ref.add(
+        BoundaryCondition(node_set_2_ref, get_bc_dict(), bc_type=mpy.bc.neumann)
+    )
+    mesh_couple.add(
+        BoundaryCondition(node_set_2_couple, get_bc_dict(), bc_type=mpy.bc.neumann)
+    )
 
     # Compare the meshes.
+    # TODO: Add reference mesh for this test
     assert_results_equal(mesh_ref, mesh_couple)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def create_beam_to_solid_conditions_model(get_corresponding_reference_file_path):
     """Create the input file for the beam-to-solid input conditions tests."""
 
     # Create input file.
     input_file = InputFile(
-        dat_file=get_corresponding_reference_file_path(
+        yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_block"
         )
     )
@@ -1193,14 +1217,14 @@ def create_beam_to_solid_conditions_model(get_corresponding_reference_file_path)
         BoundaryCondition(
             line_set,
             bc_type=mpy.bc.beam_to_solid_volume_meshtying,
-            bc_string="COUPLING_ID 1",
+            bc_dict={"COUPLING_ID": 1},
         )
     )
     beam_mesh.add(
         BoundaryCondition(
             line_set,
             bc_type=mpy.bc.beam_to_solid_surface_meshtying,
-            bc_string="COUPLING_ID 2",
+            bc_dict={"COUPLING_ID": 2},
         )
     )
 
@@ -1210,9 +1234,6 @@ def create_beam_to_solid_conditions_model(get_corresponding_reference_file_path)
     return input_file
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize("test_type", [None, "full"])
 def test_meshpy_beam_to_solid_conditions(
     test_type,
@@ -1242,9 +1263,6 @@ def test_meshpy_beam_to_solid_conditions(
     )
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_surface_to_surface_contact_import(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -1254,7 +1272,7 @@ def test_meshpy_surface_to_surface_contact_import(
     # Create input file.
     mpy.import_mesh_full = True
     input_file = InputFile(
-        dat_file=get_corresponding_reference_file_path(
+        yaml_file=get_corresponding_reference_file_path(
             additional_identifier="solid_mesh"
         )
     )
@@ -1263,9 +1281,6 @@ def test_meshpy_surface_to_surface_contact_import(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_nurbs_import(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -1277,7 +1292,7 @@ def test_meshpy_nurbs_import(
 
     # Create beam mesh and load solid file.
     input_file = InputFile(
-        dat_file=get_corresponding_reference_file_path(
+        yaml_file=get_corresponding_reference_file_path(
             additional_identifier="solid_mesh"
         )
     )
@@ -1304,18 +1319,16 @@ def test_meshpy_nurbs_import(
     )
     set_runtime_output(input_file, output_solid=False)
     input_file.add(
-        InputSection(
-            "IO",
-            """
-        OUTPUT_BIN     yes
-        STRUCT_DISP    yes
-        FILESTEPS      1000
-        VERBOSITY      Standard
-        """,
-            option_overwrite=True,
-        )
+        {
+            "IO": {
+                "OUTPUT_BIN": True,
+                "STRUCT_DISP": True,
+                "VERBOSITY": "Standard",
+            }
+        },
+        option_overwrite=True,
     )
-    fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+    fun = Function([{"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"}])
     input_file.add(fun)
 
     # Create the beam material.
@@ -1338,64 +1351,67 @@ def test_meshpy_nurbs_import(
     input_file.add(
         BoundaryCondition(
             set_1["start"],
-            "NUMDOF 9 ONOFF 0 0 0 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+            {
+                "NUMDOF": 9,
+                "ONOFF": [0, 0, 0, 1, 1, 1, 0, 0, 0],
+                "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
     input_file.add(
         BoundaryCondition(
             set_1["end"],
-            "NUMDOF 9 ONOFF 0 1 0 0 0 0 0 0 0 VAL 0 0.02 0 0 0 0 0 0 0 FUNCT 0 {} 0 0 0 0 0 0 0",
-            format_replacement=[fun],
+            {
+                "NUMDOF": 9,
+                "ONOFF": [0, 1, 0, 0, 0, 0, 0, 0, 0],
+                "VAL": [0, 0.02, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [0, fun, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.neumann,
         )
     )
     input_file.add(
         BoundaryCondition(
             set_2["start"],
-            "NUMDOF 9 ONOFF 0 0 0 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+            {
+                "NUMDOF": 9,
+                "ONOFF": [0, 0, 0, 1, 1, 1, 0, 0, 0],
+                "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
     input_file.add(
         BoundaryCondition(
             set_2["end"],
-            "NUMDOF 9 ONOFF 1 0 0 0 0 0 0 0 0 VAL -0.06 0 0 0 0 0 0 0 0 "
-            "FUNCT {} 0 0 0 0 0 0 0 0",
-            format_replacement=[fun],
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 0, 0, 0, 0, 0, 0, 0, 0],
+                "VAL": [-0.06, 0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [fun, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.neumann,
         )
     )
 
     # Add result checks.
-    displacement = [
+    displacements = [
         [
             -5.14451531793581718e-01,
             -1.05846397858073843e-01,
             -1.77822866851472888e-01,
         ]
     ]
-
     nodes = [64]
-    for j, node in enumerate(nodes):
-        for i, direction in enumerate(["x", "y", "z"]):
-            input_file.add(
-                InputSection(
-                    "RESULT DESCRIPTION",
-                    (
-                        "STRUCTURE DIS structure NODE {} QUANTITY disp{} "
-                        "VALUE {} TOLERANCE 1e-10"
-                    ).format(node, direction, displacement[j][i]),
-                )
-            )
+    add_result_description(input_file, displacements, nodes)
 
     # Compare with the reference solution.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_stvenantkirchhoff_solid(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -1418,14 +1434,18 @@ def test_meshpy_stvenantkirchhoff_solid(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize(
     "coupling_type",
     [
         ["exact", mpy.bc.point_coupling, mpy.coupling_dof.fix],
-        ["penalty", mpy.bc.point_coupling_penalty, "PENALTY_VALUE"],
+        [
+            "penalty",
+            mpy.bc.point_coupling_penalty,
+            {
+                "POSITIONAL_PENALTY_PARAMETER": 10000,
+                "ROTATIONAL_PENALTY_PARAMETER": 0,
+            },
+        ],
     ],
 )
 def test_meshpy_point_couplings(
@@ -1616,9 +1636,6 @@ def test_meshpy_vtk_writer_beam(
     assert_results_equal(ref_file, vtk_file, atol=mpy.eps_pos)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_vtk_writer_solid(
     assert_results_equal, get_corresponding_reference_file_path, tmp_path
 ):
@@ -1630,7 +1647,7 @@ def test_meshpy_vtk_writer_solid(
 
     # Create the input file and read solid mesh data.
     input_file = InputFile()
-    input_file.read_dat(
+    input_file.read_yaml(
         get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_tube"
         )
@@ -1649,9 +1666,6 @@ def test_meshpy_vtk_writer_solid(
     assert_results_equal(ref_file, vtk_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_vtk_writer_solid_elements(
     assert_results_equal, get_corresponding_reference_file_path, tmp_path
 ):
@@ -1663,7 +1677,7 @@ def test_meshpy_vtk_writer_solid_elements(
 
     # Create the input file and read solid mesh data.
     input_file = InputFile()
-    input_file.read_dat(
+    input_file.read_yaml(
         get_corresponding_reference_file_path(additional_identifier="import")
     )
 
@@ -1737,9 +1751,6 @@ def test_meshpy_vtk_curve_cell_data(
     assert_results_equal(ref_file, vtk_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.cubitpy
 def test_meshpy_cubitpy_import(
     assert_results_equal,
@@ -1755,7 +1766,7 @@ def test_meshpy_cubitpy_import(
     # Create the input file and read the file.
     file_path = os.path.join(tmp_path, "test_cubitpy_import.dat")
     create_tube(file_path)
-    input_file = InputFile(dat_file=file_path)
+    input_file = InputFile(yaml_file=file_path)
 
     # Create the input file and read the cubit object.
     input_file_cubit = InputFile(cubit=create_tube_cubit())
@@ -1764,14 +1775,14 @@ def test_meshpy_cubitpy_import(
     file_path_ref = get_corresponding_reference_file_path(
         reference_file_base_name="test_create_cubit_input_tube"
     )
-    input_file_ref = InputFile(dat_file=file_path_ref)
+    input_file_ref = InputFile(yaml_file=file_path_ref)
 
     # Compare the input files.
     assert_results_equal(input_file, input_file_cubit)
     assert_results_equal(input_file, input_file_ref, rtol=1e-14)
 
 
-def test_meshpy_deep_copy(assert_results_equal):
+def test_meshpy_deep_copy(get_bc_dict, assert_results_equal):
     """This test checks that the deep copy function on a mesh does not copy the
     materials or functions."""
 
@@ -1784,8 +1795,16 @@ def test_meshpy_deep_copy(assert_results_equal):
         mesh.add(fun, mat)
         set1 = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0])
         set2 = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [1, 0, 0], [1, 1, 0])
-        mesh.add(BoundaryCondition(set1["line"], "fix", bc_type=mpy.bc.dirichlet))
-        mesh.add(BoundaryCondition(set2["line"], "load", bc_type=mpy.bc.neumann))
+        mesh.add(
+            BoundaryCondition(
+                set1["line"], get_bc_dict(identifier=1), bc_type=mpy.bc.dirichlet
+            )
+        )
+        mesh.add(
+            BoundaryCondition(
+                set2["line"], get_bc_dict(identifier=2), bc_type=mpy.bc.neumann
+            )
+        )
         mesh.couple_nodes()
 
     # The second mesh will be translated and rotated with those vales.
@@ -1812,6 +1831,7 @@ def test_meshpy_deep_copy(assert_results_equal):
     input_file_copy.add(mesh_copy_1, mesh_copy_2)
 
     # Check that the input files are the same.
+    # TODO: add reference file check here as well
     assert_results_equal(input_file_ref, input_file_copy)
 
 
@@ -1851,9 +1871,6 @@ def test_meshpy_mesh_add_checks():
         mesh.add(geometry_set)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_check_two_couplings(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -1879,9 +1896,6 @@ def test_meshpy_check_two_couplings(
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize("reuse_nodes", [[None, False], ["reuse", True]])
 def test_meshpy_check_multiple_node_penalty_coupling(
     reuse_nodes, assert_results_equal, get_corresponding_reference_file_path
@@ -1906,6 +1920,10 @@ def test_meshpy_check_multiple_node_penalty_coupling(
     mesh.couple_nodes(
         reuse_matching_nodes=reuse_nodes[1],
         coupling_type=mpy.bc.point_coupling_penalty,
+        coupling_dof_type={
+            "POSITIONAL_PENALTY_PARAMETER": 10000,
+            "ROTATIONAL_PENALTY_PARAMETER": 0,
+        },
     )
     assert_results_equal(
         get_corresponding_reference_file_path(additional_identifier=reuse_nodes[0]),
@@ -2009,11 +2027,8 @@ def test_meshpy_check_start_end_node_error():
         create_beam_mesh_line(*args, **kwargs)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_userdefined_boundary_condition(
-    assert_results_equal, get_corresponding_reference_file_path
+    get_bc_dict, assert_results_equal, get_corresponding_reference_file_path
 ):
     """Check if an user defined boundary condition can be added."""
 
@@ -2021,15 +2036,16 @@ def test_meshpy_userdefined_boundary_condition(
 
     mat = MaterialReissner()
     sets = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 2, 3])
-    mesh.add(BoundaryCondition(sets["line"], "test", bc_type="USER SECTION FOR BC"))
+    mesh.add(
+        BoundaryCondition(
+            sets["line"], get_bc_dict(), bc_type="DESIGN VOL ALE DIRICH CONDITIONS"
+        )
+    )
 
     # Compare the output of the mesh.
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_meshpy_display_pyvista(get_corresponding_reference_file_path):
     """Test that the display in pyvista function does not lead to errors.
 

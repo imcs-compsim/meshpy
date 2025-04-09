@@ -23,31 +23,60 @@
 module."""
 
 from meshpy.four_c.function_utility import (
+    create_linear_interpolation_dict,
     create_linear_interpolation_function,
-    create_linear_interpolation_string,
 )
 
 
-def test_linear_interpolation_function():
+def test_linear_interpolation_function(assert_results_equal):
     """Test that linear interpolation functions are created correctly."""
 
     t = [1.5, 2.5, 3.5, 10.0]
     values = [1.0, -1.0, 3.5, -10.3]
 
     fun = create_linear_interpolation_function(t, values)
-    assert [
-        "SYMBOLIC_FUNCTION_OF_SPACE_TIME var\nVARIABLE 0 NAME var TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3"
-    ] == fun.get_dat_lines()
+    assert_results_equal(
+        [
+            {"SYMBOLIC_FUNCTION_OF_SPACE_TIME": "var"},
+            {
+                "VARIABLE": 0,
+                "NAME": "var",
+                "TYPE": "linearinterpolation",
+                "NUMPOINTS": 6,
+                "TIMES": [-1000.0, 1.5, 2.5, 3.5, 10.0, 1010.0],
+                "VALUES": [1.0, 1.0, -1.0, 3.5, -10.3, -10.3],
+            },
+        ],
+        fun.dump_to_list(),
+    )
 
     fun = create_linear_interpolation_function(t, values, function_type="My type")
-    assert [
-        "My type var\nVARIABLE 0 NAME var TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3"
-    ] == fun.get_dat_lines()
+    assert_results_equal(
+        [
+            {"My type": "var"},
+            {
+                "VARIABLE": 0,
+                "NAME": "var",
+                "TYPE": "linearinterpolation",
+                "NUMPOINTS": 6,
+                "TIMES": [-1000.0, 1.5, 2.5, 3.5, 10.0, 1010.0],
+                "VALUES": [1.0, 1.0, -1.0, 3.5, -10.3, -10.3],
+            },
+        ],
+        fun.dump_to_list(),
+    )
 
-    fun_string = create_linear_interpolation_string(
+    function_definition = create_linear_interpolation_dict(
         t, values, variable_name="test", variable_index=12
     )
-    assert (
-        "VARIABLE 12 NAME test TYPE linearinterpolation NUMPOINTS 6 TIMES -1000.0 1.5 2.5 3.5 10.0 1010.0 VALUES 1.0 1.0 -1.0 3.5 -10.3 -10.3"
-        == fun_string
+    assert_results_equal(
+        {
+            "VARIABLE": 12,
+            "NAME": "test",
+            "TYPE": "linearinterpolation",
+            "NUMPOINTS": 6,
+            "TIMES": [-1000.0, 1.5, 2.5, 3.5, 10.0, 1010.0],
+            "VALUES": [1.0, 1.0, -1.0, 3.5, -10.3, -10.3],
+        },
+        function_definition,
     )

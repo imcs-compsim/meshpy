@@ -22,11 +22,10 @@
 """This script is used to test the mesh creation functions for NURBS."""
 
 import numpy as np
-import pytest
 
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.input_file import InputFile
-from meshpy.four_c.material import MaterialString, MaterialStVenantKirchhoff
+from meshpy.four_c.material import MaterialStVenantKirchhoff
 from meshpy.mesh_creation_functions.nurbs_generic import add_geomdl_nurbs_to_mesh
 from meshpy.mesh_creation_functions.nurbs_geometries import (
     create_nurbs_brick,
@@ -38,9 +37,6 @@ from meshpy.mesh_creation_functions.nurbs_geometries import (
 )
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_nurbs_hollow_cylinder_segment_2d(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -75,9 +71,6 @@ def test_nurbs_hollow_cylinder_segment_2d(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_nurbs_flat_plate_2d(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -110,9 +103,6 @@ def test_nurbs_flat_plate_2d(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_nurbs_brick(assert_results_equal, get_corresponding_reference_file_path):
     """Test the creation of a brick."""
 
@@ -141,9 +131,6 @@ def test_nurbs_brick(assert_results_equal, get_corresponding_reference_file_path
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_nurbs_rotation_nurbs_surface(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -179,9 +166,6 @@ def test_nurbs_rotation_nurbs_surface(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_nurbs_translate_nurbs_surface(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -215,9 +199,6 @@ def test_nurbs_translate_nurbs_surface(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_nurbs_couple_nurbs_meshes(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -269,9 +250,6 @@ def test_nurbs_couple_nurbs_meshes(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_nurbs_sphere_surface(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -303,9 +281,6 @@ def test_nurbs_sphere_surface(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_nurbs_string_types(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -319,7 +294,7 @@ def test_nurbs_string_types(
     surf_obj = create_nurbs_flat_plate_2d(1, 3, n_ele_u=3, n_ele_v=2)
 
     # Create first patch set
-    mat = MaterialString("STRING_MATERIAL")
+    mat = MaterialStVenantKirchhoff()
 
     patch_set = add_geomdl_nurbs_to_mesh(
         input_file,
@@ -335,9 +310,6 @@ def test_nurbs_string_types(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_nurbs_hemisphere_surface(
     assert_results_equal, get_corresponding_reference_file_path
 ):
@@ -371,9 +343,6 @@ def test_nurbs_hemisphere_surface(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_nurbs_torus_surface(
     assert_results_equal, get_corresponding_reference_file_path
 ):
