@@ -346,7 +346,34 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             def get_dictionary(data) -> dict:
                 """Get the dictionary representation of the data object."""
                 if isinstance(data, InputFile):
-                    return data.dump()
+                    # BIG TODO: It can happen that we write some numpy scalars to the dict returned by
+                    # get_dict_to_dump. If we dont do anything about that we will get a pickle of that
+                    # numpy object instead of the "actual" representation of the item. We will likely
+                    # need one central place where we define how to dump our created dictionaries to
+                    # yaml and define these functions there (along with Function, GeometrySet and Material - maybe even node).
+                    def numpy_float_representer(dumper, value):
+                        """Converter for numpy float to yaml."""
+                        return dumper.represent_float(float(value))
+
+                    def numpy_int_representer(dumper, value):
+                        """Converter for numpy int to yaml."""
+                        return dumper.represent_int(int(value))
+
+                    def numpy_bool_representer(dumper, value):
+                        """Converter for numpy bool to yaml."""
+                        return dumper.represent_bool(bool(value))
+
+                    yaml.add_representer(np.float32, numpy_float_representer)
+                    yaml.add_representer(np.float64, numpy_float_representer)
+                    yaml.add_representer(np.int32, numpy_int_representer)
+                    yaml.add_representer(np.int64, numpy_int_representer)
+                    yaml.add_representer(np.bool_, numpy_bool_representer)
+
+                    return yaml.safe_load(
+                        yaml.dump(
+                            data.get_dict_to_dump(check_nox=False), width=float("inf")
+                        )
+                    )
                 if isinstance(data, dict):
                     return data
                 elif isinstance(data, Path):
@@ -593,7 +620,7 @@ def compare_dicts(
     if dict_1.keys() != dict_2.keys():
         raise AssertionError(
             "The keys of the dictionary are not equal. "
-            f"Got {dict_1.keys()} and {dict_2.keys()}"
+            f"Got {dict_1.keys()} and {dict_2.keys()} {dict_1.keys() - dict_2.keys()} {dict_2.keys() - dict_1.keys()}"
         )
 
     for key in dict_1:
@@ -627,7 +654,7 @@ def compare_dicts(
                     )
             except:
                 raise AssertionError(
-                    f"Comparison of the values {value_1} and {value_2} failed."
+                    f"Comparison of the values {value_1} and {value_2} failed. {type(value_1)} and {type(value_2)}"
                 )
 
         elif isinstance(value_1, list) and isinstance(value_2, list):
@@ -635,7 +662,7 @@ def compare_dicts(
             compare_lists(value_1, value_2, rtol=rtol, atol=atol)
         elif not value_1 == value_2:
             raise AssertionError(
-                f'Comparison of values for the key "{key}" failed. Values: {value_1} and {value_2}'
+                f'Comparison of values for the key "{key}" failed. {value_1} {value_2} |||| {type(value_1)} {type(value_2)}'
             )
 
 
@@ -692,5 +719,5 @@ def compare_lists(
             compare_strings(item_1, item_2, rtol=rtol, atol=atol)
         elif not item_1 == item_2:
             raise AssertionError(
-                f"Comparison of values for the key failed. {item_1} {item_2}"
+                f"Comparison of values for the key failed. {item_1} {item_2}\n\n{list_1} {list_2}"
             )
