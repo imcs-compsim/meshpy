@@ -91,7 +91,7 @@ class BeamPotential:
     def add_header(
         self,
         *,
-        potential_type="Volume",
+        potential_type="volume",
         cutoff_radius=None,
         evaluation_strategy=None,
         regularization_type=None,
@@ -141,23 +141,23 @@ class BeamPotential:
         settings = {
             "POT_LAW_PREFACTOR": " ".join(map(str, self.pot_law_prefactor)),
             "POT_LAW_EXPONENT": " ".join(map(str, self.pot_law_exponent)),
-            "BEAMPOTENTIAL_TYPE": potential_type,
+            "TYPE": potential_type,
             "CUTOFF_RADIUS": cutoff_radius,
             "STRATEGY": evaluation_strategy,
-            "NUM_INTEGRATION_SEGMENTS": integration_segments,
-            "NUM_GAUSSPOINTS": gauss_points,
+            "N_INTEGRATION_SEGMENTS": integration_segments,
+            "N_GAUSS_POINTS": gauss_points,
             "POTENTIAL_REDUCTION_LENGTH": potential_reduction_length,
             "AUTOMATIC_DIFFERENTIATION": automatic_differentiation,
         }
 
         if regularization_type is not None:
-            settings | {
+            settings = settings | {
                 "REGULARIZATION_TYPE": regularization_type,
                 "REGULARIZATION_SEPARATION": regularization_separation,
             }
 
         if choice_master_slave is not None:
-            settings | {"CHOICE_MASTER_SLAVE": choice_master_slave}
+            settings = settings | {"CHOICE_MASTER_SLAVE": choice_master_slave}
 
         self.input_file.add(
             {"BEAM POTENTIAL": settings},
