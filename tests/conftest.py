@@ -40,6 +40,7 @@ from vtk_utils.compare_grids import compare_grids
 from meshpy.core.conf import mpy
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
+from meshpy.utils.environment import fourcipp_is_available
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -171,15 +172,11 @@ def get_string() -> Callable:
         Function to get string from file.
     """
 
-    def _get_string(
-        data: Union[Path, str, InputFile, dict], input_file_kwargs: dict = {}
-    ) -> str:
-        """Get string from file, string or InputFile.
+    def _get_string(data: Union[Path, str, dict]) -> str:
+        """Get string from file or string.
 
         Args:
             data: Object that should be converted to a string.
-            input_file_kwargs: Dictionary which contains the settings when extracting
-                the string from the input file.
 
         Returns:
             String representation of data.
@@ -192,8 +189,6 @@ def get_string() -> Callable:
                 raise FileNotFoundError(f"File {data} does not exist!")
             with open(data, "r") as file:
                 return file.read()
-        elif isinstance(data, InputFile):
-            return data.get_string(**input_file_kwargs)
         elif isinstance(data, dict):
 
             def convert_numpy(obj):
@@ -283,10 +278,6 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
         result: Union[Path, str, dict, InputFile],
         rtol: Optional[float] = None,
         atol: Optional[float] = None,
-        input_file_kwargs: dict = {
-            "check_nox": False,
-            "header": False,
-        },
         **kwargs,
     ) -> None:
         """Comparison between reference and result with relative or absolute
@@ -299,8 +290,6 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             result: The result data.
             rtol: The relative tolerance.
             atol: The absolute tolerance.
-            input_file_kwargs: Dictionary which contains the settings when extracting
-                the string from the input file.
         """
 
         # Per default we do a string comparison of the objects. Some data types, e.g.,
@@ -347,6 +336,12 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             def get_dictionary(data) -> dict:
                 """Get the dictionary representation of the data object."""
                 if isinstance(data, InputFile):
+                    if fourcipp_is_available():
+                        raise ValueError(
+                            "Port this functionality to create the node from the dict "
+                            "representing the node, not the legacy string."
+                        )
+
                     return yaml.safe_load(
                         yaml.dump(
                             data.get_dict_to_dump(check_nox=False),
@@ -368,14 +363,16 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             compare_dicts(reference_dict, result_dict, rtol=rtol, atol=atol)
             return
 
-        if isinstance(reference, list) or isinstance(result, list):
+        if isinstance(reference, (list, np.ndarray)) and isinstance(
+            result, (list, np.ndarray)
+        ):
             compare_lists(reference, result, rtol=rtol, atol=atol)
             return
 
         # We didn't raise an error or exit this function yet, so we default to a string
         # based comparison.
         [reference_string, result_string] = [
-            get_string(data, input_file_kwargs) for data in [reference, result]
+            get_string(data) for data in [reference, result]
         ]
 
         # compare strings and handle non-matching strings
