@@ -29,22 +29,6 @@ from meshpy.core.conf import mpy as _mpy
 from meshpy.four_c.input_file import InputFile as _InputFile
 
 
-def get_yes_no(bool_var):
-    """Convert a bool into a string for the 4C input file."""
-    if bool_var:
-        return "yes"
-    else:
-        return "no"
-
-
-def get_comment(bool_var):
-    """Convert a bool into a comment or no comment for the 4C input file."""
-    if bool_var:
-        return ""
-    else:
-        return "//"
-
-
 def _get_segmentation_strategy(segmentation):
     """Get the 4C string for a geometry pair strategy."""
     if segmentation:

@@ -23,7 +23,6 @@
 interaction potentials."""
 
 from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
-from meshpy.four_c.header_functions import get_yes_no as _get_yes_no
 
 
 class BeamPotential:
