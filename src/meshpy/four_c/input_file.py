@@ -22,224 +22,83 @@
 """This module defines the classes that are used to create an input file for
 4C."""
 
+import copy as _copy
 import datetime as _datetime
 import os as _os
-import re as _re
 import shutil as _shutil
 import subprocess as _subprocess  # nosec B404
 import sys as _sys
+from pathlib import Path as _Path
+from typing import Any as _Any
+from typing import Dict as _Dict
+from typing import List as _List
+from typing import Optional as _Optional
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
-from meshpy.core.base_mesh_item import BaseMeshItemString as _BaseMeshItemString
+import yaml as _yaml
+
+import meshpy.core.conf as _conf
 from meshpy.core.boundary_condition import (
     BoundaryConditionBase as _BoundaryConditionBase,
 )
-from meshpy.core.boundary_condition import (
-    BoundaryConditionContainer as _BoundaryConditionContainer,
-)
 from meshpy.core.conf import mpy as _mpy
+from meshpy.core.container import ContainerBase as _ContainerBase
 from meshpy.core.element import Element as _Element
-from meshpy.core.geometry_set import GeometrySetContainer as _GeometrySetContainer
+from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySetNodes as _GeometrySetNodes
 from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.core.node import Node as _Node
 from meshpy.core.nurbs_patch import NURBSPatch as _NURBSPatch
+from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
 from meshpy.utils.environment import cubitpy_is_available as _cubitpy_is_available
+from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 if _cubitpy_is_available():
     import cubitpy as _cubitpy
 
 
-def get_section_string(section_name):
-    """Return the string for a section in the dat file."""
-    return (
-        "".join(["-" for _i in range(_mpy.dat_len_section - len(section_name))])
-        + section_name
-    )
+def _get_geometry_set_indices_from_section(
+    section_list: _List, *, append_node_ids: bool = True
+) -> _Dict:
+    """Return a dictionary with the geometry set ID as keys and the node IDs as
+    values.
 
-
-class InputLine:
-    """This class is a single option in a 4C input file."""
-
-    def __init__(self, *args, option_comment=None, option_overwrite=False):
-        """Set a line of the 4C input file.
-
-        Args
-        ----
-        args: str
-            First the string is checked for a comment at the end of it. Then
-            the remaining string will be searched for an equal sign and if
-            found split up at that sign. Otherwise it will be checked how many
-            parts separated by spaces there are in the string. If there are
-            exactly two parts, the first one will be the option_name the second
-            one the option_value.
-        args: (str, str)
-            The first one will be the option_name the second one the
-            option_value.
-        option_comment: str
-            This will be added as a comment to this line.
-        option_overwrite: bool
-            If this object is added to a section which already contains an
-            option with the same name, this flag decides weather the option
-            will be overwritten.
-        """
-
-        self.option_name = ""
-        self.option_value = ""
-        self.option_comment = ""
-        self.option_value_pad = "  "
-        self.overwrite = option_overwrite
-
-        if len(args) == 1:
-            # Set from single a string.
-            string = args[0]
-
-            # First check if the line has a comment.
-            first_comment = string.find("//")
-            if not first_comment == -1:
-                self.option_comment = string[first_comment:]
-                string = string[:first_comment]
-
-            # Check if there is an equal sign in the string.
-            if not string.find("=") == -1:
-                string_split = [text.strip() for text in string.split("=")]
-                self.option_value_pad = "= "
-            elif len(string.split()) == 2:
-                string_split = [text.strip() for text in string.split()]
-            else:
-                string_split = ["", ""]
-                self.option_comment = args[0].strip()
-        else:
-            string_split = [str(arg).strip() for arg in args]
-
-        if option_comment is not None:
-            if self.option_comment == "":
-                self.option_comment = f"// {option_comment}"
-            else:
-                self.option_comment += f" // {option_comment}"
-
-        # Check if the string_split array has a suitable size.
-        if len(string_split) == 2:
-            self.option_name = string_split[0]
-            self.option_value = string_split[1]
-        else:
-            raise ValueError(
-                "Could not process the input parameters:"
-                f"\nargs:\n    {args}\noption_comment:\n    {option_comment}"
-            )
-
-    def get_key(self):
-        """Return a key that will be used in the dictionary storage for this
-        item.
-
-        If the option_comment is empty the identifier of this object
-        will be returned, so than more than one empty lines can be in
-        one section.
-        """
-
-        if self.option_name == "":
-            if self.option_comment == "":
-                return str(id(self))
-            else:
-                return self.option_comment
-        else:
-            return self.option_name
-
-    def __str__(self):
-        """Return the string for this line of the input file."""
-        string = ""
-        if self.option_name != "":
-            string += "{:<35} {}{}".format(
-                self.option_name, self.option_value_pad, self.option_value
-            )
-        if self.option_comment != "":
-            if self.option_name != "":
-                string += " "
-            string += f"{self.option_comment}"
-        return string
-
-
-class InputSection:
-    """Represent a single section in the input file."""
-
-    def __init__(self, name, *args, **kwargs):
-        # Section title.
-        self.name = name
-
-        # Each input line will be one entry in this dictionary.
-        self.data = dict()
-
-        for arg in args:
-            self.add(arg, **kwargs)
-
-    def add(self, data, **kwargs):
-        """Add data to this section in the form of an InputLine object.
-
-        Args
-        ----
-        data: str, list(str)
-            If data is a string, it will be split up into lines.
-            Each line will be added as an InputLine object.
-        """
-
-        if isinstance(data, str):
-            data_lines = data.split("\n")
-        else:
-            # Check if data has entries
-            if len(data) == 0:
-                return
-            data_lines = data
-
-        # Remove the first and or last line if it is empty.
-        for index in [0, -1]:
-            if data_lines[index].strip() == "":
-                del data_lines[index]
-
-        # Add the data lines.
-        for item in data_lines:
-            self._add_data(InputLine(item, **kwargs))
-
-    def _add_data(self, option):
-        """Add a InputLine object to the item."""
-
-        if (option.get_key() not in self.data.keys()) or option.overwrite:
-            self.data[option.get_key()] = option
-        else:
-            raise KeyError(f"Key {option.get_key()} is already set!")
-
-    def merge_section(self, section):
-        """Merge this section with another.
-
-        This one is the master.
-        """
-
-        for option in section.data.values():
-            self._add_data(option)
-
-    def get_dat_lines(self):
-        """Return the lines for this section in the input file."""
-
-        lines = [get_section_string(self.name)]
-        lines.extend([str(line) for line in self.data.values()])
-        return lines
-
-
-class InputSectionMultiKey(InputSection):
-    """Represent a single section in the input file.
-
-    This section can have the same key multiple times.
+    Args:
+        section_list: A list with the legacy strings for the geometry pair
+        append_node_ids: If the node IDs shall be appended, or only the
+            dict with the keys should be returned.
     """
 
-    def _add_data(self, option):
-        """Add an InputLine object to the item.
+    if _fourcipp_is_available():
+        raise ValueError("Port this functionality to not use the legacy string.")
 
-        Each key can exist multiple times.
-        """
+    geometry_set_dict: _Dict[int, _List[int]] = {}
+    for line in section_list:
+        index_geometry_set = int(line.split()[-1])
+        index_node = int(line.split()[1]) - 1
+        if index_geometry_set not in geometry_set_dict:
+            geometry_set_dict[index_geometry_set] = []
+        if append_node_ids:
+            geometry_set_dict[index_geometry_set].append(index_node)
 
-        # We add each line with a key that represents the index of the line.
-        # This would be better with a list, but by doing it his way we can use
-        # the same structure as in the base class.
-        self.data[len(self.data)] = option
+    return geometry_set_dict
+
+
+def _get_yaml_geometry_sets(
+    nodes: _List[_Node], geometry_key: _conf.Geometry, section_list: _List
+):
+    """Add sets of points, lines, surfaces or volumes to the object."""
+
+    # Create the individual geometry sets. The nodes are still integers at this
+    # point. They have to be converted to links to the actual nodes later on.
+    geometry_set_dict = _get_geometry_set_indices_from_section(section_list)
+    geometry_sets_in_this_section = []
+    for node_ids in geometry_set_dict.values():
+        geometry_sets_in_this_section.append(
+            _GeometrySetNodes(
+                geometry_key, nodes=[nodes[node_id] for node_id in node_ids]
+            )
+        )
+    return geometry_sets_in_this_section
 
 
 class InputFile(_Mesh):
@@ -308,337 +167,175 @@ class InputFile(_Mesh):
         ): "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
     }
 
-    # Sections that won't be exported to input file.
-    skip_sections = [
-        "ALE ELEMENTS",
-        "LUBRICATION ELEMENTS",
-        "TRANSPORT ELEMENTS",
-        "TRANSPORT2 ELEMENTS",
-        "THERMO ELEMENTS",
-        "ACOUSTIC ELEMENTS",
-        "CELL ELEMENTS",
-        "CELLSCATRA ELEMENTS",
-        "ARTERY ELEMENTS",
-        "ELECTROMAGNETIC ELEMENTS",
-    ]
-
-    def __init__(self, *, description=None, dat_file=None, cubit=None):
+    def __init__(self, *, yaml_file: _Optional[_Path] = None, cubit=None):
         """Initialize the input file.
 
-        Args
-        ----
-        description: srt
-            Will be shown in the input file as description of the system.
-        dat_file: str
-            A file path to an existing input file that will be read into this
-            object.
-        cubit:
-            A cubit object, that contains an input file. The input lines are
-            loaded with the get_dat_lines method. Mutually exclusive with the
-            option dat_file.
+        Args:
+            yaml_file:
+                A file path to an existing input file that will be read into this
+                object.
+            cubit:
+                A cubit object, that contains an input file which will be loaded
+                into this input file.
         """
 
         super().__init__()
 
-        self.description = description
-        self.dat_header = []
-
-        # In case we import a 4C dat file with plain string data, we store them in these lists,
-        # they do not interfere with other operations.
-        self.dat_nodes = []
-        self.dat_elements = []
-        self.dat_elements_fluid = []
-        self.dat_geometry_sets = _GeometrySetContainer()
-        self.dat_boundary_conditions = _BoundaryConditionContainer()
+        # Everything that is not a full MeshPy object is stored here, e.g., parameters
+        # and imported nodes/elements/materials/...
+        self.sections: _Dict[str, _Any] = dict()
 
         # Contents of NOX xml file.
         self.nox_xml = None
         self._nox_xml_file = None
 
-        # Dictionaries for sections other than mesh sections.
-        self.sections = dict()
+        if yaml_file is not None:
+            self.read_yaml(yaml_file)
 
-        # Flag if dat file was loaded.
-        self._dat_file_loaded = False
+        # if cubit is not None:
+        #     self._read_dat_lines(cubit.get_dat_lines())
 
-        # Load existing dat files. If both of the following if statements are
-        # true, an error will be thrown.
-        if dat_file is not None:
-            self.read_dat(dat_file)
-        if cubit is not None:
-            self._read_dat_lines(cubit.get_dat_lines())
-
-    def read_dat(self, file_path):
+    def read_yaml(self, file_path: _Path):
         """Read an existing input file into this object.
 
-        Args
-        ----
-        file_path: str
-            A file path to an existing input file that will be read into this
-            object.
+        Args:
+            file_path:
+                A file path to an existing input file that will be read into this
+                object.
         """
 
-        with open(file_path) as dat_file:
-            lines = dat_file.readlines()
-        self._read_dat_lines(lines)
+        if _fourcipp_is_available():
+            raise ValueError("Use fourcipp to parse the yaml file.")
 
-    def _read_dat_lines(self, dat_lines):
-        """Add an existing input file into this object.
-
-        Args
-        ----
-        dat_lines: [str]
-            A list containing the lines of the input file.
-        """
-
-        if (
-            len(self.nodes)
-            + len(self.elements)
-            + len(self.materials)
-            + len(self.functions)
-            > 0
-        ):
-            raise RuntimeError("A dat file can only be loaded for an empty mesh!")
-        if self._dat_file_loaded:
-            raise RuntimeError("It is not possible to import two dat files!")
-
-        # Add the lines to this input file.
-        self._add_dat_lines(dat_lines)
+        with open(file_path) as stream:
+            self.sections = _yaml.safe_load(stream)
 
         if _mpy.import_mesh_full:
-            # If the solid mesh is imported as objects, link the relevant data
-            # after the import.
+            self.sections_to_mesh()
 
-            # First link the nodes to the elements and sets.
-            for element in self.elements:
-                for i in range(len(element.nodes)):
-                    element.nodes[i] = self.nodes[element.nodes[i]]
-            for geometry_type_list in self.geometry_sets.values():
-                for geometry_set in geometry_type_list:
-                    geometry_set.replace_indices_with_nodes(self.nodes)
+    def sections_to_mesh(self):
+        """Convert mesh items, e.g., nodes, elements, element sets, node sets,
+        boundary conditions, materials, ...
 
-            # Link the boundary conditions.
-            for bc_key, bc_list in self.boundary_conditions.items():
-                for boundary_condition in bc_list:
-                    geom_list = self.geometry_sets[bc_key[1]]
-                    geom_index = boundary_condition.geometry_set
-                    boundary_condition.geometry_set = geom_list[geom_index]
-                    boundary_condition.check()
-
-        self._dat_file_loaded = True
-
-    def _add_dat_lines(self, data, **kwargs):
-        """Read lines of string into this object."""
-
-        if isinstance(data, list):
-            lines = data
-        elif isinstance(data, str):
-            lines = data.split("\n")
-        else:
-            raise TypeError(f"Expected list or string but got {type(data)}")
-
-        # Loop over lines and add individual sections separately.
-        section_line = None
-        section_data = []
-        for line in lines:
-            line = line.strip()
-            if line.startswith("--"):
-                self._add_dat_section(section_line, section_data, **kwargs)
-                section_line = line
-                section_data = []
-            else:
-                section_data.append(line)
-        self._add_dat_section(section_line, section_data, **kwargs)
-
-    def _add_dat_section(self, section_line, section_data, **kwargs):
-        """Add a section to the object.
-
-        Args
-        ----
-        section_line: string
-            A string containing the line with the section header. If this is
-            None, the data will be added to self.dat_header
-        section_data: list(str)
-            A list with strings containing the data for this section.
+        to "true" MeshPy objects.
         """
 
-        # The text until the first section will have no section line.
-        if section_line is None:
-            if not (len(section_data) == 1 and section_data[0] == ""):
-                self.dat_header.extend(section_data)
-        else:
-            # Extract the name of the section.
-            name = section_line.strip()
-            start = _re.search(r"[^-]", name).start()
-            section_name = name[start:]
+        def _get_section_items(section_name):
+            """Return the items in a given section.
 
-            def group_input_comments(section_data):
-                """Group the section data in relevant input data and comment /
-                empty lines.
+            Since we will add the created MeshPy objects to the mesh, we
+            delete them from the plain data storage to avoid having
+            duplicate entries.
+            """
+            if section_name in self.sections:
+                return_list = self.sections[section_name]
+                self.sections[section_name] = []
+            else:
+                return_list = []
+            return return_list
 
-                The comments at the end of the section are lost, as it
-                is not clear where they belong to.
-                """
+        # Go through all sections that have to be converted to full MeshPy objects
+        mesh = _Mesh()
 
-                group_list = []
-                temp_header_list = []
-                for line in section_data:
-                    # Check if the line is relevant input data or not.
-                    if line.strip() == "" or line.strip().startswith("//"):
-                        temp_header_list.append(line)
-                    else:
-                        group_list.append([line, temp_header_list])
-                        temp_header_list = []
-                return group_list
+        # Add nodes
+        for item in _get_section_items("NODE COORDS"):
+            mesh.nodes.append(_Node.from_legacy_string(item))
 
-            def add_bc(section_header, section_data_comment):
-                """Add boundary conditions to the object."""
+        # Add elements
+        for item in _get_section_items("STRUCTURE ELEMENTS"):
+            if _fourcipp_is_available():
+                raise ValueError(
+                    "Port this functionality to not use the legacy string."
+                )
 
-                # Get the bc and geometry key
-                for key, value in self.boundary_condition_names.items():
-                    if value == section_header:
-                        (bc_key, geometry_key) = key
-                        break
+            # Get a list containing the element nodes.
+            element_nodes = []
+            for split_item in item.split()[3:]:
+                if split_item.isdigit():
+                    node_id = int(split_item) - 1
+                    element_nodes.append(mesh.nodes[node_id])
+                else:
+                    break
+            else:
+                raise ValueError(
+                    f'The input line:\n"{item}"\ncould not be converted to a element!'
+                )
 
-                for item, comments in section_data_comment:
-                    if _mpy.import_mesh_full:
-                        self.boundary_conditions.append(
-                            (bc_key, geometry_key),
-                            _BoundaryConditionBase.from_dat(
-                                bc_key, item, comments=comments
-                            ),
-                        )
-                    else:
-                        self.dat_boundary_conditions.append(
-                            (bc_key, geometry_key),
-                            _BaseMeshItemString(item, comments=comments),
-                        )
+            mesh.elements.append(_Element.from_legacy_string(element_nodes, item))
 
-            def add_set(section_header, section_data_comment):
-                """Add sets of points, lines, surfaces or volumes to the
-                object.
-
-                We have to do a check of the set index, as it is
-                possible that the existing input file skips sections. If
-                a section is skipped a dummy section will be inserted,
-                so the final numbering matches the sections again.
-                """
-
-                def add_to_set(section_header, dat_list, comments):
-                    """Add the data_list to the sets of this object."""
+        # Add geometry sets
+        for section_name in self.sections.keys():
+            if section_name.endswith("TOPOLOGY"):
+                section_items = _get_section_items(section_name)
+                if len(section_items) > 0:
+                    # Get the geometry key for this set
                     for key, value in self.geometry_set_names.items():
-                        if value == section_header:
+                        if value == section_name:
                             geometry_key = key
                             break
-
-                    if _mpy.import_mesh_full:
-                        self.geometry_sets[geometry_key].append(
-                            _GeometrySetNodes.from_dat(
-                                geometry_key, dat_list, comments=comments
-                            )
-                        )
                     else:
-                        self.dat_geometry_sets[geometry_key].append(
-                            _BaseMeshItemString(dat_list, comments=comments)
-                        )
+                        raise ValueError(f"Could not find the set {section_name}")
+                    geometry_sets_in_this_section = _get_yaml_geometry_sets(
+                        mesh.nodes, geometry_key, section_items
+                    )
+                    mesh.geometry_sets[geometry_key] = geometry_sets_in_this_section
 
-                if len(section_data_comment) > 0:
-                    # Add the individual sets to the object. For that loop
-                    # until a new set index is reached.
-                    last_index = 1
-                    dat_list = []
-                    current_comments = []
-                    for line, comments in section_data_comment:
-                        index_line = int(line.split()[-1])
-                        if last_index == index_line:
-                            dat_list.append(line)
-                        elif index_line > last_index:
-                            add_to_set(section_header, dat_list, current_comments)
-                            # If indices were skipped, add a dummy section
-                            # here, so the final ordering will match the
-                            # original one.
-                            for skip_index in range(last_index + 1, index_line):
-                                add_to_set(
-                                    section_header,
-                                    [f"// Empty set {skip_index}"],
-                                    None,
-                                )
-                            last_index = index_line
-                            dat_list = [line]
-                            current_comments = comments
-                        else:
-                            raise ValueError(
-                                "The node set indices must be given in ascending order!"
-                            )
-                    # Add the last set.
-                    add_to_set(section_header, dat_list, current_comments)
-
-            def add_line(self_list, line):
-                """Add the line to self_list, and handle comments."""
-                self_list.append(_BaseMeshItemString(line[0], comments=line[1]))
-
-            # Check if the section contains mesh data that has to be added to
-            # specific lists.
-            section_data_comment = group_input_comments(section_data)
-            if section_name == "MATERIALS":
-                for line in section_data_comment:
-                    add_line(self.materials, line)
-            elif section_name == "NODE COORDS":
-                for line in section_data_comment:
-                    if _mpy.import_mesh_full:
-                        self.nodes.append(_Node.from_dat(line))
-                    else:
-                        add_line(self.dat_nodes, line)
-            elif section_name == "STRUCTURE ELEMENTS":
-                for line in section_data_comment:
-                    if _mpy.import_mesh_full:
-                        self.elements.append(_Element.from_dat(line))
-                    else:
-                        add_line(self.dat_elements, line)
-            elif section_name == "FLUID ELEMENTS":
-                for line in section_data_comment:
-                    if _mpy.import_mesh_full:
-                        raise NotImplementedError(
-                            "Fluid elements in combination with mpy.import_mesh_full == True is "
-                            "not yet implemented!"
-                        )
-                    add_line(self.dat_elements_fluid, line)
-            elif section_name.startswith("FUNCT"):
-                self.functions.append(_BaseMeshItemFull(section_data))
-            elif section_name in self.boundary_condition_names.values():
-                add_bc(section_name, section_data_comment)
-            elif section_name.endswith("TOPOLOGY"):
-                add_set(section_name, section_data_comment)
-            elif section_name == "STRUCTURE KNOTVECTORS":
-                self.add_section(
-                    InputSectionMultiKey(section_name, section_data, **kwargs)
+        # Add boundary conditions
+        for (
+            bc_key,
+            geometry_key,
+        ), section_name in self.boundary_condition_names.items():
+            for item in _get_section_items(section_name):
+                mesh.boundary_conditions.append(
+                    (bc_key, geometry_key),
+                    _BoundaryConditionBase.from_dict(
+                        mesh.geometry_sets[geometry_key], bc_key, item
+                    ),
                 )
-            else:
-                # Section is not in mesh, i.e. simulation parameters.
-                self.add_section(InputSection(section_name, section_data, **kwargs))
+
+        self.add(mesh)
 
     def add(self, *args, **kwargs):
         """Add to this object.
 
         If the type is not recognized, the child add method is called.
         """
+        if len(args) == 1 and isinstance(args[0], dict):
+            # TODO: We have to check here if the item is not of any of the types we
+            # use that derive from dict, as they should be added in super().add
+            if not isinstance(args[0], _ContainerBase) and not isinstance(
+                args[0], _GeometryName
+            ):
+                self.add_section(args[0], **kwargs)
+                return
 
-        if len(args) == 1 and isinstance(args[0], InputSection):
-            self.add_section(args[0], **kwargs)
-        elif len(args) == 1 and isinstance(args[0], str):
-            self._add_dat_lines(args[0], **kwargs)
-        else:
-            super().add(*args, **kwargs)
+        super().add(*args, **kwargs)
 
-    def add_section(self, section):
+    def add_section(self, section, *, option_overwrite=False):
         """Add a section to the object.
 
         If the section name already exists, it is added to that section.
         """
-        if section.name in self.sections.keys():
-            self.sections[section.name].merge_section(section)
-        else:
-            self.sections[section.name] = section
+
+        for section_name, section_value in section.items():
+            if section_name in self.sections:
+                section_data = self.sections[section_name]
+                if isinstance(section_data, list):
+                    section_data.extend(section_value)
+                else:
+                    for option_key, option_value in section_value.items():
+                        if option_key in self.sections[section_name]:
+                            if (
+                                not self.sections[section_name][option_key]
+                                == option_value
+                            ):
+                                if not option_overwrite:
+                                    raise KeyError(
+                                        f"Key {option_key} with the value {self.sections[section_name][option_key]} already set. You tried to set it to {option_value}"
+                                    )
+                        self.sections[section_name][option_key] = option_value
+            else:
+                self.sections[section_name] = section_value
 
     def delete_section(self, section_name):
         """Delete a section from the dictionary self.sections."""
@@ -647,16 +344,17 @@ class InputFile(_Mesh):
         else:
             raise Warning(f"Section {section_name} does not exist!")
 
-    def write_input_file(self, file_path, *, nox_xml_file=None, **kwargs):
-        """Write the input to a file.
+    def write_input_file(
+        self, file_path: _Path, *, nox_xml_file: _Optional[str] = None, **kwargs
+    ):
+        """Write the input file to disk.
 
-        Args
-        ----
-        file_path: str
-            Path to the input file that should be created.
-        nox_xml_file: str
-            (optional) If this argument is given, the xml file will be created
-            with this name, in the same directory as the input file.
+        Args:
+            file_path: str
+                Path to the input file that should be created.
+            nox_xml_file: str
+                (optional) If this argument is given, the xml file will be created
+                with this name, in the same directory as the input file.
         """
 
         # Check if a xml file needs to be written.
@@ -676,49 +374,56 @@ class InputFile(_Mesh):
                 xml_file.write(self.nox_xml)
 
         with open(file_path, "w") as input_file:
-            for line in self.get_dat_lines(**kwargs):
-                input_file.write(line)
-                input_file.write("\n")
+            _yaml.dump(
+                self.get_dict_to_dump(**kwargs),
+                input_file,
+                Dumper=_MeshPyDumper,
+                width=float("inf"),
+            )
 
-    def get_dat_lines(
+    def get_dict_to_dump(
         self,
         *,
-        header=True,
-        dat_header=True,
-        add_script_to_header=True,
-        check_nox=True,
+        header: bool = True,
+        dat_header: bool = True,
+        add_script_to_header: bool = True,
+        check_nox: bool = True,
     ):
-        """Return the lines for the input file for the whole object.
+        """Return the dictionary representation of this input file for dumping
+        to a yaml file.
 
-        Args
-        ----
-        header: bool
-            If the header should be exported to the input file files.
-        dat_header: bool
-            If header lines from the imported dat file should be exported.
-        append_script_to_header: bool
-            If true, a copy of the executing script will be added to the input
-            file. This is only in affect when dat_header==True.
-        check_nox: bool
-            If this is true, an error will be thrown if no nox file is set.
+        Args:
+            header:
+                If the header should be exported to the input file files.
+            dat_header:
+                If header lines from the imported dat file should be exported.
+            append_script_to_header:
+                If true, a copy of the executing script will be added to the input
+                file. This is only in affect when dat_header is True.
+            check_nox:
+                If this is true, an error will be thrown if no nox file is set.
         """
 
         # Perform some checks on the mesh.
         if _mpy.check_overlapping_elements:
             self.check_overlapping_elements()
 
-        # List that will contain all input lines.
-        lines = []
+        # The base dictionary we use here is the one that already exists.
+        # This one might already contain mesh sections - stored in pure
+        # data format.
+        # TODO: Check if the deepcopy makes sense to be optional
+        yaml_dict = _copy.deepcopy(self.sections)
 
-        # Add header to the input file.
-        end_text = None
+        # TODO: Add header to yaml
+        # # Add header to the input file.
+        # end_text = None
 
-        lines.extend(["// " + line for line in _mpy.input_file_meshpy_header])
-        if header:
-            header_text, end_text = self._get_header(add_script_to_header)
-            lines.append(header_text)
-        if dat_header:
-            lines.extend(self.dat_header)
+        # lines.extend(["// " + line for line in _mpy.input_file_meshpy_header])
+        # if header:
+        #     header_text, end_text = self._get_header(add_script_to_header)
+        #     lines.append(header_text)
+        # if dat_header:
+        #     lines.extend(self.dat_header)
 
         # Check if a file has to be created for the NOX xml information.
         if self.nox_xml is not None:
@@ -728,20 +433,85 @@ class InputFile(_Mesh):
                 nox_xml_name = "NOT_DEFINED"
             else:
                 nox_xml_name = self._nox_xml_file
-            self.add(
-                InputSection(
-                    "STRUCT NOX/Status Test",
-                    f"XML File = {nox_xml_name}",
-                    option_overwrite=True,
+            # TODO: Use something like the add_section here
+            yaml_dict["STRUCT NOX/Status Test"] = {"XML File": nox_xml_name}
+
+        def _get_global_start_geometry_set(yaml_dict):
+            """Get the indices for the first "real" MeshPy geometry sets."""
+
+            start_indices_geometry_set = {}
+            for geometry_type, section_name in self.geometry_set_names.items():
+                max_geometry_set_id = 0
+                if section_name in yaml_dict:
+                    section_list = yaml_dict[section_name]
+                    if len(section_list) > 0:
+                        geometry_set_dict = _get_geometry_set_indices_from_section(
+                            section_list, append_node_ids=False
+                        )
+                        max_geometry_set_id = max(geometry_set_dict.keys())
+                start_indices_geometry_set[geometry_type] = max_geometry_set_id
+            return start_indices_geometry_set
+
+        def _get_global_start_node(yaml_dict):
+            """Get the index for the first "real" MeshPy node."""
+
+            if _fourcipp_is_available():
+                raise ValueError(
+                    "Port this functionality to not use the legacy format any more"
+                    "TODO: Check if we really want this - should we just assume that the"
+                    "imported nodes are in order and without any 'missing' nodes?"
                 )
-            )
 
-        # Export the basic sections in the input file.
-        for section in self.sections.values():
-            if section.name not in self.skip_sections:
-                lines.extend(section.get_dat_lines())
+            section_name = "NODE COORDS"
+            if section_name in yaml_dict:
+                return len(yaml_dict[section_name])
+            else:
+                return 0
 
-        def set_i_global(data_list):
+        def _get_global_start_element(yaml_dict):
+            """Get the index for the first "real" MeshPy element."""
+
+            if _fourcipp_is_available():
+                raise ValueError(
+                    "Port this functionality to not use the legacy format any more"
+                    "TODO: Check if we really want this - should we just assume that the"
+                    "imported elements are in order and without any 'missing' elements?"
+                )
+
+            start_index = 0
+            section_names = ["FLUID ELEMENTS", "STRUCTURE ELEMENTS"]
+            for section_name in section_names:
+                if section_name in yaml_dict:
+                    start_index += len(yaml_dict[section_name])
+            return start_index
+
+        def _get_global_start_material(yaml_dict):
+            """Get the index for the first "real" MeshPy material.
+
+            We have to account for materials imported from yaml files
+            that have arbitrary numbering.
+            """
+
+            # Get the maximum material index in materials imported from a yaml file
+            max_material_id = 0
+            section_name = "MATERIALS"
+            if section_name in yaml_dict:
+                for material in yaml_dict[section_name]:
+                    max_material_id = max(max_material_id, material["MAT"])
+            return max_material_id
+
+        def _get_global_start_function(yaml_dict):
+            """Get the index for the first "real" MeshPy function."""
+
+            max_function_id = 0
+            for section_name in yaml_dict.keys():
+                if section_name.startswith("FUNCT"):
+                    max_function_id = max(
+                        max_function_id, int(section_name.split("FUNCT")[-1])
+                    )
+            return max_function_id
+
+        def _set_i_global(data_list, *, start_index=0):
             """Set i_global in every item of data_list."""
 
             # A check is performed that every entry in data_list is unique.
@@ -750,9 +520,10 @@ class InputFile(_Mesh):
 
             # Set the values for i_global.
             for i, item in enumerate(data_list):
-                item.i_global = i + 1
+                # TODO make i_global index-0 based
+                item.i_global = i + 1 + start_index
 
-        def set_i_global_elements(element_list):
+        def _set_i_global_elements(element_list, *, start_index=0):
             """Set i_global in every item of element_list."""
 
             # A check is performed that every entry in element_list is unique.
@@ -760,11 +531,12 @@ class InputFile(_Mesh):
                 raise ValueError("Elements in element_list are not unique!")
 
             # Set the values for i_global.
-            i = 0
+            i = start_index
             i_nurbs_patch = 0
             for item in element_list:
                 # As a NURBS patch can be defined with more elements, an offset is applied to the
                 # rest of the items
+                # TODO make i_global index-0 based
                 item.i_global = i + 1
                 if isinstance(item, _NURBSPatch):
                     item.n_nurbs_patch = i_nurbs_patch + 1
@@ -774,97 +546,53 @@ class InputFile(_Mesh):
                 else:
                     i += 1
 
-        def set_i_global_materials(material_list):
-            """Set i_global in every item of the materials list.
-
-            We have to account for materials imported from dat files
-            that have a random numbering.
-            """
-
-            # A check is performed that every entry in material_list is unique.
-            if len(material_list) != len(set(material_list)):
-                raise ValueError("Elements in material_list are not unique!")
-
-            # Get the maximum material index in materials imported from a string
-            max_material_id = 0
-            for material in material_list:
-                if isinstance(material, _BaseMeshItemString):
-                    for dat_line in material.get_dat_lines():
-                        if dat_line.startswith("MAT "):
-                            max_material_id = max(
-                                max_material_id, int(dat_line.split(" ")[1])
-                            )
-
-            # Set the material id in all MeshPy materials
-            i_material = max_material_id + 1
-            for material in material_list:
-                if not isinstance(material, _BaseMeshItemString):
-                    material.i_global = i_material
-                    i_material += 1
-
-        # Add sets from couplings and boundary conditions to a temp container.
-        self.unlink_nodes()
-        mesh_sets = self.get_unique_geometry_sets()
-
-        # Combined lists for string type items and "real" mesh type items
-        all_nodes = self.dat_nodes + self.nodes
-        all_elements_structure = self.dat_elements + self.elements
-        all_elements = self.dat_elements_fluid + all_elements_structure
-        all_geometry_sets = _GeometrySetContainer()
-        all_geometry_sets.extend(self.dat_geometry_sets)
-        all_geometry_sets.extend(mesh_sets)
-        all_boundary_conditions = _BoundaryConditionContainer()
-        all_boundary_conditions.extend(self.dat_boundary_conditions)
-        all_boundary_conditions.extend(self.boundary_conditions)
-
-        # Assign global indices to all entries.
-        set_i_global(all_nodes)
-        set_i_global_elements(all_elements)
-        set_i_global_materials(self.materials)
-        set_i_global(self.functions)
-        for value in all_geometry_sets.values():
-            # We reset the geometry set index here since in self.get_unique_geometry_sets the
-            # geometry sets from the dat file are not included.
-            set_i_global(value)
-        for value in all_boundary_conditions.values():
-            set_i_global(value)
-
-        def get_section_dat(section_name, data_list, header_lines=None):
-            """Output a section name and apply the get_dat_line for each list
+        def _dump_mesh_items(yaml_dict, section_name, data_list):
+            """Output a section name and apply the dump_to_list for each list
             item."""
 
-            # do not write section if no content is available
+            # Do not write section if no content is available
             if len(data_list) == 0:
                 return
 
-            lines.append(get_section_string(section_name))
-            if header_lines:
-                if isinstance(header_lines, list):
-                    lines.extend(header_lines)
-                elif isinstance(header_lines, str):
-                    lines.append(header_lines)
-                else:
-                    raise TypeError(
-                        f"Expected string or list, got {type(header_lines)}"
-                    )
+            # Check if section already exists
+            if section_name not in yaml_dict.keys():
+                yaml_dict[section_name] = []
+
+            item_dict_list = yaml_dict[section_name]
             for item in data_list:
-                lines.extend(item.get_dat_lines())
+                item_dict_list.extend(item.dump_to_list())
+
+        # Add sets from couplings and boundary conditions to a temp container.
+        self.unlink_nodes()
+        start_indices_geometry_set = _get_global_start_geometry_set(yaml_dict)
+        mesh_sets = self.get_unique_geometry_sets(
+            geometry_set_start_indices=start_indices_geometry_set
+        )
+
+        # Assign global indices to all entries.
+        start_index_nodes = _get_global_start_node(yaml_dict)
+        _set_i_global(self.nodes, start_index=start_index_nodes)
+        start_index_elements = _get_global_start_element(yaml_dict)
+        _set_i_global_elements(self.elements, start_index=start_index_elements)
+        start_index_materials = _get_global_start_material(yaml_dict)
+        _set_i_global(self.materials, start_index=start_index_materials)
+        start_index_functions = _get_global_start_function(yaml_dict)
+        _set_i_global(self.functions, start_index=start_index_functions)
 
         # Add material data to the input file.
-        get_section_dat("MATERIALS", self.materials)
+        _dump_mesh_items(yaml_dict, "MATERIALS", self.materials)
 
         # Add the functions.
-        for i, funct in enumerate(self.functions):
-            lines.append(get_section_string("FUNCT{}".format(i + 1)))
-            lines.extend(funct.get_dat_lines())
+        for function in self.functions:
+            yaml_dict[f"FUNCT{function.i_global}"] = function.dump_to_list()
 
         # If there are couplings in the mesh, set the link between the nodes
         # and elements, so the couplings can decide which DOFs they couple,
         # depending on the type of the connected beam element.
         def get_number_of_coupling_conditions(key):
             """Return the number of coupling conditions in the mesh."""
-            if (key, _mpy.geo.point) in all_boundary_conditions.keys():
-                return len(all_boundary_conditions[key, _mpy.geo.point])
+            if (key, _mpy.geo.point) in self.boundary_conditions.keys():
+                return len(self.boundary_conditions[key, _mpy.geo.point])
             else:
                 return 0
 
@@ -876,48 +604,36 @@ class InputFile(_Mesh):
             self.set_node_links()
 
         # Add the boundary conditions.
-        for (bc_key, geom_key), bc_list in all_boundary_conditions.items():
+        for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
             if len(bc_list) > 0:
                 section_name = (
                     bc_key
                     if isinstance(bc_key, str)
                     else self.boundary_condition_names[bc_key, geom_key]
                 )
-                get_section_dat(section_name, bc_list)
+                _dump_mesh_items(yaml_dict, section_name, bc_list)
 
         # Add additional element sections (e.g. STRUCTURE KNOTVECTORS)
         # We only need to to this on the "real" elements as the imported ones already have their
         # dat sections.
-        element_sections = dict()
         for element in self.elements:
-            element.add_element_specific_section(element_sections)
-
-        for section in element_sections.values():
-            lines.extend(section.get_dat_lines())
+            element.dump_element_specific_section(yaml_dict)
 
         # Add the geometry sets.
-        for geom_key, item in all_geometry_sets.items():
+        for geom_key, item in mesh_sets.items():
             if len(item) > 0:
-                get_section_dat(self.geometry_set_names[geom_key], item)
+                _dump_mesh_items(yaml_dict, self.geometry_set_names[geom_key], item)
 
         # Add the nodes and elements.
-        get_section_dat("NODE COORDS", all_nodes)
-        get_section_dat("STRUCTURE ELEMENTS", all_elements_structure)
-        get_section_dat("FLUID ELEMENTS", self.dat_elements_fluid)
+        _dump_mesh_items(yaml_dict, "NODE COORDS", self.nodes)
+        _dump_mesh_items(yaml_dict, "STRUCTURE ELEMENTS", self.elements)
 
-        # Add end text.
-        if end_text is not None:
-            lines.append(end_text)
+        # TODO: what to do here - how to add the script
+        # # Add end text.
+        # if end_text is not None:
+        #     lines.append(end_text)
 
-        return lines
-
-    def get_string(self, **kwargs):
-        """Return the lines of the input file as a joined string."""
-        return "\n".join(self.get_dat_lines(**kwargs))
-
-    def __str__(self, **kwargs):
-        """Return the string representation of this input file."""
-        return self.get_string(**kwargs)
+        return yaml_dict
 
     def _get_header(self, add_script):
         """Return the header for the input file."""

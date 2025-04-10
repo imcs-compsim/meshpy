@@ -3,14 +3,20 @@ PROBLEM TYPE:
 IO:
   OUTPUT_BIN: false
   STRUCT_DISP: false
+  STRUCT_STRESS: "no"
+  STRUCT_STRAIN: "no"
   VERBOSITY: "Standard"
 STRUCTURAL DYNAMIC:
   INT_STRATEGY: "Standard"
   DYNAMICTYPE: "Statics"
   NUMSTEP: 20
   MAXTIME: 1
+  TIMESTEP: 0.05
   PREDICT: "TangDis"
   LINEAR_SOLVER: 1
+  LOADLIN: false
+  PRESTRESS: "none"
+  PRESTRESSTIME: 0
 SOLVER 1:
   SOLVER: "Superlu"
   NAME: "Structure_Solver"
@@ -26,57 +32,57 @@ RESULT DESCRIPTION:
       NODE: 13
       QUANTITY: "dispx"
       VALUE: 1.5015284845
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 13
       QUANTITY: "dispy"
       VALUE: 0.35139255451
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 13
       QUANTITY: "dispz"
       VALUE: -1.0126517891
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 26
       QUANTITY: "dispx"
       VALUE: 1.5015284845
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 26
       QUANTITY: "dispy"
       VALUE: 0.35139255451
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 26
       QUANTITY: "dispz"
       VALUE: -1.0126517891
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 40
       QUANTITY: "dispx"
       VALUE: 1.5015284845
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 40
       QUANTITY: "dispy"
       VALUE: 0.35139255451
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 40
       QUANTITY: "dispz"
       VALUE: -1.0126517891
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
 STRUCT NOX/Status Test:
-  XML File: "/home/rudlstorfer/01_work/01_workspace/meshpy/tests/reference-files/NOT_DEFINED"
+  XML File: "NOT_DEFINED"
 MATERIALS:
   - MAT: 1
     MAT_BeamReissnerElastHyper:

@@ -112,10 +112,10 @@ def create_beam_mesh_curve(
         is_rot_funct = True
 
     # Check that the position is an np.array
-    if not isinstance(function(float(interval[0])), _np.ndarray):
+    if not isinstance(function(interval[0]), _np.ndarray):
         raise TypeError(
-            "Function must be of type _np.ndarray, got {}!".format(
-                type(function(float(interval[0])))
+            "Function must be of type np.ndarray, got {}!".format(
+                type(function(interval[0]))
             )
         )
 
@@ -178,7 +178,7 @@ def create_beam_mesh_curve(
             self.last_triad = None
 
             if is_3d_curve:
-                r_prime = rp(float(interval[0]))
+                r_prime = rp(interval[0])
                 if abs(_np.dot(r_prime, [0, 0, 1])) < abs(_np.dot(r_prime, [0, 1, 0])):
                     t2_temp = [0, 0, 1]
                 else:

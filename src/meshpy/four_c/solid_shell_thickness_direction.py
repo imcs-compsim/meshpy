@@ -199,7 +199,7 @@ def set_solid_shell_thickness_direction(
     for element in elements:
         is_hex8 = isinstance(element, _VolumeHEX8)
         if is_hex8:
-            is_solid_shell = "SOLIDSH8" in element.dat_pre_nodes  # type: ignore[attr-defined]
+            is_solid_shell = "SOLIDSH8" in element.string_pre_nodes  # type: ignore[attr-defined]
 
             if is_solid_shell:
                 # Get the element center and the Jacobian at the center

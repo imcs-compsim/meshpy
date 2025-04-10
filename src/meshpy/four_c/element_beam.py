@@ -33,6 +33,7 @@ from meshpy.four_c.material import MaterialReissner as _MaterialReissner
 from meshpy.four_c.material import (
     MaterialReissnerElastoplastic as _MaterialReissnerElastoplastic,
 )
+from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 class Beam3rHerm2Line3(_Beam):
@@ -42,11 +43,16 @@ class Beam3rHerm2Line3(_Beam):
     beam_type = _mpy.beam.reissner
     valid_material = [_MaterialReissner, _MaterialReissnerElastoplastic]
 
-    coupling_fix_string = "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0"
-    coupling_joint_string = "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0"
+    coupling_fix_dict = {"NUMDOF": 9, "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0]}
+    coupling_joint_dict = {"NUMDOF": 9, "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0]}
 
-    def _get_dat(self):
-        """Return the line for the input file."""
+    def dump_to_list(self):
+        """Return a list with the (single) item representing this element."""
+
+        if _fourcipp_is_available():
+            raise ValueError(
+                "Port this functionality to not use the legacy string any more"
+            )
 
         string_nodes = ""
         string_triads = ""
@@ -58,10 +64,10 @@ class Beam3rHerm2Line3(_Beam):
         # Check the material.
         self._check_material()
 
-        return (
+        return [
             f"{self.i_global} BEAM3R HERM2LINE3 {string_nodes}MAT {self.material.i_global} "
             f"TRIADS{string_triads}"
-        )
+        ]
 
 
 class Beam3rLine2Line2(_Beam):
@@ -72,11 +78,16 @@ class Beam3rLine2Line2(_Beam):
     beam_type = _mpy.beam.reissner
     valid_material = [_MaterialReissner]
 
-    coupling_fix_string = "NUMDOF 6 ONOFF 1 1 1 1 1 1"
-    coupling_joint_string = "NUMDOF 6 ONOFF 1 1 1 0 0 0"
+    coupling_fix_dict = {"NUMDOF": 6, "ONOFF": [1, 1, 1, 1, 1, 1]}
+    coupling_joint_dict = {"NUMDOF": 6, "ONOFF": [1, 1, 1, 0, 0, 0]}
 
-    def _get_dat(self):
-        """Return the line for the input file."""
+    def dump_to_list(self):
+        """Return a list with the (single) item representing this element."""
+
+        if _fourcipp_is_available():
+            raise ValueError(
+                "Port this functionality to not use the legacy string any more"
+            )
 
         string_nodes = ""
         string_triads = ""
@@ -88,10 +99,10 @@ class Beam3rLine2Line2(_Beam):
         # Check the material.
         self._check_material()
 
-        return (
+        return [
             f"{self.i_global} BEAM3R LINE2 {string_nodes}MAT {self.material.i_global} "
             f"TRIADS{string_triads}"
-        )
+        ]
 
 
 class Beam3kClass(_Beam):
@@ -101,8 +112,8 @@ class Beam3kClass(_Beam):
     beam_type = _mpy.beam.kirchhoff
     valid_material = [_MaterialKirchhoff]
 
-    coupling_fix_string = "NUMDOF 7 ONOFF 1 1 1 1 1 1 0"
-    coupling_joint_string = "NUMDOF 7 ONOFF 1 1 1 0 0 0 0"
+    coupling_fix_dict = {"NUMDOF": 7, "ONOFF": [1, 1, 1, 1, 1, 1, 0]}
+    coupling_joint_dict = {"NUMDOF": 7, "ONOFF": [1, 1, 1, 0, 0, 0, 0]}
 
     def __init__(self, *, weak=True, rotvec=True, is_fad=True, **kwargs):
         _Beam.__init__(self, **kwargs)
@@ -119,14 +130,21 @@ class Beam3kClass(_Beam):
                 "and couplings."
             )
 
-    def _get_dat(self):
-        """Return the line for the input file."""
+    def dump_to_list(self):
+        """Return a list with the (single) item representing this element."""
 
-        string_nodes = ""
+        if _fourcipp_is_available():
+            raise ValueError(
+                "Port this functionality to not use the legacy string any more"
+            )
+
+        node_ordering = [0, 2, 1]
+        string_nodes = " ".join(
+            [str(self.nodes[i_node].i_global) for i_node in node_ordering]
+        )
         string_triads = ""
-        for i in [0, 2, 1]:
+        for i in node_ordering:
             node = self.nodes[i]
-            string_nodes += f"{node.i_global} "
             string_triads += " " + node.rotation.get_dat()
 
         # Check the material.
@@ -142,7 +160,7 @@ class Beam3kClass(_Beam):
             " FAD" if self.is_fad else "",
         )
 
-        return string_dat
+        return [string_dat]
 
 
 def Beam3k(**kwargs_class):
@@ -170,8 +188,13 @@ class Beam3eb(_Beam):
     beam_type = _mpy.beam.euler_bernoulli
     valid_material = [_MaterialEulerBernoulli]
 
-    def _get_dat(self):
-        """Return the line for the input file."""
+    def dump_to_list(self):
+        """Return a list with the (single) item representing this element."""
+
+        if _fourcipp_is_available():
+            raise ValueError(
+                "Port this functionality to not use the legacy string any more"
+            )
 
         # The two rotations must be the same and the x1 vector must point from
         # the start point to the end point.
@@ -197,6 +220,6 @@ class Beam3eb(_Beam):
         # Check the material.
         self._check_material()
 
-        return (
+        return [
             f"{self.i_global} BEAM3EB LINE2 {string_nodes}MAT {self.material.i_global}"
-        )
+        ]

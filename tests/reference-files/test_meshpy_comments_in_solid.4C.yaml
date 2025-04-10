@@ -45,10 +45,10 @@ MATERIALS:
       MOMIN3: 0.7853981633974483
 DESIGN POINT DIRICH CONDITIONS:
   - E: 1
-    NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
-    VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    NUMDOF: 3
+    ONOFF: [1, 1, 1]
+    VAL: [1, 0, 0]
+    FUNCT: [0, 0, 0]
 DESIGN SURF DIRICH CONDITIONS:
   - E: 1
     NUMDOF: 6
@@ -62,10 +62,10 @@ DESIGN SURF DIRICH CONDITIONS:
     FUNCT: [0, 0, 0, 0, 0, 0]
 DESIGN POINT NEUMANN CONDITIONS:
   - E: 2
-    NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
-    VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    NUMDOF: 3
+    ONOFF: [1, 1, 1]
+    VAL: [2, 0, 0]
+    FUNCT: [0, 0, 0]
 DNODE-NODE TOPOLOGY:
   - NODE 17 DNODE 1
   - NODE 19 DNODE 2

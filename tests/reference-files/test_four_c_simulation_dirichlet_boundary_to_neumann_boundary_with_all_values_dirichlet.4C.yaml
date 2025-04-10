@@ -1,6 +1,10 @@
 PROBLEM TYPE:
   PROBLEMTYPE: "Structure"
 IO:
+  OUTPUT_BIN: true
+  STRUCT_DISP: true
+  STRUCT_STRESS: "no"
+  STRUCT_STRAIN: "no"
   VERBOSITY: "Standard"
 STRUCTURAL DYNAMIC:
   INT_STRATEGY: "Standard"
@@ -10,6 +14,9 @@ STRUCTURAL DYNAMIC:
   MAXTIME: 0.5
   PREDICT: "TangDis"
   LINEAR_SOLVER: 1
+  LOADLIN: false
+  PRESTRESS: "none"
+  PRESTRESSTIME: 0
 SOLVER 1:
   SOLVER: "Superlu"
   NAME: "Structure_Solver"
@@ -24,7 +31,7 @@ IO/MONITOR STRUCTURE DBC:
   PRECISION_FILE: 10
   WRITE_HEADER: true
 STRUCT NOX/Status Test:
-  XML File: "/home/rudlstorfer/01_work/01_workspace/meshpy/tests/reference-files/NOT_DEFINED"
+  XML File: "NOT_DEFINED"
 MATERIALS:
   - MAT: 1
     MAT_BeamReissnerElastHyper:
@@ -52,7 +59,7 @@ DESIGN POINT DIRICH CONDITIONS:
     NUMDOF: 9
     ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
     VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    FUNCT: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
   - E: 2
     NUMDOF: 9
     ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]

@@ -30,52 +30,53 @@ IO/RUNTIME VTK OUTPUT/BEAMS:
   DISPLACEMENT: true
   TRIAD_VISUALIZATIONPOINT: true
   STRAINS_GAUSSPOINT: true
+  USE_ABSOLUTE_POSITIONS: true
 RESULT DESCRIPTION:
   - STRUCTURE:
       DIS: "structure"
       NODE: 32
       QUANTITY: "dispx"
       VALUE: 1.50796091342925
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 32
       QUANTITY: "dispy"
       VALUE: 1.31453288915877e-08
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 32
       QUANTITY: "dispz"
       VALUE: 0.0439008100184687
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 69
       QUANTITY: "dispx"
       VALUE: 0.921450108160878
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 69
       QUANTITY: "dispy"
       VALUE: 1.41113401669104e-15
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 69
       QUANTITY: "dispz"
       VALUE: 0.0178350143764099
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
 MATERIALS:
   - MAT: 1
     MAT_Struct_StVenantKirchhoff:
-      YOUNG: 1e+09
+      YOUNG: 1.0e+09
       NUE: 0
       DENS: 7.8e-06
   - MAT: 2
     MAT_BeamReissnerElastHyper:
-      YOUNG: 1e+09
+      YOUNG: 1.0e+09
       POISSONRATIO: 0
       DENS: 0
       CROSSAREA: 0.19634954084936207

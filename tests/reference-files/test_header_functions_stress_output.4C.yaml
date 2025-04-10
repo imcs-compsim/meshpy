@@ -55,4 +55,4 @@ BEAM INTERACTION/BEAM TO SOLID SURFACE/RUNTIME VTK OUTPUT:
   SEGMENTATION: true
   INTEGRATION_POINTS: true
 STRUCT NOX/Status Test:
-  XML File: "/home/rudlstorfer/01_work/01_workspace/meshpy/tests/reference-files/NOT_DEFINED"
+  XML File: "NOT_DEFINED"

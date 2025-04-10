@@ -6,13 +6,15 @@ IO:
   VERBOSITY: "Standard"
 IO/RUNTIME VTK OUTPUT:
   INTERVAL_STEPS: 1
+  OUTPUT_DATA_FORMAT: "binary"
+  EVERY_ITERATION: False
 STRUCTURAL DYNAMIC:
   INT_STRATEGY: "Standard"
   DYNAMICTYPE: "Statics"
   TIMESTEP: 1
   NUMSTEP: 1
   MAXTIME: 10
-  TOLDISP: 1e-11
+  TOLDISP: 1.0e-11
   TOLRES: 0.0001
   MAXITER: 20
   PREDICT: "TangDis"
@@ -31,73 +33,73 @@ RESULT DESCRIPTION:
       NODE: 190
       QUANTITY: "dispx"
       VALUE: 0.13191721002739798
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 190
       QUANTITY: "dispy"
       VALUE: 0.1993348845583147
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 190
       QUANTITY: "dispz"
       VALUE: 0.06922093109571521
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 470
       QUANTITY: "dispx"
       VALUE: 0.13298272648260862
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 470
       QUANTITY: "dispy"
       VALUE: 0.20055514581095235
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 470
       QUANTITY: "dispz"
       VALUE: 0.06970034314267715
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 711
       QUANTITY: "dispx"
       VALUE: 0.07692742096635531
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 711
       QUANTITY: "dispy"
       VALUE: 0.12499373471095152
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 711
       QUANTITY: "dispz"
       VALUE: 0.05867991807126929
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 1071
       QUANTITY: "dispx"
       VALUE: 0.06988026757838893
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 1071
       QUANTITY: "dispy"
       VALUE: 0.10989253309528824
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
   - STRUCTURE:
       DIS: "structure"
       NODE: 1071
       QUANTITY: "dispz"
       VALUE: 0.04835255275303983
-      TOLERANCE: 1e-10
+      TOLERANCE: 1.0e-10
 MATERIALS:
   - MAT: 1
     MAT_BeamReissnerElastHyper:

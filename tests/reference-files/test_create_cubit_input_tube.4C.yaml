@@ -28,7 +28,7 @@ SOLVER 1:
 MATERIALS:
   - MAT: 1
     MAT_Struct_StVenantKirchhoff:
-      YOUNG: 1e+09
+      YOUNG: 1.0e+09
       NUE: 0
       DENS: 7.8e-06
 FUNCT1:

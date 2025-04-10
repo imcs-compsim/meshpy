@@ -40,12 +40,13 @@ from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.function import Function
 from meshpy.four_c.function_utility import create_linear_interpolation_function
 from meshpy.four_c.header_functions import (
+    add_result_description,
     set_beam_contact_runtime_output,
     set_beam_contact_section,
     set_header_static,
     set_runtime_output,
 )
-from meshpy.four_c.input_file import InputFile, InputSection
+from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.material import MaterialReissner
 from meshpy.four_c.run_four_c import run_four_c
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
@@ -75,8 +76,17 @@ def create_cantilever_model(n_steps, time_step=0.5):
 
     input_file = InputFile()
     set_header_static(input_file, time_step=time_step, n_steps=n_steps)
-    input_file.add("--IO\nOUTPUT_BIN yes\nSTRUCT_DISP yes", option_overwrite=True)
-    ft = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+    input_file.add(
+        {"IO": {"OUTPUT_BIN": True, "STRUCT_DISP": True}}, option_overwrite=True
+    )
+    ft = Function(
+        [
+            {
+                "COMPONENT": 0,
+                "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t",
+            },
+        ]
+    )
     input_file.add(ft)
     mat = MaterialReissner(youngs_modulus=100.0, radius=0.1)
     beam_set = create_beam_mesh_line(
@@ -108,7 +118,7 @@ def run_four_c_test(tmp_path, name, mesh, n_proc=2, restart=[None, None], **kwar
     os.makedirs(testing_dir, exist_ok=True)
 
     # Create input file.
-    input_file = os.path.join(testing_dir, name + ".dat")
+    input_file = os.path.join(testing_dir, name + ".4C.yaml")
     mesh.write_input_file(input_file, add_script_to_header=False, **kwargs)
 
     return_code = run_four_c(
@@ -122,9 +132,6 @@ def run_four_c_test(tmp_path, name, mesh, n_proc=2, restart=[None, None], **kwar
     assert 0 == return_code
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
 @pytest.mark.parametrize("full_import", [False, True])
 def test_four_c_simulation_honeycomb_sphere(
@@ -146,37 +153,37 @@ def test_four_c_simulation_honeycomb_sphere(
     # Read input file with information of the sphere and simulation.
     mpy.import_mesh_full = full_import
     input_file = InputFile(
-        description="honeycomb beam in contact with sphere",
-        dat_file=get_corresponding_reference_file_path(additional_identifier="import"),
+        yaml_file=get_corresponding_reference_file_path(additional_identifier="import"),
     )
 
     # Modify the time step options.
     input_file.add(
-        InputSection(
-            "STRUCTURAL DYNAMIC",
-            "NUMSTEP 5",
-            "TIMESTEP 0.2",
-            option_overwrite=True,
-        )
+        {"STRUCTURAL DYNAMIC": {"NUMSTEP": 5, "TIMESTEP": 0.2}},
+        option_overwrite=True,
     )
 
     # Delete the results given in the input file.
     input_file.delete_section("RESULT DESCRIPTION")
-    input_file.add("-----RESULT DESCRIPTION")
 
     # Add result checks.
     displacement = [0.0, -8.09347204109101170, 2.89298005937795688]
-
     nodes = [268, 188, 182]
     for node in nodes:
         for i, direction in enumerate(["x", "y", "z"]):
             input_file.add(
-                InputSection(
-                    "RESULT DESCRIPTION",
-                    "STRUCTURE DIS structure NODE {} QUANTITY disp{} VALUE {} TOLERANCE 1e-10".format(
-                        node, direction, displacement[i]
-                    ),
-                )
+                {
+                    "RESULT DESCRIPTION": [
+                        {
+                            "STRUCTURE": {
+                                "DIS": "structure",
+                                "NODE": node,
+                                "QUANTITY": f"disp{direction}",
+                                "VALUE": displacement[i],
+                                "TOLERANCE": "1e-10",
+                            },
+                        }
+                    ]
+                }
             )
 
     # Material for the beam.
@@ -199,8 +206,20 @@ def test_four_c_simulation_honeycomb_sphere(
 
     # Functions for the boundary conditions
     ft = Function(
-        "COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME a\n"
-        "VARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 3 TIMES 0.0 0.2 1.0 VALUES 0.0 1.0 1.0"
+        [
+            {
+                "COMPONENT": 0,
+                "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "a",
+            },
+            {
+                "VARIABLE": 0,
+                "NAME": "a",
+                "TYPE": "linearinterpolation",
+                "NUMPOINTS": 3,
+                "TIMES": [0, 0.2, 1],
+                "VALUES": [0, 1, 1],
+            },
+        ]
     )
     mesh_honeycomb.add(ft)
 
@@ -210,15 +229,24 @@ def test_four_c_simulation_honeycomb_sphere(
     mesh_honeycomb.add(
         BoundaryCondition(
             honeycomb_set["bottom"],
-            "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+                "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
     mesh_honeycomb.add(
         BoundaryCondition(
             honeycomb_set["top"],
-            "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 5.0 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0",
-            format_replacement=[ft],
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+                "VAL": [0, 0, 5.0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [0, 0, ft, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
@@ -246,9 +274,6 @@ def test_four_c_simulation_honeycomb_sphere(
     )
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
 @pytest.mark.parametrize("full_import", [False, True])
 def test_four_c_simulation_beam_and_solid_tube(
@@ -262,8 +287,8 @@ def test_four_c_simulation_beam_and_solid_tube(
 
     # Create the input file and read solid mesh data.
     mpy.import_mesh_full = full_import
-    input_file = InputFile(description="Solid tube with beam tube")
-    input_file.read_dat(
+    input_file = InputFile()
+    input_file.read_yaml(
         get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_tube"
         )
@@ -271,21 +296,20 @@ def test_four_c_simulation_beam_and_solid_tube(
 
     # Add options for beam_output.
     input_file.add(
-        InputSection(
-            "IO/RUNTIME VTK OUTPUT/BEAMS",
-            """
-        OUTPUT_BEAMS                    Yes
-        DISPLACEMENT                    Yes
-        USE_ABSOLUTE_POSITIONS          Yes
-        TRIAD_VISUALIZATIONPOINT        Yes
-        STRAINS_GAUSSPOINT              Yes
-        """,
-        )
+        {
+            "IO/RUNTIME VTK OUTPUT/BEAMS": {
+                "OUTPUT_BEAMS": True,
+                "DISPLACEMENT": True,
+                "USE_ABSOLUTE_POSITIONS": True,
+                "TRIAD_VISUALIZATIONPOINT": True,
+                "STRAINS_GAUSSPOINT": True,
+            }
+        }
     )
 
     # Add functions for boundary conditions and material.
-    sin = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME sin(t*2*pi)")
-    cos = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME cos(t*2*pi)")
+    sin = Function([{"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "sin(t*2*pi)"}])
+    cos = Function([{"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "cos(t*2*pi)"}])
     material = MaterialReissner(youngs_modulus=1e9, radius=0.25, shear_correction=0.75)
     input_file.add(sin, cos, material)
 
@@ -299,36 +323,36 @@ def test_four_c_simulation_beam_and_solid_tube(
     input_file.add(
         BoundaryCondition(
             cantilever_set["start"],
-            "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
     input_file.add(
         BoundaryCondition(
             cantilever_set["end"],
-            "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 3. 3. 0 0 0 0 0 0 0 FUNCT {} {} 0 0 0 0 0 0 0",
-            format_replacement=[cos, sin],
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                "VAL": [3.0, 3.0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [cos, sin, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
 
     # Add result checks.
-    displacement = [
+    displacements = [
         [1.50796091342925, 1.31453288915877e-8, 0.0439008100184687],
         [0.921450108160878, 1.41113401669104e-15, 0.0178350143764099],
     ]
 
     nodes = [32, 69]
-    for j, node in enumerate(nodes):
-        for i, direction in enumerate(["x", "y", "z"]):
-            input_file.add(
-                InputSection(
-                    "RESULT DESCRIPTION",
-                    "STRUCTURE DIS structure NODE {} QUANTITY disp{} VALUE {} TOLERANCE 1e-10".format(
-                        node, direction, displacement[j][i]
-                    ),
-                )
-            )
+    add_result_description(input_file, displacements, nodes)
 
     # Call get_unique_geometry_sets to check that this does not affect the
     # mesh creation.
@@ -354,9 +378,6 @@ def test_four_c_simulation_beam_and_solid_tube(
     )
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
 def test_four_c_simulation_honeycomb_variants(
     enforce_four_c,
@@ -367,85 +388,86 @@ def test_four_c_simulation_honeycomb_variants(
     """Create a few different honeycomb structures."""
 
     # Create input file.
-    input_file = InputFile(description="Varieties of honeycomb")
+    input_file = InputFile()
 
     # Set options with different syntaxes.
-    input_file.add(InputSection("PROBLEM SIZE", "DIM 3"))
     input_file.add(
-        """
-    -----------------------------------PROBLEM TYPE
-    PROBLEMTYPE                           Structure
-    RESTART                               0
-    --------------------------------------IO
-    OUTPUT_BIN                            No
-    STRUCT_DISP                           No
-    FILESTEPS                             1000
-    VERBOSITY                             Standard
-    """
+        {
+            "PROBLEM TYPE": {
+                "PROBLEMTYPE": "Structure",
+            },
+            "IO": {
+                "OUTPUT_BIN": False,
+                "STRUCT_DISP": False,
+                "VERBOSITY": "Standard",
+            },
+        }
     )
     input_file.add(
-        InputSection(
-            "IO/RUNTIME VTK OUTPUT",
-            """
-        OUTPUT_DATA_FORMAT                    binary
-        INTERVAL_STEPS                        1
-        EVERY_ITERATION                       No
-        """,
-        )
+        {
+            "IO/RUNTIME VTK OUTPUT": {
+                "OUTPUT_DATA_FORMAT": "binary",
+                "INTERVAL_STEPS": 1,
+                "EVERY_ITERATION": False,
+            }
+        }
     )
     input_file.add(
-        """
-        ------------------------------------STRUCTURAL DYNAMIC
-        LINEAR_SOLVER                         1
-        INT_STRATEGY                          Standard
-        DYNAMICTYPE                           Statics
-        RESULTSEVERY                          1
-        NLNSOL                                fullnewton
-        PREDICT                               TangDis
-        TIMESTEP                              1.
-        NUMSTEP                               666
-        MAXTIME                               10.0
-        TOLRES                                1.0E-4
-        TOLDISP                               1.0E-11
-        NORM_RESF                             Abs
-        NORM_DISP                             Abs
-        NORMCOMBI_RESFDISP                    And
-        MAXITER                               20
-        """
+        {
+            "STRUCTURAL DYNAMIC": {
+                "LINEAR_SOLVER": 1,
+                "INT_STRATEGY": "Standard",
+                "DYNAMICTYPE": "Statics",
+                "PREDICT": "TangDis",
+                "TIMESTEP": 1.0,
+                "NUMSTEP": 666,
+                "MAXTIME": 10.0,
+                "TOLRES": 1.0e-4,
+                "TOLDISP": 1.0e-11,
+                "MAXITER": 20,
+            }
+        }
     )
     input_file.add(
-        InputSection("STRUCTURAL DYNAMIC", "NUMSTEP 1", option_overwrite=True)
+        {
+            "SOLVER 1": {
+                "NAME": "Structure_Solver",
+                "SOLVER": "UMFPACK",
+            },
+        }
     )
     input_file.add(
-        InputSection(
-            "SOLVER 1",
-            """
-        NAME                                  Structure_Solver
-        SOLVER                                UMFPACK
-        """,
-        )
+        {
+            "IO/RUNTIME VTK OUTPUT/BEAMS": {
+                "OUTPUT_BEAMS": True,
+                "DISPLACEMENT": True,
+                "TRIAD_VISUALIZATIONPOINT": True,
+                "STRAINS_GAUSSPOINT": True,
+            },
+        }
     )
-    input_file.add(
-        InputSection(
-            "IO/RUNTIME VTK OUTPUT/BEAMS",
-            """
-        OUTPUT_BEAMS                    Yes
-        DISPLACEMENT                    Yes
-        USE_ABSOLUTE_POSITIONS          Yes
-        TRIAD_VISUALIZATIONPOINT        Yes
-        STRAINS_GAUSSPOINT              Yes
-        """,
-        )
-    )
+
+    # Check that we can overwrite keys
+    input_file.add({"STRUCTURAL DYNAMIC": {"NUMSTEP": 1}}, option_overwrite=True)
+
+    # This works, because the overwritten key is the same
+    input_file.add({"STRUCTURAL DYNAMIC": {"NUMSTEP": 1}}, option_overwrite=False)
+
+    # This does not work, because we change a key without the option_overwrite flag
+    with pytest.raises(
+        KeyError,
+        match="Key NUMSTEP with the value",
+    ):
+        input_file.add({"STRUCTURAL DYNAMIC": {"NUMSTEP": 123}}, option_overwrite=False)
 
     # Create four meshes with different types of honeycomb structure.
     mesh = Mesh()
     material = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
     ft = []
-    ft.append(Function("SYMBOLIC_FUNCTION_OF_TIME t"))
-    ft.append(Function("SYMBOLIC_FUNCTION_OF_TIME t"))
-    ft.append(Function("SYMBOLIC_FUNCTION_OF_TIME t"))
-    ft.append(Function("SYMBOLIC_FUNCTION_OF_TIME t"))
+    ft.append(Function([{"SYMBOLIC_FUNCTION_OF_TIME": "t"}]))
+    ft.append(Function([{"SYMBOLIC_FUNCTION_OF_TIME": "t"}]))
+    ft.append(Function([{"SYMBOLIC_FUNCTION_OF_TIME": "t"}]))
+    ft.append(Function([{"SYMBOLIC_FUNCTION_OF_TIME": "t"}]))
     mesh.add(ft)
 
     counter = 0
@@ -466,15 +488,34 @@ def test_four_c_simulation_honeycomb_variants(
             mesh.add(
                 BoundaryCondition(
                     honeycomb_set["bottom"],
-                    "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+                    {
+                        "NUMDOF": 9,
+                        "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+                        "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    },
                     bc_type=mpy.bc.dirichlet,
                 )
             )
             mesh.add(
                 BoundaryCondition(
                     honeycomb_set["top"],
-                    "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL {1} {1} {1} 0 0 0 0 0 0 FUNCT {0} {0} {0} 0 0 0 0 0 0",
-                    format_replacement=[ft[counter], 0.0001],
+                    {
+                        "NUMDOF": 9,
+                        "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+                        "VAL": [0.0001, 0.0001, 0.0001, 0, 0, 0, 0, 0, 0],
+                        "FUNCT": [
+                            ft[counter],
+                            ft[counter],
+                            ft[counter],
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                            0,
+                        ],
+                    },
                     bc_type=mpy.bc.neumann,
                     double_nodes=mpy.double_nodes.remove,
                 )
@@ -485,24 +526,14 @@ def test_four_c_simulation_honeycomb_variants(
     input_file.add(mesh)
 
     # Add result checks.
-    displacement = [
+    displacements = [
         [1.31917210027397980e-01, 1.99334884558314690e-01, 6.92209310957152130e-02],
         [1.32982726482608615e-01, 2.00555145810952351e-01, 6.97003431426771458e-02],
         [7.69274209663553116e-02, 1.24993734710951515e-01, 5.86799180712692867e-02],
         [6.98802675783889299e-02, 1.09892533095288236e-01, 4.83525527530398319e-02],
     ]
-
     nodes = [190, 470, 711, 1071]
-    for j, node in enumerate(nodes):
-        for i, direction in enumerate(["x", "y", "z"]):
-            input_file.add(
-                InputSection(
-                    "RESULT DESCRIPTION",
-                    "STRUCTURE DIS structure NODE {} QUANTITY disp{} VALUE {} TOLERANCE 1e-10".format(
-                        node, direction, displacement[j][i]
-                    ),
-                )
-            )
+    add_result_description(input_file, displacements, nodes)
 
     # Check the created input file
     assert_results_equal(
@@ -517,9 +548,6 @@ def test_four_c_simulation_honeycomb_variants(
     run_four_c_test(tmp_path, "honeycomb_variants", input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
 def test_four_c_simulation_rotated_beam_axis(
     enforce_four_c,
@@ -538,13 +566,13 @@ def test_four_c_simulation_rotated_beam_axis(
     """
 
     # Create input file.
-    input_file = InputFile(description="Rotation of beam along axis")
+    input_file = InputFile()
 
     # Set header
     set_header_static(input_file, time_step=0.05, n_steps=20)
 
     # Define linear function over time.
-    ft = Function("SYMBOLIC_FUNCTION_OF_TIME t")
+    ft = Function([{"SYMBOLIC_FUNCTION_OF_TIME": "t"}])
     input_file.add(ft)
 
     # Set beam material.
@@ -590,16 +618,25 @@ def test_four_c_simulation_rotated_beam_axis(
         mesh.add(
             BoundaryCondition(
                 set_1["start"],
-                "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+                {
+                    "NUMDOF": 9,
+                    "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                    "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                },
                 bc_type=mpy.bc.dirichlet,
             )
         )
         mesh.add(
             BoundaryCondition(
                 set_2["end"],
-                "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL {1} {1} {1} {1} {1} {1} 0 0 0 FUNCT {0} {0} {0} {0} {0} {0} 0 0 0",
+                {
+                    "NUMDOF": 9,
+                    "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                    "VAL": [force_fac] * 6 + [0] * 3,
+                    "FUNCT": [ft] * 6 + [0] * 3,
+                },
                 bc_type=mpy.bc.neumann,
-                format_replacement=[ft, force_fac],
             )
         )
 
@@ -614,18 +651,9 @@ def test_four_c_simulation_rotated_beam_axis(
         input_file.translate([1, 0, 0])
 
     # Add result checks.
-    displacement = [1.5015284845, 0.35139255451, -1.0126517891]
+    displacements = [[1.5015284845, 0.35139255451, -1.0126517891]] * 3
     nodes = [13, 26, 40]
-    for node in nodes:
-        for i, direction in enumerate(["x", "y", "z"]):
-            input_file.add(
-                InputSection(
-                    "RESULT DESCRIPTION",
-                    "STRUCTURE DIS structure NODE {} QUANTITY disp{} VALUE {} TOLERANCE 1e-10".format(
-                        node, direction, displacement[i]
-                    ),
-                )
-            )
+    add_result_description(input_file, displacements, nodes)
 
     # Check the created input file
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
@@ -641,9 +669,6 @@ def test_four_c_simulation_rotated_beam_axis(
     )
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
 @pytest.mark.parametrize(
     "initial_run_name",
@@ -679,26 +704,36 @@ def test_four_c_simulation_dbc_monitor_to_input(
     initial_simulation.add(
         BoundaryCondition(
             beam_set["start"],
-            "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
     initial_simulation.add(
         BoundaryCondition(
             beam_set["end"],
-            "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL -0.2 1.5 1 0 0 0 0 0 0 FUNCT 1 1 1 0 0 0 0 0 0 TAG monitor_reaction",
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+                "VAL": [-0.2, 1.5, 1.0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+                "TAG": "monitor_reaction",
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
     initial_simulation.add(
-        """
-        --IO/MONITOR STRUCTURE DBC
-        PRECISION_FILE         10
-        PRECISION_SCREEN       5
-        FILE_TYPE              csv
-        WRITE_HEADER           yes
-        INTERVAL_STEPS         1
-        """
+        {
+            "IO/MONITOR STRUCTURE DBC": {
+                "PRECISION_FILE": 10,
+                "WRITE_HEADER": True,
+                "INTERVAL_STEPS": 1,
+            }
+        }
     )
 
     # Check the input file
@@ -719,13 +754,27 @@ def test_four_c_simulation_dbc_monitor_to_input(
     restart_simulation.add(
         BoundaryCondition(
             beam_set["start"],
-            "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
     function_nbc = Function(
-        """SYMBOLIC_FUNCTION_OF_TIME nbc_value\nVARIABLE 0 NAME nbc_value TYPE linearinterpolation NUMPOINTS 2 """
-        "TIMES 1.0 11.0 VALUES 1.0 0.0"
+        [
+            {"SYMBOLIC_FUNCTION_OF_TIME": "nbc_value"},
+            {
+                "VARIABLE": 0,
+                "NAME": "nbc_value",
+                "TYPE": "linearinterpolation",
+                "NUMPOINTS": 2,
+                "TIMES": [1, 11],
+                "VALUES": [1, 0],
+            },
+        ]
     )
     restart_simulation.add(function_nbc)
 
@@ -755,13 +804,11 @@ def test_four_c_simulation_dbc_monitor_to_input(
             initial_run_name + " is not yet implemented for this test case."
         )
 
-    restart_simulation.add(
-        """--RESULT DESCRIPTION
-        STRUCTURE DIS structure NODE 21 QUANTITY dispx VALUE -4.09988307566066690e-01 TOLERANCE 1e-10
-        STRUCTURE DIS structure NODE 21 QUANTITY dispy VALUE  9.93075098427816383e-01 TOLERANCE 1e-10
-        STRUCTURE DIS structure NODE 21 QUANTITY dispz VALUE  6.62050065618549843e-01 TOLERANCE 1e-10
-        """
-    )
+    displacements = [
+        [-4.09988307566066690e-01, 9.93075098427816383e-01, 6.62050065618549843e-01]
+    ]
+    nodes = [21]
+    add_result_description(restart_simulation, displacements, nodes)
 
     # Check the input file of the restart simulation
     assert_results_equal(
@@ -778,9 +825,6 @@ def test_four_c_simulation_dbc_monitor_to_input(
     )
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
 def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_values(
     enforce_four_c,
@@ -805,9 +849,19 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     # Add simple lienar interpolation function.
     initial_simulation.add(
         Function(
-            "SYMBOLIC_FUNCTION_OF_SPACE_TIME a\nVARIABLE 0 NAME a TYPE linearinterpolation NUMPOINTS 4 TIMES 0 {} {} 9999999999.0 VALUES 0.0 1.0 0.0 0.0".format(
-                dt * n_steps, 2 * dt * n_steps
-            )
+            [
+                {
+                    "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "a",
+                },
+                {
+                    "VARIABLE": 0,
+                    "NAME": "a",
+                    "TYPE": "linearinterpolation",
+                    "NUMPOINTS": 4,
+                    "TIMES": [0, dt * n_steps, 2 * dt * n_steps, 9999999999.0],
+                    "VALUES": [0.0, 1.0, 0.0, 0.0],
+                },
+            ]
         )
     )
 
@@ -820,7 +874,12 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                 initial_simulation.add(
                     BoundaryCondition(
                         GeometrySet(node),
-                        "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 1 1 1 0 0 0 0 0 0",
+                        {
+                            "NUMDOF": 9,
+                            "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                            "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                            "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                        },
                         bc_type=mpy.bc.dirichlet,
                     )
                 )
@@ -829,24 +888,36 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                 initial_simulation.add(
                     BoundaryCondition(
                         GeometrySet(node),
-                        "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 {} 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0 TAG monitor_reaction".format(
-                            0.25 * np.sin(node.coordinates[0] * np.pi),
-                            "2",
-                        ),
+                        {
+                            "NUMDOF": 9,
+                            "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+                            "VAL": [
+                                0,
+                                0,
+                                0.25 * np.sin(node.coordinates[0] * np.pi),
+                                0,
+                                0,
+                                0,
+                                0,
+                                0,
+                                0,
+                            ],
+                            "FUNCT": [0, 0, 2, 0, 0, 0, 0, 0, 0],
+                            "TAG": "monitor_reaction",
+                        },
                         bc_type=mpy.bc.dirichlet,
                     )
                 )
 
     # Add DB-monitor header.
     initial_simulation.add(
-        """
-        --IO/MONITOR STRUCTURE DBC
-        PRECISION_FILE         10
-        PRECISION_SCREEN       5
-        FILE_TYPE              csv
-        WRITE_HEADER           yes
-        INTERVAL_STEPS         1
-        """
+        {
+            "IO/MONITOR STRUCTURE DBC": {
+                "PRECISION_FILE": 10,
+                "WRITE_HEADER": True,
+                "INTERVAL_STEPS": 1,
+            }
+        }
     )
 
     # Check the input file.
@@ -868,7 +939,12 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     force_simulation.add(
         BoundaryCondition(
             beam_set["start"],
-            "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
@@ -889,13 +965,9 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                     n_dof=9,
                 )
 
-    force_simulation.add(
-        """--RESULT DESCRIPTION
-        STRUCTURE DIS structure NODE 21 QUANTITY dispx VALUE 0.0 TOLERANCE 1e-10
-        STRUCTURE DIS structure NODE 21 QUANTITY dispy VALUE 0.0 TOLERANCE 1e-10
-        STRUCTURE DIS structure NODE 21 QUANTITY dispz VALUE 0.0 TOLERANCE 1e-10
-        """
-    )
+    displacements = [[0.0, 0.0, 0.0]]
+    nodes = [21]
+    add_result_description(force_simulation, displacements, nodes)
 
     # Compare the input file of the restart simulation.
     assert_results_equal(
@@ -933,21 +1005,30 @@ def test_four_c_simulation_cantilever_convergence(
         input_file.add(
             BoundaryCondition(
                 beam_set["start"],
-                (
-                    "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0"
-                ),
+                {
+                    "NUMDOF": 9,
+                    "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                    "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                },
                 bc_type=mpy.bc.dirichlet,
             )
         )
-        fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+        fun = Function(
+            [
+                {"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"},
+            ]
+        )
         input_file.add(
             fun,
             BoundaryCondition(
                 beam_set["end"],
-                (
-                    "NUMDOF 9 ONOFF 0 0 1 0 0 0 0 0 0 VAL 0 0 -{} 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0"
-                ),
-                format_replacement=[0.5, fun],
+                {
+                    "NUMDOF": 9,
+                    "ONOFF": [0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    "VAL": [0, 0, -0.5, 0, 0, 0, 0, 0, 0],
+                    "FUNCT": [0, 0, fun, 0, 0, 0, 0, 0, 0],
+                },
                 bc_type=mpy.bc.dirichlet,
             ),
         )
@@ -974,9 +1055,6 @@ def test_four_c_simulation_cantilever_convergence(
         assert abs(results[key] - results_ref[key]) < 1e-12
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
 def test_four_c_simulation_beam_to_beam_contact_example(
     enforce_four_c,
@@ -1018,7 +1096,12 @@ def test_four_c_simulation_beam_to_beam_contact_example(
         beam_to_beam_contact_simulation.add(
             BoundaryCondition(
                 beam_x[set_name],
-                "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 0 0 0 0 0 0 0 FUNCT 0 0 0 0 0 0 0 0 0",
+                {
+                    "NUMDOF": 9,
+                    "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+                    "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                },
                 bc_type=mpy.bc.dirichlet,
             )
         )
@@ -1046,9 +1129,13 @@ def test_four_c_simulation_beam_to_beam_contact_example(
         beam_to_beam_contact_simulation.add(
             BoundaryCondition(
                 beam_y[set_name],
-                "NUMDOF 9 ONOFF 1 1 1 0 0 0 0 0 0 VAL 0 0 1 0 0 0 0 0 0 FUNCT 0 0 {} 0 0 0 0 0 0",
+                {
+                    "NUMDOF": 9,
+                    "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+                    "VAL": [0, 0, 1, 0, 0, 0, 0, 0, 0],
+                    "FUNCT": [0, 0, fun, 0, 0, 0, 0, 0, 0],
+                },
                 bc_type=mpy.bc.dirichlet,
-                format_replacement=[fun],
             )
         )
 
@@ -1066,7 +1153,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
         time_step=0.05,
         n_steps=24,
         total_time=1.2,
-        write_stress="Yes",
+        write_stress="2PK",
         tol_residuum=1e-5,
         tol_increment=1e-5,
     )
@@ -1095,13 +1182,10 @@ def test_four_c_simulation_beam_to_beam_contact_example(
         get_corresponding_reference_file_path(), beam_to_beam_contact_simulation
     )
 
-    beam_to_beam_contact_simulation.add(
-        InputSection(
-            "RESULT DESCRIPTION",
-            """STRUCTURE DIS structure NODE 12 QUANTITY dispx VALUE -2.78205406266063848e+00 TOLERANCE 1e-8
-                        STRUCTURE DIS structure NODE 12 QUANTITY dispy VALUE 0e+00 TOLERANCE 1e-8
-                        STRUCTURE DIS structure NODE 12 QUANTITY dispz VALUE 0e+0 TOLERANCE 1e-8""",
-        ),
+    displacements = [[-2.78205406266063848e00, 0, 0]]
+    nodes = [12]
+    add_result_description(
+        beam_to_beam_contact_simulation, displacements, nodes, tol=1e-8
     )
 
     # Check if we still have to actually run 4C.

@@ -1,7 +1,7 @@
 MATERIALS:
   - MAT: 1
     MAT_BeamKirchhoffTorsionFreeElastHyper:
-      YOUNG: 1e+08
+      YOUNG: 1.0e+08
       DENS: 10
       CROSSAREA: 3.141592653589793e-06
       MOMIN: 7.853981633974485e-13

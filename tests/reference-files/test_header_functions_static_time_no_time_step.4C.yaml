@@ -22,4 +22,4 @@ STRUCT NOX/Printing:
   Linear Solver Details: true
   Test Details: true
 STRUCT NOX/Status Test:
-  XML File: "/home/rudlstorfer/01_work/01_workspace/meshpy/tests/reference-files/NOT_DEFINED"
+  XML File: "NOT_DEFINED"
