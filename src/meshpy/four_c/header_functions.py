@@ -702,7 +702,7 @@ def add_result_description(
     *,
     tol: float = 1e-10,
 ):
-    """Add result descriptions to the input file.
+    """Add result descriptions for structure problems to the input file.
 
     Args:
         input_file: Input file to add the result description to
