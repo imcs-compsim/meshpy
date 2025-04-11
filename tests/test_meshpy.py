@@ -168,7 +168,7 @@ def test_meshpy_mesh_rotations_individual(assert_results_equal):
 @pytest.mark.parametrize("origin", [False, True])
 @pytest.mark.parametrize("flip", [False, True])
 def test_meshpy_mesh_reflection(origin, flip, assert_results_equal):
-    """Create a mesh, and its mirrored counterpart and then compare the dat
+    """Create a mesh, and its mirrored counterpart and then compare the input
     files."""
 
     # Rotations to be applied.
@@ -232,7 +232,7 @@ def test_meshpy_mesh_reflection(origin, flip, assert_results_equal):
     else:
         mesh.reflect(2 * (rot_2 * [1, 0, 0]), flip_beams=flip)
 
-    # Compare the dat files.
+    # Compare the input files.
     # TODO: Also add fixed result files to compare the tests with
     assert_results_equal(mesh_ref, mesh)
 
@@ -312,7 +312,7 @@ def test_meshpy_mesh_transformations_with_solid(
         # Check the output.
         assert_results_equal(
             get_corresponding_reference_file_path(
-                additional_identifier="full" if import_full else "dat"
+                additional_identifier="full" if import_full else "yaml"
             ),
             mesh,
         )
@@ -697,7 +697,7 @@ def test_meshpy_kirchhoff_material(assert_results_equal):
 def test_meshpy_euler_bernoulli(
     assert_results_equal, get_corresponding_reference_file_path
 ):
-    """Recreate the 4C test case beam3eb_static_endmoment_quartercircle.dat
+    """Recreate the 4C test case beam3eb_static_endmoment_quartercircle.4C.yaml
     This tests the implementation for Euler Bernoulli beams."""
 
     # Create the input file and add function and material.
@@ -1761,13 +1761,13 @@ def test_meshpy_cubitpy_import(
     tmp_path,
 ):
     """Check that a import from a cubitpy object is the same as importing the
-    dat file."""
+    input file."""
 
     # Load the mesh creation functions
     from tests.create_cubit_input import create_tube, create_tube_cubit
 
     # Create the input file and read the file.
-    file_path = os.path.join(tmp_path, "test_cubitpy_import.dat")
+    file_path = os.path.join(tmp_path, "test_cubitpy_import.4C.yaml")
     create_tube(file_path)
     input_file = InputFile(yaml_file=file_path)
 

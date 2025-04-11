@@ -52,8 +52,8 @@ def test_four_c_material_numbering(
     assert_results_equal, get_corresponding_reference_file_path
 ):
     """Test that materials can be added as strings to an input file (as is done
-    when importing dat files) and that the numbering with other added materials
-    does not lead to materials with double IDs."""
+    when importing input files) and that the numbering with other added
+    materials does not lead to materials with double IDs."""
 
     input_file = InputFile()
     input_file.add(
@@ -331,9 +331,9 @@ def test_four_c_locsys_condition(
 ):
     """Test case for point locsys condition for beams.
 
-    The testcase is adapted from to beam3r_herm2line3_static_locsys.dat.
-    However it has a simpler material, and an additional line locsys
-    condition.
+    The testcase is adapted from to
+    beam3r_herm2line3_static_locsys.4C.yaml. However it has a simpler
+    material, and an additional line locsys condition.
     """
 
     # Create the input file with function and material.

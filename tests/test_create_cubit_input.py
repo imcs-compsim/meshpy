@@ -64,11 +64,13 @@ def test_create_cubit_input_tutorial(
     """Test the creation of the solid input file for the tutorial."""
 
     # Create the tube for the tutorial.
-    result_path = tmp_path / "tutorial.dat"
+    result_path = tmp_path / "tutorial.4C.yaml"
     create_tube_tutorial(result_path)
 
     tutorial_path = (
-        reference_file_directory.parents[1] / "tutorial" / "4C_input_solid_tutorial.dat"
+        reference_file_directory.parents[1]
+        / "tutorial"
+        / "4C_input_solid_tutorial.4C.yaml"
     )
     assert_results_equal(tutorial_path, result_path, **ASSERT_RESULTS_EQUAL_TOL)
 

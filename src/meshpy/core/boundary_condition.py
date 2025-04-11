@@ -37,10 +37,8 @@ class BoundaryConditionBase(_BaseMeshItemFull):
 
         Args
         ----
-        geometry_set: GeometrySet, int
-            Geometry that this boundary condition acts on. An integer can be
-            given, in the case a dat file is imported. This integer is only
-            temporary and will be replaced with the GeometrySet object.
+        geometry_set: GeometrySet
+            Geometry that this boundary condition acts on.
         bc_type: mpy.bc
             Type of the boundary condition.
         """

@@ -24,8 +24,9 @@
 import numpy as np
 import pytest
 
-from meshpy.abaqus.beam import AbaqusBeamMaterial, generate_abaqus_beam
+from meshpy.abaqus.beam import generate_abaqus_beam
 from meshpy.abaqus.input_file import AbaqusBeamNormalDefinition, AbaqusInputFile
+from meshpy.abaqus.material import AbaqusBeamMaterial
 from meshpy.core.geometry_set import GeometrySet
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation

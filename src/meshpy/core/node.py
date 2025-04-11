@@ -122,7 +122,7 @@ class Node(_BaseMeshItemFull):
         coordinate_string = " ".join(
             [
                 (
-                    _mpy.dat_precision.format(component + 0)
+                    _mpy.output_precision.format(component + 0)
                     if _np.abs(component) >= _mpy.eps_pos
                     else "0"
                 )
@@ -186,7 +186,7 @@ class ControlPoint(Node):
         coordinate_string = " ".join(
             [
                 (
-                    _mpy.dat_precision.format(component + 0)
+                    _mpy.output_precision.format(component + 0)
                     if _np.abs(component) >= _mpy.eps_pos
                     else "0"
                 )

@@ -143,9 +143,9 @@ def test_four_c_simulation_honeycomb_sphere(
 ):
     """Create the same honeycomb mesh as defined in 4C/tests/input_files/beam3r
     _herm2lin3_static_point_coupling_BTSPH_contact_stent_honeycomb_stretch_r01_
-    circ10.dat The honeycomb beam is in contact with a rigid sphere, the sphere
-    is moved compared to the original test file, since there are some problems
-    with the contact convergence.
+    circ10.4C.yaml The honeycomb beam is in contact with a rigid sphere, the
+    sphere is moved compared to the original test file, since there are some
+    problems with the contact convergence.
 
     The sphere is imported as an existing mesh.
     """

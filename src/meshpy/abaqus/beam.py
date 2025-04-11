@@ -25,7 +25,6 @@ used with MeshPy."""
 import numpy as _np
 
 from meshpy.core.element_beam import Beam as _Beam
-from meshpy.core.material import MaterialBeam as _MaterialBeam
 
 
 def generate_abaqus_beam(beam_type: str):
@@ -69,19 +68,3 @@ def generate_abaqus_beam(beam_type: str):
             "n_dim": n_dim,
         },
     )
-
-
-class AbaqusBeamMaterial(_MaterialBeam):
-    """A class representing an Abaqus beam material."""
-
-    def __init__(self, name: str):
-        """Initialize the material. For now it is only supported to state the
-        name of the resulting element set here. The material and cross-section
-        lines in the input file have to be defined manually.
-
-        Args
-        ----
-        name: str
-            Name of the material, this will be the name of the resulting element set
-        """
-        super().__init__(data=name)

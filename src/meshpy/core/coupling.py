@@ -60,12 +60,12 @@ class Coupling(_BoundaryConditionBase):
             physical position.
         check_at_init: bool
             If the previous check should be performed at initialization. This is required
-            when importing a coupling from a dat file as the nodes themselves are not build
+            when importing a coupling from an input file as the nodes themselves are not build
             up when the coupling is read.
         """
 
         if isinstance(geometry, int):
-            # This is the case if the boundary condition is read from an existing dat file
+            # This is the case if the boundary condition is read from an existing input file
             pass
         elif isinstance(geometry, _GeometrySetBase):
             pass
