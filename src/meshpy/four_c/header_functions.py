@@ -188,7 +188,7 @@ def set_beam_to_solid_meshtying(
     segmentation=True,
     segmentation_search_points=2,
     couple_restart=False,
-    mortar_shape=None,
+    mortar_shape="none",
     n_gauss_points=6,
     n_integration_points_circ=None,
     penalty_parameter=None,
@@ -258,7 +258,8 @@ def set_beam_to_solid_meshtying(
             f"Got {interaction_type} of type {type(interaction_type)}."
         )
     bts_parameters["CONSTRAINT_STRATEGY"] = "penalty"
-    bts_parameters["PENALTY_PARAMETER"] = penalty_parameter
+    if penalty_parameter is not None:
+        bts_parameters["PENALTY_PARAMETER"] = penalty_parameter
     bts_parameters["GAUSS_POINTS"] = n_gauss_points
 
     if contact_discretization == "mortar":
@@ -281,7 +282,8 @@ def set_beam_to_solid_meshtying(
     bts_parameters["GEOMETRY_PAIR_SEGMENTATION_SEARCH_POINTS"] = (
         segmentation_search_points
     )
-    bts_parameters["COUPLE_RESTART_STATE"] = couple_restart
+    if interaction_type == _mpy.beam_to_solid.volume_meshtying:
+        bts_parameters["COUPLE_RESTART_STATE"] = couple_restart
 
     input_file.add(
         {bts_section_name: bts_parameters}, option_overwrite=option_overwrite
@@ -301,7 +303,7 @@ def set_header_static(
     write_bin=False,
     write_stress="no",
     write_strain="no",
-    prestress="none",
+    prestress="None",
     prestress_time=0,
     option_overwrite=False,
 ):

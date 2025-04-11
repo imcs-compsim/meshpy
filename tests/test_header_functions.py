@@ -35,9 +35,6 @@ from meshpy.four_c.header_functions import (
 from meshpy.four_c.input_file import InputFile
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_header_functions_static(
     get_corresponding_reference_file_path,
     assert_results_equal,
