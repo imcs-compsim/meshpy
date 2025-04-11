@@ -25,7 +25,6 @@ import pytest
 
 from meshpy.core.conf import mpy
 from meshpy.four_c.header_functions import (
-    get_comment,
     set_beam_contact_runtime_output,
     set_beam_contact_section,
     set_beam_to_solid_meshtying,
@@ -67,6 +66,7 @@ def test_header_functions_static(
         coupling_type="consistent_fad",
     )
 
+    # This is to test that the overwrite_option argument is handled correctly
     set_beam_to_solid_meshtying(
         input_file,
         mpy.beam_to_solid.surface_meshtying,
@@ -74,8 +74,6 @@ def test_header_functions_static(
         segmentation=False,
         option_overwrite=True,
     )
-
-    input_file.add("--Test\n{}on\n{}off".format(get_comment(True), get_comment(False)))
 
     # Check the output.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)

@@ -33,7 +33,6 @@ from meshpy.core.conf import mpy
 from meshpy.core.mesh import Mesh
 from meshpy.core.node import NodeCosserat
 from meshpy.core.rotation import Rotation
-from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.element_beam import Beam3eb, Beam3rHerm2Line3
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.material import MaterialEulerBernoulli, MaterialReissner
@@ -243,7 +242,7 @@ def test_mesh_creation_functions_arc_segment_via_rotation(
     mat = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
 
     # Create mesh.
-    mesh = create_beam_mesh_arc_segment_via_rotation(
+    beam_set = create_beam_mesh_arc_segment_via_rotation(
         input_file,
         Beam3rHerm2Line3,
         mat,
@@ -255,8 +254,7 @@ def test_mesh_creation_functions_arc_segment_via_rotation(
     )
 
     # Add boundary conditions.
-    input_file.add(BoundaryCondition(mesh["start"], "rb", bc_type=mpy.bc.dirichlet))
-    input_file.add(BoundaryCondition(mesh["end"], "rb", bc_type=mpy.bc.neumann))
+    input_file.add(beam_set)
 
     # Check the output.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
@@ -274,7 +272,7 @@ def test_mesh_creation_functions_arc_segment_2d(
     mat = MaterialReissner(radius=0.1)
 
     # Create mesh.
-    mesh1 = create_beam_mesh_arc_segment_2d(
+    beam_set_1 = create_beam_mesh_arc_segment_2d(
         input_file,
         Beam3rHerm2Line3,
         mat,
@@ -284,7 +282,7 @@ def test_mesh_creation_functions_arc_segment_2d(
         np.pi * (1.0 + 1.0 / 3.0),
         n_el=5,
     )
-    mesh2 = create_beam_mesh_arc_segment_2d(
+    beam_set_2 = create_beam_mesh_arc_segment_2d(
         input_file,
         Beam3rHerm2Line3,
         mat,
@@ -296,11 +294,8 @@ def test_mesh_creation_functions_arc_segment_2d(
         start_node=input_file.nodes[-1],
     )
 
-    # Add boundary conditions.
-    input_file.add(BoundaryCondition(mesh1["start"], "rb1", bc_type=mpy.bc.dirichlet))
-    input_file.add(BoundaryCondition(mesh1["end"], "rb2", bc_type=mpy.bc.neumann))
-    input_file.add(BoundaryCondition(mesh2["start"], "rb3", bc_type=mpy.bc.dirichlet))
-    input_file.add(BoundaryCondition(mesh2["end"], "rb4", bc_type=mpy.bc.neumann))
+    # Add geometry sets
+    input_file.add(beam_set_1, beam_set_2)
 
     # Check the output.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)

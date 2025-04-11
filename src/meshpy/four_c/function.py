@@ -28,8 +28,9 @@ from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
 class Function(_BaseMeshItemFull):
     """Holds information for a function."""
 
-    def __init__(self, data):
-        super().__init__(data=data)
+    def __init__(self, function_list):
+        super().__init__()
+        self.function_list = function_list
 
     def __deepcopy__(self, memo):
         """When deepcopy is called on a mesh, we do not want the same functions
@@ -42,12 +43,6 @@ class Function(_BaseMeshItemFull):
         # Return this object again, as no copy should be created.
         return self
 
-    def __str__(self):
-        """Return the global index for this function.
-
-        This is usually used then the function is called with the
-        str.format() function.
-        """
-        if self.i_global is None:
-            raise IndexError("The function does not have a global index!")
-        return str(self.i_global)
+    def dump_to_list(self):
+        """Return a list with the items representing this function."""
+        return self.function_list

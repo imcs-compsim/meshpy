@@ -22,7 +22,6 @@
 """This file contains a function to add the beam interaction conditions for
 4C."""
 
-import re as _re
 from typing import Optional as _Optional
 
 import meshpy.core.conf as _conf
@@ -35,9 +34,7 @@ def get_next_possible_id_for_boundary_condition(
     mesh: _Mesh,
     bc_type: _conf.BoundaryCondition,
     geometry_type: _conf.Geometry,
-    regex_search_string: str,
-    *,
-    group_idx: int = 1,
+    condition_string: str,
 ) -> int:
     """Returns the next possible id, which can be used for a boundary condition
     based on all previous added boundary conditions within a mesh.
@@ -49,8 +46,7 @@ def get_next_possible_id_for_boundary_condition(
         mesh: Mesh containing already set boundary conditions.
         bc_type: Type of the boundary condition to be searched.
         geometry_type: Geometry type of the boundary condition.
-        regex_search_string: String used for the regex search of the bc_string.
-        group_idx: Selected index of found regex expression that represents the ID.
+        condition_string: String defining the condition ID tag.
 
     Returns:
         id: Smallest available ID
@@ -71,15 +67,12 @@ def get_next_possible_id_for_boundary_condition(
 
         # compare string of each condition with input and store existing ids
         for bc in found_conditions:
-            match = _re.search(regex_search_string, bc.bc_string)
-            if match is None:
-                raise ValueError(
-                    "The string provided "
-                    + regex_search_string
-                    + " could not be found within the condition "
-                    + bc.bc_string
+            if condition_string in bc.bc_dict:
+                existing_ids.append(bc.bc_dict[condition_string])
+            else:
+                raise KeyError(
+                    f"The key {condition_string} is not in the bc_dict {bc.bc_dict}"
                 )
-            existing_ids.append(int(match.group(group_idx)))
 
         # return lowest found id
         return min(set(range(len(existing_ids) + 1)) - set(existing_ids))
@@ -107,20 +100,20 @@ def add_beam_interaction_condition(
         id: Used id for the created condition.
     """
 
-    condition_string = "COUPLING_ID "
+    condition_string = "COUPLING_ID"
     if id is None:
         id = get_next_possible_id_for_boundary_condition(
             mesh,
             bc_type,
             geometry_set_1.geometry_type,
-            regex_search_string=_re.escape(condition_string) + r"(\d+)",
+            condition_string=condition_string,
         )
 
         id_2 = get_next_possible_id_for_boundary_condition(
             mesh,
             bc_type,
             geometry_set_2.geometry_type,
-            regex_search_string=_re.escape(condition_string) + r"(\d+)",
+            condition_string=condition_string,
         )
 
         if not id == id_2:
@@ -132,7 +125,7 @@ def add_beam_interaction_condition(
     for geometry_set in [geometry_set_1, geometry_set_2]:
         mesh.add(
             _BoundaryCondition(
-                geometry_set, bc_string=condition_string + str(id), bc_type=bc_type
+                geometry_set, bc_dict={condition_string: id}, bc_type=bc_type
             )
         )
 

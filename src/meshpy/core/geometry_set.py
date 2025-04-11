@@ -30,6 +30,7 @@ from meshpy.core.conf import mpy as _mpy
 from meshpy.core.container import ContainerBase as _ContainerBase
 from meshpy.core.element_beam import Beam as _Beam
 from meshpy.core.node import Node as _Node
+from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 class GeometrySetBase(_BaseMeshItemFull):
@@ -120,8 +121,13 @@ class GeometrySetBase(_BaseMeshItemFull):
             'The "get_all_nodes" method has to be overwritten in the derived class'
         )
 
-    def _get_dat(self):
-        """Get the lines for the input file."""
+    def dump_to_list(self):
+        """Return a list with the legacy strings of this geometry set."""
+
+        if _fourcipp_is_available():
+            raise ValueError(
+                "Port this functionality to dump the geometry set to a suitable data format"
+            )
 
         # Sort the nodes based on the node GID.
         nodes = self.get_all_nodes()
@@ -263,26 +269,6 @@ class GeometrySetNodes(GeometrySetBase):
         self.nodes = {}
         if nodes is not None:
             self.add(nodes)
-
-    @classmethod
-    def from_dat(cls, geometry_key, lines, comments=None):
-        """Get a geometry set from an input line in a dat file.
-
-        The geometry set is passed as integer (0 based index) and will
-        be connected after the whole input file is parsed.
-        """
-        nodes = []
-        for line in lines:
-            nodes.append(int(line.split()[1]) - 1)
-        return cls(geometry_key, nodes, comments=comments)
-
-    def replace_indices_with_nodes(self, nodes):
-        """After the set is imported from a dat file, replace the node indices
-        with the corresponding nodes objects."""
-        node_dict = {}
-        for node_id in self.nodes.keys():
-            node_dict[nodes[node_id]] = None
-        self.nodes = node_dict
 
     def add(self, value):
         """Add nodes to this object.

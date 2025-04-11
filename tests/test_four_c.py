@@ -52,28 +52,115 @@ def test_four_c_material_numbering(
     assert_results_equal, get_corresponding_reference_file_path
 ):
     """Test that materials can be added as strings to an input file (as is done
-    when importing dat files) and that the numbering with other added materials
-    does not lead to materials with double IDs."""
+    when importing input files) and that the numbering with other added
+    materials does not lead to materials with double IDs."""
 
     input_file = InputFile()
     input_file.add(
-        """
-        --MATERIALS
-        // some comment
-        MAT 1 MAT_ViscoElastHyper NUMMAT 4 MATIDS 10 11 12 13 DENS 1.3e-6   // density (kg/mm^3), young (N/mm^2)
-        MAT 10 ELAST_CoupNeoHooke YOUNG 0.16 NUE 0.45  // 0.16 (MPa)
-        MAT 11 VISCO_GenMax TAU 0.1 BETA 0.4 SOLVE OST
-        MAT 12 ELAST_CoupAnisoExpo K1 2.4e-03 K2 0.14 GAMMA 0.0 K1COMP 0 K2COMP 1 ADAPT_ANGLE No INIT 3 STR_TENS_ID 100 FIBER_ID 1
-        MAT 13 ELAST_CoupAnisoExpo K1 5.4e-03 K2 1.24 GAMMA 0.0 K1COMP 0 K2COMP 1 ADAPT_ANGLE No INIT 3 STR_TENS_ID 100 FIBER_ID 2
-        MAT 100 ELAST_StructuralTensor STRATEGY Standard
-
-        // other comment
-        MAT 2 MAT_ElastHyper NUMMAT 3 MATIDS 20 21 22 DENS 1.3e-6                                            // density (kg/mm^3), young (N/mm^2)
-        MAT 20 ELAST_CoupNeoHooke YOUNG 1.23 NUE 0.45                                                 // MPa
-        MAT 21 ELAST_CoupAnisoExpo K1 0.4e-03 K2 12.0 GAMMA 0.0 K1COMP 0 K2COMP 1 ADAPT_ANGLE No INIT 3 STR_TENS_ID 200 FIBER_ID 1
-        MAT 22 ELAST_CoupAnisoExpo K1 50.2e-03 K2 10.0 GAMMA 0.0 K1COMP 0 K2COMP 1 ADAPT_ANGLE No INIT 3 STR_TENS_ID 200 FIBER_ID 2
-        MAT 200 ELAST_StructuralTensor STRATEGY Standard
-        """
+        {
+            "MATERIALS": [
+                {
+                    "MAT": 1,
+                    "MAT_ViscoElastHyper": {
+                        "NUMMAT": 4,
+                        "MATIDS": [10, 11, 12, 13],
+                        "DENS": 1.3e-06,
+                    },
+                },
+                {
+                    "MAT": 10,
+                    "ELAST_CoupNeoHooke": {
+                        "YOUNG": 0.16,
+                        "NUE": 0.45,
+                    },
+                },
+                {
+                    "MAT": 11,
+                    "VISCO_GenMax": {
+                        "TAU": 0.1,
+                        "BETA": 0.4,
+                        "SOLVE": "OST",
+                    },
+                },
+                {
+                    "MAT": 12,
+                    "ELAST_CoupAnisoExpo": {
+                        "K1": 0.0024,
+                        "K2": 0.14,
+                        "GAMMA": 0,
+                        "K1COMP": 0,
+                        "K2COMP": 1,
+                        "STR_TENS_ID": 100,
+                        "INIT": 3,
+                    },
+                },
+                {
+                    "MAT": 13,
+                    "ELAST_CoupAnisoExpo": {
+                        "K1": 0.0054,
+                        "K2": 1.24,
+                        "GAMMA": 0,
+                        "K1COMP": 0,
+                        "K2COMP": 1,
+                        "STR_TENS_ID": 100,
+                        "INIT": 3,
+                        "FIBER_ID": 2,
+                    },
+                },
+                {
+                    "MAT": 100,
+                    "ELAST_StructuralTensor": {
+                        "STRATEGY": "Standard",
+                    },
+                },
+                {
+                    "MAT": 2,
+                    "MAT_ElastHyper": {
+                        "NUMMAT": 3,
+                        "MATIDS": [20, 21, 22],
+                        "DENS": 1.3e-06,
+                    },
+                },
+                {
+                    "MAT": 20,
+                    "ELAST_CoupNeoHooke": {
+                        "YOUNG": 1.23,
+                        "NUE": 0.45,
+                    },
+                },
+                {
+                    "MAT": 21,
+                    "ELAST_CoupAnisoExpo": {
+                        "K1": 0.0004,
+                        "K2": 12,
+                        "GAMMA": 0,
+                        "K1COMP": 0,
+                        "K2COMP": 1,
+                        "STR_TENS_ID": 200,
+                        "INIT": 3,
+                    },
+                },
+                {
+                    "MAT": 22,
+                    "ELAST_CoupAnisoExpo": {
+                        "K1": 0.0502,
+                        "K2": 10,
+                        "GAMMA": 0,
+                        "K1COMP": 0,
+                        "K2COMP": 1,
+                        "STR_TENS_ID": 200,
+                        "INIT": 3,
+                        "FIBER_ID": 2,
+                    },
+                },
+                {
+                    "MAT": 200,
+                    "ELAST_StructuralTensor": {
+                        "STRATEGY": "Standard",
+                    },
+                },
+            ]
+        }
     )
     input_file.add(MaterialReissner(youngs_modulus=1.0, radius=2.0))
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
@@ -89,7 +176,7 @@ def test_four_c_simulation_beam_potential_helix(
     mat = MaterialReissner(youngs_modulus=1000, radius=0.5, shear_correction=1.0)
 
     # define function for line charge density
-    fun = Function("COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+    fun = Function([{"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"}])
 
     # define the beam potential
     beampotential = BeamPotential(
@@ -102,16 +189,16 @@ def test_four_c_simulation_beam_potential_helix(
 
     # set headers for static case and beam potential
     beampotential.add_header(
-        potential_type="Volume",
+        potential_type="volume",
         cutoff_radius=10.0,
-        evaluation_strategy="SingleLengthSpecific_SmallSepApprox_Simple",
-        regularization_type="linear_extrapolation",
+        evaluation_strategy="single_length_specific_small_separations_simple",
+        regularization_type="linear",
         regularization_separation=0.1,
         integration_segments=2,
         gauss_points=50,
         potential_reduction_length=15.0,
         automatic_differentiation=False,
-        choice_master_slave="lower_eleGID_is_slave",
+        choice_master_slave="smaller_eleGID_is_slave",
     )
     beampotential.add_runtime_output(every_iteration=True)
 
@@ -142,7 +229,12 @@ def test_four_c_simulation_beam_potential_helix(
                     tol=0.1,
                 )
             ),
-            "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0",
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
@@ -160,7 +252,7 @@ def test_four_c_solid_shell_direction_detection(
     # Test the plates
     mpy.import_mesh_full = True
     mesh_block = InputFile(
-        dat_file=get_corresponding_reference_file_path(
+        yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_solid_shell_blocks"
         )
     )
@@ -178,7 +270,7 @@ def test_four_c_solid_shell_direction_detection(
 
     # Test the dome
     mesh_dome_original = InputFile(
-        dat_file=get_corresponding_reference_file_path(
+        yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_solid_shell_dome"
         )
     )
@@ -239,15 +331,15 @@ def test_four_c_locsys_condition(
 ):
     """Test case for point locsys condition for beams.
 
-    The testcase is adapted from to beam3r_herm2line3_static_locsys.dat.
-    However it has a simpler material, and an additional line locsys
-    condition.
+    The testcase is adapted from to
+    beam3r_herm2line3_static_locsys.4C.yaml. However it has a simpler
+    material, and an additional line locsys condition.
     """
 
     # Create the input file with function and material.
     input_file = InputFile()
 
-    fun = Function("SYMBOLIC_FUNCTION_OF_SPACE_TIME t")
+    fun = Function([{"SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"}])
     input_file.add(fun)
 
     mat = MaterialReissner()
@@ -262,7 +354,12 @@ def test_four_c_locsys_condition(
     input_file.add(
         BoundaryCondition(
             beam_set["start"],
-            "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0 0 0 0",
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
+                "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
@@ -270,7 +367,12 @@ def test_four_c_locsys_condition(
     input_file.add(
         BoundaryCondition(
             beam_set["end"],
-            "NUMDOF 9 ONOFF 1 0 0 0 0 0 0 0 0 VAL 1.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 1 0 0 0 0 0 0 0 0",
+            {
+                "NUMDOF": 9,
+                "ONOFF": [1, 0, 0, 0, 0, 0, 0, 0, 0],
+                "VAL": [1.0, 0, 0, 0, 0, 0, 0, 0, 0],
+                "FUNCT": [fun, 0, 0, 0, 0, 0, 0, 0, 0],
+            },
             bc_type=mpy.bc.dirichlet,
         )
     )
@@ -280,7 +382,7 @@ def test_four_c_locsys_condition(
 
     # Add line Function with function array
 
-    fun_2 = Function("SYMBOLIC_FUNCTION_OF_SPACE_TIME 2.0*t")
+    fun_2 = Function([{"SYMBOLIC_FUNCTION_OF_SPACE_TIME": "2.0*t"}])
     input_file.add(fun_2)
 
     # Check if the LocSys condition is added correctly for a line with additional options.
@@ -528,11 +630,23 @@ def test_four_c_beam_to_solid(
     # Load a solid
     mpy.import_mesh_full = True
     input_file = InputFile(
-        dat_file=get_corresponding_reference_file_path(
+        yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_block"
         )
     )
-    input_file.boundary_conditions.clear()
+
+    # The yaml file already contains the beam-to-solid boundary conditions
+    # for the solid. We don't need them in this test case, as we want to
+    # create them again. Thus, we have to delete them here.
+    input_file.boundary_conditions[
+        (mpy.bc.beam_to_solid_volume_meshtying, mpy.geo.volume)
+    ].clear()
+    input_file.boundary_conditions[
+        (mpy.bc.beam_to_solid_surface_meshtying, mpy.geo.surface)
+    ].clear()
+
+    # Get the geometry set objects representing the geometry from the cubit
+    # file.
     surface_set = input_file.geometry_sets[mpy.geo.surface][0]
     volume_set = input_file.geometry_sets[mpy.geo.volume][0]
 

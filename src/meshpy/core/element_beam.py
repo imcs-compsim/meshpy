@@ -155,18 +155,18 @@ class Beam(_Element):
         return created_nodes
 
     @classmethod
-    def get_coupling_string(cls, coupling_dof_type):
-        """Return the string to couple this beam to another beam."""
+    def get_coupling_dict(cls, coupling_dof_type):
+        """Return the dict to couple this beam to another beam."""
 
         match coupling_dof_type:
             case _mpy.coupling_dof.joint:
-                if cls.coupling_joint_string is None:
+                if cls.coupling_joint_dict is None:
                     raise ValueError(f"Joint coupling is not implemented for {cls}")
-                return cls.coupling_joint_string
+                return cls.coupling_joint_dict
             case _mpy.coupling_dof.fix:
-                if cls.coupling_fix_string is None:
+                if cls.coupling_fix_dict is None:
                     raise ValueError("Fix coupling is not implemented for {cls}")
-                return cls.coupling_fix_string
+                return cls.coupling_fix_dict
             case _:
                 raise ValueError(
                     f'Coupling_dof_type "{coupling_dof_type}" is not implemented!'

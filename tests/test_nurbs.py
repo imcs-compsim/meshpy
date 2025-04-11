@@ -25,7 +25,7 @@ import numpy as np
 
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.input_file import InputFile
-from meshpy.four_c.material import MaterialString, MaterialStVenantKirchhoff
+from meshpy.four_c.material import MaterialStVenantKirchhoff
 from meshpy.mesh_creation_functions.nurbs_generic import add_geomdl_nurbs_to_mesh
 from meshpy.mesh_creation_functions.nurbs_geometries import (
     create_nurbs_brick,
@@ -294,7 +294,7 @@ def test_nurbs_string_types(
     surf_obj = create_nurbs_flat_plate_2d(1, 3, n_ele_u=3, n_ele_v=2)
 
     # Create first patch set
-    mat = MaterialString("STRING_MATERIAL")
+    mat = MaterialStVenantKirchhoff()
 
     patch_set = add_geomdl_nurbs_to_mesh(
         input_file,

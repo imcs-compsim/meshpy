@@ -190,15 +190,15 @@ def add_point_neuman_condition_to_input_file(
     geo = _GeometrySet(mesh_nodes)
 
     # Create the Boundary Condition.
-    extra_dof_zero = " 0" * (n_dof - 3)
     bc = _BoundaryCondition(
         geo,
-        (
-            "NUMDOF {n_dof} ONOFF 1 1 1{edz} VAL {data[0]} {data[1]} {data[2]}"
-            "{edz} FUNCT {{}} {{}} {{}}{edz}"
-        ).format(n_dof=n_dof, data=force, edz=extra_dof_zero),
+        {
+            "NUMDOF": n_dof,
+            "ONOFF": [1, 1, 1] + [0] * (n_dof - 3),
+            "VAL": force.tolist() + [0] * (n_dof - 3),
+            "FUNCT": function_array + [0] * (n_dof - 3),
+        },
         bc_type=_mpy.bc.neumann,
-        format_replacement=function_array,
     )
     input_file.add(bc)
 

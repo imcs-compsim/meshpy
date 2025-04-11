@@ -25,7 +25,9 @@ elements, sets, ...) for a meshed geometry."""
 import copy as _copy
 import os as _os
 import warnings as _warnings
+from typing import Dict as _Dict
 from typing import List as _List
+from typing import Optional as _Optional
 
 import numpy as _np
 import pyvista as _pv
@@ -264,23 +266,34 @@ class Mesh:
         else:
             raise ValueError("The node that should be replaced is not in the mesh")
 
-    def get_unique_geometry_sets(self, *, coupling_sets=True, link_to_nodes="no_link"):
+    def get_unique_geometry_sets(
+        self,
+        *,
+        coupling_sets: bool = True,
+        link_to_nodes: str = "no_link",
+        geometry_set_start_indices: _Optional[_Dict] = None,
+    ):
         """Return a geometry set container that contains geometry sets
         explicitly added to the mesh, as well as sets for boundary conditions.
 
-        Args
-        ----
-        coupling_sets: bool
-            If this is true, also sets for couplings will be added.
-        link_to_nodes: str
-            "no_link":
-                No link between the geometry set and the nodes is set
-            "explicitly_contained_nodes":
-                A link will be set for all nodes that are explicitly part of the geometry set
-            "all_nodes":
-                A link will be set for all nodes that are part of the geometry set, i.e., also
-                nodes connected to elements of an element set. This is mainly used for vtk
-                output so we can color the nodes which are part of element sets.
+        The i_global values are set in the returned geometry sets.
+
+        Args:
+            coupling_sets:
+                If this is true, also sets for couplings will be added.
+            link_to_nodes:
+                "no_link":
+                    No link between the geometry set and the nodes is set
+                "explicitly_contained_nodes":
+                    A link will be set for all nodes that are explicitly part of the geometry set
+                "all_nodes":
+                    A link will be set for all nodes that are part of the geometry set, i.e., also
+                    nodes connected to elements of an element set. This is mainly used for vtk
+                    output so we can color the nodes which are part of element sets.
+            geometry_set_start_indices:
+                Dictionary where the keys are geometry type and the value is the starting
+                index for those geometry sets. This can be used to define an offset in the
+                i_global numbering of the geometry sets. The offsets default to 0.
         """
 
         is_link_nodes = not link_to_nodes == "no_link"
@@ -308,9 +321,15 @@ class Mesh:
                         mesh_sets[geom_key].append(bc.geometry_set)
 
         for key in mesh_sets.keys():
+            i_global_offset = 0
+            if geometry_set_start_indices is not None:
+                if key in geometry_set_start_indices:
+                    i_global_offset = geometry_set_start_indices[key]
+                else:
+                    raise KeyError("Could not find {key} in geometry_set_start_indices")
             for i, geometry_set in enumerate(mesh_sets[key]):
                 # Add global indices to the geometry set.
-                geometry_set.i_global = i + 1
+                geometry_set.i_global = i + 1 + i_global_offset
                 if is_link_nodes:
                     geometry_set.link_to_nodes(link_to_nodes=link_to_nodes)
 

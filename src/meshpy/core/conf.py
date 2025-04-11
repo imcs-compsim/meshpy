@@ -151,7 +151,7 @@ class MeshPy(object):
         self.git_date = None
 
         # Precision for floats in output.
-        self.dat_precision = "{:.12g}"
+        self.output_precision = "{:.12g}"
 
         # Set the epsilons for comparison of different types of values.
         self.eps_quaternion = 1e-10
@@ -166,10 +166,7 @@ class MeshPy(object):
         self.geometric_search_max_nodes_brute_force = 1000
         self.geometric_search_binning_n_bin = 10
 
-        # Values for the formatting of the input file.
-        self.dat_len_section = 80
-
-        # Import meshes as pure dat or import the geometry.
+        # Import meshes as pure dict or import the geometry.
         self.import_mesh_full = False
 
         # Number of digits for node set output (this will be set in the
@@ -179,19 +176,16 @@ class MeshPy(object):
         self.vtk_nan_int = -1
         self.vtk_nan_float = 0.0
 
-        # Check for overlapping elements when creating a dat file.
+        # Check for overlapping elements when creating an input file.
         self.check_overlapping_elements = True
 
         # Lines to be added to each created input file
         self.input_file_meshpy_header = [
-            "-" * 77,
+            "-" * 40,
             "This input file was created with MeshPy.",
-            "Copyright (c) 2018-2025",
-            "    Ivo Steinbrecher",
-            "    Institute for Mathematics and Computer-Based Simulation",
-            "    Universitaet der Bundeswehr Muenchen",
-            "    https://www.unibw.de/imcs-en",
-            "-" * 77,
+            "Copyright (c) 2018-2025 MeshPy Authors",
+            "https://imcs-compsim.github.io/meshpy/",
+            "-" * 40,
         ]
 
 

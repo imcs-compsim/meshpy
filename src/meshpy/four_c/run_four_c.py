@@ -54,7 +54,7 @@ def run_four_c(
     Args
     ----
     input_file: str
-        Path to the dat file on the filesystem
+        Path to the input file on the filesystem
     output_dir: str
         Directory where the simulation should be performed (will be created if
         it does not exist)

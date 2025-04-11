@@ -22,6 +22,7 @@
 """Test the functionality of the Cosserat curve module."""
 
 import numpy as np
+import pytest
 import pyvista as pv
 import quaternion
 
@@ -56,7 +57,7 @@ def create_beam_solid_input_file(get_corresponding_reference_file_path):
 
     mpy.import_mesh_full = True
     mesh = InputFile(
-        dat_file=get_corresponding_reference_file_path(
+        yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_cosserat_curve_mesh"
         )
     )

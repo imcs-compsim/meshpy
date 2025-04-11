@@ -32,10 +32,10 @@ class SolidRigidSphere(_VolumeElement):
         _VolumeElement.__init__(self, **kwargs)
 
         # Set radius of sphere from input file.
-        arg_name = self.dat_post_nodes.split()[0]
+        arg_name = self.string_post_nodes.split()[0]
         if not arg_name == "RADIUS":
             raise ValueError(
                 "The first argument after the node should be "
                 f'RADIUS, but it is "{arg_name}"!'
             )
-        self.radius = float(self.dat_post_nodes.split()[1])
+        self.radius = float(self.string_post_nodes.split()[1])

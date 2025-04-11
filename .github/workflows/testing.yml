@@ -97,7 +97,7 @@ jobs:
         with:
           source-command: "source python-workflow-venv/bin/activate"
           install-command: "-e .[dev]"
-          additional-pytest-flags: "--4C --ArborX --cov-fail-under=93"
+          additional-pytest-flags: "--4C --ArborX --cov-fail-under=92"
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4

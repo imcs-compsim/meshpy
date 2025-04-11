@@ -324,7 +324,7 @@ class Rotation:
             return object.__eq__(self, other)
 
     def get_dat(self):
-        """Return a string with the triad components for the .dat line."""
+        """Return a string with the triad components for the input line."""
 
         rotation_vector = self.get_rotation_vector()
 
@@ -332,7 +332,7 @@ class Rotation:
         return " ".join(
             [
                 (
-                    _mpy.dat_precision.format(component + 0)
+                    _mpy.output_precision.format(component + 0)
                     if _np.abs(component) >= _mpy.eps_quaternion
                     else "0"
                 )

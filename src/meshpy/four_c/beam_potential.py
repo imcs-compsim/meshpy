@@ -23,8 +23,6 @@
 interaction potentials."""
 
 from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
-from meshpy.four_c.header_functions import get_yes_no as _get_yes_no
-from meshpy.four_c.input_file import InputSection as _InputSection
 
 
 class BeamPotential:
@@ -93,7 +91,7 @@ class BeamPotential:
     def add_header(
         self,
         *,
-        potential_type="Volume",
+        potential_type="volume",
         cutoff_radius=None,
         evaluation_strategy=None,
         regularization_type=None,
@@ -140,31 +138,30 @@ class BeamPotential:
             option is already defined, and error will be thrown.
         """
 
-        settings = f"""
-            POT_LAW_PREFACTOR                     {" ".join(map(str, self.pot_law_prefactor))}
-            POT_LAW_EXPONENT                      {" ".join(map(str, self.pot_law_exponent))}
-            BEAMPOTENTIAL_TYPE              {potential_type}
-            CUTOFF_RADIUS                   {cutoff_radius}
-            STRATEGY                        {evaluation_strategy}
-            NUM_INTEGRATION_SEGMENTS        {integration_segments}
-            NUM_GAUSSPOINTS                 {gauss_points}
-            POTENTIAL_REDUCTION_LENGTH      {potential_reduction_length}
-            AUTOMATIC_DIFFERENTIATION       {_get_yes_no(automatic_differentiation)}"""
+        settings = {
+            "POT_LAW_PREFACTOR": " ".join(map(str, self.pot_law_prefactor)),
+            "POT_LAW_EXPONENT": " ".join(map(str, self.pot_law_exponent)),
+            "TYPE": potential_type,
+            "CUTOFF_RADIUS": cutoff_radius,
+            "STRATEGY": evaluation_strategy,
+            "N_INTEGRATION_SEGMENTS": integration_segments,
+            "N_GAUSS_POINTS": gauss_points,
+            "POTENTIAL_REDUCTION_LENGTH": potential_reduction_length,
+            "AUTOMATIC_DIFFERENTIATION": automatic_differentiation,
+        }
 
         if regularization_type is not None:
-            settings += f"""
-            REGULARIZATION_TYPE             {regularization_type}
-            REGULARIZATION_SEPARATION       {regularization_separation}"""
+            settings = settings | {
+                "REGULARIZATION_TYPE": regularization_type,
+                "REGULARIZATION_SEPARATION": regularization_separation,
+            }
 
         if choice_master_slave is not None:
-            settings += f"\nCHOICE_MASTER_SLAVE             {choice_master_slave}"
+            settings = settings | {"CHOICE_MASTER_SLAVE": choice_master_slave}
 
         self.input_file.add(
-            _InputSection(
-                "BEAM POTENTIAL",
-                settings,
-                option_overwrite=option_overwrite,
-            )
+            {"BEAM POTENTIAL": settings},
+            option_overwrite=option_overwrite,
         )
 
     def add_runtime_output(
@@ -204,18 +201,18 @@ class BeamPotential:
         """
 
         self.input_file.add(
-            _InputSection(
-                "BEAM POTENTIAL/RUNTIME VTK OUTPUT",
-                f"""
-            VTK_OUTPUT_BEAM_POTENTIAL           {_get_yes_no(output_beam_potential)}
-            INTERVAL_STEPS                      {interval_steps}
-            EVERY_ITERATION                     {_get_yes_no(every_iteration)}
-            FORCES                              {_get_yes_no(forces)}
-            MOMENTS                             {_get_yes_no(moments)}
-            WRITE_UIDS                          {_get_yes_no(uids)}
-            WRITE_FORCE_MOMENT_PER_ELEMENTPAIR  {_get_yes_no(per_ele_pair)}""",
-                option_overwrite=option_overwrite,
-            )
+            {
+                "BEAM POTENTIAL/RUNTIME VTK OUTPUT": {
+                    "VTK_OUTPUT_BEAM_POTENTIAL": output_beam_potential,
+                    "INTERVAL_STEPS": interval_steps,
+                    "EVERY_ITERATION": every_iteration,
+                    "FORCES": forces,
+                    "MOMENTS": moments,
+                    "WRITE_UIDS": uids,
+                    "WRITE_FORCE_MOMENT_PER_ELEMENTPAIR": per_ele_pair,
+                }
+            },
+            option_overwrite=option_overwrite,
         )
 
     def add_potential_charge_condition(self, *, geometry_set=None):
@@ -237,9 +234,8 @@ class BeamPotential:
 
             bc = _BoundaryCondition(
                 geometry_set,
-                f"POTLAW {i + 1} VAL {line_charge} FUNCT {{}}",
+                {"POTLAW": i + 1, "VAL": line_charge, "FUNCT": func},
                 bc_type="DESIGN LINE BEAM POTENTIAL CHARGE CONDITIONS",
-                format_replacement=[func],
             )
 
             self.input_file.add(bc)

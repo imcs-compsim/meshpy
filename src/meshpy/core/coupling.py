@@ -60,12 +60,12 @@ class Coupling(_BoundaryConditionBase):
             physical position.
         check_at_init: bool
             If the previous check should be performed at initialization. This is required
-            when importing a coupling from a dat file as the nodes themselves are not build
+            when importing a coupling from an input file as the nodes themselves are not build
             up when the coupling is read.
         """
 
         if isinstance(geometry, int):
-            # This is the case if the boundary condition is read from an existing dat file
+            # This is the case if the boundary condition is read from an existing input file
             pass
         elif isinstance(geometry, _GeometrySetBase):
             pass
@@ -108,15 +108,12 @@ class Coupling(_BoundaryConditionBase):
                 "The nodes given to Coupling do not have the same position."
             )
 
-    def _get_dat(self):
-        """Return the dat line for this object.
+    def dump_to_list(self):
+        """Return a list with a single item representing this coupling
+        condition."""
 
-        If no explicit string was given, it depends on the coupling type
-        as well as the beam type.
-        """
-
-        if isinstance(self.coupling_dof_type, str):
-            string = self.coupling_dof_type
+        if isinstance(self.coupling_dof_type, dict):
+            bc_dict = self.coupling_dof_type
         else:
             # In this case we have to check which beams are connected to the node.
             # TODO: Coupling also makes sense for different beam types, this can
@@ -150,9 +147,9 @@ class Coupling(_BoundaryConditionBase):
                             "Coupling beams of different types is not yet possible!"
                         )
 
-            string = beam_four_c_type.get_coupling_string(self.coupling_dof_type)
+            bc_dict = beam_four_c_type.get_coupling_dict(self.coupling_dof_type)
 
-        return f"E {self.geometry_set.i_global} {string}"
+        return [{"E": self.geometry_set.i_global, **bc_dict}]
 
 
 def coupling_factory(geometry, coupling_type, coupling_dof_type, **kwargs):

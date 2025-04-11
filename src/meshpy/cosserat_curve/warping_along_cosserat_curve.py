@@ -296,12 +296,17 @@ def create_transform_boundary_conditions(
         ]
         for fun in fun_pos:
             mesh.add(fun)
-        additional_dof = "0 " * (n_dof_per_node - 3)
+        n_additional_dof = n_dof_per_node - 3
         mesh.add(
             _BoundaryCondition(
                 _GeometrySet(node),
-                "NUMDOF {4} ONOFF 1 1 1 {3}VAL 1.0 1.0 1.0 {3}FUNCT {0} {1} {2} {3}TAG monitor_reaction",
-                format_replacement=fun_pos + [additional_dof, n_dof_per_node],
+                {
+                    "NUMDOF": n_dof_per_node,
+                    "ONOFF": [1] * 3 + [0] * n_additional_dof,
+                    "VAL": [1.0] * 3 + [0.0] * n_additional_dof,
+                    "FUNCT": fun_pos + [None] * n_additional_dof,
+                    "TAG": "monitor_reaction",
+                },
                 bc_type=_mpy.bc.dirichlet,
             )
         )

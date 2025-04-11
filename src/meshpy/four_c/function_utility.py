@@ -29,56 +29,60 @@ import numpy as _np
 from meshpy.four_c.function import Function as _Function
 
 
-def create_linear_interpolation_string(
-    t, values, *, variable_name="var", variable_index=0
+def create_linear_interpolation_dict(
+    times: _List[float], values: _List[float], *, variable_name="var", variable_index=0
 ):
     """Create a string that describes a variable that is linear interpolated
     over time.
 
     Args
-    ----
-    t, values: list(float)
-        Time and values that will be interpolated with piecewise linear functions
-    variable_name: str
-        Name of the created variable
-    variable_index: int
-        Index of this created variable
+        times, values:
+            Time and values that will be interpolated with piecewise linear functions
+        variable_name:
+            Name of the created variable
+        variable_index:
+            Index of this created variable
     """
 
-    if not len(t) == len(values):
+    if not len(times) == len(values):
         raise ValueError(
-            f"The dimensions of time ({len(t)}) and values ({len(values)}) do not match"
+            f"The dimensions of time ({len(times)}) and values ({len(values)}) do not match"
         )
 
-    t = t.copy()
-    f = values.copy()
-    t_max = _np.max(t)
-    t = _np.insert(t, 0, -1000.0, axis=0)
-    t = _np.append(t, [t_max + 1000.0])
-    f = _np.insert(f, 0, f[0], axis=0)
-    f = _np.append(f, f[-1])
-    times = " ".join(map(str, t))
-    values = " ".join(map(str, f))
-    return (
-        f"VARIABLE {variable_index} NAME {variable_name} TYPE linearinterpolation "
-        + f"NUMPOINTS {len(t)} TIMES {times} VALUES {values}"
-    )
+    times_appended = _np.array(times)
+    values_appended = _np.array(values)
+    t_max = _np.max(times_appended)
+    times_appended = _np.insert(times_appended, 0, -1000.0, axis=0)
+    times_appended = _np.append(times_appended, [t_max + 1000.0])
+    values_appended = _np.insert(values_appended, 0, values[0], axis=0)
+    values_appended = _np.append(values_appended, values_appended[-1])
+    return {
+        "VARIABLE": variable_index,
+        "NAME": variable_name,
+        "TYPE": "linearinterpolation",
+        "NUMPOINTS": len(times_appended),
+        "TIMES": times_appended.tolist(),
+        "VALUES": values_appended.tolist(),
+    }
 
 
 def create_linear_interpolation_function(
-    t, values, *, function_type="SYMBOLIC_FUNCTION_OF_SPACE_TIME"
+    times: _List[float],
+    values: _List[float],
+    *,
+    function_type="SYMBOLIC_FUNCTION_OF_SPACE_TIME",
 ):
     """Create a function that describes a linear interpolation between the
     given time points and values. Before and after it will be constant.
 
     Args
     ----
-    t, values: list(float)
-        Time and values that will be interpolated with piecewise linear functions
+        times, values:
+            Time and values that will be interpolated with piecewise linear functions
     """
 
-    variable_string = create_linear_interpolation_string(t, values, variable_name="var")
-    return _Function(f"{function_type} var\n" + variable_string)
+    function_dict = create_linear_interpolation_dict(times, values, variable_name="var")
+    return _Function([{function_type: "var"}, function_dict])
 
 
 def ensure_length_of_function_array(function_array: _List, length: int = 3):
