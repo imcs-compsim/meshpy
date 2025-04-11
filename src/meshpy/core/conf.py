@@ -181,14 +181,11 @@ class MeshPy(object):
 
         # Lines to be added to each created input file
         self.input_file_meshpy_header = [
-            "-" * 77,
+            "-" * 40,
             "This input file was created with MeshPy.",
-            "Copyright (c) 2018-2025",
-            "    Ivo Steinbrecher",
-            "    Institute for Mathematics and Computer-Based Simulation",
-            "    Universitaet der Bundeswehr Muenchen",
-            "    https://www.unibw.de/imcs-en",
-            "-" * 77,
+            "Copyright (c) 2018-2025 MeshPy Authors",
+            "https://imcs-compsim.github.io/meshpy/",
+            "-" * 40,
         ]
 
 

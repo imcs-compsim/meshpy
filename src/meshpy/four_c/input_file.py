@@ -351,7 +351,8 @@ class InputFile(_Mesh):
         file_path: _Path,
         *,
         nox_xml_file: _Optional[str] = None,
-        add_application_script: _Optional[bool] = False,
+        add_header_default: bool = True,
+        add_footer_application_script: bool = True,
         **kwargs,
     ):
         """Write the input file to disk.
@@ -362,10 +363,11 @@ class InputFile(_Mesh):
             nox_xml_file:
                 (optional) If this argument is given, the xml file will be created
                 with this name, in the same directory as the input file.
-            add_application_script:
-                (optional) If this argument is set to True, the script that
-                created this input file will be added to the input file as a
-                comment.
+            add_header_default:
+                Prepend the default MeshPy header comment to the input file.
+            add_footer_application_script:
+                Append the application script which creates the input files as a
+                comment at the end of the input file.
         """
 
         # Check if a xml file needs to be written.
@@ -385,6 +387,12 @@ class InputFile(_Mesh):
                 xml_file.write(self.nox_xml)
 
         with open(file_path, "w") as input_file:
+            # write MeshPy header
+            if add_header_default:
+                input_file.writelines(
+                    "# " + line + "\n" for line in _mpy.input_file_meshpy_header
+                )
+
             _yaml.dump(
                 self.get_dict_to_dump(**kwargs),
                 input_file,
@@ -393,7 +401,7 @@ class InputFile(_Mesh):
             )
 
             # Add the application script to the input file.
-            if add_application_script:
+            if add_footer_application_script:
                 application_path = _Path(_sys.argv[0]).resolve()
                 application_script_lines = self._get_application_script(
                     application_path
@@ -403,14 +411,14 @@ class InputFile(_Mesh):
     def get_dict_to_dump(
         self,
         *,
-        information_header: bool = False,
+        add_header_information: bool = True,
         check_nox: bool = True,
     ):
         """Return the dictionary representation of this input file for dumping
         to a yaml file.
 
         Args:
-            information_header:
+            add_header_information:
                 If the information header should be exported to the input file
                 Contains creation date, git details of MeshPy, CubitPy and
                 original application which created the input file if available.
@@ -429,7 +437,7 @@ class InputFile(_Mesh):
         yaml_dict = _copy.deepcopy(self.sections)
 
         # Add information header to the input file
-        if information_header:
+        if add_header_information:
             yaml_dict["TITLE"] = self._get_header()
 
         # Check if a file has to be created for the NOX xml information.
@@ -688,10 +696,12 @@ class InputFile(_Mesh):
             application_path.parent
         )
         if application_git_sha is not None and application_git_date is not None:
-            header["MeshPy"]["Application"] = {
-                "git_sha": application_git_sha,
-                "git_date": application_git_date,
-            }
+            header["MeshPy"]["Application"].update(
+                {
+                    "git_sha": application_git_sha,
+                    "git_date": application_git_date,
+                }
+            )
 
         # MeshPy information
         meshpy_git_sha, meshpy_git_date = _get_git_data(

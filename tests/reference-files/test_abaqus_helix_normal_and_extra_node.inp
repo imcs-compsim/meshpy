@@ -1,11 +1,8 @@
-** -----------------------------------------------------------------------------
+** ----------------------------------------
 ** This input file was created with MeshPy.
-** Copyright (c) 2018-2025
-**     Ivo Steinbrecher
-**     Institute for Mathematics and Computer-Based Simulation
-**     Universitaet der Bundeswehr Muenchen
-**     https://www.unibw.de/imcs-en
-** -----------------------------------------------------------------------------
+** Copyright (c) 2018-2025 MeshPy Authors
+** https://imcs-compsim.github.io/meshpy/
+** ----------------------------------------
 *Node
      1,  5.00000000000000e-01,  0.00000000000000e+00,  0.00000000000000e+00
      2,  4.45503262094184e-01,  2.26995249869773e-01,  5.00000000000000e-02

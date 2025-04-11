@@ -1256,10 +1256,6 @@ def test_meshpy_beam_to_solid_conditions(
     assert_results_equal(
         get_corresponding_reference_file_path(additional_identifier=test_type),
         input_file,
-        input_file_kwargs={
-            "check_nox": False,
-            "header": False,
-        },
     )
 
 
