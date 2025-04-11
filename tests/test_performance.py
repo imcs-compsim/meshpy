@@ -113,7 +113,7 @@ def load_solid(solid_file, full_import):
     """Load a solid into an input file."""
 
     mpy.import_mesh_full = full_import
-    InputFile(dat_file=solid_file)
+    InputFile(yaml_file=solid_file)
 
 
 def create_large_beam_mesh(n_x, n_y, n_z, n_el):
@@ -225,8 +225,8 @@ def test_performance(tmp_path):
     """The actual performance test."""
 
     # Directories and files for testing.
-    testing_solid_block = tmp_path / "performance_testing_solid.dat"
-    testing_beam = tmp_path / "performance_testing_beam.dat"
+    testing_solid_block = tmp_path / "performance_testing_solid.4C.yaml"
+    testing_beam = tmp_path / "performance_testing_beam.4C.yaml"
 
     # These are the expected test times that should not be exceeded
     expected_times = {

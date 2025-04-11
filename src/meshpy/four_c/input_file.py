@@ -192,6 +192,7 @@ class InputFile(_Mesh):
         if yaml_file is not None:
             self.read_yaml(yaml_file)
 
+        # TODO fix once cubit is converted to YAML
         # if cubit is not None:
         #     self._read_dat_lines(cubit.get_dat_lines())
 
@@ -385,7 +386,6 @@ class InputFile(_Mesh):
         self,
         *,
         header: bool = True,
-        dat_header: bool = True,
         add_script_to_header: bool = True,
         check_nox: bool = True,
     ):
@@ -395,11 +395,9 @@ class InputFile(_Mesh):
         Args:
             header:
                 If the header should be exported to the input file files.
-            dat_header:
-                If header lines from the imported dat file should be exported.
-            append_script_to_header:
+            add_script_to_header:
                 If true, a copy of the executing script will be added to the input
-                file. This is only in affect when dat_header is True.
+                file. This is only in affect when header is True.
             check_nox:
                 If this is true, an error will be thrown if no nox file is set.
         """
@@ -422,8 +420,6 @@ class InputFile(_Mesh):
         # if header:
         #     header_text, end_text = self._get_header(add_script_to_header)
         #     lines.append(header_text)
-        # if dat_header:
-        #     lines.extend(self.dat_header)
 
         # Check if a file has to be created for the NOX xml information.
         if self.nox_xml is not None:
@@ -613,9 +609,7 @@ class InputFile(_Mesh):
                 )
                 _dump_mesh_items(yaml_dict, section_name, bc_list)
 
-        # Add additional element sections (e.g. STRUCTURE KNOTVECTORS)
-        # We only need to to this on the "real" elements as the imported ones already have their
-        # dat sections.
+        # Add additional element sections, e.g., for NURBS knot vectors.
         for element in self.elements:
             element.dump_element_specific_section(yaml_dict)
 
@@ -707,7 +701,7 @@ class InputFile(_Mesh):
                     f"// git date:   {cubitpy_git_date}\n"
                 )
 
-        string_line = "// " + "".join(["-" for _i in range(_mpy.dat_len_section - 3)])
+        string_line = "// " + "".join(["-"] * 80)
 
         # If needed, append the contents of the script.
         if add_script:

@@ -19,40 +19,27 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This module implements the class that will be used as the base for all items
-that are in a mesh."""
+"""This file provides functions to create Abaqus beam element classes to be
+used with MeshPy."""
+
+from meshpy.core.material import MaterialBeam as _MaterialBeam
 
 
-class BaseMeshItem:
-    """Base class for all objects that are related to a mesh."""
+class AbaqusBeamMaterial(_MaterialBeam):
+    """A class representing an Abaqus beam material."""
 
-    def __init__(self, data=None, comments=None):
-        """Create the object.
+    def __init__(self, name: str):
+        """Initialize the material. For now it is only supported to state the
+        name of the resulting element set here. The material and cross-section
+        lines in the input file have to be defined manually.
 
         Args
         ----
-        data: str, list(str)
-            Data for this object.
-        TODO: comments
+        name: str
+            Name of the material, this will be the name of the resulting element set
         """
+        super().__init__(data=name)
 
-        self.data = data
-
-        # Overall index of this item in the mesh.
-        self.i_global = None
-
-        # Comments regarding this Mesh Item.
-        if comments is None:
-            self.comments = []
-        else:
-            self.comments = comments
-
-
-class BaseMeshItemFull(BaseMeshItem):
-    """Base class for all objects that are related to a mesh and are fully
-    created in MeshPy."""
-
-
-class BaseMeshItemString(BaseMeshItem):
-    """Base class for all objects that are imported from an input file as a
-    plain string."""
+    def dump_to_list(self):
+        """Return a list with the (single) item representing this material."""
+        return [self.data]

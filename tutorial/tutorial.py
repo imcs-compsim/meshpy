@@ -250,10 +250,10 @@ def meshpy_tutorial(base_dir, preview=False):
     # general, volume elements (fluid, ...) can be combined with beam elements.
     # Everything from the volume input file will be included in the combined
     # input file, e.g. BC, loads, materials, solver parameters, ... .
-    solid_dat_path = os.path.join(
-        os.path.dirname(__file__), "4C_input_solid_tutorial.dat"
+    solid_input_path = os.path.join(
+        os.path.dirname(__file__), "4C_input_solid_tutorial.4C.yaml"
     )
-    input_file = InputFile(dat_file=solid_dat_path)
+    input_file = InputFile(yaml_file=solid_input_path)
 
     # Add the beam geometry to the input file.
     input_file.add(mesh)
@@ -310,4 +310,4 @@ if __name__ == "__main__":
     # Adapt this path to the directory you want to store the tutorial files in.
     tutorial_directory = ""
     input_file = meshpy_tutorial(tutorial_directory)
-    input_file.write_input_file(os.path.join(tutorial_directory, "tutorial.dat"))
+    input_file.write_input_file(os.path.join(tutorial_directory, "tutorial.4C.yaml"))

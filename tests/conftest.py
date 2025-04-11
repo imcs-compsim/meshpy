@@ -231,7 +231,7 @@ def get_corresponding_reference_file_path(
             reference_file_base_name: Basename of reference file, if none is
                 provided the current test name is utilized
             additional_identifier: Additional identifier for reference file, by default none
-            extension: Extension of reference file, by default ".dat"
+            extension: Extension of reference file, by default ".4C.yaml"
 
         Returns:
             Path to reference file.
@@ -305,9 +305,6 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             elif reference.suffix in [".vtk", ".vtu"]:
                 compare_vtk_files(reference, result, rtol, atol)
                 return
-            elif reference.suffix == ".dat":
-                # Do nothing here as the mechanism below will compare the dat files.
-                pass
             else:
                 raise NotImplementedError(
                     f"Comparison is not yet implemented for {reference.suffix} files."
