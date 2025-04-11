@@ -35,9 +35,6 @@ from meshpy.four_c.header_functions import (
 from meshpy.four_c.input_file import InputFile
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_header_functions_static(
     get_corresponding_reference_file_path,
     assert_results_equal,
@@ -69,6 +66,7 @@ def test_header_functions_static(
         coupling_type="consistent_fad",
     )
 
+    # This is to test that the overwrite_option argument is handled correctly
     set_beam_to_solid_meshtying(
         input_file,
         mpy.beam_to_solid.surface_meshtying,
@@ -81,9 +79,6 @@ def test_header_functions_static(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize(
     "additional_identifier, time_step, n_steps, total_time",
     [
@@ -117,9 +112,6 @@ def test_header_functions_static_time(
     )
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_header_functions_static_prestress(
     get_corresponding_reference_file_path,
     assert_results_equal,
@@ -162,9 +154,6 @@ def test_header_functions_static_prestress(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_header_functions_stress_output(
     get_corresponding_reference_file_path,
     assert_results_equal,
@@ -190,9 +179,6 @@ def test_header_functions_stress_output(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_header_functions_beam_interaction(
     get_corresponding_reference_file_path, assert_results_equal
 ):
