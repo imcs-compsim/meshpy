@@ -153,9 +153,6 @@ def test_header_functions_static_prestress(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 def test_header_functions_stress_output(
     get_corresponding_reference_file_path,
     assert_results_equal,
