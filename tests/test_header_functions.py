@@ -66,6 +66,7 @@ def test_header_functions_static(
         coupling_type="consistent_fad",
     )
 
+    # This is to test that the overwrite_option argument is handled correctly
     set_beam_to_solid_meshtying(
         input_file,
         mpy.beam_to_solid.surface_meshtying,
