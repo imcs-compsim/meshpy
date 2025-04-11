@@ -1098,7 +1098,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
                 beam_x[set_name],
                 {
                     "NUMDOF": 9,
-                    "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+                    "ONOFF": [1, 1, 1, 1, 0, 0, 0, 0, 0],
                     "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                     "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 },
@@ -1131,7 +1131,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
                 beam_y[set_name],
                 {
                     "NUMDOF": 9,
-                    "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0],
+                    "ONOFF": [1, 1, 1, 0, 1, 0, 0, 0, 0],
                     "VAL": [0, 0, 1, 0, 0, 0, 0, 0, 0],
                     "FUNCT": [0, 0, fun, 0, 0, 0, 0, 0, 0],
                 },
@@ -1182,8 +1182,8 @@ def test_four_c_simulation_beam_to_beam_contact_example(
         get_corresponding_reference_file_path(), beam_to_beam_contact_simulation
     )
 
-    displacements = [[-2.78205406266063848e00, 0, 0]]
-    nodes = [12]
+    displacements = [[1.11158519615313324e-03, 0, -1.48443346935174636e-01]]
+    nodes = [13]
     add_result_description(
         beam_to_beam_contact_simulation, displacements, nodes, tol=1e-8
     )

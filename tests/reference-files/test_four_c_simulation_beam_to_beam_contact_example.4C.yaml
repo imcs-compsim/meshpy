@@ -116,22 +116,22 @@ FUNCT1:
 DESIGN POINT DIRICH CONDITIONS:
   - E: 1
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    ONOFF: [1, 1, 1, 1, 0, 0, 0, 0, 0]
     VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
     FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
   - E: 2
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    ONOFF: [1, 1, 1, 1, 0, 0, 0, 0, 0]
     VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
     FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
   - E: 3
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    ONOFF: [1, 1, 1, 0, 1, 0, 0, 0, 0]
     VAL: [0, 0, 1, 0, 0, 0, 0, 0, 0]
     FUNCT: [0, 0, 1, 0, 0, 0, 0, 0, 0]
   - E: 4
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
+    ONOFF: [1, 1, 1, 0, 1, 0, 0, 0, 0]
     VAL: [0, 0, 1, 0, 0, 0, 0, 0, 0]
     FUNCT: [0, 0, 1, 0, 0, 0, 0, 0, 0]
 BEAM INTERACTION/BEAM TO BEAM CONTACT CONDITIONS:
