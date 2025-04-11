@@ -78,9 +78,6 @@ def test_header_functions_static(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.parametrize(
     "additional_identifier, time_step, n_steps, total_time",
     [
