@@ -112,10 +112,10 @@ def test_meshpy_rotations(assert_results_equal):
     """Check if the Mesh function rotation gives the same results as rotating
     each node it self."""
 
-    mesh_1 = InputFile()
+    mesh_1 = Mesh()
     create_test_mesh(mesh_1)
 
-    mesh_2 = InputFile()
+    mesh_2 = Mesh()
     create_test_mesh(mesh_2)
 
     # Set the seed for the pseudo random numbers
