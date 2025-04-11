@@ -23,16 +23,17 @@
 4C."""
 
 import copy as _copy
-import datetime as _datetime
 import os as _os
 import shutil as _shutil
 import subprocess as _subprocess  # nosec B404
 import sys as _sys
+from datetime import datetime as _datetime
 from pathlib import Path as _Path
 from typing import Any as _Any
 from typing import Dict as _Dict
 from typing import List as _List
 from typing import Optional as _Optional
+from typing import Tuple as _Tuple
 
 import yaml as _yaml
 
@@ -346,16 +347,27 @@ class InputFile(_Mesh):
             raise Warning(f"Section {section_name} does not exist!")
 
     def write_input_file(
-        self, file_path: _Path, *, nox_xml_file: _Optional[str] = None, **kwargs
+        self,
+        file_path: _Path,
+        *,
+        nox_xml_file: _Optional[str] = None,
+        add_header_default: bool = True,
+        add_footer_application_script: bool = True,
+        **kwargs,
     ):
         """Write the input file to disk.
 
         Args:
-            file_path: str
+            file_path:
                 Path to the input file that should be created.
-            nox_xml_file: str
+            nox_xml_file:
                 (optional) If this argument is given, the xml file will be created
                 with this name, in the same directory as the input file.
+            add_header_default:
+                Prepend the default MeshPy header comment to the input file.
+            add_footer_application_script:
+                Append the application script which creates the input files as a
+                comment at the end of the input file.
         """
 
         # Check if a xml file needs to be written.
@@ -375,6 +387,12 @@ class InputFile(_Mesh):
                 xml_file.write(self.nox_xml)
 
         with open(file_path, "w") as input_file:
+            # write MeshPy header
+            if add_header_default:
+                input_file.writelines(
+                    "# " + line + "\n" for line in _mpy.input_file_meshpy_header
+                )
+
             _yaml.dump(
                 self.get_dict_to_dump(**kwargs),
                 input_file,
@@ -382,22 +400,28 @@ class InputFile(_Mesh):
                 width=float("inf"),
             )
 
+            # Add the application script to the input file.
+            if add_footer_application_script:
+                application_path = _Path(_sys.argv[0]).resolve()
+                application_script_lines = self._get_application_script(
+                    application_path
+                )
+                input_file.writelines(application_script_lines)
+
     def get_dict_to_dump(
         self,
         *,
-        header: bool = True,
-        add_script_to_header: bool = True,
+        add_header_information: bool = True,
         check_nox: bool = True,
     ):
         """Return the dictionary representation of this input file for dumping
         to a yaml file.
 
         Args:
-            header:
-                If the header should be exported to the input file files.
-            add_script_to_header:
-                If true, a copy of the executing script will be added to the input
-                file. This is only in affect when header is True.
+            add_header_information:
+                If the information header should be exported to the input file
+                Contains creation date, git details of MeshPy, CubitPy and
+                original application which created the input file if available.
             check_nox:
                 If this is true, an error will be thrown if no nox file is set.
         """
@@ -412,14 +436,9 @@ class InputFile(_Mesh):
         # TODO: Check if the deepcopy makes sense to be optional
         yaml_dict = _copy.deepcopy(self.sections)
 
-        # TODO: Add header to yaml
-        # # Add header to the input file.
-        # end_text = None
-
-        # lines.extend(["// " + line for line in _mpy.input_file_meshpy_header])
-        # if header:
-        #     header_text, end_text = self._get_header(add_script_to_header)
-        #     lines.append(header_text)
+        # Add information header to the input file
+        if add_header_information:
+            yaml_dict["TITLE"] = self._get_header()
 
         # Check if a file has to be created for the NOX xml information.
         if self.nox_xml is not None:
@@ -622,104 +641,106 @@ class InputFile(_Mesh):
         _dump_mesh_items(yaml_dict, "NODE COORDS", self.nodes)
         _dump_mesh_items(yaml_dict, "STRUCTURE ELEMENTS", self.elements)
 
-        # TODO: what to do here - how to add the script
-        # # Add end text.
-        # if end_text is not None:
-        #     lines.append(end_text)
-
         return yaml_dict
 
-    def _get_header(self, add_script):
-        """Return the header for the input file."""
+    def _get_header(self) -> dict:
+        """Return the information header for the current MeshPy run.
 
-        def get_git_data(repo):
-            """Return the hash and date of the current git commit."""
+        Returns:
+            A dictionary with the header information.
+        """
+
+        def _get_git_data(repo_path: _Path) -> _Tuple[_Optional[str], _Optional[str]]:
+            """Return the hash and date of the current git commit.
+
+            Args:
+                repo_path: Path to the git repository.
+            Returns:
+                A tuple with the hash and date of the current git commit
+                if available, otherwise None.
+            """
             git = _shutil.which("git")
             if git is None:
                 raise RuntimeError("Git executable not found")
             out_sha = _subprocess.run(  # nosec B603
                 [git, "rev-parse", "HEAD"],
-                cwd=repo,
+                cwd=repo_path,
                 stdout=_subprocess.PIPE,
                 stderr=_subprocess.DEVNULL,
             )
             out_date = _subprocess.run(  # nosec B603
                 [git, "show", "-s", "--format=%ci"],
-                cwd=repo,
+                cwd=repo_path,
                 stdout=_subprocess.PIPE,
                 stderr=_subprocess.DEVNULL,
             )
+
             if not out_sha.returncode + out_date.returncode == 0:
                 return None, None
-            else:
-                sha = out_sha.stdout.decode("ascii").strip()
-                date = out_date.stdout.decode("ascii").strip()
-                return sha, date
 
-        headers = []
-        end_text = None
+            git_sha = out_sha.stdout.decode("ascii").strip()
+            git_date = out_date.stdout.decode("ascii").strip()
+            return git_sha, git_date
 
-        # Header containing model information.
-        current_time_string = _datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        model_header = f"// Date:       {current_time_string}\n"
-        if self.description:
-            model_header += f"// Description: {self.description}\n"
-        headers.append(model_header)
+        header: dict = {"MeshPy": {}}
 
-        # Get information about the script.
-        script_path = _os.path.realpath(_sys.argv[0])
-        script_git_sha, script_git_date = get_git_data(_os.path.dirname(script_path))
-        script_header = "// Script used to create input file:\n"
-        script_header += f"// path:       {script_path}\n"
-        if script_git_sha is not None:
-            script_header += (
-                f"// git sha:    {script_git_sha}\n// git date:   {script_git_date}\n"
+        header["MeshPy"]["creation_date"] = _datetime.now().isoformat(
+            sep=" ", timespec="seconds"
+        )
+
+        # application which created the input file
+        application_path = _Path(_sys.argv[0]).resolve()
+        header["MeshPy"]["Application"] = {"path": str(application_path)}
+
+        application_git_sha, application_git_date = _get_git_data(
+            application_path.parent
+        )
+        if application_git_sha is not None and application_git_date is not None:
+            header["MeshPy"]["Application"].update(
+                {
+                    "git_sha": application_git_sha,
+                    "git_date": application_git_date,
+                }
             )
-        headers.append(script_header)
 
-        # Header containing meshpy information.
-        meshpy_git_sha, meshpy_git_date = get_git_data(
-            _os.path.dirname(_os.path.realpath(__file__))
+        # MeshPy information
+        meshpy_git_sha, meshpy_git_date = _get_git_data(
+            _Path(__file__).resolve().parent
         )
-        headers.append(
-            "// Input file created with meshpy\n"
-            f"// git sha:    {meshpy_git_sha}\n"
-            f"// git date:   {meshpy_git_date}\n"
-        )
+        if meshpy_git_sha is not None and meshpy_git_date is not None:
+            header["MeshPy"]["MeshPy"] = {
+                "git_SHA": meshpy_git_sha,
+                "git_date": meshpy_git_date,
+            }
 
+        # CubitPy information
         if _cubitpy_is_available():
-            # Get git information about cubitpy.
-            cubitpy_git_sha, cubitpy_git_date = get_git_data(
+            cubitpy_git_sha, cubitpy_git_date = _get_git_data(
                 _os.path.dirname(_cubitpy.__file__)
             )
 
-            if cubitpy_git_sha is not None:
-                # Cubitpy_header.
-                headers.append(
-                    "// The module cubitpy was loaded\n"
-                    f"// git sha:    {cubitpy_git_sha}\n"
-                    f"// git date:   {cubitpy_git_date}\n"
-                )
+            if cubitpy_git_sha is not None and cubitpy_git_date is not None:
+                header["MeshPy"]["CubitPy"] = {
+                    "git_SHA": cubitpy_git_sha,
+                    "git_date": cubitpy_git_date,
+                }
 
-        string_line = "// " + "".join(["-"] * 80)
+        return header
 
-        # If needed, append the contents of the script.
-        if add_script:
-            # Header for the script 'section'.
-            script_lines = [
-                string_line
-                + "\n// Full script used to create this input file.\n"
-                + string_line
-                + "\n"
-            ]
+    def _get_application_script(self, application_path: _Path) -> list[str]:
+        """Get the script that created this input file.
 
-            # Get the contents of script.
-            with open(script_path) as script_file:
-                script_lines.extend(script_file.readlines())
+        Args:
+            application_path: Path to the script that created this input file.
+        Returns:
+            A list of strings with the script that created this input file.
+        """
 
-            # Comment the python code lines.
-            end_text = "//".join(script_lines)
+        application_script_lines = [
+            "# Application script which created this input file:\n"
+        ]
 
-        return (
-            string_line + "\n" + (string_line + "\n").join(headers) + string_line
-        ), end_text
+        with open(application_path) as script_file:
+            application_script_lines.extend("# " + line for line in script_file)
+
+        return application_script_lines

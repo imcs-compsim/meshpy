@@ -119,7 +119,7 @@ def run_four_c_test(tmp_path, name, mesh, n_proc=2, restart=[None, None], **kwar
 
     # Create input file.
     input_file = os.path.join(testing_dir, name + ".4C.yaml")
-    mesh.write_input_file(input_file, add_script_to_header=False, **kwargs)
+    mesh.write_input_file(input_file, **kwargs)
 
     return_code = run_four_c(
         input_file,

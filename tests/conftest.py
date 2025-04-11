@@ -278,6 +278,7 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
         result: Union[Path, str, dict, InputFile],
         rtol: Optional[float] = None,
         atol: Optional[float] = None,
+        input_file_kwargs: dict = {"add_header_information": False, "check_nox": False},
         **kwargs,
     ) -> None:
         """Comparison between reference and result with relative or absolute
@@ -290,6 +291,8 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             result: The result data.
             rtol: The relative tolerance.
             atol: The absolute tolerance.
+            input_file_kwargs: Dictionary which contains the settings when
+                dumping the input file.
         """
 
         # Per default we do a string comparison of the objects. Some data types, e.g.,
@@ -341,7 +344,7 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
 
                     return yaml.safe_load(
                         yaml.dump(
-                            data.get_dict_to_dump(check_nox=False),
+                            data.get_dict_to_dump(**input_file_kwargs),
                             Dumper=_MeshPyDumper,
                             width=float("inf"),
                         )
