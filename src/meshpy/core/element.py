@@ -63,6 +63,7 @@ class Element(_BaseMeshItemFull):
         from meshpy.core.element_volume import VolumeHEX27 as _VolumeHEX27
         from meshpy.core.element_volume import VolumeTET4 as _VolumeTET4
         from meshpy.core.element_volume import VolumeTET10 as _VolumeTET10
+        from meshpy.core.element_volume import VolumeWEDGE6 as _VolumeWEDGE6
         from meshpy.four_c.element_volume import SolidRigidSphere as _SolidRigidSphere
 
         # Split up input line and get pre node string.
@@ -116,6 +117,12 @@ class Element(_BaseMeshItemFull):
                 )
             case 27:
                 return _VolumeHEX27(
+                    nodes=nodes,
+                    string_pre_nodes=string_pre_nodes,
+                    string_post_nodes=string_post_nodes,
+                )
+            case 6:
+                return _VolumeWEDGE6(
                     nodes=nodes,
                     string_pre_nodes=string_pre_nodes,
                     string_post_nodes=string_post_nodes,
