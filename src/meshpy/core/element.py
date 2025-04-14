@@ -123,10 +123,9 @@ class Element(_BaseMeshItemFull):
                 )
             case 6:
                 return _VolumeWEDGE6(
-                    nodes=element_nodes,
-                    dat_pre_nodes=dat_pre_nodes,
-                    dat_post_nodes=dat_post_nodes,
-                    comments=input_line[1],
+                    nodes=nodes,
+                    string_pre_nodes=string_pre_nodes,
+                    string_post_nodes=string_post_nodes,
                 )
             case 1:
                 return _SolidRigidSphere(
