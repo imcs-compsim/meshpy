@@ -60,7 +60,8 @@ def create_beam_solid_input_file(get_corresponding_reference_file_path):
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_cosserat_curve_mesh"
         )
-    )
+    ).mesh
+
     create_beam_mesh_helix(
         mesh,
         Beam3rHerm2Line3,
