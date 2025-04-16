@@ -684,6 +684,8 @@ def test_four_c_beam_to_solid(
     )
 
     # Check results
+    print(get_corresponding_reference_file_path())
+    print(input_file)
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
     # If we try to add this the IDs won't match, because the next volume ID for
