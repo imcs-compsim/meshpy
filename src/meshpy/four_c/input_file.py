@@ -74,30 +74,28 @@ def _get_geometry_set_indices_from_section(
 
     geometry_set_dict: _Dict[int, _List[int]] = {}
     for line in section_list:
-        index_geometry_set = int(line.split()[-1])
+        id_geometry_set = int(line.split()[-1])
         index_node = int(line.split()[1]) - 1
-        if index_geometry_set not in geometry_set_dict:
-            geometry_set_dict[index_geometry_set] = []
+        if id_geometry_set not in geometry_set_dict:
+            geometry_set_dict[id_geometry_set] = []
         if append_node_ids:
-            geometry_set_dict[index_geometry_set].append(index_node)
+            geometry_set_dict[id_geometry_set].append(index_node)
 
     return geometry_set_dict
 
 
 def _get_yaml_geometry_sets(
     nodes: _List[_Node], geometry_key: _conf.Geometry, section_list: _List
-):
+) -> _Dict[int, _GeometrySetNodes]:
     """Add sets of points, lines, surfaces or volumes to the object."""
 
     # Create the individual geometry sets. The nodes are still integers at this
     # point. They have to be converted to links to the actual nodes later on.
     geometry_set_dict = _get_geometry_set_indices_from_section(section_list)
-    geometry_sets_in_this_section = []
-    for node_ids in geometry_set_dict.values():
-        geometry_sets_in_this_section.append(
-            _GeometrySetNodes(
-                geometry_key, nodes=[nodes[node_id] for node_id in node_ids]
-            )
+    geometry_sets_in_this_section = {}
+    for geometry_set_id, node_ids in geometry_set_dict.items():
+        geometry_sets_in_this_section[geometry_set_id] = _GeometrySetNodes(
+            geometry_key, nodes=[nodes[node_id] for node_id in node_ids]
         )
     return geometry_sets_in_this_section
 
@@ -219,6 +217,10 @@ class InputFile(_Mesh):
         """Convert mesh items, e.g., nodes, elements, element sets, node sets,
         boundary conditions, materials, ...
 
+        Note: In the current implementation we cannibalize the mesh sections in
+            the self.sections dictionary. This should be reconsidered and be done
+            in a better way when this function is generalized.
+
         to "true" MeshPy objects.
         """
 
@@ -266,6 +268,7 @@ class InputFile(_Mesh):
             mesh.elements.append(_Element.from_legacy_string(element_nodes, item))
 
         # Add geometry sets
+        geometry_sets_in_sections = {key: None for key in _mpy.geo}
         for section_name in self.sections.keys():
             if section_name.endswith("TOPOLOGY"):
                 section_items = _get_section_items(section_name)
@@ -277,10 +280,13 @@ class InputFile(_Mesh):
                             break
                     else:
                         raise ValueError(f"Could not find the set {section_name}")
-                    geometry_sets_in_this_section = _get_yaml_geometry_sets(
+                    geometry_sets_in_section = _get_yaml_geometry_sets(
                         mesh.nodes, geometry_key, section_items
                     )
-                    mesh.geometry_sets[geometry_key] = geometry_sets_in_this_section
+                    geometry_sets_in_sections[geometry_key] = geometry_sets_in_section
+                    mesh.geometry_sets[geometry_key] = list(
+                        geometry_sets_in_section.values()
+                    )
 
         # Add boundary conditions
         for (
@@ -288,11 +294,11 @@ class InputFile(_Mesh):
             geometry_key,
         ), section_name in self.boundary_condition_names.items():
             for item in _get_section_items(section_name):
+                geometry_set_id = item["E"]
+                geometry_set = geometry_sets_in_sections[geometry_key][geometry_set_id]
                 mesh.boundary_conditions.append(
                     (bc_key, geometry_key),
-                    _BoundaryConditionBase.from_dict(
-                        mesh.geometry_sets[geometry_key], bc_key, item
-                    ),
+                    _BoundaryConditionBase.from_dict(geometry_set, bc_key, item),
                 )
 
         self.add(mesh)

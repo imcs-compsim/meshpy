@@ -47,12 +47,10 @@ class BoundaryConditionBase(_BaseMeshItem):
         self.geometry_set = geometry_set
 
     @classmethod
-    def from_dict(cls, geometry_sets, bc_key, bc_dict):
+    def from_dict(cls, geometry_set, bc_key, bc_dict):
         """This function acts as a factory and creates the correct boundary
         condition object from a dictionary parsed from an input file."""
 
-        geometry_set_id = int(bc_dict["E"]) - 1
-        geometry_set = geometry_sets[geometry_set_id]
         del bc_dict["E"]
 
         if bc_key in (
