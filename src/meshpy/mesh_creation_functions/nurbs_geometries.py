@@ -141,6 +141,101 @@ def create_nurbs_hollow_cylinder_segment_2d(
     return surf
 
 
+def create_nurbs_cylindrical_shell_sector(
+    radius: float, angle: float, length: float, *, n_ele_u: int = 1, n_ele_v: int = 1
+) -> _NURBS.Surface:
+    """Creates a NURBS surface representing a 3D sector of a cylindrical shell.
+    The center of the cylindrical shell sector is located at [0, 0, 0].
+
+    Args:
+        radius: Radius of the cylindrical shell.
+        angle: Angle of the cylindrical shell sector in radians.
+                       The angle is only valid for 0 < angle <= pi according
+                       to "Isogeometric Analysis: Toward Integration of CAD and FEA" by
+                       J.Austin Cottrell, 2009
+        length: Length of the cylindrical shell.
+        n_ele_u: Number of elements in the parametric u-direction. Defaults to 1.
+        n_ele_v: Number of elements in the parametric v-direction. Defaults to 1.
+
+    Returns:
+        geomdl.NURBS.Surface: A geomdl object that contains the surface information.
+    """
+
+    # Check the validity of the input values:
+    if (angle >= _np.pi) or (angle < 0):
+        raise ValueError(
+            "The following algorithm for creating a cylindrical shell sector is only valid for 0 < angle <= pi."
+        )
+
+    # Create a NURBS surface instance
+    surf = _NURBS.Surface()
+
+    # Set degrees
+    surf.degree_u = 2
+    surf.degree_v = 2
+
+    # Control points and set them to the surface
+    p_size_u = 3
+    p_size_v = 3
+
+    # Obtaining the control points
+    cp_1 = [-radius * _np.sin(angle / 2), -length / 2, -radius * _np.cos(angle / 2)]
+    cp_3 = [radius * _np.sin(angle / 2), -length / 2, -radius * _np.cos(angle / 2)]
+
+    # Calculating position of middle points. This is done by
+    # obtaining the tangents on the points cp_1 and cp_3 and
+    # calculating the intersection point between the tangents.
+    m_1 = -_np.tan(-angle / 2)
+    m_3 = -_np.tan(angle / 2)
+    b_1 = cp_1[2] + m_1 * cp_1[0]
+    b_3 = cp_3[2] + m_3 * cp_3[0]
+
+    inter_point_x = (b_3 - b_1) / (m_3 - m_1)
+    inter_point_z = m_1 * inter_point_x + b_1
+
+    # The intersection point is assigned to the middle points cp_2, cp_5 and cp_8
+    cp_2 = [inter_point_x, -length / 2, inter_point_z]
+
+    cp_4 = [-radius * _np.sin(angle / 2), 0.0, -radius * _np.cos(angle / 2)]
+    cp_5 = [inter_point_x, 0.0, inter_point_z]
+    cp_6 = [radius * _np.sin(angle / 2), 0.0, -radius * _np.cos(angle / 2)]
+
+    cp_7 = [
+        -radius * _np.sin(angle / 2),
+        length / 2,
+        -radius * _np.cos(angle / 2),
+    ]
+    cp_8 = [inter_point_x, length / 2, inter_point_z]
+    cp_9 = [radius * _np.sin(angle / 2), length / 2, -radius * _np.cos(angle / 2)]
+
+    ctrlpts = [cp_1, cp_4, cp_7, cp_2, cp_5, cp_8, cp_3, cp_6, cp_9]
+
+    weights = [
+        1.0,
+        1.0,
+        1.0,
+        _np.cos(angle / 2),
+        _np.cos(angle / 2),
+        _np.cos(angle / 2),
+        1.0,
+        1.0,
+        1.0,
+    ]
+
+    t_ctrlptsw = _compat.combine_ctrlpts_weights(ctrlpts, weights)
+
+    surf.ctrlpts_size_u = p_size_u
+    surf.ctrlpts_size_v = p_size_v
+    surf.ctrlptsw = t_ctrlptsw
+
+    surf.knotvector_u = [0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+    surf.knotvector_v = [0.0, 0.0, 0.0, 1.0, 1.0, 1.0]
+
+    do_uniform_knot_refinement_surface(surf, n_ele_u, n_ele_v)
+
+    return surf
+
+
 def create_nurbs_flat_plate_2d(width, length, *, n_ele_u=1, n_ele_v=1):
     """Creates a patch of a 2 dimensional flat plate.
 

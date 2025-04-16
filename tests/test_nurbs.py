@@ -29,6 +29,7 @@ from meshpy.four_c.material import MaterialStVenantKirchhoff
 from meshpy.mesh_creation_functions.nurbs_generic import add_geomdl_nurbs_to_mesh
 from meshpy.mesh_creation_functions.nurbs_geometries import (
     create_nurbs_brick,
+    create_nurbs_cylindrical_shell_sector,
     create_nurbs_flat_plate_2d,
     create_nurbs_hemisphere_surface,
     create_nurbs_hollow_cylinder_segment_2d,
@@ -194,6 +195,36 @@ def test_nurbs_translate_nurbs_surface(
     input_file.add(patch_set)
 
     input_file.translate([-1.6, -2.3, 3.7])
+
+    # Compare with the reference file
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+
+
+def test_nurbs_cylindrical_shell_sector(
+    assert_results_equal, get_corresponding_reference_file_path
+):
+    """Test the creation of a 3-dimensional cylindrical shell sector."""
+
+    # Create the surface of a quarter of a hollow cylinder
+    surf_obj = create_nurbs_cylindrical_shell_sector(
+        2.3, np.pi / 3, 1.7, n_ele_u=3, n_ele_v=5
+    )
+
+    # Create input file
+    input_file = InputFile()
+
+    # Add material
+    mat = MaterialStVenantKirchhoff()
+
+    # Create patch set
+    patch_set = add_geomdl_nurbs_to_mesh(
+        input_file,
+        surf_obj,
+        material=mat,
+        element_description="dummy",
+    )
+
+    input_file.add(patch_set)
 
     # Compare with the reference file
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
