@@ -22,13 +22,12 @@
 """This module implements a class to represent boundary conditions in
 MeshPy."""
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
-from meshpy.core.base_mesh_item import BaseMeshItemString as _BaseMeshItemString
+from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.container import ContainerBase as _ContainerBase
 
 
-class BoundaryConditionBase(_BaseMeshItemFull):
+class BoundaryConditionBase(_BaseMeshItem):
     """This is a base object, which represents one boundary condition in the
     input file, e.g. Dirichlet, Neumann, coupling or beam-to-solid."""
 
@@ -100,7 +99,7 @@ class BoundaryConditionContainer(_ContainerBase):
         """Initialize the container and create the default keys in the map."""
         super().__init__(*args, **kwargs)
 
-        self.item_types = [_BaseMeshItemString, BoundaryConditionBase]
+        self.item_types = [BoundaryConditionBase]
 
         for bc_key in _mpy.bc:
             for geometry_key in _mpy.geo:

@@ -24,8 +24,7 @@ file."""
 
 import numpy as _np
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
-from meshpy.core.base_mesh_item import BaseMeshItemString as _BaseMeshItemString
+from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.container import ContainerBase as _ContainerBase
 from meshpy.core.element_beam import Beam as _Beam
@@ -33,7 +32,7 @@ from meshpy.core.node import Node as _Node
 from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
-class GeometrySetBase(_BaseMeshItemFull):
+class GeometrySetBase(_BaseMeshItem):
     """Base class for a geometry set."""
 
     # Node set names for the input file file.
@@ -348,7 +347,7 @@ class GeometrySetContainer(_ContainerBase):
         """Initialize the container and create the default keys in the map."""
         super().__init__(*args, **kwargs)
 
-        self.item_types = [_BaseMeshItemString, GeometrySetBase]
+        self.item_types = [GeometrySetBase]
 
         for geometry_key in _mpy.geo:
             self[geometry_key] = []

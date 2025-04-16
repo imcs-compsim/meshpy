@@ -23,12 +23,12 @@
 
 from typing import List as _List
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
+from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
 from meshpy.core.node import Node as _Node
 from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
-class Element(_BaseMeshItemFull):
+class Element(_BaseMeshItem):
     """A base class for an FEM element in the mesh."""
 
     def __init__(self, nodes=None, material=None, **kwargs):
@@ -95,7 +95,6 @@ class Element(_BaseMeshItemFull):
                     nodes=nodes,
                     string_pre_nodes=string_pre_nodes,
                     string_post_nodes=string_post_nodes,
-                    comments=input_line[1],
                 )
             case 4:
                 return _VolumeTET4(

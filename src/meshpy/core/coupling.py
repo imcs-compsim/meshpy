@@ -64,10 +64,7 @@ class Coupling(_BoundaryConditionBase):
             up when the coupling is read.
         """
 
-        if isinstance(geometry, int):
-            # This is the case if the boundary condition is read from an existing input file
-            pass
-        elif isinstance(geometry, _GeometrySetBase):
+        if isinstance(geometry, _GeometrySetBase):
             pass
         elif isinstance(geometry, list):
             geometry = _GeometrySet(geometry)
