@@ -54,19 +54,19 @@ class Beam3rHerm2Line3(_Beam):
                 "Port this functionality to not use the legacy string any more"
             )
 
-        string_nodes = ""
-        string_triads = ""
-        for i in [0, 2, 1]:
-            node = self.nodes[i]
-            string_nodes += f"{node.i_global} "
-            string_triads += " " + node.rotation.get_dat()
+        string_nodes = " ".join(str(self.nodes[i].i_global) for i in [0, 2, 1])
+        string_triads = " ".join(
+            str(item)
+            for i in [0, 2, 1]
+            for item in self.nodes[i].rotation.get_rotation_vector()
+        )
 
         # Check the material.
         self._check_material()
 
         return [
-            f"{self.i_global} BEAM3R HERM2LINE3 {string_nodes}MAT {self.material.i_global} "
-            f"TRIADS{string_triads}"
+            f"{self.i_global} BEAM3R HERM2LINE3 {string_nodes} MAT {self.material.i_global} "
+            f"TRIADS {string_triads}"
         ]
 
 
@@ -89,19 +89,19 @@ class Beam3rLine2Line2(_Beam):
                 "Port this functionality to not use the legacy string any more"
             )
 
-        string_nodes = ""
-        string_triads = ""
-        for i in [0, 1]:
-            node = self.nodes[i]
-            string_nodes += f"{node.i_global} "
-            string_triads += " " + node.rotation.get_dat()
+        string_nodes = " ".join(str(self.nodes[i].i_global) for i in [0, 1])
+        string_triads = " ".join(
+            str(item)
+            for i in [0, 1]
+            for item in self.nodes[i].rotation.get_rotation_vector()
+        )
 
         # Check the material.
         self._check_material()
 
         return [
-            f"{self.i_global} BEAM3R LINE2 {string_nodes}MAT {self.material.i_global} "
-            f"TRIADS{string_triads}"
+            f"{self.i_global} BEAM3R LINE2 {string_nodes} MAT {self.material.i_global} "
+            f"TRIADS {string_triads}"
         ]
 
 
@@ -138,19 +138,17 @@ class Beam3kClass(_Beam):
                 "Port this functionality to not use the legacy string any more"
             )
 
-        node_ordering = [0, 2, 1]
-        string_nodes = " ".join(
-            [str(self.nodes[i_node].i_global) for i_node in node_ordering]
+        string_nodes = " ".join(str(self.nodes[i].i_global) for i in [0, 2, 1])
+        string_triads = " ".join(
+            str(item)
+            for i in [0, 2, 1]
+            for item in self.nodes[i].rotation.get_rotation_vector()
         )
-        string_triads = ""
-        for i in node_ordering:
-            node = self.nodes[i]
-            string_triads += " " + node.rotation.get_dat()
 
         # Check the material.
         self._check_material()
 
-        string_dat = ("{} BEAM3K LINE3 {} WK {} ROTVEC {} MAT {} TRIADS{}{}").format(
+        string_dat = ("{} BEAM3K LINE3 {} WK {} ROTVEC {} MAT {} TRIADS {}{}").format(
             self.i_global,
             string_nodes,
             "1" if self.weak else "0",
@@ -210,16 +208,11 @@ class Beam3eb(_Beam):
                 "The rotations do not match the direction of the Euler Bernoulli beam!"
             )
 
-        string_nodes = ""
-        string_triads = ""
-        for i in [0, 1]:
-            node = self.nodes[i]
-            string_nodes += f"{node.i_global} "
-            string_triads += " " + node.rotation.get_dat()
+        string_nodes = " ".join(str(self.nodes[i].i_global) for i in [0, 1])
 
         # Check the material.
         self._check_material()
 
         return [
-            f"{self.i_global} BEAM3EB LINE2 {string_nodes}MAT {self.material.i_global}"
+            f"{self.i_global} BEAM3EB LINE2 {string_nodes} MAT {self.material.i_global}"
         ]

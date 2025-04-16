@@ -119,16 +119,7 @@ class Node(_BaseMeshItem):
                 "Port this functionality to create a dict, not the legacy string."
             )
 
-        coordinate_string = " ".join(
-            [
-                (
-                    _mpy.output_precision.format(component + 0)
-                    if _np.abs(component) >= _mpy.eps_pos
-                    else "0"
-                )
-                for component in self.coordinates
-            ]
-        )
+        coordinate_string = " ".join([str(item) for item in self.coordinates])
         return [f"NODE {self.i_global} COORD {coordinate_string}"]
 
 
@@ -183,14 +174,5 @@ class ControlPoint(Node):
                 "Port this functionality to create a dict, not the legacy string."
             )
 
-        coordinate_string = " ".join(
-            [
-                (
-                    _mpy.output_precision.format(component + 0)
-                    if _np.abs(component) >= _mpy.eps_pos
-                    else "0"
-                )
-                for component in self.coordinates
-            ]
-        )
+        coordinate_string = " ".join([str(item) for item in self.coordinates])
         return [f"CP {self.i_global} COORD {coordinate_string} {self.weight}"]

@@ -110,7 +110,7 @@ class VTKType(_Enum):
 
 
 class MeshPy(object):
-    """A global object that stores options for the whole meshpy application."""
+    """A global object that stores options for the whole MeshPy application."""
 
     def __init__(self):
         self.set_default_values()
@@ -146,12 +146,6 @@ class MeshPy(object):
 
     def set_default_values(self):
         """Set the configuration to the default values."""
-        # Version information.
-        self.git_sha = None
-        self.git_date = None
-
-        # Precision for floats in output.
-        self.output_precision = "{:.12g}"
 
         # Set the epsilons for comparison of different types of values.
         self.eps_quaternion = 1e-10
@@ -161,10 +155,6 @@ class MeshPy(object):
         # Allow the rotation of beams when connected and the triads do not
         # match.
         self.allow_beam_rotation = True
-
-        # Geometric search options.
-        self.geometric_search_max_nodes_brute_force = 1000
-        self.geometric_search_binning_n_bin = 10
 
         # Import meshes as pure dict or import the geometry.
         self.import_mesh_full = False

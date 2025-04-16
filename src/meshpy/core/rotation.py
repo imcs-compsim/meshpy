@@ -323,23 +323,6 @@ class Rotation:
         else:
             return object.__eq__(self, other)
 
-    def get_dat(self):
-        """Return a string with the triad components for the input line."""
-
-        rotation_vector = self.get_rotation_vector()
-
-        # The zeros are added to avoid negative zeros in the input file.
-        return " ".join(
-            [
-                (
-                    _mpy.output_precision.format(component + 0)
-                    if _np.abs(component) >= _mpy.eps_quaternion
-                    else "0"
-                )
-                for component in rotation_vector
-            ]
-        )
-
     def copy(self):
         """Return a deep copy of this object."""
         return _copy.deepcopy(self)
