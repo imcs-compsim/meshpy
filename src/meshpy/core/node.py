@@ -23,12 +23,12 @@
 
 import numpy as _np
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
+from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
 from meshpy.core.conf import mpy as _mpy
 from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
-class Node(_BaseMeshItemFull):
+class Node(_BaseMeshItem):
     """This object represents one node in the mesh."""
 
     def __init__(self, coordinates, *, is_middle_node=False, **kwargs):

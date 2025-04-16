@@ -77,10 +77,6 @@ class BoundaryCondition(_BoundaryConditionBase):
         """Check for point Neumann boundaries that there is not a double Node
         in the set."""
 
-        if isinstance(self.geometry_set, int):
-            # In the case of solid imports this is a integer at initialization.
-            return
-
         if self.double_nodes is _mpy.double_nodes.keep:
             return
 

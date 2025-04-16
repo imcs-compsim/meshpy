@@ -22,37 +22,21 @@
 """This module implements the class that will be used as the base for all items
 that are in a mesh."""
 
+from typing import Any as _Any
+from typing import Optional as _Optional
+
 
 class BaseMeshItem:
     """Base class for all objects that are related to a mesh."""
 
-    def __init__(self, data=None, comments=None):
-        """Create the object.
+    def __init__(self, data: _Optional[_Any] = None):
+        """Create the base object.
 
-        Args
-        ----
-        data: str, list(str)
-            Data for this object.
-        TODO: comments
+        Args:
+            data: General data to be stored for this item.
         """
 
         self.data = data
 
-        # Overall index of this item in the mesh.
+        # Global index of this item in a mesh.
         self.i_global = None
-
-        # Comments regarding this Mesh Item.
-        if comments is None:
-            self.comments = []
-        else:
-            self.comments = comments
-
-
-class BaseMeshItemFull(BaseMeshItem):
-    """Base class for all objects that are related to a mesh and are fully
-    created in MeshPy."""
-
-
-class BaseMeshItemString(BaseMeshItem):
-    """Base class for all objects that are imported from an input file as a
-    plain string."""

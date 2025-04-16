@@ -22,10 +22,10 @@
 """This module implements a basic class to manage functions in the 4C input
 file."""
 
-from meshpy.core.base_mesh_item import BaseMeshItemFull as _BaseMeshItemFull
+from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
 
 
-class Function(_BaseMeshItemFull):
+class Function(_BaseMeshItem):
     """Holds information for a function."""
 
     def __init__(self, function_list):
