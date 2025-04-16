@@ -22,7 +22,7 @@
 """This file includes functions to ease the creation of input files using beam
 interaction potentials."""
 
-from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
+from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 
 
 class BeamPotential:

@@ -701,7 +701,7 @@ def compare_lists(
 
 
 @pytest.fixture(scope="function")
-def get_bc_dict() -> Callable:
+def get_bc_data() -> Callable:
     """Return a function to create a dummy definition for a boundary condition
     in 4C.
 
@@ -709,7 +709,7 @@ def get_bc_dict() -> Callable:
         A function to create a dummy boundary condition definition.
     """
 
-    def _get_bc_dict(*, identifier=None, num_dof: int = 3) -> Dict:
+    def _get_bc_data(*, identifier=None, num_dof: int = 3) -> Dict:
         """Return a dummy definition for a boundary condition in 4C that can be
         used for testing purposes.
 
@@ -729,4 +729,4 @@ def get_bc_dict() -> Callable:
             "FUNCT": [0] * num_dof,
         }
 
-    return _get_bc_dict
+    return _get_bc_data

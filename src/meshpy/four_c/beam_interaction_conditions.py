@@ -25,9 +25,9 @@
 from typing import Optional as _Optional
 
 import meshpy.core.conf as _conf
+from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
 from meshpy.core.mesh import Mesh as _Mesh
-from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
 
 
 def get_next_possible_id_for_boundary_condition(
@@ -67,11 +67,11 @@ def get_next_possible_id_for_boundary_condition(
 
         # compare string of each condition with input and store existing ids
         for bc in found_conditions:
-            if condition_string in bc.bc_dict:
-                existing_ids.append(bc.bc_dict[condition_string])
+            if condition_string in bc.data:
+                existing_ids.append(bc.data[condition_string])
             else:
                 raise KeyError(
-                    f"The key {condition_string} is not in the bc_dict {bc.bc_dict}"
+                    f"The key {condition_string} is not in the data {bc.data}"
                 )
 
         # return lowest found id
@@ -125,7 +125,7 @@ def add_beam_interaction_condition(
     for geometry_set in [geometry_set_1, geometry_set_2]:
         mesh.add(
             _BoundaryCondition(
-                geometry_set, bc_dict={condition_string: id}, bc_type=bc_type
+                geometry_set, data={condition_string: id}, bc_type=bc_type
             )
         )
 

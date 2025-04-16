@@ -29,6 +29,7 @@ import numpy as _np
 import quaternion as _quaternion
 from numpy.typing import NDArray as _NDArray
 
+from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
 from meshpy.core.mesh import Mesh as _Mesh
@@ -36,7 +37,6 @@ from meshpy.core.node import Node as _Node
 from meshpy.core.node import NodeCosserat as _NodeCosserat
 from meshpy.core.rotation import Rotation as _Rotation
 from meshpy.cosserat_curve.cosserat_curve import CosseratCurve as _CosseratCurve
-from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.four_c.function_utility import (
     create_linear_interpolation_function as _create_linear_interpolation_function,
 )

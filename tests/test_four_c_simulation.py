@@ -26,12 +26,12 @@ import os
 import numpy as np
 import pytest
 
+from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
 from meshpy.core.geometry_set import GeometrySet
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.beam_interaction_conditions import add_beam_interaction_condition
-from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.dbc_monitor import (
     dbc_monitor_to_input,
     dbc_monitor_to_input_all_values,

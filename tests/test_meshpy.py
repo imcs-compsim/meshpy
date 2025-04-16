@@ -30,6 +30,7 @@ import numpy as np
 import pytest
 import vtk
 
+from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
 from meshpy.core.coupling import Coupling
 from meshpy.core.element_beam import Beam
@@ -39,7 +40,6 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.core.rotation import Rotation
 from meshpy.core.vtk_writer import VTKWriter
-from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.element_beam import (
     Beam3eb,
     Beam3k,
@@ -239,7 +239,7 @@ def test_meshpy_mesh_reflection(origin, flip, assert_results_equal):
 
 @pytest.mark.parametrize("full_import", [[True, "full"], [False, None]])
 def test_meshpy_comments_in_solid(
-    get_bc_dict,
+    get_bc_data,
     assert_results_equal,
     get_corresponding_reference_file_path,
     full_import,
@@ -257,12 +257,12 @@ def test_meshpy_comments_in_solid(
     sets = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 2, 3])
     mesh.add(
         BoundaryCondition(
-            sets["start"], get_bc_dict(identifier=1), bc_type=mpy.bc.dirichlet
+            sets["start"], get_bc_data(identifier=1), bc_type=mpy.bc.dirichlet
         )
     )
     mesh.add(
         BoundaryCondition(
-            sets["end"], get_bc_dict(identifier=2), bc_type=mpy.bc.neumann
+            sets["end"], get_bc_data(identifier=2), bc_type=mpy.bc.neumann
         )
     )
 
@@ -464,7 +464,7 @@ def test_meshpy_geometry_sets(
 
 
 def test_meshpy_unique_ordering_of_get_all_nodes_for_line_condition(
-    get_bc_dict, assert_results_equal, get_corresponding_reference_file_path
+    get_bc_data, assert_results_equal, get_corresponding_reference_file_path
 ):
     """This test ensures that the ordering of the nodes returned from the
     function get_all_nodes is unique for line sets."""
@@ -482,7 +482,7 @@ def test_meshpy_unique_ordering_of_get_all_nodes_for_line_condition(
         input_file.add(
             BoundaryCondition(
                 GeometrySet(node),
-                get_bc_dict(identifier=node.coordinates[0]),
+                get_bc_data(identifier=node.coordinates[0]),
                 bc_type=mpy.bc.dirichlet,
             )
         )
@@ -1029,7 +1029,7 @@ def test_geometry_set_get_geometry_objects():
 
 @pytest.mark.parametrize("use_nodal_geometry_sets", [True, False])
 def test_meshpy_replace_nodes_geometry_set(
-    get_bc_dict, use_nodal_geometry_sets, assert_results_equal
+    get_bc_data, use_nodal_geometry_sets, assert_results_equal
 ):
     """Test case for coupling of nodes, and reusing the identical nodes."""
 
@@ -1180,10 +1180,10 @@ def test_meshpy_replace_nodes_geometry_set(
 
     # Add BCs.
     mesh_ref.add(
-        BoundaryCondition(node_set_2_ref, get_bc_dict(), bc_type=mpy.bc.neumann)
+        BoundaryCondition(node_set_2_ref, get_bc_data(), bc_type=mpy.bc.neumann)
     )
     mesh_couple.add(
-        BoundaryCondition(node_set_2_couple, get_bc_dict(), bc_type=mpy.bc.neumann)
+        BoundaryCondition(node_set_2_couple, get_bc_data(), bc_type=mpy.bc.neumann)
     )
 
     # Compare the meshes.
@@ -1217,14 +1217,14 @@ def create_beam_to_solid_conditions_model(get_corresponding_reference_file_path)
         BoundaryCondition(
             line_set,
             bc_type=mpy.bc.beam_to_solid_volume_meshtying,
-            bc_dict={"COUPLING_ID": 1},
+            data={"COUPLING_ID": 1},
         )
     )
     beam_mesh.add(
         BoundaryCondition(
             line_set,
             bc_type=mpy.bc.beam_to_solid_surface_meshtying,
-            bc_dict={"COUPLING_ID": 2},
+            data={"COUPLING_ID": 2},
         )
     )
 
@@ -1508,7 +1508,7 @@ def test_meshpy_point_couplings_check():
 
     # This should work, as the points are not within the global tolerance of
     # each other but we dont perform the check
-    Coupling(get_nodes(1.0), None, None, check_at_init=False)
+    Coupling(get_nodes(1.0), None, None, check_overlapping_nodes=False)
 
 
 def test_meshpy_vtk_writer(
@@ -1781,7 +1781,7 @@ def test_meshpy_cubitpy_import(
     assert_results_equal(input_file, input_file_ref, rtol=1e-14)
 
 
-def test_meshpy_deep_copy(get_bc_dict, assert_results_equal):
+def test_meshpy_deep_copy(get_bc_data, assert_results_equal):
     """This test checks that the deep copy function on a mesh does not copy the
     materials or functions."""
 
@@ -1796,12 +1796,12 @@ def test_meshpy_deep_copy(get_bc_dict, assert_results_equal):
         set2 = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [1, 0, 0], [1, 1, 0])
         mesh.add(
             BoundaryCondition(
-                set1["line"], get_bc_dict(identifier=1), bc_type=mpy.bc.dirichlet
+                set1["line"], get_bc_data(identifier=1), bc_type=mpy.bc.dirichlet
             )
         )
         mesh.add(
             BoundaryCondition(
-                set2["line"], get_bc_dict(identifier=2), bc_type=mpy.bc.neumann
+                set2["line"], get_bc_data(identifier=2), bc_type=mpy.bc.neumann
             )
         )
         mesh.couple_nodes()
@@ -2027,7 +2027,7 @@ def test_meshpy_check_start_end_node_error():
 
 
 def test_meshpy_userdefined_boundary_condition(
-    get_bc_dict, assert_results_equal, get_corresponding_reference_file_path
+    get_bc_data, assert_results_equal, get_corresponding_reference_file_path
 ):
     """Check if an user defined boundary condition can be added."""
 
@@ -2037,7 +2037,7 @@ def test_meshpy_userdefined_boundary_condition(
     sets = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 2, 3])
     mesh.add(
         BoundaryCondition(
-            sets["line"], get_bc_dict(), bc_type="DESIGN VOL ALE DIRICH CONDITIONS"
+            sets["line"], get_bc_data(), bc_type="DESIGN VOL ALE DIRICH CONDITIONS"
         )
     )
 

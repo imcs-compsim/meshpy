@@ -25,10 +25,10 @@ from typing import List as _List
 from typing import Optional as _Optional
 from typing import Union as _Union
 
+from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
 from meshpy.core.rotation import Rotation as _Rotation
-from meshpy.four_c.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.four_c.function import Function as _Function
 from meshpy.four_c.function_utility import (
     ensure_length_of_function_array as _ensure_length_of_function_array,
@@ -86,8 +86,5 @@ class LocSysCondition(_BoundaryCondition):
             )
 
         super().__init__(
-            geometry_set,
-            bc_dict=condition_dict,
-            bc_type=_mpy.bc.locsys,
-            **kwargs,
+            geometry_set, data=condition_dict, bc_type=_mpy.bc.locsys, **kwargs
         )

@@ -31,11 +31,11 @@ import os
 import autograd.numpy as npAD
 import numpy as np
 
+from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
 from meshpy.core.geometry_set import GeometrySet
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
-from meshpy.four_c.boundary_condition import BoundaryCondition
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.function import Function
 from meshpy.four_c.input_file import InputFile
