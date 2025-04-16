@@ -1,689 +1,2350 @@
-PROBLEM TYPE:
-  PROBLEMTYPE: "Structure"
-IO:
-  OUTPUT_BIN: false
-  STRUCT_DISP: false
-  VERBOSITY: "Standard"
-IO/RUNTIME VTK OUTPUT:
-  INTERVAL_STEPS: 1
-  OUTPUT_DATA_FORMAT: "binary"
-  EVERY_ITERATION: False
-STRUCTURAL DYNAMIC:
-  INT_STRATEGY: "Standard"
-  DYNAMICTYPE: "Statics"
-  TIMESTEP: 1
-  NUMSTEP: 1
-  MAXTIME: 10
-  TOLDISP: 1.0e-11
-  TOLRES: 0.0001
-  MAXITER: 20
-  PREDICT: "TangDis"
-  LINEAR_SOLVER: 1
-SOLVER 1:
-  SOLVER: "UMFPACK"
-  NAME: "Structure_Solver"
-IO/RUNTIME VTK OUTPUT/BEAMS:
-  OUTPUT_BEAMS: true
-  DISPLACEMENT: true
-  TRIAD_VISUALIZATIONPOINT: true
-  STRAINS_GAUSSPOINT: true
-RESULT DESCRIPTION:
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 190
-      QUANTITY: "dispx"
-      VALUE: 0.13191721002739798
-      TOLERANCE: 1.e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 190
-      QUANTITY: "dispy"
-      VALUE: 0.1993348845583147
-      TOLERANCE: 1.e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 190
-      QUANTITY: "dispz"
-      VALUE: 0.06922093109571521
-      TOLERANCE: 1.e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 470
-      QUANTITY: "dispx"
-      VALUE: 0.13298272648260862
-      TOLERANCE: 1.e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 470
-      QUANTITY: "dispy"
-      VALUE: 0.20055514581095235
-      TOLERANCE: 1.e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 470
-      QUANTITY: "dispz"
-      VALUE: 0.06970034314267715
-      TOLERANCE: 1.e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 711
-      QUANTITY: "dispx"
-      VALUE: 0.07692742096635531
-      TOLERANCE: 1.e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 711
-      QUANTITY: "dispy"
-      VALUE: 0.12499373471095152
-      TOLERANCE: 1.e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 711
-      QUANTITY: "dispz"
-      VALUE: 0.05867991807126929
-      TOLERANCE: 1.e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 1071
-      QUANTITY: "dispx"
-      VALUE: 0.06988026757838893
-      TOLERANCE: 1.e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 1071
-      QUANTITY: "dispy"
-      VALUE: 0.10989253309528824
-      TOLERANCE: 1.0e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 1071
-      QUANTITY: "dispz"
-      VALUE: 0.04835255275303983
-      TOLERANCE: 1.0e-10
-MATERIALS:
-  - MAT: 1
-    MAT_BeamReissnerElastHyper:
-      YOUNG: 207
-      POISSONRATIO: 0
-      DENS: 0
-      CROSSAREA: 0.031415926535897934
-      SHEARCORR: 1.1
-      MOMINPOL: 0.00015707963267948968
-      MOMIN2: 7.853981633974484e-05
-      MOMIN3: 7.853981633974484e-05
-FUNCT1:
-  - SYMBOLIC_FUNCTION_OF_TIME: "t"
-FUNCT2:
-  - SYMBOLIC_FUNCTION_OF_TIME: "t"
-FUNCT3:
-  - SYMBOLIC_FUNCTION_OF_TIME: "t"
-FUNCT4:
-  - SYMBOLIC_FUNCTION_OF_TIME: "t"
-DESIGN POINT DIRICH CONDITIONS:
-  - E: 1
-    NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
-    VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-  - E: 2
-    NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
-    VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-  - E: 3
-    NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
-    VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-  - E: 4
-    NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
-    VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-DESIGN POINT NEUMANN CONDITIONS:
-  - E: 5
-    NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
-    VAL: [0.0001, 0.0001, 0.0001, 0, 0, 0, 0, 0, 0]
-    FUNCT: [1, 1, 1, 0, 0, 0, 0, 0, 0]
-  - E: 6
-    NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
-    VAL: [0.0001, 0.0001, 0.0001, 0, 0, 0, 0, 0, 0]
-    FUNCT: [2, 2, 2, 0, 0, 0, 0, 0, 0]
-  - E: 7
-    NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
-    VAL: [0.0001, 0.0001, 0.0001, 0, 0, 0, 0, 0, 0]
-    FUNCT: [3, 3, 3, 0, 0, 0, 0, 0, 0]
-  - E: 8
-    NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 0, 0, 0, 0, 0]
-    VAL: [0.0001, 0.0001, 0.0001, 0, 0, 0, 0, 0, 0]
-    FUNCT: [4, 4, 4, 0, 0, 0, 0, 0, 0]
 DESIGN POINT COUPLING CONDITIONS:
   - E: 9
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 10
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 11
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 12
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 13
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 14
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 15
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 16
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 17
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 18
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 19
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 20
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 21
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 22
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 23
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 24
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 25
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 26
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 27
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 28
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 29
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 30
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 31
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 32
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 33
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 34
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 35
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 36
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 37
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 38
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 39
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 40
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 41
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 42
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 43
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 44
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 45
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 46
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 47
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 48
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 49
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 50
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 51
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 52
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 53
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 54
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 55
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 56
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 57
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 58
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 59
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 60
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 61
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 62
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 63
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 64
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 65
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 66
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 67
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 68
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 69
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 70
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 71
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 72
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 73
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 74
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 75
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 76
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 77
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 78
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 79
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 80
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 81
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 82
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 83
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 84
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 85
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 86
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 87
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 88
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 89
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 90
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 91
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 92
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 93
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 94
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 95
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 96
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 97
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 98
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 99
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 100
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 101
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 102
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 103
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 104
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 105
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 106
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 107
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 108
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 109
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 110
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 111
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 112
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 113
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 114
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 115
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 116
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 117
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 118
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 119
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 120
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 121
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 122
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 123
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 124
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 125
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 126
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 127
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 128
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 129
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 130
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 131
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 132
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 133
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 134
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 135
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 136
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 137
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 138
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 139
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 140
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 141
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 142
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 143
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 144
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 145
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 146
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 147
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 148
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 149
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 150
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 151
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 152
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 153
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 154
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 155
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 156
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 157
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 158
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 159
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 160
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 161
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 162
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 163
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 164
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 165
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 166
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 167
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 168
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 169
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 170
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 171
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 172
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 173
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 174
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 175
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 176
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 177
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 178
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 179
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 180
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 181
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 182
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+DESIGN POINT DIRICH CONDITIONS:
+  - E: 1
+    FUNCT:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    NUMDOF: 9
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+  - E: 2
+    FUNCT:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    NUMDOF: 9
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+  - E: 3
+    FUNCT:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    NUMDOF: 9
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+  - E: 4
+    FUNCT:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    NUMDOF: 9
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+DESIGN POINT NEUMANN CONDITIONS:
+  - E: 5
+    FUNCT:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    NUMDOF: 9
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0.0001
+      - 0.0001
+      - 0.0001
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+  - E: 6
+    FUNCT:
+      - 2
+      - 2
+      - 2
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    NUMDOF: 9
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0.0001
+      - 0.0001
+      - 0.0001
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+  - E: 7
+    FUNCT:
+      - 3
+      - 3
+      - 3
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    NUMDOF: 9
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0.0001
+      - 0.0001
+      - 0.0001
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+  - E: 8
+    FUNCT:
+      - 4
+      - 4
+      - 4
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    NUMDOF: 9
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0.0001
+      - 0.0001
+      - 0.0001
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
 DNODE-NODE TOPOLOGY:
   - NODE 1 DNODE 1
   - NODE 11 DNODE 1
@@ -1243,6 +2904,38 @@ DNODE-NODE TOPOLOGY:
   - NODE 1231 DNODE 181
   - NODE 1240 DNODE 182
   - NODE 1241 DNODE 182
+FUNCT1:
+  - SYMBOLIC_FUNCTION_OF_TIME: t
+FUNCT2:
+  - SYMBOLIC_FUNCTION_OF_TIME: t
+FUNCT3:
+  - SYMBOLIC_FUNCTION_OF_TIME: t
+FUNCT4:
+  - SYMBOLIC_FUNCTION_OF_TIME: t
+IO:
+  OUTPUT_BIN: false
+  STRUCT_DISP: false
+  VERBOSITY: Standard
+IO/RUNTIME VTK OUTPUT:
+  EVERY_ITERATION: false
+  INTERVAL_STEPS: 1
+  OUTPUT_DATA_FORMAT: binary
+IO/RUNTIME VTK OUTPUT/BEAMS:
+  DISPLACEMENT: true
+  OUTPUT_BEAMS: true
+  STRAINS_GAUSSPOINT: true
+  TRIAD_VISUALIZATIONPOINT: true
+MATERIALS:
+  - MAT: 1
+    MAT_BeamReissnerElastHyper:
+      CROSSAREA: 0.031415926535897934
+      DENS: 0
+      MOMIN2: 7.853981633974484e-05
+      MOMIN3: 7.853981633974484e-05
+      MOMINPOL: 0.00015707963267948968
+      POISSONRATIO: 0
+      SHEARCORR: 1.1
+      YOUNG: 207
 NODE COORDS:
   - NODE 1 COORD 55.6984631039 1.71010071663 0
   - NODE 2 COORD 55.8296291314 1.29409522551 0.755749735098
@@ -2489,6 +4182,95 @@ NODE COORDS:
   - NODE 1243 COORD 4.82962913145 -1.29409522551 14.3592449669
   - NODE 1244 COORD 4.95722430687 -0.6526309611 13.9813700993
   - NODE 1245 COORD 5 0 13.6034952318
+PROBLEM TYPE:
+  PROBLEMTYPE: Structure
+RESULT DESCRIPTION:
+  - STRUCTURE:
+      DIS: structure
+      NODE: 190
+      QUANTITY: dispx
+      TOLERANCE: 1.0e-10
+      VALUE: 0.13191721002739798
+  - STRUCTURE:
+      DIS: structure
+      NODE: 190
+      QUANTITY: dispy
+      TOLERANCE: 1.0e-10
+      VALUE: 0.1993348845583147
+  - STRUCTURE:
+      DIS: structure
+      NODE: 190
+      QUANTITY: dispz
+      TOLERANCE: 1.0e-10
+      VALUE: 0.06922093109571521
+  - STRUCTURE:
+      DIS: structure
+      NODE: 470
+      QUANTITY: dispx
+      TOLERANCE: 1.0e-10
+      VALUE: 0.13298272648260862
+  - STRUCTURE:
+      DIS: structure
+      NODE: 470
+      QUANTITY: dispy
+      TOLERANCE: 1.0e-10
+      VALUE: 0.20055514581095235
+  - STRUCTURE:
+      DIS: structure
+      NODE: 470
+      QUANTITY: dispz
+      TOLERANCE: 1.0e-10
+      VALUE: 0.06970034314267715
+  - STRUCTURE:
+      DIS: structure
+      NODE: 711
+      QUANTITY: dispx
+      TOLERANCE: 1.0e-10
+      VALUE: 0.07692742096635531
+  - STRUCTURE:
+      DIS: structure
+      NODE: 711
+      QUANTITY: dispy
+      TOLERANCE: 1.0e-10
+      VALUE: 0.12499373471095152
+  - STRUCTURE:
+      DIS: structure
+      NODE: 711
+      QUANTITY: dispz
+      TOLERANCE: 1.0e-10
+      VALUE: 0.05867991807126929
+  - STRUCTURE:
+      DIS: structure
+      NODE: 1071
+      QUANTITY: dispx
+      TOLERANCE: 1.0e-10
+      VALUE: 0.06988026757838893
+  - STRUCTURE:
+      DIS: structure
+      NODE: 1071
+      QUANTITY: dispy
+      TOLERANCE: 1.0e-10
+      VALUE: 0.10989253309528824
+  - STRUCTURE:
+      DIS: structure
+      NODE: 1071
+      QUANTITY: dispz
+      TOLERANCE: 1.0e-10
+      VALUE: 0.04835255275303983
+SOLVER 1:
+  NAME: Structure_Solver
+  SOLVER: UMFPACK
+STRUCTURAL DYNAMIC:
+  DYNAMICTYPE: Statics
+  INT_STRATEGY: Standard
+  LINEAR_SOLVER: 1
+  MAXITER: 20
+  MAXTIME: 10
+  NUMSTEP: 1
+  PREDICT: TangDis
+  TIMESTEP: 1
+  TOLDISP: 1.0e-11
+  TOLRES: 0.0001
 STRUCTURE ELEMENTS:
   - 1 BEAM3R HERM2LINE3 1 3 2 MAT 1 TRIADS 1.89559897934 -1.32731269476 1.094424581 1.74248330835 -1.46211710137 1.00602320713 1.81982377094 -1.39639989281 1.05067574403
   - 2 BEAM3R HERM2LINE3 3 5 4 MAT 1 TRIADS 1.74248330835 -1.46211710137 1.00602320713 1.58351453426 -1.58351453426 0.914242542623 1.6636807013 -1.52448249021 0.960526500739

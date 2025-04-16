@@ -1,37 +1,44 @@
-MATERIALS:
-  - MAT: 1
-    MAT_BeamKirchhoffElastHyper:
-      YOUNG: 1000
-      SHEARMOD: 500
-      DENS: 0
-      CROSSAREA: 0.031415926535897934
-      MOMINPOL: 0.00015707963267948968
-      MOMIN2: 7.853981633974484e-05
-      MOMIN3: 7.853981633974484e-05
-      FAD: true
-  - MAT: 2
-    MAT_BeamKirchhoffElastHyper:
-      YOUNG: 1000
-      SHEARMOD: 500
-      DENS: 0
-      CROSSAREA: 0.031415926535897934
-      MOMINPOL: 0.00015707963267948968
-      MOMIN2: 7.853981633974484e-05
-      MOMIN3: 7.853981633974484e-05
-      FAD: false
 DESIGN POINT COUPLING CONDITIONS:
   - E: 1
     NUMDOF: 7
-    ONOFF: [1, 1, 1, 1, 1, 1, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
   - E: 2
     NUMDOF: 7
-    ONOFF: [1, 1, 1, 1, 1, 1, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
   - E: 3
     NUMDOF: 7
-    ONOFF: [1, 1, 1, 1, 1, 1, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
   - E: 4
     NUMDOF: 7
-    ONOFF: [1, 1, 1, 1, 1, 1, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
 DNODE-NODE TOPOLOGY:
   - NODE 5 DNODE 1
   - NODE 6 DNODE 1
@@ -41,6 +48,27 @@ DNODE-NODE TOPOLOGY:
   - NODE 46 DNODE 3
   - NODE 65 DNODE 4
   - NODE 66 DNODE 4
+MATERIALS:
+  - MAT: 1
+    MAT_BeamKirchhoffElastHyper:
+      CROSSAREA: 0.031415926535897934
+      DENS: 0
+      FAD: true
+      MOMIN2: 7.853981633974484e-05
+      MOMIN3: 7.853981633974484e-05
+      MOMINPOL: 0.00015707963267948968
+      SHEARMOD: 500
+      YOUNG: 1000
+  - MAT: 2
+    MAT_BeamKirchhoffElastHyper:
+      CROSSAREA: 0.031415926535897934
+      DENS: 0
+      FAD: false
+      MOMIN2: 7.853981633974484e-05
+      MOMIN3: 7.853981633974484e-05
+      MOMINPOL: 0.00015707963267948968
+      SHEARMOD: 500
+      YOUNG: 1000
 NODE COORDS:
   - NODE 1 COORD 0 4 0
   - NODE 2 COORD 0.25 4 0

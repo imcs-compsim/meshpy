@@ -1,475 +1,3 @@
-MATERIALS:
-  - MAT: 1
-    MAT_Struct_StVenantKirchhoff:
-      YOUNG: -1
-      NUE: 0
-      DENS: 0
-STRUCTURE KNOTVECTORS:
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 1
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 2
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 3
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 4
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 5
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 6
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 7
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 8
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 9
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 10
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 11
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 12
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 13
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 14
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 15
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-  - NURBS_DIMENSION 2
-  - BEGIN NURBSPATCH
-  - ID 16
-  - NUMKNOTS 7
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.5
-  - 1.0
-  - 1.0
-  - 1.0
-  - NUMKNOTS 8
-  - DEGREE 2
-  - TYPE Interpolated
-  - 0.0
-  - 0.0
-  - 0.0
-  - 0.3333333333333333
-  - 0.6666666666666666
-  - 1.0
-  - 1.0
-  - 1.0
-  - END NURBSPATCH
-DNODE-NODE TOPOLOGY:
-  - NODE 20 DNODE 1
-  - NODE 4 DNODE 2
-  - NODE 17 DNODE 3
-  - NODE 1 DNODE 4
-  - NODE 40 DNODE 5
-  - NODE 24 DNODE 6
-  - NODE 37 DNODE 7
-  - NODE 21 DNODE 8
-  - NODE 60 DNODE 9
-  - NODE 44 DNODE 10
-  - NODE 57 DNODE 11
-  - NODE 41 DNODE 12
-  - NODE 80 DNODE 13
-  - NODE 64 DNODE 14
-  - NODE 77 DNODE 15
-  - NODE 61 DNODE 16
-  - NODE 100 DNODE 17
-  - NODE 84 DNODE 18
-  - NODE 97 DNODE 19
-  - NODE 81 DNODE 20
-  - NODE 120 DNODE 21
-  - NODE 104 DNODE 22
-  - NODE 117 DNODE 23
-  - NODE 101 DNODE 24
-  - NODE 140 DNODE 25
-  - NODE 124 DNODE 26
-  - NODE 137 DNODE 27
-  - NODE 121 DNODE 28
-  - NODE 160 DNODE 29
-  - NODE 144 DNODE 30
-  - NODE 157 DNODE 31
-  - NODE 141 DNODE 32
-  - NODE 180 DNODE 33
-  - NODE 164 DNODE 34
-  - NODE 177 DNODE 35
-  - NODE 161 DNODE 36
-  - NODE 200 DNODE 37
-  - NODE 184 DNODE 38
-  - NODE 197 DNODE 39
-  - NODE 181 DNODE 40
-  - NODE 220 DNODE 41
-  - NODE 204 DNODE 42
-  - NODE 217 DNODE 43
-  - NODE 201 DNODE 44
-  - NODE 240 DNODE 45
-  - NODE 224 DNODE 46
-  - NODE 237 DNODE 47
-  - NODE 221 DNODE 48
-  - NODE 260 DNODE 49
-  - NODE 244 DNODE 50
-  - NODE 257 DNODE 51
-  - NODE 241 DNODE 52
-  - NODE 280 DNODE 53
-  - NODE 264 DNODE 54
-  - NODE 277 DNODE 55
-  - NODE 261 DNODE 56
-  - NODE 300 DNODE 57
-  - NODE 284 DNODE 58
-  - NODE 297 DNODE 59
-  - NODE 281 DNODE 60
-  - NODE 320 DNODE 61
-  - NODE 304 DNODE 62
-  - NODE 317 DNODE 63
-  - NODE 301 DNODE 64
 DLINE-NODE TOPOLOGY:
   - NODE 4 DLINE 1
   - NODE 8 DLINE 1
@@ -1047,6 +575,71 @@ DLINE-NODE TOPOLOGY:
   - NODE 306 DLINE 128
   - NODE 307 DLINE 128
   - NODE 308 DLINE 128
+DNODE-NODE TOPOLOGY:
+  - NODE 20 DNODE 1
+  - NODE 4 DNODE 2
+  - NODE 17 DNODE 3
+  - NODE 1 DNODE 4
+  - NODE 40 DNODE 5
+  - NODE 24 DNODE 6
+  - NODE 37 DNODE 7
+  - NODE 21 DNODE 8
+  - NODE 60 DNODE 9
+  - NODE 44 DNODE 10
+  - NODE 57 DNODE 11
+  - NODE 41 DNODE 12
+  - NODE 80 DNODE 13
+  - NODE 64 DNODE 14
+  - NODE 77 DNODE 15
+  - NODE 61 DNODE 16
+  - NODE 100 DNODE 17
+  - NODE 84 DNODE 18
+  - NODE 97 DNODE 19
+  - NODE 81 DNODE 20
+  - NODE 120 DNODE 21
+  - NODE 104 DNODE 22
+  - NODE 117 DNODE 23
+  - NODE 101 DNODE 24
+  - NODE 140 DNODE 25
+  - NODE 124 DNODE 26
+  - NODE 137 DNODE 27
+  - NODE 121 DNODE 28
+  - NODE 160 DNODE 29
+  - NODE 144 DNODE 30
+  - NODE 157 DNODE 31
+  - NODE 141 DNODE 32
+  - NODE 180 DNODE 33
+  - NODE 164 DNODE 34
+  - NODE 177 DNODE 35
+  - NODE 161 DNODE 36
+  - NODE 200 DNODE 37
+  - NODE 184 DNODE 38
+  - NODE 197 DNODE 39
+  - NODE 181 DNODE 40
+  - NODE 220 DNODE 41
+  - NODE 204 DNODE 42
+  - NODE 217 DNODE 43
+  - NODE 201 DNODE 44
+  - NODE 240 DNODE 45
+  - NODE 224 DNODE 46
+  - NODE 237 DNODE 47
+  - NODE 221 DNODE 48
+  - NODE 260 DNODE 49
+  - NODE 244 DNODE 50
+  - NODE 257 DNODE 51
+  - NODE 241 DNODE 52
+  - NODE 280 DNODE 53
+  - NODE 264 DNODE 54
+  - NODE 277 DNODE 55
+  - NODE 261 DNODE 56
+  - NODE 300 DNODE 57
+  - NODE 284 DNODE 58
+  - NODE 297 DNODE 59
+  - NODE 281 DNODE 60
+  - NODE 320 DNODE 61
+  - NODE 304 DNODE 62
+  - NODE 317 DNODE 63
+  - NODE 301 DNODE 64
 DSURF-NODE TOPOLOGY:
   - NODE 1 DSURFACE 1
   - NODE 2 DSURFACE 1
@@ -1368,6 +961,12 @@ DSURF-NODE TOPOLOGY:
   - NODE 318 DSURFACE 16
   - NODE 319 DSURFACE 16
   - NODE 320 DSURFACE 16
+MATERIALS:
+  - MAT: 1
+    MAT_Struct_StVenantKirchhoff:
+      DENS: 0
+      NUE: 0
+      YOUNG: -1
 NODE COORDS:
   - CP 1 COORD 1.5 0 0 1.0
   - CP 2 COORD 1.5 0.62132034356 0 0.8535533905932737
@@ -1786,3 +1385,404 @@ STRUCTURE ELEMENTS:
   - 94 WALLNURBS NURBS9 306 307 308 310 311 312 314 315 316 MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
   - 95 WALLNURBS NURBS9 309 310 311 313 314 315 317 318 319 MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
   - 96 WALLNURBS NURBS9 310 311 312 314 315 316 318 319 320 MAT 1 KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3
+STRUCTURE KNOTVECTORS:
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 1
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 2
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 3
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 4
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 5
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 6
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 7
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 8
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 9
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 10
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 11
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 12
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 13
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 14
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 15
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH
+  - NURBS_DIMENSION 2
+  - BEGIN NURBSPATCH
+  - ID 16
+  - NUMKNOTS 7
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.5
+  - 1.0
+  - 1.0
+  - 1.0
+  - NUMKNOTS 8
+  - DEGREE 2
+  - TYPE Interpolated
+  - 0.0
+  - 0.0
+  - 0.0
+  - 0.3333333333333333
+  - 0.6666666666666666
+  - 1.0
+  - 1.0
+  - 1.0
+  - END NURBSPATCH

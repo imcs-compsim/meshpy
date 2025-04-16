@@ -1,43 +1,112 @@
-MATERIALS:
-  - MAT: 1
-    MAT_BeamReissnerElastHyper:
-      YOUNG: 1000
-      POISSONRATIO: 0
-      DENS: 0
-      CROSSAREA: 0.031415926535897934
-      SHEARCORR: 1
-      MOMINPOL: 0.00015707963267948968
-      MOMIN2: 7.853981633974484e-05
-      MOMIN3: 7.853981633974484e-05
-      INTERACTIONRADIUS: 2
 DESIGN POINT COUPLING CONDITIONS:
   - E: 1
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 2
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 3
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 4
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 5
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 6
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 7
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 8
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
   - E: 9
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
 DNODE-NODE TOPOLOGY:
   - NODE 1 DNODE 1
   - NODE 4 DNODE 1
@@ -57,6 +126,18 @@ DNODE-NODE TOPOLOGY:
   - NODE 23 DNODE 8
   - NODE 28 DNODE 9
   - NODE 30 DNODE 9
+MATERIALS:
+  - MAT: 1
+    MAT_BeamReissnerElastHyper:
+      CROSSAREA: 0.031415926535897934
+      DENS: 0
+      INTERACTIONRADIUS: 2
+      MOMIN2: 7.853981633974484e-05
+      MOMIN3: 7.853981633974484e-05
+      MOMINPOL: 0.00015707963267948968
+      POISSONRATIO: 0
+      SHEARCORR: 1
+      YOUNG: 1000
 NODE COORDS:
   - NODE 1 COORD 0 0 0
   - NODE 2 COORD 0.5 0 0

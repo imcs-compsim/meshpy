@@ -1,30 +1,30 @@
-PROBLEM TYPE:
-  PROBLEMTYPE: "Structure"
 IO:
   OUTPUT_BIN: false
   STRUCT_DISP: false
-  VERBOSITY: "Standard"
-  STRUCT_STRAIN: "no"
-  STRUCT_STRESS: "no"
-STRUCTURAL DYNAMIC:
-  INT_STRATEGY: "Standard"
-  DYNAMICTYPE: "Statics"
-  TIMESTEP: 0.01
-  NUMSTEP: 17
-  MAXTIME: 2.1
-  LOADLIN: false
-  PREDICT: "TangDis"
-  LINEAR_SOLVER: 1
-  PRESTRESS: None
-  PRESTRESSTIME: 0
+  STRUCT_STRAIN: 'no'
+  STRUCT_STRESS: 'no'
+  VERBOSITY: Standard
+PROBLEM TYPE:
+  PROBLEMTYPE: Structure
 SOLVER 1:
-  SOLVER: "Superlu"
-  NAME: "Structure_Solver"
+  NAME: Structure_Solver
+  SOLVER: Superlu
 STRUCT NOX/Printing:
+  Details: true
   Error: true
   Inner Iteration: false
-  Details: true
   Linear Solver Details: true
   Test Details: true
 STRUCT NOX/Status Test:
-  XML File: "NOT_DEFINED"
+  XML File: NOT_DEFINED
+STRUCTURAL DYNAMIC:
+  DYNAMICTYPE: Statics
+  INT_STRATEGY: Standard
+  LINEAR_SOLVER: 1
+  LOADLIN: false
+  MAXTIME: 2.1
+  NUMSTEP: 17
+  PREDICT: TangDis
+  PRESTRESS: None
+  PRESTRESSTIME: 0
+  TIMESTEP: 0.01

@@ -1,9 +1,9 @@
 MATERIALS:
   - MAT: 1
     MAT_Struct_StVenantKirchhoff:
-      YOUNG: 1e+09
-      NUE: 0
       DENS: 7.8e-06
+      NUE: 0
+      YOUNG: 1e+09
 NODE COORDS:
   - NODE 1 COORD -0.5 -1 1.5
   - NODE 2 COORD -0.5 -1 -1.5

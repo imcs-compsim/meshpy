@@ -1,123 +1,119 @@
-PROBLEM TYPE:
-  PROBLEMTYPE: "Structure"
-DISCRETISATION:
-  NUMFLUIDDIS: 0
-  NUMALEDIS: 0
-  NUMTHERMDIS: 0
-IO:
-  VERBOSITY: "Standard"
-IO/RUNTIME VTK OUTPUT:
-  INTERVAL_STEPS: 1
-IO/RUNTIME VTK OUTPUT/STRUCTURE:
-  OUTPUT_STRUCTURE: true
-  DISPLACEMENT: true
-STRUCTURAL DYNAMIC:
-  INT_STRATEGY: "Standard"
-  DYNAMICTYPE: "Statics"
-  RESTARTEVERY: 5
-  NUMSTEP: 20
-  MAXTIME: 1
-  TOLDISP: 1e-11
-  TOLRES: 1e-05
-  MAXITER: 20
-  PREDICT: "TangDis"
-  LINEAR_SOLVER: 1
-SOLVER 1:
-  SOLVER: "UMFPACK"
-  NAME: "Structure_Solver"
-IO/RUNTIME VTK OUTPUT/BEAMS:
-  OUTPUT_BEAMS: true
-  DISPLACEMENT: true
-  TRIAD_VISUALIZATIONPOINT: true
-  STRAINS_GAUSSPOINT: true
-  USE_ABSOLUTE_POSITIONS: true
-RESULT DESCRIPTION:
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 32
-      QUANTITY: "dispx"
-      VALUE: 1.50796091342925
-      TOLERANCE: 1.0e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 32
-      QUANTITY: "dispy"
-      VALUE: 1.31453288915877e-08
-      TOLERANCE: 1.0e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 32
-      QUANTITY: "dispz"
-      VALUE: 0.0439008100184687
-      TOLERANCE: 1.0e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 69
-      QUANTITY: "dispx"
-      VALUE: 0.921450108160878
-      TOLERANCE: 1.0e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 69
-      QUANTITY: "dispy"
-      VALUE: 1.41113401669104e-15
-      TOLERANCE: 1.0e-10
-  - STRUCTURE:
-      DIS: "structure"
-      NODE: 69
-      QUANTITY: "dispz"
-      VALUE: 0.0178350143764099
-      TOLERANCE: 1.0e-10
-MATERIALS:
-  - MAT: 1
-    MAT_Struct_StVenantKirchhoff:
-      YOUNG: 1.0e+09
-      NUE: 0
-      DENS: 7.8e-06
-  - MAT: 2
-    MAT_BeamReissnerElastHyper:
-      YOUNG: 1.0e+09
-      POISSONRATIO: 0
-      DENS: 0
-      CROSSAREA: 0.19634954084936207
-      SHEARCORR: 0.75
-      MOMINPOL: 0.006135923151542565
-      MOMIN2: 0.0030679615757712823
-      MOMIN3: 0.0030679615757712823
-FUNCT1:
-  - COMPONENT: 0
-    SYMBOLIC_FUNCTION_OF_SPACE_TIME: "cos(2*pi*t)"
-FUNCT2:
-  - COMPONENT: 0
-    SYMBOLIC_FUNCTION_OF_SPACE_TIME: "sin(2*pi*t)"
-FUNCT3:
-  - COMPONENT: 0
-    SYMBOLIC_FUNCTION_OF_SPACE_TIME: "sin(t*2*pi)"
-FUNCT4:
-  - COMPONENT: 0
-    SYMBOLIC_FUNCTION_OF_SPACE_TIME: "cos(t*2*pi)"
 DESIGN POINT DIRICH CONDITIONS:
   - E: 1
+    FUNCT:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
-    VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
   - E: 2
+    FUNCT:
+      - 4
+      - 3
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 1, 1, 0, 0, 0]
-    VAL: [3, 3, 0, 0, 0, 0, 0, 0, 0]
-    FUNCT: [4, 3, 0, 0, 0, 0, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 3
+      - 3
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
 DESIGN SURF DIRICH CONDITIONS:
   - E: 1
+    FUNCT:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
     NUMDOF: 6
-    ONOFF: [1, 1, 1, 0, 0, 0]
-    VAL: [0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 0, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
   - E: 2
+    FUNCT:
+      - 1
+      - 2
+      - 0
+      - 0
+      - 0
+      - 0
     NUMDOF: 6
-    ONOFF: [1, 1, 1, 0, 0, 0]
-    VAL: [3, 3, 0, 0, 0, 0]
-    FUNCT: [1, 2, 0, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 3
+      - 3
+      - 0
+      - 0
+      - 0
+      - 0
+DISCRETISATION:
+  NUMALEDIS: 0
+  NUMFLUIDDIS: 0
+  NUMTHERMDIS: 0
 DNODE-NODE TOPOLOGY:
   - NODE 67 DNODE 1
   - NODE 73 DNODE 2
@@ -134,6 +130,47 @@ DSURF-NODE TOPOLOGY:
   - NODE 64 DSURFACE 2
   - NODE 65 DSURFACE 2
   - NODE 66 DSURFACE 2
+FUNCT1:
+  - COMPONENT: 0
+    SYMBOLIC_FUNCTION_OF_SPACE_TIME: cos(2*pi*t)
+FUNCT2:
+  - COMPONENT: 0
+    SYMBOLIC_FUNCTION_OF_SPACE_TIME: sin(2*pi*t)
+FUNCT3:
+  - COMPONENT: 0
+    SYMBOLIC_FUNCTION_OF_SPACE_TIME: sin(t*2*pi)
+FUNCT4:
+  - COMPONENT: 0
+    SYMBOLIC_FUNCTION_OF_SPACE_TIME: cos(t*2*pi)
+IO:
+  VERBOSITY: Standard
+IO/RUNTIME VTK OUTPUT:
+  INTERVAL_STEPS: 1
+IO/RUNTIME VTK OUTPUT/BEAMS:
+  DISPLACEMENT: true
+  OUTPUT_BEAMS: true
+  STRAINS_GAUSSPOINT: true
+  TRIAD_VISUALIZATIONPOINT: true
+  USE_ABSOLUTE_POSITIONS: true
+IO/RUNTIME VTK OUTPUT/STRUCTURE:
+  DISPLACEMENT: true
+  OUTPUT_STRUCTURE: true
+MATERIALS:
+  - MAT: 1
+    MAT_Struct_StVenantKirchhoff:
+      DENS: 7.8e-06
+      NUE: 0
+      YOUNG: 1000000000.0
+  - MAT: 2
+    MAT_BeamReissnerElastHyper:
+      CROSSAREA: 0.19634954084936207
+      DENS: 0
+      MOMIN2: 0.0030679615757712823
+      MOMIN3: 0.0030679615757712823
+      MOMINPOL: 0.006135923151542565
+      POISSONRATIO: 0
+      SHEARCORR: 0.75
+      YOUNG: 1000000000.0
 NODE COORDS:
   - NODE 1 COORD -0.25 0 -4
   - NODE 2 COORD -0.125 0.216506350946 -4
@@ -208,6 +245,59 @@ NODE COORDS:
   - NODE 71 COORD 2 0 1.66666666667
   - NODE 72 COORD 2 0 3.33333333333
   - NODE 73 COORD 2 0 5
+PROBLEM TYPE:
+  PROBLEMTYPE: Structure
+RESULT DESCRIPTION:
+  - STRUCTURE:
+      DIS: structure
+      NODE: 32
+      QUANTITY: dispx
+      TOLERANCE: 1.0e-10
+      VALUE: 1.50796091342925
+  - STRUCTURE:
+      DIS: structure
+      NODE: 32
+      QUANTITY: dispy
+      TOLERANCE: 1.0e-10
+      VALUE: 1.31453288915877e-08
+  - STRUCTURE:
+      DIS: structure
+      NODE: 32
+      QUANTITY: dispz
+      TOLERANCE: 1.0e-10
+      VALUE: 0.0439008100184687
+  - STRUCTURE:
+      DIS: structure
+      NODE: 69
+      QUANTITY: dispx
+      TOLERANCE: 1.0e-10
+      VALUE: 0.921450108160878
+  - STRUCTURE:
+      DIS: structure
+      NODE: 69
+      QUANTITY: dispy
+      TOLERANCE: 1.0e-10
+      VALUE: 1.41113401669104e-15
+  - STRUCTURE:
+      DIS: structure
+      NODE: 69
+      QUANTITY: dispz
+      TOLERANCE: 1.0e-10
+      VALUE: 0.0178350143764099
+SOLVER 1:
+  NAME: Structure_Solver
+  SOLVER: UMFPACK
+STRUCTURAL DYNAMIC:
+  DYNAMICTYPE: Statics
+  INT_STRATEGY: Standard
+  LINEAR_SOLVER: 1
+  MAXITER: 20
+  MAXTIME: 1
+  NUMSTEP: 20
+  PREDICT: TangDis
+  RESTARTEVERY: 5
+  TOLDISP: 1e-11
+  TOLRES: 1e-05
 STRUCTURE ELEMENTS:
   - 1 SOLID HEX8 1 2 3 4 5 6 7 8 MAT 1 KINEM nonlinear
   - 2 SOLID HEX8 4 9 10 1 8 11 12 5 MAT 1 KINEM nonlinear

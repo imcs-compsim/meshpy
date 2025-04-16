@@ -1,19 +1,19 @@
 MATERIALS:
   - MAT: 1
     MAT_Struct_StVenantKirchhoff:
-      YOUNG: 1e+09
-      NUE: 0
       DENS: 7.8e-06
+      NUE: 0
+      YOUNG: 1e+09
   - MAT: 2
     MAT_BeamReissnerElastHyper:
-      YOUNG: -1
-      POISSONRATIO: 0
-      DENS: 0
       CROSSAREA: 0.007853981633974483
-      SHEARCORR: 1
-      MOMINPOL: 9.817477042468105e-06
+      DENS: 0
       MOMIN2: 4.9087385212340526e-06
       MOMIN3: 4.9087385212340526e-06
+      MOMINPOL: 9.817477042468105e-06
+      POISSONRATIO: 0
+      SHEARCORR: 1
+      YOUNG: -1
 NODE COORDS:
   - NODE 1 COORD -0.5 -1 1.5
   - NODE 2 COORD -0.5 -1 -1.5

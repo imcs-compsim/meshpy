@@ -1,149 +1,185 @@
-PROBLEM TYPE:
-  PROBLEMTYPE: "Structure"
-IO:
-  OUTPUT_BIN: false
-  STRUCT_DISP: false
-  STRUCT_STRESS: "2PK"
-  STRUCT_STRAIN: "no"
-  VERBOSITY: "Standard"
-STRUCTURAL DYNAMIC:
-  INT_STRATEGY: "Standard"
-  DYNAMICTYPE: "Statics"
-  NUMSTEP: 24
-  MAXTIME: 1.2
-  TIMESTEP: 0.05
-  PREDICT: "TangDis"
-  LINEAR_SOLVER: 1
-  LOADLIN: false
-  PRESTRESS: "None"
-  PRESTRESSTIME: 0
-SOLVER 1:
-  SOLVER: "Superlu"
-  NAME: "Structure_Solver"
-STRUCT NOX/Printing:
-  Error: true
-  Inner Iteration: false
-  Details: true
-  Linear Solver Details: true
-  Test Details: true
-BEAM INTERACTION/BEAM TO BEAM CONTACT:
-  STRATEGY: "penalty"
 BEAM CONTACT:
-  BEAMS_STRATEGY: "penalty"
-  MODELEVALUATOR: "standard"
-  BEAMS_SEGCON: true
-  BEAMS_BTBPENALTYPARAM: 50
   BEAMS_BTBLINEPENALTYPARAM: 0
+  BEAMS_BTBPENALTYPARAM: 50
   BEAMS_MAXDELTADISSCALEFAC: -1
-  BEAMS_PERPSHIFTANGLE1: 70
-  BEAMS_PERPSHIFTANGLE2: 80
+  BEAMS_NUMINTEGRATIONINTERVAL: 5
   BEAMS_PARSHIFTANGLE1: 70
   BEAMS_PARSHIFTANGLE2: 80
-  BEAMS_SEGANGLE: 12
-  BEAMS_NUMINTEGRATIONINTERVAL: 5
-  BEAMS_PENALTYLAW: "LinPosQuadPen"
-  BEAMS_PENREGPARAM_G0: 0.002
-  BEAMS_PENREGPARAM_F0: 0
+  BEAMS_PENALTYLAW: LinPosQuadPen
   BEAMS_PENREGPARAM_C0: 0
+  BEAMS_PENREGPARAM_F0: 0
+  BEAMS_PENREGPARAM_G0: 0.002
+  BEAMS_PERPSHIFTANGLE1: 70
+  BEAMS_PERPSHIFTANGLE2: 80
+  BEAMS_SEGANGLE: 12
+  BEAMS_SEGCON: true
+  BEAMS_STRATEGY: penalty
+  MODELEVALUATOR: standard
+BEAM CONTACT/RUNTIME VTK OUTPUT:
+  CONTACT_FORCES: true
+  EVERY_ITERATION: false
+  GAPS: true
+  INTERVAL_STEPS: 1
+  VTK_OUTPUT_BEAM_CONTACT: true
+BEAM INTERACTION:
+  REPARTITIONSTRATEGY: everydt
+  SEARCH_STRATEGY: bounding_volume_hierarchy
+BEAM INTERACTION/BEAM TO BEAM CONTACT:
+  STRATEGY: penalty
+BEAM INTERACTION/BEAM TO BEAM CONTACT CONDITIONS:
+  - COUPLING_ID: 0
+    E: 1
+  - COUPLING_ID: 0
+    E: 2
+BEAM INTERACTION/BEAM TO SOLID SURFACE/RUNTIME VTK OUTPUT:
+  AVERAGED_NORMALS: true
+  INTEGRATION_POINTS: true
+  MORTAR_LAMBDA_CONTINUOUS: true
+  MORTAR_LAMBDA_CONTINUOUS_SEGMENTS: 5
+  MORTAR_LAMBDA_DISCRET: true
+  NODAL_FORCES: true
+  SEGMENTATION: true
+  WRITE_OUTPUT: true
+BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/RUNTIME VTK OUTPUT:
+  INTEGRATION_POINTS: true
+  MORTAR_LAMBDA_CONTINUOUS: true
+  MORTAR_LAMBDA_CONTINUOUS_SEGMENTS: 5
+  MORTAR_LAMBDA_DISCRET: true
+  NODAL_FORCES: true
+  SEGMENTATION: true
+  WRITE_OUTPUT: true
 BINNING STRATEGY:
   BIN_SIZE_LOWER_BOUND: 5
-  DOMAINBOUNDINGBOX: "-3 -3 -3 3 3 3"
-BEAM INTERACTION:
-  REPARTITIONSTRATEGY: "everydt"
-  SEARCH_STRATEGY: bounding_volume_hierarchy
-IO/RUNTIME VTK OUTPUT:
-  INTERVAL_STEPS: 1
-  EVERY_ITERATION: false
-  OUTPUT_DATA_FORMAT: binary
-IO/RUNTIME VTK OUTPUT/STRUCTURE:
-  OUTPUT_STRUCTURE: true
-  STRESS_STRAIN: false
-  DISPLACEMENT: true
-  ELEMENT_OWNER: true
-  ELEMENT_GID: true
-  ELEMENT_MAT_ID: true
-IO/RUNTIME VTK OUTPUT/BEAMS:
-  OUTPUT_BEAMS: true
-  DISPLACEMENT: true
-  TRIAD_VISUALIZATIONPOINT: true
-  STRAINS_GAUSSPOINT: true
-  ELEMENT_GID: true
-  USE_ABSOLUTE_POSITIONS: true
-BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING/RUNTIME VTK OUTPUT:
-  WRITE_OUTPUT: true
-  NODAL_FORCES: true
-  MORTAR_LAMBDA_DISCRET: true
-  MORTAR_LAMBDA_CONTINUOUS: true
-  MORTAR_LAMBDA_CONTINUOUS_SEGMENTS: 5
-  SEGMENTATION: true
-  INTEGRATION_POINTS: true
-BEAM INTERACTION/BEAM TO SOLID SURFACE/RUNTIME VTK OUTPUT:
-  WRITE_OUTPUT: true
-  NODAL_FORCES: true
-  AVERAGED_NORMALS: true
-  MORTAR_LAMBDA_DISCRET: true
-  MORTAR_LAMBDA_CONTINUOUS: true
-  MORTAR_LAMBDA_CONTINUOUS_SEGMENTS: 5
-  SEGMENTATION: true
-  INTEGRATION_POINTS: true
-BEAM CONTACT/RUNTIME VTK OUTPUT:
-  VTK_OUTPUT_BEAM_CONTACT: true
-  INTERVAL_STEPS: 1
-  CONTACT_FORCES: true
-  GAPS: true
-  EVERY_ITERATION: false
-STRUCT NOX/Status Test:
-  XML File: "NOT_DEFINED"
-MATERIALS:
-  - MAT: 1
-    MAT_BeamReissnerElastHyper:
-      YOUNG: 1
-      POISSONRATIO: 0
-      DENS: 0
-      CROSSAREA: 0.031415926535897934
-      SHEARCORR: 1
-      MOMINPOL: 0.00015707963267948968
-      MOMIN2: 7.853981633974484e-05
-      MOMIN3: 7.853981633974484e-05
-FUNCT1:
-  - SYMBOLIC_FUNCTION_OF_SPACE_TIME: "var"
-  - VARIABLE: 0
-    NAME: "var"
-    TYPE: "linearinterpolation"
-    NUMPOINTS: 5
-    TIMES: [-1000, 0, 1, 1000, 2000]
-    VALUES: [0, 0, -0.35, -0.35, -0.35]
+  DOMAINBOUNDINGBOX: -3 -3 -3 3 3 3
 DESIGN POINT DIRICH CONDITIONS:
   - E: 1
+    FUNCT:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 0, 0, 0, 0, 0]
-    VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
   - E: 2
+    FUNCT:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 1, 0, 0, 0, 0, 0]
-    VAL: [0, 0, 0, 0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
   - E: 3
+    FUNCT:
+      - 0
+      - 0
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 1, 0, 0, 0, 0]
-    VAL: [0, 0, 1, 0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 1, 0, 0, 0, 0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0
+      - 0
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
   - E: 4
+    FUNCT:
+      - 0
+      - 0
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
     NUMDOF: 9
-    ONOFF: [1, 1, 1, 0, 1, 0, 0, 0, 0]
-    VAL: [0, 0, 1, 0, 0, 0, 0, 0, 0]
-    FUNCT: [0, 0, 1, 0, 0, 0, 0, 0, 0]
-BEAM INTERACTION/BEAM TO BEAM CONTACT CONDITIONS:
-  - E: 1
-    COUPLING_ID: 0
-  - E: 2
-    COUPLING_ID: 0
-DNODE-NODE TOPOLOGY:
-  - NODE 1 DNODE 1
-  - NODE 23 DNODE 2
-  - NODE 24 DNODE 3
-  - NODE 46 DNODE 4
+    ONOFF:
+      - 1
+      - 1
+      - 1
+      - 0
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+    VAL:
+      - 0
+      - 0
+      - 1
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
 DLINE-NODE TOPOLOGY:
   - NODE 1 DLINE 1
   - NODE 2 DLINE 1
@@ -191,6 +227,64 @@ DLINE-NODE TOPOLOGY:
   - NODE 44 DLINE 2
   - NODE 45 DLINE 2
   - NODE 46 DLINE 2
+DNODE-NODE TOPOLOGY:
+  - NODE 1 DNODE 1
+  - NODE 23 DNODE 2
+  - NODE 24 DNODE 3
+  - NODE 46 DNODE 4
+FUNCT1:
+  - SYMBOLIC_FUNCTION_OF_SPACE_TIME: var
+  - NAME: var
+    NUMPOINTS: 5
+    TIMES:
+      - -1000
+      - 0
+      - 1
+      - 1000
+      - 2000
+    TYPE: linearinterpolation
+    VALUES:
+      - 0
+      - 0
+      - -0.35
+      - -0.35
+      - -0.35
+    VARIABLE: 0
+IO:
+  OUTPUT_BIN: false
+  STRUCT_DISP: false
+  STRUCT_STRAIN: 'no'
+  STRUCT_STRESS: 2PK
+  VERBOSITY: Standard
+IO/RUNTIME VTK OUTPUT:
+  EVERY_ITERATION: false
+  INTERVAL_STEPS: 1
+  OUTPUT_DATA_FORMAT: binary
+IO/RUNTIME VTK OUTPUT/BEAMS:
+  DISPLACEMENT: true
+  ELEMENT_GID: true
+  OUTPUT_BEAMS: true
+  STRAINS_GAUSSPOINT: true
+  TRIAD_VISUALIZATIONPOINT: true
+  USE_ABSOLUTE_POSITIONS: true
+IO/RUNTIME VTK OUTPUT/STRUCTURE:
+  DISPLACEMENT: true
+  ELEMENT_GID: true
+  ELEMENT_MAT_ID: true
+  ELEMENT_OWNER: true
+  OUTPUT_STRUCTURE: true
+  STRESS_STRAIN: false
+MATERIALS:
+  - MAT: 1
+    MAT_BeamReissnerElastHyper:
+      CROSSAREA: 0.031415926535897934
+      DENS: 0
+      MOMIN2: 7.853981633974484e-05
+      MOMIN3: 7.853981633974484e-05
+      MOMINPOL: 0.00015707963267948968
+      POISSONRATIO: 0
+      SHEARCORR: 1
+      YOUNG: 1
 NODE COORDS:
   - NODE 1 COORD -1 0 0
   - NODE 2 COORD -0.909090909091 0 0
@@ -238,6 +332,30 @@ NODE COORDS:
   - NODE 44 COORD 0 0.818181818182 0.25
   - NODE 45 COORD 0 0.909090909091 0.25
   - NODE 46 COORD 0 1 0.25
+PROBLEM TYPE:
+  PROBLEMTYPE: Structure
+SOLVER 1:
+  NAME: Structure_Solver
+  SOLVER: Superlu
+STRUCT NOX/Printing:
+  Details: true
+  Error: true
+  Inner Iteration: false
+  Linear Solver Details: true
+  Test Details: true
+STRUCT NOX/Status Test:
+  XML File: NOT_DEFINED
+STRUCTURAL DYNAMIC:
+  DYNAMICTYPE: Statics
+  INT_STRATEGY: Standard
+  LINEAR_SOLVER: 1
+  LOADLIN: false
+  MAXTIME: 1.2
+  NUMSTEP: 24
+  PREDICT: TangDis
+  PRESTRESS: None
+  PRESTRESSTIME: 0
+  TIMESTEP: 0.05
 STRUCTURE ELEMENTS:
   - 1 BEAM3R HERM2LINE3 1 3 2 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0
   - 2 BEAM3R HERM2LINE3 3 5 4 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0

@@ -1,87 +1,145 @@
-TITLE:
-  - created by pre_exodus
-PROBLEM TYPE:
-  PROBLEMTYPE: "Structure"
-IO:
-  STRUCT_STRAIN: "GL"
-IO/RUNTIME VTK OUTPUT:
-  INTERVAL_STEPS: 1
-  OUTPUT_DATA_FORMAT: ascii
-IO/RUNTIME VTK OUTPUT/STRUCTURE:
-  OUTPUT_STRUCTURE: true
-  DISPLACEMENT: true
-STRUCTURAL DYNAMIC:
-  INT_STRATEGY: "Standard"
-  DYNAMICTYPE: "Statics"
-  TIMESTEP: 0.1
-  NUMSTEP: 10
-  TOLDISP: 1e-11
-  TOLRES: 1e-06
-  LINEAR_SOLVER: 1
-SOLVER 1:
-  SOLVER: "Superlu"
-  NAME: "Structure_Solver"
-FUNCT1:
-  - COMPONENT: 0
-    SYMBOLIC_FUNCTION_OF_SPACE_TIME: "t"
-MATERIALS:
-  - MAT: 1
-    MAT_Struct_StVenantKirchhoff:
-      YOUNG: 1
-      NUE: 0.3
-      DENS: 0
-DESIGN SURF NEUMANN CONDITIONS:
-  - E: 2
-    NUMDOF: 3
-    ONOFF: [1, 1, 1]
-    VAL: [0, 0, 0]
-    FUNCT: [1, 1, 1]
-  - E: 4
-    NUMDOF: 3
-    ONOFF: [1, 1, 1]
-    VAL: [0, 0, 0]
-    FUNCT: [1, 1, 1]
-  - E: 6
-    NUMDOF: 3
-    ONOFF: [1, 1, 1]
-    VAL: [0, 0, 0]
-    FUNCT: [1, 1, 1]
-  - E: 8
-    NUMDOF: 3
-    ONOFF: [1, 1, 1]
-    VAL: [0, 0, 0]
-    FUNCT: [1, 1, 1]
-  - E: 10
-    NUMDOF: 3
-    ONOFF: [1, 1, 1]
-    VAL: [0, 0, 0]
-    FUNCT: [1, 1, 1]
 DESIGN SURF DIRICH CONDITIONS:
   - E: 1
+    FUNCT:
+      - 0
+      - 0
+      - 0
     NUMDOF: 3
-    ONOFF: [1, 1, 1]
-    VAL: [0, 0, 0]
-    FUNCT: [0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+    VAL:
+      - 0
+      - 0
+      - 0
   - E: 3
+    FUNCT:
+      - 0
+      - 0
+      - 0
     NUMDOF: 3
-    ONOFF: [1, 1, 1]
-    VAL: [0, 0, 0]
-    FUNCT: [0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+    VAL:
+      - 0
+      - 0
+      - 0
   - E: 5
+    FUNCT:
+      - 0
+      - 0
+      - 0
     NUMDOF: 3
-    ONOFF: [1, 1, 1]
-    VAL: [0, 0, 0]
-    FUNCT: [0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+    VAL:
+      - 0
+      - 0
+      - 0
   - E: 7
+    FUNCT:
+      - 0
+      - 0
+      - 0
     NUMDOF: 3
-    ONOFF: [1, 1, 1]
-    VAL: [0, 0, 0]
-    FUNCT: [0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+    VAL:
+      - 0
+      - 0
+      - 0
   - E: 9
+    FUNCT:
+      - 0
+      - 0
+      - 0
     NUMDOF: 3
-    ONOFF: [1, 1, 1]
-    VAL: [0, 0, 0]
-    FUNCT: [0, 0, 0]
+    ONOFF:
+      - 1
+      - 1
+      - 1
+    VAL:
+      - 0
+      - 0
+      - 0
+DESIGN SURF NEUMANN CONDITIONS:
+  - E: 2
+    FUNCT:
+      - 1
+      - 1
+      - 1
+    NUMDOF: 3
+    ONOFF:
+      - 1
+      - 1
+      - 1
+    VAL:
+      - 0
+      - 0
+      - 0
+  - E: 4
+    FUNCT:
+      - 1
+      - 1
+      - 1
+    NUMDOF: 3
+    ONOFF:
+      - 1
+      - 1
+      - 1
+    VAL:
+      - 0
+      - 0
+      - 0
+  - E: 6
+    FUNCT:
+      - 1
+      - 1
+      - 1
+    NUMDOF: 3
+    ONOFF:
+      - 1
+      - 1
+      - 1
+    VAL:
+      - 0
+      - 0
+      - 0
+  - E: 8
+    FUNCT:
+      - 1
+      - 1
+      - 1
+    NUMDOF: 3
+    ONOFF:
+      - 1
+      - 1
+      - 1
+    VAL:
+      - 0
+      - 0
+      - 0
+  - E: 10
+    FUNCT:
+      - 1
+      - 1
+      - 1
+    NUMDOF: 3
+    ONOFF:
+      - 1
+      - 1
+      - 1
+    VAL:
+      - 0
+      - 0
+      - 0
 DSURF-NODE TOPOLOGY:
   - NODE 13 DSURFACE 1
   - NODE 15 DSURFACE 1
@@ -262,6 +320,23 @@ DSURF-NODE TOPOLOGY:
   - NODE 406 DSURFACE 10
   - NODE 409 DSURFACE 10
 DVOL-NODE TOPOLOGY: []
+FUNCT1:
+  - COMPONENT: 0
+    SYMBOLIC_FUNCTION_OF_SPACE_TIME: t
+IO:
+  STRUCT_STRAIN: GL
+IO/RUNTIME VTK OUTPUT:
+  INTERVAL_STEPS: 1
+  OUTPUT_DATA_FORMAT: ascii
+IO/RUNTIME VTK OUTPUT/STRUCTURE:
+  DISPLACEMENT: true
+  OUTPUT_STRUCTURE: true
+MATERIALS:
+  - MAT: 1
+    MAT_Struct_StVenantKirchhoff:
+      DENS: 0
+      NUE: 0.3
+      YOUNG: 1
 NODE COORDS:
   - NODE 1 COORD -2.1164982020854950e-01 8.2906387746334076e-02 6.6246682405471802e-01
   - NODE 2 COORD 2.0996239781379700e-01 8.2901701331138611e-02 6.5127986669540405e-01
@@ -697,6 +772,19 @@ NODE COORDS:
   - NODE 432 COORD  0.0000000000000000e+00  1.0000000000000000e+01  0.0000000000000000e+00
   - NODE 433 COORD  5.0000000000000000e-01  1.0500000000000000e+01  0.0000000000000000e+00
   - NODE 434 COORD  5.0000000000000000e-01  9.5000000000000000e+00  0.0000000000000000e+00
+PROBLEM TYPE:
+  PROBLEMTYPE: Structure
+SOLVER 1:
+  NAME: Structure_Solver
+  SOLVER: Superlu
+STRUCTURAL DYNAMIC:
+  DYNAMICTYPE: Statics
+  INT_STRATEGY: Standard
+  LINEAR_SOLVER: 1
+  NUMSTEP: 10
+  TIMESTEP: 0.1
+  TOLDISP: 1e-11
+  TOLRES: 1e-06
 STRUCTURE ELEMENTS:
   - 1 SOLIDT4 TET4 1 2 3 4 MAT 1 KINEM nonlinear
   - 2 SOLIDT4 TET4 1 5 2 6 MAT 1 KINEM nonlinear
@@ -873,3 +961,5 @@ STRUCTURE ELEMENTS:
   - 173 SOLID WEDGE6 425 424  427  432  431  433  MAT 1 KINEM nonlinear
   - 174 SOLID WEDGE6 429 425  427  434  432  433  MAT 1 KINEM nonlinear
   - 175 SOLID WEDGE6 423 425  429  430  432  434  MAT 1 KINEM nonlinear
+TITLE:
+  - created by pre_exodus
