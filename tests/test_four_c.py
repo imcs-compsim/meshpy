@@ -709,3 +709,35 @@ def test_four_c_beam_to_solid(
             mpy.bc.beam_to_solid_surface_contact,
         )
         assert_results_equal(get_corresponding_reference_file_path(), input_file)
+
+
+@pytest.mark.parametrize(
+    ("full_import", "additional_identifier"),
+    [(False, "dict_import"), (True, "full_import")],
+)
+def test_four_c_import_non_consecutive_geometry_sets(
+    full_import,
+    additional_identifier,
+    get_corresponding_reference_file_path,
+    assert_results_equal,
+):
+    """Test that we can import non-consecutively numbered geometry sets."""
+
+    mpy.import_mesh_full = full_import
+    input_file = InputFile(
+        yaml_file=get_corresponding_reference_file_path(additional_identifier="input")
+    )
+
+    material = MaterialReissner()
+    for i in range(3):
+        beam_set = create_beam_mesh_line(
+            input_file, Beam3rHerm2Line3, material, [i + 3, 0, 0], [i + 3, 0, 4], n_el=2
+        )
+        input_file.add(beam_set)
+
+    assert_results_equal(
+        get_corresponding_reference_file_path(
+            additional_identifier=additional_identifier
+        ),
+        input_file,
+    )
