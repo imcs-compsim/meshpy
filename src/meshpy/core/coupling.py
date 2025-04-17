@@ -21,14 +21,19 @@
 # THE SOFTWARE.
 """This module implements a class to couple geometry together."""
 
+from typing import List as _List
+from typing import Union as _Union
+
 import numpy as _np
 
+import meshpy.core.conf as _conf
 from meshpy.core.boundary_condition import (
     BoundaryConditionBase as _BoundaryConditionBase,
 )
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
 from meshpy.core.geometry_set import GeometrySetBase as _GeometrySetBase
+from meshpy.core.node import Node as _Node
 
 
 class Coupling(_BoundaryConditionBase):
@@ -36,32 +41,23 @@ class Coupling(_BoundaryConditionBase):
 
     def __init__(
         self,
-        geometry,
-        coupling_type,
+        geometry: _Union[_GeometrySetBase, _List[_Node]],
+        coupling_type: _Union[_conf.BoundaryCondition, str],
         coupling_dof_type,
         *,
-        check_overlapping_nodes=True,
-        check_at_init=True,
+        check_overlapping_nodes: bool = True,
         **kwargs,
     ):
         """Initialize this object.
 
-        Args
-        ----
-        geometry: GeometrySet, [Nodes], int
-            Geometry that this boundary condition acts on.
-        coupling_type: mpy.bc
-            Type of point coupling.
-        coupling_dof_type: mpy.coupling_dof, str
-            If this is a string it is the string that will be used in the input
-            file, otherwise it has to be of type mpy.coupling_dof.
-        check_overlapping_nodes: bool
-            If all nodes of this coupling condition have to be at the same
-            physical position.
-        check_at_init: bool
-            If the previous check should be performed at initialization. This is required
-            when importing a coupling from an input file as the nodes themselves are not build
-            up when the coupling is read.
+        Args:
+            geometry: Geometry set or nodes that should be coupled.
+            coupling_type: Type of coupling.
+            coupling_dof_type: mpy.coupling_dof, str
+                If this is a string it is the string that will be used in the input
+                file, otherwise it has to be of type mpy.coupling_dof.
+            check_overlapping_nodes: If all nodes of this coupling condition
+                have to be at the same physical position.
         """
 
         if isinstance(geometry, _GeometrySetBase):
@@ -84,9 +80,8 @@ class Coupling(_BoundaryConditionBase):
         self.coupling_dof_type = coupling_dof_type
         self.check_overlapping_nodes = check_overlapping_nodes
 
-        if check_at_init:
-            # Perform the checks on this boundary condition
-            self.check()
+        # Perform sanity checks for this boundary condition
+        self.check()
 
     def check(self):
         """Check that all nodes that are coupled have the same position
@@ -110,7 +105,7 @@ class Coupling(_BoundaryConditionBase):
         condition."""
 
         if isinstance(self.coupling_dof_type, dict):
-            bc_dict = self.coupling_dof_type
+            data = self.coupling_dof_type
         else:
             # In this case we have to check which beams are connected to the node.
             # TODO: Coupling also makes sense for different beam types, this can
@@ -144,9 +139,9 @@ class Coupling(_BoundaryConditionBase):
                             "Coupling beams of different types is not yet possible!"
                         )
 
-            bc_dict = beam_four_c_type.get_coupling_dict(self.coupling_dof_type)
+            data = beam_four_c_type.get_coupling_dict(self.coupling_dof_type)
 
-        return [{"E": self.geometry_set.i_global, **bc_dict}]
+        return [{"E": self.geometry_set.i_global, **data}]
 
 
 def coupling_factory(geometry, coupling_type, coupling_dof_type, **kwargs):

@@ -22,69 +22,107 @@
 """This module implements a class to represent boundary conditions in
 MeshPy."""
 
+import warnings as _warnings
+from typing import Dict as _Dict
+from typing import Optional as _Optional
+from typing import Union as _Union
+
+import meshpy.core.conf as _conf
 from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.container import ContainerBase as _ContainerBase
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.geometry_set import GeometrySetBase as _GeometrySetBase
+from meshpy.utils.nodes import find_close_nodes as _find_close_nodes
 
 
 class BoundaryConditionBase(_BaseMeshItem):
-    """This is a base object, which represents one boundary condition in the
-    input file, e.g. Dirichlet, Neumann, coupling or beam-to-solid."""
+    """Base class for boundary conditions."""
 
-    def __init__(self, geometry_set, bc_type=None, **kwargs):
-        """Initialize the object.
+    def __init__(
+        self,
+        geometry_set: _GeometrySetBase,
+        bc_type: _Union[_conf.BoundaryCondition, str],
+        **kwargs,
+    ):
+        """Initialize the boundary condition.
 
-        Args
-        ----
-        geometry_set: GeometrySet
-            Geometry that this boundary condition acts on.
-        bc_type: mpy.bc
-            Type of the boundary condition.
+        Args:
+            geometry_set: Geometry that this boundary condition acts on.
+            bc_type: Type of the boundary condition.
         """
 
         super().__init__(**kwargs)
         self.bc_type = bc_type
         self.geometry_set = geometry_set
 
-    @classmethod
-    def from_dict(cls, geometry_set, bc_key, bc_dict):
-        """This function acts as a factory and creates the correct boundary
-        condition object from a dictionary parsed from an input file."""
 
-        del bc_dict["E"]
+class BoundaryCondition(BoundaryConditionBase):
+    """This object represents one boundary condition, e.g., Dirichlet, Neumann,
+    ..."""
 
-        if bc_key in (
-            _mpy.bc.dirichlet,
-            _mpy.bc.neumann,
-            _mpy.bc.locsys,
-            _mpy.bc.beam_to_solid_surface_meshtying,
-            _mpy.bc.beam_to_solid_surface_contact,
-            _mpy.bc.beam_to_solid_volume_meshtying,
-        ) or isinstance(bc_key, str):
-            # Normal boundary condition (including beam-to-solid conditions).
-            from meshpy.four_c.boundary_condition import (
-                BoundaryCondition as _BoundaryCondition,
-            )
+    def __init__(
+        self,
+        geometry_set: _GeometrySetBase,
+        data: _Dict,
+        bc_type: _Union[_conf.BoundaryCondition, str],
+        *,
+        double_nodes: _Optional[_conf.DoubleNodes] = None,
+        **kwargs,
+    ):
+        """Initialize the object.
 
-            boundary_condition = _BoundaryCondition(
-                geometry_set, bc_dict, bc_type=bc_key
-            )
-        elif bc_key is _mpy.bc.point_coupling:
-            # Coupling condition.
-            from meshpy.core.coupling import Coupling as _Coupling
+        Args:
+            geometry_set: Geometry that this boundary condition acts on.
+            data: Data defining the properties of this boundary condition.
+            bc_type: Type of the boundary condition.
+            double_nodes: Depending on this parameter, it will be checked if point
+                Neumann conditions do contain nodes at the same spatial positions.
+        """
 
-            boundary_condition = _Coupling(
-                geometry_set,
-                bc_key,
-                bc_dict,
-                check_overlapping_nodes=False,
-                check_at_init=False,
-            )
-        else:
-            raise ValueError("Got unexpected boundary condition!")
+        super().__init__(geometry_set, bc_type, data=data, **kwargs)
+        self.double_nodes = double_nodes
 
-        boundary_condition.check()
-        return boundary_condition
+        # Perform some sanity checks for this boundary condition.
+        self.check()
+
+    def check(self):
+        """Check for point Neumann boundaries that there is not a double Node
+        in the set.
+
+        Duplicate nodes in a point Neumann boundary condition can lead
+        to the same force being applied multiple times at the same
+        spatial position, which results in incorrect load application.
+        """
+
+        if self.double_nodes is _mpy.double_nodes.keep:
+            return
+
+        if (
+            self.bc_type == _mpy.bc.neumann
+            and self.geometry_set.geometry_type == _mpy.geo.point
+        ):
+            my_nodes = self.geometry_set.get_points()
+            partners = _find_close_nodes(my_nodes)
+            # Create a list with nodes that will not be kept in the set.
+            double_node_list = []
+            for node_list in partners:
+                for i, node in enumerate(node_list):
+                    if i > 0:
+                        double_node_list.append(node)
+            if (
+                len(double_node_list) > 0
+                and self.double_nodes is _mpy.double_nodes.remove
+            ):
+                # Create the a new geometry set with the unique nodes.
+                self.geometry_set = _GeometrySet(
+                    [node for node in my_nodes if (node not in double_node_list)]
+                )
+            elif len(double_node_list) > 0:
+                _warnings.warn(
+                    "There are overlapping nodes in this point Neumann boundary, and it is not "
+                    "specified on how to handle them!"
+                )
 
 
 class BoundaryConditionContainer(_ContainerBase):

@@ -34,15 +34,18 @@ from typing import Dict as _Dict
 from typing import List as _List
 from typing import Optional as _Optional
 from typing import Tuple as _Tuple
+from typing import Union as _Union
 
 import yaml as _yaml
 
 import meshpy.core.conf as _conf
+from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.core.boundary_condition import (
     BoundaryConditionBase as _BoundaryConditionBase,
 )
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.container import ContainerBase as _ContainerBase
+from meshpy.core.coupling import Coupling as _Coupling
 from meshpy.core.element import Element as _Element
 from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySetNodes as _GeometrySetNodes
@@ -55,6 +58,31 @@ from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_avail
 
 if _cubitpy_is_available():
     import cubitpy as _cubitpy
+
+
+def _boundary_condition_from_dict(
+    geometry_set: _GeometrySetNodes,
+    bc_key: _Union[_conf.BoundaryCondition, str],
+    data: _Dict,
+) -> _BoundaryConditionBase:
+    """This function acts as a factory and creates the correct boundary
+    condition object from a dictionary parsed from an input file."""
+
+    del data["E"]
+
+    if bc_key in (
+        _mpy.bc.dirichlet,
+        _mpy.bc.neumann,
+        _mpy.bc.locsys,
+        _mpy.bc.beam_to_solid_surface_meshtying,
+        _mpy.bc.beam_to_solid_surface_contact,
+        _mpy.bc.beam_to_solid_volume_meshtying,
+    ) or isinstance(bc_key, str):
+        return _BoundaryCondition(geometry_set, data, bc_type=bc_key)
+    elif bc_key is _mpy.bc.point_coupling:
+        return _Coupling(geometry_set, bc_key, data, check_overlapping_nodes=False)
+    else:
+        raise ValueError("Got unexpected boundary condition!")
 
 
 def _get_geometry_set_indices_from_section(
@@ -298,7 +326,7 @@ class InputFile(_Mesh):
                 geometry_set = geometry_sets_in_sections[geometry_key][geometry_set_id]
                 mesh.boundary_conditions.append(
                     (bc_key, geometry_key),
-                    _BoundaryConditionBase.from_dict(geometry_set, bc_key, item),
+                    _boundary_condition_from_dict(geometry_set, bc_key, item),
                 )
 
         self.add(mesh)
@@ -568,8 +596,8 @@ class InputFile(_Mesh):
                     i += 1
 
         def _dump_mesh_items(yaml_dict, section_name, data_list):
-            """Output a section name and apply the dump_to_list for each list
-            item."""
+            """Output a section name and apply either the default dump or the
+            specialized the dump_to_list for each list item."""
 
             # Do not write section if no content is available
             if len(data_list) == 0:
@@ -581,7 +609,14 @@ class InputFile(_Mesh):
 
             item_dict_list = yaml_dict[section_name]
             for item in data_list:
-                item_dict_list.extend(item.dump_to_list())
+                if hasattr(item, "dump_to_list"):
+                    item_dict_list.extend(item.dump_to_list())
+                elif isinstance(item, _BoundaryCondition):
+                    item_dict_list.append(
+                        {"E": item.geometry_set.i_global, **item.data}
+                    )
+                else:
+                    raise TypeError(f"Could not dump {item}")
 
         # Add sets from couplings and boundary conditions to a temp container.
         self.unlink_nodes()
