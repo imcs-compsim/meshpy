@@ -1,78 +1,85 @@
 MATERIALS:
   - MAT: 1
     MAT_ViscoElastHyper:
-      NUMMAT: 4
-      MATIDS: [10, 11, 12, 13]
       DENS: 1.3e-06
-  - MAT: 10
-    ELAST_CoupNeoHooke:
-      YOUNG: 0.16
+      MATIDS:
+        - 10
+        - 11
+        - 12
+        - 13
+      NUMMAT: 4
+  - ELAST_CoupNeoHooke:
       NUE: 0.45
+      YOUNG: 0.16
+    MAT: 10
   - MAT: 11
     VISCO_GenMax:
-      TAU: 0.1
       BETA: 0.4
-      SOLVE: "OST"
-  - MAT: 12
-    ELAST_CoupAnisoExpo:
+      SOLVE: OST
+      TAU: 0.1
+  - ELAST_CoupAnisoExpo:
+      GAMMA: 0
+      INIT: 3
       K1: 0.0024
+      K1COMP: 0
       K2: 0.14
-      GAMMA: 0
-      K1COMP: 0
       K2COMP: 1
       STR_TENS_ID: 100
-      INIT: 3
-  - MAT: 13
-    ELAST_CoupAnisoExpo:
-      K1: 0.0054
-      K2: 1.24
-      GAMMA: 0
-      K1COMP: 0
-      K2COMP: 1
-      STR_TENS_ID: 100
-      INIT: 3
+    MAT: 12
+  - ELAST_CoupAnisoExpo:
       FIBER_ID: 2
-  - MAT: 100
-    ELAST_StructuralTensor:
-      STRATEGY: "Standard"
+      GAMMA: 0
+      INIT: 3
+      K1: 0.0054
+      K1COMP: 0
+      K2: 1.24
+      K2COMP: 1
+      STR_TENS_ID: 100
+    MAT: 13
+  - ELAST_StructuralTensor:
+      STRATEGY: Standard
+    MAT: 100
   - MAT: 2
     MAT_ElastHyper:
-      NUMMAT: 3
-      MATIDS: [20, 21, 22]
       DENS: 1.3e-06
-  - MAT: 20
-    ELAST_CoupNeoHooke:
-      YOUNG: 1.23
+      MATIDS:
+        - 20
+        - 21
+        - 22
+      NUMMAT: 3
+  - ELAST_CoupNeoHooke:
       NUE: 0.45
-  - MAT: 21
-    ELAST_CoupAnisoExpo:
+      YOUNG: 1.23
+    MAT: 20
+  - ELAST_CoupAnisoExpo:
+      GAMMA: 0
+      INIT: 3
       K1: 0.0004
+      K1COMP: 0
       K2: 12
-      GAMMA: 0
-      K1COMP: 0
       K2COMP: 1
       STR_TENS_ID: 200
-      INIT: 3
-  - MAT: 22
-    ELAST_CoupAnisoExpo:
-      K1: 0.0502
-      K2: 10
-      GAMMA: 0
-      K1COMP: 0
-      K2COMP: 1
-      STR_TENS_ID: 200
-      INIT: 3
+    MAT: 21
+  - ELAST_CoupAnisoExpo:
       FIBER_ID: 2
-  - MAT: 200
-    ELAST_StructuralTensor:
-      STRATEGY: "Standard"
+      GAMMA: 0
+      INIT: 3
+      K1: 0.0502
+      K1COMP: 0
+      K2: 10
+      K2COMP: 1
+      STR_TENS_ID: 200
+    MAT: 22
+  - ELAST_StructuralTensor:
+      STRATEGY: Standard
+    MAT: 200
   - MAT: 201
     MAT_BeamReissnerElastHyper:
-      YOUNG: 1
-      POISSONRATIO: 0
-      DENS: 0
       CROSSAREA: 12.566370614359172
-      SHEARCORR: 1
-      MOMINPOL: 25.132741228718345
+      DENS: 0.0
       MOMIN2: 12.566370614359172
       MOMIN3: 12.566370614359172
+      MOMINPOL: 25.132741228718345
+      POISSONRATIO: 0.0
+      SHEARCORR: 1
+      YOUNG: 1.0

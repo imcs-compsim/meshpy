@@ -1,23 +1,12 @@
-MATERIALS:
-  - MAT: 1
-    MAT_Struct_StVenantKirchhoff:
-      YOUNG: 8
-      NUE: 0
-      DENS: 0
-  - MAT: 2
-    MAT_Struct_StVenantKirchhoff:
-      YOUNG: 1
-      NUE: 0.45
-      DENS: 0
 DESIGN SURF MORTAR CONTACT CONDITIONS 3D:
   - E: 1
-    InterfaceID: 1
-    Side: "Master"
     FrCoeffOrBound: 0.5
+    InterfaceID: 1
+    Side: Master
   - E: 2
-    InterfaceID: 1
-    Side: "Master"
     FrCoeffOrBound: 0.5
+    InterfaceID: 1
+    Side: Master
 DSURF-NODE TOPOLOGY:
   - NODE 1 DSURFACE 1
   - NODE 4 DSURFACE 1
@@ -27,6 +16,17 @@ DSURF-NODE TOPOLOGY:
   - NODE 12 DSURFACE 2
   - NODE 13 DSURFACE 2
   - NODE 16 DSURFACE 2
+MATERIALS:
+  - MAT: 1
+    MAT_Struct_StVenantKirchhoff:
+      DENS: 0
+      NUE: 0
+      YOUNG: 8
+  - MAT: 2
+    MAT_Struct_StVenantKirchhoff:
+      DENS: 0
+      NUE: 0.45
+      YOUNG: 1
 NODE COORDS:
   - NODE 1 COORD 1.5 -0.5 0.5
   - NODE 2 COORD 1.5 -0.5 -0.5
