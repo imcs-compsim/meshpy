@@ -41,16 +41,15 @@ class VolumeElement(_Element):
         self.string_pre_nodes = string_pre_nodes
         self.string_post_nodes = string_post_nodes
 
-    def dump_to_list(self):
-        """Return a list with the items representing this object (usually a
+    # ! TODO fix this export with a dict
+    def dump_data(self):
+        """Return a dict with the items representing this object (usually a
         single item)."""
 
         # String with the node ids.
         nodes_string = " ".join(str(node.i_global) for node in self.nodes)
 
-        return [
-            f"{self.i_global} {self.string_pre_nodes} {nodes_string} {self.string_post_nodes}"
-        ]
+        return f"{self.i_global} {self.string_pre_nodes} {nodes_string} {self.string_post_nodes}"
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid, **kwargs):
         """Add the representation of this element to the VTK writer as a

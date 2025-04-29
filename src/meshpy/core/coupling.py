@@ -100,8 +100,8 @@ class Coupling(_BoundaryConditionBase):
                 "The nodes given to Coupling do not have the same position."
             )
 
-    def dump_to_list(self):
-        """Return a list with a single item representing this coupling
+    def dump_data(self):
+        """Return a dictionary with a single item representing this coupling
         condition."""
 
         if isinstance(self.coupling_dof_type, dict):
@@ -141,7 +141,7 @@ class Coupling(_BoundaryConditionBase):
 
             data = beam_four_c_type.get_coupling_dict(self.coupling_dof_type)
 
-        return [{"E": self.geometry_set.i_global, **data}]
+        return {"E": self.geometry_set.i_global, **data}
 
 
 def coupling_factory(geometry, coupling_type, coupling_dof_type, **kwargs):

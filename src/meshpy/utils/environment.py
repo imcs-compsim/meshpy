@@ -22,7 +22,12 @@
 """Helper functions to interact with the MeshPy environment."""
 
 import os as _os
+import shutil as _shutil
+import subprocess as _subprocess  # nosec B404
 from importlib.util import find_spec as _find_spec
+from pathlib import Path as _Path
+from typing import Optional as _Optional
+from typing import Tuple as _Tuple
 
 
 def cubitpy_is_available() -> bool:
@@ -37,6 +42,7 @@ def cubitpy_is_available() -> bool:
     return True
 
 
+# TODO remove this function once Nurbs Patches are transferred
 def fourcipp_is_available() -> bool:
     """Check if FourCIPP is installed.
 
@@ -76,3 +82,41 @@ def get_env_variable(name, *, default="default_not_set"):
     elif default == "default_not_set":
         raise ValueError(f"Environment variable {name} is not set")
     return default
+
+
+def get_git_data(repo_path: _Path) -> _Tuple[_Optional[str], _Optional[str]]:
+    """Return the hash and date of the current git commit of a git repo for a
+    given repo path.
+
+    Args:
+        repo_path: Path to the git repository.
+    Returns:
+        A tuple with the hash and date of the current git commit
+        if available, otherwise None.
+    """
+
+    git = _shutil.which("git")
+    if git is None:
+        raise RuntimeError("Git executable not found")
+
+    out_sha = _subprocess.run(  # nosec B603
+        [git, "rev-parse", "HEAD"],
+        cwd=repo_path,
+        stdout=_subprocess.PIPE,
+        stderr=_subprocess.DEVNULL,
+    )
+
+    out_date = _subprocess.run(  # nosec B603
+        [git, "show", "-s", "--format=%ci"],
+        cwd=repo_path,
+        stdout=_subprocess.PIPE,
+        stderr=_subprocess.DEVNULL,
+    )
+
+    if not out_sha.returncode + out_date.returncode == 0:
+        return None, None
+
+    git_sha = out_sha.stdout.decode("ascii").strip()
+    git_date = out_date.stdout.decode("ascii").strip()
+
+    return git_sha, git_date

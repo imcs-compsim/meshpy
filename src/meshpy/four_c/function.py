@@ -43,6 +43,6 @@ class Function(_BaseMeshItem):
         # Return this object again, as no copy should be created.
         return self
 
-    def dump_to_list(self):
+    def dump_data(self):
         """Return a list with the items representing this function."""
         return self.function_list

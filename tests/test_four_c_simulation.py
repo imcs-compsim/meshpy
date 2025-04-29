@@ -46,7 +46,7 @@ from meshpy.four_c.header_functions import (
     set_header_static,
     set_runtime_output,
 )
-from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.input_file import FourCInputFile
 from meshpy.four_c.material import MaterialReissner
 from meshpy.four_c.run_four_c import run_four_c
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
@@ -74,7 +74,7 @@ def create_cantilever_model(n_steps, time_step=0.5):
         Time step size.
     """
 
-    input_file = InputFile()
+    input_file = FourCInputFile()
     set_header_static(input_file, time_step=time_step, n_steps=n_steps)
     input_file.add(
         {"IO": {"OUTPUT_BIN": True, "STRUCT_DISP": True}}, option_overwrite=True
@@ -105,8 +105,8 @@ def run_four_c_test(tmp_path, name, mesh, n_proc=2, restart=[None, None], **kwar
         Path to the temporary directory
     name: str
         Name of the test case
-    mesh: InputFile
-        The InputFile object that contains the simulation
+    mesh: FourCInputFile
+        The FourCInputFile object that contains the simulation
     n_proc: int
         Number of processors to run 4C on
     restart: [restart_step, restart_from]
@@ -152,7 +152,7 @@ def test_four_c_simulation_honeycomb_sphere(
 
     # Read input file with information of the sphere and simulation.
     mpy.import_mesh_full = full_import
-    input_file = InputFile(
+    input_file = FourCInputFile(
         yaml_file=get_corresponding_reference_file_path(additional_identifier="import"),
     )
 
@@ -287,7 +287,7 @@ def test_four_c_simulation_beam_and_solid_tube(
 
     # Create the input file and read solid mesh data.
     mpy.import_mesh_full = full_import
-    input_file = InputFile()
+    input_file = FourCInputFile()
     input_file.read_yaml(
         get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_tube"
@@ -388,7 +388,7 @@ def test_four_c_simulation_honeycomb_variants(
     """Create a few different honeycomb structures."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Set options with different syntaxes.
     input_file.add(
@@ -566,7 +566,7 @@ def test_four_c_simulation_rotated_beam_axis(
     """
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Set header
     set_header_static(input_file, time_step=0.05, n_steps=20)
@@ -995,7 +995,7 @@ def test_four_c_simulation_cantilever_convergence(
     def create_and_run_cantilever(n_el, *, n_proc=1):
         """Create a cantilever beam for a convergence analysis."""
 
-        input_file = InputFile()
+        input_file = FourCInputFile()
         set_header_static(input_file, time_step=0.25, n_steps=4)
         set_runtime_output(input_file, output_energy=True)
         mat = MaterialReissner(radius=0.1, youngs_modulus=10000.0)
@@ -1078,7 +1078,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
     h = 0.25
 
     # Set up mesh and material.
-    beam_to_beam_contact_simulation = InputFile()
+    beam_to_beam_contact_simulation = FourCInputFile()
     mat = MaterialReissner(radius=0.1, youngs_modulus=1)
 
     # Create a beam in x-axis.

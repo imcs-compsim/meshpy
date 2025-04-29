@@ -38,8 +38,7 @@ from _pytest.config.argparsing import Parser
 from vtk_utils.compare_grids import compare_grids
 
 from meshpy.core.conf import mpy
-from meshpy.four_c.input_file import InputFile
-from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
+from meshpy.four_c.input_file import FourCInputFile
 from meshpy.utils.environment import fourcipp_is_available
 
 
@@ -275,7 +274,7 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
 
     def _assert_results_equal(
         reference: Union[Path, str, dict],
-        result: Union[Path, str, dict, InputFile],
+        result: Union[Path, str, dict, FourCInputFile],
         rtol: Optional[float] = None,
         atol: Optional[float] = None,
         input_file_kwargs: dict = {"add_header_information": False, "check_nox": False},
@@ -331,11 +330,11 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             compare_dicts(reference_dict, result_dict, rtol=rtol, atol=atol)
             return
 
-        if isinstance(reference, InputFile) or isinstance(result, InputFile):
+        if isinstance(reference, FourCInputFile) or isinstance(result, FourCInputFile):
 
             def get_dictionary(data) -> dict:
                 """Get the dictionary representation of the data object."""
-                if isinstance(data, InputFile):
+                if isinstance(data, FourCInputFile):
                     if fourcipp_is_available():
                         raise ValueError(
                             "Port this functionality to create the node from the dict "

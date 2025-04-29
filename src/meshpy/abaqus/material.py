@@ -40,6 +40,6 @@ class AbaqusBeamMaterial(_MaterialBeam):
         """
         super().__init__(data=name)
 
-    def dump_to_list(self):
+    def dump_data(self):
         """Return a list with the (single) item representing this material."""
         return [self.data]

@@ -29,12 +29,12 @@ from meshpy.core.conf import mpy as _mpy
 from meshpy.core.container import ContainerBase as _ContainerBase
 from meshpy.core.element_beam import Beam as _Beam
 from meshpy.core.node import Node as _Node
-from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 class GeometrySetBase(_BaseMeshItem):
     """Base class for a geometry set."""
 
+    # TODO reuse new global mapping
     # Node set names for the input file file.
     geometry_set_names = {
         _mpy.geo.point: "DNODE",
@@ -121,23 +121,27 @@ class GeometrySetBase(_BaseMeshItem):
         )
 
     def dump_to_list(self):
-        """Return a list with the legacy strings of this geometry set."""
+        """Return a dict with the this geometry set."""
 
-        if _fourcipp_is_available():
-            raise ValueError(
-                "Port this functionality to dump the geometry set to a suitable data format"
-            )
+        # TODO update this function to not return a list but a dict
+        # probably the best way is to create some sort of DNODE class
+        # which has its own dump function. This way we could here simply return
+        # a list of DNODE objects, then iterate over them and dump the dict for
+        # each of them.
 
-        # Sort the nodes based on the node GID.
-        nodes = self.get_all_nodes()
-        if len(nodes) == 0:
+        # Sort nodes based on their global index
+        nodes = sorted(self.get_all_nodes(), key=lambda n: n.i_global)
+
+        if not nodes:
             raise ValueError("Writing empty geometry sets is not supported")
-        nodes_id = [node.i_global for node in nodes]
-        sort_indices = _np.argsort(nodes_id)
-        nodes = [nodes[i] for i in sort_indices]
 
         return [
-            f"NODE {node.i_global} {self.geometry_set_names[self.geometry_type]} {self.i_global}"
+            {
+                "type": "NODE",
+                "node_id": node.i_global,
+                "d_type": self.geometry_set_names[self.geometry_type],
+                "d_id": self.i_global,
+            }
             for node in nodes
         ]
 

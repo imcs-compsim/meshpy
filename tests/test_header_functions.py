@@ -32,7 +32,7 @@ from meshpy.four_c.header_functions import (
     set_header_static,
     set_runtime_output,
 )
-from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.input_file import FourCInputFile
 
 
 def test_header_functions_static(
@@ -42,7 +42,7 @@ def test_header_functions_static(
     """Test the default static header function."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Set the header.
     set_header_static(input_file, time_step=0.1, n_steps=17, load_lin=True)
@@ -98,7 +98,7 @@ def test_header_functions_static_time(
 ):
     """Test the time setting options in the static header functions."""
 
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     set_header_static(
         input_file, time_step=time_step, n_steps=n_steps, total_time=total_time
@@ -120,7 +120,7 @@ def test_header_functions_static_prestress(
     parameter."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Set the header.
     set_header_static(
@@ -162,7 +162,7 @@ def test_header_functions_stress_output(
     parameter."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Set the header.
     set_header_static(
@@ -185,7 +185,7 @@ def test_header_functions_beam_interaction(
     """Test the beam-to-beam contact header function with default parameter."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add Beam contact section to file.
     set_beam_contact_section(

@@ -35,7 +35,7 @@ from meshpy.cosserat_curve.warping_along_cosserat_curve import (
     warp_mesh_along_curve,
 )
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
-from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.input_file import FourCInputFile
 from meshpy.four_c.material import MaterialReissner
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_helix
 
@@ -56,7 +56,7 @@ def create_beam_solid_input_file(get_corresponding_reference_file_path):
     """Create a beam and solid input file for testing purposes."""
 
     mpy.import_mesh_full = True
-    mesh = InputFile(
+    mesh = FourCInputFile(
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_cosserat_curve_mesh"
         )

@@ -25,7 +25,7 @@ MeshPy testing."""
 import os
 
 from meshpy.core.conf import mpy
-from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.input_file import FourCInputFile
 from meshpy.utils.environment import cubitpy_is_available
 
 if cubitpy_is_available():
@@ -257,10 +257,10 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
             mesh=True,
         )
         mpy.import_mesh_full = True
-        return InputFile(cubit=cubit)
+        return FourCInputFile(cubit=cubit)
 
     # Create the input file with the blocks representing plates in different planes
-    mesh = InputFile()
+    mesh = FourCInputFile()
     dimensions = [0.1, 2, 4]
     elements = [1, 2, 2]
 

@@ -34,7 +34,7 @@ class MaterialReissner(_MaterialBeam):
         # Shear factor for Reissner beam.
         self.shear_correction = shear_correction
 
-    def dump_to_list(self):
+    def dump_data(self):
         """Return a list with the (single) item representing this material."""
         if (
             self.area is None
@@ -72,7 +72,7 @@ class MaterialReissner(_MaterialBeam):
         }
         if self.interaction_radius is not None:
             data["INTERACTIONRADIUS"] = self.interaction_radius
-        return [{"MAT": self.i_global, self.material_string: data}]
+        return {"MAT": self.i_global, self.material_string: data}
 
 
 class MaterialReissnerElastoplastic(MaterialReissner):
@@ -99,9 +99,9 @@ class MaterialReissnerElastoplastic(MaterialReissner):
         self.isohardening_modulus_moment = isohardening_modulus_moment
         self.torsion_plasticity = torsion_plasticity
 
-    def dump_to_list(self):
+    def dump_data(self):
         """Return a list with the (single) item representing this material."""
-        super_list = super().dump_to_list()
+        super_list = super().dump_data()
         mat_dict = super_list[0][self.material_string]
         mat_dict["YIELDM"] = self.yield_moment
         mat_dict["ISOHARDM"] = self.isohardening_modulus_moment
@@ -116,7 +116,7 @@ class MaterialKirchhoff(_MaterialBeam):
         super().__init__(material_string="MAT_BeamKirchhoffElastHyper", **kwargs)
         self.is_fad = is_fad
 
-    def dump_to_list(self):
+    def dump_data(self):
         """Return a list with the (single) item representing this material."""
         if (
             self.area is None
@@ -153,7 +153,7 @@ class MaterialKirchhoff(_MaterialBeam):
         }
         if self.interaction_radius is not None:
             data["INTERACTIONRADIUS"] = self.interaction_radius
-        return [{"MAT": self.i_global, self.material_string: data}]
+        return {"MAT": self.i_global, self.material_string: data}
 
 
 class MaterialEulerBernoulli(_MaterialBeam):
@@ -164,7 +164,7 @@ class MaterialEulerBernoulli(_MaterialBeam):
             material_string="MAT_BeamKirchhoffTorsionFreeElastHyper", **kwargs
         )
 
-    def dump_to_list(self):
+    def dump_data(self):
         """Return a list with the (single) item representing this material."""
         area, mom2, _mom3, _polar = self.calc_area_stiffness()
         if self.area is None and self.mom2 is None:
@@ -184,7 +184,7 @@ class MaterialEulerBernoulli(_MaterialBeam):
             "CROSSAREA": area,
             "MOMIN": mom2,
         }
-        return [{"MAT": self.i_global, self.material_string: data}]
+        return {"MAT": self.i_global, self.material_string: data}
 
 
 class MaterialSolid(_Material):
@@ -201,19 +201,17 @@ class MaterialSolid(_Material):
         self.nu = nu
         self.density = density
 
-    def dump_to_list(self):
+    def dump_data(self):
         """Return a list with the (single) item representing this material."""
 
-        return [
-            {
-                "MAT": self.i_global,
-                self.material_string: {
-                    "YOUNG": self.youngs_modulus,
-                    "NUE": self.nu,
-                    "DENS": self.density,
-                },
-            }
-        ]
+        return {
+            "MAT": self.i_global,
+            self.material_string: {
+                "YOUNG": self.youngs_modulus,
+                "NUE": self.nu,
+                "DENS": self.density,
+            },
+        }
 
 
 class MaterialStVenantKirchhoff(MaterialSolid):
