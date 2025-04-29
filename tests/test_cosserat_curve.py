@@ -84,8 +84,9 @@ def test_cosserat_curve_translate_and_rotate(get_corresponding_reference_file_pa
     curve.translate(-curve.centerline_interpolation(5.0))
 
     # Rotate the curve around its center point
-    pos_1, q_1 = curve.get_centerline_position_and_rotation(0.0)
-    curve.rotate(Rotation.from_quaternion(quaternion.as_float_array(q_1)), origin=pos_1)
+    origin = [1, 2, 3]
+    rotation = Rotation([1, 2, 3], np.pi / 7)
+    curve.rotate(rotation, origin=origin)
 
     # Get the points and rotations at certain points
     t = list(map(float, range(-10, 30, 5)))
