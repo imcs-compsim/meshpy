@@ -150,6 +150,16 @@ def test_cosserat_curve_translate_and_rotate(
     )
 
 
+def test_cosserat_curve_bad_guess_triad(get_corresponding_reference_file_path):
+    """Check that an error is thrown for a bad guess triad."""
+    with pytest.raises(ValueError):
+        load_cosserat_curve_from_file(
+            get_corresponding_reference_file_path,
+            starting_triad_guess=Rotation([-0.5, 3, -0.5], 2)
+            * Rotation([0, 0, 1], np.pi * 0.5),
+        )
+
+
 def test_cosserat_curve_vtk_representation(
     tmp_path, get_corresponding_reference_file_path, assert_results_equal
 ):

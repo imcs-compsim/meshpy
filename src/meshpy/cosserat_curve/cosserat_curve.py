@@ -230,11 +230,18 @@ class CosseratCurve(object):
 
         # Check if we have to apply a twist for the rotations
         if starting_triad_guess is not None:
+            first_rotation = _Rotation.from_quaternion(
+                _quaternion.as_float_array(self.quaternions[0])
+            )
+            starting_triad_e1 = starting_triad_guess * [1, 0, 0]
+            if _np.dot(first_rotation * [1, 0, 0], starting_triad_e1) < 0.5:
+                raise ValueError(
+                    "The angle between the first basis vectors of the guess triad you"
+                    " provided and the automatically calculated one is too large,"
+                    " please check your input data."
+                )
             smallest_rotation_to_guess_tangent = _smallest_rotation(
-                _Rotation.from_quaternion(
-                    _quaternion.as_float_array(self.quaternions[0])
-                ),
-                starting_triad_guess * [1, 0, 0],
+                first_rotation, starting_triad_e1
             )
             relative_rotation = (
                 starting_triad_guess * smallest_rotation_to_guess_tangent.inv()
