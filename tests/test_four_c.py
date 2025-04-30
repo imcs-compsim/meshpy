@@ -28,6 +28,7 @@ import pytest
 from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
 from meshpy.core.geometry_set import GeometrySet
+from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.beam_interaction_conditions import add_beam_interaction_condition
 from meshpy.four_c.beam_potential import BeamPotential
@@ -162,7 +163,12 @@ def test_four_c_material_numbering(
             ]
         }
     )
-    input_file.add(MaterialReissner(youngs_modulus=1.0, radius=2.0))
+
+    mesh = Mesh()
+    mesh.add(MaterialReissner(youngs_modulus=1.0, radius=2.0))
+
+    input_file.add(mesh)
+
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
@@ -172,7 +178,9 @@ def test_four_c_simulation_beam_potential_helix(
     """Test the correct creation of input files for simulations including beam
     to beam potential interactions."""
 
+    mesh = Mesh()
     input_file = InputFile()
+
     mat = MaterialReissner(youngs_modulus=1000, radius=0.5, shear_correction=1.0)
 
     # define function for line charge density
@@ -204,7 +212,7 @@ def test_four_c_simulation_beam_potential_helix(
 
     # create helix
     helix_set = create_beam_mesh_helix(
-        input_file,
+        mesh,
         Beam3rHerm2Line3,
         mat,
         [0.0, 0.0, 1.0],
@@ -219,10 +227,10 @@ def test_four_c_simulation_beam_potential_helix(
     beampotential.add_potential_charge_condition(geometry_set=helix_set["line"])
 
     # Add boundary condition to bottom node
-    input_file.add(
+    mesh.add(
         BoundaryCondition(
             GeometrySet(
-                input_file.get_nodes_by_function(
+                mesh.get_nodes_by_function(
                     is_node_on_plane,
                     normal=[0, 0, 1],
                     origin_distance=0.0,
@@ -238,6 +246,8 @@ def test_four_c_simulation_beam_potential_helix(
             bc_type=mpy.bc.dirichlet,
         )
     )
+
+    input_file.add(mesh)
 
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
@@ -255,7 +265,7 @@ def test_four_c_solid_shell_direction_detection(
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_solid_shell_blocks"
         )
-    )
+    ).mesh
     # Add a beam element to check the function also works with beam elements
     mat = MaterialReissner()
     create_beam_mesh_line(
@@ -273,7 +283,7 @@ def test_four_c_solid_shell_direction_detection(
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_solid_shell_dome"
         )
-    )
+    ).mesh
 
     # Test that the thickness version works
     mesh_dome = mesh_dome_original.copy()
@@ -336,22 +346,22 @@ def test_four_c_locsys_condition(
     material, and an additional line locsys condition.
     """
 
-    # Create the input file with function and material.
-    input_file = InputFile()
+    # Create the mesh.
+    mesh = Mesh()
 
     fun = Function([{"SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"}])
-    input_file.add(fun)
+    mesh.add(fun)
 
     mat = MaterialReissner()
-    input_file.add(mat)
+    mesh.add(mat)
 
     # Create the beam.
     beam_set = create_beam_mesh_line(
-        input_file, Beam3rHerm2Line3, mat, [2.5, 2.5, 2.5], [4.5, 2.5, 2.5], n_el=1
+        mesh, Beam3rHerm2Line3, mat, [2.5, 2.5, 2.5], [4.5, 2.5, 2.5], n_el=1
     )
 
     # Add dirichlet boundary conditions.
-    input_file.add(
+    mesh.add(
         BoundaryCondition(
             beam_set["start"],
             {
@@ -364,7 +374,7 @@ def test_four_c_locsys_condition(
         )
     )
     # Add additional dirichlet boundary condition to check if combination with locsys condition works.
-    input_file.add(
+    mesh.add(
         BoundaryCondition(
             beam_set["end"],
             {
@@ -378,15 +388,15 @@ def test_four_c_locsys_condition(
     )
 
     # Add locsys condition with rotation
-    input_file.add(LocSysCondition(beam_set["end"], Rotation([0, 0, 1], 0.1)))
+    mesh.add(LocSysCondition(beam_set["end"], Rotation([0, 0, 1], 0.1)))
 
     # Add line Function with function array
 
     fun_2 = Function([{"SYMBOLIC_FUNCTION_OF_SPACE_TIME": "2.0*t"}])
-    input_file.add(fun_2)
+    mesh.add(fun_2)
 
     # Check if the LocSys condition is added correctly for a line with additional options.
-    input_file.add(
+    mesh.add(
         LocSysCondition(
             GeometrySet(beam_set["line"]),
             Rotation(
@@ -400,7 +410,7 @@ def test_four_c_locsys_condition(
     )
 
     # Check that the Locsys condition works with 3 given functions
-    input_file.add(
+    mesh.add(
         LocSysCondition(
             GeometrySet(beam_set["start"]),
             Rotation(
@@ -414,7 +424,7 @@ def test_four_c_locsys_condition(
     )
 
     # Compare with the reference solution.
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
 def test_four_c_linear_time_transformation_scaling():
@@ -521,7 +531,7 @@ def test_four_c_add_beam_interaction_condition():
     correctly."""
 
     # Create the mesh.
-    mesh = InputFile()
+    mesh = Mesh()
 
     # Create Material.
     mat = MaterialReissner()
@@ -587,7 +597,7 @@ def test_four_c_beam_to_beam_contact(
     """Test the beam-to-beam contact boundary conditions."""
 
     # Create the mesh.
-    mesh = InputFile()
+    mesh = Mesh()
 
     # Create Material.
     mat = MaterialReissner()
@@ -629,64 +639,61 @@ def test_four_c_beam_to_solid(
 
     # Load a solid
     mpy.import_mesh_full = True
-    input_file = InputFile(
+    mesh = InputFile(
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_block"
         )
-    )
+    ).mesh
 
     # The yaml file already contains the beam-to-solid boundary conditions
     # for the solid. We don't need them in this test case, as we want to
     # create them again. Thus, we have to delete them here.
-    input_file.boundary_conditions[
+    mesh.boundary_conditions[
         (mpy.bc.beam_to_solid_volume_meshtying, mpy.geo.volume)
     ].clear()
-    input_file.boundary_conditions[
+    mesh.boundary_conditions[
         (mpy.bc.beam_to_solid_surface_meshtying, mpy.geo.surface)
     ].clear()
 
     # Get the geometry set objects representing the geometry from the cubit
     # file.
-    surface_set = input_file.geometry_sets[mpy.geo.surface][0]
-    volume_set = input_file.geometry_sets[mpy.geo.volume][0]
+    surface_set = mesh.geometry_sets[mpy.geo.surface][0]
+    volume_set = mesh.geometry_sets[mpy.geo.volume][0]
 
     # Add the beam
     material = MaterialReissner()
     beam_set_1 = create_beam_mesh_line(
-        input_file, Beam3rHerm2Line3, material, [0, 0, 0], [0, 0, 1], n_el=1
+        mesh, Beam3rHerm2Line3, material, [0, 0, 0], [0, 0, 1], n_el=1
     )
     beam_set_2 = create_beam_mesh_line(
-        input_file, Beam3rHerm2Line3, material, [0, 1, 0], [0, 1, 1], n_el=2
+        mesh, Beam3rHerm2Line3, material, [0, 1, 0], [0, 1, 1], n_el=2
     )
     add_beam_interaction_condition(
-        input_file,
+        mesh,
         volume_set,
         beam_set_1["line"],
         mpy.bc.beam_to_solid_volume_meshtying,
     )
     add_beam_interaction_condition(
-        input_file,
+        mesh,
         volume_set,
         beam_set_2["line"],
         mpy.bc.beam_to_solid_volume_meshtying,
     )
     add_beam_interaction_condition(
-        input_file,
+        mesh,
         surface_set,
         beam_set_2["line"],
         mpy.bc.beam_to_solid_surface_meshtying,
     )
     add_beam_interaction_condition(
-        input_file,
+        mesh,
         surface_set,
         beam_set_1["line"],
         mpy.bc.beam_to_solid_surface_meshtying,
     )
 
-    # Check results
-    print(get_corresponding_reference_file_path())
-    print(input_file)
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
     # If we try to add this the IDs won't match, because the next volume ID for
     # beam-to-surface coupling should be 0 (this one does not make sense, but
@@ -694,7 +701,7 @@ def test_four_c_beam_to_solid(
     # coupling is 2 (there are already two of these conditions).
     with pytest.raises(ValueError):
         add_beam_interaction_condition(
-            input_file,
+            mesh,
             volume_set,
             beam_set_1["line"],
             mpy.bc.beam_to_solid_surface_meshtying,
@@ -705,12 +712,12 @@ def test_four_c_beam_to_solid(
     # contains a volume set.
     with pytest.raises(KeyError):
         add_beam_interaction_condition(
-            input_file,
+            mesh,
             volume_set,
             beam_set_1["line"],
             mpy.bc.beam_to_solid_surface_contact,
         )
-        assert_results_equal(get_corresponding_reference_file_path(), input_file)
+        assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
 @pytest.mark.parametrize(
@@ -725,6 +732,13 @@ def test_four_c_import_non_consecutive_geometry_sets(
 ):
     """Test that we can import non-consecutively numbered geometry sets."""
 
+    # TODO rework this test once the input file is refactored, i.e.
+    # input_file, mesh = InputFile(yaml_file=...)
+    # ... add different geometry sets to the mesh
+    # input_file.add(mesh)
+    # this way it is tested exhaustively rather than accessing the mesh
+    # in the input file during the beam mesh creation
+
     mpy.import_mesh_full = full_import
     input_file = InputFile(
         yaml_file=get_corresponding_reference_file_path(additional_identifier="input")
@@ -733,7 +747,12 @@ def test_four_c_import_non_consecutive_geometry_sets(
     material = MaterialReissner()
     for i in range(3):
         beam_set = create_beam_mesh_line(
-            input_file, Beam3rHerm2Line3, material, [i + 3, 0, 0], [i + 3, 0, 4], n_el=2
+            input_file.mesh,
+            Beam3rHerm2Line3,
+            material,
+            [i + 3, 0, 0],
+            [i + 3, 0, 4],
+            n_el=2,
         )
         input_file.add(beam_set)
 

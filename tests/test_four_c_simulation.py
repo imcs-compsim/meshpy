@@ -88,10 +88,14 @@ def create_cantilever_model(n_steps, time_step=0.5):
         ]
     )
     input_file.add(ft)
+
+    mesh = Mesh()
     mat = MaterialReissner(youngs_modulus=100.0, radius=0.1)
     beam_set = create_beam_mesh_line(
-        input_file, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
+        mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
     )
+
+    input_file.add(mesh)
 
     return input_file, beam_set
 
@@ -313,14 +317,17 @@ def test_four_c_simulation_beam_and_solid_tube(
     material = MaterialReissner(youngs_modulus=1e9, radius=0.25, shear_correction=0.75)
     input_file.add(sin, cos, material)
 
+    # Create a mesh
+    mesh = Mesh()
+
     # Add a straight beam.
-    input_file.add(material)
+    mesh.add(material)
     cantilever_set = create_beam_mesh_line(
-        input_file, Beam3rHerm2Line3, material, [2, 0, -5], [2, 0, 5], n_el=3
+        mesh, Beam3rHerm2Line3, material, [2, 0, -5], [2, 0, 5], n_el=3
     )
 
     # Add boundary conditions.
-    input_file.add(
+    mesh.add(
         BoundaryCondition(
             cantilever_set["start"],
             {
@@ -332,7 +339,7 @@ def test_four_c_simulation_beam_and_solid_tube(
             bc_type=mpy.bc.dirichlet,
         )
     )
-    input_file.add(
+    mesh.add(
         BoundaryCondition(
             cantilever_set["end"],
             {
@@ -354,9 +361,8 @@ def test_four_c_simulation_beam_and_solid_tube(
     nodes = [32, 69]
     add_result_description(input_file, displacements, nodes)
 
-    # Call get_unique_geometry_sets to check that this does not affect the
-    # mesh creation.
-    input_file.get_unique_geometry_sets(link_to_nodes="all_nodes")
+    # Add mesh to input file
+    input_file.add(mesh)
 
     # Check the created input file
     assert_results_equal(
@@ -565,7 +571,7 @@ def test_four_c_simulation_rotated_beam_axis(
         and couples them with a coupling.
     """
 
-    # Create input file.
+    # Create input file
     input_file = InputFile()
 
     # Set header
@@ -648,7 +654,7 @@ def test_four_c_simulation_rotated_beam_axis(
         input_file.add(mesh)
 
         # Each time move the whole mesh.
-        input_file.translate([1, 0, 0])
+        input_file.mesh.translate([1, 0, 0])
 
     # Add result checks.
     displacements = [[1.5015284845, 0.35139255451, -1.0126517891]] * 3
@@ -998,11 +1004,13 @@ def test_four_c_simulation_cantilever_convergence(
         input_file = InputFile()
         set_header_static(input_file, time_step=0.25, n_steps=4)
         set_runtime_output(input_file, output_energy=True)
+
+        mesh = Mesh()
         mat = MaterialReissner(radius=0.1, youngs_modulus=10000.0)
         beam_set = create_beam_mesh_line(
-            input_file, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0], n_el=n_el
+            mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 0, 0], n_el=n_el
         )
-        input_file.add(
+        mesh.add(
             BoundaryCondition(
                 beam_set["start"],
                 {
@@ -1019,7 +1027,7 @@ def test_four_c_simulation_cantilever_convergence(
                 {"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"},
             ]
         )
-        input_file.add(
+        mesh.add(
             fun,
             BoundaryCondition(
                 beam_set["end"],
@@ -1032,6 +1040,9 @@ def test_four_c_simulation_cantilever_convergence(
                 bc_type=mpy.bc.dirichlet,
             ),
         )
+
+        input_file.add(mesh)
+
         output_name = f"cantilever_convergence_{n_el}"
         run_four_c_test(tmp_path, output_name, input_file, n_proc=n_proc)
         testing_dir = tmp_path / output_name
@@ -1078,12 +1089,12 @@ def test_four_c_simulation_beam_to_beam_contact_example(
     h = 0.25
 
     # Set up mesh and material.
-    beam_to_beam_contact_simulation = InputFile()
+    mesh = Mesh()
     mat = MaterialReissner(radius=0.1, youngs_modulus=1)
 
     # Create a beam in x-axis.
     beam_x = create_beam_mesh_line(
-        beam_to_beam_contact_simulation,
+        mesh,
         Beam3rHerm2Line3,
         mat,
         [-l_beam / 2, 0, 0],
@@ -1093,7 +1104,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
 
     # Apply Dirichlet condition to start and end nodes of beam 1:
     for set_name in ["start", "end"]:
-        beam_to_beam_contact_simulation.add(
+        mesh.add(
             BoundaryCondition(
                 beam_x[set_name],
                 {
@@ -1108,7 +1119,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
 
     # Create a second beam in y-axis.
     beam_y = create_beam_mesh_line(
-        beam_to_beam_contact_simulation,
+        mesh,
         Beam3rHerm2Line3,
         mat,
         [0, -l_beam / 2, h],
@@ -1122,11 +1133,11 @@ def test_four_c_simulation_beam_to_beam_contact_example(
     # Create a linear interpolation function with the displacement.
     fun = create_linear_interpolation_function(t, disp_values)
 
-    beam_to_beam_contact_simulation.add(fun)
+    mesh.add(fun)
 
     # Apply Dirichlet conditions at starting and end node to displace the beam endings.
     for set_name in ["start", "end"]:
-        beam_to_beam_contact_simulation.add(
+        mesh.add(
             BoundaryCondition(
                 beam_y[set_name],
                 {
@@ -1141,15 +1152,21 @@ def test_four_c_simulation_beam_to_beam_contact_example(
 
     # Create a beam to beam contact boundary condition factory.
     add_beam_interaction_condition(
-        beam_to_beam_contact_simulation,
+        mesh,
         beam_x["line"],
         beam_y["line"],
         mpy.bc.beam_to_beam_contact,
     )
 
+    # Create the input file
+    input_file = InputFile()
+
+    # Add the mesh to the input file.
+    input_file.add(mesh)
+
     # Add the standard,static header.
     set_header_static(
-        beam_to_beam_contact_simulation,
+        input_file,
         time_step=0.05,
         n_steps=24,
         total_time=1.2,
@@ -1160,7 +1177,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
 
     # Set the parameters for beam to beam contact.
     set_beam_contact_section(
-        beam_to_beam_contact_simulation,
+        input_file,
         btb_penalty=50,
         penalty_regularization_g0=r_beam * 0.02,
         binning_parameters={
@@ -1170,29 +1187,21 @@ def test_four_c_simulation_beam_to_beam_contact_example(
     )
 
     # Add normal runtime output.
-    set_runtime_output(beam_to_beam_contact_simulation)
+    set_runtime_output(input_file)
 
     # Add special runtime output for beam interaction.
-    set_beam_contact_runtime_output(
-        beam_to_beam_contact_simulation, every_iteration=False
-    )
+    set_beam_contact_runtime_output(input_file, every_iteration=False)
 
     # Compare with the reference solution.
-    assert_results_equal(
-        get_corresponding_reference_file_path(), beam_to_beam_contact_simulation
-    )
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
     displacements = [[1.11158519615313324e-03, 0, -1.48443346935174636e-01]]
     nodes = [13]
-    add_result_description(
-        beam_to_beam_contact_simulation, displacements, nodes, tol=1e-8
-    )
+    add_result_description(input_file, displacements, nodes, tol=1e-8)
 
     # Check if we still have to actually run 4C.
     if not enforce_four_c:
         return
 
     initial_run_name = "beam_to_beam_contact_simulation"
-    run_four_c_test(
-        tmp_path, initial_run_name, beam_to_beam_contact_simulation, n_proc=1
-    )
+    run_four_c_test(tmp_path, initial_run_name, input_file, n_proc=1)
