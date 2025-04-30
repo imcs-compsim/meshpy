@@ -128,7 +128,7 @@ def _get_yaml_geometry_sets(
     return geometry_sets_in_this_section
 
 
-class InputFile(_Mesh):
+class InputFile:
     """An item that represents a complete 4C input file."""
 
     # Define the names of sections and boundary conditions in the input file.
@@ -206,7 +206,7 @@ class InputFile(_Mesh):
                 into this input file.
         """
 
-        super().__init__()
+        self.mesh = _Mesh()
 
         # Everything that is not a full MeshPy object is stored here, e.g., parameters
         # and imported nodes/elements/materials/...
@@ -345,7 +345,7 @@ class InputFile(_Mesh):
                 self.add_section(args[0], **kwargs)
                 return
 
-        super().add(*args, **kwargs)
+        self.mesh.add(*args, **kwargs)
 
     def add_section(self, section, *, option_overwrite=False):
         """Add a section to the object.
@@ -462,7 +462,7 @@ class InputFile(_Mesh):
 
         # Perform some checks on the mesh.
         if _mpy.check_overlapping_elements:
-            self.check_overlapping_elements()
+            self.mesh.check_overlapping_elements()
 
         # The base dictionary we use here is the one that already exists.
         # This one might already contain mesh sections - stored in pure
@@ -619,27 +619,27 @@ class InputFile(_Mesh):
                     raise TypeError(f"Could not dump {item}")
 
         # Add sets from couplings and boundary conditions to a temp container.
-        self.unlink_nodes()
+        self.mesh.unlink_nodes()
         start_indices_geometry_set = _get_global_start_geometry_set(yaml_dict)
-        mesh_sets = self.get_unique_geometry_sets(
+        mesh_sets = self.mesh.get_unique_geometry_sets(
             geometry_set_start_indices=start_indices_geometry_set
         )
 
         # Assign global indices to all entries.
         start_index_nodes = _get_global_start_node(yaml_dict)
-        _set_i_global(self.nodes, start_index=start_index_nodes)
+        _set_i_global(self.mesh.nodes, start_index=start_index_nodes)
         start_index_elements = _get_global_start_element(yaml_dict)
-        _set_i_global_elements(self.elements, start_index=start_index_elements)
+        _set_i_global_elements(self.mesh.elements, start_index=start_index_elements)
         start_index_materials = _get_global_start_material(yaml_dict)
-        _set_i_global(self.materials, start_index=start_index_materials)
+        _set_i_global(self.mesh.materials, start_index=start_index_materials)
         start_index_functions = _get_global_start_function(yaml_dict)
-        _set_i_global(self.functions, start_index=start_index_functions)
+        _set_i_global(self.mesh.functions, start_index=start_index_functions)
 
         # Add material data to the input file.
-        _dump_mesh_items(yaml_dict, "MATERIALS", self.materials)
+        _dump_mesh_items(yaml_dict, "MATERIALS", self.mesh.materials)
 
         # Add the functions.
-        for function in self.functions:
+        for function in self.mesh.functions:
             yaml_dict[f"FUNCT{function.i_global}"] = function.dump_to_list()
 
         # If there are couplings in the mesh, set the link between the nodes
@@ -647,8 +647,8 @@ class InputFile(_Mesh):
         # depending on the type of the connected beam element.
         def get_number_of_coupling_conditions(key):
             """Return the number of coupling conditions in the mesh."""
-            if (key, _mpy.geo.point) in self.boundary_conditions.keys():
-                return len(self.boundary_conditions[key, _mpy.geo.point])
+            if (key, _mpy.geo.point) in self.mesh.boundary_conditions.keys():
+                return len(self.mesh.boundary_conditions[key, _mpy.geo.point])
             else:
                 return 0
 
@@ -657,10 +657,10 @@ class InputFile(_Mesh):
             + get_number_of_coupling_conditions(_mpy.bc.point_coupling_penalty)
             > 0
         ):
-            self.set_node_links()
+            self.mesh.set_node_links()
 
         # Add the boundary conditions.
-        for (bc_key, geom_key), bc_list in self.boundary_conditions.items():
+        for (bc_key, geom_key), bc_list in self.mesh.boundary_conditions.items():
             if len(bc_list) > 0:
                 section_name = (
                     bc_key
@@ -670,7 +670,7 @@ class InputFile(_Mesh):
                 _dump_mesh_items(yaml_dict, section_name, bc_list)
 
         # Add additional element sections, e.g., for NURBS knot vectors.
-        for element in self.elements:
+        for element in self.mesh.elements:
             element.dump_element_specific_section(yaml_dict)
 
         # Add the geometry sets.
@@ -679,8 +679,8 @@ class InputFile(_Mesh):
                 _dump_mesh_items(yaml_dict, self.geometry_set_names[geom_key], item)
 
         # Add the nodes and elements.
-        _dump_mesh_items(yaml_dict, "NODE COORDS", self.nodes)
-        _dump_mesh_items(yaml_dict, "STRUCTURE ELEMENTS", self.elements)
+        _dump_mesh_items(yaml_dict, "NODE COORDS", self.mesh.nodes)
+        _dump_mesh_items(yaml_dict, "STRUCTURE ELEMENTS", self.mesh.elements)
 
         return yaml_dict
 
