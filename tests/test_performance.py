@@ -31,7 +31,7 @@ from meshpy.core.conf import mpy
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
-from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.input_file import FourCInputFile
 from meshpy.four_c.material import MaterialReissner
 from meshpy.geometric_search.find_close_points import (
     FindClosePointAlgorithm,
@@ -109,18 +109,11 @@ def create_solid_block(file_path, nx, ny, nz):
     cubit.create_dat(file_path)
 
 
-def load_solid(solid_file, full_import):
-    """Load a solid into an input file."""
-
-    mpy.import_mesh_full = full_import
-    InputFile(yaml_file=solid_file)
-
-
 def create_large_beam_mesh(n_x, n_y, n_z, n_el):
     """Create a beam grid on the domain (1 x 1 x 1) with (nx * ny * nz) "grid
     cells"."""
 
-    mesh = InputFile()
+    mesh = FourCInputFile()
     material = MaterialReissner(radius=0.25 / np.max([n_x, n_y, n_z]))
 
     for i_x in range(n_x + 1):
@@ -254,11 +247,17 @@ def test_performance(tmp_path):
     )
 
     test_performance.time_function(
-        "meshpy_load_solid", load_solid, args=[testing_solid_block, False]
+        "meshpy_load_solid",
+        FourCInputFile.from_4C_yaml(
+            input_file_path=testing_solid_block, convert_input_to_mesh=False
+        ),
     )
 
     test_performance.time_function(
-        "meshpy_load_solid_full", load_solid, args=[testing_solid_block, True]
+        "meshpy_load_solid_full",
+        FourCInputFile.from_4C_yaml(
+            input_file_path=testing_solid_block, convert_input_to_mesh=True
+        ),
     )
 
     mesh = test_performance.time_function(

@@ -308,7 +308,7 @@ class AbaqusInputFile(object):
         # Create the element sets for the different materials.
         input_file_lines = []
         for material, elements in materials.items():
-            material_name = material.dump_to_list()[0]
+            material_name = material.dump_data()[0]
             input_file_lines.extend(get_set_lines("Elset", elements, material_name))
         return input_file_lines
 

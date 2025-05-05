@@ -124,6 +124,15 @@ class BoundaryCondition(BoundaryConditionBase):
                     "specified on how to handle them!"
                 )
 
+    def dump_data(self) -> _Dict:
+        """Dump the data of this boundary condition.
+
+        Returns:
+            A dictionary with the data of this boundary condition.
+        """
+
+        return {"E": self.geometry_set.i_global, **self.data}
+
 
 class BoundaryConditionContainer(_ContainerBase):
     """A class to group boundary conditions together.

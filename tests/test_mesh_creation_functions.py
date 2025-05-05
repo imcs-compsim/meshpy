@@ -34,7 +34,7 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.node import NodeCosserat
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.element_beam import Beam3eb, Beam3rHerm2Line3
-from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.input_file import FourCInputFile
 from meshpy.four_c.material import MaterialEulerBernoulli, MaterialReissner
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_at_node,
@@ -135,7 +135,7 @@ def test_mesh_creation_functions_arc_segment_via_axis(
     reference file."""
 
     # Create mesh
-    input_file = InputFile()
+    input_file = FourCInputFile()
     mat = MaterialReissner()
     radius = 2.0
     beam_set = create_beam_mesh_arc_segment_via_axis(
@@ -170,7 +170,7 @@ def test_mesh_creation_functions_arc_segment_start_end_node(
     def create_beam(*, start_node=None, end_node=None):
         """This is the base function we use to generate the beam in this test
         case."""
-        input_file = InputFile()
+        input_file = FourCInputFile()
         mat = MaterialReissner()
         if start_node is not None:
             input_file.add(start_node)
@@ -236,7 +236,7 @@ def test_mesh_creation_functions_arc_segment_via_rotation(
     the reference file."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and function.
     mat = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
@@ -266,7 +266,7 @@ def test_mesh_creation_functions_arc_segment_2d(
     """Create a circular segments in 2D."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and function.
     mat = MaterialReissner(radius=0.1)
@@ -308,7 +308,7 @@ def test_mesh_creation_functions_node_positions_of_elements_option(
     node_positions_of_elements."""
 
     # Create a mesh.
-    mesh = InputFile()
+    mesh = FourCInputFile()
 
     # Create and add material to mesh.
     material = MaterialReissner()
@@ -372,7 +372,7 @@ def test_mesh_creation_functions_stent(
     """Test the stent creation function."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and function.
     mat = MaterialReissner()
@@ -405,7 +405,7 @@ def test_mesh_creation_functions_fibers_in_rectangle(
     """Test the create_fibers_in_rectangle function."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Create mesh.
     mat = MaterialEulerBernoulli()
@@ -437,7 +437,7 @@ def test_mesh_creation_functions_fibers_in_rectangle_reference_point(
     reference_point option."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Create mesh.
     mat = MaterialEulerBernoulli()
@@ -467,7 +467,7 @@ def test_mesh_creation_functions_fibers_in_rectangle_return_set(
     """Test the set returned by the create_fibers_in_rectangle function."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Create mesh.
     mat = MaterialEulerBernoulli()
@@ -486,7 +486,7 @@ def test_mesh_creation_functions_wire(
     """Test the create_wire_fibers function."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Create two wires with different parameters.
     mat = MaterialEulerBernoulli(radius=0.05)
@@ -516,7 +516,7 @@ def test_mesh_creation_functions_nurbs(
     assert np.isclose(3.140204411551537, length, rtol=mpy.eps_pos, atol=0.0)
 
     # Check the output.
-    input_file = InputFile()
+    input_file = FourCInputFile()
     input_file.add(mesh)
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
@@ -594,7 +594,7 @@ def test_mesh_creation_functions_node_continuation(
     )
 
     # Check the geometry
-    input_file = InputFile()
+    input_file = FourCInputFile()
     input_file.add(mesh)
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
@@ -652,7 +652,7 @@ def test_mesh_creation_functions_element_length_option(
     """Test that the element length can be specified in the beam creation
     functions."""
 
-    input_file = InputFile()
+    input_file = FourCInputFile()
     mat = MaterialReissner(radius=0.1)
 
     l_el = 1.5
@@ -1135,7 +1135,7 @@ def test_mesh_creation_functions_curve_3d_helix(
     parameter."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and functions.
     mat = MaterialReissner()
@@ -1174,8 +1174,8 @@ def test_mesh_creation_functions_curve_3d_helix_length(assert_results_equal):
     """Create a helix from a parametric curve where and check that the correct
     length is returned."""
 
-    input_file_1 = InputFile()
-    input_file_2 = InputFile()
+    input_file_1 = FourCInputFile()
+    input_file_2 = FourCInputFile()
     mat = MaterialReissner()
 
     # Get the helix curve function
@@ -1209,7 +1209,7 @@ def test_mesh_creation_functions_curve_2d_sin(
     """Create a sin from a parametric curve."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and functions.
     mat = MaterialReissner()
@@ -1250,7 +1250,7 @@ def test_mesh_creation_functions_curve_3d_curve_rotation(
     """Create a line from a parametric curve and prescribe the rotation."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and functions.
     mat = MaterialReissner()
@@ -1308,7 +1308,7 @@ def test_mesh_creation_functions_curve_3d_line(
     """
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and function.
     mat = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
@@ -1341,7 +1341,7 @@ def test_mesh_creation_functions_helix_no_rotation(
 
     ## Helix angle and height helix combination
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and function.
     mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
@@ -1370,7 +1370,7 @@ def test_mesh_creation_functions_helix_no_rotation(
 
     ## Helix angle and turns
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and function.
     mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
@@ -1398,7 +1398,7 @@ def test_mesh_creation_functions_helix_no_rotation(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and function.
     mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
@@ -1432,7 +1432,7 @@ def test_mesh_creation_functions_helix_rotation_offset(
     """Create a helix and compare it with the reference file."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and function.
     mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
@@ -1466,7 +1466,7 @@ def test_mesh_creation_functions_helix_radius_zero(
     """Create a helix and compare it with the reference file."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and function.
     mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)
@@ -1501,7 +1501,7 @@ def test_mesh_creation_functions_helix_helix_angle_right_angle(
     """Create a helix and compare it with the reference file."""
 
     # Create input file.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material and function.
     mat = MaterialReissner(youngs_modulus=1e5, radius=0.5, shear_correction=1.0)

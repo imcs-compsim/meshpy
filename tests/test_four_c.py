@@ -34,7 +34,7 @@ from meshpy.four_c.beam_potential import BeamPotential
 from meshpy.four_c.dbc_monitor import linear_time_transformation
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.function import Function
-from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.input_file import FourCInputFile
 from meshpy.four_c.locsys_condition import LocSysCondition
 from meshpy.four_c.material import MaterialReissner
 from meshpy.four_c.solid_shell_thickness_direction import (
@@ -55,7 +55,7 @@ def test_four_c_material_numbering(
     when importing input files) and that the numbering with other added
     materials does not lead to materials with double IDs."""
 
-    input_file = InputFile()
+    input_file = FourCInputFile()
     input_file.add(
         {
             "MATERIALS": [
@@ -172,7 +172,7 @@ def test_four_c_simulation_beam_potential_helix(
     """Test the correct creation of input files for simulations including beam
     to beam potential interactions."""
 
-    input_file = InputFile()
+    input_file = FourCInputFile()
     mat = MaterialReissner(youngs_modulus=1000, radius=0.5, shear_correction=1.0)
 
     # define function for line charge density
@@ -251,7 +251,7 @@ def test_four_c_solid_shell_direction_detection(
 
     # Test the plates
     mpy.import_mesh_full = True
-    mesh_block = InputFile(
+    mesh_block = FourCInputFile(
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_solid_shell_blocks"
         )
@@ -269,7 +269,7 @@ def test_four_c_solid_shell_direction_detection(
     )
 
     # Test the dome
-    mesh_dome_original = InputFile(
+    mesh_dome_original = FourCInputFile(
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_solid_shell_dome"
         )
@@ -337,7 +337,7 @@ def test_four_c_locsys_condition(
     """
 
     # Create the input file with function and material.
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     fun = Function([{"SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"}])
     input_file.add(fun)
@@ -521,7 +521,7 @@ def test_four_c_add_beam_interaction_condition():
     correctly."""
 
     # Create the mesh.
-    mesh = InputFile()
+    mesh = FourCInputFile()
 
     # Create Material.
     mat = MaterialReissner()
@@ -587,7 +587,7 @@ def test_four_c_beam_to_beam_contact(
     """Test the beam-to-beam contact boundary conditions."""
 
     # Create the mesh.
-    mesh = InputFile()
+    mesh = FourCInputFile()
 
     # Create Material.
     mat = MaterialReissner()
@@ -629,7 +629,7 @@ def test_four_c_beam_to_solid(
 
     # Load a solid
     mpy.import_mesh_full = True
-    input_file = InputFile(
+    input_file = FourCInputFile(
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_block"
         )
@@ -726,7 +726,7 @@ def test_four_c_import_non_consecutive_geometry_sets(
     """Test that we can import non-consecutively numbered geometry sets."""
 
     mpy.import_mesh_full = full_import
-    input_file = InputFile(
+    input_file = FourCInputFile(
         yaml_file=get_corresponding_reference_file_path(additional_identifier="input")
     )
 

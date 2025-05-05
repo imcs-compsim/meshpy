@@ -53,7 +53,7 @@ from meshpy.four_c.header_functions import (
     set_header_static,
     set_runtime_output,
 )
-from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.input_file import FourCInputFile
 from meshpy.four_c.material import (
     MaterialEulerBernoulli,
     MaterialKirchhoff,
@@ -112,10 +112,10 @@ def test_meshpy_rotations(assert_results_equal):
     """Check if the Mesh function rotation gives the same results as rotating
     each node it self."""
 
-    mesh_1 = InputFile()
+    mesh_1 = Mesh()
     create_test_mesh(mesh_1)
 
-    mesh_2 = InputFile()
+    mesh_2 = Mesh()
     create_test_mesh(mesh_2)
 
     # Set the seed for the pseudo random numbers
@@ -554,13 +554,13 @@ def test_meshpy_reissner_elasto_plastic(assert_results_equal):
 
     mat = MaterialReissnerElastoplastic(**kwargs)
     mat.i_global = 69
-    assert_results_equal(mat.dump_to_list(), [ref_dict])
+    assert_results_equal(mat.dump_data(), [ref_dict])
 
     ref_dict["MAT_BeamReissnerElastPlastic"]["TORSIONPLAST"] = True
     kwargs["torsion_plasticity"] = True
     mat = MaterialReissnerElastoplastic(**kwargs)
     mat.i_global = 69
-    assert_results_equal(mat.dump_to_list(), [ref_dict])
+    assert_results_equal(mat.dump_data(), [ref_dict])
 
 
 def test_meshpy_kirchhoff_beam(
@@ -632,65 +632,59 @@ def test_meshpy_kirchhoff_material(assert_results_equal):
     material = MaterialKirchhoff(youngs_modulus=1000, is_fad=True)
     set_stiff(material)
     assert_results_equal(
-        material.dump_to_list(),
-        [
-            {
-                "MAT": None,
-                "MAT_BeamKirchhoffElastHyper": {
-                    "YOUNG": 1000,
-                    "SHEARMOD": 500.0,
-                    "DENS": 0.0,
-                    "CROSSAREA": 2.0,
-                    "MOMINPOL": 5.0,
-                    "MOMIN2": 3.0,
-                    "MOMIN3": 4.0,
-                    "FAD": True,
-                },
-            }
-        ],
+        material.dump_data(),
+        {
+            "MAT": None,
+            "MAT_BeamKirchhoffElastHyper": {
+                "YOUNG": 1000,
+                "SHEARMOD": 500.0,
+                "DENS": 0.0,
+                "CROSSAREA": 2.0,
+                "MOMINPOL": 5.0,
+                "MOMIN2": 3.0,
+                "MOMIN3": 4.0,
+                "FAD": True,
+            },
+        },
     )
 
     material = MaterialKirchhoff(youngs_modulus=1000, is_fad=False)
     set_stiff(material)
     assert_results_equal(
-        material.dump_to_list(),
-        [
-            {
-                "MAT": None,
-                "MAT_BeamKirchhoffElastHyper": {
-                    "YOUNG": 1000,
-                    "SHEARMOD": 500.0,
-                    "DENS": 0.0,
-                    "CROSSAREA": 2.0,
-                    "MOMINPOL": 5.0,
-                    "MOMIN2": 3.0,
-                    "MOMIN3": 4.0,
-                    "FAD": False,
-                },
-            }
-        ],
+        material.dump_data(),
+        {
+            "MAT": None,
+            "MAT_BeamKirchhoffElastHyper": {
+                "YOUNG": 1000,
+                "SHEARMOD": 500.0,
+                "DENS": 0.0,
+                "CROSSAREA": 2.0,
+                "MOMINPOL": 5.0,
+                "MOMIN2": 3.0,
+                "MOMIN3": 4.0,
+                "FAD": False,
+            },
+        },
     )
 
     material = MaterialKirchhoff(youngs_modulus=1000, interaction_radius=1.1)
     set_stiff(material)
     assert_results_equal(
-        material.dump_to_list(),
-        [
-            {
-                "MAT": None,
-                "MAT_BeamKirchhoffElastHyper": {
-                    "YOUNG": 1000,
-                    "SHEARMOD": 500.0,
-                    "DENS": 0.0,
-                    "CROSSAREA": 2.0,
-                    "MOMINPOL": 5.0,
-                    "MOMIN2": 3.0,
-                    "MOMIN3": 4.0,
-                    "FAD": False,
-                    "INTERACTIONRADIUS": 1.1,
-                },
-            }
-        ],
+        material.dump_data(),
+        {
+            "MAT": None,
+            "MAT_BeamKirchhoffElastHyper": {
+                "YOUNG": 1000,
+                "SHEARMOD": 500.0,
+                "DENS": 0.0,
+                "CROSSAREA": 2.0,
+                "MOMINPOL": 5.0,
+                "MOMIN2": 3.0,
+                "MOMIN3": 4.0,
+                "FAD": False,
+                "INTERACTIONRADIUS": 1.1,
+            },
+        },
     )
 
 

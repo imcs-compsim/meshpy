@@ -156,9 +156,6 @@ class MeshPy(object):
         # match.
         self.allow_beam_rotation = True
 
-        # Import meshes as pure dict or import the geometry.
-        self.import_mesh_full = False
-
         # Number of digits for node set output (this will be set in the
         # Mesh.get_unique_geometry_sets() method.
         self.vtk_node_set_format = "{:05}"

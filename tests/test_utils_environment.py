@@ -22,13 +22,15 @@
 """Test environment utils of MeshPy."""
 
 import os
-from unittest.mock import patch
+from pathlib import Path
+from unittest.mock import MagicMock, patch
 
 import pytest
 
 from meshpy.utils.environment import (
     cubitpy_is_available,
     get_env_variable,
+    get_git_data,
     is_mybinder,
     is_testing,
 )
@@ -78,3 +80,65 @@ def test_get_env_variable() -> None:
             ValueError, match="Environment variable TEST_VAR is not set"
         ):
             get_env_variable("TEST_VAR")
+
+
+@patch("my_module._shutil.which")
+@patch("my_module._subprocess.run")
+def test_get_git_data_success(mock_run, mock_which):
+    """Test get_git_data function with successful git command execution."""
+
+    # Arrange
+    mock_which.return_value = "/usr/bin/git"
+
+    mock_sha_process = MagicMock()
+    mock_sha_process.returncode = 0
+    mock_sha_process.stdout = b"abcdef1234567890\n"
+
+    mock_date_process = MagicMock()
+    mock_date_process.returncode = 0
+    mock_date_process.stdout = b"2024-04-26 12:34:56 +0000\n"
+
+    mock_run.side_effect = [mock_sha_process, mock_date_process]
+
+    # Act
+    sha, date = get_git_data(Path("/path/to/repo"))
+
+    # Assert
+    assert sha == "abcdef1234567890"
+    assert date == "2024-04-26 12:34:56 +0000"
+    assert mock_run.call_count == 2
+
+
+@patch("my_module._shutil.which")
+def test_get_git_data_git_not_found(mock_which):
+    """Test get_git_data function when git executable is not found."""
+
+    # Arrange
+    mock_which.return_value = None
+
+    # Act & Assert
+    with pytest.raises(RuntimeError, match="Git executable not found"):
+        get_git_data(Path("/path/to/repo"))
+
+
+@patch("my_module._shutil.which")
+@patch("my_module._subprocess.run")
+def test_get_git_data_subprocess_failure(mock_run, mock_which):
+    """Test get_git_data function with subprocess command failure."""
+
+    # Arrange
+    mock_which.return_value = "/usr/bin/git"
+
+    mock_failed_process = MagicMock()
+    mock_failed_process.returncode = 1
+    mock_failed_process.stdout = b""
+
+    mock_run.side_effect = [mock_failed_process, mock_failed_process]
+
+    # Act
+    sha, date = get_git_data(Path("/path/to/repo"))
+
+    # Assert
+    assert sha is None
+    assert date is None
+    assert mock_run.call_count == 2

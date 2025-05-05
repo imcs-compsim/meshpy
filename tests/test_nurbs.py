@@ -24,7 +24,7 @@
 import numpy as np
 
 from meshpy.core.rotation import Rotation
-from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.input_file import FourCInputFile
 from meshpy.four_c.material import MaterialStVenantKirchhoff
 from meshpy.mesh_creation_functions.nurbs_generic import add_geomdl_nurbs_to_mesh
 from meshpy.mesh_creation_functions.nurbs_geometries import (
@@ -49,7 +49,7 @@ def test_nurbs_hollow_cylinder_segment_2d(
     )
 
     # Create input file
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material
     mat = MaterialStVenantKirchhoff(youngs_modulus=50, nu=0.19, density=5.3e-7)
@@ -81,7 +81,7 @@ def test_nurbs_flat_plate_2d(
     surf_obj = create_nurbs_flat_plate_2d(0.75, 0.91, n_ele_u=2, n_ele_v=5)
 
     # Create input file
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material
     mat = MaterialStVenantKirchhoff(youngs_modulus=710, nu=0.19, density=5.3e-7)
@@ -111,7 +111,7 @@ def test_nurbs_brick(assert_results_equal, get_corresponding_reference_file_path
     vol_obj = create_nurbs_brick(1.5, 3.0, 2.4, n_ele_u=2, n_ele_v=3, n_ele_w=4)
 
     # Create input file
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material
     mat = MaterialStVenantKirchhoff(youngs_modulus=710, nu=0.19, density=5.3e-7)
@@ -143,7 +143,7 @@ def test_nurbs_rotation_nurbs_surface(
     )
 
     # Create input file
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Create patch set
     mat = MaterialStVenantKirchhoff(youngs_modulus=650, nu=0.20, density=4.2e-7)
@@ -176,7 +176,7 @@ def test_nurbs_translate_nurbs_surface(
     surf_obj = create_nurbs_flat_plate_2d(0.87, 1.35, n_ele_u=2, n_ele_v=3)
 
     # Create input file
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Create patch set
     mat = MaterialStVenantKirchhoff(youngs_modulus=430, nu=0.10, density=4.2e-7)
@@ -211,7 +211,7 @@ def test_nurbs_cylindrical_shell_sector(
     )
 
     # Create input file
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Add material
     mat = MaterialStVenantKirchhoff()
@@ -236,7 +236,7 @@ def test_nurbs_couple_nurbs_meshes(
     """Test the coupling of NURBS surface meshes."""
 
     # Create input file
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Create the first surface object
     surf_obj_1 = create_nurbs_hollow_cylinder_segment_2d(
@@ -287,7 +287,7 @@ def test_nurbs_sphere_surface(
     """Test the creating of the base patch of the surface of a sphere."""
 
     # Create input file
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Create the base of a sphere
     surf_obj = create_nurbs_sphere_surface(1, n_ele_u=3, n_ele_v=2)
@@ -319,7 +319,7 @@ def test_nurbs_string_types(
     definition."""
 
     # Create input file
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Create the base of a sphere
     surf_obj = create_nurbs_flat_plate_2d(1, 3, n_ele_u=3, n_ele_v=2)
@@ -347,7 +347,7 @@ def test_nurbs_hemisphere_surface(
     """Test the creation of the surface of a hemisphere."""
 
     # Create input file
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Create the base of a sphere
     surfs = create_nurbs_hemisphere_surface(2.5, n_ele_uv=2)
@@ -380,7 +380,7 @@ def test_nurbs_torus_surface(
     """Test the creation of a torus."""
 
     # Create input file
-    input_file = InputFile()
+    input_file = FourCInputFile()
 
     # Create the surface of a torus
     surfs = create_nurbs_torus_surface(1, 0.5, n_ele_u=2, n_ele_v=3)

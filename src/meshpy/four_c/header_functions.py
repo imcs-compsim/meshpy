@@ -26,7 +26,7 @@ from typing import List as _List
 from typing import Union as _Union
 
 from meshpy.core.conf import mpy as _mpy
-from meshpy.four_c.input_file import InputFile as _InputFile
+from meshpy.four_c.input_file import FourCInputFile as _FourCInputFile
 
 
 def _get_segmentation_strategy(segmentation):
@@ -478,7 +478,7 @@ def set_header_static(
 
 
 def set_binning_strategy_section(
-    input_file: _InputFile,
+    input_file: _FourCInputFile,
     binning_bounding_box: _Union[_List[int], None] = None,
     binning_cutoff_radius: _Union[float, None] = None,
     *,
@@ -522,7 +522,7 @@ def set_binning_strategy_section(
 
 
 def set_beam_interaction_section(
-    input_file: _InputFile,
+    input_file: _FourCInputFile,
     *,
     repartition_strategy: str = "everydt",
     search_strategy: str = "bounding_volume_hierarchy",
@@ -557,7 +557,7 @@ def set_beam_interaction_section(
 
 
 def set_beam_contact_runtime_output(
-    input_file: _InputFile,
+    input_file: _FourCInputFile,
     *,
     every_iteration: bool = False,
     option_overwrite: bool = False,
@@ -588,7 +588,7 @@ def set_beam_contact_runtime_output(
 
 
 def set_beam_contact_section(
-    input_file: _InputFile,
+    input_file: _FourCInputFile,
     *,
     interaction_strategy: str = "penalty",
     btb_penalty: float = 0,
@@ -698,7 +698,7 @@ def set_beam_contact_section(
 
 
 def add_result_description(
-    input_file: _InputFile,
+    input_file: _FourCInputFile,
     displacements: _List,
     node_ids: _List[int],
     *,

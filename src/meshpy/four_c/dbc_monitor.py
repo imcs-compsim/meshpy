@@ -36,7 +36,7 @@ from meshpy.four_c.function_utility import (
 from meshpy.four_c.function_utility import (
     ensure_length_of_function_array as _ensure_length_of_function_array,
 )
-from meshpy.four_c.input_file import InputFile as _InputFile
+from meshpy.four_c.input_file import FourCInputFile as _FourCInputFile
 
 
 def linear_time_transformation(
@@ -148,7 +148,7 @@ def read_dbc_monitor_file(file_path):
 
 
 def add_point_neuman_condition_to_input_file(
-    input_file: _InputFile,
+    input_file: _FourCInputFile,
     nodes: list[int],
     function_array: list[_Function],
     force: _np.ndarray,
@@ -161,8 +161,8 @@ def add_point_neuman_condition_to_input_file(
 
     Args
     ----
-    input_file: InputFile
-        InputFile where the boundary conditions are added to
+    input_file: FourCInputFile
+        FourCInputFile where the boundary conditions are added to
     nodes: [node_id]
         list containing the ids of the nodes for the condition
     function_array: [function]
@@ -204,7 +204,7 @@ def add_point_neuman_condition_to_input_file(
 
 
 def dbc_monitor_to_input_all_values(
-    input_file: _InputFile,
+    input_file: _FourCInputFile,
     file_path: str,
     *,
     steps: list[int] = [],
@@ -225,7 +225,7 @@ def dbc_monitor_to_input_all_values(
 
     Args
     ----
-    input_file: InputFile
+    input_file: FourCInputFile
         The input file where the created Neumann boundary condition is added
         to. The nodes(e.g., discretization) referred to in the log file must match with the ones
         in input_file.
@@ -340,7 +340,7 @@ def dbc_monitor_to_input_all_values(
 
 
 def dbc_monitor_to_input(
-    input_file: _InputFile,
+    input_file: _FourCInputFile,
     file_path: str,
     *,
     step: int = -1,
@@ -352,7 +352,7 @@ def dbc_monitor_to_input(
 
     Args
     ----
-    input_file: InputFile
+    input_file: FourCInputFile
         The input file where the created Neumann boundary condition is added
         to. The nodes referred to in the log file have to match with the ones
         in the input section. It is advisable to only call this function once
