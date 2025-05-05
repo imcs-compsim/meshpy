@@ -80,7 +80,7 @@ def create_beam_solid_input_file(get_corresponding_reference_file_path):
     [
         (None, 0.0, None),
         ("angle", np.pi / 5, None),
-        ("starting_rotation", -0.12479987836708838, Rotation([-0.5, 3, -0.5], 2)),
+        ("starting_rotation", 0.3293917321011114, Rotation([-0.5, 3, -0.5], 2)),
     ],
 )
 def test_cosserat_curve_translate_and_rotate(

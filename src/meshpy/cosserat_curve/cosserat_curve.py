@@ -244,7 +244,7 @@ class CosseratCurve(object):
                 first_rotation, starting_triad_e1
             )
             relative_rotation = (
-                starting_triad_guess * smallest_rotation_to_guess_tangent.inv()
+                smallest_rotation_to_guess_tangent.inv() * starting_triad_guess
             )
             psi = relative_rotation.get_rotation_vector()
             if _np.linalg.norm(psi[1:]) > _mpy.eps_quaternion:
