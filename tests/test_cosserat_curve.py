@@ -206,7 +206,6 @@ def test_cosserat_curve_mesh_warp(
             Rotation([0, 0, 1], -0.5 * np.pi) * Rotation([0, 1, 0], -0.5 * np.pi)
         ),
     )
-    print("###", type(mesh), mesh)
     assert_results_equal(get_corresponding_reference_file_path(), mesh, rtol=1e-10)
 
 

@@ -1173,14 +1173,10 @@ def test_meshpy_replace_nodes_geometry_set(
 def create_beam_to_solid_conditions_model(get_corresponding_reference_file_path):
     """Create the input file for the beam-to-solid input conditions tests."""
 
-    # TODO rework this test once the input file is refactored, i.e.
-    # input_file, mesh = InputFile(yaml_file=...)
-    # ... add different geometry sets to the mesh
-    # input_file.add(mesh)
-    # this way it is tested exhaustively rather than accessing the mesh
-    # in the input file during the beam mesh creation
+    # TODO update this function to take the "full_import" argument
+    # Then return the input file and corresponding mesh.
 
-    # Create input file.
+    # Create input file
     input_file = InputFile(
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_block"
@@ -1411,13 +1407,13 @@ def test_meshpy_stvenantkirchhoff_solid(
 
     material_2 = MaterialStVenantKirchhoff(youngs_modulus=370, nu=0.20, density=5.2e-7)
 
-    # Create input file
-    input_file = InputFile()
-    input_file.add(material_1)
-    input_file.add(material_2)
+    # Create mesh
+    mesh = Mesh()
+    mesh.add(material_1)
+    mesh.add(material_2)
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
 @pytest.mark.parametrize(
@@ -1811,8 +1807,7 @@ def test_meshpy_deep_copy(get_bc_data, assert_results_equal):
     mesh_ref_2.translate(translate)
 
     mesh = Mesh()
-    mesh.add(mesh_ref_1)
-    mesh.add(mesh_ref_2)
+    mesh.add(mesh_ref_1, mesh_ref_2)
 
     # Now copy the first mesh and add them together in the input file.
     mesh_copy_1 = Mesh()
@@ -1822,8 +1817,7 @@ def test_meshpy_deep_copy(get_bc_data, assert_results_equal):
     mesh_copy_2.translate(translate)
 
     mesh_copy = Mesh()
-    mesh_copy.add(mesh_copy_1)
-    mesh_copy.add(mesh_copy_2)
+    mesh_copy.add(mesh_copy_1, mesh_copy_2)
 
     # Check that the input files are the same.
     # TODO: add reference file check here as well
@@ -1854,7 +1848,7 @@ def test_meshpy_mesh_add_checks():
     mesh.add(geometry_set)
 
     # Add the objects again and check for errors.
-    # TODO catch and test errors
+    # TODO catch and test error messages
     with pytest.raises(ValueError):
         mesh.add(node)
     with pytest.raises(ValueError):

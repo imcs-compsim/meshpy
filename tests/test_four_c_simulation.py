@@ -361,6 +361,10 @@ def test_four_c_simulation_beam_and_solid_tube(
     nodes = [32, 69]
     add_result_description(input_file, displacements, nodes)
 
+    # Call get_unique_geometry_sets to check that this does not affect the
+    # mesh creation.
+    mesh.get_unique_geometry_sets(link_to_nodes="all_nodes")
+
     # Add mesh to input file
     input_file.add(mesh)
 
@@ -574,6 +578,9 @@ def test_four_c_simulation_rotated_beam_axis(
     # Create input file
     input_file = InputFile()
 
+    # Create mesh
+    mesh = Mesh()
+
     # Set header
     set_header_static(input_file, time_step=0.05, n_steps=20)
 
@@ -591,17 +598,17 @@ def test_four_c_simulation_rotated_beam_axis(
 
     # Create mesh.
     for i in range(3):
-        mesh = Mesh()
+        mesh_line = Mesh()
 
         # Create the first line.
         set_1 = create_beam_mesh_line(
-            mesh, Beam3rHerm2Line3, mat, [0, 0, 0], 1.0 * direction, n_el=3
+            mesh_line, Beam3rHerm2Line3, mat, [0, 0, 0], 1.0 * direction, n_el=3
         )
 
         if not i == 0:
             # In the second case rotate the line, so the triads do not
             # match any more.
-            mesh.rotate(Rotation(direction, alpha))
+            mesh_line.rotate(Rotation(direction, alpha))
 
         if i == 2:
             # The third line is with couplings.
@@ -611,7 +618,7 @@ def test_four_c_simulation_rotated_beam_axis(
 
         # Add the second line.
         set_2 = create_beam_mesh_line(
-            mesh,
+            mesh_line,
             Beam3rHerm2Line3,
             mat,
             1.0 * direction,
@@ -621,7 +628,7 @@ def test_four_c_simulation_rotated_beam_axis(
         )
 
         # Add boundary conditions.
-        mesh.add(
+        mesh_line.add(
             BoundaryCondition(
                 set_1["start"],
                 {
@@ -633,7 +640,7 @@ def test_four_c_simulation_rotated_beam_axis(
                 bc_type=mpy.bc.dirichlet,
             )
         )
-        mesh.add(
+        mesh_line.add(
             BoundaryCondition(
                 set_2["end"],
                 {
@@ -648,18 +655,21 @@ def test_four_c_simulation_rotated_beam_axis(
 
         if i == 2:
             # In the third case add a coupling.
-            mesh.couple_nodes()
+            mesh_line.couple_nodes()
 
         # Add the mesh to the input file.
-        input_file.add(mesh)
+        mesh.add(mesh_line)
 
         # Each time move the whole mesh.
-        input_file.mesh.translate([1, 0, 0])
+        mesh.translate([1, 0, 0])
 
     # Add result checks.
     displacements = [[1.5015284845, 0.35139255451, -1.0126517891]] * 3
     nodes = [13, 26, 40]
     add_result_description(input_file, displacements, nodes)
+
+    # Add the mesh to the input file
+    input_file.add(mesh)
 
     # Check the created input file
     assert_results_equal(get_corresponding_reference_file_path(), input_file)

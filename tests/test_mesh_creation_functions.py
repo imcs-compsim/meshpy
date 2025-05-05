@@ -34,7 +34,6 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.node import NodeCosserat
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.element_beam import Beam3eb, Beam3rHerm2Line3
-from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.material import MaterialEulerBernoulli, MaterialReissner
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_at_node,
