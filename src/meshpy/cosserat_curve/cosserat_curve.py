@@ -246,7 +246,12 @@ class CosseratCurve(object):
             relative_rotation = (
                 starting_triad_guess * smallest_rotation_to_guess_tangent.inv()
             )
-            twist_angle = relative_rotation.get_rotation_vector()[0]
+            psi = relative_rotation.get_rotation_vector()
+            if _np.linalg.norm(psi[1:]) > _mpy.eps_quaternion:
+                raise ValueError(
+                    "The twist angle can not be extracted as the relative rotation is not plane!"
+                )
+            twist_angle = psi[0]
             self.twist(twist_angle)
 
     def set_centerline_interpolation(self):
