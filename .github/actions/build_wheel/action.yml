@@ -1,0 +1,23 @@
+name: build_wheel
+description: Build the MeshPy wheel
+inputs:
+  source-command:
+    description: Command to source the virtual environment
+    required: false
+    default: ""
+runs:
+  using: composite
+  steps:
+    - name: Build MeshPy wheel
+      shell: bash
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        ${{ inputs.source-command }}
+        pip -m build
+        # Check if we got exactly one wheel file
+        shopt -s nullglob
+        files=(dist/*.whl)
+        if [ ${#files[@]} -ne 1 ]; then
+          echo "Expected exactly one .whl file in dist/, found ${#files[@]}"
+          exit 1
+        fi
