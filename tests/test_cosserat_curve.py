@@ -127,27 +127,16 @@ def test_cosserat_curve_translate_and_rotate(
 
     def get_compare_rot_with_twist(name):
         """Apply twist rotations to reference files."""
-        rotations = load_compare(name)
-        # TODO: use numpy array functions for this.
-        for i in range(len(rotations)):
-            rotations[i] = (
-                Rotation.from_quaternion(rotations[i]) * relative_rotation
-            ).q
+        rotations = quaternion.from_float_array(
+            load_compare(name)
+        ) * quaternion.from_float_array(relative_rotation.q)
         return rotations
 
     assert np.allclose(sol_half_pos, load_compare("pos_half_ref"), rtol=1e-14)
-    assert np.allclose(
-        quaternion.as_float_array(sol_half_q),
-        get_compare_rot_with_twist("q_half_ref"),
-        rtol=1e-14,
-    )
+    assert np.allclose(sol_half_q, get_compare_rot_with_twist("q_half_ref"), rtol=1e-14)
 
     assert np.allclose(sol_full_pos, load_compare("pos_full_ref"), rtol=1e-14)
-    assert np.allclose(
-        quaternion.as_float_array(sol_full_q),
-        get_compare_rot_with_twist("q_full_ref"),
-        rtol=1e-14,
-    )
+    assert np.allclose(sol_full_q, get_compare_rot_with_twist("q_full_ref"), rtol=1e-14)
 
 
 def test_cosserat_curve_bad_guess_triad(get_corresponding_reference_file_path):

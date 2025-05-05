@@ -277,39 +277,20 @@ class CosseratCurve(object):
         Args:
             twist_angle: The rotation angle (in radiants).
         """
-
-        material_twist_rotation = _Rotation([1, 0, 0], twist_angle)
-        # TODO: use numpy array functions for the following operations.
-        for i in range(len(self.quaternions)):
-            self.quaternions[i] = self.quaternions[i] * _quaternion.from_float_array(
-                material_twist_rotation.q
-            )
-        for i, (relative_distances_rotation, relative_rotation) in enumerate(
-            zip(self.relative_distances_rotation, self.relative_rotations)
-        ):
-            relative_distances_rotation = _Rotation.from_quaternion(
-                _quaternion.as_float_array(relative_distances_rotation)
-            )
-            relative_rotation = _Rotation.from_quaternion(
-                _quaternion.as_float_array(relative_rotation)
-            )
-
-            new_relative_distances_rotation = (
-                material_twist_rotation.inv()
-                * relative_distances_rotation
-                * material_twist_rotation
-            )
-            new_relative_rotation = (
-                material_twist_rotation.inv()
-                * relative_rotation
-                * material_twist_rotation
-            )
-            self.relative_distances_rotation[i] = _quaternion.from_float_array(
-                new_relative_distances_rotation.q
-            )
-            self.relative_rotations[i] = _quaternion.from_float_array(
-                new_relative_rotation.q
-            )
+        material_twist_rotation = _quaternion.from_float_array(
+            _Rotation([1, 0, 0], twist_angle).q
+        )
+        self.quaternions = self.quaternions * material_twist_rotation
+        self.relative_distances_rotation = (
+            material_twist_rotation.conjugate()
+            * self.relative_distances_rotation
+            * material_twist_rotation
+        )
+        self.relative_rotations = (
+            material_twist_rotation.conjugate()
+            * self.relative_rotations
+            * material_twist_rotation
+        )
 
     def get_centerline_position_and_rotation(
         self, arc_length: float, **kwargs
