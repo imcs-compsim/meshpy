@@ -150,8 +150,8 @@ def get_relative_distance_and_rotations(
             _Rotation(),
             relative_distance_local,
         )
-        relative_distances_rotation[i_segment] = _quaternion.from_float_array(
-            smallest_relative_rotation_onto_distance.q
+        relative_distances_rotation[i_segment] = (
+            smallest_relative_rotation_onto_distance.get_numpy_quaternion()
         )
 
         relative_rotations[i_segment] = (
@@ -230,9 +230,7 @@ class CosseratCurve(object):
 
         # Check if we have to apply a twist for the rotations
         if starting_triad_guess is not None:
-            first_rotation = _Rotation.from_quaternion(
-                _quaternion.as_float_array(self.quaternions[0])
-            )
+            first_rotation = _Rotation.from_quaternion(self.quaternions[0])
             starting_triad_e1 = starting_triad_guess * [1, 0, 0]
             if _np.dot(first_rotation * [1, 0, 0], starting_triad_e1) < 0.5:
                 raise ValueError(
@@ -265,7 +263,7 @@ class CosseratCurve(object):
     def rotate(self, rotation: _Rotation, *, origin=None):
         """Rotate the curve and the quaternions."""
 
-        self.quaternions = _quaternion.from_float_array(rotation.q) * self.quaternions
+        self.quaternions = rotation.get_numpy_quaternion() * self.quaternions
         self.coordinates = _rotate_coordinates(
             self.coordinates, rotation, origin=origin
         )
@@ -277,9 +275,10 @@ class CosseratCurve(object):
         Args:
             twist_angle: The rotation angle (in radiants).
         """
-        material_twist_rotation = _quaternion.from_float_array(
-            _Rotation([1, 0, 0], twist_angle).q
-        )
+        material_twist_rotation = _Rotation(
+            [1, 0, 0], twist_angle
+        ).get_numpy_quaternion()
+
         self.quaternions = self.quaternions * material_twist_rotation
         self.relative_distances_rotation = (
             material_twist_rotation.conjugate()
@@ -405,9 +404,7 @@ class CosseratCurve(object):
                 sol_r[i_point] = get_spline_interpolation(
                     coordinates, self.point_arc_length
                 )(centerline_arc_length)
-                sol_q[i_point] = _quaternion.as_float_array(
-                    _quaternion.slerp_evaluate(q1, q2, xi)
-                )
+                sol_q[i_point] = _quaternion.slerp_evaluate(q1, q2, xi)
             else:
                 raise ValueError("Centerline value out of bounds")
 
@@ -431,9 +428,7 @@ class CosseratCurve(object):
             length = arc_length - self.point_arc_length[index]
             r = sol_r[index]
             q = sol_q[index]
-            sol_r_final[i] = r + _Rotation.from_quaternion(
-                _quaternion.as_float_array(q)
-            ) * [length, 0, 0]
+            sol_r_final[i] = r + _Rotation.from_quaternion(q) * [length, 0, 0]
             sol_q_final[i] = q
 
         return sol_r_final, sol_q_final

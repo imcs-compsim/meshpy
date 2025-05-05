@@ -207,9 +207,7 @@ def get_mesh_transformation(
             )
 
             rigid_body_rotation_for_factor = _quaternion.slerp_evaluate(
-                _quaternion.from_float_array(reference_rotation.q),
-                rigid_body_rotation,
-                factor,
+                reference_rotation.get_numpy_quaternion(), rigid_body_rotation, factor
             )
 
             current_pos = (
@@ -230,7 +228,7 @@ def get_mesh_transformation(
             relative_rotations[i_step, i_node] = (
                 rigid_body_rotation_for_factor
                 * centerline_relative_rotation
-                * _quaternion.from_float_array(reference_rotation.q).conjugate()
+                * reference_rotation.get_numpy_quaternion().conjugate()
             )
 
     return positions, relative_rotations
@@ -345,7 +343,4 @@ def warp_mesh_along_curve(
         new_pos = pos[0, i_node]
         node.coordinates = new_pos
         if isinstance(node, _NodeCosserat):
-            node.rotation = (
-                _Rotation.from_quaternion(_quaternion.as_float_array(rot[0, i_node]))
-                * node.rotation
-            )
+            node.rotation = _Rotation.from_quaternion(rot[0, i_node]) * node.rotation

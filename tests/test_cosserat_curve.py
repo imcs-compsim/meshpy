@@ -127,9 +127,10 @@ def test_cosserat_curve_translate_and_rotate(
 
     def get_compare_rot_with_twist(name):
         """Apply twist rotations to reference files."""
-        rotations = quaternion.from_float_array(
-            load_compare(name)
-        ) * quaternion.from_float_array(relative_rotation.q)
+        rotations = (
+            quaternion.from_float_array(load_compare(name))
+            * relative_rotation.get_numpy_quaternion()
+        )
         return rotations
 
     assert np.allclose(sol_half_pos, load_compare("pos_half_ref"), rtol=1e-14)
@@ -193,7 +194,7 @@ def test_cosserat_curve_mesh_transformation(
 
     curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pos, rot = curve.get_centerline_position_and_rotation(0)
-    rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
+    rot = Rotation.from_quaternion(rot)
     curve.translate(-pos)
     curve.translate([1, 2, 3])
 
@@ -224,7 +225,7 @@ def test_cosserat_curve_mesh_warp(
     # Load the curve
     curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pos, rot = curve.get_centerline_position_and_rotation(0)
-    rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
+    rot = Rotation.from_quaternion(rot)
     curve.translate(-pos)
     curve.translate([1, 2, 3])
 
@@ -252,7 +253,7 @@ def test_cosserat_curve_mesh_warp_transform_boundary_conditions(
     # Load the curve
     curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pos, rot = curve.get_centerline_position_and_rotation(0)
-    rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
+    rot = Rotation.from_quaternion(rot)
     curve.translate(-pos)
     curve.translate([1, 2, 3])
 
