@@ -247,7 +247,7 @@ def create_transform_boundary_conditions(
     **kwargs,
 ) -> None:
     """Create the Dirichlet boundary conditions that enforce the warping. The
-    warped object is assumed to align with the z-axis in the reference
+    warped object is assumed to align with the x-axis in the reference
     configuration.
 
     Args
