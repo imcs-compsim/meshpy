@@ -112,10 +112,10 @@ def test_meshpy_rotations(assert_results_equal):
     """Check if the Mesh function rotation gives the same results as rotating
     each node it self."""
 
-    mesh_1 = InputFile()
+    mesh_1 = Mesh()
     create_test_mesh(mesh_1)
 
-    mesh_2 = InputFile()
+    mesh_2 = Mesh()
     create_test_mesh(mesh_2)
 
     # Set the seed for the pseudo random numbers
@@ -139,10 +139,10 @@ def test_meshpy_mesh_rotations_individual(assert_results_equal):
     """Check if the Mesh function rotation gives the same results as rotating
     each node it self, when an array is passed with different rotations."""
 
-    mesh_1 = InputFile()
+    mesh_1 = Mesh()
     create_test_mesh(mesh_1)
 
-    mesh_2 = InputFile()
+    mesh_2 = Mesh()
     create_test_mesh(mesh_2)
 
     # Set the seed for the pseudo random numbers
@@ -175,8 +175,8 @@ def test_meshpy_mesh_reflection(origin, flip, assert_results_equal):
     rot_1 = Rotation([0, 1, 1], np.pi / 6)
     rot_2 = Rotation([1, 2.455, -1.2324], 1.2342352)
 
-    mesh_ref = InputFile()
-    mesh = InputFile()
+    mesh_ref = Mesh()
+    mesh = Mesh()
     mat = MaterialReissner(radius=0.1)
 
     # Create the reference mesh.
@@ -237,45 +237,14 @@ def test_meshpy_mesh_reflection(origin, flip, assert_results_equal):
     assert_results_equal(mesh_ref, mesh)
 
 
-@pytest.mark.parametrize("full_import", [[True, "full"], [False, None]])
-def test_meshpy_comments_in_solid(
-    get_bc_data,
-    assert_results_equal,
-    get_corresponding_reference_file_path,
-    full_import,
-):
-    """Check if comments in the solid file are handled correctly if they are
-    inside a mesh section."""
-
-    # Convert the solid mesh to meshpy objects.
-    mpy.import_mesh_full = full_import[0]
-    solid_file = get_corresponding_reference_file_path(additional_identifier="initial")
-    mesh = InputFile(yaml_file=solid_file)
-
-    # Add one element with BCs.
-    mat = MaterialReissner()
-    sets = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 2, 3])
-    mesh.add(
-        BoundaryCondition(
-            sets["start"], get_bc_data(identifier=1), bc_type=mpy.bc.dirichlet
-        )
-    )
-    mesh.add(
-        BoundaryCondition(
-            sets["end"], get_bc_data(identifier=2), bc_type=mpy.bc.neumann
-        )
-    )
-
-    # Compare the output of the mesh.
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
-
-
 def test_meshpy_mesh_transformations_with_solid(
     assert_results_equal,
     get_corresponding_reference_file_path,
 ):
     """Test the different mesh transformation methods in combination with solid
     elements."""
+
+    # TODO use pytest fixtures for the different setups
 
     def base_test_mesh_translations(*, import_full=False, radius=None, reflect=True):
         """Create the line and wrap it with passing radius to the wrap
@@ -285,7 +254,15 @@ def test_meshpy_mesh_transformations_with_solid(
         mpy.import_mesh_full = import_full
 
         # Create the mesh.
-        mesh = InputFile(
+
+        # TODO rework this test once the input file is refactored, i.e.
+        # input_file, mesh = InputFile(yaml_file=...)
+        # ... add different geometry sets to the mesh
+        # input_file.add(mesh)
+        # this way it is tested exhaustively rather than accessing the mesh
+        # in the input file during the beam mesh creation
+
+        input_file = InputFile(
             yaml_file=get_corresponding_reference_file_path(
                 reference_file_base_name="4C_input_solid_cuboid"
             )
@@ -294,7 +271,7 @@ def test_meshpy_mesh_transformations_with_solid(
 
         # Create the line.
         create_beam_mesh_line(
-            mesh,
+            input_file.mesh,
             Beam3rHerm2Line3,
             mat,
             [0.2, 0, 0],
@@ -303,18 +280,18 @@ def test_meshpy_mesh_transformations_with_solid(
         )
 
         # Transform the mesh.
-        mesh.wrap_around_cylinder(radius=radius)
-        mesh.translate([1, 2, 3])
-        mesh.rotate(Rotation([1, 2, 3], np.pi * 17.0 / 27.0))
+        input_file.mesh.wrap_around_cylinder(radius=radius)
+        input_file.mesh.translate([1, 2, 3])
+        input_file.mesh.rotate(Rotation([1, 2, 3], np.pi * 17.0 / 27.0))
         if reflect:
-            mesh.reflect([0.1, -2, 1])
+            input_file.mesh.reflect([0.1, -2, 1])
 
         # Check the output.
         assert_results_equal(
             get_corresponding_reference_file_path(
                 additional_identifier="full" if import_full else "yaml"
             ),
-            mesh,
+            input_file,
         )
 
     base_test_mesh_translations(import_full=False, radius=None)
@@ -353,6 +330,7 @@ def test_meshpy_fluid_element_section(
     create_beam_mesh_line(
         beam_mesh, Beam3eb, material, [0, -0.5, 0], [0, 0.2, 0], n_el=5
     )
+
     input_file.add(beam_mesh)
 
     # Check the output.
@@ -368,7 +346,7 @@ def test_meshpy_wrap_cylinder_not_on_same_plane(
     warnings.filterwarnings("ignore")
 
     # Create the mesh.
-    mesh = InputFile()
+    mesh = Mesh()
     mat = MaterialReissner(radius=0.05)
 
     # Create the line and bend it to a helix.
@@ -427,7 +405,7 @@ def test_meshpy_get_min_max_coordinates(get_corresponding_reference_file_path):
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="4C_input_solid_cuboid"
         )
-    )
+    ).mesh
     mat = MaterialReissner(radius=0.05)
     create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 3, 4], n_el=10)
 
@@ -442,7 +420,7 @@ def test_meshpy_geometry_sets(
 ):
     """Test functionality of the GeometrySet objects."""
 
-    mesh = InputFile()
+    mesh = Mesh()
     for i in range(6):
         mesh.add(NodeCosserat([i, 2 * i, 3 * i], Rotation()))
 
@@ -470,16 +448,16 @@ def test_meshpy_unique_ordering_of_get_all_nodes_for_line_condition(
     function get_all_nodes is unique for line sets."""
 
     # set up a beam mesh with material
-    input_file = InputFile()
+    mesh = Mesh()
     mat = MaterialReissner()
     beam_set = create_beam_mesh_line(
-        input_file, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
+        mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
     )
 
     # apply different Dirichlet conditions to all nodes within this condition
     for i, node in enumerate(beam_set["line"].get_all_nodes()):
         # add different condition value for each node
-        input_file.add(
+        mesh.add(
             BoundaryCondition(
                 GeometrySet(node),
                 get_bc_data(identifier=node.coordinates[0]),
@@ -490,7 +468,7 @@ def test_meshpy_unique_ordering_of_get_all_nodes_for_line_condition(
     # Check the input file
     assert_results_equal(
         get_corresponding_reference_file_path(),
-        input_file,
+        mesh,
     )
 
 
@@ -500,14 +478,16 @@ def test_meshpy_reissner_beam(
     """Test that the input file for all types of Reissner beams is generated
     correctly."""
 
-    # Create input file.
+    # Create mesh
+    mesh = Mesh()
+
+    # Create material
     material = MaterialReissner(radius=0.1, youngs_modulus=1000, interaction_radius=2.0)
-    input_file = InputFile()
 
     # Create a beam arc with the different Reissner beam types.
     for i, beam_type in enumerate([Beam3rHerm2Line3, Beam3rLine2Line2]):
         create_beam_mesh_arc_segment_via_rotation(
-            input_file,
+            mesh,
             beam_type,
             material,
             [0.0, 0.0, i],
@@ -518,7 +498,7 @@ def test_meshpy_reissner_beam(
         )
 
     # Compare with the reference solution.
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
 def test_meshpy_reissner_elasto_plastic(assert_results_equal):
@@ -569,8 +549,8 @@ def test_meshpy_kirchhoff_beam(
     """Test that the input file for all types of Kirchhoff beams is generated
     correctly."""
 
-    # Create input file.
-    input_file = InputFile()
+    # Create mesh
+    mesh = Mesh()
 
     with warnings.catch_warnings():
         # Ignore the warnings for the rotvec beams.
@@ -587,7 +567,7 @@ def test_meshpy_kirchhoff_beam(
 
                     # Create a beam.
                     set_1 = create_beam_mesh_line(
-                        input_file,
+                        mesh,
                         BeamObject,
                         material,
                         [0, 0, 0],
@@ -595,7 +575,7 @@ def test_meshpy_kirchhoff_beam(
                         n_el=2,
                     )
                     set_2 = create_beam_mesh_line(
-                        input_file,
+                        mesh,
                         BeamObject,
                         material,
                         [1, 0, 0],
@@ -605,7 +585,7 @@ def test_meshpy_kirchhoff_beam(
 
                     # Couple the nodes.
                     if rotvec:
-                        input_file.couple_nodes(
+                        mesh.couple_nodes(
                             nodes=[
                                 get_single_node(set_1["end"]),
                                 get_single_node(set_2["start"]),
@@ -613,10 +593,10 @@ def test_meshpy_kirchhoff_beam(
                         )
 
                     # Move the mesh away from the next created beam.
-                    input_file.translate([0, 0.5, 0])
+                    mesh.translate([0, 0.5, 0])
 
     # Compare with the reference solution.
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
 def test_meshpy_kirchhoff_material(assert_results_equal):
@@ -700,10 +680,10 @@ def test_meshpy_euler_bernoulli(
     """Recreate the 4C test case beam3eb_static_endmoment_quartercircle.4C.yaml
     This tests the implementation for Euler Bernoulli beams."""
 
-    # Create the input file and add function and material.
-    input_file = InputFile()
+    # Create the mesh and add function and material.
+    mesh = Mesh()
     fun = Function([{"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"}])
-    input_file.add(fun)
+    mesh.add(fun)
     mat = MaterialEulerBernoulli(youngs_modulus=1.0, density=1.3e9)
 
     # Set the parameters that are also set in the test file.
@@ -711,12 +691,10 @@ def test_meshpy_euler_bernoulli(
     mat.mom2 = 1e-4
 
     # Create the beam.
-    beam_set = create_beam_mesh_line(
-        input_file, Beam3eb, mat, [-1, 0, 0], [1, 0, 0], n_el=16
-    )
+    beam_set = create_beam_mesh_line(mesh, Beam3eb, mat, [-1, 0, 0], [1, 0, 0], n_el=16)
 
     # Add boundary conditions.
-    input_file.add(
+    mesh.add(
         BoundaryCondition(
             beam_set["start"],
             {
@@ -728,7 +706,7 @@ def test_meshpy_euler_bernoulli(
             bc_type=mpy.bc.dirichlet,
         )
     )
-    input_file.add(
+    mesh.add(
         BoundaryCondition(
             beam_set["end"],
             {
@@ -742,20 +720,22 @@ def test_meshpy_euler_bernoulli(
     )
 
     # Compare with the reference solution.
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
     # Test consistency checks.
     rot = Rotation([1, 2, 3], 2.3434)
-    input_file.nodes[-1].rotation = rot
+    mesh.nodes[-1].rotation = rot
     with pytest.raises(
         ValueError,
         match="The two nodal rotations in Euler Bernoulli beams must be the same",
     ):
         # This raises an error because not all rotation in the beams are
         # the same.
+        input_file = InputFile()
+        input_file.add(mesh)
         input_file.get_dict_to_dump()
 
-    for node in input_file.nodes:
+    for node in mesh.nodes:
         node.rotation = rot
     with pytest.raises(
         ValueError,
@@ -763,6 +743,8 @@ def test_meshpy_euler_bernoulli(
     ):
         # This raises an error because the rotations do not match the
         # director between the nodes.
+        input_file = InputFile()
+        input_file.add(mesh)
         input_file.get_dict_to_dump()
 
 
@@ -787,8 +769,8 @@ def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_fil
 
     def create_mesh_manually(start_rotation):
         """Create the full circle manually."""
-        input_file = InputFile()
-        input_file.add(mat)
+        mesh = Mesh()
+        mesh.add(mat)
 
         # Add nodes.
         for i in range(4 * n_el):
@@ -797,64 +779,62 @@ def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_fil
             node = NodeCosserat(r, basis)
             rotation = Rotation([0, 0, 1], 0.5 * i * np.pi / n_el)
             node.rotate(rotation, origin=[0, 0, 0])
-            input_file.nodes.append(node)
+            mesh.nodes.append(node)
 
         # Add elements.
         for i in range(2 * n_el):
             node_index = [2 * i, 2 * i + 1, 2 * i + 2]
             nodes = []
             for index in node_index:
-                if index == len(input_file.nodes):
-                    nodes.append(input_file.nodes[0])
+                if index == len(mesh.nodes):
+                    nodes.append(mesh.nodes[0])
                 else:
-                    nodes.append(input_file.nodes[index])
+                    nodes.append(mesh.nodes[index])
             element = Beam3rHerm2Line3(mat, nodes)
-            input_file.add(element)
+            mesh.add(element)
 
         # Add sets.
         geom_set = GeometryName()
-        geom_set["start"] = GeometrySet(input_file.nodes[0])
-        geom_set["end"] = GeometrySet(input_file.nodes[0])
-        geom_set["line"] = GeometrySet(input_file.elements)
-        input_file.add(geom_set)
-        return input_file
+        geom_set["start"] = GeometrySet(mesh.nodes[0])
+        geom_set["end"] = GeometrySet(mesh.nodes[0])
+        geom_set["line"] = GeometrySet(mesh.elements)
+        mesh.add(geom_set)
+        return mesh
 
     def one_full_circle_closed(function, argument_list, additional_rotation=None):
         """Create one full circle and connect it to itself."""
 
-        input_file = InputFile()
+        mesh = Mesh()
 
         if additional_rotation is not None:
             start_rotation = additional_rotation * Rotation([0, 0, 1], np.pi * 0.5)
-            input_file.add(NodeCosserat([R, 0, 0], start_rotation))
+            mesh.add(NodeCosserat([R, 0, 0], start_rotation))
             beam_sets = function(
-                input_file,
-                start_node=input_file.nodes[0],
+                mesh,
+                start_node=mesh.nodes[0],
                 close_beam=True,
                 **(argument_list),
             )
         else:
-            beam_sets = function(input_file, close_beam=True, **(argument_list))
-        input_file.add(beam_sets)
-        return input_file
+            beam_sets = function(mesh, close_beam=True, **(argument_list))
+        mesh.add(beam_sets)
+        return mesh
 
     def two_half_circles_closed(function, argument_list, additional_rotation=None):
         """Create two half circles and close them, by reusing the connecting
         nodes."""
 
-        input_file = InputFile()
+        mesh = Mesh()
 
         if additional_rotation is not None:
             start_rotation = additional_rotation * Rotation([0, 0, 1], np.pi * 0.5)
-            input_file.add(NodeCosserat([R, 0, 0], start_rotation))
-            set_1 = function(
-                input_file, start_node=input_file.nodes[0], **(argument_list[0])
-            )
+            mesh.add(NodeCosserat([R, 0, 0], start_rotation))
+            set_1 = function(mesh, start_node=mesh.nodes[0], **(argument_list[0]))
         else:
-            set_1 = function(input_file, **(argument_list[0]))
+            set_1 = function(mesh, **(argument_list[0]))
 
         set_2 = function(
-            input_file,
+            mesh,
             start_node=set_1["end"],
             end_node=set_1["start"],
             **(argument_list[1]),
@@ -865,9 +845,9 @@ def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_fil
         geom_set["start"] = GeometrySet(set_1["start"])
         geom_set["end"] = GeometrySet(set_2["end"])
         geom_set["line"] = GeometrySet([set_1["line"], set_2["line"]])
-        input_file.add(geom_set)
+        mesh.add(geom_set)
 
-        return input_file
+        return mesh
 
     def get_arguments_arc_segment(circle_type):
         """Return the arguments for the arc segment function."""
@@ -1004,9 +984,9 @@ def test_geometry_set_get_geometry_objects():
     """Test if the geometry set returns the objects(elements) in the correct
     order."""
 
-    # Initialize material and input file.
+    # Initialize material and mesh
     mat = MaterialReissner()
-    mesh = InputFile()
+    mesh = Mesh()
 
     # number of elements
     n_el = 5
@@ -1038,13 +1018,10 @@ def test_meshpy_replace_nodes_geometry_set(
     mat = MaterialReissner(radius=0.1, youngs_modulus=1)
     rot = Rotation([1, 2, 43], 213123)
 
-    def create_mesh():
-        """Create two empty meshes."""
-        return InputFile(), InputFile()
-
     # Create a beam with two elements. Once immediately and once as two
     # beams with couplings.
-    mesh_ref, mesh_couple = create_mesh()
+    mesh_ref = Mesh()
+    mesh_couple = Mesh()
 
     # Create a simple beam.
     create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=2)
@@ -1107,7 +1084,8 @@ def test_meshpy_replace_nodes_geometry_set(
 
     # Create two overlapping beams. This is to test that the middle nodes
     # are not coupled.
-    mesh_ref, mesh_couple = create_mesh()
+    mesh_ref = Mesh()
+    mesh_couple = Mesh()
 
     # Create a simple beam.
     set_ref = create_beam_mesh_line(
@@ -1139,7 +1117,8 @@ def test_meshpy_replace_nodes_geometry_set(
 
     # Create a beam with two elements. Once immediately and once as two
     # beams with couplings.
-    mesh_ref, mesh_couple = create_mesh()
+    mesh_ref = Mesh()
+    mesh_couple = Mesh()
 
     # Create a simple beam.
     create_beam_mesh_line(mesh_ref, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=2)
@@ -1194,7 +1173,10 @@ def test_meshpy_replace_nodes_geometry_set(
 def create_beam_to_solid_conditions_model(get_corresponding_reference_file_path):
     """Create the input file for the beam-to-solid input conditions tests."""
 
-    # Create input file.
+    # TODO update this function to take the "full_import" argument
+    # Then return the input file and corresponding mesh.
+
+    # Create input file
     input_file = InputFile(
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_block"
@@ -1229,7 +1211,7 @@ def create_beam_to_solid_conditions_model(get_corresponding_reference_file_path)
     )
 
     # Add the beam to the solid mesh.
-    input_file.add(beam_mesh)
+    input_file.mesh.add(beam_mesh)
 
     return input_file
 
@@ -1265,7 +1247,6 @@ def test_meshpy_surface_to_surface_contact_import(
     """Test that surface-to-surface contact problems can be imported as
     expected."""
 
-    # Create input file.
     mpy.import_mesh_full = True
     input_file = InputFile(
         yaml_file=get_corresponding_reference_file_path(
@@ -1286,7 +1267,8 @@ def test_meshpy_nurbs_import(
     beam3r_herm2line3_static_beam_to_solid_volume_meshtying_nurbs27_mortar_penalty_line4
     """
 
-    # Create beam mesh and load solid file.
+    # Create mesh and load solid file.
+    mesh = Mesh()
     input_file = InputFile(
         yaml_file=get_corresponding_reference_file_path(
             additional_identifier="solid_mesh"
@@ -1324,18 +1306,19 @@ def test_meshpy_nurbs_import(
         },
         option_overwrite=True,
     )
+
     fun = Function([{"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"}])
-    input_file.add(fun)
+    mesh.add(fun)
 
     # Create the beam material.
     material = MaterialReissner(youngs_modulus=1000, radius=0.05)
 
     # Create the beams.
     set_1 = create_beam_mesh_line(
-        input_file, Beam3rHerm2Line3, material, [0, 0, 0.95], [1, 0, 0.95], n_el=2
+        mesh, Beam3rHerm2Line3, material, [0, 0, 0.95], [1, 0, 0.95], n_el=2
     )
     set_2 = create_beam_mesh_line(
-        input_file,
+        mesh,
         Beam3rHerm2Line3,
         material,
         [-0.25, -0.3, 0.85],
@@ -1344,7 +1327,7 @@ def test_meshpy_nurbs_import(
     )
 
     # Add boundary conditions on the beams.
-    input_file.add(
+    mesh.add(
         BoundaryCondition(
             set_1["start"],
             {
@@ -1356,7 +1339,7 @@ def test_meshpy_nurbs_import(
             bc_type=mpy.bc.dirichlet,
         )
     )
-    input_file.add(
+    mesh.add(
         BoundaryCondition(
             set_1["end"],
             {
@@ -1368,7 +1351,7 @@ def test_meshpy_nurbs_import(
             bc_type=mpy.bc.neumann,
         )
     )
-    input_file.add(
+    mesh.add(
         BoundaryCondition(
             set_2["start"],
             {
@@ -1380,7 +1363,7 @@ def test_meshpy_nurbs_import(
             bc_type=mpy.bc.dirichlet,
         )
     )
-    input_file.add(
+    mesh.add(
         BoundaryCondition(
             set_2["end"],
             {
@@ -1404,6 +1387,9 @@ def test_meshpy_nurbs_import(
     nodes = [64]
     add_result_description(input_file, displacements, nodes)
 
+    # Add the mesh to the input file
+    input_file.add(mesh)
+
     # Compare with the reference solution.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
@@ -1421,13 +1407,13 @@ def test_meshpy_stvenantkirchhoff_solid(
 
     material_2 = MaterialStVenantKirchhoff(youngs_modulus=370, nu=0.20, density=5.2e-7)
 
-    # Create input file
-    input_file = InputFile()
-    input_file.add(material_1)
-    input_file.add(material_2)
+    # Create mesh
+    mesh = Mesh()
+    mesh.add(material_1)
+    mesh.add(material_2)
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
 @pytest.mark.parametrize(
@@ -1449,22 +1435,22 @@ def test_meshpy_point_couplings(
 ):
     """Create the input file for the test_point_couplings method."""
 
-    # Create input file.
+    # Create material and mesh
     material = MaterialReissner(radius=0.1, youngs_modulus=1000, interaction_radius=2.0)
-    input_file = InputFile()
+    mesh = Mesh()
 
     # Create a 2x2 grid of beams.
     for i in range(3):
         for j in range(2):
             create_beam_mesh_line(
-                input_file, Beam3rHerm2Line3, material, [j, i, 0.0], [j + 1, i, 0.0]
+                mesh, Beam3rHerm2Line3, material, [j, i, 0.0], [j + 1, i, 0.0]
             )
             create_beam_mesh_line(
-                input_file, Beam3rHerm2Line3, material, [i, j, 0.0], [i, j + 1, 0.0]
+                mesh, Beam3rHerm2Line3, material, [i, j, 0.0], [i, j + 1, 0.0]
             )
 
     # Couple the beams.
-    input_file.couple_nodes(
+    mesh.couple_nodes(
         reuse_matching_nodes=True,
         coupling_type=coupling_type[1],
         coupling_dof_type=coupling_type[2],
@@ -1472,7 +1458,7 @@ def test_meshpy_point_couplings(
 
     assert_results_equal(
         get_corresponding_reference_file_path(additional_identifier=coupling_type[0]),
-        input_file,
+        mesh,
     )
 
 
@@ -1648,13 +1634,14 @@ def test_meshpy_vtk_writer_solid(
             reference_file_base_name="test_create_cubit_input_tube"
         )
     )
+    mesh = input_file.mesh
 
     # Write VTK output.
     ref_file = get_corresponding_reference_file_path(extension="vtu")
     vtk_file = tmp_path / ref_file.name
     if os.path.isfile(vtk_file):  # Todo: Can this check be removed?
         os.remove(vtk_file)
-    input_file.write_vtk(
+    mesh.write_vtk(
         output_name="test_meshpy_vtk_writer", output_directory=tmp_path, binary=False
     )
 
@@ -1676,6 +1663,7 @@ def test_meshpy_vtk_writer_solid_elements(
     input_file.read_yaml(
         get_corresponding_reference_file_path(additional_identifier="import")
     )
+    mesh = input_file.mesh
 
     # Write VTK output.
     ref_file = get_corresponding_reference_file_path(
@@ -1684,7 +1672,7 @@ def test_meshpy_vtk_writer_solid_elements(
     vtk_file = tmp_path / ref_file.name
     if os.path.isfile(vtk_file):  # Todo: Can this check be removed?
         os.remove(vtk_file)
-    input_file.write_vtk(
+    mesh.write_vtk(
         output_name="test_meshpy_vtk_writer_solid_elements",
         output_directory=tmp_path,
         binary=False,
@@ -1817,8 +1805,9 @@ def test_meshpy_deep_copy(get_bc_data, assert_results_equal):
     create_mesh(mesh_ref_2)
     mesh_ref_2.rotate(rotation)
     mesh_ref_2.translate(translate)
-    input_file_ref = InputFile()
-    input_file_ref.add(mesh_ref_1, mesh_ref_2)
+
+    mesh = Mesh()
+    mesh.add(mesh_ref_1, mesh_ref_2)
 
     # Now copy the first mesh and add them together in the input file.
     mesh_copy_1 = Mesh()
@@ -1826,12 +1815,13 @@ def test_meshpy_deep_copy(get_bc_data, assert_results_equal):
     mesh_copy_2 = mesh_copy_1.copy()
     mesh_copy_2.rotate(rotation)
     mesh_copy_2.translate(translate)
-    input_file_copy = InputFile()
-    input_file_copy.add(mesh_copy_1, mesh_copy_2)
+
+    mesh_copy = Mesh()
+    mesh_copy.add(mesh_copy_1, mesh_copy_2)
 
     # Check that the input files are the same.
     # TODO: add reference file check here as well
-    assert_results_equal(input_file_ref, input_file_copy)
+    assert_results_equal(mesh, mesh_copy)
 
 
 def test_meshpy_mesh_add_checks():
@@ -1858,6 +1848,7 @@ def test_meshpy_mesh_add_checks():
     mesh.add(geometry_set)
 
     # Add the objects again and check for errors.
+    # TODO catch and test error messages
     with pytest.raises(ValueError):
         mesh.add(node)
     with pytest.raises(ValueError):
@@ -1877,7 +1868,7 @@ def test_meshpy_check_two_couplings(
     correctly, therefore we check this here."""
 
     # Create mesh object
-    mesh = InputFile()
+    mesh = Mesh()
     mat = MaterialReissner()
     mesh.add(mat)
 
@@ -1907,7 +1898,7 @@ def test_meshpy_check_multiple_node_penalty_coupling(
     """
 
     # Create mesh object
-    mesh = InputFile()
+    mesh = Mesh()
     mat = MaterialReissner()
     mesh.add(mat)
 
@@ -1936,7 +1927,7 @@ def test_meshpy_check_double_elements(
     """Check if there are overlapping elements in a mesh."""
 
     # Create mesh object.
-    mesh = InputFile()
+    mesh = Mesh()
     mat = MaterialReissner()
     mesh.add(mat)
 
@@ -1980,7 +1971,7 @@ def test_meshpy_check_overlapping_coupling_nodes(check):
     """
 
     # Create mesh object.
-    mesh = InputFile()
+    mesh = Mesh()
     mat = MaterialReissner()
     mesh.add(mat)
 
@@ -2031,7 +2022,7 @@ def test_meshpy_userdefined_boundary_condition(
 ):
     """Check if an user defined boundary condition can be added."""
 
-    mesh = InputFile()
+    mesh = Mesh()
 
     mat = MaterialReissner()
     sets = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [1, 2, 3])
@@ -2052,5 +2043,7 @@ def test_meshpy_display_pyvista(get_corresponding_reference_file_path):
     """
 
     mpy.import_mesh_full = True
-    mesh = create_beam_to_solid_conditions_model(get_corresponding_reference_file_path)
-    _ = mesh.display_pyvista(resolution=3)
+    input_file = create_beam_to_solid_conditions_model(
+        get_corresponding_reference_file_path
+    )
+    _ = input_file.mesh.display_pyvista(resolution=3)
