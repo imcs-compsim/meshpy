@@ -37,10 +37,10 @@ from meshpy.cosserat_curve.warping_along_cosserat_curve import (
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.material import MaterialReissner
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_helix
+from meshpy.mesh_creation_functions.beam_helix import create_beam_mesh_helix
 
 
-def load_cosserat_curve_from_file(get_corresponding_reference_file_path):
+def load_cosserat_curve_from_file(get_corresponding_reference_file_path, **kwargs):
     """Load the centerline coordinates from the reference files and create the
     Cosserat curve."""
     point_coordinates_file = get_corresponding_reference_file_path(
@@ -49,7 +49,7 @@ def load_cosserat_curve_from_file(get_corresponding_reference_file_path):
     coordinates = np.loadtxt(
         point_coordinates_file, comments="#", delimiter=",", unpack=False
     )
-    return CosseratCurve(coordinates)
+    return CosseratCurve(coordinates, **kwargs)
 
 
 def create_beam_solid_input_file(get_corresponding_reference_file_path):
@@ -60,7 +60,8 @@ def create_beam_solid_input_file(get_corresponding_reference_file_path):
         yaml_file=get_corresponding_reference_file_path(
             reference_file_base_name="test_cosserat_curve_mesh"
         )
-    )
+    ).mesh
+
     create_beam_mesh_helix(
         mesh,
         Beam3rHerm2Line3,
@@ -75,17 +76,38 @@ def create_beam_solid_input_file(get_corresponding_reference_file_path):
     return mesh
 
 
-def test_cosserat_curve_translate_and_rotate(get_corresponding_reference_file_path):
+@pytest.mark.parametrize(
+    ("twist_type", "twist_angle", "starting_triad_guess"),
+    [
+        (None, 0.0, None),
+        ("angle", np.pi / 5, None),
+        ("starting_rotation", 0.3293917321011114, Rotation([-0.5, 3, -0.5], 2)),
+    ],
+)
+def test_cosserat_curve_translate_and_rotate(
+    twist_type, twist_angle, starting_triad_guess, get_corresponding_reference_file_path
+):
     """Test that a curve can be loaded, rotated and transformed."""
 
-    curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
+    if twist_type is None:
+        curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
+    elif twist_type == "angle":
+        curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
+        curve.twist(twist_angle)
+    elif starting_triad_guess is not None:
+        curve = load_cosserat_curve_from_file(
+            get_corresponding_reference_file_path,
+            starting_triad_guess=starting_triad_guess,
+        )
+    relative_rotation = Rotation([1, 0, 0], twist_angle)
 
     # Translate the curve so that the start is at the origin
     curve.translate(-curve.centerline_interpolation(5.0))
 
     # Rotate the curve around its center point
-    pos_1, q_1 = curve.get_centerline_position_and_rotation(0.0)
-    curve.rotate(Rotation.from_quaternion(quaternion.as_float_array(q_1)), origin=pos_1)
+    origin = [1, 2, 3]
+    rotation = Rotation([1, 2, 3], np.pi / 7)
+    curve.rotate(rotation, origin=origin)
 
     # Get the points and rotations at certain points
     t = list(map(float, range(-10, 30, 5)))
@@ -104,15 +126,29 @@ def test_cosserat_curve_translate_and_rotate(get_corresponding_reference_file_pa
             )
         )
 
+    def get_compare_rot_with_twist(name):
+        """Apply twist rotations to reference files."""
+        rotations = (
+            quaternion.from_float_array(load_compare(name))
+            * relative_rotation.get_numpy_quaternion()
+        )
+        return rotations
+
     assert np.allclose(sol_half_pos, load_compare("pos_half_ref"), rtol=1e-14)
-    assert np.allclose(
-        quaternion.as_float_array(sol_half_q), load_compare("q_half_ref"), rtol=1e-14
-    )
+    assert np.allclose(sol_half_q, get_compare_rot_with_twist("q_half_ref"), rtol=1e-14)
 
     assert np.allclose(sol_full_pos, load_compare("pos_full_ref"), rtol=1e-14)
-    assert np.allclose(
-        quaternion.as_float_array(sol_full_q), load_compare("q_full_ref"), rtol=1e-14
-    )
+    assert np.allclose(sol_full_q, get_compare_rot_with_twist("q_full_ref"), rtol=1e-14)
+
+
+def test_cosserat_curve_bad_guess_triad(get_corresponding_reference_file_path):
+    """Check that an error is thrown for a bad guess triad."""
+    with pytest.raises(ValueError):
+        load_cosserat_curve_from_file(
+            get_corresponding_reference_file_path,
+            starting_triad_guess=Rotation([-0.5, 3, -0.5], 2)
+            * Rotation([0, 0, 1], np.pi * 0.5),
+        )
 
 
 def test_cosserat_curve_vtk_representation(
@@ -159,7 +195,7 @@ def test_cosserat_curve_mesh_transformation(
 
     curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pos, rot = curve.get_centerline_position_and_rotation(0)
-    rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
+    rot = Rotation.from_quaternion(rot)
     curve.translate(-pos)
     curve.translate([1, 2, 3])
 
@@ -190,7 +226,7 @@ def test_cosserat_curve_mesh_warp(
     # Load the curve
     curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pos, rot = curve.get_centerline_position_and_rotation(0)
-    rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
+    rot = Rotation.from_quaternion(rot)
     curve.translate(-pos)
     curve.translate([1, 2, 3])
 
@@ -205,7 +241,6 @@ def test_cosserat_curve_mesh_warp(
             Rotation([0, 0, 1], -0.5 * np.pi) * Rotation([0, 1, 0], -0.5 * np.pi)
         ),
     )
-
     assert_results_equal(get_corresponding_reference_file_path(), mesh, rtol=1e-10)
 
 
@@ -218,7 +253,7 @@ def test_cosserat_curve_mesh_warp_transform_boundary_conditions(
     # Load the curve
     curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pos, rot = curve.get_centerline_position_and_rotation(0)
-    rot = Rotation.from_quaternion(quaternion.as_float_array(rot))
+    rot = Rotation.from_quaternion(rot)
     curve.translate(-pos)
     curve.translate([1, 2, 3])
 

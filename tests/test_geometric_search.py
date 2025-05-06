@@ -38,7 +38,7 @@ from meshpy.geometric_search.find_close_points import (
     point_partners_to_partner_indices,
     point_partners_to_unique_indices,
 )
-from meshpy.mesh_creation_functions.beam_honeycomb import (
+from meshpy.mesh_creation_functions.applications.beam_honeycomb import (
     create_beam_mesh_honeycomb_flat,
 )
 from meshpy.utils.nodes import filter_nodes, get_nodal_coordinates

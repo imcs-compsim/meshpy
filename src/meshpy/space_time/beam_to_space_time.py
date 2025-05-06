@@ -168,8 +168,6 @@ def beam_to_space_time(
         # Since the basic space meshes here contain nodes that don't have the
         # arc_length attribute by default, we have to do the following check
         # and branching.
-        # TODO: Think if it makes sense to somehow add this as a member to the
-        # default Node object.
         nodes_have_arc_length_attribute = {
             hasattr(node, "arc_length") for node in mesh_space_current_time.nodes
         }

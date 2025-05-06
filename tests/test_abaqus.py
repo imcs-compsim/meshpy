@@ -30,7 +30,7 @@ from meshpy.abaqus.material import AbaqusBeamMaterial
 from meshpy.core.geometry_set import GeometrySet
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
+from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
 
 PYTEST_ABAQUS_NORMAL_DEFINITION_PARAMETRIZE = [
     ("normal_definition", "additional_identifier"),

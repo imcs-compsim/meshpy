@@ -37,7 +37,7 @@ from meshpy.geometric_search.find_close_points import (
     FindClosePointAlgorithm,
     find_close_points,
 )
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
+from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
 from meshpy.utils.environment import cubitpy_is_available
 from meshpy.utils.nodes import find_close_nodes
 
@@ -120,7 +120,7 @@ def create_large_beam_mesh(n_x, n_y, n_z, n_el):
     """Create a beam grid on the domain (1 x 1 x 1) with (nx * ny * nz) "grid
     cells"."""
 
-    mesh = InputFile()
+    mesh = Mesh()
     material = MaterialReissner(radius=0.25 / np.max([n_x, n_y, n_z]))
 
     for i_x in range(n_x + 1):

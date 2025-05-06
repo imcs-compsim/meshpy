@@ -24,8 +24,8 @@
 import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
-from meshpy.mesh_creation_functions.beam_curve import (
-    create_beam_mesh_curve as _create_beam_mesh_curve,
+from meshpy.mesh_creation_functions.beam_parametric_curve import (
+    create_beam_mesh_parametric_curve as _create_beam_mesh_parametric_curve,
 )
 
 
@@ -150,7 +150,7 @@ def create_beam_mesh_from_nurbs(
     ) = get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=tol)
 
     # Create the beams
-    return _create_beam_mesh_curve(
+    return _create_beam_mesh_parametric_curve(
         mesh,
         beam_class,
         material,

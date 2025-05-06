@@ -24,6 +24,7 @@
 import copy as _copy
 
 import numpy as _np
+import quaternion as _quaternion
 
 from meshpy.core.conf import mpy as _mpy
 
@@ -88,6 +89,9 @@ class Rotation:
             where we can be sure that the input quaternion is normalized to avoid
             error accumulation.
         """
+        if isinstance(q, _quaternion.quaternion):
+            q = _quaternion.as_float_array(q)
+
         rotation = object.__new__(cls)
         if normalized:
             rotation.q = _np.array(q)
@@ -195,8 +199,12 @@ class Rotation:
 
     def get_quaternion(self):
         """Return the quaternion for this rotation, as numpy array (copy)."""
-
         return _np.array(self.q)
+
+    def get_numpy_quaternion(self):
+        """Return a numpy quaternion object representing this rotation
+        (copy)."""
+        return _quaternion.from_float_array(_np.array(self.q))
 
     def get_rotation_vector(self):
         """Return the rotation vector for this object."""

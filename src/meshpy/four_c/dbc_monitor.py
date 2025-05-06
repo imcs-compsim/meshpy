@@ -183,10 +183,10 @@ def add_point_neuman_condition_to_input_file(
 
     # Add the function to the input file, if they are not previously added.
     for function in function_array:
-        input_file.add(function)
+        input_file.mesh.add(function)
 
     # Create GeometrySet with nodes.
-    mesh_nodes = [input_file.nodes[i_node] for i_node in nodes]
+    mesh_nodes = [input_file.mesh.nodes[i_node] for i_node in nodes]
     geo = _GeometrySet(mesh_nodes)
 
     # Create the Boundary Condition.
@@ -200,7 +200,7 @@ def add_point_neuman_condition_to_input_file(
         },
         bc_type=_mpy.bc.neumann,
     )
-    input_file.add(bc)
+    input_file.mesh.add(bc)
 
 
 def dbc_monitor_to_input_all_values(
@@ -322,7 +322,7 @@ def dbc_monitor_to_input_all_values(
             )
 
             # add the function to the input array
-            input_file.add(fun)
+            input_file.mesh.add(fun)
 
             # store function
             functions.append(fun)

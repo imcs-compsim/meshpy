@@ -27,7 +27,7 @@ from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
 from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.core.rotation import Rotation as _Rotation
-from meshpy.mesh_creation_functions.beam_basic_geometry import (
+from meshpy.mesh_creation_functions.beam_line import (
     create_beam_mesh_line as _create_beam_mesh_line,
 )
 from meshpy.utils.nodes import get_min_max_nodes as _get_min_max_nodes

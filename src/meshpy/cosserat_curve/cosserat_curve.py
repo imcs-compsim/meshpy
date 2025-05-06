@@ -22,6 +22,7 @@
 """Define a Cosserat curve object that can be used to describe warping of
 curve-like objects."""
 
+from typing import Optional as _Optional
 from typing import Tuple as _Tuple
 
 import numpy as _np
@@ -149,8 +150,8 @@ def get_relative_distance_and_rotations(
             _Rotation(),
             relative_distance_local,
         )
-        relative_distances_rotation[i_segment] = _quaternion.from_float_array(
-            smallest_relative_rotation_onto_distance.q
+        relative_distances_rotation[i_segment] = (
+            smallest_relative_rotation_onto_distance.get_numpy_quaternion()
         )
 
         relative_rotations[i_segment] = (
@@ -163,13 +164,22 @@ def get_relative_distance_and_rotations(
 class CosseratCurve(object):
     """Represent a Cosserat curve in space."""
 
-    def __init__(self, point_coordinates: _np.ndarray):
+    def __init__(
+        self,
+        point_coordinates: _np.ndarray,
+        *,
+        starting_triad_guess: _Optional[_Rotation] = None,
+    ):
         """Initialize the Cosserat curve based on points in 3D space.
 
-        Args
-        ----
-        point_coordinates:
-            Array containing the point coordinates
+        Args:
+            point_coordinates: Array containing the point coordinates
+            starting_triad_guess: Optional initial guess for the starting triad.
+                If provided, this introduces a constant twist angle along the curve.
+                The twist angle is computed between:
+                - The given starting guess triad, and
+                - The automatically calculated triad, rotated onto the first basis vector
+                  of the starting guess triad using the smallest rotation.
         """
 
         self.coordinates = point_coordinates.copy()
@@ -218,6 +228,30 @@ class CosseratCurve(object):
             self.relative_rotations,
         ) = get_relative_distance_and_rotations(self.coordinates, self.quaternions)
 
+        # Check if we have to apply a twist for the rotations
+        if starting_triad_guess is not None:
+            first_rotation = _Rotation.from_quaternion(self.quaternions[0])
+            starting_triad_e1 = starting_triad_guess * [1, 0, 0]
+            if _np.dot(first_rotation * [1, 0, 0], starting_triad_e1) < 0.5:
+                raise ValueError(
+                    "The angle between the first basis vectors of the guess triad you"
+                    " provided and the automatically calculated one is too large,"
+                    " please check your input data."
+                )
+            smallest_rotation_to_guess_tangent = _smallest_rotation(
+                first_rotation, starting_triad_e1
+            )
+            relative_rotation = (
+                smallest_rotation_to_guess_tangent.inv() * starting_triad_guess
+            )
+            psi = relative_rotation.get_rotation_vector()
+            if _np.linalg.norm(psi[1:]) > _mpy.eps_quaternion:
+                raise ValueError(
+                    "The twist angle can not be extracted as the relative rotation is not plane!"
+                )
+            twist_angle = psi[0]
+            self.twist(twist_angle)
+
     def set_centerline_interpolation(self):
         """Set the interpolation of the centerline based on the coordinates and
         arc length stored in this object."""
@@ -234,18 +268,40 @@ class CosseratCurve(object):
     def rotate(self, rotation: _Rotation, *, origin=None):
         """Rotate the curve and the quaternions."""
 
-        self.quaternions = _quaternion.from_float_array(rotation.q) * self.quaternions
+        self.quaternions = rotation.get_numpy_quaternion() * self.quaternions
         self.coordinates = _rotate_coordinates(
             self.coordinates, rotation, origin=origin
         )
         self.set_centerline_interpolation()
+
+    def twist(self, twist_angle: float) -> None:
+        """Apply a constant twist rotation along the Cosserat curve.
+
+        Args:
+            twist_angle: The rotation angle (in radiants).
+        """
+        material_twist_rotation = _Rotation(
+            [1, 0, 0], twist_angle
+        ).get_numpy_quaternion()
+
+        self.quaternions = self.quaternions * material_twist_rotation
+        self.relative_distances_rotation = (
+            material_twist_rotation.conjugate()
+            * self.relative_distances_rotation
+            * material_twist_rotation
+        )
+        self.relative_rotations = (
+            material_twist_rotation.conjugate()
+            * self.relative_rotations
+            * material_twist_rotation
+        )
 
     def get_centerline_position_and_rotation(
         self, arc_length: float, **kwargs
     ) -> _Tuple[_np.ndarray, _NDArray[_quaternion.quaternion]]:
         """Return the position and rotation at a given centerline arc
         length."""
-        pos, rot = self.get_centerline_positions_and_rotations([arc_length])
+        pos, rot = self.get_centerline_positions_and_rotations([arc_length], **kwargs)
         return pos[0], rot[0]
 
     def get_centerline_positions_and_rotations(
@@ -353,9 +409,7 @@ class CosseratCurve(object):
                 sol_r[i_point] = get_spline_interpolation(
                     coordinates, self.point_arc_length
                 )(centerline_arc_length)
-                sol_q[i_point] = _quaternion.as_float_array(
-                    _quaternion.slerp_evaluate(q1, q2, xi)
-                )
+                sol_q[i_point] = _quaternion.slerp_evaluate(q1, q2, xi)
             else:
                 raise ValueError("Centerline value out of bounds")
 
@@ -379,9 +433,7 @@ class CosseratCurve(object):
             length = arc_length - self.point_arc_length[index]
             r = sol_r[index]
             q = sol_q[index]
-            sol_r_final[i] = r + _Rotation.from_quaternion(
-                _quaternion.as_float_array(q)
-            ) * [length, 0, 0]
+            sol_r_final[i] = r + _Rotation.from_quaternion(q) * [length, 0, 0]
             sol_q_final[i] = q
 
         return sol_r_final, sol_q_final

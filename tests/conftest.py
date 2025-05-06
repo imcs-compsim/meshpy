@@ -38,6 +38,7 @@ from _pytest.config.argparsing import Parser
 from vtk_utils.compare_grids import compare_grids
 
 from meshpy.core.conf import mpy
+from meshpy.core.mesh import Mesh
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
 from meshpy.utils.environment import fourcipp_is_available
@@ -274,8 +275,8 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
     """
 
     def _assert_results_equal(
-        reference: Union[Path, str, dict],
-        result: Union[Path, str, dict, InputFile],
+        reference: Union[Path, str, dict, InputFile, Mesh],
+        result: Union[Path, str, dict, InputFile, Mesh],
         rtol: Optional[float] = None,
         atol: Optional[float] = None,
         input_file_kwargs: dict = {"add_header_information": False, "check_nox": False},
@@ -331,10 +332,20 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             compare_dicts(reference_dict, result_dict, rtol=rtol, atol=atol)
             return
 
-        if isinstance(reference, InputFile) or isinstance(result, InputFile):
+        if isinstance(reference, (InputFile, Mesh)) or isinstance(
+            result, (InputFile, Mesh)
+        ):
 
             def get_dictionary(data) -> dict:
                 """Get the dictionary representation of the data object."""
+
+                # Internally convert Mesh to InputFile to allow for simple comparison via dictionary
+                # TODO this should be improved in the future
+                if isinstance(data, Mesh):
+                    input_file = InputFile()
+                    input_file.add(data)
+                    data = input_file
+
                 if isinstance(data, InputFile):
                     if fourcipp_is_available():
                         raise ValueError(

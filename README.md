@@ -50,6 +50,7 @@ MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulat
 - [Work that uses MeshPy](#work-that-uses-meshpy)
 - [Installation](#installation)
   - [Python environment](#python-environment)
+  - [Install MeshPy from GitHub (most recent version)](#install-meshpy-from-github-most-recent-version)
   - [Install MeshPy from source](#install-meshpy-from-source)
 - [Optional dependencies](#optional-dependencies)
   - [4C](#4c)
@@ -182,6 +183,13 @@ MeshPy is tested with, and supports Python versions 3.9-3.12. It is recommended 
   # Activate the environment
   source <path-to-env-folder>/meshpy-env/bin/activate
   ```
+
+### Install MeshPy from GitHub (most recent version)
+
+If you want to install the current `main` version of MeshPy directly from GitHub, simply run:
+```bash
+pip install git+https://github.com/imcs-compsim/meshpy.git@main
+```
 
 ### Install MeshPy from source
 
