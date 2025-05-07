@@ -33,8 +33,8 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.beam_interaction_conditions import add_beam_interaction_condition
 from meshpy.four_c.dbc_monitor import (
-    dbc_monitor_to_input,
-    dbc_monitor_to_input_all_values,
+    dbc_monitor_to_mesh,
+    dbc_monitor_to_mesh_all_values,
 )
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.function import Function
@@ -804,11 +804,10 @@ def test_four_c_simulation_dbc_monitor_to_input(
         ]
     )
     restart_mesh.add(function_nbc)
-    restart_input_file.add(restart_mesh, header_information=False, check_nox=False)
 
     if initial_run_name == "test_cantilever_w_dbc_monitor_to_input":
-        dbc_monitor_to_input(
-            restart_input_file,
+        dbc_monitor_to_mesh(
+            restart_mesh,
             tmp_path
             / initial_run_name
             / f"{initial_run_name}_monitor_dbc"
@@ -817,8 +816,8 @@ def test_four_c_simulation_dbc_monitor_to_input(
             function=function_nbc,
         )
     elif initial_run_name == "test_cantilever_w_dbc_monitor_to_input_all_values":
-        dbc_monitor_to_input_all_values(
-            restart_input_file,
+        dbc_monitor_to_mesh_all_values(
+            restart_mesh,
             tmp_path
             / initial_run_name
             / f"{initial_run_name}_monitor_dbc"
@@ -831,6 +830,8 @@ def test_four_c_simulation_dbc_monitor_to_input(
         raise ValueError(
             initial_run_name + " is not yet implemented for this test case."
         )
+
+    restart_input_file.add(restart_mesh, header_information=False, check_nox=False)
 
     displacements = [
         [-4.09988307566066690e-01, 9.93075098427816383e-01, 6.62050065618549843e-01]
@@ -981,7 +982,6 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
             bc_type=mpy.bc.dirichlet,
         )
     )
-    force_simulation.add(mesh, add_header_information=False, check_nox=False)
 
     # Set up path to monitor.
     monitor_db_path = tmp_path / initial_run_name / (initial_run_name + "_monitor_dbc")
@@ -990,14 +990,16 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     for _, _, file_names in os.walk(monitor_db_path):
         for file_name in sorted(file_names):
             if "_monitor_dbc" in file_name:
-                dbc_monitor_to_input_all_values(
-                    force_simulation,
+                dbc_monitor_to_mesh_all_values(
+                    mesh,
                     os.path.join(monitor_db_path, file_name),
                     steps=[0, n_steps + 1],
                     time_span=[0, n_steps * dt, 2 * n_steps * dt],
                     type="hat",
                     n_dof=9,
                 )
+
+    force_simulation.add(mesh, add_header_information=False, check_nox=False)
 
     displacements = [[0.0, 0.0, 0.0]]
     nodes = [21]
