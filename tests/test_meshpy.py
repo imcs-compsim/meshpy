@@ -277,7 +277,7 @@ def test_meshpy_mesh_transformations_with_solid(
         if reflect:
             mesh.reflect([0.1, -2, 1])
 
-        input_file.add(mesh, add_header_information=False, check_nox=False)
+        input_file.add(mesh, add_header_information=False)
 
         # Check the output.
         assert_results_equal(
@@ -327,7 +327,7 @@ def test_meshpy_fluid_element_section(
         beam_mesh, Beam3eb, material, [0, -0.5, 0], [0, 0.2, 0], n_el=5
     )
 
-    input_file.add(beam_mesh, add_header_information=False, check_nox=False)
+    input_file.add(beam_mesh, add_header_information=False)
 
     # Check the output.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
@@ -1228,7 +1228,7 @@ def test_meshpy_beam_to_solid_conditions(
     input_file, mesh = create_beam_to_solid_conditions_model(
         get_corresponding_reference_file_path, full_import=full_import
     )
-    input_file.add(mesh, add_header_information=False, check_nox=False)
+    input_file.add(mesh, add_header_information=False)
 
     # Check results
     assert_results_equal(
@@ -1252,7 +1252,7 @@ def test_meshpy_surface_to_surface_contact_import(
         convert_input_to_mesh=True,
     )
 
-    input_file.add(mesh, add_header_information=False, check_nox=False)
+    input_file.add(mesh, add_header_information=False)
 
     # Compare with the reference file.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
@@ -1388,7 +1388,7 @@ def test_meshpy_nurbs_import(
     add_result_description(input_file, displacements, nodes)
 
     # Add the mesh to the input file
-    input_file.add(mesh, add_header_information=False, check_nox=False)
+    input_file.add(mesh, add_header_information=False)
 
     # Compare with the reference solution.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)

@@ -212,8 +212,7 @@ class InputFile:
         self.sections: _Dict[str, _Any] = dict()
 
         # Contents of NOX xml file.
-        self.nox_xml = None
-        self._nox_xml_file = None
+        self.nox_xml_contents = ""
 
         # TODO fix once cubit is converted to YAML
         # if cubit is not None:
@@ -394,7 +393,7 @@ class InputFile:
         self,
         file_path: _Path,
         *,
-        nox_xml_file: _Optional[str] = None,
+        nox_xml_file: bool | str = False,
         add_header_default: bool = True,
         add_footer_application_script: bool = True,
         **kwargs,
@@ -405,8 +404,10 @@ class InputFile:
             file_path:
                 Path to the input file that should be created.
             nox_xml_file:
-                (optional) If this argument is given, the xml file will be created
-                with this name, in the same directory as the input file.
+                If this is a string, the xml file will be created with this
+                name. If this is False, no xml file will be created. If this
+                is True, the xml file will be created with the name of the
+                input file with the extension ".xml".
             add_header_default:
                 Prepend the default MeshPy header comment to the input file.
             add_footer_application_script:
@@ -414,21 +415,21 @@ class InputFile:
                 comment at the end of the input file.
         """
 
-        # Check if a xml file needs to be written.
-        if self.nox_xml is not None:
-            if nox_xml_file is None:
-                # Get the name of the xml file.
-                self._nox_xml_file = (
-                    _os.path.splitext(_os.path.basename(file_path))[0] + ".xml"
-                )
-            else:
-                self._nox_xml_file = nox_xml_file
+        if self.nox_xml_contents:
+            if nox_xml_file is False:
+                xml_file_name = "NOT_DEFINED"
+            elif nox_xml_file is True:
+                xml_file_name = _os.path.splitext(file_path)[0] + ".xml"
+            elif isinstance(nox_xml_file, str):
+                xml_file_name = nox_xml_file
+
+            self.sections["STRUCT NOX/Status Test"] = {"XML File": xml_file_name}
 
             # Write the xml file to the disc.
             with open(
-                _os.path.join(_os.path.dirname(file_path), self._nox_xml_file), "w"
+                _os.path.join(_os.path.dirname(file_path), xml_file_name), "w"
             ) as xml_file:
-                xml_file.write(self.nox_xml)
+                xml_file.write(self.nox_xml_contents)
 
         with open(file_path, "w") as input_file:
             # write MeshPy header
@@ -457,7 +458,6 @@ class InputFile:
         mesh: _Mesh,
         *,
         add_header_information: bool = True,
-        check_nox: bool = True,
     ):
         """Return the dictionary representation of this input file for dumping
         to a yaml file.
@@ -467,8 +467,6 @@ class InputFile:
                 If the information header should be exported to the input file
                 Contains creation date, git details of MeshPy, CubitPy and
                 original application which created the input file if available.
-            check_nox:
-                If this is true, an error will be thrown if no nox file is set.
         """
 
         # Perform some checks on the mesh.
@@ -478,17 +476,6 @@ class InputFile:
         # Add information header to the input file
         if add_header_information:
             self.sections["TITLE"] = self._get_header()
-
-        # Check if a file has to be created for the NOX xml information.
-        if self.nox_xml is not None:
-            if self._nox_xml_file is None:
-                if check_nox:
-                    raise ValueError("NOX xml content is given, but no file defined!")
-                nox_xml_name = "NOT_DEFINED"
-            else:
-                nox_xml_name = self._nox_xml_file
-            # TODO: Use something like the add_section here
-            self.sections["STRUCT NOX/Status Test"] = {"XML File": nox_xml_name}
 
         def _get_global_start_geometry_set(dictionary):
             """Get the indices for the first "real" MeshPy geometry sets."""

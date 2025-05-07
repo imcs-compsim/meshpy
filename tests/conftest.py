@@ -279,7 +279,7 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
         result: Union[Path, str, dict, InputFile, Mesh],
         rtol: Optional[float] = None,
         atol: Optional[float] = None,
-        input_file_kwargs: dict = {"add_header_information": False, "check_nox": False},
+        input_file_kwargs: dict = {"add_header_information": False},
         **kwargs,
     ) -> None:
         """Comparison between reference and result with relative or absolute

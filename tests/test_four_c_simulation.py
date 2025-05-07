@@ -96,7 +96,7 @@ def create_cantilever_model(n_steps, time_step=0.5):
         mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
     )
 
-    input_file.add(mesh, add_header_information=False, check_nox=False)
+    input_file.add(mesh, add_header_information=False)
 
     return input_file, beam_set
 
@@ -164,7 +164,7 @@ def test_four_c_simulation_honeycomb_sphere(
     )
     # add mesh back to the input file to check if import works
     if full_import:
-        input_file.add(mesh, add_header_information=False, check_nox=False)
+        input_file.add(mesh, add_header_information=False)
 
     # Modify the time step options.
     input_file.add(
@@ -262,7 +262,7 @@ def test_four_c_simulation_honeycomb_sphere(
     )
 
     # Add the mesh to the imported solid mesh.
-    input_file.add(mesh_honeycomb, add_header_information=False, check_nox=False)
+    input_file.add(mesh_honeycomb, add_header_information=False)
 
     # Check the created input file
     assert_results_equal(
@@ -304,7 +304,7 @@ def test_four_c_simulation_beam_and_solid_tube(
     )
     # Add mesh back to the input file to check if import works
     if full_import:
-        input_file.add(imported_mesh, add_header_information=False, check_nox=False)
+        input_file.add(imported_mesh, add_header_information=False)
 
     # Add options for beam_output.
     input_file.add(
@@ -372,7 +372,7 @@ def test_four_c_simulation_beam_and_solid_tube(
     mesh.get_unique_geometry_sets(link_to_nodes="all_nodes")
 
     # Add mesh to input file
-    input_file.add(mesh, add_header_information=False, check_nox=False)
+    input_file.add(mesh, add_header_information=False)
 
     # Check the created input file
     assert_results_equal(
@@ -539,7 +539,7 @@ def test_four_c_simulation_honeycomb_variants(
             counter += 1
 
     # Add mesh to input file.
-    input_file.add(mesh, add_header_information=False, check_nox=False)
+    input_file.add(mesh, add_header_information=False)
 
     # Add result checks.
     displacements = [
@@ -675,7 +675,7 @@ def test_four_c_simulation_rotated_beam_axis(
     add_result_description(input_file, displacements, nodes)
 
     # Add the mesh to the input file
-    input_file.add(mesh, add_header_information=False, check_nox=False)
+    input_file.add(mesh, add_header_information=False)
 
     # Check the created input file
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
@@ -759,7 +759,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
             }
         }
     )
-    initial_input_file.add(initial_mesh, add_header_information=False, check_nox=False)
+    initial_input_file.add(initial_mesh, add_header_information=False)
 
     # Check the input file
     assert_results_equal(
@@ -831,7 +831,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
             initial_run_name + " is not yet implemented for this test case."
         )
 
-    restart_input_file.add(restart_mesh, header_information=False, check_nox=False)
+    restart_input_file.add(restart_mesh, header_information=False)
 
     displacements = [
         [-4.09988307566066690e-01, 9.93075098427816383e-01, 6.62050065618549843e-01]
@@ -939,7 +939,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                     )
                 )
 
-    initial_simulation.add(mesh, add_header_information=False, check_nox=False)
+    initial_simulation.add(mesh, add_header_information=False)
 
     # Add DB-monitor header.
     initial_simulation.add(
@@ -999,7 +999,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                     n_dof=9,
                 )
 
-    force_simulation.add(mesh, add_header_information=False, check_nox=False)
+    force_simulation.add(mesh, add_header_information=False)
 
     displacements = [[0.0, 0.0, 0.0]]
     nodes = [21]
@@ -1214,7 +1214,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
     )
 
     # Add the mesh to the input file.
-    input_file.add(mesh, add_header_information=False, check_nox=False)
+    input_file.add(mesh, add_header_information=False)
 
     # Add normal runtime output.
     set_runtime_output(input_file)

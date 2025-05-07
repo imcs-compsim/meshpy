@@ -150,9 +150,6 @@ STRUCT NOX/Printing:
   Error: true
   Inner Iteration: false
   Linear Solver Details: true
-  Test Details: true
-STRUCT NOX/Status Test:
-  XML File: NOT_DEFINED
 STRUCTURAL DYNAMIC:
   DYNAMICTYPE: Statics
   INT_STRATEGY: Standard
