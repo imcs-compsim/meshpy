@@ -343,7 +343,7 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
                 # TODO this should be improved in the future
                 if isinstance(data, Mesh):
                     input_file = InputFile()
-                    input_file.add(data)
+                    input_file.add(data, **input_file_kwargs)
                     data = input_file
 
                 if isinstance(data, InputFile):
@@ -355,7 +355,7 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
 
                     return yaml.safe_load(
                         yaml.dump(
-                            data.get_dict_to_dump(**input_file_kwargs),
+                            data.sections,
                             Dumper=_MeshPyDumper,
                             width=float("inf"),
                         )

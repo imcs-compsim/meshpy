@@ -112,8 +112,9 @@ def create_solid_block(file_path, nx, ny, nz):
 def load_solid(solid_file, full_import):
     """Load a solid into an input file."""
 
-    mpy.import_mesh_full = full_import
-    InputFile(yaml_file=solid_file)
+    InputFile.from_4C_yaml(
+        input_file_path=solid_file, convert_input_to_mesh=full_import
+    )
 
 
 def create_large_beam_mesh(n_x, n_y, n_z, n_el):

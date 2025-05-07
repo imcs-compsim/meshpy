@@ -55,12 +55,12 @@ def load_cosserat_curve_from_file(get_corresponding_reference_file_path, **kwarg
 def create_beam_solid_input_file(get_corresponding_reference_file_path):
     """Create a beam and solid input file for testing purposes."""
 
-    mpy.import_mesh_full = True
-    mesh = InputFile(
-        yaml_file=get_corresponding_reference_file_path(
+    _, mesh = InputFile.from_4C_yaml(
+        input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_cosserat_curve_mesh"
-        )
-    ).mesh
+        ),
+        convert_input_to_mesh=True,
+    )
 
     create_beam_mesh_helix(
         mesh,

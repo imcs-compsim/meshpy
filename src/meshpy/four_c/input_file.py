@@ -22,7 +22,6 @@
 """This module defines the classes that are used to create an input file for
 4C."""
 
-import copy as _copy
 import os as _os
 import shutil as _shutil
 import subprocess as _subprocess  # nosec B404
@@ -33,6 +32,7 @@ from typing import Any as _Any
 from typing import Dict as _Dict
 from typing import List as _List
 from typing import Optional as _Optional
+from typing import Self as _Self
 from typing import Tuple as _Tuple
 from typing import Union as _Union
 
@@ -194,19 +194,14 @@ class InputFile:
         ): "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
     }
 
-    def __init__(self, *, yaml_file: _Optional[_Path] = None, cubit=None):
+    def __init__(self, *, cubit=None):
         """Initialize the input file.
 
         Args:
-            yaml_file:
-                A file path to an existing input file that will be read into this
-                object.
             cubit:
                 A cubit object, that contains an input file which will be loaded
                 into this input file.
         """
-
-        self.mesh = _Mesh()
 
         # Everything that is not a full MeshPy object is stored here, e.g., parameters
         # and imported nodes/elements/materials/...
@@ -216,30 +211,40 @@ class InputFile:
         self.nox_xml = None
         self._nox_xml_file = None
 
-        if yaml_file is not None:
-            self.read_yaml(yaml_file)
-
         # TODO fix once cubit is converted to YAML
         # if cubit is not None:
         #     self._read_dat_lines(cubit.get_dat_lines())
 
-    def read_yaml(self, file_path: _Path):
-        """Read an existing input file into this object.
+    @classmethod
+    def from_4C_yaml(
+        cls, input_file_path: _Path, convert_input_to_mesh: bool = False
+    ) -> _Tuple[_Self, _Mesh]:
+        """Read an existing input file and optionally convert it into a MeshPy
+        mesh.
 
         Args:
-            file_path:
-                A file path to an existing input file that will be read into this
-                object.
+            input_file_path: A file path to an existing input file that will be read
+                into this object.
+            convert_input_to_mesh: If True, the input file will be converted to a
+                MeshPy mesh.
+
+        Returns:
+            A tuple with the input file and the mesh. If convert_input_to_mesh is
+            False, the mesh will be empty.
         """
 
         if _fourcipp_is_available():
             raise ValueError("Use fourcipp to parse the yaml file.")
 
-        with open(file_path) as stream:
-            self.sections = _yaml.safe_load(stream)
+        instance = cls()
 
-        if _mpy.import_mesh_full:
-            self.sections_to_mesh()
+        with open(input_file_path) as stream:
+            instance.sections = _yaml.safe_load(stream)
+
+        if convert_input_to_mesh:
+            return instance, instance.sections_to_mesh()
+        else:
+            return instance, _Mesh()
 
     def sections_to_mesh(self):
         """Convert mesh items, e.g., nodes, elements, element sets, node sets,
@@ -329,7 +334,7 @@ class InputFile:
                     _boundary_condition_from_dict(geometry_set, bc_key, item),
                 )
 
-        self.add(mesh)
+        return mesh
 
     def add(self, *args, **kwargs):
         """Add to this object.
@@ -345,7 +350,8 @@ class InputFile:
                 self.add_section(args[0], **kwargs)
                 return
 
-        self.mesh.add(*args, **kwargs)
+        # convert mesh to dict and recall add
+        self.add_mesh_to_dict(mesh=args[0], **kwargs)
 
     def add_section(self, section, *, option_overwrite=False):
         """Add a section to the object.
@@ -428,7 +434,7 @@ class InputFile:
                 )
 
             _yaml.dump(
-                self.get_dict_to_dump(**kwargs),
+                self.sections,
                 input_file,
                 Dumper=_MeshPyDumper,
                 width=float("inf"),
@@ -442,8 +448,9 @@ class InputFile:
                 )
                 input_file.writelines(application_script_lines)
 
-    def get_dict_to_dump(
+    def add_mesh_to_dict(
         self,
+        mesh: _Mesh,
         *,
         add_header_information: bool = True,
         check_nox: bool = True,
@@ -462,17 +469,11 @@ class InputFile:
 
         # Perform some checks on the mesh.
         if _mpy.check_overlapping_elements:
-            self.mesh.check_overlapping_elements()
-
-        # The base dictionary we use here is the one that already exists.
-        # This one might already contain mesh sections - stored in pure
-        # data format.
-        # TODO: Check if the deepcopy makes sense to be optional
-        yaml_dict = _copy.deepcopy(self.sections)
+            mesh.check_overlapping_elements()
 
         # Add information header to the input file
         if add_header_information:
-            yaml_dict["TITLE"] = self._get_header()
+            self.sections["TITLE"] = self._get_header()
 
         # Check if a file has to be created for the NOX xml information.
         if self.nox_xml is not None:
@@ -483,16 +484,16 @@ class InputFile:
             else:
                 nox_xml_name = self._nox_xml_file
             # TODO: Use something like the add_section here
-            yaml_dict["STRUCT NOX/Status Test"] = {"XML File": nox_xml_name}
+            self.sections["STRUCT NOX/Status Test"] = {"XML File": nox_xml_name}
 
-        def _get_global_start_geometry_set(yaml_dict):
+        def _get_global_start_geometry_set(dictionary):
             """Get the indices for the first "real" MeshPy geometry sets."""
 
             start_indices_geometry_set = {}
             for geometry_type, section_name in self.geometry_set_names.items():
                 max_geometry_set_id = 0
-                if section_name in yaml_dict:
-                    section_list = yaml_dict[section_name]
+                if section_name in dictionary:
+                    section_list = dictionary[section_name]
                     if len(section_list) > 0:
                         geometry_set_dict = _get_geometry_set_indices_from_section(
                             section_list, append_node_ids=False
@@ -501,7 +502,7 @@ class InputFile:
                 start_indices_geometry_set[geometry_type] = max_geometry_set_id
             return start_indices_geometry_set
 
-        def _get_global_start_node(yaml_dict):
+        def _get_global_start_node(dictionary):
             """Get the index for the first "real" MeshPy node."""
 
             if _fourcipp_is_available():
@@ -512,12 +513,12 @@ class InputFile:
                 )
 
             section_name = "NODE COORDS"
-            if section_name in yaml_dict:
-                return len(yaml_dict[section_name])
+            if section_name in dictionary:
+                return len(dictionary[section_name])
             else:
                 return 0
 
-        def _get_global_start_element(yaml_dict):
+        def _get_global_start_element(dictionary):
             """Get the index for the first "real" MeshPy element."""
 
             if _fourcipp_is_available():
@@ -530,11 +531,11 @@ class InputFile:
             start_index = 0
             section_names = ["FLUID ELEMENTS", "STRUCTURE ELEMENTS"]
             for section_name in section_names:
-                if section_name in yaml_dict:
-                    start_index += len(yaml_dict[section_name])
+                if section_name in dictionary:
+                    start_index += len(dictionary[section_name])
             return start_index
 
-        def _get_global_start_material(yaml_dict):
+        def _get_global_start_material(dictionary):
             """Get the index for the first "real" MeshPy material.
 
             We have to account for materials imported from yaml files
@@ -544,16 +545,16 @@ class InputFile:
             # Get the maximum material index in materials imported from a yaml file
             max_material_id = 0
             section_name = "MATERIALS"
-            if section_name in yaml_dict:
-                for material in yaml_dict[section_name]:
+            if section_name in dictionary:
+                for material in dictionary[section_name]:
                     max_material_id = max(max_material_id, material["MAT"])
             return max_material_id
 
-        def _get_global_start_function(yaml_dict):
+        def _get_global_start_function(dictionary):
             """Get the index for the first "real" MeshPy function."""
 
             max_function_id = 0
-            for section_name in yaml_dict.keys():
+            for section_name in dictionary.keys():
                 if section_name.startswith("FUNCT"):
                     max_function_id = max(
                         max_function_id, int(section_name.split("FUNCT")[-1])
@@ -619,36 +620,36 @@ class InputFile:
                     raise TypeError(f"Could not dump {item}")
 
         # Add sets from couplings and boundary conditions to a temp container.
-        self.mesh.unlink_nodes()
-        start_indices_geometry_set = _get_global_start_geometry_set(yaml_dict)
-        mesh_sets = self.mesh.get_unique_geometry_sets(
+        mesh.unlink_nodes()
+        start_indices_geometry_set = _get_global_start_geometry_set(self.sections)
+        mesh_sets = mesh.get_unique_geometry_sets(
             geometry_set_start_indices=start_indices_geometry_set
         )
 
         # Assign global indices to all entries.
-        start_index_nodes = _get_global_start_node(yaml_dict)
-        _set_i_global(self.mesh.nodes, start_index=start_index_nodes)
-        start_index_elements = _get_global_start_element(yaml_dict)
-        _set_i_global_elements(self.mesh.elements, start_index=start_index_elements)
-        start_index_materials = _get_global_start_material(yaml_dict)
-        _set_i_global(self.mesh.materials, start_index=start_index_materials)
-        start_index_functions = _get_global_start_function(yaml_dict)
-        _set_i_global(self.mesh.functions, start_index=start_index_functions)
+        start_index_nodes = _get_global_start_node(self.sections)
+        _set_i_global(mesh.nodes, start_index=start_index_nodes)
+        start_index_elements = _get_global_start_element(self.sections)
+        _set_i_global_elements(mesh.elements, start_index=start_index_elements)
+        start_index_materials = _get_global_start_material(self.sections)
+        _set_i_global(mesh.materials, start_index=start_index_materials)
+        start_index_functions = _get_global_start_function(self.sections)
+        _set_i_global(mesh.functions, start_index=start_index_functions)
 
         # Add material data to the input file.
-        _dump_mesh_items(yaml_dict, "MATERIALS", self.mesh.materials)
+        _dump_mesh_items(self.sections, "MATERIALS", mesh.materials)
 
         # Add the functions.
-        for function in self.mesh.functions:
-            yaml_dict[f"FUNCT{function.i_global}"] = function.dump_to_list()
+        for function in mesh.functions:
+            self.sections[f"FUNCT{function.i_global}"] = function.dump_to_list()
 
         # If there are couplings in the mesh, set the link between the nodes
         # and elements, so the couplings can decide which DOFs they couple,
         # depending on the type of the connected beam element.
         def get_number_of_coupling_conditions(key):
             """Return the number of coupling conditions in the mesh."""
-            if (key, _mpy.geo.point) in self.mesh.boundary_conditions.keys():
-                return len(self.mesh.boundary_conditions[key, _mpy.geo.point])
+            if (key, _mpy.geo.point) in mesh.boundary_conditions.keys():
+                return len(mesh.boundary_conditions[key, _mpy.geo.point])
             else:
                 return 0
 
@@ -657,32 +658,30 @@ class InputFile:
             + get_number_of_coupling_conditions(_mpy.bc.point_coupling_penalty)
             > 0
         ):
-            self.mesh.set_node_links()
+            mesh.set_node_links()
 
         # Add the boundary conditions.
-        for (bc_key, geom_key), bc_list in self.mesh.boundary_conditions.items():
+        for (bc_key, geom_key), bc_list in mesh.boundary_conditions.items():
             if len(bc_list) > 0:
                 section_name = (
                     bc_key
                     if isinstance(bc_key, str)
                     else self.boundary_condition_names[bc_key, geom_key]
                 )
-                _dump_mesh_items(yaml_dict, section_name, bc_list)
+                _dump_mesh_items(self.sections, section_name, bc_list)
 
         # Add additional element sections, e.g., for NURBS knot vectors.
-        for element in self.mesh.elements:
-            element.dump_element_specific_section(yaml_dict)
+        for element in mesh.elements:
+            element.dump_element_specific_section(self.sections)
 
         # Add the geometry sets.
         for geom_key, item in mesh_sets.items():
             if len(item) > 0:
-                _dump_mesh_items(yaml_dict, self.geometry_set_names[geom_key], item)
+                _dump_mesh_items(self.sections, self.geometry_set_names[geom_key], item)
 
         # Add the nodes and elements.
-        _dump_mesh_items(yaml_dict, "NODE COORDS", self.mesh.nodes)
-        _dump_mesh_items(yaml_dict, "STRUCTURE ELEMENTS", self.mesh.elements)
-
-        return yaml_dict
+        _dump_mesh_items(self.sections, "NODE COORDS", mesh.nodes)
+        _dump_mesh_items(self.sections, "STRUCTURE ELEMENTS", mesh.elements)
 
     def _get_header(self) -> dict:
         """Return the information header for the current MeshPy run.

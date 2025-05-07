@@ -250,28 +250,19 @@ def test_meshpy_mesh_transformations_with_solid(
         """Create the line and wrap it with passing radius to the wrap
         function."""
 
-        # Set if we want to do a full import or not
-        mpy.import_mesh_full = import_full
-
         # Create the mesh.
-
-        # TODO rework this test once the input file is refactored, i.e.
-        # input_file, mesh = InputFile(yaml_file=...)
-        # ... add different geometry sets to the mesh
-        # input_file.add(mesh)
-        # this way it is tested exhaustively rather than accessing the mesh
-        # in the input file during the beam mesh creation
-
-        input_file = InputFile(
-            yaml_file=get_corresponding_reference_file_path(
+        input_file, mesh = InputFile.from_4C_yaml(
+            input_file_path=get_corresponding_reference_file_path(
                 reference_file_base_name="4C_input_solid_cuboid"
-            )
+            ),
+            convert_input_to_mesh=import_full,
         )
+
         mat = MaterialReissner(radius=0.05)
 
         # Create the line.
         create_beam_mesh_line(
-            input_file.mesh,
+            mesh,
             Beam3rHerm2Line3,
             mat,
             [0.2, 0, 0],
@@ -280,11 +271,13 @@ def test_meshpy_mesh_transformations_with_solid(
         )
 
         # Transform the mesh.
-        input_file.mesh.wrap_around_cylinder(radius=radius)
-        input_file.mesh.translate([1, 2, 3])
-        input_file.mesh.rotate(Rotation([1, 2, 3], np.pi * 17.0 / 27.0))
+        mesh.wrap_around_cylinder(radius=radius)
+        mesh.translate([1, 2, 3])
+        mesh.rotate(Rotation([1, 2, 3], np.pi * 17.0 / 27.0))
         if reflect:
-            input_file.mesh.reflect([0.1, -2, 1])
+            mesh.reflect([0.1, -2, 1])
+
+        input_file.add(mesh, add_header_information=False, check_nox=False)
 
         # Check the output.
         assert_results_equal(
@@ -319,8 +312,11 @@ def test_meshpy_fluid_element_section(
     get_corresponding_reference_file_path,
 ):
     """Add beam elements to an input file containing fluid elements."""
-    input_file = InputFile(
-        yaml_file=get_corresponding_reference_file_path(additional_identifier="import")
+
+    input_file, _ = InputFile.from_4C_yaml(
+        input_file_path=get_corresponding_reference_file_path(
+            additional_identifier="import"
+        )
     )
 
     beam_mesh = Mesh()
@@ -331,7 +327,7 @@ def test_meshpy_fluid_element_section(
         beam_mesh, Beam3eb, material, [0, -0.5, 0], [0, 0.2, 0], n_el=5
     )
 
-    input_file.add(beam_mesh)
+    input_file.add(beam_mesh, add_header_information=False, check_nox=False)
 
     # Check the output.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
@@ -400,12 +396,13 @@ def test_meshpy_get_min_max_coordinates(get_corresponding_reference_file_path):
     """Test if the get_min_max_coordinates function works properly."""
 
     # Create the mesh.
-    mpy.import_mesh_full = True
-    mesh = InputFile(
-        yaml_file=get_corresponding_reference_file_path(
+    _, mesh = InputFile.from_4C_yaml(
+        input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="4C_input_solid_cuboid"
-        )
-    ).mesh
+        ),
+        convert_input_to_mesh=True,
+    )
+
     mat = MaterialReissner(radius=0.05)
     create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 3, 4], n_el=10)
 
@@ -1170,73 +1167,74 @@ def test_meshpy_replace_nodes_geometry_set(
     assert_results_equal(mesh_ref, mesh_couple)
 
 
-def create_beam_to_solid_conditions_model(get_corresponding_reference_file_path):
+def create_beam_to_solid_conditions_model(
+    get_corresponding_reference_file_path, full_import: bool
+):
     """Create the input file for the beam-to-solid input conditions tests."""
 
-    # TODO update this function to take the "full_import" argument
-    # Then return the input file and corresponding mesh.
-
     # Create input file
-    input_file = InputFile(
-        yaml_file=get_corresponding_reference_file_path(
+    input_file, mesh = InputFile.from_4C_yaml(
+        input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_block"
-        )
+        ),
+        convert_input_to_mesh=full_import,
     )
 
-    # Add beams to the model.
-    beam_mesh = Mesh()
+    # Add beams to the model
+    mesh_beams = Mesh()
     material = MaterialReissner(youngs_modulus=1000, radius=0.05)
     create_beam_mesh_line(
-        beam_mesh, Beam3rHerm2Line3, material, [0, 0, 0], [0, 0, 1], n_el=3
+        mesh_beams, Beam3rHerm2Line3, material, [0, 0, 0], [0, 0, 1], n_el=3
     )
     create_beam_mesh_line(
-        beam_mesh, Beam3rHerm2Line3, material, [0, 0.5, 0], [0, 0.5, 1], n_el=3
+        mesh_beams, Beam3rHerm2Line3, material, [0, 0.5, 0], [0, 0.5, 1], n_el=3
     )
 
     # Set beam-to-solid coupling conditions.
-    line_set = GeometrySet(beam_mesh.elements)
-    beam_mesh.add(
+    line_set = GeometrySet(mesh_beams.elements)
+    mesh_beams.add(
         BoundaryCondition(
             line_set,
             bc_type=mpy.bc.beam_to_solid_volume_meshtying,
             data={"COUPLING_ID": 1},
         )
     )
-    beam_mesh.add(
+    mesh_beams.add(
         BoundaryCondition(
             line_set,
             bc_type=mpy.bc.beam_to_solid_surface_meshtying,
             data={"COUPLING_ID": 2},
         )
     )
+    mesh.add(mesh_beams)
 
-    # Add the beam to the solid mesh.
-    input_file.mesh.add(beam_mesh)
-
-    return input_file
+    return input_file, mesh
 
 
-@pytest.mark.parametrize("test_type", [None, "full"])
+# TODO change additional identifier
+@pytest.mark.parametrize(
+    ("full_import", "additional_identifier"),
+    [(False, None), (True, "full")],
+)
 def test_meshpy_beam_to_solid_conditions(
-    test_type,
+    full_import,
+    additional_identifier,
     assert_results_equal,
     get_corresponding_reference_file_path,
 ):
     """Create the input file for the beam-to-solid input conditions tests."""
 
-    if test_type == "full":
-        mpy.import_mesh_full = True
-    else:
-        mpy.import_mesh_full = False
-
     # Get the input file.
-    input_file = create_beam_to_solid_conditions_model(
-        get_corresponding_reference_file_path
+    input_file, mesh = create_beam_to_solid_conditions_model(
+        get_corresponding_reference_file_path, full_import=full_import
     )
+    input_file.add(mesh, add_header_information=False, check_nox=False)
 
     # Check results
     assert_results_equal(
-        get_corresponding_reference_file_path(additional_identifier=test_type),
+        get_corresponding_reference_file_path(
+            additional_identifier=additional_identifier
+        ),
         input_file,
     )
 
@@ -1247,12 +1245,14 @@ def test_meshpy_surface_to_surface_contact_import(
     """Test that surface-to-surface contact problems can be imported as
     expected."""
 
-    mpy.import_mesh_full = True
-    input_file = InputFile(
-        yaml_file=get_corresponding_reference_file_path(
+    input_file, mesh = InputFile.from_4C_yaml(
+        input_file_path=get_corresponding_reference_file_path(
             additional_identifier="solid_mesh"
-        )
+        ),
+        convert_input_to_mesh=True,
     )
+
+    input_file.add(mesh, add_header_information=False, check_nox=False)
 
     # Compare with the reference file.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
@@ -1268,12 +1268,12 @@ def test_meshpy_nurbs_import(
     """
 
     # Create mesh and load solid file.
-    mesh = Mesh()
-    input_file = InputFile(
-        yaml_file=get_corresponding_reference_file_path(
+    input_file, mesh = InputFile.from_4C_yaml(
+        input_file_path=get_corresponding_reference_file_path(
             additional_identifier="solid_mesh"
         )
     )
+
     set_header_static(
         input_file,
         time_step=0.5,
@@ -1388,7 +1388,7 @@ def test_meshpy_nurbs_import(
     add_result_description(input_file, displacements, nodes)
 
     # Add the mesh to the input file
-    input_file.add(mesh)
+    input_file.add(mesh, add_header_information=False, check_nox=False)
 
     # Compare with the reference solution.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
@@ -1623,18 +1623,13 @@ def test_meshpy_vtk_writer_solid(
 ):
     """Import a solid mesh and check the VTK output."""
 
-    # Convert the solid mesh to meshpy objects. Without this parameter no
-    # solid VTK file would be written.
-    mpy.import_mesh_full = True
-
-    # Create the input file and read solid mesh data.
-    input_file = InputFile()
-    input_file.read_yaml(
-        get_corresponding_reference_file_path(
+    # Convert the solid mesh to meshpy objects.
+    _, mesh = InputFile.from_4C_yaml(
+        input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_tube"
-        )
+        ),
+        convert_input_to_mesh=True,
     )
-    mesh = input_file.mesh
 
     # Write VTK output.
     ref_file = get_corresponding_reference_file_path(extension="vtu")
@@ -1654,16 +1649,13 @@ def test_meshpy_vtk_writer_solid_elements(
 ):
     """Import a solid mesh with all solid types and check the VTK output."""
 
-    # Convert the solid mesh to meshpy objects. Without this parameter no
-    # solid VTK file would be written.
-    mpy.import_mesh_full = True
-
-    # Create the input file and read solid mesh data.
-    input_file = InputFile()
-    input_file.read_yaml(
-        get_corresponding_reference_file_path(additional_identifier="import")
+    # Convert the solid mesh to meshpy objects.
+    _, mesh = InputFile.from_4C_yaml(
+        input_file_path=get_corresponding_reference_file_path(
+            additional_identifier="import"
+        ),
+        convert_input_to_mesh=True,
     )
-    mesh = input_file.mesh
 
     # Write VTK output.
     ref_file = get_corresponding_reference_file_path(
@@ -1753,7 +1745,7 @@ def test_meshpy_cubitpy_import(
     # Create the input file and read the file.
     file_path = os.path.join(tmp_path, "test_cubitpy_import.4C.yaml")
     create_tube(file_path)
-    input_file = InputFile(yaml_file=file_path)
+    input_file, _ = InputFile.from_4C_yaml(input_file_path=file_path)
 
     # Create the input file and read the cubit object.
     input_file_cubit = InputFile(cubit=create_tube_cubit())
@@ -1762,7 +1754,7 @@ def test_meshpy_cubitpy_import(
     file_path_ref = get_corresponding_reference_file_path(
         reference_file_base_name="test_create_cubit_input_tube"
     )
-    input_file_ref = InputFile(yaml_file=file_path_ref)
+    input_file_ref, _ = InputFile.from_4C_yaml(input_file_path=file_path_ref)
 
     # Compare the input files.
     assert_results_equal(input_file, input_file_cubit)
@@ -2042,8 +2034,8 @@ def test_meshpy_display_pyvista(get_corresponding_reference_file_path):
     TODO: Add a check for the created visualziation
     """
 
-    mpy.import_mesh_full = True
-    input_file = create_beam_to_solid_conditions_model(
-        get_corresponding_reference_file_path
+    _, mesh = create_beam_to_solid_conditions_model(
+        get_corresponding_reference_file_path, full_import=True
     )
-    _ = input_file.mesh.display_pyvista(resolution=3)
+
+    mesh.display_pyvista(resolution=3)
