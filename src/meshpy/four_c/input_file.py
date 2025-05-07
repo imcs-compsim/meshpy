@@ -32,8 +32,8 @@ from typing import Any as _Any
 from typing import Dict as _Dict
 from typing import List as _List
 from typing import Optional as _Optional
-from typing import Self as _Self
 from typing import Tuple as _Tuple
+from typing import TypeVar as _TypeVar
 from typing import Union as _Union
 
 import yaml as _yaml
@@ -55,6 +55,10 @@ from meshpy.core.nurbs_patch import NURBSPatch as _NURBSPatch
 from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
 from meshpy.utils.environment import cubitpy_is_available as _cubitpy_is_available
 from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
+
+# necessary to allow for type hint of from_4C_yaml for python version <3.11
+# can be replaced with _Self in python 3.11
+T = _TypeVar("T", bound="InputFile")
 
 if _cubitpy_is_available():
     import cubitpy as _cubitpy
@@ -217,8 +221,8 @@ class InputFile:
 
     @classmethod
     def from_4C_yaml(
-        cls, input_file_path: _Path, convert_input_to_mesh: bool = False
-    ) -> _Tuple[_Self, _Mesh]:
+        cls: type[T], input_file_path: _Path, convert_input_to_mesh: bool = False
+    ) -> _Tuple[T, _Mesh]:
         """Read an existing input file and optionally convert it into a MeshPy
         mesh.
 
