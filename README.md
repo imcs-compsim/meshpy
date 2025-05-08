@@ -167,11 +167,11 @@ interaction, <https://athene-forschung.unibw.de/143755>, (2022)</span>
 
 ### Python environment
 
-MeshPy is tested with, and supports Python versions 3.9-3.12. It is recommended to use a virtual Python environment such as [Conda](https://anaconda.org/anaconda/conda)/[Miniforge](https://conda-forge.org/download/) or [venv](https://docs.python.org/3/library/venv.html).
+MeshPy is tested with, and supports Python versions 3.9-3.13. It is recommended to use a virtual Python environment such as [Conda](https://anaconda.org/anaconda/conda)/[Miniforge](https://conda-forge.org/download/) or [venv](https://docs.python.org/3/library/venv.html).
 - A [Conda](https://anaconda.org/anaconda/conda)/[Miniforge](https://conda-forge.org/download/) environment can be created and loaded with
   ```bash
   # Create the environment (this only has to be done once)
-  conda create -n meshpy python=3.12
+  conda create -n meshpy python=3.13
   # Activate the environment
   conda activate meshpy
   ```
