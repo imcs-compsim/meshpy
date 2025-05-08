@@ -94,22 +94,28 @@ class InputFile:
         # Contents of NOX xml file.
         self.nox_xml_contents = ""
 
-    def add(self, *args, **kwargs):
-        """Add to this object.
+    def add(self, object_to_add, **kwargs):
+        """Add a mesh or a dictionary to the input file.
 
-        If the type is not recognized, the child add method is called.
+        Args:
+            object: The object to be added. This can be a mesh or a dictionary.
+            **kwargs: Additional arguments to be passed to the add method.
         """
-        if len(args) == 1 and isinstance(args[0], dict):
-            # TODO: We have to check here if the item is not of any of the types we
-            # use that derive from dict, as they should be added in super().add
-            if not isinstance(args[0], _ContainerBase) and not isinstance(
-                args[0], _GeometryName
-            ):
-                self.add_section(args[0], **kwargs)
-                return
 
-        # convert mesh to dict and recall add
-        self.add_mesh_to_dict(mesh=args[0], **kwargs)
+        # TODO rework this once fourcipp is available to call
+        # the super method directly
+
+        if isinstance(object_to_add, _Mesh):
+            self.add_mesh_to_dict(mesh=object_to_add, **kwargs)
+
+        elif isinstance(object_to_add, dict):
+            self.add_section(object_to_add, **kwargs)
+
+        else:
+            raise TypeError(
+                f"Cannot add object of type {type(object_to_add)} to the input file."
+                " Only MeshPy meshes and dictionaries are supported."
+            )
 
     def add_section(self, section, *, option_overwrite=False):
         """Add a section to the object.
