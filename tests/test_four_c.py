@@ -38,6 +38,7 @@ from meshpy.four_c.function import Function
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.locsys_condition import LocSysCondition
 from meshpy.four_c.material import MaterialReissner
+from meshpy.four_c.model_importer import import_4C_model
 from meshpy.four_c.solid_shell_thickness_direction import (
     get_visualization_third_parameter_direction_hex8,
     set_solid_shell_thickness_direction,
@@ -261,7 +262,7 @@ def test_four_c_solid_shell_direction_detection(
     """Test the solid shell direction detection functionality."""
 
     # Test the plates
-    _, mesh_block = InputFile.from_4C_yaml(
+    _, mesh_block = import_4C_model(
         input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_solid_shell_blocks"
         ),
@@ -281,7 +282,7 @@ def test_four_c_solid_shell_direction_detection(
     )
 
     # Test the dome
-    _, mesh_dome_original = InputFile.from_4C_yaml(
+    _, mesh_dome_original = import_4C_model(
         input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_solid_shell_dome"
         ),
@@ -641,7 +642,7 @@ def test_four_c_beam_to_solid(
     works."""
 
     # Load a solid
-    _, mesh = InputFile.from_4C_yaml(
+    _, mesh = import_4C_model(
         input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_block"
         ),
@@ -735,7 +736,7 @@ def test_four_c_import_non_consecutive_geometry_sets(
 ):
     """Test that we can import non-consecutively numbered geometry sets."""
 
-    input_file, mesh = InputFile.from_4C_yaml(
+    input_file, mesh = import_4C_model(
         input_file_path=get_corresponding_reference_file_path(
             additional_identifier="input"
         ),

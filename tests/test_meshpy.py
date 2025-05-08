@@ -61,6 +61,7 @@ from meshpy.four_c.material import (
     MaterialReissnerElastoplastic,
     MaterialStVenantKirchhoff,
 )
+from meshpy.four_c.model_importer import import_4C_model
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_via_rotation,
     create_beam_mesh_line,
@@ -251,7 +252,7 @@ def test_meshpy_mesh_transformations_with_solid(
         function."""
 
         # Create the mesh.
-        input_file, mesh = InputFile.from_4C_yaml(
+        input_file, mesh = import_4C_model(
             input_file_path=get_corresponding_reference_file_path(
                 reference_file_base_name="4C_input_solid_cuboid"
             ),
@@ -313,7 +314,7 @@ def test_meshpy_fluid_element_section(
 ):
     """Add beam elements to an input file containing fluid elements."""
 
-    input_file, _ = InputFile.from_4C_yaml(
+    input_file, _ = import_4C_model(
         input_file_path=get_corresponding_reference_file_path(
             additional_identifier="import"
         )
@@ -396,7 +397,7 @@ def test_meshpy_get_min_max_coordinates(get_corresponding_reference_file_path):
     """Test if the get_min_max_coordinates function works properly."""
 
     # Create the mesh.
-    _, mesh = InputFile.from_4C_yaml(
+    _, mesh = import_4C_model(
         input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="4C_input_solid_cuboid"
         ),
@@ -1173,7 +1174,7 @@ def create_beam_to_solid_conditions_model(
     """Create the input file for the beam-to-solid input conditions tests."""
 
     # Create input file
-    input_file, mesh = InputFile.from_4C_yaml(
+    input_file, mesh = import_4C_model(
         input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_block"
         ),
@@ -1245,7 +1246,7 @@ def test_meshpy_surface_to_surface_contact_import(
     """Test that surface-to-surface contact problems can be imported as
     expected."""
 
-    input_file, mesh = InputFile.from_4C_yaml(
+    input_file, mesh = import_4C_model(
         input_file_path=get_corresponding_reference_file_path(
             additional_identifier="solid_mesh"
         ),
@@ -1268,7 +1269,7 @@ def test_meshpy_nurbs_import(
     """
 
     # Create mesh and load solid file.
-    input_file, mesh = InputFile.from_4C_yaml(
+    input_file, mesh = import_4C_model(
         input_file_path=get_corresponding_reference_file_path(
             additional_identifier="solid_mesh"
         )
@@ -1624,7 +1625,7 @@ def test_meshpy_vtk_writer_solid(
     """Import a solid mesh and check the VTK output."""
 
     # Convert the solid mesh to meshpy objects.
-    _, mesh = InputFile.from_4C_yaml(
+    _, mesh = import_4C_model(
         input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_tube"
         ),
@@ -1650,7 +1651,7 @@ def test_meshpy_vtk_writer_solid_elements(
     """Import a solid mesh with all solid types and check the VTK output."""
 
     # Convert the solid mesh to meshpy objects.
-    _, mesh = InputFile.from_4C_yaml(
+    _, mesh = import_4C_model(
         input_file_path=get_corresponding_reference_file_path(
             additional_identifier="import"
         ),
@@ -1745,7 +1746,7 @@ def test_meshpy_cubitpy_import(
     # Create the input file and read the file.
     file_path = os.path.join(tmp_path, "test_cubitpy_import.4C.yaml")
     create_tube(file_path)
-    input_file, _ = InputFile.from_4C_yaml(input_file_path=file_path)
+    input_file, _ = import_4C_model(input_file_path=file_path)
 
     # Create the input file and read the cubit object.
     input_file_cubit = InputFile(cubit=create_tube_cubit())
@@ -1754,7 +1755,7 @@ def test_meshpy_cubitpy_import(
     file_path_ref = get_corresponding_reference_file_path(
         reference_file_base_name="test_create_cubit_input_tube"
     )
-    input_file_ref, _ = InputFile.from_4C_yaml(input_file_path=file_path_ref)
+    input_file_ref, _ = import_4C_model(input_file_path=file_path_ref)
 
     # Compare the input files.
     assert_results_equal(input_file, input_file_cubit)
