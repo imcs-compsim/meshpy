@@ -168,7 +168,7 @@ def test_four_c_material_numbering(
     mesh = Mesh()
     mesh.add(MaterialReissner(youngs_modulus=1.0, radius=2.0))
 
-    input_file.add(mesh, add_header_information=False)
+    input_file.add(mesh)
 
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
@@ -249,7 +249,7 @@ def test_four_c_simulation_beam_potential_helix(
         )
     )
 
-    input_file.add(mesh, add_header_information=False)
+    input_file.add(mesh)
 
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
@@ -755,7 +755,7 @@ def test_four_c_import_non_consecutive_geometry_sets(
         )
         mesh.add(beam_set)
 
-    input_file.add(mesh, add_header_information=False)
+    input_file.add(mesh)
 
     assert_results_equal(
         get_corresponding_reference_file_path(

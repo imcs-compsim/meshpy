@@ -106,7 +106,7 @@ class InputFile:
         # the super method directly
 
         if isinstance(object_to_add, _Mesh):
-            self.add_mesh_to_dict(mesh=object_to_add, **kwargs)
+            self.add_mesh_to_input_file(mesh=object_to_add, **kwargs)
 
         elif isinstance(object_to_add, dict):
             self.add_section(object_to_add, **kwargs)
@@ -156,8 +156,8 @@ class InputFile:
         *,
         nox_xml_file: bool | str = False,
         add_header_default: bool = True,
+        add_header_information: bool = True,
         add_footer_application_script: bool = True,
-        **kwargs,
     ):
         """Write the input file to disk.
 
@@ -171,6 +171,10 @@ class InputFile:
                 input file with the extension ".xml".
             add_header_default:
                 Prepend the default MeshPy header comment to the input file.
+            add_header_information:
+                If the information header should be exported to the input file
+                Contains creation date, git details of MeshPy, CubitPy and
+                original application which created the input file if available.
             add_footer_application_script:
                 Append the application script which creates the input files as a
                 comment at the end of the input file.
@@ -191,6 +195,10 @@ class InputFile:
                 _os.path.join(_os.path.dirname(file_path), xml_file_name), "w"
             ) as xml_file:
                 xml_file.write(self.nox_xml_contents)
+
+        # Add information header to the input file
+        if add_header_information:
+            self.sections["TITLE"] = self._get_header()
 
         with open(file_path, "w") as input_file:
             # write MeshPy header
@@ -214,29 +222,16 @@ class InputFile:
                 )
                 input_file.writelines(application_script_lines)
 
-    def add_mesh_to_dict(
-        self,
-        mesh: _Mesh,
-        *,
-        add_header_information: bool = True,
-    ):
-        """Return the dictionary representation of this input file for dumping
-        to a yaml file.
+    def add_mesh_to_input_file(self, mesh: _Mesh):
+        """Add a mesh to the input file.
 
         Args:
-            add_header_information:
-                If the information header should be exported to the input file
-                Contains creation date, git details of MeshPy, CubitPy and
-                original application which created the input file if available.
+            mesh: The mesh to be added to the input file.
         """
 
         # Perform some checks on the mesh.
         if _mpy.check_overlapping_elements:
             mesh.check_overlapping_elements()
-
-        # Add information header to the input file
-        if add_header_information:
-            self.sections["TITLE"] = self._get_header()
 
         def _get_global_start_geometry_set(dictionary):
             """Get the indices for the first "real" MeshPy geometry sets."""
