@@ -97,12 +97,12 @@ def create_cantilever_model(n_steps, time_step=0.5):
         mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
     )
 
-    input_file.add(mesh)
-
-    return input_file, beam_set
+    return input_file, mesh, beam_set
 
 
-def run_four_c_test(tmp_path, name, mesh, n_proc=2, restart=[None, None], **kwargs):
+def run_four_c_test(
+    tmp_path, name, input_file, n_proc=2, restart=[None, None], **kwargs
+):
     """Run 4C with a input file and check the output.
 
     Args
@@ -124,11 +124,11 @@ def run_four_c_test(tmp_path, name, mesh, n_proc=2, restart=[None, None], **kwar
     os.makedirs(testing_dir, exist_ok=True)
 
     # Create input file.
-    input_file = os.path.join(testing_dir, name + ".4C.yaml")
-    mesh.write_input_file(input_file, **kwargs)
+    input_file_name = os.path.join(testing_dir, name + ".4C.yaml")
+    input_file.write_input_file(input_file_name, add_header_information=False, **kwargs)
 
     return_code = run_four_c(
-        input_file,
+        input_file_name,
         testing_dir,
         output_name=name,
         n_proc=n_proc,
@@ -723,8 +723,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
     """
 
     # Create and run the initial simulation.
-    initial_input_file, mesh_beam_set = create_cantilever_model(n_steps=2)
-    initial_mesh = Mesh()
+    initial_input_file, initial_mesh, mesh_beam_set = create_cantilever_model(n_steps=2)
 
     initial_mesh.add(
         BoundaryCondition(
@@ -776,8 +775,9 @@ def test_four_c_simulation_dbc_monitor_to_input(
     run_four_c_test(tmp_path, initial_run_name, initial_input_file)
 
     # Create and run the second simulation.
-    restart_input_file, mesh_beam_set = create_cantilever_model(n_steps=21)
-    restart_mesh = Mesh()
+    restart_input_file, restart_mesh, mesh_beam_set = create_cantilever_model(
+        n_steps=21
+    )
 
     restart_mesh.add(
         BoundaryCondition(
@@ -832,7 +832,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
             initial_run_name + " is not yet implemented for this test case."
         )
 
-    restart_input_file.add(restart_mesh, header_information=False)
+    restart_input_file.add(restart_mesh)
 
     displacements = [
         [-4.09988307566066690e-01, 9.93075098427816383e-01, 6.62050065618549843e-01]
@@ -874,10 +874,9 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     dt = 0.1  # time step size from create_cantilever_model
 
     # Create and run the initial simulation.
-    initial_simulation, beam_set = create_cantilever_model(n_steps, dt)
+    initial_simulation, mesh, beam_set = create_cantilever_model(n_steps, dt)
 
     # Add simple lienar interpolation function.
-    mesh = Mesh()
     mesh.add(
         Function(
             [
@@ -968,9 +967,8 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     run_four_c_test(tmp_path, initial_run_name, initial_simulation)
 
     # Create and run the second simulation.
-    force_simulation, beam_set = create_cantilever_model(2 * n_steps, dt)
+    force_simulation, mesh, beam_set = create_cantilever_model(2 * n_steps, dt)
 
-    mesh = Mesh()
     mesh.add(
         BoundaryCondition(
             beam_set["start"],

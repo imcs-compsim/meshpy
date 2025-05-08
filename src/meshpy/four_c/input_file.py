@@ -38,8 +38,6 @@ import yaml as _yaml
 
 from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.core.conf import mpy as _mpy
-from meshpy.core.container import ContainerBase as _ContainerBase
-from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.core.nurbs_patch import NURBSPatch as _NURBSPatch
 from meshpy.four_c.input_file_mappings import (

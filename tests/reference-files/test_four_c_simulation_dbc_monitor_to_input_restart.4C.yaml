@@ -150,6 +150,7 @@ STRUCT NOX/Printing:
   Error: true
   Inner Iteration: false
   Linear Solver Details: true
+  Test Details: true
 STRUCTURAL DYNAMIC:
   DYNAMICTYPE: Statics
   INT_STRATEGY: Standard
