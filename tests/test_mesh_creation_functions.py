@@ -1143,7 +1143,6 @@ def test_mesh_creation_functions_curve_3d_helix(
     n_el = 5
     helix = create_helix_function(R, tz, transformation_factor=2.0, number_of_turns=n)
 
-
     helix_set = create_beam_mesh_parametric_curve(
         mesh, Beam3rHerm2Line3, mat, helix, [0.0, 2.0 * np.pi * n], n_el=n_el
     )
@@ -1185,7 +1184,6 @@ def test_mesh_creation_functions_curve_3d_helix_length(assert_results_equal):
     args = [Beam3rHerm2Line3, mat, helix, [0.0, 2.0 * np.pi * n]]
     kwargs = {"n_el": n_el}
 
-
     helix_set_1 = create_beam_mesh_parametric_curve(mesh_1, *args, **kwargs)
     mesh_1.add(helix_set_1)
 
@@ -1219,9 +1217,7 @@ def test_mesh_creation_functions_curve_2d_sin(
         """Parametric curve as a sin."""
         return npAD.array([t, npAD.sin(t)])
 
-
     sin_set = create_beam_mesh_parametric_curve(
-
         mesh, Beam3rHerm2Line3, mat, sin, [0.0, 2.0 * np.pi], n_el=n_el
     )
     mesh.add(sin_set)
@@ -1270,7 +1266,6 @@ def test_mesh_creation_functions_curve_3d_curve_rotation(
         R1 = Rotation([1, 0, 0], t * 2 * np.pi)
         R2 = Rotation.from_basis(rp, [0, 0, 1])
         return R2 * R1
-
 
     sin_set = create_beam_mesh_parametric_curve(
         mesh,
