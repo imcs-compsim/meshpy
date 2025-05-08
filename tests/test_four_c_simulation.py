@@ -49,8 +49,10 @@ from meshpy.four_c.header_functions import (
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.material import MaterialReissner
 from meshpy.four_c.run_four_c import run_four_c
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
-from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
+from meshpy.mesh_creation_functions.applications.beam_honeycomb import (
+    create_beam_mesh_honeycomb,
+)
+from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
 from meshpy.utils.nodes import check_node_by_coordinate
 
 # We test all test cases in this file twice. Once we only run up to the first
