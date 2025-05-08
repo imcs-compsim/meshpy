@@ -1212,7 +1212,13 @@ def create_beam_to_solid_conditions_model(
     return input_file, mesh
 
 
-# TODO change additional identifier
+# TODO: Standardize test parameterization for (full_import, additional_identifier).
+# Currently, different tests use inconsistent patterns for parametrize:
+#   - (False, "dict_import"), (True, "full_import")
+#   - (False, None), (True, "full")
+#   - Only "full_import" as a boolean param
+# Consider unifying these under a shared fixture or helper to reduce redundancy
+# and improve readability across tests. Also adjust reference file names.
 @pytest.mark.parametrize(
     ("full_import", "additional_identifier"),
     [(False, None), (True, "full")],
