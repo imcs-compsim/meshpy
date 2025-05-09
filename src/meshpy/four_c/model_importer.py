@@ -51,7 +51,7 @@ from meshpy.four_c.input_file_mappings import geometry_set_names as _geometry_se
 from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
-def import_4C_model(
+def import_four_c_model(
     input_file_path: _Path, convert_input_to_mesh: bool = False
 ) -> _Tuple[_InputFile, _Mesh]:
     """Import an existing 4C input file and optionally convert it into a MeshPy
@@ -77,12 +77,12 @@ def import_4C_model(
         input_file.sections = _yaml.safe_load(stream)
 
     if convert_input_to_mesh:
-        return sections_to_mesh(input_file)
+        return _extract_mesh_sections(input_file)
     else:
         return input_file, _Mesh()
 
 
-def boundary_condition_from_dict(
+def _boundary_condition_from_dict(
     geometry_set: _GeometrySetNodes,
     bc_key: _Union[_conf.BoundaryCondition, str],
     data: _Dict,
@@ -107,13 +107,12 @@ def boundary_condition_from_dict(
         raise ValueError("Got unexpected boundary condition!")
 
 
-def get_yaml_geometry_sets(
+def _get_yaml_geometry_sets(
     nodes: _List[_Node], geometry_key: _conf.Geometry, section_list: _List
 ) -> _Dict[int, _GeometrySetNodes]:
     """Add sets of points, lines, surfaces or volumes to the object."""
 
-    # Create the individual geometry sets. The nodes are still integers at this
-    # point. They have to be converted to links to the actual nodes later on.
+    # Create the individual geometry sets
     geometry_set_dict = _get_geometry_set_indices_from_section(section_list)
     geometry_sets_in_this_section = {}
     for geometry_set_id, node_ids in geometry_set_dict.items():
@@ -123,14 +122,9 @@ def get_yaml_geometry_sets(
     return geometry_sets_in_this_section
 
 
-def sections_to_mesh(input_file: _InputFile) -> _Tuple[_InputFile, _Mesh]:
+def _extract_mesh_sections(input_file: _InputFile) -> _Tuple[_InputFile, _Mesh]:
     """Convert an existing input file to a MeshPy mesh with mesh items, e.g.,
     nodes, elements, element sets, node sets, boundary conditions, materials.
-
-    Note: In the current implementation we cannibalize the mesh sections in
-        the self.sections dictionary. This should be reconsidered and be done
-        in a better way when this function is generalized.
-
 
     Args:
         input_file: The input file object that contains the sections to be
@@ -197,7 +191,7 @@ def sections_to_mesh(input_file: _InputFile) -> _Tuple[_InputFile, _Mesh]:
                         break
                 else:
                     raise ValueError(f"Could not find the set {section_name}")
-                geometry_sets_in_section = get_yaml_geometry_sets(
+                geometry_sets_in_section = _get_yaml_geometry_sets(
                     mesh.nodes, geometry_key, section_items
                 )
                 geometry_sets_in_sections[geometry_key] = geometry_sets_in_section
@@ -215,7 +209,7 @@ def sections_to_mesh(input_file: _InputFile) -> _Tuple[_InputFile, _Mesh]:
             geometry_set = geometry_sets_in_sections[geometry_key][geometry_set_id]
             mesh.boundary_conditions.append(
                 (bc_key, geometry_key),
-                boundary_condition_from_dict(geometry_set, bc_key, item),
+                _boundary_condition_from_dict(geometry_set, bc_key, item),
             )
 
     return input_file, mesh

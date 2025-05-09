@@ -48,7 +48,7 @@ from meshpy.four_c.header_functions import (
 )
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.material import MaterialReissner
-from meshpy.four_c.model_importer import import_4C_model
+from meshpy.four_c.model_importer import import_four_c_model
 from meshpy.four_c.run_four_c import run_four_c
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
@@ -157,7 +157,7 @@ def test_four_c_simulation_honeycomb_sphere(
     """
 
     # Read input file with information of the sphere and simulation.
-    input_file, mesh = import_4C_model(
+    input_file, mesh = import_four_c_model(
         input_file_path=get_corresponding_reference_file_path(
             additional_identifier="import"
         ),
@@ -297,7 +297,7 @@ def test_four_c_simulation_beam_and_solid_tube(
     """Merge a solid tube with a beam tube and simulate them together."""
 
     # Create the input file and read solid mesh data.
-    input_file, imported_mesh = import_4C_model(
+    input_file, imported_mesh = import_four_c_model(
         input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_tube"
         ),

@@ -185,6 +185,8 @@ class InputFile:
                 xml_file_name = _os.path.splitext(file_path)[0] + ".xml"
             elif isinstance(nox_xml_file, str):
                 xml_file_name = nox_xml_file
+            else:
+                raise TypeError("nox_xml_file must be a string or a boolean value.")
 
             self.sections["STRUCT NOX/Status Test"] = {"XML File": xml_file_name}
 
@@ -427,6 +429,7 @@ class InputFile:
         # Add the nodes and elements.
         _dump_mesh_items(self.sections, "NODE COORDS", mesh.nodes)
         _dump_mesh_items(self.sections, "STRUCTURE ELEMENTS", mesh.elements)
+        # TODO: reset all links and counters set in this method.
 
     def _get_header(self) -> dict:
         """Return the information header for the current MeshPy run.
