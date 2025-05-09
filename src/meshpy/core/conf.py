@@ -62,7 +62,7 @@ class BoundaryCondition(_Enum):
         elif self == self.point_coupling_penalty:
             return True
         else:
-            raise TypeError(f"Gor unexpected coupling type {self}")
+            raise TypeError(f"Got unexpected coupling type: {self}")
 
 
 class BeamType(_Enum):
