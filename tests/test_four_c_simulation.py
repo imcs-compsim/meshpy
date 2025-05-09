@@ -28,6 +28,7 @@ import pytest
 
 from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
+from meshpy.core.function import Function
 from meshpy.core.geometry_set import GeometrySet
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
@@ -37,7 +38,6 @@ from meshpy.four_c.dbc_monitor import (
     dbc_monitor_to_mesh_all_values,
 )
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
-from meshpy.four_c.function import Function
 from meshpy.four_c.function_utility import create_linear_interpolation_function
 from meshpy.four_c.header_functions import (
     add_result_description,

@@ -26,7 +26,7 @@ from typing import List as _List
 
 import numpy as _np
 
-from meshpy.four_c.function import Function as _Function
+from meshpy.core.function import Function as _Function
 
 
 def create_linear_interpolation_dict(

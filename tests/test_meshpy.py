@@ -34,6 +34,7 @@ from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
 from meshpy.core.coupling import Coupling
 from meshpy.core.element_beam import Beam
+from meshpy.core.function import Function
 from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetNodes
 from meshpy.core.material import MaterialBeamBase
 from meshpy.core.mesh import Mesh
@@ -46,7 +47,6 @@ from meshpy.four_c.element_beam import (
     Beam3rHerm2Line3,
     Beam3rLine2Line2,
 )
-from meshpy.four_c.function import Function
 from meshpy.four_c.header_functions import (
     add_result_description,
     set_beam_to_solid_meshtying,

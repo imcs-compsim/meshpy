@@ -47,7 +47,7 @@ def test_linear_interpolation_function(assert_results_equal):
                 "VALUES": [1.0, 1.0, -1.0, 3.5, -10.3, -10.3],
             },
         ],
-        fun.dump_to_list(),
+        fun.data,
     )
 
     fun = create_linear_interpolation_function(t, values, function_type="My type")
@@ -63,7 +63,7 @@ def test_linear_interpolation_function(assert_results_equal):
                 "VALUES": [1.0, 1.0, -1.0, 3.5, -10.3, -10.3],
             },
         ],
-        fun.dump_to_list(),
+        fun.data,
     )
 
     function_definition = create_linear_interpolation_dict(
