@@ -45,9 +45,8 @@ from meshpy.four_c.input_file import (
     get_geometry_set_indices_from_section as _get_geometry_set_indices_from_section,
 )
 from meshpy.four_c.input_file_mappings import (
-    boundary_condition_names as _boundary_condition_names,
+    INPUT_FILE_MAPPINGS as _INPUT_FILE_MAPPINGS,
 )
-from meshpy.four_c.input_file_mappings import geometry_set_names as _geometry_set_names
 from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
@@ -185,7 +184,7 @@ def _extract_mesh_sections(input_file: _InputFile) -> _Tuple[_InputFile, _Mesh]:
             section_items = _get_section_items(section_name)
             if len(section_items) > 0:
                 # Get the geometry key for this set
-                for key, value in _geometry_set_names.items():
+                for key, value in _INPUT_FILE_MAPPINGS["geometry_sets"].items():
                     if value == section_name:
                         geometry_key = key
                         break
@@ -203,7 +202,7 @@ def _extract_mesh_sections(input_file: _InputFile) -> _Tuple[_InputFile, _Mesh]:
     for (
         bc_key,
         geometry_key,
-    ), section_name in _boundary_condition_names.items():
+    ), section_name in _INPUT_FILE_MAPPINGS["boundary_conditions"].items():
         for item in _get_section_items(section_name):
             geometry_set_id = item["E"]
             geometry_set = geometry_sets_in_sections[geometry_key][geometry_set_id]
