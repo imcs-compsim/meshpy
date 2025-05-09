@@ -22,10 +22,10 @@
 """This file provides functions to create Abaqus beam element classes to be
 used with MeshPy."""
 
-from meshpy.core.material import MaterialBeam as _MaterialBeam
+from meshpy.core.material import MaterialBeamBase as _MaterialBeamBase
 
 
-class AbaqusBeamMaterial(_MaterialBeam):
+class AbaqusBeamMaterial(_MaterialBeamBase):
     """A class representing an Abaqus beam material."""
 
     def __init__(self, name: str):

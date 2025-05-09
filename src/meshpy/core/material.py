@@ -44,7 +44,7 @@ class Material(_BaseMeshItem):
         return self
 
 
-class MaterialBeam(Material):
+class MaterialBeamBase(Material):
     """Base class for all beam materials."""
 
     def __init__(
@@ -80,3 +80,9 @@ class MaterialBeam(Material):
         mom3 = mom2
         polar = mom2 + mom3
         return area, mom2, mom3, polar
+
+
+class MaterialSolidBase(Material):
+    """Base class for all solid materials."""
+
+    pass

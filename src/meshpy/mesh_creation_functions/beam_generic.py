@@ -35,7 +35,7 @@ from meshpy.core.conf import mpy as _mpy
 from meshpy.core.element_beam import Beam as _Beam
 from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
-from meshpy.core.material import MaterialBeam as _MaterialBeam
+from meshpy.core.material import MaterialBeamBase as _MaterialBeamBase
 from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.core.node import NodeCosserat as _NodeCosserat
 from meshpy.utils.nodes import get_single_node as _get_single_node
@@ -45,7 +45,7 @@ def create_beam_mesh_function(
     mesh: _Mesh,
     *,
     beam_class: _Type[_Beam],
-    material: _MaterialBeam,
+    material: _MaterialBeamBase,
     function_generator: _Callable,
     interval: _Tuple[float, float],
     n_el: _Optional[int] = None,

@@ -35,7 +35,7 @@ from meshpy.core.conf import mpy
 from meshpy.core.coupling import Coupling
 from meshpy.core.element_beam import Beam
 from meshpy.core.geometry_set import GeometryName, GeometrySet, GeometrySetNodes
-from meshpy.core.material import MaterialBeam
+from meshpy.core.material import MaterialBeamBase
 from meshpy.core.mesh import Mesh
 from meshpy.core.node import Node, NodeCosserat
 from meshpy.core.rotation import Rotation
@@ -1581,7 +1581,7 @@ def test_meshpy_vtk_writer_beam(
     mesh = Mesh()
 
     # Add content to the mesh.
-    mat = MaterialBeam(radius=0.05)
+    mat = MaterialBeamBase(radius=0.05)
     create_beam_mesh_honeycomb(
         mesh, Beam3rHerm2Line3, mat, 2.0, 2, 3, n_el=2, add_sets=True
     )
@@ -1696,7 +1696,7 @@ def test_meshpy_vtk_curve_cell_data(
     mpy.vtk_nan_int = 69
 
     # Add content to the mesh.
-    mat = MaterialBeam(radius=0.05)
+    mat = MaterialBeamBase(radius=0.05)
     create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=2)
     create_beam_mesh_line(
         mesh,
