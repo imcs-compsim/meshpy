@@ -75,7 +75,9 @@ class BoundaryCondition(BoundaryConditionBase):
         Args:
             geometry_set: Geometry that this boundary condition acts on.
             data: Data defining the properties of this boundary condition.
-            bc_type: Type of the boundary condition.
+            bc_type: If this is a string, this will be the section that
+                this BC will be added to. If it is a mpy.bc, the section will
+                be determined automatically.
             double_nodes: Depending on this parameter, it will be checked if point
                 Neumann conditions do contain nodes at the same spatial positions.
         """

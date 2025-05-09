@@ -49,6 +49,21 @@ class BoundaryCondition(_Enum):
     point_coupling = _auto()
     point_coupling_penalty = _auto()
 
+    def is_point_coupling_pairwise(self) -> bool:
+        """Check whether the point coupling condition should be applied
+        pairwise.
+
+        Returns:
+            bool: True if the coupling should be applied individually between pairs of nodes,
+                rather than to the entire geometry set as a whole.
+        """
+        if self == self.point_coupling:
+            return False
+        elif self == self.point_coupling_penalty:
+            return True
+        else:
+            raise TypeError(f"Gor unexpected coupling type {self}")
+
 
 class BeamType(_Enum):
     """Enum for beam types."""
