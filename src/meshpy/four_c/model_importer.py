@@ -36,10 +36,16 @@ from meshpy.core.boundary_condition import (
 )
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.coupling import Coupling as _Coupling
-from meshpy.core.element import Element as _Element
+from meshpy.core.element_volume import VolumeHEX8 as _VolumeHEX8
+from meshpy.core.element_volume import VolumeHEX20 as _VolumeHEX20
+from meshpy.core.element_volume import VolumeHEX27 as _VolumeHEX27
+from meshpy.core.element_volume import VolumeTET4 as _VolumeTET4
+from meshpy.core.element_volume import VolumeTET10 as _VolumeTET10
+from meshpy.core.element_volume import VolumeWEDGE6 as _VolumeWEDGE6
 from meshpy.core.geometry_set import GeometrySetNodes as _GeometrySetNodes
 from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.core.node import Node as _Node
+from meshpy.four_c.element_volume import SolidRigidSphere as _SolidRigidSphere
 from meshpy.four_c.input_file import InputFile as _InputFile
 from meshpy.four_c.input_file import (
     get_geometry_set_indices_from_section as _get_geometry_set_indices_from_section,
@@ -79,6 +85,62 @@ def import_four_c_model(
         return _extract_mesh_sections(input_file)
     else:
         return input_file, _Mesh()
+
+
+def _element_from_dict(nodes: _List[_Node], input_line: str):
+    """TODO: Update this doc string once we don't use the legacy string any more.
+    Create an element from a legacy string."""
+
+    if _fourcipp_is_available():
+        raise ValueError(
+            "Port this functionality to create the element from the dict "
+            "representing the element, not the legacy string."
+            "TODO: pass the nodes array here, so we can directly link to the nodes"
+            "TODO: The whole string_pre_nodes and string_post_nodes is obsolete once"
+            " we move on from legacy string"
+        )
+
+    # Split up input line and get pre node string.
+    line_split = input_line.split()
+    string_pre_nodes = " ".join(line_split[1:3])
+
+    # Get a list of the element nodes.
+    # This is only here because we need the pre and post strings - can be
+    # removed when moving on from the legacy format.
+    dummy = []
+    for i, item in enumerate(line_split[3:]):
+        if item.isdigit():
+            dummy.append(int(item) - 1)
+        else:
+            break
+    else:
+        raise ValueError(
+            f'The input line:\n"{input_line}"\ncould not be converted to a solid element!'
+        )
+
+    # Get the post node string
+    string_post_nodes = " ".join(line_split[3 + i :])
+
+    # Depending on the number of nodes chose which solid element to return.
+    n_nodes = len(nodes)
+    element_type = {
+        8: _VolumeHEX8,
+        20: _VolumeHEX20,
+        27: _VolumeHEX27,
+        4: _VolumeTET4,
+        10: _VolumeTET10,
+        6: _VolumeWEDGE6,
+        1: _SolidRigidSphere,
+    }
+    if n_nodes not in element_type:
+        raise TypeError(
+            f"Could not find a element type for {string_pre_nodes}, with {n_nodes} nodes"
+        )
+    return element_type[n_nodes](
+        nodes=nodes,
+        string_pre_nodes=string_pre_nodes,
+        string_post_nodes=string_post_nodes,
+    )
 
 
 def _boundary_condition_from_dict(
@@ -173,7 +235,7 @@ def _extract_mesh_sections(input_file: _InputFile) -> _Tuple[_InputFile, _Mesh]:
                 f'The input line:\n"{item}"\ncould not be converted to a element!'
             )
 
-        mesh.elements.append(_Element.from_legacy_string(element_nodes, item))
+        mesh.elements.append(_element_from_dict(element_nodes, item))
 
     # Add geometry sets
     geometry_sets_in_sections: dict[str, dict[int, _GeometrySetNodes]] = {
