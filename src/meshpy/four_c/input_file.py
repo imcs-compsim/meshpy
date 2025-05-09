@@ -37,9 +37,8 @@ from meshpy.core.conf import mpy as _mpy
 from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.core.nurbs_patch import NURBSPatch as _NURBSPatch
 from meshpy.four_c.input_file_mappings import (
-    boundary_condition_names as _boundary_condition_names,
+    INPUT_FILE_MAPPINGS as _INPUT_FILE_MAPPINGS,
 )
-from meshpy.four_c.input_file_mappings import geometry_set_names as _geometry_set_names
 from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
 from meshpy.utils.environment import cubitpy_is_available as _cubitpy_is_available
 from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
@@ -234,7 +233,9 @@ class InputFile:
             """Get the indices for the first "real" MeshPy geometry sets."""
 
             start_indices_geometry_set = {}
-            for geometry_type, section_name in _geometry_set_names.items():
+            for geometry_type, section_name in _INPUT_FILE_MAPPINGS[
+                "geometry_sets"
+            ].items():
                 max_geometry_set_id = 0
                 if section_name in dictionary:
                     section_list = dictionary[section_name]
@@ -410,7 +411,7 @@ class InputFile:
                 section_name = (
                     bc_key
                     if isinstance(bc_key, str)
-                    else _boundary_condition_names[bc_key, geom_key]
+                    else _INPUT_FILE_MAPPINGS["boundary_conditions"][(bc_key, geom_key)]
                 )
                 _dump_mesh_items(self.sections, section_name, bc_list)
 
@@ -421,7 +422,9 @@ class InputFile:
         # Add the geometry sets.
         for geom_key, item in mesh_sets.items():
             if len(item) > 0:
-                _dump_mesh_items(self.sections, _geometry_set_names[geom_key], item)
+                _dump_mesh_items(
+                    self.sections, _INPUT_FILE_MAPPINGS["geometry_sets"][geom_key], item
+                )
 
         # Add the nodes and elements.
         _dump_mesh_items(self.sections, "NODE COORDS", mesh.nodes)
