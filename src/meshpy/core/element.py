@@ -21,11 +21,7 @@
 # THE SOFTWARE.
 """This module implements the class that represents one element in the Mesh."""
 
-from typing import List as _List
-
 from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
-from meshpy.core.node import Node as _Node
-from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 class Element(_BaseMeshItem):
@@ -45,97 +41,6 @@ class Element(_BaseMeshItem):
 
         # VTK cell data for this element.
         self.vtk_cell_data = {}
-
-    @classmethod
-    def from_legacy_string(cls, nodes: _List[_Node], input_line: str):
-        """Create an element from a legacy string."""
-
-        if _fourcipp_is_available():
-            raise ValueError(
-                "Port this functionality to create the element from the dict "
-                "representing the element, not the legacy string."
-                "TODO: pass the nodes array here, so we can directly link to the nodes"
-            )
-
-        # Import solid element classes for creation of the element.
-        from meshpy.core.element_volume import VolumeHEX8 as _VolumeHEX8
-        from meshpy.core.element_volume import VolumeHEX20 as _VolumeHEX20
-        from meshpy.core.element_volume import VolumeHEX27 as _VolumeHEX27
-        from meshpy.core.element_volume import VolumeTET4 as _VolumeTET4
-        from meshpy.core.element_volume import VolumeTET10 as _VolumeTET10
-        from meshpy.core.element_volume import VolumeWEDGE6 as _VolumeWEDGE6
-        from meshpy.four_c.element_volume import SolidRigidSphere as _SolidRigidSphere
-
-        # Split up input line and get pre node string.
-        line_split = input_line.split()
-        string_pre_nodes = " ".join(line_split[1:3])
-
-        # Get a list of the element nodes.
-        # This is only here because we need the pre and post strings - can be
-        # removed when moving on from the legacy format.
-        dummy = []
-        for i, item in enumerate(line_split[3:]):
-            if item.isdigit():
-                dummy.append(int(item) - 1)
-            else:
-                break
-        else:
-            raise ValueError(
-                f'The input line:\n"{input_line}"\ncould not be converted to a solid element!'
-            )
-
-        # Get the post node string
-        string_post_nodes = " ".join(line_split[3 + i :])
-
-        # Depending on the number of nodes chose which solid element to return.
-        n_nodes = len(nodes)
-        match n_nodes:
-            case 8:
-                return _VolumeHEX8(
-                    nodes=nodes,
-                    string_pre_nodes=string_pre_nodes,
-                    string_post_nodes=string_post_nodes,
-                )
-            case 4:
-                return _VolumeTET4(
-                    nodes=nodes,
-                    string_pre_nodes=string_pre_nodes,
-                    string_post_nodes=string_post_nodes,
-                )
-            case 10:
-                return _VolumeTET10(
-                    nodes=nodes,
-                    string_pre_nodes=string_pre_nodes,
-                    string_post_nodes=string_post_nodes,
-                )
-            case 20:
-                return _VolumeHEX20(
-                    nodes=nodes,
-                    string_pre_nodes=string_pre_nodes,
-                    string_post_nodes=string_post_nodes,
-                )
-            case 27:
-                return _VolumeHEX27(
-                    nodes=nodes,
-                    string_pre_nodes=string_pre_nodes,
-                    string_post_nodes=string_post_nodes,
-                )
-            case 6:
-                return _VolumeWEDGE6(
-                    nodes=nodes,
-                    string_pre_nodes=string_pre_nodes,
-                    string_post_nodes=string_post_nodes,
-                )
-            case 1:
-                return _SolidRigidSphere(
-                    nodes=nodes,
-                    string_pre_nodes=string_pre_nodes,
-                    string_post_nodes=string_post_nodes,
-                )
-            case _:
-                raise TypeError(
-                    f"Could not find a element type for {string_pre_nodes}, with {n_nodes} nodes"
-                )
 
     def flip(self):
         """Reverse the nodes of this element.
