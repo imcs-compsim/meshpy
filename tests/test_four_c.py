@@ -38,6 +38,7 @@ from meshpy.four_c.function import Function
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.locsys_condition import LocSysCondition
 from meshpy.four_c.material import MaterialReissner
+from meshpy.four_c.model_importer import import_four_c_model
 from meshpy.four_c.solid_shell_thickness_direction import (
     get_visualization_third_parameter_direction_hex8,
     set_solid_shell_thickness_direction,
@@ -189,6 +190,7 @@ def test_four_c_simulation_beam_potential_helix(
     # define the beam potential
     beampotential = BeamPotential(
         input_file,
+        mesh,
         pot_law_prefactor=[-1.0e-3, 12.45e-8],
         pot_law_exponent=[6.0, 12.0],
         pot_law_line_charge_density=[1.0, 2.0],
@@ -260,12 +262,13 @@ def test_four_c_solid_shell_direction_detection(
     """Test the solid shell direction detection functionality."""
 
     # Test the plates
-    mpy.import_mesh_full = True
-    mesh_block = InputFile(
-        yaml_file=get_corresponding_reference_file_path(
+    _, mesh_block = import_four_c_model(
+        input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_solid_shell_blocks"
-        )
-    ).mesh
+        ),
+        convert_input_to_mesh=True,
+    )
+
     # Add a beam element to check the function also works with beam elements
     mat = MaterialReissner()
     create_beam_mesh_line(
@@ -279,11 +282,12 @@ def test_four_c_solid_shell_direction_detection(
     )
 
     # Test the dome
-    mesh_dome_original = InputFile(
-        yaml_file=get_corresponding_reference_file_path(
+    _, mesh_dome_original = import_four_c_model(
+        input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_solid_shell_dome"
-        )
-    ).mesh
+        ),
+        convert_input_to_mesh=True,
+    )
 
     # Test that the thickness version works
     mesh_dome = mesh_dome_original.copy()
@@ -638,12 +642,12 @@ def test_four_c_beam_to_solid(
     works."""
 
     # Load a solid
-    mpy.import_mesh_full = True
-    mesh = InputFile(
-        yaml_file=get_corresponding_reference_file_path(
+    _, mesh = import_four_c_model(
+        input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_block"
-        )
-    ).mesh
+        ),
+        convert_input_to_mesh=True,
+    )
 
     # The yaml file already contains the beam-to-solid boundary conditions
     # for the solid. We don't need them in this test case, as we want to
@@ -732,29 +736,26 @@ def test_four_c_import_non_consecutive_geometry_sets(
 ):
     """Test that we can import non-consecutively numbered geometry sets."""
 
-    # TODO rework this test once the input file is refactored, i.e.
-    # input_file, mesh = InputFile(yaml_file=...)
-    # ... add different geometry sets to the mesh
-    # input_file.add(mesh)
-    # this way it is tested exhaustively rather than accessing the mesh
-    # in the input file during the beam mesh creation
-
-    mpy.import_mesh_full = full_import
-    input_file = InputFile(
-        yaml_file=get_corresponding_reference_file_path(additional_identifier="input")
+    input_file, mesh = import_four_c_model(
+        input_file_path=get_corresponding_reference_file_path(
+            additional_identifier="input"
+        ),
+        convert_input_to_mesh=full_import,
     )
 
     material = MaterialReissner()
     for i in range(3):
         beam_set = create_beam_mesh_line(
-            input_file.mesh,
+            mesh,
             Beam3rHerm2Line3,
             material,
             [i + 3, 0, 0],
             [i + 3, 0, 4],
             n_el=2,
         )
-        input_file.add(beam_set)
+        mesh.add(beam_set)
+
+    input_file.add(mesh)
 
     assert_results_equal(
         get_corresponding_reference_file_path(

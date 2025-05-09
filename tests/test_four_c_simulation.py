@@ -33,8 +33,8 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.beam_interaction_conditions import add_beam_interaction_condition
 from meshpy.four_c.dbc_monitor import (
-    dbc_monitor_to_input,
-    dbc_monitor_to_input_all_values,
+    dbc_monitor_to_mesh,
+    dbc_monitor_to_mesh_all_values,
 )
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.function import Function
@@ -48,6 +48,7 @@ from meshpy.four_c.header_functions import (
 )
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.material import MaterialReissner
+from meshpy.four_c.model_importer import import_four_c_model
 from meshpy.four_c.run_four_c import run_four_c
 from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
 from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
@@ -79,6 +80,8 @@ def create_cantilever_model(n_steps, time_step=0.5):
     input_file.add(
         {"IO": {"OUTPUT_BIN": True, "STRUCT_DISP": True}}, option_overwrite=True
     )
+
+    mesh = Mesh()
     ft = Function(
         [
             {
@@ -87,20 +90,19 @@ def create_cantilever_model(n_steps, time_step=0.5):
             },
         ]
     )
-    input_file.add(ft)
+    mesh.add(ft)
 
-    mesh = Mesh()
     mat = MaterialReissner(youngs_modulus=100.0, radius=0.1)
     beam_set = create_beam_mesh_line(
         mesh, Beam3rHerm2Line3, mat, [0, 0, 0], [2, 0, 0], n_el=10
     )
 
-    input_file.add(mesh)
-
-    return input_file, beam_set
+    return input_file, mesh, beam_set
 
 
-def run_four_c_test(tmp_path, name, mesh, n_proc=2, restart=[None, None], **kwargs):
+def run_four_c_test(
+    tmp_path, name, input_file, n_proc=2, restart=[None, None], **kwargs
+):
     """Run 4C with a input file and check the output.
 
     Args
@@ -122,11 +124,11 @@ def run_four_c_test(tmp_path, name, mesh, n_proc=2, restart=[None, None], **kwar
     os.makedirs(testing_dir, exist_ok=True)
 
     # Create input file.
-    input_file = os.path.join(testing_dir, name + ".4C.yaml")
-    mesh.write_input_file(input_file, **kwargs)
+    input_file_name = os.path.join(testing_dir, name + ".4C.yaml")
+    input_file.write_input_file(input_file_name, add_header_information=False, **kwargs)
 
     return_code = run_four_c(
-        input_file,
+        input_file_name,
         testing_dir,
         output_name=name,
         n_proc=n_proc,
@@ -155,10 +157,15 @@ def test_four_c_simulation_honeycomb_sphere(
     """
 
     # Read input file with information of the sphere and simulation.
-    mpy.import_mesh_full = full_import
-    input_file = InputFile(
-        yaml_file=get_corresponding_reference_file_path(additional_identifier="import"),
+    input_file, mesh = import_four_c_model(
+        input_file_path=get_corresponding_reference_file_path(
+            additional_identifier="import"
+        ),
+        convert_input_to_mesh=full_import,
     )
+    # add mesh back to the input file to check if import works
+    if full_import:
+        input_file.add(mesh)
 
     # Modify the time step options.
     input_file.add(
@@ -290,13 +297,15 @@ def test_four_c_simulation_beam_and_solid_tube(
     """Merge a solid tube with a beam tube and simulate them together."""
 
     # Create the input file and read solid mesh data.
-    mpy.import_mesh_full = full_import
-    input_file = InputFile()
-    input_file.read_yaml(
-        get_corresponding_reference_file_path(
+    input_file, imported_mesh = import_four_c_model(
+        input_file_path=get_corresponding_reference_file_path(
             reference_file_base_name="test_create_cubit_input_tube"
-        )
+        ),
+        convert_input_to_mesh=full_import,
     )
+    # Add mesh back to the input file to check if import works
+    if full_import:
+        input_file.add(imported_mesh)
 
     # Add options for beam_output.
     input_file.add(
@@ -312,13 +321,11 @@ def test_four_c_simulation_beam_and_solid_tube(
     )
 
     # Add functions for boundary conditions and material.
+    mesh = Mesh()
     sin = Function([{"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "sin(t*2*pi)"}])
     cos = Function([{"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "cos(t*2*pi)"}])
     material = MaterialReissner(youngs_modulus=1e9, radius=0.25, shear_correction=0.75)
-    input_file.add(sin, cos, material)
-
-    # Create a mesh
-    mesh = Mesh()
+    mesh.add(sin, cos, material)
 
     # Add a straight beam.
     mesh.add(material)
@@ -586,7 +593,7 @@ def test_four_c_simulation_rotated_beam_axis(
 
     # Define linear function over time.
     ft = Function([{"SYMBOLIC_FUNCTION_OF_TIME": "t"}])
-    input_file.add(ft)
+    mesh.add(ft)
 
     # Set beam material.
     mat = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
@@ -716,10 +723,11 @@ def test_four_c_simulation_dbc_monitor_to_input(
     """
 
     # Create and run the initial simulation.
-    initial_simulation, beam_set = create_cantilever_model(n_steps=2)
-    initial_simulation.add(
+    initial_input_file, initial_mesh, mesh_beam_set = create_cantilever_model(n_steps=2)
+
+    initial_mesh.add(
         BoundaryCondition(
-            beam_set["start"],
+            mesh_beam_set["start"],
             {
                 "NUMDOF": 9,
                 "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
@@ -729,9 +737,9 @@ def test_four_c_simulation_dbc_monitor_to_input(
             bc_type=mpy.bc.dirichlet,
         )
     )
-    initial_simulation.add(
+    initial_mesh.add(
         BoundaryCondition(
-            beam_set["end"],
+            mesh_beam_set["end"],
             {
                 "NUMDOF": 9,
                 "ONOFF": [1, 1, 1, 0, 0, 0, 0, 0, 0],
@@ -742,7 +750,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
             bc_type=mpy.bc.dirichlet,
         )
     )
-    initial_simulation.add(
+    initial_input_file.add(
         {
             "IO/MONITOR STRUCTURE DBC": {
                 "PRECISION_FILE": 10,
@@ -751,11 +759,12 @@ def test_four_c_simulation_dbc_monitor_to_input(
             }
         }
     )
+    initial_input_file.add(initial_mesh)
 
     # Check the input file
     assert_results_equal(
         get_corresponding_reference_file_path(additional_identifier="initial"),
-        initial_simulation,
+        initial_input_file,
     )
 
     # Check if we still have to actually run 4C.
@@ -763,13 +772,16 @@ def test_four_c_simulation_dbc_monitor_to_input(
         return
 
     # Run the simulation in 4C
-    run_four_c_test(tmp_path, initial_run_name, initial_simulation)
+    run_four_c_test(tmp_path, initial_run_name, initial_input_file)
 
     # Create and run the second simulation.
-    restart_simulation, beam_set = create_cantilever_model(n_steps=21)
-    restart_simulation.add(
+    restart_input_file, restart_mesh, mesh_beam_set = create_cantilever_model(
+        n_steps=21
+    )
+
+    restart_mesh.add(
         BoundaryCondition(
-            beam_set["start"],
+            mesh_beam_set["start"],
             {
                 "NUMDOF": 9,
                 "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0],
@@ -792,11 +804,11 @@ def test_four_c_simulation_dbc_monitor_to_input(
             },
         ]
     )
-    restart_simulation.add(function_nbc)
+    restart_mesh.add(function_nbc)
 
     if initial_run_name == "test_cantilever_w_dbc_monitor_to_input":
-        dbc_monitor_to_input(
-            restart_simulation,
+        dbc_monitor_to_mesh(
+            restart_mesh,
             tmp_path
             / initial_run_name
             / f"{initial_run_name}_monitor_dbc"
@@ -805,8 +817,8 @@ def test_four_c_simulation_dbc_monitor_to_input(
             function=function_nbc,
         )
     elif initial_run_name == "test_cantilever_w_dbc_monitor_to_input_all_values":
-        dbc_monitor_to_input_all_values(
-            restart_simulation,
+        dbc_monitor_to_mesh_all_values(
+            restart_mesh,
             tmp_path
             / initial_run_name
             / f"{initial_run_name}_monitor_dbc"
@@ -820,23 +832,25 @@ def test_four_c_simulation_dbc_monitor_to_input(
             initial_run_name + " is not yet implemented for this test case."
         )
 
+    restart_input_file.add(restart_mesh)
+
     displacements = [
         [-4.09988307566066690e-01, 9.93075098427816383e-01, 6.62050065618549843e-01]
     ]
     nodes = [21]
-    add_result_description(restart_simulation, displacements, nodes)
+    add_result_description(restart_input_file, displacements, nodes)
 
     # Check the input file of the restart simulation
     assert_results_equal(
         get_corresponding_reference_file_path(additional_identifier="restart"),
-        restart_simulation,
+        restart_input_file,
     )
 
     # Run the restart simulation
     run_four_c_test(
         tmp_path,
         f"{initial_run_name}_restart",
-        restart_simulation,
+        restart_input_file,
         restart=[2, f"../{initial_run_name}/{initial_run_name}"],
     )
 
@@ -860,10 +874,10 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     dt = 0.1  # time step size from create_cantilever_model
 
     # Create and run the initial simulation.
-    initial_simulation, beam_set = create_cantilever_model(n_steps, dt)
+    initial_simulation, mesh, beam_set = create_cantilever_model(n_steps, dt)
 
     # Add simple lienar interpolation function.
-    initial_simulation.add(
+    mesh.add(
         Function(
             [
                 {
@@ -887,7 +901,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
         if not node.is_middle_node:
             # Set Dirichlet conditions at one end.
             if check_node_by_coordinate(node, 0, 0):
-                initial_simulation.add(
+                mesh.add(
                     BoundaryCondition(
                         GeometrySet(node),
                         {
@@ -901,7 +915,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                 )
             else:
                 # Add small displacement at other end.
-                initial_simulation.add(
+                mesh.add(
                     BoundaryCondition(
                         GeometrySet(node),
                         {
@@ -924,6 +938,8 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                         bc_type=mpy.bc.dirichlet,
                     )
                 )
+
+    initial_simulation.add(mesh)
 
     # Add DB-monitor header.
     initial_simulation.add(
@@ -951,8 +967,9 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     run_four_c_test(tmp_path, initial_run_name, initial_simulation)
 
     # Create and run the second simulation.
-    force_simulation, beam_set = create_cantilever_model(2 * n_steps, dt)
-    force_simulation.add(
+    force_simulation, mesh, beam_set = create_cantilever_model(2 * n_steps, dt)
+
+    mesh.add(
         BoundaryCondition(
             beam_set["start"],
             {
@@ -972,14 +989,16 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     for _, _, file_names in os.walk(monitor_db_path):
         for file_name in sorted(file_names):
             if "_monitor_dbc" in file_name:
-                dbc_monitor_to_input_all_values(
-                    force_simulation,
+                dbc_monitor_to_mesh_all_values(
+                    mesh,
                     os.path.join(monitor_db_path, file_name),
                     steps=[0, n_steps + 1],
                     time_span=[0, n_steps * dt, 2 * n_steps * dt],
                     type="hat",
                     n_dof=9,
                 )
+
+    force_simulation.add(mesh)
 
     displacements = [[0.0, 0.0, 0.0]]
     nodes = [21]
@@ -1171,9 +1190,6 @@ def test_four_c_simulation_beam_to_beam_contact_example(
     # Create the input file
     input_file = InputFile()
 
-    # Add the mesh to the input file.
-    input_file.add(mesh)
-
     # Add the standard,static header.
     set_header_static(
         input_file,
@@ -1195,6 +1211,9 @@ def test_four_c_simulation_beam_to_beam_contact_example(
             "binning_bounding_box": [-3, -3, -3, 3, 3, 3],
         },
     )
+
+    # Add the mesh to the input file.
+    input_file.add(mesh)
 
     # Add normal runtime output.
     set_runtime_output(input_file)

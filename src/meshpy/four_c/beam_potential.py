@@ -23,6 +23,7 @@
 interaction potentials."""
 
 from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
+from meshpy.core.mesh import Mesh as _Mesh
 
 
 class BeamPotential:
@@ -32,6 +33,7 @@ class BeamPotential:
     def __init__(
         self,
         input_file,
+        mesh,
         *,
         pot_law_prefactor=None,
         pot_law_exponent=None,
@@ -44,6 +46,8 @@ class BeamPotential:
         ----
         input_file:
             Input file of current problem setup.
+        mesh:
+            Mesh object of current problem setup.
         pot_law_prefactors: float, int, _np.array, list
             Prefactors of a potential law in form of a power law. Same number
             of prefactors and exponents/line charge densities/functions must be
@@ -63,6 +67,7 @@ class BeamPotential:
         """
 
         self.input_file = input_file
+        self.mesh = mesh
 
         # if only one potential law prefactor/exponent is present, convert it
         # into a list for simplified usage
@@ -230,7 +235,7 @@ class BeamPotential:
             )
         ):
             if func != "none":
-                self.input_file.add(func)
+                self.mesh.add(func)
 
             bc = _BoundaryCondition(
                 geometry_set,
@@ -238,4 +243,4 @@ class BeamPotential:
                 bc_type="DESIGN LINE BEAM POTENTIAL CHARGE CONDITIONS",
             )
 
-            self.input_file.add(bc)
+            self.mesh.add(bc)

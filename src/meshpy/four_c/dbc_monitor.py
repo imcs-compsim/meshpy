@@ -19,8 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This function converts the DBC monitor log files to Neumann input
-sections."""
+"""This function converts the DBC monitor log files to Neumann boundary
+conditions in a mesh."""
 
 from typing import Optional as _Optional
 
@@ -29,6 +29,7 @@ import numpy as _np
 from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.four_c.function import Function as _Function
 from meshpy.four_c.function_utility import (
     create_linear_interpolation_function as _create_linear_interpolation_function,
@@ -36,7 +37,6 @@ from meshpy.four_c.function_utility import (
 from meshpy.four_c.function_utility import (
     ensure_length_of_function_array as _ensure_length_of_function_array,
 )
-from meshpy.four_c.input_file import InputFile as _InputFile
 
 
 def linear_time_transformation(
@@ -147,22 +147,21 @@ def read_dbc_monitor_file(file_path):
     return nodes, data[:, 1], data[:, 4:7], data[:, 7:]
 
 
-def add_point_neuman_condition_to_input_file(
-    input_file: _InputFile,
+def add_point_neuman_condition_to_mesh(
+    mesh: _Mesh,
     nodes: list[int],
     function_array: list[_Function],
     force: _np.ndarray,
     *,
     n_dof: int = 3,
 ):
-    """Adds a Neumann boundary condition to the input file for the given
-    node_ids with the function_array and force values by creating a new
-    geometry set.
+    """Adds a Neumann boundary condition to a mesh for the given node_ids with
+    the function_array and force values by creating a new geometry set.
 
     Args
     ----
-    input_file: InputFile
-        InputFile where the boundary conditions are added to
+    mesh: Mesh
+        Mesh where the boundary conditions are added to
     nodes: [node_id]
         list containing the ids of the nodes for the condition
     function_array: [function]
@@ -181,12 +180,12 @@ def add_point_neuman_condition_to_input_file(
 
     function_array = _ensure_length_of_function_array(function_array, 3)
 
-    # Add the function to the input file, if they are not previously added.
+    # Add the function to the mesh, if they are not previously added.
     for function in function_array:
-        input_file.mesh.add(function)
+        mesh.add(function)
 
     # Create GeometrySet with nodes.
-    mesh_nodes = [input_file.mesh.nodes[i_node] for i_node in nodes]
+    mesh_nodes = [mesh.nodes[i_node] for i_node in nodes]
     geo = _GeometrySet(mesh_nodes)
 
     # Create the Boundary Condition.
@@ -200,11 +199,11 @@ def add_point_neuman_condition_to_input_file(
         },
         bc_type=_mpy.bc.neumann,
     )
-    input_file.mesh.add(bc)
+    mesh.add(bc)
 
 
-def dbc_monitor_to_input_all_values(
-    input_file: _InputFile,
+def dbc_monitor_to_mesh_all_values(
+    mesh: _Mesh,
     file_path: str,
     *,
     steps: list[int] = [],
@@ -216,19 +215,19 @@ def dbc_monitor_to_input_all_values(
 ):
     """Extracts all the force values of the monitored Dirichlet boundary
     condition and converts them into a Function with a Neumann boundary
-    condition for the input_file. The monitor log force values must be obtained
+    condition for a given mesh. The monitor log force values must be obtained
     from a previous simulation with constant step size. The discretization of
-    the previous simulation must be identical to the one within the input_file.
-    The extracted force values are passed to a linear interpolation
-    4C-function. It is advisable to only call this function once all nodes have
-    been added to the input file.
+    the previous simulation must be identical to the one within the mesh. The
+    extracted force values are passed to a linear interpolation 4C-function. It
+    is advisable to only call this function once all nodes have been added to
+    the mesh.
 
     Args
     ----
-    input_file: InputFile
-        The input file where the created Neumann boundary condition is added
+    mesh: Mesh
+        The mesh where the created Neumann boundary condition is added
         to. The nodes(e.g., discretization) referred to in the log file must match with the ones
-        in input_file.
+        in the mesh.
     file_path: str
         Path to the Dirichlet boundary condition log file.
     steps: [int,int]
@@ -321,8 +320,8 @@ def dbc_monitor_to_input_all_values(
                 time, force[:, dim], function_type="SYMBOLIC_FUNCTION_OF_TIME"
             )
 
-            # add the function to the input array
-            input_file.mesh.add(fun)
+            # add the function to the mesh
+            mesh.add(fun)
 
             # store function
             functions.append(fun)
@@ -333,14 +332,14 @@ def dbc_monitor_to_input_all_values(
     elif len(functions) != 3:
         raise ValueError("Please provide functions with ")
 
-    # Create condition in input file.
-    add_point_neuman_condition_to_input_file(
-        input_file, nodes, functions, force[steps[1]], **kwargs
+    # Create condition in mesh
+    add_point_neuman_condition_to_mesh(
+        mesh, nodes, functions, force[steps[1]], **kwargs
     )
 
 
-def dbc_monitor_to_input(
-    input_file: _InputFile,
+def dbc_monitor_to_mesh(
+    mesh: _Mesh,
     file_path: str,
     *,
     step: int = -1,
@@ -348,15 +347,15 @@ def dbc_monitor_to_input(
     **kwargs,
 ):
     """Converts the last value of a Dirichlet boundary condition monitor log to
-    a Neumann boundary condition input section.
+    a Neumann boundary condition in the mesh.
 
     Args
     ----
-    input_file: InputFile
-        The input file where the created Neumann boundary condition is added
-        to. The nodes referred to in the log file have to match with the ones
-        in the input section. It is advisable to only call this function once
-        all nodes have been added to the input file.
+    mesh: Mesh
+        The mesh where the created Neumann boundary condition is added to.
+        The nodes referred to in the log file have to match with the ones
+        in the mesh. It is advisable to only call this function once
+        all nodes have been added to the mesh.
     file_path: str
         Path to the Dirichlet boundary condition log file.
     step: int
@@ -371,7 +370,7 @@ def dbc_monitor_to_input(
     # The forces are the negative reactions at the Dirichlet boundaries.
     force *= -1.0
 
-    # Create condition in input file.
-    add_point_neuman_condition_to_input_file(
-        input_file, nodes, [function] * 3, force[step], **kwargs
+    # Create condition in mesh
+    add_point_neuman_condition_to_mesh(
+        mesh, nodes, [function] * 3, force[step], **kwargs
     )

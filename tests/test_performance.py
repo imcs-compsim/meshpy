@@ -33,6 +33,7 @@ from meshpy.core.rotation import Rotation
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.material import MaterialReissner
+from meshpy.four_c.model_importer import import_four_c_model
 from meshpy.geometric_search.find_close_points import (
     FindClosePointAlgorithm,
     find_close_points,
@@ -112,8 +113,7 @@ def create_solid_block(file_path, nx, ny, nz):
 def load_solid(solid_file, full_import):
     """Load a solid into an input file."""
 
-    mpy.import_mesh_full = full_import
-    InputFile(yaml_file=solid_file)
+    import_four_c_model(input_file_path=solid_file, convert_input_to_mesh=full_import)
 
 
 def create_large_beam_mesh(n_x, n_y, n_z, n_el):
