@@ -265,7 +265,7 @@ def beam_to_space_time(
                         for node_id in coupling_node_ids
                     ],
                     coupling.bc_type,
-                    coupling.coupling_dof_type,
+                    coupling.data,
                 )
             )
 

@@ -43,19 +43,20 @@ class Coupling(_BoundaryConditionBase):
         self,
         geometry: _Union[_GeometrySetBase, _List[_Node]],
         coupling_type: _Union[_conf.BoundaryCondition, str],
-        coupling_dof_type,
+        coupling_dof_type: _Union[_conf.CouplingDofType, dict],
         *,
         check_overlapping_nodes: bool = True,
-        **kwargs,
     ):
         """Initialize this object.
 
         Args:
             geometry: Geometry set or nodes that should be coupled.
-            coupling_type: Type of coupling.
-            coupling_dof_type: mpy.coupling_dof, str
-                If this is a string it is the string that will be used in the input
-                file, otherwise it has to be of type mpy.coupling_dof.
+            coupling_type: If this is a string, this will be the section that
+                this coupling will be added to. If it is a mpy.bc, the section
+                will be determined automatically.
+            coupling_dof_type: If this is a dictionary it is the dictionary
+                that will be used in the input file, otherwise it has to be
+                of type mpy.coupling_dof.
             check_overlapping_nodes: If all nodes of this coupling condition
                 have to be at the same physical position.
         """
@@ -76,8 +77,7 @@ class Coupling(_BoundaryConditionBase):
         ):
             raise TypeError("Couplings are only implemented for point sets.")
 
-        super().__init__(geometry, bc_type=coupling_type, **kwargs)
-        self.coupling_dof_type = coupling_dof_type
+        super().__init__(geometry, bc_type=coupling_type, data=coupling_dof_type)
         self.check_overlapping_nodes = check_overlapping_nodes
 
         # Perform sanity checks for this boundary condition
@@ -104,8 +104,8 @@ class Coupling(_BoundaryConditionBase):
         """Return a list with a single item representing this coupling
         condition."""
 
-        if isinstance(self.coupling_dof_type, dict):
-            data = self.coupling_dof_type
+        if isinstance(self.data, dict):
+            data = self.data
         else:
             # In this case we have to check which beams are connected to the node.
             # TODO: Coupling also makes sense for different beam types, this can
@@ -139,7 +139,7 @@ class Coupling(_BoundaryConditionBase):
                             "Coupling beams of different types is not yet possible!"
                         )
 
-            data = beam_four_c_type.get_coupling_dict(self.coupling_dof_type)
+            data = beam_four_c_type.get_coupling_dict(self.data)
 
         return [{"E": self.geometry_set.i_global, **data}]
 
@@ -153,9 +153,7 @@ def coupling_factory(geometry, coupling_type, coupling_dof_type, **kwargs):
     of the coupling.
     """
 
-    if coupling_type is _mpy.bc.point_coupling_penalty:
-        # Penalty point couplings in 4C can only contain two nodes. In this case
-        # we expect the given geometry to be a list of nodes.
+    if coupling_type.is_point_coupling_pairwise():
         main_node = geometry[0]
         return [
             Coupling([main_node, node], coupling_type, coupling_dof_type, **kwargs)

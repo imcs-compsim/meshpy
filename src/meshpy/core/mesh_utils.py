@@ -60,7 +60,7 @@ def get_coupled_nodes_to_master_map(
     # Get a dictionary that maps the "replaced" nodes to the "master" ones
     replaced_node_to_master_map = {}
     for coupling in mesh.boundary_conditions[_mpy.bc.point_coupling, _mpy.geo.point]:
-        if coupling.coupling_dof_type is not _mpy.coupling_dof.fix:
+        if coupling.data is not _mpy.coupling_dof.fix:
             raise ValueError(
                 "This function is only implemented for rigid joints at the DOFs"
             )
