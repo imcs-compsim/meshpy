@@ -19,8 +19,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This module implements a basic class to manage functions in the 4C input
-file."""
+"""This module implements a basic class to manage functions in a MeshPy
+mesh."""
 
 from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
 
@@ -28,9 +28,8 @@ from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
 class Function(_BaseMeshItem):
     """Holds information for a function."""
 
-    def __init__(self, function_list):
-        super().__init__()
-        self.function_list = function_list
+    def __init__(self, function_data):
+        super().__init__(data=function_data)
 
     def __deepcopy__(self, memo):
         """When deepcopy is called on a mesh, we do not want the same functions
@@ -42,7 +41,3 @@ class Function(_BaseMeshItem):
 
         # Return this object again, as no copy should be created.
         return self
-
-    def dump_to_list(self):
-        """Return a list with the items representing this function."""
-        return self.function_list

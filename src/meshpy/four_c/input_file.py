@@ -423,7 +423,7 @@ class InputFile:
 
         # Add the functions.
         for function in mesh.functions:
-            self.sections[f"FUNCT{function.i_global}"] = function.dump_to_list()
+            self.sections[f"FUNCT{function.i_global}"] = function.data
 
         # If there are couplings in the mesh, set the link between the nodes
         # and elements, so the couplings can decide which DOFs they couple,

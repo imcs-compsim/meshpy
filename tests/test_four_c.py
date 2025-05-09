@@ -27,6 +27,7 @@ import pytest
 
 from meshpy.core.boundary_condition import BoundaryCondition
 from meshpy.core.conf import mpy
+from meshpy.core.function import Function
 from meshpy.core.geometry_set import GeometrySet
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
@@ -34,7 +35,6 @@ from meshpy.four_c.beam_interaction_conditions import add_beam_interaction_condi
 from meshpy.four_c.beam_potential import BeamPotential
 from meshpy.four_c.dbc_monitor import linear_time_transformation
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
-from meshpy.four_c.function import Function
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.locsys_condition import LocSysCondition
 from meshpy.four_c.material import MaterialReissner

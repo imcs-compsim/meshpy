@@ -27,9 +27,9 @@ from typing import Union as _Union
 
 from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.core.conf import mpy as _mpy
+from meshpy.core.function import Function as _Function
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
 from meshpy.core.rotation import Rotation as _Rotation
-from meshpy.four_c.function import Function as _Function
 from meshpy.four_c.function_utility import (
     ensure_length_of_function_array as _ensure_length_of_function_array,
 )

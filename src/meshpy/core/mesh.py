@@ -42,6 +42,7 @@ from meshpy.core.conf import mpy as _mpy
 from meshpy.core.coupling import coupling_factory as _coupling_factory
 from meshpy.core.element import Element as _Element
 from meshpy.core.element_beam import Beam as _Beam
+from meshpy.core.function import Function as _Function
 from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySetBase as _GeometrySetBase
 from meshpy.core.geometry_set import GeometrySetContainer as _GeometrySetContainer
@@ -52,7 +53,6 @@ from meshpy.core.rotation import Rotation as _Rotation
 from meshpy.core.rotation import add_rotations as _add_rotations
 from meshpy.core.rotation import rotate_coordinates as _rotate_coordinates
 from meshpy.core.vtk_writer import VTKWriter as _VTKWriter
-from meshpy.four_c.function import Function as _Function
 from meshpy.geometric_search.find_close_points import (
     find_close_points as _find_close_points,
 )

@@ -28,9 +28,9 @@ import numpy as _np
 
 from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.core.conf import mpy as _mpy
+from meshpy.core.function import Function as _Function
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
 from meshpy.core.mesh import Mesh as _Mesh
-from meshpy.four_c.function import Function as _Function
 from meshpy.four_c.function_utility import (
     create_linear_interpolation_function as _create_linear_interpolation_function,
 )

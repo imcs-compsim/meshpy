@@ -24,7 +24,7 @@
 import numpy as _np
 import yaml as _yaml
 
-from meshpy.four_c.function import Function as _Function
+from meshpy.core.function import Function as _Function
 
 
 class MeshPyDumper(_yaml.SafeDumper):
