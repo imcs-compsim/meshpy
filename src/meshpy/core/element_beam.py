@@ -182,7 +182,7 @@ class Beam(_Element):
     def _check_material(self):
         """Check if the linked material is valid for this type of beam
         element."""
-        for material_type in self.valid_material:
+        for material_type in type(self).valid_material:
             if isinstance(self.material, material_type):
                 break
         else:

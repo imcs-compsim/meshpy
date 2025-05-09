@@ -25,8 +25,8 @@ import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.element import Element as _Element
-from meshpy.four_c.material import (
-    MaterialStVenantKirchhoff as _MaterialStVenantKirchhoff,
+from meshpy.core.material import (
+    MaterialSolidBase as _MaterialSolidBase,
 )
 from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
@@ -35,7 +35,7 @@ class NURBSPatch(_Element):
     """A base class for a NURBS patch."""
 
     # A list of valid material types for this element
-    valid_material = [_MaterialStVenantKirchhoff]
+    valid_material = [_MaterialSolidBase]
 
     def __init__(
         self,
@@ -146,12 +146,12 @@ class NURBSPatch(_Element):
     def _check_material(self):
         """Check if the linked material is valid for this type of NURBS solid
         element."""
-        for material_type in self.valid_material:
+        for material_type in type(self).valid_material:
             if isinstance(self.material, material_type):
                 return
         raise TypeError(
-            f"NURBS solid of type {type(self)} can not have a material of t"
-            f"ype {type(self.material)}!"
+            f"NURBS solid of type {type(self)} can not have a material of"
+            f" type {type(self.material)}!"
         )
 
 
