@@ -23,16 +23,12 @@
 4C."""
 
 import os as _os
-import shutil as _shutil
-import subprocess as _subprocess  # nosec B404
 import sys as _sys
 from datetime import datetime as _datetime
 from pathlib import Path as _Path
 from typing import Any as _Any
 from typing import Dict as _Dict
 from typing import List as _List
-from typing import Optional as _Optional
-from typing import Tuple as _Tuple
 
 import yaml as _yaml
 
@@ -47,6 +43,7 @@ from meshpy.four_c.input_file_mappings import geometry_set_names as _geometry_se
 from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
 from meshpy.utils.environment import cubitpy_is_available as _cubitpy_is_available
 from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
+from meshpy.utils.environment import get_git_data as _get_git_data
 
 if _cubitpy_is_available():
     import cubitpy as _cubitpy
@@ -437,38 +434,6 @@ class InputFile:
         Returns:
             A dictionary with the header information.
         """
-
-        def _get_git_data(repo_path: _Path) -> _Tuple[_Optional[str], _Optional[str]]:
-            """Return the hash and date of the current git commit.
-
-            Args:
-                repo_path: Path to the git repository.
-            Returns:
-                A tuple with the hash and date of the current git commit
-                if available, otherwise None.
-            """
-            git = _shutil.which("git")
-            if git is None:
-                raise RuntimeError("Git executable not found")
-            out_sha = _subprocess.run(  # nosec B603
-                [git, "rev-parse", "HEAD"],
-                cwd=repo_path,
-                stdout=_subprocess.PIPE,
-                stderr=_subprocess.DEVNULL,
-            )
-            out_date = _subprocess.run(  # nosec B603
-                [git, "show", "-s", "--format=%ci"],
-                cwd=repo_path,
-                stdout=_subprocess.PIPE,
-                stderr=_subprocess.DEVNULL,
-            )
-
-            if not out_sha.returncode + out_date.returncode == 0:
-                return None, None
-
-            git_sha = out_sha.stdout.decode("ascii").strip()
-            git_date = out_date.stdout.decode("ascii").strip()
-            return git_sha, git_date
 
         header: dict = {"MeshPy": {}}
 
