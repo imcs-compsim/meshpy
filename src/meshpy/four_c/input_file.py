@@ -38,6 +38,7 @@ import yaml as _yaml
 
 from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.core.conf import mpy as _mpy
+from meshpy.core.coupling import Coupling as _Coupling
 from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.core.nurbs_patch import NURBSPatch as _NURBSPatch
 from meshpy.four_c.input_file_mappings import (
@@ -77,6 +78,40 @@ def get_geometry_set_indices_from_section(
             geometry_set_dict[id_geometry_set].append(index_node)
 
     return geometry_set_dict
+
+
+def _dump_coupling(coupling):
+    """Return the input file representation of the coupling condition."""
+
+    # TODO: Move this to a better place / gather all dump functions for general
+    # MeshPy items in a file or so.
+
+    if isinstance(coupling.data, dict):
+        data = coupling.data
+    else:
+        # In this case we have to check which beams are connected to the node.
+        # TODO: Coupling also makes sense for different beam types, this can
+        # be implemented at some point.
+        nodes = coupling.geometry_set.get_points()
+        connected_elements = [
+            element for node in nodes for element in node.element_link
+        ]
+        element_types = {type(element) for element in connected_elements}
+        if len(element_types) > 1:
+            raise TypeError(
+                f"Expected a single connected type of beam elements, got {element_types}"
+            )
+        element_type = element_types.pop()
+        if element_type.beam_type is _mpy.beam.kirchhoff:
+            rotvec = {element.rotvec for element in connected_elements}
+            if len(rotvec) > 1 or not rotvec.pop():
+                raise TypeError(
+                    "Couplings for Kirchhoff beams and rotvec==False not yet implemented."
+                )
+
+        data = element_type.get_coupling_dict(coupling.data)
+
+    return {"E": coupling.geometry_set.i_global, **data}
 
 
 class InputFile:
@@ -363,6 +398,8 @@ class InputFile:
                     item_dict_list.append(
                         {"E": item.geometry_set.i_global, **item.data}
                     )
+                elif isinstance(item, _Coupling):
+                    item_dict_list.append(_dump_coupling(item))
                 else:
                     raise TypeError(f"Could not dump {item}")
 

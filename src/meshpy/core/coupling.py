@@ -100,49 +100,6 @@ class Coupling(_BoundaryConditionBase):
                 "The nodes given to Coupling do not have the same position."
             )
 
-    def dump_to_list(self):
-        """Return a list with a single item representing this coupling
-        condition."""
-
-        if isinstance(self.data, dict):
-            data = self.data
-        else:
-            # In this case we have to check which beams are connected to the node.
-            # TODO: Coupling also makes sense for different beam types, this can
-            # be implemented at some point.
-            nodes = self.geometry_set.get_points()
-            beam_type = nodes[0].element_link[0].beam_type
-            for node in nodes:
-                for element in node.element_link:
-                    if beam_type is not element.beam_type:
-                        raise ValueError(
-                            f'The first element in this coupling is of the type "{beam_type}" '
-                            f'another one is of type "{element.beam_type}"! They have to be '
-                            "of the same kind."
-                        )
-                    if beam_type is _mpy.beam.kirchhoff and element.rotvec is False:
-                        raise ValueError(
-                            "Couplings for Kirchhoff beams and rotvec==False not yet implemented."
-                        )
-
-            # In 4C it is not possible to couple beams of the same type, but
-            # with different centerline discretizations, e.g. Beam3rHerm2Line3
-            # and Beam3rLine2Line2, therefore, we check that all beams are
-            # exactly the same type and discretization.
-            # TODO: Remove this check once it is possible to couple beams, but
-            # then also the syntax in the next few lines has to be adapted.
-            beam_four_c_type = type(nodes[0].element_link[0])
-            for node in nodes:
-                for element in node.element_link:
-                    if beam_four_c_type is not type(element):
-                        raise ValueError(
-                            "Coupling beams of different types is not yet possible!"
-                        )
-
-            data = beam_four_c_type.get_coupling_dict(self.data)
-
-        return [{"E": self.geometry_set.i_global, **data}]
-
 
 def coupling_factory(geometry, coupling_type, coupling_dof_type, **kwargs):
     """Create coupling conditions for the nodes in geometry.
