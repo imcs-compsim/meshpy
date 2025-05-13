@@ -43,10 +43,8 @@ from meshpy.four_c.solid_shell_thickness_direction import (
     get_visualization_third_parameter_direction_hex8,
     set_solid_shell_thickness_direction,
 )
-from meshpy.mesh_creation_functions.beam_basic_geometry import (
-    create_beam_mesh_helix,
-    create_beam_mesh_line,
-)
+from meshpy.mesh_creation_functions.beam_helix import create_beam_mesh_helix
+from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
 from meshpy.utils.nodes import is_node_on_plane
 
 

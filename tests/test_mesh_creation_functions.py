@@ -35,26 +35,32 @@ from meshpy.core.node import NodeCosserat
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.element_beam import Beam3eb, Beam3rHerm2Line3
 from meshpy.four_c.material import MaterialEulerBernoulli, MaterialReissner
-from meshpy.mesh_creation_functions.beam_basic_geometry import (
-    create_beam_mesh_arc_at_node,
+from meshpy.mesh_creation_functions.applications.beam_fibers_in_rectangle import (
+    create_fibers_in_rectangle,
+)
+from meshpy.mesh_creation_functions.applications.beam_stent import (
+    create_beam_mesh_stent,
+)
+from meshpy.mesh_creation_functions.applications.beam_wire import create_wire_fibers
+from meshpy.mesh_creation_functions.beam_arc import (
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_arc_segment_via_axis,
     create_beam_mesh_arc_segment_via_rotation,
-    create_beam_mesh_helix,
-    create_beam_mesh_line,
-    create_beam_mesh_line_at_node,
 )
-from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
-from meshpy.mesh_creation_functions.beam_fibers_in_rectangle import (
-    create_fibers_in_rectangle,
-)
-from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_function
-from meshpy.mesh_creation_functions.beam_nurbs import (
+from meshpy.mesh_creation_functions.beam_from_nurbs_curve import (
     create_beam_mesh_from_nurbs,
     get_nurbs_curve_function_and_jacobian_for_integration,
 )
-from meshpy.mesh_creation_functions.beam_stent import create_beam_mesh_stent
-from meshpy.mesh_creation_functions.beam_wire import create_wire_fibers
+from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_generic
+from meshpy.mesh_creation_functions.beam_helix import create_beam_mesh_helix
+from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
+from meshpy.mesh_creation_functions.beam_node_continuation import (
+    create_beam_mesh_arc_at_node,
+    create_beam_mesh_line_at_node,
+)
+from meshpy.mesh_creation_functions.beam_parametric_curve import (
+    create_beam_mesh_parametric_curve,
+)
 from meshpy.utils.nodes import get_nodal_coordinates
 
 
@@ -685,7 +691,7 @@ def test_mesh_creation_functions_element_length_option(
     helix = create_helix_function(R, tz, transformation_factor=2.0, number_of_turns=n)
 
     mesh_curve = Mesh()
-    create_beam_mesh_curve(
+    create_beam_mesh_parametric_curve(
         mesh_curve,
         Beam3rHerm2Line3,
         mat,
@@ -732,7 +738,7 @@ def test_mesh_creation_functions_argument_checks():
         mesh = Mesh()
         # This should raise an error because node_positions_of_elements can not be used with l_el.
 
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -748,7 +754,7 @@ def test_mesh_creation_functions_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because node_positions_of_elements can not be used with n_el.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -764,7 +770,7 @@ def test_mesh_creation_functions_argument_checks():
         mesh = Mesh()
         # This should raise an error because we set `l_el` but don't provide
         # `interval_length`.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -779,7 +785,7 @@ def test_mesh_creation_functions_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because the interval [0,1] is violated.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -793,7 +799,7 @@ def test_mesh_creation_functions_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because the interval [0,1] is violated.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -810,7 +816,7 @@ def test_mesh_creation_functions_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because the interval is not ordered.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -827,7 +833,7 @@ def test_mesh_creation_functions_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because the interval is not ordered.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -1010,7 +1016,7 @@ def test_mesh_creation_functions_arc_length_argument_checks():
         mesh = Mesh()
         # This should raise an error because node_positions_of_elements can not be used with l_el.
 
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -1026,7 +1032,7 @@ def test_mesh_creation_functions_arc_length_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because node_positions_of_elements can not be used with n_el.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -1042,7 +1048,7 @@ def test_mesh_creation_functions_arc_length_argument_checks():
         mesh = Mesh()
         # This should raise an error because we set `l_el` but don't provide
         # `interval_length`.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -1057,7 +1063,7 @@ def test_mesh_creation_functions_arc_length_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because the interval [0,1] is violated.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -1071,7 +1077,7 @@ def test_mesh_creation_functions_arc_length_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because the interval [0,1] is violated.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -1088,7 +1094,7 @@ def test_mesh_creation_functions_arc_length_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because the interval is not ordered.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -1105,7 +1111,7 @@ def test_mesh_creation_functions_arc_length_argument_checks():
     ):
         mesh = Mesh()
         # This should raise an error because the interval is not ordered.
-        create_beam_mesh_function(
+        create_beam_mesh_generic(
             mesh,
             beam_class=dummy_arg,
             material=dummy_arg,
@@ -1137,7 +1143,7 @@ def test_mesh_creation_functions_curve_3d_helix(
     n_el = 5
     helix = create_helix_function(R, tz, transformation_factor=2.0, number_of_turns=n)
 
-    helix_set = create_beam_mesh_curve(
+    helix_set = create_beam_mesh_parametric_curve(
         mesh, Beam3rHerm2Line3, mat, helix, [0.0, 2.0 * np.pi * n], n_el=n_el
     )
     mesh.add(helix_set)
@@ -1178,10 +1184,10 @@ def test_mesh_creation_functions_curve_3d_helix_length(assert_results_equal):
     args = [Beam3rHerm2Line3, mat, helix, [0.0, 2.0 * np.pi * n]]
     kwargs = {"n_el": n_el}
 
-    helix_set_1 = create_beam_mesh_curve(mesh_1, *args, **kwargs)
+    helix_set_1 = create_beam_mesh_parametric_curve(mesh_1, *args, **kwargs)
     mesh_1.add(helix_set_1)
 
-    helix_set_2, length = create_beam_mesh_curve(
+    helix_set_2, length = create_beam_mesh_parametric_curve(
         mesh_2, *args, output_length=True, **kwargs
     )
     mesh_2.add(helix_set_2)
@@ -1211,7 +1217,7 @@ def test_mesh_creation_functions_curve_2d_sin(
         """Parametric curve as a sin."""
         return npAD.array([t, npAD.sin(t)])
 
-    sin_set = create_beam_mesh_curve(
+    sin_set = create_beam_mesh_parametric_curve(
         mesh, Beam3rHerm2Line3, mat, sin, [0.0, 2.0 * np.pi], n_el=n_el
     )
     mesh.add(sin_set)
@@ -1261,7 +1267,7 @@ def test_mesh_creation_functions_curve_3d_curve_rotation(
         R2 = Rotation.from_basis(rp, [0, 0, 1])
         return R2 * R1
 
-    sin_set = create_beam_mesh_curve(
+    sin_set = create_beam_mesh_parametric_curve(
         mesh,
         Beam3rHerm2Line3,
         mat,
@@ -1273,7 +1279,7 @@ def test_mesh_creation_functions_curve_3d_curve_rotation(
     mesh.add(sin_set)
 
     # extend test case with different meshing strategy
-    create_beam_mesh_curve(
+    create_beam_mesh_parametric_curve(
         mesh,
         Beam3rHerm2Line3,
         mat,
@@ -1311,11 +1317,11 @@ def test_mesh_creation_functions_curve_3d_line(
         return npAD.array([t_trans, 0, 0])
 
     # Create mesh.
-    set_1 = create_beam_mesh_curve(
+    set_1 = create_beam_mesh_parametric_curve(
         mesh, Beam3rHerm2Line3, mat, line, [0.0, 5.0], n_el=3
     )
     mesh.translate([0, 1, 0])
-    set_2 = create_beam_mesh_curve(
+    set_2 = create_beam_mesh_parametric_curve(
         mesh, Beam3rHerm2Line3, mat, line, [5.0, 0.0], n_el=3
     )
     mesh.add(set_1, set_2)

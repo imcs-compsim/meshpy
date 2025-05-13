@@ -41,7 +41,7 @@ from meshpy.core.node import NodeCosserat as _NodeCosserat
 from meshpy.utils.nodes import get_single_node as _get_single_node
 
 
-def create_beam_mesh_function(
+def create_beam_mesh_generic(
     mesh: _Mesh,
     *,
     beam_class: _Type[_Beam],

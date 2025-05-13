@@ -38,7 +38,7 @@ from meshpy.geometric_search.find_close_points import (
     FindClosePointAlgorithm,
     find_close_points,
 )
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
+from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
 from meshpy.utils.environment import cubitpy_is_available
 from meshpy.utils.nodes import find_close_nodes
 

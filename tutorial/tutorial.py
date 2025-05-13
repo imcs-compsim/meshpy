@@ -44,7 +44,7 @@ from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_line,
 )
-from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
+from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_parametric_curve
 from meshpy.utils.nodes import get_single_node
 
 
@@ -154,7 +154,7 @@ def meshpy_tutorial(base_dir, preview=False):
         return 0.5 / npAD.pi * npAD.array([t, npAD.sin(t)])
 
     mesh_sin = Mesh()
-    beam_set_sin = create_beam_mesh_curve(
+    beam_set_sin = create_beam_mesh_parametric_curve(
         mesh_sin, beam_class, mat, beam_sinus, [0, 2.0 * np.pi], n_el=10
     )
     mesh_sin.write_vtk("step_5", base_dir)

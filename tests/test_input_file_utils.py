@@ -25,7 +25,7 @@ from meshpy.core.mesh import Mesh
 from meshpy.core.mesh_utils import get_coupled_nodes_to_master_map
 from meshpy.four_c.element_beam import Beam3rLine2Line2
 from meshpy.four_c.material import MaterialReissner
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_line
+from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
 
 
 def test_input_file_utils_get_coupled_nodes_to_master_map():
