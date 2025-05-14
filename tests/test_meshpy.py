@@ -1734,9 +1734,6 @@ def test_meshpy_vtk_curve_cell_data(
     assert_results_equal(ref_file, vtk_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.cubitpy
 def test_meshpy_cubitpy_import(
     assert_results_equal,
