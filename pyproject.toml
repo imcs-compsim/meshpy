@@ -29,7 +29,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-cubitpy = ["cubitpy@git+https://github.com/imcs-compsim/cubitpy.git@main"]
+cubitpy = ["cubitpy@git+https://github.com/m-frey/cubitpy.git@migrate_dat_to_yaml"]
 fourc = ["fourcipp@git+https://github.com/4c-multiphysics/fourcipp.git@main"]
 dev = [
   "coverage-badge",
@@ -39,8 +39,7 @@ dev = [
   "pytest",
   "pytest-cov",
   "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@main",
-  "testbook",
-  "cubitpy@git+https://github.com/m-frey/cubitpy.git@migrate_dat_to_yaml"
+  "testbook"
 ]
 
 [project.urls]
