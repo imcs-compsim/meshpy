@@ -306,6 +306,46 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             elif reference.suffix in [".vtk", ".vtu"]:
                 compare_vtk_files(reference, result, rtol, atol)
                 return
+            elif reference.suffix in [".yaml"]:
+
+                def get_dictionary(data) -> dict:
+                    """Get the dictionary representation of the data object."""
+
+                    # Internally convert Mesh to InputFile to allow for simple comparison via dictionary
+                    # TODO this should be improved in the future
+                    if isinstance(data, Mesh):
+                        input_file = InputFile()
+                        input_file.add(data)
+                        data = input_file
+
+                    if isinstance(data, InputFile):
+                        if fourcipp_is_available():
+                            raise ValueError(
+                                "Port this functionality to create the node from the dict "
+                                "representing the node, not the legacy string."
+                            )
+
+                        return yaml.safe_load(
+                            yaml.dump(
+                                data.sections,
+                                Dumper=_MeshPyDumper,
+                                width=float("inf"),
+                            )
+                        )
+                    if isinstance(data, dict):
+                        return data
+                    elif isinstance(data, Path):
+                        with open(data) as stream:
+                            return yaml.safe_load(stream)
+                    raise TypeError(
+                        f"The comparison for {type(data)} is not yet implemented."
+                    )
+
+                reference_dict = get_dictionary(reference)
+                result_dict = get_dictionary(result)
+                compare_dicts(reference_dict, result_dict, rtol=rtol, atol=atol)
+                return
+
             else:
                 raise NotImplementedError(
                     f"Comparison is not yet implemented for {reference.suffix} files."

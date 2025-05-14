@@ -27,6 +27,8 @@ from typing import List as _List
 from typing import Tuple as _Tuple
 from typing import Union as _Union
 
+import fourcipp as _fourcipp
+import fourcipp.fourc_input as _fourc_input
 import yaml as _yaml
 
 import meshpy.core.conf as _conf
@@ -54,6 +56,20 @@ from meshpy.four_c.input_file_mappings import (
     INPUT_FILE_MAPPINGS as _INPUT_FILE_MAPPINGS,
 )
 from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
+
+
+def import_cubitpy_model(cubit, convert_input_to_mesh: bool = False):
+    """TODO."""
+
+    from cubitpy.cubit_to_fourc_input import (
+        get_input_file_with_mesh as _get_input_file_with_mesh,
+    )
+
+    input_file = _get_input_file_with_mesh(cubit)
+    input_file.dump("test.4C.yaml")
+    return import_four_c_model(
+        _Path("test.4C.yaml"), convert_input_to_mesh=convert_input_to_mesh
+    )
 
 
 def import_four_c_model(

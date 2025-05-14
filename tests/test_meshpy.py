@@ -61,7 +61,7 @@ from meshpy.four_c.material import (
     MaterialReissnerElastoplastic,
     MaterialStVenantKirchhoff,
 )
-from meshpy.four_c.model_importer import import_four_c_model
+from meshpy.four_c.model_importer import import_cubitpy_model, import_four_c_model
 from meshpy.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_via_rotation,
     create_beam_mesh_line,
@@ -1734,9 +1734,6 @@ def test_meshpy_vtk_curve_cell_data(
     assert_results_equal(ref_file, vtk_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
 @pytest.mark.cubitpy
 def test_meshpy_cubitpy_import(
     assert_results_equal,
@@ -1755,7 +1752,7 @@ def test_meshpy_cubitpy_import(
     input_file, _ = import_four_c_model(input_file_path=file_path)
 
     # Create the input file and read the cubit object.
-    input_file_cubit = InputFile(cubit=create_tube_cubit())
+    input_file_cubit, _ = import_cubitpy_model(create_tube_cubit())
 
     # Load the file from the reference folder.
     file_path_ref = get_corresponding_reference_file_path(
