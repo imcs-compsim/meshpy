@@ -59,14 +59,16 @@ from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_avail
 
 
 def import_cubitpy_model(cubit, convert_input_to_mesh: bool = False):
-    """TODO"""
+    """TODO."""
 
     from cubitpy.cubit_to_fourc_input import get_input_file_with_mesh
     from fourcipp.utils.yaml_io import dump_yaml, load_yaml
 
     input_file = get_input_file_with_mesh(cubit)
     input_file.dump("test.4C.yaml")
-    return import_four_c_model("test.4C.yaml")
+    return import_four_c_model(
+        "test.4C.yaml", convert_input_to_mesh=convert_input_to_mesh
+    )
 
 
 def import_four_c_model(

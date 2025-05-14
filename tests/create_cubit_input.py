@@ -289,12 +289,11 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
             element_type=element_type,
             mesh=True,
         )
-        mpy.import_mesh_full = True
         _, mesh = import_cubitpy_model(cubit, convert_input_to_mesh=True)
         return mesh
 
     # Create the input file with the blocks representing plates in different planes
-    mesh = InputFile()
+    input_file = InputFile()
     dimensions = [0.1, 2, 4]
     elements = [1, 2, 2]
 
@@ -307,7 +306,7 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
     for i in range(3):
         brick = create_brick_mesh(rotate_list(dimensions, i), rotate_list(elements, i))
         brick.translate([i * 4, 0, 0])
-        mesh.add(brick)
+        input_file.add(brick)
 
     # Add a last plate with standard solid elements, to make sure that the algorithm
     # skips those
@@ -317,9 +316,9 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
         element_type=cupy.element_type.hex8,
     )
     brick.translate([3 * 4, 0, 0])
-    mesh.add(brick)
+    input_file.add(brick)
 
-    mesh.write_input_file(file_path_blocks)
+    input_file.write_input_file(file_path_blocks, add_header_information=False)
 
     # Create the dome input
     cubit = CubitPy()
