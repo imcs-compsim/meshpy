@@ -24,6 +24,7 @@ MeshPy testing."""
 
 from meshpy.core.conf import mpy
 from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.model_importer import import_cubitpy_model
 from meshpy.utils.environment import cubitpy_is_available
 
 if cubitpy_is_available():
@@ -240,14 +241,14 @@ def create_block_cubit():
     cubit.add_node_set(
         cube.volumes()[0],
         bc_type=cupy.bc_type.beam_to_solid_volume_meshtying,
-        bc_description="COUPLING_ID 1",
+        bc_description={"COUPLING_ID": 1},
     )
 
     # Add the boundary condition.
     cubit.add_node_set(
         cube.surfaces()[0],
         bc_type=cupy.bc_type.beam_to_solid_surface_meshtying,
-        bc_description="COUPLING_ID 2",
+        bc_description={"COUPLING_ID": 2},
     )
 
     # Set point coupling conditions.
@@ -256,7 +257,10 @@ def create_block_cubit():
     cubit.add_node_set(
         nodes,
         bc_type=cupy.bc_type.point_coupling,
-        bc_description="NUMDOF 3 ONOFF 1 2 3",
+        bc_description={
+            "NUMDOF": 3,
+            "ONOFF": [1, 2, 3],
+        },
     )
 
     # Return the cubit object.
@@ -286,7 +290,8 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
             mesh=True,
         )
         mpy.import_mesh_full = True
-        return InputFile(cubit=cubit)
+        _, mesh = import_cubitpy_model(cubit, convert_input_to_mesh=True)
+        return mesh
 
     # Create the input file with the blocks representing plates in different planes
     mesh = InputFile()
@@ -314,7 +319,7 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
     brick.translate([3 * 4, 0, 0])
     mesh.add(brick)
 
-    mesh.write_input_file(file_path_blocks, header=False)
+    mesh.write_input_file(file_path_blocks)
 
     # Create the dome input
     cubit = CubitPy()

@@ -49,6 +49,8 @@ def fourcipp_is_available() -> bool:
         True if FourCIPP is installed, False otherwise
     """
 
+    return False
+
     if _find_spec("fourcipp") is None:
         return False
     return True
