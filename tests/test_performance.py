@@ -70,7 +70,8 @@ def create_solid_block(file_path, nx, ny, nz):
         brick.volumes()[0],
         cupy.element_type.hex8,
         name="brick",
-        bc_description="MAT 1 KINEM nonlinear EAS none",
+        material={"MAT": 1},
+        bc_description={"KINEM": "nonlinear"},
     )
     counter = 0
     for item in brick.vertices():
@@ -78,7 +79,12 @@ def create_solid_block(file_path, nx, ny, nz):
             item,
             name="node_set_" + str(counter),
             bc_type=cupy.bc_type.neumann,
-            bc_description="NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0",
+            bc_description={
+                "NUMDOF": 3,
+                "ONOFF": [1, 1, 1],
+                "VAL": [3.0, 3.0, 0],
+                "FUNCT": [1, 2, 0],
+            },
         )
         counter += 1
     for item in brick.curves():
@@ -86,7 +92,12 @@ def create_solid_block(file_path, nx, ny, nz):
             item,
             name="node_set_" + str(counter),
             bc_type=cupy.bc_type.dirichlet,
-            bc_description="NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0",
+            bc_description={
+                "NUMDOF": 3,
+                "ONOFF": [1, 1, 1],
+                "VAL": [3.0, 3.0, 0],
+                "FUNCT": [1, 2, 0],
+            },
         )
         counter += 1
     for item in brick.surfaces():
@@ -94,7 +105,12 @@ def create_solid_block(file_path, nx, ny, nz):
             item,
             name="node_set_" + str(counter),
             bc_type=cupy.bc_type.neumann,
-            bc_description="NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0",
+            bc_description={
+                "NUMDOF": 3,
+                "ONOFF": [1, 1, 1],
+                "VAL": [3.0, 3.0, 0],
+                "FUNCT": [1, 2, 0],
+            },
         )
         counter += 1
     for item in brick.volumes():
@@ -102,12 +118,17 @@ def create_solid_block(file_path, nx, ny, nz):
             item,
             name="node_set_" + str(counter),
             bc_type=cupy.bc_type.neumann,
-            bc_description="NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0",
+            bc_description={
+                "NUMDOF": 3,
+                "ONOFF": [1, 1, 1],
+                "VAL": [3.0, 3.0, 0],
+                "FUNCT": [1, 2, 0],
+            },
         )
         counter += 1
 
     # Export mesh
-    cubit.create_dat(file_path)
+    cubit.write_input_file(file_path)
 
 
 def load_solid(solid_file, full_import):
@@ -237,7 +258,8 @@ def test_performance(tmp_path):
         "meshpy_wrap_around_cylinder": 2.0,
         "meshpy_wrap_around_cylinder_without_check": 0.7,
         "meshpy_find_close_nodes": 0.5,
-        "meshpy_write_dat": 9.0,
+        "meshpy_add_mesh": 5,
+        "meshpy_write_input_file": 9.0,
         "meshpy_write_vtk": 4.5,
         "meshpy_write_vtk_smooth": 9.0,
         "geometric_search_find_nodes_brute_force": 0.05,
@@ -292,8 +314,15 @@ def test_performance(tmp_path):
         "meshpy_find_close_nodes", find_close_nodes, args=[mesh.nodes]
     )
 
+    input_file = InputFile()
     test_performance.time_function(
-        "meshpy_write_dat", InputFile.write_input_file, args=[mesh, testing_beam]
+        "meshpy_add_mesh", InputFile.add, args=[input_file, mesh]
+    )
+
+    test_performance.time_function(
+        "meshpy_write_input_file",
+        InputFile.write_input_file,
+        args=[input_file, testing_beam],
     )
 
     # Use a smaller mesh for shorter times in vtk testing
