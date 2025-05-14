@@ -39,7 +39,8 @@ dev = [
   "pytest",
   "pytest-cov",
   "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@main",
-  "testbook"
+  "testbook",
+  "cubitpy@git+https://github.com/m-frey/cubitpy.git@migrate_dat_to_yaml"
 ]
 
 [project.urls]

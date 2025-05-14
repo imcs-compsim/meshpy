@@ -27,7 +27,6 @@ import warnings
 import numpy as np
 import pytest
 
-from meshpy.core.conf import mpy
 from meshpy.core.mesh import Mesh
 from meshpy.core.rotation import Rotation
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
