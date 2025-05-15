@@ -28,10 +28,8 @@ from meshpy.core.conf import mpy
 from meshpy.core.mesh import Mesh
 from meshpy.four_c.element_beam import Beam3rHerm2Line3, Beam3rLine2Line2
 from meshpy.four_c.material import MaterialReissner
-from meshpy.mesh_creation_functions.beam_basic_geometry import (
-    create_beam_mesh_arc_segment_2d,
-    create_beam_mesh_line,
-)
+from meshpy.mesh_creation_functions.beam_arc import create_beam_mesh_arc_segment_2d
+from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
 from meshpy.space_time.beam_to_space_time import beam_to_space_time, mesh_to_data_arrays
 from tests.test_performance import PerformanceTest
 

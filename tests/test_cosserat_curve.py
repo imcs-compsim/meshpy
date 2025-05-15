@@ -37,7 +37,7 @@ from meshpy.cosserat_curve.warping_along_cosserat_curve import (
 from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.material import MaterialReissner
 from meshpy.four_c.model_importer import import_four_c_model
-from meshpy.mesh_creation_functions.beam_basic_geometry import create_beam_mesh_helix
+from meshpy.mesh_creation_functions.beam_helix import create_beam_mesh_helix
 
 
 def load_cosserat_curve_from_file(get_corresponding_reference_file_path, **kwargs):

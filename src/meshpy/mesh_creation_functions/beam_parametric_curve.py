@@ -31,11 +31,11 @@ from meshpy.core.conf import mpy as _mpy
 from meshpy.core.rotation import Rotation as _Rotation
 from meshpy.core.rotation import smallest_rotation as _smallest_rotation
 from meshpy.mesh_creation_functions.beam_generic import (
-    create_beam_mesh_function as _create_beam_mesh_function,
+    create_beam_mesh_generic as _create_beam_mesh_generic,
 )
 
 
-def create_beam_mesh_curve(
+def create_beam_mesh_parametric_curve(
     mesh,
     beam_class,
     material,
@@ -255,7 +255,7 @@ def create_beam_mesh_curve(
     length = S(interval[1])
 
     # Create the beam in the mesh
-    created_sets = _create_beam_mesh_function(
+    created_sets = _create_beam_mesh_generic(
         mesh,
         beam_class=beam_class,
         material=material,

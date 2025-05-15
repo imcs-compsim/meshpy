@@ -25,7 +25,7 @@ import numpy as _np
 
 from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
-from meshpy.mesh_creation_functions.beam_basic_geometry import (
+from meshpy.mesh_creation_functions.beam_line import (
     create_beam_mesh_line as _create_beam_mesh_line,
 )
 from meshpy.utils.nodes import check_node_by_coordinate as _check_node_by_coordinate

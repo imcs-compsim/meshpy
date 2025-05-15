@@ -62,12 +62,16 @@ from meshpy.four_c.material import (
     MaterialStVenantKirchhoff,
 )
 from meshpy.four_c.model_importer import import_four_c_model
-from meshpy.mesh_creation_functions.beam_basic_geometry import (
-    create_beam_mesh_arc_segment_via_rotation,
-    create_beam_mesh_line,
+from meshpy.mesh_creation_functions.applications.beam_honeycomb import (
+    create_beam_mesh_honeycomb,
 )
-from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_curve
-from meshpy.mesh_creation_functions.beam_honeycomb import create_beam_mesh_honeycomb
+from meshpy.mesh_creation_functions.beam_arc import (
+    create_beam_mesh_arc_segment_via_rotation,
+)
+from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
+from meshpy.mesh_creation_functions.beam_parametric_curve import (
+    create_beam_mesh_parametric_curve,
+)
 from meshpy.utils.nodes import (
     get_min_max_coordinates,
     get_single_node,
@@ -919,12 +923,15 @@ def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_fil
     )
     assert_results_equal(
         get_corresponding_reference_file_path(),
-        one_full_circle_closed(create_beam_mesh_curve, get_arguments_curve(0)),
+        one_full_circle_closed(
+            create_beam_mesh_parametric_curve, get_arguments_curve(0)
+        ),
     )
     assert_results_equal(
         get_corresponding_reference_file_path(),
         two_half_circles_closed(
-            create_beam_mesh_curve, [get_arguments_curve(1), get_arguments_curve(2)]
+            create_beam_mesh_parametric_curve,
+            [get_arguments_curve(1), get_arguments_curve(2)],
         ),
     )
 
@@ -961,7 +968,7 @@ def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_fil
             additional_identifier=additional_identifier
         ),
         one_full_circle_closed(
-            create_beam_mesh_curve,
+            create_beam_mesh_parametric_curve,
             get_arguments_curve(0),
             additional_rotation=additional_rotation,
         ),
@@ -971,7 +978,7 @@ def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_fil
             additional_identifier=additional_identifier
         ),
         two_half_circles_closed(
-            create_beam_mesh_curve,
+            create_beam_mesh_parametric_curve,
             [get_arguments_curve(1), get_arguments_curve(2)],
             additional_rotation=additional_rotation,
         ),
