@@ -4,7 +4,7 @@ inputs:
   install-command:
     description: Command to install MeshPy with pip
     required: false
-    default: ".[dev]"
+    default: ".[dev,fourc]"
   source-command:
     description: Command to source the virtual environment
     required: false
