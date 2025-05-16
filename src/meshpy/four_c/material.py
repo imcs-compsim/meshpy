@@ -72,7 +72,7 @@ class MaterialReissner(_MaterialBeamBase):
         }
         if self.interaction_radius is not None:
             data["INTERACTIONRADIUS"] = self.interaction_radius
-        return [{"MAT": self.i_global, self.material_string: data}]
+        return {"MAT": self.i_global, self.material_string: data}
 
 
 class MaterialReissnerElastoplastic(MaterialReissner):
@@ -102,7 +102,7 @@ class MaterialReissnerElastoplastic(MaterialReissner):
     def dump_to_list(self):
         """Return a list with the (single) item representing this material."""
         super_list = super().dump_to_list()
-        mat_dict = super_list[0][self.material_string]
+        mat_dict = super_list[self.material_string]
         mat_dict["YIELDM"] = self.yield_moment
         mat_dict["ISOHARDM"] = self.isohardening_modulus_moment
         mat_dict["TORSIONPLAST"] = self.torsion_plasticity
@@ -153,7 +153,7 @@ class MaterialKirchhoff(_MaterialBeamBase):
         }
         if self.interaction_radius is not None:
             data["INTERACTIONRADIUS"] = self.interaction_radius
-        return [{"MAT": self.i_global, self.material_string: data}]
+        return {"MAT": self.i_global, self.material_string: data}
 
 
 class MaterialEulerBernoulli(_MaterialBeamBase):
@@ -184,7 +184,7 @@ class MaterialEulerBernoulli(_MaterialBeamBase):
             "CROSSAREA": area,
             "MOMIN": mom2,
         }
-        return [{"MAT": self.i_global, self.material_string: data}]
+        return {"MAT": self.i_global, self.material_string: data}
 
 
 class MaterialSolid(_MaterialSolidBase):
@@ -204,16 +204,14 @@ class MaterialSolid(_MaterialSolidBase):
     def dump_to_list(self):
         """Return a list with the (single) item representing this material."""
 
-        return [
-            {
-                "MAT": self.i_global,
-                self.material_string: {
-                    "YOUNG": self.youngs_modulus,
-                    "NUE": self.nu,
-                    "DENS": self.density,
-                },
-            }
-        ]
+        return {
+            "MAT": self.i_global,
+            self.material_string: {
+                "YOUNG": self.youngs_modulus,
+                "NUE": self.nu,
+                "DENS": self.density,
+            },
+        }
 
 
 class MaterialStVenantKirchhoff(MaterialSolid):

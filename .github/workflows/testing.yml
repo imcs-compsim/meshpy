@@ -37,7 +37,7 @@ jobs:
           # non-editable installation and turn of coverage, because the coverage
           # only works in editable mode.
           install-command: >-
-            ${{ matrix.python-version == '3.10' && '-e .[dev]' || '.[dev]'}}
+            ${{ matrix.python-version == '3.10' && '-e .[dev,fourc]' || '.[dev,fourc]'}}
           # The single space in the empty string is required, otherwise GitHub
           # evaluates the if clause wrong.
           additional-pytest-flags: >-
@@ -65,7 +65,7 @@ jobs:
       - name: Run the test suite
         uses: ./.github/actions/run_tests
         with:
-          install-command: ".[cubitpy,dev]"
+          install-command: ".[cubitpy,dev,fourc]"
           source-command: "source python-workflow-venv/bin/activate"
           additional-pytest-flags: "--CubitPy --no-cov"
       - name: Upload test results on failure
@@ -96,7 +96,7 @@ jobs:
         uses: ./.github/actions/run_tests
         with:
           source-command: "source python-workflow-venv/bin/activate"
-          install-command: "-e .[dev]"
+          install-command: "-e .[dev,fourc]"
           additional-pytest-flags: "--4C --ArborX --cov-fail-under=92"
       - name: Upload test results on failure
         if: failure()
@@ -124,7 +124,7 @@ jobs:
       - name: Run the test suite
         uses: ./.github/actions/run_tests
         with:
-          install-command: ".[cubitpy,dev]"
+          install-command: ".[cubitpy,dev,fourc]"
           source-command: "source python-workflow-venv/bin/activate"
           additional-pytest-flags: "--performance-tests --exclude-standard-tests -s --no-cov"
       - name: Upload test results on failure

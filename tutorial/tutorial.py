@@ -310,4 +310,4 @@ if __name__ == "__main__":
     # Adapt this path to the directory you want to store the tutorial files in.
     tutorial_directory = ""
     input_file = meshpy_tutorial(tutorial_directory)
-    input_file.write_input_file(os.path.join(tutorial_directory, "tutorial.4C.yaml"))
+    input_file.dump(os.path.join(tutorial_directory, "tutorial.4C.yaml"))
