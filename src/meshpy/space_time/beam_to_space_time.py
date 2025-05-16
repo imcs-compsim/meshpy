@@ -163,31 +163,12 @@ def beam_to_space_time(
         else:
             mesh_space_current_time = mesh_space_reference
 
-        # For some space-time formulations it is required that the
-        # pre-processing provides the arc-length along a beam filament.
-        # Since the basic space meshes here contain nodes that don't have the
-        # arc_length attribute by default, we have to do the following check
-        # and branching.
-        nodes_have_arc_length_attribute = {
-            hasattr(node, "arc_length") for node in mesh_space_current_time.nodes
-        }
-        if not len(nodes_have_arc_length_attribute) == 1:
-            raise ValueError(
-                "There are some nodes in the mesh with the arc_length attribute and "
-                "some without it. This is not supported."
+        space_time_nodes_to_add = [
+            NodeCosseratSpaceTime(
+                node.coordinates, node.rotation, time, arc_length=node.arc_length
             )
-        if nodes_have_arc_length_attribute.pop():
-            space_time_nodes_to_add = [
-                NodeCosseratSpaceTime(
-                    node.coordinates, node.rotation, time, arc_length=node.arc_length
-                )
-                for node in mesh_space_current_time.nodes
-            ]
-        else:
-            space_time_nodes_to_add = [
-                NodeCosseratSpaceTime(node.coordinates, node.rotation, time)
-                for node in mesh_space_current_time.nodes
-            ]
+            for node in mesh_space_current_time.nodes
+        ]
         space_time_nodes.extend(space_time_nodes_to_add)
 
         if i_mesh_space == 0:
@@ -338,9 +319,12 @@ def mesh_to_data_arrays(mesh: _Mesh):
         "node_sets": node_sets,
     }
 
-    # We assume that either all nodes have an arc_length or no one.
-    # This is checked in the beam_to_space_time function.
-    if mesh.nodes[0].arc_length is not None:
+    nodes_have_arc_length = {node.arc_length is not None for node in mesh.nodes}
+    if len(nodes_have_arc_length) > 1:
+        raise ValueError(
+            "Some nodes have an arc length, some don't. This is not supported."
+        )
+    if nodes_have_arc_length.pop():
         # The arc length is added as an "element" property, since the same
         # node can have a different arc length depending on the element
         # (similar to the rotation vectors).
