@@ -28,7 +28,6 @@ from meshpy.core.element import Element as _Element
 from meshpy.core.material import (
     MaterialSolidBase as _MaterialSolidBase,
 )
-from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 class NURBSPatch(_Element):
@@ -117,9 +116,9 @@ class NURBSPatch(_Element):
                 }
             )
 
-        if "KNOTVECTORS" not in yaml_dict["KNOTVECTORS"]:
-            yaml_dict["KNOTVECTORS"] = []
-        patches = yaml_dict["KNOTVECTORS"]
+        if "STRUCTURE KNOTVECTORS" not in yaml_dict:
+            yaml_dict["STRUCTURE KNOTVECTORS"] = []
+        patches = yaml_dict["STRUCTURE KNOTVECTORS"]
         patch_data["ID"] = len(patches) + 1
         patches.append(patch_data)
 
@@ -167,9 +166,6 @@ class NURBSSurface(NURBSPatch):
     def dump_to_list(self):
         """Return a list with all the element definitions contained in this
         patch."""
-
-        if _fourcipp_is_available():
-            raise ValueError("Port this functionality to not use the legacy format.")
 
         # Check the material
         self._check_material()
@@ -251,9 +247,6 @@ class NURBSVolume(NURBSPatch):
     def dump_to_list(self):
         """Return a list with all the element definitions contained in this
         patch."""
-
-        if _fourcipp_is_available():
-            raise ValueError("Port this functionality to not use the legacy format.")
 
         # Check the material
         self._check_material()

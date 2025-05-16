@@ -131,7 +131,7 @@ class InputFile(_FourCInput):
             self.add_mesh_to_input_file(mesh=object_to_add, **kwargs)
 
         else:
-            super().add(object_to_add, **kwargs)
+            super().combine_sections(object_to_add, **kwargs)
 
     def dump(
         self,
@@ -330,7 +330,7 @@ class InputFile(_FourCInput):
                 if (
                     isinstance(item, _GeometrySet)
                     or isinstance(item, _GeometrySetNodes)
-                    or isinstance(_NURBSPatch)
+                    or isinstance(item, _NURBSPatch)
                 ):
                     list.extend(item.dump_to_list())
                 elif hasattr(item, "dump_to_list"):
