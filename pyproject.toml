@@ -3,8 +3,8 @@ requires = ["setuptools", "wheel", "cython", "numpy"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "MeshPy"
-description = "MeshPy: A general purpose 3D beam finite element input generator"
+name = "BeamMe"
+description = "BeamMe: A general purpose 3D beam finite element input generator"
 authors = [{name = "MeshPy Authors"}]
 maintainers = [
   {name = "Ivo Steinbrecher", email = "ivo.steinbrecher@unibw.de"},
@@ -25,8 +25,7 @@ dependencies = [
   "vedo==2024.5.2", # Needed as a fix for the splinepy visualization tool gustaf
   "vtk"
 ]
-
-dynamic = ["version"]
+version = "0.0.0"
 
 [project.optional-dependencies]
 cubitpy = ["cubitpy@git+https://github.com/imcs-compsim/cubitpy.git@main"]
