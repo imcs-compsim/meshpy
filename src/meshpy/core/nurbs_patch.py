@@ -212,20 +212,28 @@ class NURBSSurface(NURBSPatch):
             ):
                 element_cps_ids = get_ids_ctrlpts_surface(knot_span_u, knot_span_v)
 
-                string_cps = " ".join(
-                    [str(self.nodes[i].i_global) for i in element_cps_ids]
-                )
+                connectivity = [int(self.nodes[i].i_global) for i in element_cps_ids]
 
                 patch_elements.append(
-                    "{} {} NURBS{} {} MAT {} {}".format(
-                        self.i_global + j,
-                        self.element_string,
-                        (self.polynomial_orders[0] + 1)
-                        * (self.polynomial_orders[1] + 1),
-                        string_cps,
-                        self.material.i_global,
-                        self.element_description,
-                    )
+                    {
+                        "id": self.i_global + j,
+                        "cell": {
+                            "type": f"NURBS{
+                                (self.polynomial_orders[0] + 1)
+                                * (self.polynomial_orders[1] + 1)
+                            }",
+                            "connectivity": connectivity,
+                        },
+                        "data": {  # TODO: Fix the data values here
+                            "type": "BEAM3R",
+                            "MAT": self.material.i_global,
+                            "TRIADS": [
+                                float(item)
+                                for i in [0, 1]
+                                for item in self.nodes[i].rotation.get_rotation_vector()
+                            ],
+                        },
+                    }
                 )
                 j += 1
 
@@ -303,9 +311,9 @@ class NURBSVolume(NURBSPatch):
                         knot_span_u, knot_span_v, knot_span_w
                     )
 
-                    string_cps = " ".join(
-                        [str(self.nodes[i].i_global) for i in element_cps_ids]
-                    )
+                    connectivity = [
+                        int(self.nodes[i].i_global) for i in element_cps_ids
+                    ]
 
                     num_cp_in_element = (
                         (self.polynomial_orders[0] + 1)
@@ -314,13 +322,24 @@ class NURBSVolume(NURBSPatch):
                     )
 
                     patch_elements.append(
-                        "{} SOLID NURBS{} {} MAT {} {}".format(
-                            self.i_global + increment_ele,
-                            num_cp_in_element,
-                            string_cps,
-                            self.material.i_global,
-                            self.element_description,
-                        )
+                        {
+                            "id": self.i_global + increment_ele,
+                            "cell": {
+                                "type": f"NURBS{num_cp_in_element}",
+                                "connectivity": connectivity,
+                            },
+                            "data": {  # TODO: Fix the data values here
+                                "type": "BEAM3R",
+                                "MAT": self.material.i_global,
+                                "TRIADS": [
+                                    float(item)
+                                    for i in [0, 1]
+                                    for item in self.nodes[
+                                        i
+                                    ].rotation.get_rotation_vector()
+                                ],
+                            },
+                        }
                     )
                     increment_ele += 1
 

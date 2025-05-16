@@ -327,8 +327,10 @@ class InputFile(_FourCInput):
             list = []
 
             for item in data_list:
-                if isinstance(item, _GeometrySet) or isinstance(
-                    item, _GeometrySetNodes
+                if (
+                    isinstance(item, _GeometrySet)
+                    or isinstance(item, _GeometrySetNodes)
+                    or isinstance(_NURBSPatch)
                 ):
                     list.extend(item.dump_to_list())
                 elif hasattr(item, "dump_to_list"):
