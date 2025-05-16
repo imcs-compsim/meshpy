@@ -75,23 +75,64 @@ class NURBSPatch(_Element):
     def dump_element_specific_section(self, yaml_dict):
         """Set the knot vectors of the NURBS patch in the input file."""
 
-        if _fourcipp_is_available():
-            raise ValueError("Port this functionality to not use the legacy format.")
+        # TODO this is how data is stored in FOURCIPP
+        # data = [
+        #     {
+        #         "knot_vectors": [
+        #             {
+        #                 "DEGREE": 2,
+        #                 "TYPE": "Interpolated",
+        #                 "knots": [0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0],
+        #             },
+        #             {
+        #                 "DEGREE": 2,
+        #                 "TYPE": "Interpolated",
+        #                 "knots": [
+        #                     0.0,
+        #                     0.0,
+        #                     0.0,
+        #                     0.3333333333333333,
+        #                     0.6666666666666666,
+        #                     1.0,
+        #                     1.0,
+        #                     1.0,
+        #                 ],
+        #             },
+        #         ],
+        #         "ID": 1,
+        #     },
+        #     {
+        #         "knot_vectors": [
+        #             {
+        #                 "DEGREE": 2,
+        #                 "TYPE": "Interpolated",
+        #                 "knots": [0.0, 0.0, 0.0, 0.5, 1.0, 1.0, 1.0],
+        #             },
+        #             {
+        #                 "DEGREE": 2,
+        #                 "TYPE": "Interpolated",
+        #                 "knots": [
+        #                     0.0,
+        #                     0.0,
+        #                     0.0,
+        #                     0.3333333333333333,
+        #                     0.6666666666666666,
+        #                     1.0,
+        #                     1.0,
+        #                     1.0,
+        #                 ],
+        #             },
+        #         ],
+        #         "ID": 2,
+        #     },
+        # ]
 
-        knotvectors_section = "STRUCTURE KNOTVECTORS"
-
-        if knotvectors_section not in yaml_dict.keys():
-            yaml_dict[knotvectors_section] = []
-
-        section = yaml_dict[knotvectors_section]
-        section.append(f"NURBS_DIMENSION {self.get_nurbs_dimension()}")
-        section.append("BEGIN NURBSPATCH")
-        section.append(f"ID {self.n_nurbs_patch}")
+        knotvectors = []
 
         for dir_manifold in range(len(self.knot_vectors)):
+            knotvector_dict = {}
+
             num_knotvectors = len(self.knot_vectors[dir_manifold])
-            section.append(f"NUMKNOTS {num_knotvectors}")
-            section.append(f"DEGREE {self.polynomial_orders[dir_manifold]}")
 
             # Check the type of knot vector, in case that the multiplicity of the first and last
             # knot vectors is not p + 1, then it is a closed (periodic) knot vector, otherwise it
@@ -115,12 +156,19 @@ class NURBSPatch(_Element):
                     knotvector_type = "Periodic"
                     break
 
-            section.append(f"TYPE {knotvector_type}")
+            knotvector_dict["knot_vectors"] = []
+            knotvector_dict["ID"] = self.i_global
+            knotvector_dict["knot_vectors"].append(
+                {
+                    "DEGREE": self.polynomial_orders[dir_manifold],
+                    "TYPE": knotvector_type,
+                    "knots": [],
+                }
+            )
 
-            for knot_vector_val in self.knot_vectors[dir_manifold]:
-                section.append(knot_vector_val)
+            knotvectors.append(knotvector_dict)
 
-        section.append("END NURBSPATCH")
+        yaml_dict["KNOTVECTORS"] = knotvectors
 
     def get_number_elements(self):
         """Get the number of elements in this patch by checking the amount of
