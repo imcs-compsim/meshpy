@@ -3,7 +3,7 @@ requires = ["setuptools", "wheel", "cython", "numpy"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "BeamMe"
+name = "beamme"
 description = "BeamMe: A general purpose 3D beam finite element input generator"
 authors = [{name = "MeshPy Authors"}]
 maintainers = [
@@ -25,7 +25,7 @@ dependencies = [
   "vedo==2024.5.2", # Needed as a fix for the splinepy visualization tool gustaf
   "vtk"
 ]
-version = "0.0.0"
+version = "0.0.1"
 
 [project.optional-dependencies]
 dev = [
