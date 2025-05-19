@@ -296,7 +296,7 @@ def test_performance(tmp_path):
     )
 
     test_performance.time_function(
-        "meshpy_write_dat", InputFile.write_input_file, args=[mesh, testing_beam]
+        "meshpy_write_dat", InputFile.dump, args=[mesh, testing_beam]
     )
 
     # Use a smaller mesh for shorter times in vtk testing

@@ -28,7 +28,6 @@ from meshpy.core.element import Element as _Element
 from meshpy.core.material import (
     MaterialSolidBase as _MaterialSolidBase,
 )
-from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 class NURBSPatch(_Element):
@@ -72,26 +71,15 @@ class NURBSPatch(_Element):
             )
         return n_knots
 
-    def dump_element_specific_section(self, yaml_dict):
+    def dump_element_specific_section(self, input_file):
         """Set the knot vectors of the NURBS patch in the input file."""
 
-        if _fourcipp_is_available():
-            raise ValueError("Port this functionality to not use the legacy format.")
-
-        knotvectors_section = "STRUCTURE KNOTVECTORS"
-
-        if knotvectors_section not in yaml_dict.keys():
-            yaml_dict[knotvectors_section] = []
-
-        section = yaml_dict[knotvectors_section]
-        section.append(f"NURBS_DIMENSION {self.get_nurbs_dimension()}")
-        section.append("BEGIN NURBSPATCH")
-        section.append(f"ID {self.n_nurbs_patch}")
+        patch_data = {
+            "knot_vectors": [],
+        }
 
         for dir_manifold in range(len(self.knot_vectors)):
             num_knotvectors = len(self.knot_vectors[dir_manifold])
-            section.append(f"NUMKNOTS {num_knotvectors}")
-            section.append(f"DEGREE {self.polynomial_orders[dir_manifold]}")
 
             # Check the type of knot vector, in case that the multiplicity of the first and last
             # knot vectors is not p + 1, then it is a closed (periodic) knot vector, otherwise it
@@ -115,12 +103,24 @@ class NURBSPatch(_Element):
                     knotvector_type = "Periodic"
                     break
 
-            section.append(f"TYPE {knotvector_type}")
+            patch_data["knot_vectors"].append(
+                {
+                    "DEGREE": self.polynomial_orders[dir_manifold],
+                    "TYPE": knotvector_type,
+                    "knots": [
+                        float(knot_vector_val)
+                        for knot_vector_val in self.knot_vectors[dir_manifold]
+                    ],
+                }
+            )
 
-            for knot_vector_val in self.knot_vectors[dir_manifold]:
-                section.append(knot_vector_val)
+        if "STRUCTURE KNOTVECTORS" not in input_file:
+            input_file.add({"STRUCTURE KNOTVECTORS": []})
+            input_file["STRUCTURE KNOTVECTORS"] = []
 
-        section.append("END NURBSPATCH")
+        patches = input_file["STRUCTURE KNOTVECTORS"]
+        patch_data["ID"] = len(patches) + 1
+        patches.append(patch_data)
 
     def get_number_elements(self):
         """Get the number of elements in this patch by checking the amount of
@@ -167,9 +167,6 @@ class NURBSSurface(NURBSPatch):
         """Return a list with all the element definitions contained in this
         patch."""
 
-        if _fourcipp_is_available():
-            raise ValueError("Port this functionality to not use the legacy format.")
-
         # Check the material
         self._check_material()
 
@@ -211,20 +208,32 @@ class NURBSSurface(NURBSPatch):
             ):
                 element_cps_ids = get_ids_ctrlpts_surface(knot_span_u, knot_span_v)
 
-                string_cps = " ".join(
-                    [str(self.nodes[i].i_global) for i in element_cps_ids]
+                connectivity = [int(self.nodes[i].i_global) for i in element_cps_ids]
+
+                num_cp_in_element = (self.polynomial_orders[0] + 1) * (
+                    self.polynomial_orders[1] + 1
                 )
 
+                # TODO here a numpy data type is converted to a standard Python
+                # data type. Once FourCIPP can handle non standard data types,
+                # this should be removed.
                 patch_elements.append(
-                    "{} {} NURBS{} {} MAT {} {}".format(
-                        self.i_global + j,
-                        self.element_string,
-                        (self.polynomial_orders[0] + 1)
-                        * (self.polynomial_orders[1] + 1),
-                        string_cps,
-                        self.material.i_global,
-                        self.element_description,
-                    )
+                    {
+                        "id": int(self.i_global + j),
+                        "cell": {
+                            "type": f"NURBS{num_cp_in_element}",
+                            "connectivity": connectivity,
+                        },
+                        "data": {
+                            "type": "WALLNURBS",
+                            "MAT": self.material.i_global,
+                            **(
+                                self.element_description
+                                if self.element_description
+                                else {}
+                            ),
+                        },
+                    }
                 )
                 j += 1
 
@@ -242,9 +251,6 @@ class NURBSVolume(NURBSPatch):
     def dump_to_list(self):
         """Return a list with all the element definitions contained in this
         patch."""
-
-        if _fourcipp_is_available():
-            raise ValueError("Port this functionality to not use the legacy format.")
 
         # Check the material
         self._check_material()
@@ -302,9 +308,9 @@ class NURBSVolume(NURBSPatch):
                         knot_span_u, knot_span_v, knot_span_w
                     )
 
-                    string_cps = " ".join(
-                        [str(self.nodes[i].i_global) for i in element_cps_ids]
-                    )
+                    connectivity = [
+                        int(self.nodes[i].i_global) for i in element_cps_ids
+                    ]
 
                     num_cp_in_element = (
                         (self.polynomial_orders[0] + 1)
@@ -312,14 +318,26 @@ class NURBSVolume(NURBSPatch):
                         * (self.polynomial_orders[2] + 1)
                     )
 
+                    # TODO here a numpy data type is converted to a standard Python
+                    # data type. Once FourCIPP can handle non standard data types,
+                    # this should be removed.
                     patch_elements.append(
-                        "{} SOLID NURBS{} {} MAT {} {}".format(
-                            self.i_global + increment_ele,
-                            num_cp_in_element,
-                            string_cps,
-                            self.material.i_global,
-                            self.element_description,
-                        )
+                        {
+                            "id": int(self.i_global + increment_ele),
+                            "cell": {
+                                "type": f"NURBS{num_cp_in_element}",
+                                "connectivity": connectivity,
+                            },
+                            "data": {
+                                "type": "SOLID",
+                                "MAT": self.material.i_global,
+                                **(
+                                    self.element_description
+                                    if self.element_description
+                                    else {}
+                                ),
+                            },
+                        }
                     )
                     increment_ele += 1
 

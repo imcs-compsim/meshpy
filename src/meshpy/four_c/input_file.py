@@ -30,19 +30,20 @@ from typing import Any as _Any
 from typing import Dict as _Dict
 from typing import List as _List
 
-import yaml as _yaml
+from fourcipp.fourc_input import FourCInput as _FourCInput
 
 from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.coupling import Coupling as _Coupling
+from meshpy.core.function import Function as _Function
+from meshpy.core.geometry_set import GeometrySet as _GeometrySet
+from meshpy.core.geometry_set import GeometrySetNodes as _GeometrySetNodes
 from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.core.nurbs_patch import NURBSPatch as _NURBSPatch
 from meshpy.four_c.input_file_mappings import (
     INPUT_FILE_MAPPINGS as _INPUT_FILE_MAPPINGS,
 )
-from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
 from meshpy.utils.environment import cubitpy_is_available as _cubitpy_is_available
-from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 from meshpy.utils.environment import get_git_data as _get_git_data
 
 if _cubitpy_is_available():
@@ -61,13 +62,10 @@ def get_geometry_set_indices_from_section(
             dict with the keys should be returned.
     """
 
-    if _fourcipp_is_available():
-        raise ValueError("Port this functionality to not use the legacy string.")
-
     geometry_set_dict: _Dict[int, _List[int]] = {}
-    for line in section_list:
-        id_geometry_set = int(line.split()[-1])
-        index_node = int(line.split()[1]) - 1
+    for entry in section_list:
+        id_geometry_set = entry["d_id"]
+        index_node = entry["node_id"] - 1
         if id_geometry_set not in geometry_set_dict:
             geometry_set_dict[id_geometry_set] = []
         if append_node_ids:
@@ -110,18 +108,16 @@ def _dump_coupling(coupling):
     return {"E": coupling.geometry_set.i_global, **data}
 
 
-class InputFile:
+class InputFile(_FourCInput):
     """An item that represents a complete 4C input file."""
 
-    def __init__(self):
+    def __init__(self, sections=None):
         """Initialize the input file."""
-
-        # Everything that is not a full MeshPy object is stored here, e.g., parameters
-        # and imported nodes/elements/materials/...
-        self.sections: _Dict[str, _Any] = dict()
 
         # Contents of NOX xml file.
         self.nox_xml_contents = ""
+
+        super().__init__(sections=sections)
 
     def add(self, object_to_add, **kwargs):
         """Add a mesh or a dictionary to the input file.
@@ -131,67 +127,27 @@ class InputFile:
             **kwargs: Additional arguments to be passed to the add method.
         """
 
-        # TODO rework this once fourcipp is available to call
-        # the super method directly
-
         if isinstance(object_to_add, _Mesh):
             self.add_mesh_to_input_file(mesh=object_to_add, **kwargs)
 
-        elif isinstance(object_to_add, dict):
-            self.add_section(object_to_add, **kwargs)
-
         else:
-            raise TypeError(
-                f"Cannot add object of type {type(object_to_add)} to the input file."
-                " Only MeshPy meshes and dictionaries are supported."
-            )
+            super().combine_sections(object_to_add, **kwargs)
 
-    def add_section(self, section, *, option_overwrite=False):
-        """Add a section to the object.
-
-        If the section name already exists, it is added to that section.
-        """
-
-        for section_name, section_value in section.items():
-            if section_name in self.sections:
-                section_data = self.sections[section_name]
-                if isinstance(section_data, list):
-                    section_data.extend(section_value)
-                else:
-                    for option_key, option_value in section_value.items():
-                        if option_key in self.sections[section_name]:
-                            if (
-                                not self.sections[section_name][option_key]
-                                == option_value
-                            ):
-                                if not option_overwrite:
-                                    raise KeyError(
-                                        f"Key {option_key} with the value {self.sections[section_name][option_key]} already set. You tried to set it to {option_value}"
-                                    )
-                        self.sections[section_name][option_key] = option_value
-            else:
-                self.sections[section_name] = section_value
-
-    def delete_section(self, section_name):
-        """Delete a section from the dictionary self.sections."""
-        if section_name in self.sections.keys():
-            del self.sections[section_name]
-        else:
-            raise Warning(f"Section {section_name} does not exist!")
-
-    def write_input_file(
+    def dump(
         self,
-        file_path: _Path,
+        input_file_path: _Path,
         *,
         nox_xml_file: bool | str = False,
         add_header_default: bool = True,
         add_header_information: bool = True,
         add_footer_application_script: bool = True,
+        sort_sections=False,
+        validate=False,
     ):
         """Write the input file to disk.
 
         Args:
-            file_path:
+            input_file_path:
                 Path to the input file that should be created.
             nox_xml_file:
                 If this is a string, the xml file will be created with this
@@ -207,13 +163,17 @@ class InputFile:
             add_footer_application_script:
                 Append the application script which creates the input files as a
                 comment at the end of the input file.
+            sort_sections:
+                Sort sections alphabetically with FourCIPP.
+            validate:
+                Validate if the created input file is compatible with 4C with FourCIPP.
         """
 
         if self.nox_xml_contents:
             if nox_xml_file is False:
                 xml_file_name = "NOT_DEFINED"
             elif nox_xml_file is True:
-                xml_file_name = _os.path.splitext(file_path)[0] + ".xml"
+                xml_file_name = _os.path.splitext(input_file_path)[0] + ".xml"
             elif isinstance(nox_xml_file, str):
                 xml_file_name = nox_xml_file
             else:
@@ -223,7 +183,7 @@ class InputFile:
 
             # Write the xml file to the disc.
             with open(
-                _os.path.join(_os.path.dirname(file_path), xml_file_name), "w"
+                _os.path.join(_os.path.dirname(input_file_path), xml_file_name), "w"
             ) as xml_file:
                 xml_file.write(self.nox_xml_contents)
 
@@ -231,27 +191,27 @@ class InputFile:
         if add_header_information:
             self.sections["TITLE"] = self._get_header()
 
-        with open(file_path, "w") as input_file:
-            # write MeshPy header
-            if add_header_default:
-                input_file.writelines(
-                    "# " + line + "\n" for line in _mpy.input_file_meshpy_header
-                )
+        super().dump(
+            input_file_path=input_file_path,
+            sort_sections=sort_sections,
+            validate=validate,
+        )
 
-            _yaml.dump(
-                self.sections,
-                input_file,
-                Dumper=_MeshPyDumper,
-                width=float("inf"),
-            )
+        if add_header_default or add_footer_application_script:
+            with open(input_file_path, "r") as input_file:
+                lines = input_file.readlines()
 
-            # Add the application script to the input file.
-            if add_footer_application_script:
-                application_path = _Path(_sys.argv[0]).resolve()
-                application_script_lines = self._get_application_script(
-                    application_path
-                )
-                input_file.writelines(application_script_lines)
+                if add_header_default:
+                    lines = [
+                        "# " + line + "\n" for line in _mpy.input_file_meshpy_header
+                    ] + lines
+
+                if add_footer_application_script:
+                    application_path = _Path(_sys.argv[0]).resolve()
+                    lines += self._get_application_script(application_path)
+
+                with open(input_file_path, "w") as input_file:
+                    input_file.writelines(lines)
 
     def add_mesh_to_input_file(self, mesh: _Mesh):
         """Add a mesh to the input file.
@@ -282,40 +242,20 @@ class InputFile:
                 start_indices_geometry_set[geometry_type] = max_geometry_set_id
             return start_indices_geometry_set
 
-        def _get_global_start_node(dictionary):
+        def _get_global_start_node():
             """Get the index for the first "real" MeshPy node."""
 
-            if _fourcipp_is_available():
-                raise ValueError(
-                    "Port this functionality to not use the legacy format any more"
-                    "TODO: Check if we really want this - should we just assume that the"
-                    "imported nodes are in order and without any 'missing' nodes?"
-                )
+            return len(self.sections.get("NODE COORDS", []))
 
-            section_name = "NODE COORDS"
-            if section_name in dictionary:
-                return len(dictionary[section_name])
-            else:
-                return 0
-
-        def _get_global_start_element(dictionary):
+        def _get_global_start_element():
             """Get the index for the first "real" MeshPy element."""
 
-            if _fourcipp_is_available():
-                raise ValueError(
-                    "Port this functionality to not use the legacy format any more"
-                    "TODO: Check if we really want this - should we just assume that the"
-                    "imported elements are in order and without any 'missing' elements?"
-                )
+            return sum(
+                len(self.sections.get(section, []))
+                for section in ["FLUID ELEMENTS", "STRUCTURE ELEMENTS"]
+            )
 
-            start_index = 0
-            section_names = ["FLUID ELEMENTS", "STRUCTURE ELEMENTS"]
-            for section_name in section_names:
-                if section_name in dictionary:
-                    start_index += len(dictionary[section_name])
-            return start_index
-
-        def _get_global_start_material(dictionary):
+        def _get_global_start_material():
             """Get the index for the first "real" MeshPy material.
 
             We have to account for materials imported from yaml files
@@ -325,16 +265,16 @@ class InputFile:
             # Get the maximum material index in materials imported from a yaml file
             max_material_id = 0
             section_name = "MATERIALS"
-            if section_name in dictionary:
-                for material in dictionary[section_name]:
+            if section_name in self.sections:
+                for material in self.sections[section_name]:
                     max_material_id = max(max_material_id, material["MAT"])
             return max_material_id
 
-        def _get_global_start_function(dictionary):
+        def _get_global_start_function():
             """Get the index for the first "real" MeshPy function."""
 
             max_function_id = 0
-            for section_name in dictionary.keys():
+            for section_name in self.sections.keys():
                 if section_name.startswith("FUNCT"):
                     max_function_id = max(
                         max_function_id, int(section_name.split("FUNCT")[-1])
@@ -376,7 +316,7 @@ class InputFile:
                 else:
                     i += 1
 
-        def _dump_mesh_items(yaml_dict, section_name, data_list):
+        def _dump_mesh_items(section_name, data_list):
             """Output a section name and apply either the default dump or the
             specialized the dump_to_list for each list item."""
 
@@ -384,22 +324,61 @@ class InputFile:
             if len(data_list) == 0:
                 return
 
-            # Check if section already exists
-            if section_name not in yaml_dict.keys():
-                yaml_dict[section_name] = []
+            list = []
 
-            item_dict_list = yaml_dict[section_name]
             for item in data_list:
-                if hasattr(item, "dump_to_list"):
-                    item_dict_list.extend(item.dump_to_list())
+                if (
+                    isinstance(item, _GeometrySet)
+                    or isinstance(item, _GeometrySetNodes)
+                    or isinstance(item, _NURBSPatch)
+                ):
+                    list.extend(item.dump_to_list())
+                elif hasattr(item, "dump_to_list"):
+                    list.append(item.dump_to_list())
                 elif isinstance(item, _BoundaryCondition):
-                    item_dict_list.append(
-                        {"E": item.geometry_set.i_global, **item.data}
+                    # Here we need to convert the function objects to their
+                    # global index.
+
+                    def convert_function_field(key, value):
+                        """Convert function objects in boundary condititions to
+                        their global index.
+
+                        TODO improve this approach
+                        """
+
+                        if key != "FUNCT":
+                            return value
+
+                        if isinstance(value, _List):
+                            return [
+                                v.i_global if isinstance(v, _Function) else v
+                                for v in value
+                            ]
+                        if isinstance(value, _Function):
+                            return value.i_global
+                        else:
+                            return value
+
+                    list.append(
+                        {
+                            "E": item.geometry_set.i_global,
+                            **{
+                                key: convert_function_field(key, value)
+                                for key, value in item.data.items()
+                            },
+                        }
                     )
+
                 elif isinstance(item, _Coupling):
-                    item_dict_list.append(_dump_coupling(item))
+                    list.append(_dump_coupling(item))
                 else:
                     raise TypeError(f"Could not dump {item}")
+
+            if section_name in self.sections:
+                # If the section already exists, append the new data to it.
+                self.sections[section_name].extend(list)
+            else:
+                self.add({section_name: list})
 
         # Add sets from couplings and boundary conditions to a temp container.
         mesh.unlink_nodes()
@@ -409,21 +388,24 @@ class InputFile:
         )
 
         # Assign global indices to all entries.
-        start_index_nodes = _get_global_start_node(self.sections)
+        start_index_nodes = _get_global_start_node()
         _set_i_global(mesh.nodes, start_index=start_index_nodes)
-        start_index_elements = _get_global_start_element(self.sections)
+
+        start_index_elements = _get_global_start_element()
         _set_i_global_elements(mesh.elements, start_index=start_index_elements)
-        start_index_materials = _get_global_start_material(self.sections)
+
+        start_index_materials = _get_global_start_material()
         _set_i_global(mesh.materials, start_index=start_index_materials)
-        start_index_functions = _get_global_start_function(self.sections)
+
+        start_index_functions = _get_global_start_function()
         _set_i_global(mesh.functions, start_index=start_index_functions)
 
         # Add material data to the input file.
-        _dump_mesh_items(self.sections, "MATERIALS", mesh.materials)
+        _dump_mesh_items("MATERIALS", mesh.materials)
 
         # Add the functions.
         for function in mesh.functions:
-            self.sections[f"FUNCT{function.i_global}"] = function.data
+            self.add({f"FUNCT{function.i_global}": function.data})
 
         # If there are couplings in the mesh, set the link between the nodes
         # and elements, so the couplings can decide which DOFs they couple,
@@ -450,22 +432,20 @@ class InputFile:
                     if isinstance(bc_key, str)
                     else _INPUT_FILE_MAPPINGS["boundary_conditions"][(bc_key, geom_key)]
                 )
-                _dump_mesh_items(self.sections, section_name, bc_list)
+                _dump_mesh_items(section_name, bc_list)
 
         # Add additional element sections, e.g., for NURBS knot vectors.
         for element in mesh.elements:
-            element.dump_element_specific_section(self.sections)
+            element.dump_element_specific_section(self)
 
         # Add the geometry sets.
         for geom_key, item in mesh_sets.items():
             if len(item) > 0:
-                _dump_mesh_items(
-                    self.sections, _INPUT_FILE_MAPPINGS["geometry_sets"][geom_key], item
-                )
+                _dump_mesh_items(_INPUT_FILE_MAPPINGS["geometry_sets"][geom_key], item)
 
         # Add the nodes and elements.
-        _dump_mesh_items(self.sections, "NODE COORDS", mesh.nodes)
-        _dump_mesh_items(self.sections, "STRUCTURE ELEMENTS", mesh.elements)
+        _dump_mesh_items("NODE COORDS", mesh.nodes)
+        _dump_mesh_items("STRUCTURE ELEMENTS", mesh.elements)
         # TODO: reset all links and counters set in this method.
 
     def _get_header(self) -> dict:

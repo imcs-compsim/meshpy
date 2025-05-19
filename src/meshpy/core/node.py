@@ -24,8 +24,6 @@
 import numpy as _np
 
 from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
-from meshpy.core.conf import mpy as _mpy
-from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 class Node(_BaseMeshItem):
@@ -52,22 +50,6 @@ class Node(_BaseMeshItem):
 
         # If this node is replaced, store a link to the remaining node.
         self.master_node = None
-
-    @classmethod
-    def from_legacy_string(cls, input_line):
-        """Create the Node object from a legacy string."""
-
-        if _fourcipp_is_available():
-            raise ValueError(
-                "Port this functionality to create the node from the dict "
-                "representing the node, not the legacy string."
-            )
-
-        # Split up the input line.
-        line_split = input_line.split()
-
-        # Convert the node coordinates into a Node object.
-        return cls([float(line_split[i]) for i in range(3, 6)])
 
     def get_master_node(self):
         """Return the master node of this node.
@@ -114,13 +96,14 @@ class Node(_BaseMeshItem):
     def dump_to_list(self):
         """Return a list with the legacy string representing this node."""
 
-        if _fourcipp_is_available():
-            raise ValueError(
-                "Port this functionality to create a dict, not the legacy string."
-            )
-
-        coordinate_string = " ".join([str(item) for item in self.coordinates])
-        return [f"NODE {self.i_global} COORD {coordinate_string}"]
+        # TODO here a numpy data type is converted to a standard Python
+        # data type. Once FourCIPP can handle non standard data types,
+        # this should be removed.
+        return {
+            "id": self.i_global,
+            "COORD": self.coordinates.tolist(),
+            "data": {"type": "NODE"},
+        }
 
 
 class NodeCosserat(Node):
@@ -169,10 +152,11 @@ class ControlPoint(Node):
         """Return a list with the legacy string representing this control
         point."""
 
-        if _fourcipp_is_available():
-            raise ValueError(
-                "Port this functionality to create a dict, not the legacy string."
-            )
-
-        coordinate_string = " ".join([str(item) for item in self.coordinates])
-        return [f"CP {self.i_global} COORD {coordinate_string} {self.weight}"]
+        # TODO here a numpy data type is converted to a standard Python
+        # data type. Once FourCIPP can handle non standard data types,
+        # this should be removed.
+        return {
+            "id": self.i_global,
+            "COORD": self.coordinates.tolist(),
+            "data": {"type": "CP", "weight": self.weight},
+        }

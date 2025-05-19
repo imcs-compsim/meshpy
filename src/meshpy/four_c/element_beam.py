@@ -33,7 +33,6 @@ from meshpy.four_c.material import MaterialReissner as _MaterialReissner
 from meshpy.four_c.material import (
     MaterialReissnerElastoplastic as _MaterialReissnerElastoplastic,
 )
-from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 class Beam3rHerm2Line3(_Beam):
@@ -49,25 +48,28 @@ class Beam3rHerm2Line3(_Beam):
     def dump_to_list(self):
         """Return a list with the (single) item representing this element."""
 
-        if _fourcipp_is_available():
-            raise ValueError(
-                "Port this functionality to not use the legacy string any more"
-            )
-
-        string_nodes = " ".join(str(self.nodes[i].i_global) for i in [0, 2, 1])
-        string_triads = " ".join(
-            str(item)
-            for i in [0, 2, 1]
-            for item in self.nodes[i].rotation.get_rotation_vector()
-        )
-
         # Check the material.
         self._check_material()
 
-        return [
-            f"{self.i_global} BEAM3R HERM2LINE3 {string_nodes} MAT {self.material.i_global} "
-            f"TRIADS {string_triads}"
-        ]
+        # TODO here a numpy data type is converted to a standard Python
+        # data type. Once FourCIPP can handle non standard data types,
+        # this should be removed.
+        return {
+            "id": self.i_global,
+            "cell": {
+                "type": "HERM2LINE3",
+                "connectivity": [int(self.nodes[i].i_global) for i in [0, 2, 1]],
+            },
+            "data": {
+                "type": "BEAM3R",
+                "MAT": self.material.i_global,
+                "TRIADS": [
+                    float(item)
+                    for i in [0, 2, 1]
+                    for item in self.nodes[i].rotation.get_rotation_vector()
+                ],
+            },
+        }
 
 
 class Beam3rLine2Line2(_Beam):
@@ -84,25 +86,28 @@ class Beam3rLine2Line2(_Beam):
     def dump_to_list(self):
         """Return a list with the (single) item representing this element."""
 
-        if _fourcipp_is_available():
-            raise ValueError(
-                "Port this functionality to not use the legacy string any more"
-            )
-
-        string_nodes = " ".join(str(self.nodes[i].i_global) for i in [0, 1])
-        string_triads = " ".join(
-            str(item)
-            for i in [0, 1]
-            for item in self.nodes[i].rotation.get_rotation_vector()
-        )
-
         # Check the material.
         self._check_material()
 
-        return [
-            f"{self.i_global} BEAM3R LINE2 {string_nodes} MAT {self.material.i_global} "
-            f"TRIADS {string_triads}"
-        ]
+        # TODO here a numpy data type is converted to a standard Python
+        # data type. Once FourCIPP can handle non standard data types,
+        # this should be removed.
+        return {
+            "id": self.i_global,
+            "cell": {
+                "type": "LINE2",
+                "connectivity": [int(self.nodes[i].i_global) for i in [0, 1]],
+            },
+            "data": {
+                "type": "BEAM3R",
+                "MAT": self.material.i_global,
+                "TRIADS": [
+                    float(item)
+                    for i in [0, 1]
+                    for item in self.nodes[i].rotation.get_rotation_vector()
+                ],
+            },
+        }
 
 
 class Beam3kClass(_Beam):
@@ -133,32 +138,31 @@ class Beam3kClass(_Beam):
     def dump_to_list(self):
         """Return a list with the (single) item representing this element."""
 
-        if _fourcipp_is_available():
-            raise ValueError(
-                "Port this functionality to not use the legacy string any more"
-            )
-
-        string_nodes = " ".join(str(self.nodes[i].i_global) for i in [0, 2, 1])
-        string_triads = " ".join(
-            str(item)
-            for i in [0, 2, 1]
-            for item in self.nodes[i].rotation.get_rotation_vector()
-        )
-
         # Check the material.
         self._check_material()
 
-        string_dat = ("{} BEAM3K LINE3 {} WK {} ROTVEC {} MAT {} TRIADS {}{}").format(
-            self.i_global,
-            string_nodes,
-            "1" if self.weak else "0",
-            "1" if self.rotvec else "0",
-            self.material.i_global,
-            string_triads,
-            " FAD" if self.is_fad else "",
-        )
-
-        return [string_dat]
+        # TODO here a numpy data type is converted to a standard Python
+        # data type. Once FourCIPP can handle non standard data types,
+        # this should be removed.
+        return {
+            "id": self.i_global,
+            "cell": {
+                "type": "LINE3",
+                "connectivity": [int(self.nodes[i].i_global) for i in [0, 2, 1]],
+            },
+            "data": {
+                "type": "BEAM3K",
+                "WK": 1 if self.weak else 0,
+                "ROTVEC": 1 if self.rotvec else 0,
+                "MAT": self.material.i_global,
+                "TRIADS": [
+                    float(item)
+                    for i in [0, 2, 1]
+                    for item in self.nodes[i].rotation.get_rotation_vector()
+                ],
+                **({"USE_FAD": True} if self.is_fad else {}),
+            },
+        }
 
 
 def Beam3k(**kwargs_class):
@@ -189,10 +193,8 @@ class Beam3eb(_Beam):
     def dump_to_list(self):
         """Return a list with the (single) item representing this element."""
 
-        if _fourcipp_is_available():
-            raise ValueError(
-                "Port this functionality to not use the legacy string any more"
-            )
+        # Check the material.
+        self._check_material()
 
         # The two rotations must be the same and the x1 vector must point from
         # the start point to the end point.
@@ -208,11 +210,17 @@ class Beam3eb(_Beam):
                 "The rotations do not match the direction of the Euler Bernoulli beam!"
             )
 
-        string_nodes = " ".join(str(self.nodes[i].i_global) for i in [0, 1])
-
-        # Check the material.
-        self._check_material()
-
-        return [
-            f"{self.i_global} BEAM3EB LINE2 {string_nodes} MAT {self.material.i_global}"
-        ]
+        # TODO here a numpy data type is converted to a standard Python
+        # data type. Once FourCIPP can handle non standard data types,
+        # this should be removed.
+        return {
+            "id": self.i_global,
+            "cell": {
+                "type": "LINE2",
+                "connectivity": [int(self.nodes[i].i_global) for i in [0, 1]],
+            },
+            "data": {
+                "type": "BEAM3EB",
+                "MAT": self.material.i_global,
+            },
+        }
