@@ -34,7 +34,7 @@ import pytest
 import vtk
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
-from vtk_utils.compare_grids import compare_grids
+from vistools.vtk.compare_grids import compare_grids
 
 from meshpy.core.conf import mpy
 from meshpy.four_c.input_file import InputFile
