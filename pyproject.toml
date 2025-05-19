@@ -38,8 +38,8 @@ dev = [
   "pre-commit",
   "pytest",
   "pytest-cov",
-  "pyvista_utils@git+https://github.com/isteinbrecher/pyvista_utils.git@main",
-  "testbook"
+  "testbook",
+  "vistools"
 ]
 
 [project.urls]
