@@ -96,12 +96,9 @@ class Node(_BaseMeshItem):
     def dump_to_list(self):
         """Return a list with the legacy string representing this node."""
 
-        # TODO here a numpy data type is converted to a standard Python
-        # data type. Once FourCIPP can handle non standard data types,
-        # this should be removed.
         return {
             "id": self.i_global,
-            "COORD": self.coordinates.tolist(),
+            "COORD": self.coordinates,
             "data": {"type": "NODE"},
         }
 
@@ -152,11 +149,8 @@ class ControlPoint(Node):
         """Return a list with the legacy string representing this control
         point."""
 
-        # TODO here a numpy data type is converted to a standard Python
-        # data type. Once FourCIPP can handle non standard data types,
-        # this should be removed.
         return {
             "id": self.i_global,
-            "COORD": self.coordinates.tolist(),
+            "COORD": self.coordinates,
             "data": {"type": "CP", "weight": self.weight},
         }

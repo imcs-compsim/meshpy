@@ -114,10 +114,17 @@ class InputFile(_FourCInput):
     def __init__(self, sections=None):
         """Initialize the input file."""
 
+        super().__init__(sections=sections)
+
         # Contents of NOX xml file.
         self.nox_xml_contents = ""
 
-        super().__init__(sections=sections)
+        # Register converters to directly convert non-primitive types
+        # to native Python types via the FourCIPP type converter.
+        self.type_converter.register_numpy_types()
+        self.type_converter.register_type(
+            _Function, lambda converter, obj: obj.i_global
+        )
 
     def add(self, object_to_add, **kwargs):
         """Add a mesh or a dictionary to the input file.
@@ -131,7 +138,7 @@ class InputFile(_FourCInput):
             self.add_mesh_to_input_file(mesh=object_to_add, **kwargs)
 
         else:
-            super().combine_sections(object_to_add, **kwargs)
+            super().combine_sections(object_to_add)
 
     def dump(
         self,
@@ -336,36 +343,10 @@ class InputFile(_FourCInput):
                 elif hasattr(item, "dump_to_list"):
                     list.append(item.dump_to_list())
                 elif isinstance(item, _BoundaryCondition):
-                    # Here we need to convert the function objects to their
-                    # global index.
-
-                    def convert_function_field(key, value):
-                        """Convert function objects in boundary condititions to
-                        their global index.
-
-                        TODO improve this approach
-                        """
-
-                        if key != "FUNCT":
-                            return value
-
-                        if isinstance(value, _List):
-                            return [
-                                v.i_global if isinstance(v, _Function) else v
-                                for v in value
-                            ]
-                        if isinstance(value, _Function):
-                            return value.i_global
-                        else:
-                            return value
-
                     list.append(
                         {
                             "E": item.geometry_set.i_global,
-                            **{
-                                key: convert_function_field(key, value)
-                                for key, value in item.data.items()
-                            },
+                            **item.data,
                         }
                     )
 
@@ -374,11 +355,15 @@ class InputFile(_FourCInput):
                 else:
                     raise TypeError(f"Could not dump {item}")
 
+            # If section already exists, retrieve from input file and
+            # add newly. We always need to go through fourcipp to convert
+            # the data types correctly.
             if section_name in self.sections:
-                # If the section already exists, append the new data to it.
-                self.sections[section_name].extend(list)
-            else:
-                self.add({section_name: list})
+                existing_entries = self.pop(section_name)
+                existing_entries.extend(list)
+                list = existing_entries
+
+            self.add({section_name: list})
 
         # Add sets from couplings and boundary conditions to a temp container.
         mesh.unlink_nodes()

@@ -108,7 +108,7 @@ class NURBSPatch(_Element):
                     "DEGREE": self.polynomial_orders[dir_manifold],
                     "TYPE": knotvector_type,
                     "knots": [
-                        float(knot_vector_val)
+                        knot_vector_val
                         for knot_vector_val in self.knot_vectors[dir_manifold]
                     ],
                 }
@@ -208,18 +208,15 @@ class NURBSSurface(NURBSPatch):
             ):
                 element_cps_ids = get_ids_ctrlpts_surface(knot_span_u, knot_span_v)
 
-                connectivity = [int(self.nodes[i].i_global) for i in element_cps_ids]
+                connectivity = [self.nodes[i].i_global for i in element_cps_ids]
 
                 num_cp_in_element = (self.polynomial_orders[0] + 1) * (
                     self.polynomial_orders[1] + 1
                 )
 
-                # TODO here a numpy data type is converted to a standard Python
-                # data type. Once FourCIPP can handle non standard data types,
-                # this should be removed.
                 patch_elements.append(
                     {
-                        "id": int(self.i_global + j),
+                        "id": self.i_global + j,
                         "cell": {
                             "type": f"NURBS{num_cp_in_element}",
                             "connectivity": connectivity,
@@ -308,9 +305,7 @@ class NURBSVolume(NURBSPatch):
                         knot_span_u, knot_span_v, knot_span_w
                     )
 
-                    connectivity = [
-                        int(self.nodes[i].i_global) for i in element_cps_ids
-                    ]
+                    connectivity = [self.nodes[i].i_global for i in element_cps_ids]
 
                     num_cp_in_element = (
                         (self.polynomial_orders[0] + 1)
@@ -318,12 +313,9 @@ class NURBSVolume(NURBSPatch):
                         * (self.polynomial_orders[2] + 1)
                     )
 
-                    # TODO here a numpy data type is converted to a standard Python
-                    # data type. Once FourCIPP can handle non standard data types,
-                    # this should be removed.
                     patch_elements.append(
                         {
-                            "id": int(self.i_global + increment_ele),
+                            "id": self.i_global + increment_ele,
                             "cell": {
                                 "type": f"NURBS{num_cp_in_element}",
                                 "connectivity": connectivity,

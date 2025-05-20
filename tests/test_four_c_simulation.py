@@ -920,7 +920,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                             "VAL": [
                                 0,
                                 0,
-                                float(0.25 * np.sin(node.coordinates[0] * np.pi)),
+                                0.25 * np.sin(node.coordinates[0] * np.pi),
                                 0,
                                 0,
                                 0,
