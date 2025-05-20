@@ -29,8 +29,8 @@ from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
 class Material(_BaseMeshItem):
     """Base class for all materials."""
 
-    def __init__(self, data=None, **kwargs):
-        super().__init__(data=data, **kwargs)
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
     def __deepcopy__(self, memo):
         """When deepcopy is called on a mesh, we do not want the materials to

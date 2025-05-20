@@ -32,7 +32,7 @@ class Node(_BaseMeshItem):
     """This object represents one node in the mesh."""
 
     def __init__(self, coordinates, *, is_middle_node=False, **kwargs):
-        super().__init__(data=None, **kwargs)
+        super().__init__(**kwargs)
 
         # Coordinates of this node.
         self.coordinates = _np.array(coordinates)
