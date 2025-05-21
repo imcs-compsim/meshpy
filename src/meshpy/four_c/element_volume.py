@@ -31,11 +31,20 @@ class SolidRigidSphere(_VolumeElement):
         """Initialize solid sphere object."""
         _VolumeElement.__init__(self, **kwargs)
 
-        # Set radius of sphere from input file.
-        arg_name = self.string_post_nodes.split()[0]
-        if not arg_name == "RADIUS":
-            raise ValueError(
-                "The first argument after the node should be "
-                f'RADIUS, but it is "{arg_name}"!'
-            )
-        self.radius = float(self.string_post_nodes.split()[1])
+        self.radius = float(self.data["RADIUS"])
+
+    # TODO this method should be removed!
+    # This method should use the super method of _VolumeElement
+    # but currently this results in a circular import if we use the
+    # element to 4C mappings. Think about a better solution.
+    def dump_to_list(self):
+        """Return a dict with the items representing this object."""
+
+        return {
+            "id": self.i_global,
+            "cell": {
+                "type": "POINT1",
+                "connectivity": [node.i_global for node in self.nodes],
+            },
+            "data": self.data,
+        }

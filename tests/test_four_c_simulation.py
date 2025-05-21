@@ -79,9 +79,8 @@ def create_cantilever_model(n_steps, time_step=0.5):
 
     input_file = InputFile()
     set_header_static(input_file, time_step=time_step, n_steps=n_steps)
-    input_file.add(
-        {"IO": {"OUTPUT_BIN": True, "STRUCT_DISP": True}}, option_overwrite=True
-    )
+    input_file["IO"]["OUTPUT_BIN"] = True
+    input_file["IO"]["STRUCT_DISP"] = True
 
     mesh = Mesh()
     ft = Function(
@@ -127,7 +126,7 @@ def run_four_c_test(
 
     # Create input file.
     input_file_name = os.path.join(testing_dir, name + ".4C.yaml")
-    input_file.write_input_file(input_file_name, add_header_information=False, **kwargs)
+    input_file.dump(input_file_name, add_header_information=False, **kwargs)
 
     return_code = run_four_c(
         input_file_name,
@@ -170,34 +169,31 @@ def test_four_c_simulation_honeycomb_sphere(
         input_file.add(mesh)
 
     # Modify the time step options.
-    input_file.add(
-        {"STRUCTURAL DYNAMIC": {"NUMSTEP": 5, "TIMESTEP": 0.2}},
-        option_overwrite=True,
-    )
+    input_file["STRUCTURAL DYNAMIC"]["NUMSTEP"] = 5
+    input_file["STRUCTURAL DYNAMIC"]["TIMESTEP"] = 0.2
 
     # Delete the results given in the input file.
-    input_file.delete_section("RESULT DESCRIPTION")
+    input_file.pop("RESULT DESCRIPTION")
 
     # Add result checks.
     displacement = [0.0, -8.09347204109101170, 2.89298005937795688]
+    result_descriptions = []
     nodes = [268, 188, 182]
     for node in nodes:
         for i, direction in enumerate(["x", "y", "z"]):
-            input_file.add(
+            result_descriptions.append(
                 {
-                    "RESULT DESCRIPTION": [
-                        {
-                            "STRUCTURE": {
-                                "DIS": "structure",
-                                "NODE": node,
-                                "QUANTITY": f"disp{direction}",
-                                "VALUE": displacement[i],
-                                "TOLERANCE": "1e-10",
-                            },
-                        }
-                    ]
+                    "STRUCTURE": {
+                        "DIS": "structure",
+                        "NODE": node,
+                        "QUANTITY": f"disp{direction}",
+                        "VALUE": displacement[i],
+                        "TOLERANCE": 1e-10,
+                    },
                 }
             )
+
+    input_file.add({"RESULT DESCRIPTION": result_descriptions})
 
     # Material for the beam.
     material = MaterialReissner(youngs_modulus=2.07e2, radius=0.1, shear_correction=1.1)
@@ -467,17 +463,15 @@ def test_four_c_simulation_honeycomb_variants(
     )
 
     # Check that we can overwrite keys
-    input_file.add({"STRUCTURAL DYNAMIC": {"NUMSTEP": 1}}, option_overwrite=True)
+    input_file["STRUCTURAL DYNAMIC"]["NUMSTEP"] = 1
 
-    # This works, because the overwritten key is the same
-    input_file.add({"STRUCTURAL DYNAMIC": {"NUMSTEP": 1}}, option_overwrite=False)
+    # This does not work, because we would overwrite the entire section.
+    with pytest.raises(ValueError) as error:
+        input_file.add({"STRUCTURAL DYNAMIC": {"NUMSTEP": "something"}})
 
-    # This does not work, because we change a key without the option_overwrite flag
-    with pytest.raises(
-        KeyError,
-        match="Key NUMSTEP with the value",
-    ):
-        input_file.add({"STRUCTURAL DYNAMIC": {"NUMSTEP": 123}}, option_overwrite=False)
+    assert str(error.value) == (
+        "Section(s) STRUCTURAL DYNAMIC are defined in both InputFile objects. In order to join the InputFile objects remove the section(s) in one of them."
+    )
 
     # Create four meshes with different types of honeycomb structure.
     mesh = Mesh()

@@ -27,8 +27,6 @@ from typing import List as _List
 from typing import Tuple as _Tuple
 from typing import Union as _Union
 
-import yaml as _yaml
-
 import meshpy.core.conf as _conf
 from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
 from meshpy.core.boundary_condition import (
@@ -53,7 +51,6 @@ from meshpy.four_c.input_file import (
 from meshpy.four_c.input_file_mappings import (
     INPUT_FILE_MAPPINGS as _INPUT_FILE_MAPPINGS,
 )
-from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 def import_four_c_model(
@@ -74,12 +71,7 @@ def import_four_c_model(
         converted to a MeshPy mesh are removed from the input file object.
     """
 
-    if _fourcipp_is_available():
-        raise ValueError("Use fourcipp to parse the yaml file.")
-
-    with open(input_file_path) as stream:
-        input_file = _InputFile()
-        input_file.sections = _yaml.safe_load(stream)
+    input_file = _InputFile().from_4C_yaml(input_file_path=input_file_path)
 
     if convert_input_to_mesh:
         return _extract_mesh_sections(input_file)
@@ -87,60 +79,34 @@ def import_four_c_model(
         return input_file, _Mesh()
 
 
-def _element_from_dict(nodes: _List[_Node], input_line: str):
-    """TODO: Update this doc string once we don't use the legacy string any more.
-    Create an element from a legacy string."""
+def _element_from_dict(nodes: _List[_Node], element: dict):
+    """Create a solid element from a dictionary from a 4C input file.
 
-    if _fourcipp_is_available():
-        raise ValueError(
-            "Port this functionality to create the element from the dict "
-            "representing the element, not the legacy string."
-            "TODO: pass the nodes array here, so we can directly link to the nodes"
-            "TODO: The whole string_pre_nodes and string_post_nodes is obsolete once"
-            " we move on from legacy string"
-        )
-
-    # Split up input line and get pre node string.
-    line_split = input_line.split()
-    string_pre_nodes = " ".join(line_split[1:3])
-
-    # Get a list of the element nodes.
-    # This is only here because we need the pre and post strings - can be
-    # removed when moving on from the legacy format.
-    dummy = []
-    for i, item in enumerate(line_split[3:]):
-        if item.isdigit():
-            dummy.append(int(item) - 1)
-        else:
-            break
-    else:
-        raise ValueError(
-            f'The input line:\n"{input_line}"\ncould not be converted to a solid element!'
-        )
-
-    # Get the post node string
-    string_post_nodes = " ".join(line_split[3 + i :])
+    Args:
+        nodes: A list of nodes that are part of the element.
+        element: A dictionary with the element data.
+    Returns:
+        A solid element object.
+    """
 
     # Depending on the number of nodes chose which solid element to return.
-    n_nodes = len(nodes)
+    # TODO reuse element_type_to_four_c_string from meshpy.core.element_volume
     element_type = {
-        8: _VolumeHEX8,
-        20: _VolumeHEX20,
-        27: _VolumeHEX27,
-        4: _VolumeTET4,
-        10: _VolumeTET10,
-        6: _VolumeWEDGE6,
-        1: _SolidRigidSphere,
+        "HEX8": _VolumeHEX8,
+        "HEX20": _VolumeHEX20,
+        "HEX27": _VolumeHEX27,
+        "TET4": _VolumeTET4,
+        "TET10": _VolumeTET10,
+        "WEDGE6": _VolumeWEDGE6,
+        "POINT1": _SolidRigidSphere,
     }
-    if n_nodes not in element_type:
+
+    if element["cell"]["type"] not in element_type:
         raise TypeError(
-            f"Could not find a element type for {string_pre_nodes}, with {n_nodes} nodes"
+            f"Could not create a MeshPy element for {element['data']['type']} {element['cell']['type']}!"
         )
-    return element_type[n_nodes](
-        nodes=nodes,
-        string_pre_nodes=string_pre_nodes,
-        string_post_nodes=string_post_nodes,
-    )
+
+    return element_type[element["cell"]["type"]](nodes=nodes, data=element["data"])
 
 
 def _boundary_condition_from_dict(
@@ -203,39 +169,26 @@ def _extract_mesh_sections(input_file: _InputFile) -> _Tuple[_InputFile, _Mesh]:
         delete them from the plain data storage to avoid having
         duplicate entries.
         """
-        if section_name in input_file.sections:
-            return_list = input_file.sections[section_name]
-            input_file.sections[section_name] = []
+
+        if section_name in input_file:
+            return input_file.pop(section_name)
         else:
-            return_list = []
-        return return_list
+            return []
 
     # Go through all sections that have to be converted to full MeshPy objects
     mesh = _Mesh()
 
     # Add nodes
-    for item in _get_section_items("NODE COORDS"):
-        mesh.nodes.append(_Node.from_legacy_string(item))
+    if "NODE COORDS" in input_file:
+        mesh.nodes = [_Node(node["COORD"]) for node in input_file.pop("NODE COORDS")]
 
     # Add elements
-    for item in _get_section_items("STRUCTURE ELEMENTS"):
-        if _fourcipp_is_available():
-            raise ValueError("Port this functionality to not use the legacy string.")
-
-        # Get a list containing the element nodes.
-        element_nodes = []
-        for split_item in item.split()[3:]:
-            if split_item.isdigit():
-                node_id = int(split_item) - 1
-                element_nodes.append(mesh.nodes[node_id])
-            else:
-                break
-        else:
-            raise ValueError(
-                f'The input line:\n"{item}"\ncould not be converted to a element!'
-            )
-
-        mesh.elements.append(_element_from_dict(element_nodes, item))
+    if "STRUCTURE ELEMENTS" in input_file:
+        for element in input_file.pop("STRUCTURE ELEMENTS"):
+            nodes = [
+                mesh.nodes[node_id - 1] for node_id in element["cell"]["connectivity"]
+            ]
+            mesh.elements.append(_element_from_dict(nodes=nodes, element=element))
 
     # Add geometry sets
     geometry_sets_in_sections: dict[str, dict[int, _GeometrySetNodes]] = {

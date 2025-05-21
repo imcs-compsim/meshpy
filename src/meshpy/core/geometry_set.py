@@ -22,14 +22,11 @@
 """This module implements a basic class to manage geometry in the input
 file."""
 
-import numpy as _np
-
 from meshpy.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.container import ContainerBase as _ContainerBase
 from meshpy.core.element_beam import Beam as _Beam
 from meshpy.core.node import Node as _Node
-from meshpy.utils.environment import fourcipp_is_available as _fourcipp_is_available
 
 
 class GeometrySetBase(_BaseMeshItem):
@@ -123,21 +120,19 @@ class GeometrySetBase(_BaseMeshItem):
     def dump_to_list(self):
         """Return a list with the legacy strings of this geometry set."""
 
-        if _fourcipp_is_available():
-            raise ValueError(
-                "Port this functionality to dump the geometry set to a suitable data format"
-            )
+        # Sort nodes based on their global index
+        nodes = sorted(self.get_all_nodes(), key=lambda n: n.i_global)
 
-        # Sort the nodes based on the node GID.
-        nodes = self.get_all_nodes()
-        if len(nodes) == 0:
+        if not nodes:
             raise ValueError("Writing empty geometry sets is not supported")
-        nodes_id = [node.i_global for node in nodes]
-        sort_indices = _np.argsort(nodes_id)
-        nodes = [nodes[i] for i in sort_indices]
 
         return [
-            f"NODE {node.i_global} {self.geometry_set_names[self.geometry_type]} {self.i_global}"
+            {
+                "type": "NODE",
+                "node_id": node.i_global,
+                "d_type": self.geometry_set_names[self.geometry_type],
+                "d_id": self.i_global,
+            }
             for node in nodes
         ]
 

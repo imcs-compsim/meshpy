@@ -32,16 +32,14 @@ from typing import Callable, Dict, Optional, Union
 import numpy as np
 import pytest
 import vtk
-import yaml
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
+from fourcipp.utils.dict_utils import compare_nested_dicts_or_lists
 from vistools.vtk.compare_grids import compare_grids
 
 from meshpy.core.conf import mpy
 from meshpy.core.mesh import Mesh
 from meshpy.four_c.input_file import InputFile
-from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
-from meshpy.utils.environment import fourcipp_is_available
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -277,8 +275,8 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
     def _assert_results_equal(
         reference: Union[Path, str, dict, InputFile, Mesh],
         result: Union[Path, str, dict, InputFile, Mesh],
-        rtol: Optional[float] = None,
-        atol: Optional[float] = None,
+        rtol: Optional[float] = 1e-05,
+        atol: Optional[float] = 1e-08,
         **kwargs,
     ) -> None:
         """Comparison between reference and result with relative or absolute
@@ -314,10 +312,27 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
         # Dictionary comparison
         if isinstance(reference, dict) or isinstance(result, dict):
 
+            def sanitize(obj):
+                """Sanitize the object for comparison.
+
+                Currently the FourCIPP function cannot handle numpy
+                arrays. TODO add this functionality to FourCIPP and
+                remove from here.
+                """
+
+                if isinstance(obj, np.ndarray):
+                    return obj.tolist()
+                elif isinstance(obj, dict):
+                    return {k: sanitize(v) for k, v in obj.items()}
+                elif isinstance(obj, list):
+                    return [sanitize(i) for i in obj]
+                else:
+                    return obj
+
             def get_dictionary(data) -> dict:
                 """Get the dictionary representation of the data object."""
                 if isinstance(data, dict):
-                    return data
+                    return sanitize(data)
                 elif isinstance(data, Path):
                     return json.loads(get_string(data))
                 raise TypeError(
@@ -326,7 +341,13 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
 
             reference_dict = get_dictionary(reference)
             result_dict = get_dictionary(result)
-            compare_dicts(reference_dict, result_dict, rtol=rtol, atol=atol)
+            compare_nested_dicts_or_lists(
+                reference_dict,
+                result_dict,
+                rtol=rtol,
+                atol=atol,
+                allow_int_vs_float_comparison=True,
+            )
             return
 
         if isinstance(reference, (InputFile, Mesh)) or isinstance(
@@ -344,37 +365,40 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
                     data = input_file
 
                 if isinstance(data, InputFile):
-                    if fourcipp_is_available():
-                        raise ValueError(
-                            "Port this functionality to create the node from the dict "
-                            "representing the node, not the legacy string."
-                        )
+                    return data.sections
 
-                    return yaml.safe_load(
-                        yaml.dump(
-                            data.sections,
-                            Dumper=_MeshPyDumper,
-                            width=float("inf"),
-                        )
-                    )
                 if isinstance(data, dict):
                     return data
+
                 elif isinstance(data, Path):
-                    with open(data) as stream:
-                        return yaml.safe_load(stream)
+                    return InputFile().from_4C_yaml(input_file_path=data).sections
+
                 raise TypeError(
                     f"The comparison for {type(data)} is not yet implemented."
                 )
 
             reference_dict = get_dictionary(reference)
             result_dict = get_dictionary(result)
-            compare_dicts(reference_dict, result_dict, rtol=rtol, atol=atol)
+
+            compare_nested_dicts_or_lists(
+                reference_dict,
+                result_dict,
+                rtol=rtol,
+                atol=atol,
+                allow_int_vs_float_comparison=True,
+            )
             return
 
         if isinstance(reference, (list, np.ndarray)) and isinstance(
             result, (list, np.ndarray)
         ):
-            compare_lists(reference, result, rtol=rtol, atol=atol)
+            compare_nested_dicts_or_lists(
+                reference,
+                result,
+                rtol=rtol,
+                atol=atol,
+                allow_int_vs_float_comparison=True,
+            )
             return
 
         # We didn't raise an error or exit this function yet, so we default to a string
@@ -572,140 +596,6 @@ def handle_unequal_strings(
             stderr=subprocess.PIPE,
         )
         child.communicate()
-
-
-def compare_dicts(
-    dict_1: dict,
-    dict_2: dict,
-    *,
-    rtol: Optional[float] = None,
-    atol: Optional[float] = None,
-):
-    """Recursively compare two dictionaries.
-
-    For NumPy arrays, use np.allclose. For other types, use direct equality.
-
-    If the dictionaries are not equal, an assertion error is raised.
-
-    Args:
-        dict_1: The first dictionary to compare.
-        dict_2: The second dictionary to compare.
-        rtol: Relative tolerance for np.allclose.
-        atol: Absolute tolerance for np.allclose.
-    """
-
-    if rtol is None:
-        rtol = 1e-10
-    if atol is None:
-        atol = 1e-10
-
-    if not isinstance(dict_1, dict) or not isinstance(dict_2, dict):
-        raise ValueError("Both arguments must be dictionaries")
-
-    if dict_1.keys() != dict_2.keys():
-        raise AssertionError(
-            "The keys of the dictionary are not equal. "
-            f"Got {dict_1.keys()} and {dict_2.keys()} {dict_1.keys() - dict_2.keys()} {dict_2.keys() - dict_1.keys()}"
-        )
-
-    for key in dict_1:
-        value_1 = dict_1[key]
-        value_2 = dict_2[key]
-
-        if isinstance(value_1, np.ndarray) or isinstance(value_2, np.ndarray):
-            try:
-                if not np.allclose(value_1, value_2, rtol=rtol, atol=atol):
-                    raise AssertionError(
-                        f'Comparison of numpy arrays for the key "{key}" failed.'
-                    )
-            except:
-                raise AssertionError(
-                    f'Comparison of numpy arrays for the key "{key}" failed.'
-                )
-        elif isinstance(value_1, dict) and isinstance(value_2, dict):
-            # If both values are dictionaries, compare recursively
-            compare_dicts(value_1, value_2, rtol=rtol, atol=atol)
-        elif (
-            isinstance(value_1, float)
-            or isinstance(value_2, float)
-            or isinstance(value_1, np.generic)
-            or isinstance(value_2, np.generic)
-        ):
-            # If one of the values is a float, we do a float comparison
-            try:
-                if not np.isclose(value_1, value_2, rtol=rtol, atol=atol):
-                    raise AssertionError(
-                        f"Comparison of the values {value_1} and {value_2} failed."
-                    )
-            except:
-                raise AssertionError(
-                    f"Comparison of the values {value_1} and {value_2} failed. {type(value_1)} and {type(value_2)}"
-                )
-
-        elif isinstance(value_1, list) and isinstance(value_2, list):
-            # If both values are dictionaries, compare recursively
-            compare_lists(value_1, value_2, rtol=rtol, atol=atol)
-        elif not value_1 == value_2:
-            raise AssertionError(
-                f'Comparison of values for the key "{key}" failed. {value_1} {value_2} |||| {type(value_1)} {type(value_2)}'
-            )
-
-
-def compare_lists(
-    list_1: list,
-    list_2: list,
-    *,
-    rtol: Optional[float] = None,
-    atol: Optional[float] = None,
-):
-    """Recursively compare two dictionaries.
-
-    For NumPy arrays, use np.allclose. For other types, use direct equality.
-
-    If the dictionaries are not equal, an assertion error is raised.
-
-    Args:
-        dict_1: The first dictionary to compare.
-        dict_2: The second dictionary to compare.
-        rtol: Relative tolerance for np.allclose.
-        atol: Absolute tolerance for np.allclose.
-    """
-
-    if rtol is None:
-        rtol = 1e-10
-    if atol is None:
-        atol = 1e-10
-
-    assert len(list_1) == len(list_2)
-
-    for item_1, item_2 in zip(list_1, list_2):
-        if isinstance(item_1, np.ndarray) or isinstance(item_2, np.ndarray):
-            if not np.allclose(item_1, item_2, rtol=rtol, atol=atol):
-                raise AssertionError("Comparison of numpy arrays for the key failed.")
-        elif isinstance(item_1, dict) and isinstance(item_2, dict):
-            # If both values are dictionaries, compare recursively
-            compare_dicts(item_1, item_2, rtol=rtol, atol=atol)
-        elif (
-            isinstance(item_1, float)
-            or isinstance(item_2, float)
-            or isinstance(item_1, np.generic)
-            or isinstance(item_2, np.generic)
-        ):
-            # If one of the values is a float, we do a float comparison
-            if not np.isclose(item_1, item_2, rtol=rtol, atol=atol):
-                raise AssertionError(
-                    f"Comparison of the values {item_1} and {item_2} failed."
-                )
-        elif isinstance(item_1, list) and isinstance(item_2, list):
-            # If both values are dictionaries, compare recursively
-            compare_lists(item_1, item_2, rtol=rtol, atol=atol)
-        elif isinstance(item_1, str) and isinstance(item_2, str):
-            # If both values are dictionaries, compare recursively
-            compare_strings(item_1, item_2, rtol=rtol, atol=atol)
-        elif not item_1 == item_2:
-            raise AssertionError(
-                f"Comparison of values for the key failed. {item_1} {item_2}\n\n{list_1} {list_2}"
-            )
 
 
 @pytest.fixture(scope="function")

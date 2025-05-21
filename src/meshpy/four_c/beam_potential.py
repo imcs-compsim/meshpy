@@ -106,7 +106,6 @@ class BeamPotential:
         potential_reduction_length=-1,
         automatic_differentiation=False,
         choice_master_slave=None,
-        option_overwrite=False,
     ):
         """Set the basic header options for beam potential interactions.
 
@@ -138,9 +137,6 @@ class BeamPotential:
         choice_master_slave: string
             Rule how to assign the role of master and slave to beam elements (if
             applicable) (lower_eleGID_is_slave, higher_eleGID_is_slave).
-        option_overwrite: bool
-            If existing options should be overwritten. If this is false and an
-            option is already defined, and error will be thrown.
         """
 
         settings = {
@@ -166,7 +162,6 @@ class BeamPotential:
 
         self.input_file.add(
             {"BEAM POTENTIAL": settings},
-            option_overwrite=option_overwrite,
         )
 
     def add_runtime_output(
@@ -179,7 +174,6 @@ class BeamPotential:
         moments=True,
         uids=True,
         per_ele_pair=True,
-        option_overwrite=False,
     ):
         """Set the basic runtime output options for beam potential
         interactions.
@@ -200,9 +194,6 @@ class BeamPotential:
             If the unique ids should be written.
         per_ele_pair: bool
             If the forces/moments should be written per element pair.
-        option_overwrite: bool
-            If existing options should be overwritten. If this is false and an
-            option is already defined, and error will be thrown.
         """
 
         self.input_file.add(
@@ -216,8 +207,7 @@ class BeamPotential:
                     "WRITE_UIDS": uids,
                     "WRITE_FORCE_MOMENT_PER_ELEMENTPAIR": per_ele_pair,
                 }
-            },
-            option_overwrite=option_overwrite,
+            }
         )
 
     def add_potential_charge_condition(self, *, geometry_set=None):

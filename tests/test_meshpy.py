@@ -536,13 +536,14 @@ def test_meshpy_reissner_elasto_plastic(assert_results_equal):
 
     mat = MaterialReissnerElastoplastic(**kwargs)
     mat.i_global = 69
-    assert_results_equal(mat.dump_to_list(), [ref_dict])
+
+    assert_results_equal(mat.dump_to_list(), ref_dict)
 
     ref_dict["MAT_BeamReissnerElastPlastic"]["TORSIONPLAST"] = True
     kwargs["torsion_plasticity"] = True
     mat = MaterialReissnerElastoplastic(**kwargs)
     mat.i_global = 69
-    assert_results_equal(mat.dump_to_list(), [ref_dict])
+    assert_results_equal(mat.dump_to_list(), ref_dict)
 
 
 def test_meshpy_kirchhoff_beam(
@@ -615,64 +616,58 @@ def test_meshpy_kirchhoff_material(assert_results_equal):
     set_stiff(material)
     assert_results_equal(
         material.dump_to_list(),
-        [
-            {
-                "MAT": None,
-                "MAT_BeamKirchhoffElastHyper": {
-                    "YOUNG": 1000,
-                    "SHEARMOD": 500.0,
-                    "DENS": 0.0,
-                    "CROSSAREA": 2.0,
-                    "MOMINPOL": 5.0,
-                    "MOMIN2": 3.0,
-                    "MOMIN3": 4.0,
-                    "FAD": True,
-                },
-            }
-        ],
+        {
+            "MAT": None,
+            "MAT_BeamKirchhoffElastHyper": {
+                "YOUNG": 1000,
+                "SHEARMOD": 500.0,
+                "DENS": 0.0,
+                "CROSSAREA": 2.0,
+                "MOMINPOL": 5.0,
+                "MOMIN2": 3.0,
+                "MOMIN3": 4.0,
+                "FAD": True,
+            },
+        },
     )
 
     material = MaterialKirchhoff(youngs_modulus=1000, is_fad=False)
     set_stiff(material)
     assert_results_equal(
         material.dump_to_list(),
-        [
-            {
-                "MAT": None,
-                "MAT_BeamKirchhoffElastHyper": {
-                    "YOUNG": 1000,
-                    "SHEARMOD": 500.0,
-                    "DENS": 0.0,
-                    "CROSSAREA": 2.0,
-                    "MOMINPOL": 5.0,
-                    "MOMIN2": 3.0,
-                    "MOMIN3": 4.0,
-                    "FAD": False,
-                },
-            }
-        ],
+        {
+            "MAT": None,
+            "MAT_BeamKirchhoffElastHyper": {
+                "YOUNG": 1000,
+                "SHEARMOD": 500.0,
+                "DENS": 0.0,
+                "CROSSAREA": 2.0,
+                "MOMINPOL": 5.0,
+                "MOMIN2": 3.0,
+                "MOMIN3": 4.0,
+                "FAD": False,
+            },
+        },
     )
 
     material = MaterialKirchhoff(youngs_modulus=1000, interaction_radius=1.1)
     set_stiff(material)
     assert_results_equal(
         material.dump_to_list(),
-        [
-            {
-                "MAT": None,
-                "MAT_BeamKirchhoffElastHyper": {
-                    "YOUNG": 1000,
-                    "SHEARMOD": 500.0,
-                    "DENS": 0.0,
-                    "CROSSAREA": 2.0,
-                    "MOMINPOL": 5.0,
-                    "MOMIN2": 3.0,
-                    "MOMIN3": 4.0,
-                    "FAD": False,
-                    "INTERACTIONRADIUS": 1.1,
-                },
-            }
-        ],
+        {
+            "MAT": None,
+            "MAT_BeamKirchhoffElastHyper": {
+                "YOUNG": 1000,
+                "SHEARMOD": 500.0,
+                "DENS": 0.0,
+                "CROSSAREA": 2.0,
+                "MOMINPOL": 5.0,
+                "MOMIN2": 3.0,
+                "MOMIN3": 4.0,
+                "FAD": False,
+                "INTERACTIONRADIUS": 1.1,
+            },
+        },
     )
 
 
@@ -1288,13 +1283,14 @@ def test_meshpy_nurbs_import(
         )
     )
 
+    input_file.pop("PROBLEM TYPE")
+
     set_header_static(
         input_file,
         time_step=0.5,
         n_steps=2,
         tol_residuum=1e-14,
         tol_increment=1e-8,
-        option_overwrite=True,
     )
     set_beam_to_solid_meshtying(
         input_file,
@@ -1310,16 +1306,10 @@ def test_meshpy_nurbs_import(
         },
     )
     set_runtime_output(input_file, output_solid=False)
-    input_file.add(
-        {
-            "IO": {
-                "OUTPUT_BIN": True,
-                "STRUCT_DISP": True,
-                "VERBOSITY": "Standard",
-            }
-        },
-        option_overwrite=True,
-    )
+    input_file["PROBLEM TYPE"]["SHAPEFCT"] = "Nurbs"
+    input_file["IO"]["OUTPUT_BIN"] = True
+    input_file["IO"]["STRUCT_DISP"] = True
+    input_file["IO"]["VERBOSITY"] = "Standard"
 
     fun = Function([{"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"}])
     mesh.add(fun)

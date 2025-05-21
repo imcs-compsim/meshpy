@@ -36,21 +36,21 @@ class VolumeElement(_Element):
     vtk_cell_type = None
     vtk_topology: list = []
 
-    def __init__(self, nodes=None, string_pre_nodes="", string_post_nodes="", **kwargs):
+    def __init__(self, nodes=None, data={}, **kwargs):
         super().__init__(nodes=nodes, material=None, **kwargs)
-        self.string_pre_nodes = string_pre_nodes
-        self.string_post_nodes = string_post_nodes
+        self.data = data
 
     def dump_to_list(self):
-        """Return a list with the items representing this object (usually a
-        single item)."""
+        """Return a dict with the items representing this object."""
 
-        # String with the node ids.
-        nodes_string = " ".join(str(node.i_global) for node in self.nodes)
-
-        return [
-            f"{self.i_global} {self.string_pre_nodes} {nodes_string} {self.string_post_nodes}"
-        ]
+        return {
+            "id": self.i_global,
+            "cell": {
+                "type": element_type_to_four_c_string[type(self)],
+                "connectivity": [node.i_global for node in self.nodes],
+            },
+            "data": self.data,
+        }
 
     def get_vtk(self, vtk_writer_beam, vtk_writer_solid, **kwargs):
         """Add the representation of this element to the VTK writer as a
@@ -170,3 +170,13 @@ class VolumeHEX27(VolumeElement):
         25,
         26,
     ]
+
+
+element_type_to_four_c_string = {
+    VolumeHEX8: "HEX8",
+    VolumeHEX20: "HEX20",
+    VolumeHEX27: "HEX27",
+    VolumeTET4: "TET4",
+    VolumeTET10: "TET10",
+    VolumeWEDGE6: "WEDGE6",
+}
