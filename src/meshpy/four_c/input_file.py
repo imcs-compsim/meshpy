@@ -196,7 +196,7 @@ class InputFile(_FourCInput):
 
         # Add information header to the input file
         if add_header_information:
-            self.sections["TITLE"] = self._get_header()
+            self.add({"TITLE": self._get_header()})
 
         super().dump(
             input_file_path=input_file_path,
