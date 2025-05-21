@@ -30,7 +30,7 @@ dynamic = ["version"]
 
 [project.optional-dependencies]
 cubitpy = ["cubitpy@git+https://github.com/imcs-compsim/cubitpy.git@main"]
-fourc = ["fourcipp@git+https://github.com/davidrudlstorfer/fourcipp.git@add_type_converter"]
+fourc = ["fourcipp@git+https://github.com/4C-multiphysics/fourcipp.git@main"]
 dev = [
   "coverage-badge",
   "coverage",
