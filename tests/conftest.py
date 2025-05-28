@@ -289,7 +289,26 @@ def custom_compare(
     return None
 
 
-def get_raw_data(obj: Any, get_string: Callable) -> dict | list | np.ndarray:
+def compare_nested_dicts_or_lists_with_custom_compare(
+    reference_data, result_data, rtol, atol
+):
+    """Call the compare function from FourCIPP with the custom compare types
+    needed for MeshPy."""
+    compare_nested_dicts_or_lists(
+        reference_data,
+        result_data,
+        rtol=rtol,
+        atol=atol,
+        allow_int_vs_float_comparison=True,
+        custom_compare=lambda obj, ref_obj: custom_compare(
+            obj, ref_obj, rtol=rtol, atol=atol
+        ),
+    )
+
+
+def get_raw_data(
+    obj: Any, get_string: Optional[Callable] = None
+) -> dict | list | np.ndarray:
     """Get the raw data for a given object.
 
     Args:
@@ -392,16 +411,8 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
         ) or isinstance(result, (InputFile, Mesh, dict, list, np.ndarray, Path)):
             reference_data = get_raw_data(reference, get_string)
             result_data = get_raw_data(result, get_string)
-
-            compare_nested_dicts_or_lists(
-                reference_data,
-                result_data,
-                rtol=rtol,
-                atol=atol,
-                allow_int_vs_float_comparison=True,
-                custom_compare=lambda obj, ref_obj: custom_compare(
-                    obj, ref_obj, rtol=rtol, atol=atol
-                ),
+            compare_nested_dicts_or_lists_with_custom_compare(
+                reference_data, result_data, rtol, atol
             )
             return
 
