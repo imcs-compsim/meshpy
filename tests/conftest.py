@@ -384,6 +384,12 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             elif reference.suffix in [".vtk", ".vtu"]:
                 compare_vtk_files(reference, result, rtol, atol)
                 return
+            elif reference.suffix in [".yaml"]:
+                reference_data = get_raw_data(reference)
+                result_data = get_raw_data(result)
+                compare_nested_dicts_or_lists_with_custom_compare(
+                    reference_data, result_data, rtol, atol
+                )
             else:
                 raise NotImplementedError(
                     f"Comparison is not yet implemented for {reference.suffix} files."
