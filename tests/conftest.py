@@ -27,21 +27,19 @@ import shutil
 import subprocess
 from difflib import unified_diff
 from pathlib import Path
-from typing import Callable, Dict, Optional, Union
+from typing import Any, Callable, Dict, Optional, Union
 
 import numpy as np
 import pytest
 import vtk
-import yaml
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
+from fourcipp.utils.dict_utils import compare_nested_dicts_or_lists
 from vistools.vtk.compare_grids import compare_grids
 
 from meshpy.core.conf import mpy
 from meshpy.core.mesh import Mesh
 from meshpy.four_c.input_file import InputFile
-from meshpy.four_c.yaml_dumper import MeshPyDumper as _MeshPyDumper
-from meshpy.utils.environment import fourcipp_is_available
 
 
 def pytest_addoption(parser: Parser) -> None:
@@ -259,6 +257,67 @@ def get_corresponding_reference_file_path(
     return _get_corresponding_reference_file_path
 
 
+def custom_compare(
+    obj: Any, reference_obj: Any, rtol: float, atol: float
+) -> bool | None:
+    """Custom comparison function for the FourCIPP
+    compare_nested_dicts_or_lists function.
+
+    Comparison between two objects, either lists or numpy arrays.
+
+    Args:
+        obj: The object to compare.
+        reference_obj: The reference object to compare against.
+
+    Returns:
+        True if the objects are equal, otherwise raises an AssertionError.
+        If no comparison took place, None is returned.
+    """
+
+    if isinstance(obj, np.ndarray) or isinstance(reference_obj, np.ndarray):
+        if not np.allclose(obj, reference_obj, rtol=rtol, atol=atol):
+            raise AssertionError(
+                f"Custom MeshPy comparison failed!\n\nThe objects are not equal:\n\nobj: {obj}\n\nreference_obj: {reference_obj}"
+            )
+        return True
+
+    return None
+
+
+def get_raw_data(obj: Any, get_string: Callable) -> dict | list | np.ndarray:
+    """Get the raw data for a given object.
+
+    Args:
+        obj: The object to get the raw data from.
+
+    Returns:
+        The raw data (either a dictionary, list, numpy array).
+    """
+
+    if isinstance(obj, Mesh):
+        # Internally convert Mesh to InputFile to allow for simple comparison via dictionary
+        # TODO this should be improved in the future to not fall back to use the 4C specific InputFile
+        input_file = InputFile()
+        input_file.add(obj)
+        obj = input_file
+        return obj.sections
+
+    elif isinstance(obj, InputFile):
+        return obj.sections
+
+    elif isinstance(obj, (dict, list, np.ndarray)):
+        return obj
+
+    elif isinstance(obj, Path) and obj.name.endswith(".4C.yaml"):
+        return InputFile().from_4C_yaml(input_file_path=obj).sections
+
+    elif isinstance(obj, Path) and obj.suffix == ".json":
+        return json.loads(get_string(obj))
+
+    else:
+        raise TypeError(f"The comparison for {type(obj)} is not yet implemented.")
+
+
 @pytest.fixture(scope="function")
 def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
     """Return function to compare either string or files.
@@ -275,10 +334,10 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
     """
 
     def _assert_results_equal(
-        reference: Union[Path, str, dict, InputFile, Mesh],
-        result: Union[Path, str, dict, InputFile, Mesh],
-        rtol: Optional[float] = None,
-        atol: Optional[float] = None,
+        reference: Union[Path, str, dict, list, np.ndarray, InputFile, Mesh],
+        result: Union[Path, str, dict, list, np.ndarray, InputFile, Mesh],
+        rtol: float = 1e-05,
+        atol: float = 1e-08,
         **kwargs,
     ) -> None:
         """Comparison between reference and result with relative or absolute
@@ -293,11 +352,6 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             atol: The absolute tolerance.
         """
 
-        # Per default we do a string comparison of the objects. Some data types, e.g.,
-        # vtu files or hdf5 data structures require special comparison functions.
-        # We first check if a special case is needed, if not we default to the
-        # string comparison.
-
         if isinstance(reference, Path) and isinstance(result, Path):
             if reference.suffix != result.suffix:
                 raise RuntimeError(
@@ -311,130 +365,42 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
                     f"Comparison is not yet implemented for {reference.suffix} files."
                 )
 
-        # Dictionary comparison
-        if isinstance(reference, dict) or isinstance(result, dict):
+        if isinstance(reference, str) or isinstance(result, str):
+            reference_string = get_string(reference)
+            result_string = get_string(result)
 
-            def get_dictionary(data) -> dict:
-                """Get the dictionary representation of the data object."""
-                if isinstance(data, dict):
-                    return data
-                elif isinstance(data, Path):
-                    return json.loads(get_string(data))
-                raise TypeError(
-                    f"The comparison for {type(data)} is not yet implemented."
+            try:
+                compare_strings_with_tolerance_assert(
+                    reference_string, result_string, rtol, atol, **kwargs
                 )
-
-            reference_dict = get_dictionary(reference)
-            result_dict = get_dictionary(result)
-            compare_dicts(reference_dict, result_dict, rtol=rtol, atol=atol)
-            return
-
-        if isinstance(reference, (InputFile, Mesh)) or isinstance(
-            result, (InputFile, Mesh)
-        ):
-
-            def get_dictionary(data) -> dict:
-                """Get the dictionary representation of the data object."""
-
-                # Internally convert Mesh to InputFile to allow for simple comparison via dictionary
-                # TODO this should be improved in the future
-                if isinstance(data, Mesh):
-                    input_file = InputFile()
-                    input_file.add(data)
-                    data = input_file
-
-                if isinstance(data, InputFile):
-                    if fourcipp_is_available():
-                        raise ValueError(
-                            "Port this functionality to create the node from the dict "
-                            "representing the node, not the legacy string."
-                        )
-
-                    return yaml.safe_load(
-                        yaml.dump(
-                            data.sections,
-                            Dumper=_MeshPyDumper,
-                            width=float("inf"),
-                        )
+            except AssertionError as error:
+                if isinstance(reference, Path):
+                    handle_unequal_strings(
+                        tmp_path, current_test_name, result_string, reference
                     )
-                if isinstance(data, dict):
-                    return data
-                elif isinstance(data, Path):
-                    with open(data) as stream:
-                        return yaml.safe_load(stream)
-                raise TypeError(
-                    f"The comparison for {type(data)} is not yet implemented."
-                )
+                raise AssertionError(str(error))
 
-            reference_dict = get_dictionary(reference)
-            result_dict = get_dictionary(result)
-            compare_dicts(reference_dict, result_dict, rtol=rtol, atol=atol)
             return
 
-        if isinstance(reference, (list, np.ndarray)) and isinstance(
-            result, (list, np.ndarray)
-        ):
-            compare_lists(reference, result, rtol=rtol, atol=atol)
+        if isinstance(
+            reference, (InputFile, Mesh, dict, list, np.ndarray, Path)
+        ) or isinstance(result, (InputFile, Mesh, dict, list, np.ndarray, Path)):
+            reference_data = get_raw_data(reference, get_string)
+            result_data = get_raw_data(result, get_string)
+
+            compare_nested_dicts_or_lists(
+                reference_data,
+                result_data,
+                rtol=rtol,
+                atol=atol,
+                allow_int_vs_float_comparison=True,
+                custom_compare=lambda obj, ref_obj: custom_compare(
+                    obj, ref_obj, rtol=rtol, atol=atol
+                ),
+            )
             return
-
-        # We didn't raise an error or exit this function yet, so we default to a string
-        # based comparison.
-        [reference_string, result_string] = [
-            get_string(data) for data in [reference, result]
-        ]
-
-        # compare strings and handle non-matching strings
-        try:
-            compare_strings(reference_string, result_string, rtol, atol, **kwargs)
-        except AssertionError as error:
-            if isinstance(reference, Path):
-                handle_unequal_strings(
-                    tmp_path, current_test_name, result_string, reference
-                )
-            raise AssertionError(str(error))
 
     return _assert_results_equal
-
-
-def compare_strings(
-    reference: str,
-    result: str,
-    rtol: Optional[float] = None,
-    atol: Optional[float] = None,
-    string_splitter: str = " ",
-) -> None:
-    """Compare if two strings are identical, optionally within a given
-    tolerance. If the comparison fails, an error is raised.
-
-    Args:
-        reference: The reference string.
-        result: The result string.
-        rtol: The relative tolerance.
-        atol: The absolute tolerance.
-        string_splitter: With which string the strings are split.
-    """
-
-    if rtol is None and atol is None:
-        compare_strings_equality_assert(reference, result)
-    else:
-        compare_strings_with_tolerance_assert(
-            reference, result, rtol, atol, string_splitter=string_splitter
-        )
-
-
-def compare_strings_equality_assert(reference: str, result: str) -> None:
-    """Check if two strings are exactly equal, if not raise an error.
-
-    Args:
-        reference: The reference string.
-        result: The result string.
-    """
-    diff = list(unified_diff(reference.splitlines(), result.splitlines(), lineterm=""))
-    if diff:
-        raise AssertionError(
-            "Exact string comparison failed! Difference between reference and result: \n"
-            + "\n".join(list(diff))
-        )
 
 
 def compare_strings_with_tolerance_assert(
@@ -572,140 +538,6 @@ def handle_unequal_strings(
             stderr=subprocess.PIPE,
         )
         child.communicate()
-
-
-def compare_dicts(
-    dict_1: dict,
-    dict_2: dict,
-    *,
-    rtol: Optional[float] = None,
-    atol: Optional[float] = None,
-):
-    """Recursively compare two dictionaries.
-
-    For NumPy arrays, use np.allclose. For other types, use direct equality.
-
-    If the dictionaries are not equal, an assertion error is raised.
-
-    Args:
-        dict_1: The first dictionary to compare.
-        dict_2: The second dictionary to compare.
-        rtol: Relative tolerance for np.allclose.
-        atol: Absolute tolerance for np.allclose.
-    """
-
-    if rtol is None:
-        rtol = 1e-10
-    if atol is None:
-        atol = 1e-10
-
-    if not isinstance(dict_1, dict) or not isinstance(dict_2, dict):
-        raise ValueError("Both arguments must be dictionaries")
-
-    if dict_1.keys() != dict_2.keys():
-        raise AssertionError(
-            "The keys of the dictionary are not equal. "
-            f"Got {dict_1.keys()} and {dict_2.keys()} {dict_1.keys() - dict_2.keys()} {dict_2.keys() - dict_1.keys()}"
-        )
-
-    for key in dict_1:
-        value_1 = dict_1[key]
-        value_2 = dict_2[key]
-
-        if isinstance(value_1, np.ndarray) or isinstance(value_2, np.ndarray):
-            try:
-                if not np.allclose(value_1, value_2, rtol=rtol, atol=atol):
-                    raise AssertionError(
-                        f'Comparison of numpy arrays for the key "{key}" failed.'
-                    )
-            except:
-                raise AssertionError(
-                    f'Comparison of numpy arrays for the key "{key}" failed.'
-                )
-        elif isinstance(value_1, dict) and isinstance(value_2, dict):
-            # If both values are dictionaries, compare recursively
-            compare_dicts(value_1, value_2, rtol=rtol, atol=atol)
-        elif (
-            isinstance(value_1, float)
-            or isinstance(value_2, float)
-            or isinstance(value_1, np.generic)
-            or isinstance(value_2, np.generic)
-        ):
-            # If one of the values is a float, we do a float comparison
-            try:
-                if not np.isclose(value_1, value_2, rtol=rtol, atol=atol):
-                    raise AssertionError(
-                        f"Comparison of the values {value_1} and {value_2} failed."
-                    )
-            except:
-                raise AssertionError(
-                    f"Comparison of the values {value_1} and {value_2} failed. {type(value_1)} and {type(value_2)}"
-                )
-
-        elif isinstance(value_1, list) and isinstance(value_2, list):
-            # If both values are dictionaries, compare recursively
-            compare_lists(value_1, value_2, rtol=rtol, atol=atol)
-        elif not value_1 == value_2:
-            raise AssertionError(
-                f'Comparison of values for the key "{key}" failed. {value_1} {value_2} |||| {type(value_1)} {type(value_2)}'
-            )
-
-
-def compare_lists(
-    list_1: list,
-    list_2: list,
-    *,
-    rtol: Optional[float] = None,
-    atol: Optional[float] = None,
-):
-    """Recursively compare two dictionaries.
-
-    For NumPy arrays, use np.allclose. For other types, use direct equality.
-
-    If the dictionaries are not equal, an assertion error is raised.
-
-    Args:
-        dict_1: The first dictionary to compare.
-        dict_2: The second dictionary to compare.
-        rtol: Relative tolerance for np.allclose.
-        atol: Absolute tolerance for np.allclose.
-    """
-
-    if rtol is None:
-        rtol = 1e-10
-    if atol is None:
-        atol = 1e-10
-
-    assert len(list_1) == len(list_2)
-
-    for item_1, item_2 in zip(list_1, list_2):
-        if isinstance(item_1, np.ndarray) or isinstance(item_2, np.ndarray):
-            if not np.allclose(item_1, item_2, rtol=rtol, atol=atol):
-                raise AssertionError("Comparison of numpy arrays for the key failed.")
-        elif isinstance(item_1, dict) and isinstance(item_2, dict):
-            # If both values are dictionaries, compare recursively
-            compare_dicts(item_1, item_2, rtol=rtol, atol=atol)
-        elif (
-            isinstance(item_1, float)
-            or isinstance(item_2, float)
-            or isinstance(item_1, np.generic)
-            or isinstance(item_2, np.generic)
-        ):
-            # If one of the values is a float, we do a float comparison
-            if not np.isclose(item_1, item_2, rtol=rtol, atol=atol):
-                raise AssertionError(
-                    f"Comparison of the values {item_1} and {item_2} failed."
-                )
-        elif isinstance(item_1, list) and isinstance(item_2, list):
-            # If both values are dictionaries, compare recursively
-            compare_lists(item_1, item_2, rtol=rtol, atol=atol)
-        elif isinstance(item_1, str) and isinstance(item_2, str):
-            # If both values are dictionaries, compare recursively
-            compare_strings(item_1, item_2, rtol=rtol, atol=atol)
-        elif not item_1 == item_2:
-            raise AssertionError(
-                f"Comparison of values for the key failed. {item_1} {item_2}\n\n{list_1} {list_2}"
-            )
 
 
 @pytest.fixture(scope="function")

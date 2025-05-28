@@ -52,7 +52,6 @@ def set_runtime_output(
     element_mat_id=True,
     output_energy=False,
     output_strains=True,
-    option_overwrite=False,
 ):
     """Set the basic runtime output options.
 
@@ -87,9 +86,6 @@ def set_runtime_output(
         If the energy output from 4C should be activated.
     output_strains: bool
         If the strains in the Gauss points should be output.
-    option_overwrite: bool
-        If existing options should be overwritten. If this is false and an
-        option is already defined, and error will be thrown.
     """
 
     # Set the basic runtime output options.
@@ -100,8 +96,7 @@ def set_runtime_output(
                 "INTERVAL_STEPS": 1,
                 "EVERY_ITERATION": every_iteration,
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
     # Set the structure runtime output options
@@ -115,8 +110,7 @@ def set_runtime_output(
                 "ELEMENT_GID": element_gid,
                 "ELEMENT_MAT_ID": element_mat_id,
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
     # Set the beam runtime output options
@@ -130,8 +124,7 @@ def set_runtime_output(
                 "STRAINS_GAUSSPOINT": output_strains,
                 "ELEMENT_GID": element_gid,
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
     if btsvmt_output:
@@ -147,8 +140,7 @@ def set_runtime_output(
                     "SEGMENTATION": True,
                     "INTEGRATION_POINTS": True,
                 }
-            },
-            option_overwrite=option_overwrite,
+            }
         )
 
     if btss_output:
@@ -165,19 +157,11 @@ def set_runtime_output(
                     "INTEGRATION_POINTS": True,
                     "AVERAGED_NORMALS": True,
                 }
-            },
-            option_overwrite=option_overwrite,
+            }
         )
 
     if output_energy:
-        input_file.add(
-            {
-                "STRUCTURAL DYNAMIC": {
-                    "RESEVERYERGY": 1,
-                }
-            },
-            option_overwrite=option_overwrite,
-        )
+        input_file["STRUCTURAL DYNAMIC"]["RESEVERYERGY"] = 1
 
 
 def set_beam_to_solid_meshtying(
@@ -194,7 +178,6 @@ def set_beam_to_solid_meshtying(
     penalty_parameter=None,
     coupling_type=None,
     binning_parameters: dict = {},
-    option_overwrite=False,
 ):
     """Set the beam to solid meshtying options.
 
@@ -225,22 +208,24 @@ def set_beam_to_solid_meshtying(
         Type of coupling for beam-to-surface coupling.
     binning_parameters:
         Keyword parameters for the binning section
-    option_overwrite: bool
-        If existing options should be overwritten. If this is false and an
-        option is already defined, and error will be thrown.
     """
 
     # Set the beam contact options.
-    input_file.add(
-        {"BEAM INTERACTION": {"REPARTITIONSTRATEGY": "everydt"}}, option_overwrite=True
-    )
-    input_file.add(
-        {"BEAM CONTACT": {"MODELEVALUATOR": "Standard"}}, option_overwrite=True
-    )
+    # check if these keys are already set, otherwise set them
+    if (
+        "BEAM INTERACTION" not in input_file
+        or input_file["BEAM INTERACTION"].get("REPARTITIONSTRATEGY") != "everydt"
+    ):
+        input_file.add({"BEAM INTERACTION": {"REPARTITIONSTRATEGY": "everydt"}})
+
+    if (
+        "BEAM CONTACT" not in input_file
+        or input_file["BEAM CONTACT"].get("MODELEVALUATOR") != "Standard"
+    ):
+        input_file.add({"BEAM CONTACT": {"MODELEVALUATOR": "Standard"}})
 
     set_binning_strategy_section(
         input_file,
-        option_overwrite=option_overwrite,
         **binning_parameters,
     )
 
@@ -285,9 +270,7 @@ def set_beam_to_solid_meshtying(
     if interaction_type == _mpy.beam_to_solid.volume_meshtying:
         bts_parameters["COUPLE_RESTART_STATE"] = couple_restart
 
-    input_file.add(
-        {bts_section_name: bts_parameters}, option_overwrite=option_overwrite
-    )
+    input_file.add({bts_section_name: bts_parameters})
 
 
 def set_header_static(
@@ -305,7 +288,6 @@ def set_header_static(
     write_strain="no",
     prestress="None",
     prestress_time=0,
-    option_overwrite=False,
 ):
     """Set the default parameters for a static structure analysis.
 
@@ -340,9 +322,6 @@ def set_header_static(
         Type of prestressing strategy to be used
     presetrss_time: int
         Prestress Time
-    option_overwrite: bool
-        If existing options should be overwritten. If this is false and an
-        option is already defined, and error will be thrown.
     """
 
     # Set the parameters for a static analysis.
@@ -351,8 +330,7 @@ def set_header_static(
             "PROBLEM TYPE": {
                 "PROBLEMTYPE": "Structure",
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
     input_file.add(
@@ -364,8 +342,7 @@ def set_header_static(
                 "STRUCT_STRAIN": write_strain,
                 "VERBOSITY": "Standard",
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
     # Set the time step parameters
@@ -398,8 +375,7 @@ def set_header_static(
                 "MAXTIME": total_time,
                 "LOADLIN": load_lin,
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
     input_file.add(
@@ -408,8 +384,7 @@ def set_header_static(
                 "NAME": "Structure_Solver",
                 "SOLVER": "Superlu",
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
     # Set the contents of the NOX xml file.
@@ -469,8 +444,7 @@ def set_header_static(
                 "Linear Solver Details": True,
                 "Test Details": True,
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
     # Set the xml content in the input file.
@@ -481,8 +455,6 @@ def set_binning_strategy_section(
     input_file: _InputFile,
     binning_bounding_box: _Union[_List[int], None] = None,
     binning_cutoff_radius: _Union[float, None] = None,
-    *,
-    option_overwrite: bool = False,
 ):
     """Set binning strategy in section of the input file.
 
@@ -494,9 +466,6 @@ def set_binning_strategy_section(
         List with the limits of the bounding box.
     binning_cutoff_radius:
         Maximal influence radius of pair elements.
-    option_overwrite:
-        If existing options should be overwritten. If this is false and an
-        option is already defined, and error will be thrown.
     """
 
     if binning_bounding_box is not None and binning_cutoff_radius is not None:
@@ -510,8 +479,7 @@ def set_binning_strategy_section(
                     "BIN_SIZE_LOWER_BOUND": binning_cutoff_radius,
                     "DOMAINBOUNDINGBOX": binning_bounding_box_string,
                 }
-            },
-            option_overwrite=option_overwrite,
+            }
         )
     elif [binning_bounding_box, binning_cutoff_radius].count(None) == 2:
         return
@@ -526,7 +494,6 @@ def set_beam_interaction_section(
     *,
     repartition_strategy: str = "everydt",
     search_strategy: str = "bounding_volume_hierarchy",
-    option_overwrite: bool = False,
 ):
     """Set beam interaction section in input file.
 
@@ -540,9 +507,6 @@ def set_beam_interaction_section(
     search_strategy:
         Type of search strategy used for finding coupling pairs.
         Options: "bruteforce_with_binning", "bounding_volume_hierarchy"
-    option_overwrite:
-        If existing options should be overwritten. If this is false and an
-        option is already defined, and error will be thrown.
     """
 
     input_file.add(
@@ -551,16 +515,12 @@ def set_beam_interaction_section(
                 "REPARTITIONSTRATEGY": repartition_strategy,
                 "SEARCH_STRATEGY": search_strategy,
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
 
 def set_beam_contact_runtime_output(
-    input_file: _InputFile,
-    *,
-    every_iteration: bool = False,
-    option_overwrite: bool = False,
+    input_file: _InputFile, *, every_iteration: bool = False
 ):
     """Output the beam-to-beam contact forces and gaps with runtime output.
 
@@ -568,9 +528,6 @@ def set_beam_contact_runtime_output(
         Input file that the options will be added to.
     every_iteration:
         If output at every Newton iteration should be written.
-    option_overwrite:
-        If existing options should be overwritten. If this is false and an
-        option is already defined, and error will be thrown.
     """
 
     input_file.add(
@@ -582,8 +539,7 @@ def set_beam_contact_runtime_output(
                 "CONTACT_FORCES": True,
                 "GAPS": True,
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
 
@@ -603,7 +559,6 @@ def set_beam_contact_section(
     penalty_regularization_c0: float = 0,
     binning_parameters: dict = {},
     beam_interaction_parameters: dict = {},
-    option_overwrite: bool = False,
 ):
     """Set default beam contact section, for more and updated details see
     respective input file within 4C. Parameters for set_binning_strategy and
@@ -628,9 +583,6 @@ def set_beam_contact_section(
         Maximal angle deviation allowed for contact search segmentation
     num_integration:
         Number of integration intervals per element
-    option_overwrite: bool
-        If existing options should be overwritten. If this is false and an
-        option is already defined, and error will be thrown.
     penalty_law:
         Penalty Law Options: "LinPen", "QuadPen", "LinNegQuadPen", "LinPosQuadPen", "LinPosCubPen", "LinPosDoubleQuadPen", "LinPosExpPen"
     penalty_regularization_g0:
@@ -658,8 +610,7 @@ def set_beam_contact_section(
             "BEAM INTERACTION/BEAM TO BEAM CONTACT": {
                 "STRATEGY": interaction_strategy,
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
     input_file.add(
@@ -682,19 +633,14 @@ def set_beam_contact_section(
                 "BEAMS_PENREGPARAM_C0": penalty_regularization_c0,
                 "BEAMS_MAXDELTADISSCALEFAC": -1.0,
             }
-        },
-        option_overwrite=option_overwrite,
+        }
     )
 
     # beam contact needs a binning strategy
-    set_binning_strategy_section(
-        input_file, option_overwrite=option_overwrite, **binning_parameters
-    )
+    set_binning_strategy_section(input_file, **binning_parameters)
 
     # beam contact needs interaction strategy
-    set_beam_interaction_section(
-        input_file, option_overwrite=option_overwrite, **beam_interaction_parameters
-    )
+    set_beam_interaction_section(input_file, **beam_interaction_parameters)
 
 
 def add_result_description(
@@ -712,20 +658,20 @@ def add_result_description(
         node_ids: List with the IDs of the nodes to check
         tol: Tolerance
     """
+    result_descriptions = []
+
     for i_node, node in enumerate(node_ids):
         for i_dir, direction in enumerate(["x", "y", "z"]):
-            input_file.add(
+            result_descriptions.append(
                 {
-                    "RESULT DESCRIPTION": [
-                        {
-                            "STRUCTURE": {
-                                "DIS": "structure",
-                                "NODE": node,
-                                "QUANTITY": f"disp{direction}",
-                                "VALUE": displacements[i_node][i_dir],
-                                "TOLERANCE": tol,
-                            },
-                        }
-                    ]
+                    "STRUCTURE": {
+                        "DIS": "structure",
+                        "NODE": node,
+                        "QUANTITY": f"disp{direction}",
+                        "VALUE": displacements[i_node][i_dir],
+                        "TOLERANCE": tol,
+                    },
                 }
             )
+
+    input_file.add({"RESULT DESCRIPTION": result_descriptions})

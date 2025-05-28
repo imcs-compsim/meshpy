@@ -55,9 +55,13 @@ def test_nurbs_hollow_cylinder_segment_2d(
     mat = MaterialStVenantKirchhoff(youngs_modulus=50, nu=0.19, density=5.3e-7)
 
     # Create patch set
-    element_description = (
-        "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
-    )
+    element_description = {
+        "KINEM": "linear",
+        "EAS": "none",
+        "THICK": 1.0,
+        "STRESS_STRAIN": "plane_strain",
+        "GP": [3, 3],
+    }
 
     patch_set = add_geomdl_nurbs_to_mesh(
         mesh,
@@ -87,9 +91,13 @@ def test_nurbs_flat_plate_2d(
     mat = MaterialStVenantKirchhoff(youngs_modulus=710, nu=0.19, density=5.3e-7)
 
     # Create patch set
-    element_description = (
-        "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
-    )
+    element_description = {
+        "KINEM": "linear",
+        "EAS": "none",
+        "THICK": 1.0,
+        "STRESS_STRAIN": "plane_strain",
+        "GP": [3, 3],
+    }
 
     patch_set = add_geomdl_nurbs_to_mesh(
         mesh,
@@ -117,13 +125,10 @@ def test_nurbs_brick(assert_results_equal, get_corresponding_reference_file_path
     mat = MaterialStVenantKirchhoff(youngs_modulus=710, nu=0.19, density=5.3e-7)
 
     # Create patch set
-    element_description = "GP 3 3 3"
-
     patch_set = add_geomdl_nurbs_to_mesh(
         mesh,
         vol_obj,
         material=mat,
-        element_description=element_description,
     )
 
     mesh.add(patch_set)
@@ -148,9 +153,13 @@ def test_nurbs_rotation_nurbs_surface(
     # Create patch set
     mat = MaterialStVenantKirchhoff(youngs_modulus=650, nu=0.20, density=4.2e-7)
 
-    element_description = (
-        "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
-    )
+    element_description = {
+        "KINEM": "linear",
+        "EAS": "none",
+        "THICK": 1.0,
+        "STRESS_STRAIN": "plane_strain",
+        "GP": [3, 3],
+    }
 
     patch_set = add_geomdl_nurbs_to_mesh(
         mesh,
@@ -181,9 +190,13 @@ def test_nurbs_translate_nurbs_surface(
     # Create patch set
     mat = MaterialStVenantKirchhoff(youngs_modulus=430, nu=0.10, density=4.2e-7)
 
-    element_description = (
-        "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
-    )
+    element_description = {
+        "KINEM": "linear",
+        "EAS": "none",
+        "THICK": 1.0,
+        "STRESS_STRAIN": "plane_strain",
+        "GP": [3, 3],
+    }
 
     patch_set = add_geomdl_nurbs_to_mesh(
         mesh,
@@ -221,7 +234,7 @@ def test_nurbs_cylindrical_shell_sector(
         mesh,
         surf_obj,
         material=mat,
-        element_description="dummy",
+        element_description={"KINEM": "linear", "EAS": "none", "THICK": 1.0},
     )
 
     mesh.add(patch_set)
@@ -246,9 +259,13 @@ def test_nurbs_couple_nurbs_meshes(
     # Create first patch set
     mat = MaterialStVenantKirchhoff(youngs_modulus=430, nu=0.10, density=4.2e-7)
 
-    element_description = (
-        "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
-    )
+    element_description = {
+        "KINEM": "linear",
+        "EAS": "none",
+        "THICK": 1.0,
+        "STRESS_STRAIN": "plane_strain",
+        "GP": [3, 3],
+    }
 
     patch_set_1 = add_geomdl_nurbs_to_mesh(
         mesh,
@@ -295,9 +312,13 @@ def test_nurbs_sphere_surface(
     # Create first patch set
     mat = MaterialStVenantKirchhoff()
 
-    element_description = (
-        "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
-    )
+    element_description = {
+        "KINEM": "linear",
+        "EAS": "none",
+        "THICK": 1.0,
+        "STRESS_STRAIN": "plane_strain",
+        "GP": [3, 3],
+    }
 
     patch_set = add_geomdl_nurbs_to_mesh(
         mesh,
@@ -331,8 +352,8 @@ def test_nurbs_string_types(
         mesh,
         surf_obj,
         material=mat,
-        element_string="STRING_TYPE",
-        element_description="STRING_DESCRIPTION",
+        element_string="WALLNURBS",
+        element_description={"KINEM": "linear", "EAS": "none", "THICK": 1.0},
     )
 
     mesh.add(patch_set)
@@ -355,9 +376,13 @@ def test_nurbs_hemisphere_surface(
     # Create first patch set
     mat = MaterialStVenantKirchhoff()
 
-    element_description = (
-        "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
-    )
+    element_description = {
+        "KINEM": "linear",
+        "EAS": "none",
+        "THICK": 1.0,
+        "STRESS_STRAIN": "plane_strain",
+        "GP": [3, 3],
+    }
 
     # Add the patch sets of every surface section of the hemisphere to the input file
     for surf in surfs:
@@ -388,7 +413,13 @@ def test_nurbs_torus_surface(
     # Define material and element description
     mat = MaterialStVenantKirchhoff()
 
-    dummy_string = "KINEM linear EAS none THICK 1.0 STRESS_STRAIN plane_strain GP 3 3"
+    element_description = {
+        "KINEM": "linear",
+        "EAS": "none",
+        "THICK": 1.0,
+        "STRESS_STRAIN": "plane_strain",
+        "GP": [3, 3],
+    }
 
     # Add the patch sets of every surface section of the torus to the input file
     for surf in surfs:
@@ -396,7 +427,7 @@ def test_nurbs_torus_surface(
             mesh,
             surf,
             material=mat,
-            element_description=dummy_string,
+            element_description=element_description,
         )
 
         mesh.add(patch_set)

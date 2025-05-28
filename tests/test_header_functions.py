@@ -62,17 +62,8 @@ def test_header_functions_static(
         input_file,
         mpy.beam_to_solid.surface_meshtying,
         contact_discretization="gp",
-        segmentation_search_points=6,
         coupling_type="consistent_fad",
-    )
-
-    # This is to test that the overwrite_option argument is handled correctly
-    set_beam_to_solid_meshtying(
-        input_file,
-        mpy.beam_to_solid.surface_meshtying,
-        contact_discretization="gp",
         segmentation=False,
-        option_overwrite=True,
     )
 
     # Check the output.
