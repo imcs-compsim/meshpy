@@ -28,7 +28,7 @@ dependencies = [
 dynamic = ["version"]
 
 [project.optional-dependencies]
-cubitpy = ["cubitpy@git+https://github.com/imcs-compsim/cubitpy.git@main"]
+cubitpy = ["cubitpy@git+https://github.com/imcs-compsim/cubitpy.git@e9e603b64ef56e90369c659981b8a831e858de8e"]
 dev = [
   "coverage-badge",
   "coverage",
