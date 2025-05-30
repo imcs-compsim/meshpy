@@ -274,7 +274,9 @@ def custom_compare(
         If no comparison took place, None is returned.
     """
 
-    if isinstance(obj, np.ndarray) or isinstance(reference_obj, np.ndarray):
+    if isinstance(obj, (np.ndarray, np.generic)) or isinstance(
+        reference_obj, (np.ndarray, np.generic)
+    ):
         if not np.allclose(obj, reference_obj, rtol=rtol, atol=atol):
             raise AssertionError(
                 f"Custom MeshPy comparison failed!\n\nThe objects are not equal:\n\nobj: {obj}\n\nreference_obj: {reference_obj}"
@@ -284,7 +286,26 @@ def custom_compare(
     return None
 
 
-def get_raw_data(obj: Any, get_string: Callable) -> dict | list | np.ndarray:
+def compare_nested_dicts_or_lists_with_custom_compare(
+    reference_data, result_data, rtol, atol
+):
+    """Call the compare function from FourCIPP with the custom compare types
+    needed for MeshPy."""
+    compare_nested_dicts_or_lists(
+        reference_data,
+        result_data,
+        rtol=rtol,
+        atol=atol,
+        allow_int_vs_float_comparison=True,
+        custom_compare=lambda obj, ref_obj: custom_compare(
+            obj, ref_obj, rtol=rtol, atol=atol
+        ),
+    )
+
+
+def get_raw_data(
+    obj: Any, get_string: Optional[Callable] = None
+) -> dict | list | np.ndarray:
     """Get the raw data for a given object.
 
     Args:
@@ -360,6 +381,12 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             elif reference.suffix in [".vtk", ".vtu"]:
                 compare_vtk_files(reference, result, rtol, atol)
                 return
+            elif reference.suffix in [".yaml"]:
+                reference_data = get_raw_data(reference)
+                result_data = get_raw_data(result)
+                compare_nested_dicts_or_lists_with_custom_compare(
+                    reference_data, result_data, rtol, atol
+                )
             else:
                 raise NotImplementedError(
                     f"Comparison is not yet implemented for {reference.suffix} files."
@@ -387,16 +414,8 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
         ) or isinstance(result, (InputFile, Mesh, dict, list, np.ndarray, Path)):
             reference_data = get_raw_data(reference, get_string)
             result_data = get_raw_data(result, get_string)
-
-            compare_nested_dicts_or_lists(
-                reference_data,
-                result_data,
-                rtol=rtol,
-                atol=atol,
-                allow_int_vs_float_comparison=True,
-                custom_compare=lambda obj, ref_obj: custom_compare(
-                    obj, ref_obj, rtol=rtol, atol=atol
-                ),
+            compare_nested_dicts_or_lists_with_custom_compare(
+                reference_data, result_data, rtol, atol
             )
             return
 

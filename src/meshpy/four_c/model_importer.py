@@ -51,6 +51,37 @@ from meshpy.four_c.input_file import (
 from meshpy.four_c.input_file_mappings import (
     INPUT_FILE_MAPPINGS as _INPUT_FILE_MAPPINGS,
 )
+from meshpy.utils.environment import cubitpy_is_available as _cubitpy_is_available
+
+if _cubitpy_is_available():
+    from cubitpy.cubit_to_fourc_input import (
+        get_input_file_with_mesh as _get_input_file_with_mesh,
+    )
+
+
+def import_cubitpy_model(cubit, convert_input_to_mesh: bool = False):
+    """Convert a CubitPy instance to a MeshPy InputFile.
+
+    Args:
+        cubit (CubitPy): An instance of a cubit model.
+        convert_input_to_mesh: If this is false, the cubit model will be
+            converted to plain FourCIPP input data. If this is true, an input
+            file with all the parameters will be returned and a mesh which
+            contains the mesh information from cubit converted to MeshPy
+            objects.
+
+    Returns:
+        A tuple with the input file and the mesh. If convert_input_to_mesh is
+        False, the mesh will be empty. Note that the input sections which are
+        converted to a MeshPy mesh are removed from the input file object.
+    """
+
+    input_file = _InputFile(sections=_get_input_file_with_mesh(cubit).sections)
+
+    if convert_input_to_mesh:
+        return _extract_mesh_sections(input_file)
+    else:
+        return input_file, _Mesh()
 
 
 def import_four_c_model(

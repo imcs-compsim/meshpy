@@ -61,7 +61,7 @@ from meshpy.four_c.material import (
     MaterialReissnerElastoplastic,
     MaterialStVenantKirchhoff,
 )
-from meshpy.four_c.model_importer import import_four_c_model
+from meshpy.four_c.model_importer import import_cubitpy_model, import_four_c_model
 from meshpy.mesh_creation_functions.applications.beam_honeycomb import (
     create_beam_mesh_honeycomb,
 )
@@ -76,6 +76,7 @@ from meshpy.utils.nodes import (
     get_min_max_coordinates,
     get_single_node,
 )
+from tests.create_cubit_input import create_tube_cubit
 
 
 def create_test_mesh(mesh):
@@ -1731,38 +1732,26 @@ def test_meshpy_vtk_curve_cell_data(
     assert_results_equal(ref_file, vtk_file)
 
 
-@pytest.mark.skip(
-    reason="Temporarily disabled due to switch to .yaml based input files - check if test is necessary and fix"
-)
+@pytest.mark.parametrize("full_import", [False, True])
 @pytest.mark.cubitpy
 def test_meshpy_cubitpy_import(
-    assert_results_equal,
-    get_corresponding_reference_file_path,
-    tmp_path,
+    full_import, assert_results_equal, get_corresponding_reference_file_path
 ):
-    """Check that a import from a cubitpy object is the same as importing the
-    input file."""
+    """Check that an import from a cubitpy object works as expected."""
 
-    # Load the mesh creation functions
-    from tests.create_cubit_input import create_tube, create_tube_cubit
-
-    # Create the input file and read the file.
-    file_path = os.path.join(tmp_path, "test_cubitpy_import.4C.yaml")
-    create_tube(file_path)
-    input_file, _ = import_four_c_model(input_file_path=file_path)
-
-    # Create the input file and read the cubit object.
-    input_file_cubit = InputFile(cubit=create_tube_cubit())
-
-    # Load the file from the reference folder.
-    file_path_ref = get_corresponding_reference_file_path(
-        reference_file_base_name="test_create_cubit_input_tube"
+    cubit = create_tube_cubit()
+    input_file_cubit, mesh = import_cubitpy_model(
+        cubit, convert_input_to_mesh=full_import
     )
-    input_file_ref, _ = import_four_c_model(input_file_path=file_path_ref)
+    if full_import:
+        input_file_cubit.add(mesh)
 
-    # Compare the input files.
-    assert_results_equal(input_file, input_file_cubit)
-    assert_results_equal(input_file, input_file_ref, rtol=1e-14)
+    assert_results_equal(
+        get_corresponding_reference_file_path(
+            reference_file_base_name="test_create_cubit_input_tube"
+        ),
+        input_file_cubit,
+    )
 
 
 def test_meshpy_deep_copy(get_bc_data, assert_results_equal):

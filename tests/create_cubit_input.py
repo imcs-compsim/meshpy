@@ -22,10 +22,9 @@
 """This script creates solid input files with CubitPy which are then used in
 MeshPy testing."""
 
-import os
-
 from meshpy.core.conf import mpy
 from meshpy.four_c.input_file import InputFile
+from meshpy.four_c.model_importer import import_cubitpy_model
 from meshpy.utils.environment import cubitpy_is_available
 
 if cubitpy_is_available():
@@ -87,68 +86,79 @@ def create_tube_cubit():
         cylinder.surfaces()[1],
         name="fix",
         bc_section="DESIGN SURF DIRICH CONDITIONS",
-        bc_description=(
-            "NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 0.0 0.0 0.0 0.0 0.0 0.0 FUNCT 0 0 0 0 0 0"
-        ),
+        bc_description={
+            "NUMDOF": 3,
+            "ONOFF": [1, 1, 1],
+            "VAL": [0, 0, 0],
+            "FUNCT": [0, 0, 0],
+        },
     )
     cubit.add_node_set(
         cylinder.surfaces()[2],
         name="dirichlet_controlled",
         bc_section="DESIGN SURF DIRICH CONDITIONS",
-        bc_description=(
-            "NUMDOF 6 ONOFF 1 1 1 0 0 0 VAL 3.0 3.0 0.0 0.0 0.0 0.0 FUNCT 1 2 0 0 0 0"
-        ),
+        bc_description={
+            "NUMDOF": 3,
+            "ONOFF": [1, 1, 1],
+            "VAL": [3.0, 3.0, 0],
+            "FUNCT": [1, 2, 0],
+        },
     )
 
     # Set header.
-    cubit.head = """
-        -----------------------------------------------------------PROBLEM TYPE
-        PROBLEMTYPE                     Structure
-        RESTART                         0
-        ----------------------------------------------------------DISCRETISATION
-        NUMFLUIDDIS                     0
-        NUMSTRUCDIS                     1
-        NUMALEDIS                       0
-        NUMTHERMDIS                     0
-        ---------------------------------------------------------------------IO
-        OUTPUT_BIN                      Yes
-        STRUCT_DISP                     Yes
-        FILESTEPS                       1000
-        VERBOSITY                       Standard
-        --------------------------------------------------IO/RUNTIME VTK OUTPUT
-        OUTPUT_DATA_FORMAT              binary
-        INTERVAL_STEPS                  1
-        EVERY_ITERATION                 No
-        ----------------------------------------IO/RUNTIME VTK OUTPUT/STRUCTURE
-        OUTPUT_STRUCTURE                Yes
-        DISPLACEMENT                    Yes
-        -----------------------------------------------------STRUCTURAL DYNAMIC
-        LINEAR_SOLVER                   1
-        INT_STRATEGY                    Standard
-        DYNAMICTYPE                     Statics
-        RESULTSEVERY                    1
-        RESTARTEVERY                    5
-        NLNSOL                          fullnewton
-        PREDICT                         TangDis
-        TIMESTEP                        0.05
-        NUMSTEP                         20
-        MAXTIME                         1.0
-        TOLRES                          1.0E-5
-        TOLDISP                         1.0E-11
-        NORM_RESF                       Abs
-        NORM_DISP                       Abs
-        NORMCOMBI_RESFDISP              And
-        MAXITER                         20
-        ---------------------------------------------------------------SOLVER 1
-        NAME                            Structure_Solver
-        SOLVER                          UMFPACK
-        ------------------------------------------------------------------MATERIALS
-        MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0e+09 NUE 0.0 DENS 7.80E-6
-        ---------------------------------------------------------------------FUNCT1
-        COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME cos(2*pi*t)
-        -----------------------------------------------------------------FUNCT2
-        COMPONENT 0 SYMBOLIC_FUNCTION_OF_SPACE_TIME sin(2*pi*t)
-        """
+    cubit.fourc_input.combine_sections(
+        {
+            "PROBLEM TYPE": {"PROBLEMTYPE": "Structure"},
+            "IO": {
+                "VERBOSITY": "Standard",
+            },
+            "IO/RUNTIME VTK OUTPUT": {
+                "OUTPUT_DATA_FORMAT": "binary",
+                "INTERVAL_STEPS": 1,
+                "EVERY_ITERATION": False,
+            },
+            "IO/RUNTIME VTK OUTPUT/STRUCTURE": {
+                "OUTPUT_STRUCTURE": True,
+                "DISPLACEMENT": True,
+            },
+            "STRUCTURAL DYNAMIC": {
+                "LINEAR_SOLVER": 1,
+                "INT_STRATEGY": "Standard",
+                "DYNAMICTYPE": "Statics",
+                "RESTARTEVERY": 5,
+                "PREDICT": "TangDis",
+                "TIMESTEP": 0.05,
+                "NUMSTEP": 20,
+                "MAXTIME": 1.0,
+                "TOLRES": 1.0e-5,
+                "TOLDISP": 1.0e-11,
+                "MAXITER": 20,
+            },
+            "SOLVER 1": {"NAME": "Structure_Solver", "SOLVER": "UMFPACK"},
+            "MATERIALS": [
+                {
+                    "MAT": 1,
+                    "MAT_Struct_StVenantKirchhoff": {
+                        "YOUNG": 1.0e9,
+                        "NUE": 0.0,
+                        "DENS": 7.8e-6,
+                    },
+                }
+            ],
+            "FUNCT1": [
+                {
+                    "COMPONENT": 0,
+                    "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "cos(2*pi*t)",
+                }
+            ],
+            "FUNCT2": [
+                {
+                    "COMPONENT": 0,
+                    "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "sin(2*pi*t)",
+                }
+            ],
+        }
+    )
 
     # Return the cubit object.
     return cubit
@@ -158,7 +168,7 @@ def create_tube(file_path):
     """Write the solid tube to a file."""
 
     # Export mesh.
-    create_tube_cubit().create_dat(file_path)
+    create_tube_cubit().dump(file_path)
 
 
 def create_tube_tutorial(file_path):
@@ -179,23 +189,43 @@ def create_tube_tutorial(file_path):
         cylinder.surfaces()[1],
         name="fix",
         bc_type=cupy.bc_type.dirichlet,
-        bc_description="NUMDOF 3 ONOFF 1 1 1 VAL 0 0 0 FUNCT 0 0 0",
+        bc_description={
+            "NUMDOF": 3,
+            "ONOFF": [1, 1, 1],
+            "VAL": [0, 0, 0],
+            "FUNCT": [0, 0, 0],
+        },
     )
     cubit.add_node_set(
         cylinder.surfaces()[2],
         name="dirichlet_controlled",
         bc_type=cupy.bc_type.dirichlet,
-        bc_description="NUMDOF 3 ONOFF 1 0 0 VAL 0.5 0 0 FUNCT 1 0 0",
+        bc_description={
+            "NUMDOF": 3,
+            "ONOFF": [1, 0, 0],
+            "VAL": [0.5, 0, 0],
+            "FUNCT": [1, 0, 0],
+        },
     )
 
     # Set header.
-    cubit.head = """
-        ------------------------------------------------------------------MATERIALS
-        MAT 1 MAT_Struct_StVenantKirchhoff YOUNG 1.0 NUE 0 DENS 0
-        """
+    cubit.fourc_input.combine_sections(
+        {
+            "MATERIALS": [
+                {
+                    "MAT": 1,
+                    "MAT_Struct_StVenantKirchhoff": {
+                        "YOUNG": 1.0,
+                        "NUE": 0.0,
+                        "DENS": 0.0,
+                    },
+                }
+            ]
+        }
+    )
 
     # Export mesh.
-    cubit.create_dat(file_path)
+    cubit.dump(file_path)
 
 
 def create_block_cubit():
@@ -211,14 +241,14 @@ def create_block_cubit():
     cubit.add_node_set(
         cube.volumes()[0],
         bc_type=cupy.bc_type.beam_to_solid_volume_meshtying,
-        bc_description="COUPLING_ID 1",
+        bc_description={"COUPLING_ID": 1},
     )
 
     # Add the boundary condition.
     cubit.add_node_set(
         cube.surfaces()[0],
         bc_type=cupy.bc_type.beam_to_solid_surface_meshtying,
-        bc_description="COUPLING_ID 2",
+        bc_description={"COUPLING_ID": 2},
     )
 
     # Set point coupling conditions.
@@ -227,7 +257,10 @@ def create_block_cubit():
     cubit.add_node_set(
         nodes,
         bc_type=cupy.bc_type.point_coupling,
-        bc_description="NUMDOF 3 ONOFF 1 2 3",
+        bc_description={
+            "NUMDOF": 3,
+            "ONOFF": [1, 2, 3],
+        },
     )
 
     # Return the cubit object.
@@ -238,7 +271,7 @@ def create_block(file_path):
     """Create the solid cube in cubit and write it to a file."""
 
     # Export mesh.
-    create_block_cubit().create_dat(file_path)
+    create_block_cubit().dump(file_path)
 
 
 def create_solid_shell_meshes(file_path_blocks, file_path_dome):
@@ -256,11 +289,11 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
             element_type=element_type,
             mesh=True,
         )
-        mpy.import_mesh_full = True
-        return InputFile(cubit=cubit)
+        _, mesh = import_cubitpy_model(cubit, convert_input_to_mesh=True)
+        return mesh
 
     # Create the input file with the blocks representing plates in different planes
-    mesh = InputFile()
+    input_file = InputFile()
     dimensions = [0.1, 2, 4]
     elements = [1, 2, 2]
 
@@ -273,7 +306,7 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
     for i in range(3):
         brick = create_brick_mesh(rotate_list(dimensions, i), rotate_list(elements, i))
         brick.translate([i * 4, 0, 0])
-        mesh.add(brick)
+        input_file.add(brick)
 
     # Add a last plate with standard solid elements, to make sure that the algorithm
     # skips those
@@ -283,9 +316,9 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
         element_type=cupy.element_type.hex8,
     )
     brick.translate([3 * 4, 0, 0])
-    mesh.add(brick)
+    input_file.add(brick)
 
-    mesh.dump(file_path_blocks, header=False)
+    input_file.dump(file_path_blocks, add_header_information=False)
 
     # Create the dome input
     cubit = CubitPy()
@@ -296,4 +329,4 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
         cubit, [cubit.surface(2)], 0.1, n_layer=1
     )
     cubit.add_element_type(dome_mesh, cupy.element_type.hex8sh)
-    cubit.create_dat(file_path_dome)
+    cubit.dump(file_path_dome)
