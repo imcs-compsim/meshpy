@@ -255,7 +255,7 @@ make -j4
 
 If you want to actively develop MeshPy or run the test suite, you must install MeshPy in _editable_ (`-e`) mode and with our optional developer dependencies (`[dev]`) like
 ```bash
-pip install -e ".[dev]" # Quotation marks are required for some shells
+pip install -e ".[dev,fourc]" # Quotation marks are required for some shells
 ```
 You can now run the MeshPy test suite to check that everything worked as expected
 ```bash
