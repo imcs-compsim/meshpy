@@ -26,9 +26,9 @@ import os as _os
 import sys as _sys
 from datetime import datetime as _datetime
 from pathlib import Path as _Path
-from typing import Any as _Any
 from typing import Dict as _Dict
 from typing import List as _List
+from typing import Optional as _Optional
 
 from fourcipp.fourc_input import FourCInput as _FourCInput
 
@@ -142,9 +142,9 @@ class InputFile(_FourCInput):
 
     def dump(
         self,
-        input_file_path: _Path,
+        input_file_path: str | _Path,
         *,
-        nox_xml_file: bool | str = False,
+        nox_xml_file: str | None = None,
         add_header_default: bool = True,
         add_header_information: bool = True,
         add_footer_application_script: bool = True,
@@ -157,10 +157,9 @@ class InputFile(_FourCInput):
             input_file_path:
                 Path to the input file that should be created.
             nox_xml_file:
-                If this is a string, the xml file will be created with this
-                name. If this is False, no xml file will be created. If this
-                is True, the xml file will be created with the name of the
-                input file with the extension ".xml".
+                If this is a string, the NOX xml file will be created with this
+                name. If this is None, the NOX xml file will be created with the
+                name of the input file with the extension ".nox.xml".
             add_header_default:
                 Prepend the default MeshPy header comment to the input file.
             add_header_information:
@@ -176,22 +175,17 @@ class InputFile(_FourCInput):
                 Validate if the created input file is compatible with 4C with FourCIPP.
         """
 
-        if self.nox_xml_contents:
-            if nox_xml_file is False:
-                xml_file_name = "NOT_DEFINED"
-            elif nox_xml_file is True:
-                xml_file_name = _os.path.splitext(input_file_path)[0] + ".xml"
-            elif isinstance(nox_xml_file, str):
-                xml_file_name = nox_xml_file
-            else:
-                raise TypeError("nox_xml_file must be a string or a boolean value.")
+        # Make sure the given input file is a Path instance.
+        input_file_path = _Path(input_file_path)
 
-            self.sections["STRUCT NOX/Status Test"] = {"XML File": xml_file_name}
+        if self.nox_xml_contents:
+            if nox_xml_file is None:
+                nox_xml_file = input_file_path.name.split(".")[0] + ".nox.xml"
+
+            self["STRUCT NOX/Status Test"] = {"XML File": nox_xml_file}
 
             # Write the xml file to the disc.
-            with open(
-                _os.path.join(_os.path.dirname(input_file_path), xml_file_name), "w"
-            ) as xml_file:
+            with open(input_file_path.parent / nox_xml_file, "w") as xml_file:
                 xml_file.write(self.nox_xml_contents)
 
         # Add information header to the input file

@@ -25,13 +25,13 @@ import json
 import os
 import shutil
 import subprocess
-from difflib import unified_diff
 from pathlib import Path
 from typing import Any, Callable, Dict, Optional, Union
 
 import numpy as np
 import pytest
 import vtk
+import xmltodict
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
 from fourcipp.utils.dict_utils import compare_nested_dicts_or_lists
@@ -335,6 +335,10 @@ def get_raw_data(
     elif isinstance(obj, Path) and obj.suffix == ".json":
         return json.loads(get_string(obj))
 
+    elif isinstance(obj, Path) and obj.suffix == ".xml":
+        with open(obj, "r", encoding="utf-8") as f:
+            return xmltodict.parse(f.read())
+
     else:
         raise TypeError(f"The comparison for {type(obj)} is not yet implemented.")
 
@@ -381,12 +385,13 @@ def assert_results_equal(get_string, tmp_path, current_test_name) -> Callable:
             elif reference.suffix in [".vtk", ".vtu"]:
                 compare_vtk_files(reference, result, rtol, atol)
                 return
-            elif reference.suffix in [".yaml"]:
+            elif reference.suffix in [".yaml", ".xml"]:
                 reference_data = get_raw_data(reference)
                 result_data = get_raw_data(result)
                 compare_nested_dicts_or_lists_with_custom_compare(
                     reference_data, result_data, rtol, atol
                 )
+                return
             else:
                 raise NotImplementedError(
                     f"Comparison is not yet implemented for {reference.suffix} files."
