@@ -388,7 +388,7 @@ def set_header_static(
     )
 
     # Set the contents of the NOX xml file.
-    nox_xml = f"""
+    nox_xml_contents = f"""
         <ParameterList name="Status Test">
         <!-- Outer Status Test: This test is an OR combination of the structural convergence and the maximum number of iterations -->
         <ParameterList name="Outer Status Test">
@@ -448,7 +448,7 @@ def set_header_static(
     )
 
     # Set the xml content in the input file.
-    input_file.nox_xml = nox_xml
+    input_file.nox_xml_contents = nox_xml_contents
 
 
 def set_binning_strategy_section(

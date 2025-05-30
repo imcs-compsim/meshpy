@@ -193,3 +193,36 @@ def test_header_functions_beam_interaction(
 
     # Compare the output.
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
+
+
+@pytest.mark.parametrize(
+    ("nox_xml_file_kwarg", "xml_relative_path"),
+    [(None, "xml_test.nox.xml"), ("custom_name.xml", "custom_name.xml")],
+)
+def test_header_functions_nox_xml(
+    get_corresponding_reference_file_path,
+    assert_results_equal,
+    nox_xml_file_kwarg,
+    xml_relative_path,
+    tmp_path,
+):
+    """Test that the NOX xml is exported correctly."""
+
+    input_file = InputFile()
+    set_header_static(
+        input_file, total_time=1.0, n_steps=1, tol_increment=1e-4, tol_residuum=1e-5
+    )
+    input_file.dump(
+        tmp_path / "xml_test.4C.yaml",
+        nox_xml_file=nox_xml_file_kwarg,
+        add_footer_application_script=False,
+    )
+
+    # Check the xml path in the input file
+    assert input_file["STRUCT NOX/Status Test"]["XML File"] == xml_relative_path
+
+    # Check the created xml
+    assert_results_equal(
+        get_corresponding_reference_file_path(extension="xml"),
+        tmp_path / xml_relative_path,
+    )
