@@ -375,9 +375,7 @@ def test_four_c_simulation_beam_and_solid_tube(
 
     # Check the created input file
     assert_results_equal(
-        get_corresponding_reference_file_path(
-            additional_identifier="full_import" if full_import else None
-        ),
+        get_corresponding_reference_file_path(),
         input_file,
     )
 
