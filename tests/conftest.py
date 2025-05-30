@@ -274,12 +274,9 @@ def custom_compare(
         If no comparison took place, None is returned.
     """
 
-    def is_numpy_type(data):
-        """Check if the given data originates from numpy, either as an array
-        like structure or a scalar."""
-        return isinstance(data, np.ndarray) or isinstance(data, np.generic)
-
-    if is_numpy_type(obj) or is_numpy_type(reference_obj):
+    if isinstance(obj, (np.ndarray, np.generic)) or isinstance(
+        reference_obj, (np.ndarray, np.generic)
+    ):
         if not np.allclose(obj, reference_obj, rtol=rtol, atol=atol):
             raise AssertionError(
                 f"Custom MeshPy comparison failed!\n\nThe objects are not equal:\n\nobj: {obj}\n\nreference_obj: {reference_obj}"
