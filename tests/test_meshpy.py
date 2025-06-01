@@ -731,7 +731,6 @@ def test_meshpy_euler_bernoulli(
         # the same.
         input_file = InputFile()
         input_file.add(mesh)
-        input_file.get_dict_to_dump()
 
     for node in mesh.nodes:
         node.rotation = rot
@@ -743,7 +742,6 @@ def test_meshpy_euler_bernoulli(
         # director between the nodes.
         input_file = InputFile()
         input_file.add(mesh)
-        input_file.get_dict_to_dump()
 
 
 def test_meshpy_close_beam(assert_results_equal, get_corresponding_reference_file_path):
