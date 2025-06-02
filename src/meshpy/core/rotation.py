@@ -332,8 +332,8 @@ class Rotation:
             return object.__eq__(self, other)
 
     def copy(self):
-        """Return a deep copy of this object."""
-        return _copy.deepcopy(self)
+        """Return a copy of this object."""
+        return Rotation.from_quaternion(self.q, normalized=True)
 
     def __str__(self):
         """String representation of object."""
