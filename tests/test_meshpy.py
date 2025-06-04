@@ -1295,7 +1295,7 @@ def test_meshpy_nurbs_import(
     )
     set_beam_to_solid_meshtying(
         input_file,
-        mpy.beam_to_solid.volume_meshtying,
+        mpy.bc.beam_to_solid_volume_meshtying,
         contact_discretization="mortar",
         mortar_shape="line4",
         penalty_parameter=1000,
