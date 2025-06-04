@@ -149,7 +149,8 @@ class InputFile(_FourCInput):
         add_header_information: bool = True,
         add_footer_application_script: bool = True,
         sort_sections=False,
-        validate=False,
+        validate=True,
+        validate_sections_only: bool = False,
     ):
         """Write the input file to disk.
 
@@ -173,6 +174,9 @@ class InputFile(_FourCInput):
                 Sort sections alphabetically with FourCIPP.
             validate:
                 Validate if the created input file is compatible with 4C with FourCIPP.
+            validate_sections_only:
+                Validate each section independently. Required sections are no longer
+                required, but the sections must be valid.
         """
 
         # Make sure the given input file is a Path instance.
@@ -196,6 +200,7 @@ class InputFile(_FourCInput):
             input_file_path=input_file_path,
             sort_sections=sort_sections,
             validate=validate,
+            validate_sections_only=validate_sections_only,
             convert_to_native_types=False,  # conversion already happens during add()
         )
 

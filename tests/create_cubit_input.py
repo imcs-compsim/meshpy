@@ -318,7 +318,9 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
     brick.translate([3 * 4, 0, 0])
     input_file.add(brick)
 
-    input_file.dump(file_path_blocks, add_header_information=False)
+    input_file.dump(
+        file_path_blocks, add_header_information=False, validate_sections_only=True
+    )
 
     # Create the dome input
     cubit = CubitPy()
