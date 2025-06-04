@@ -39,7 +39,8 @@ dev = [
   "pytest",
   "pytest-cov",
   "testbook",
-  "vistools"
+  "vistools",
+  "xmltodict"
 ]
 
 [project.urls]
