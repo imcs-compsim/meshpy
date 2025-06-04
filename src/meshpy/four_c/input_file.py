@@ -196,6 +196,7 @@ class InputFile(_FourCInput):
             input_file_path=input_file_path,
             sort_sections=sort_sections,
             validate=validate,
+            convert_to_native_types=False,  # conversion already happens during add()
         )
 
         if add_header_default or add_footer_application_script:
