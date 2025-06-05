@@ -319,7 +319,10 @@ def test_performance(tmp_path):
     )
 
     test_performance.time_function(
-        "meshpy_dump", InputFile.dump, args=[input_file, testing_beam]
+        "meshpy_dump",
+        InputFile.dump,
+        args=[input_file, testing_beam],
+        kwargs={"validate_sections_only": True},
     )
 
     # Use a smaller mesh for shorter times in vtk testing
