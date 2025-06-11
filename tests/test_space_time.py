@@ -31,7 +31,6 @@ from meshpy.four_c.material import MaterialReissner
 from meshpy.mesh_creation_functions.beam_arc import create_beam_mesh_arc_segment_2d
 from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
 from meshpy.space_time.beam_to_space_time import beam_to_space_time, mesh_to_data_arrays
-from tests.test_performance import PerformanceTest
 
 
 def get_name(beam_class):
@@ -211,34 +210,41 @@ def test_space_time_varying_material_length(
 
 
 @pytest.mark.performance
-def test_space_time_performance():
-    """Test the performance of the space time creation."""
+def test_performance_create_mesh_in_space(evaluate_execution_time, cache_data):
+    """Test the performance of the mesh creation in space."""
 
-    # These are the expected test times that should not be exceeded
-    expected_times = {
-        "space_time_create_mesh_in_space": 0.01,
-        "space_time_create_mesh_in_time": 6.0,
-    }
-    test_performance = PerformanceTest(expected_times)
-
-    # Create the beam mesh in space
-    beam_type = Beam3rHerm2Line3
-    beam_radius = 0.05
-    mat = MaterialReissner(radius=beam_radius)
     mesh = Mesh()
-    test_performance.time_function(
-        "space_time_create_mesh_in_space",
+
+    evaluate_execution_time(
+        "MeshPy: Space-Time: Create mesh in space",
         create_beam_mesh_line,
-        args=[mesh, beam_type, mat, [0, 0, 0], [1, 0, 0]],
-        kwargs={"n_el": 100},
+        kwargs={
+            "mesh": mesh,
+            "beam_class": Beam3rHerm2Line3,
+            "material": MaterialReissner(radius=0.05),
+            "start_point": [0, 0, 0],
+            "end_point": [1, 0, 0],
+            "n_el": 100,
+        },
+        expected_time=0.01,
     )
 
-    # Create the beam mesh in time
-    test_performance.time_function(
-        "space_time_create_mesh_in_time",
+    # store mesh in cache for upcoming test
+    cache_data.mesh = mesh
+
+
+@pytest.mark.performance
+def test_performance_create_mesh_in_time(evaluate_execution_time, cache_data):
+    """Test the performance of the mesh creation in time."""
+
+    evaluate_execution_time(
+        "MeshPy: Space-Time: Create mesh in time",
         beam_to_space_time,
-        args=[mesh, 6.9, 1000],
-        kwargs={"time_start": 1.69},
+        kwargs={
+            "mesh_space_or_generator": cache_data.mesh,
+            "time_duration": 6.9,
+            "number_of_elements_in_time": 1000,
+            "time_start": 1.69,
+        },
+        expected_time=6.0,
     )
-
-    assert test_performance.failed_tests == 0

@@ -21,9 +21,6 @@
 # THE SOFTWARE.
 """Create a couple of different mesh cases and test the performance."""
 
-import time
-import warnings
-
 import numpy as np
 import pytest
 
@@ -43,6 +40,12 @@ from meshpy.utils.nodes import find_close_nodes
 
 if cubitpy_is_available():
     from cubitpy import CubitPy, cupy
+
+
+@pytest.fixture(scope="module")
+def shared_tmp_path(tmp_path_factory):
+    """Create a temporary path for shared use in performance tests."""
+    return tmp_path_factory.mktemp("performance_tests")
 
 
 def create_solid_block(file_path, nx, ny, nz):
@@ -130,13 +133,7 @@ def create_solid_block(file_path, nx, ny, nz):
     cubit.dump(file_path)
 
 
-def load_solid(solid_file, full_import):
-    """Load a solid into an input file."""
-
-    import_four_c_model(input_file_path=solid_file, convert_input_to_mesh=full_import)
-
-
-def create_large_beam_mesh(n_x, n_y, n_z, n_el):
+def create_beam_mesh(n_x, n_y, n_z, n_el):
     """Create a beam grid on the domain (1 x 1 x 1) with (nx * ny * nz) "grid
     cells"."""
 
@@ -176,184 +173,235 @@ def create_large_beam_mesh(n_x, n_y, n_z, n_el):
     return mesh
 
 
-class PerformanceTest(object):
-    """A class to test meshpy performance."""
+@pytest.mark.performance
+def test_performance_cubitpy_create_solid(evaluate_execution_time, shared_tmp_path):
+    """Test the performance of creating a solid block using CubitPy."""
 
-    def __init__(self, expected_times):
-        """Initialize counters."""
-
-        self.expected_times = expected_times
-        self.passed_tests = 0
-        self.failed_tests = 0
-
-    def time_function(self, name, funct, args=None, kwargs=None):
-        """Execute a function and check if the time is as expected."""
-
-        if args is None:
-            args = []
-        if kwargs is None:
-            kwargs = {}
-
-        # Get the expected time for this function.
-        if name in self.expected_times.keys():
-            expected_time = self.expected_times[name]
-        else:
-            raise ValueError("Function name {} not found!".format(name))
-
-        # Time before the execution.
-        start_time = time.time()
-
-        # Execute the function.
-        return_val = funct(*args, **kwargs)
-
-        # Check the elapsed time.
-        elapsed_time = time.time() - start_time
-        print(
-            f"Times for {name}:\n"
-            f"    Expected: {expected_time:.3g}sec\n"
-            f"    Actual:   {elapsed_time:.3g}sec"
-        )
-        if expected_time > elapsed_time:
-            self.passed_tests += 1
-            print("    OK")
-        else:
-            self.failed_tests += 1
-            print("    FAILED")
-            warnings.warn("Expected time not reached in function {}!".format(name))
-
-        # Return what the function would have given.
-        return return_val
+    evaluate_execution_time(
+        "CubitPy: Create solid block",
+        create_solid_block,
+        kwargs={
+            "file_path": shared_tmp_path / "performance_testing_solid.4C.yaml",
+            "nx": 100,
+            "ny": 100,
+            "nz": 10,
+        },
+        expected_time=8.0,
+    )
 
 
-def get_geometric_search_time(algorithm, n_points, n_runs):
-    """Return the time needed to perform geometric search functions."""
+@pytest.mark.parametrize(
+    ("log_name", "full_import", "expected_time"),
+    [
+        ("MeshPy: Load solid mesh (no full import)", False, 1.5),
+        ("MeshPy: Load solid mesh (full import)", True, 3.5),
+    ],
+)
+@pytest.mark.performance
+def test_performance_meshpy_load_solid(
+    evaluate_execution_time, shared_tmp_path, log_name, full_import, expected_time
+):
+    """Test the performance of loading a solid mesh using MeshPy."""
 
-    np.random.seed(seed=1)
-    points = np.random.rand(n_points, 3)
-
-    start = time.time()
-    for i in range(n_runs):
-        find_close_points(points, algorithm=algorithm)
-    return time.time() - start
+    evaluate_execution_time(
+        log_name,
+        import_four_c_model,
+        kwargs={
+            "input_file_path": shared_tmp_path / "performance_testing_solid.4C.yaml",
+            "convert_input_to_mesh": full_import,
+        },
+        expected_time=expected_time,
+    )
 
 
 @pytest.mark.performance
-def test_performance(tmp_path):
-    """The actual performance test."""
+def test_performance_meshpy_create_beams(evaluate_execution_time, cache_data):
+    """Test the performance of creating a large beam mesh."""
 
-    # Directories and files for testing.
-    testing_solid_block = tmp_path / "performance_testing_solid.4C.yaml"
-    testing_beam = tmp_path / "performance_testing_beam.4C.yaml"
-
-    # These are the expected test times that should not be exceeded
-    expected_times = {
-        "cubitpy_create_solid": 8.0,
-        "meshpy_load_solid": 1.5,
-        "meshpy_load_solid_full": 3.5,
-        "meshpy_create_beams": 9.0,
-        "meshpy_rotate": 0.6,
-        "meshpy_translate": 0.5,
-        "meshpy_reflect": 0.7,
-        "meshpy_wrap_around_cylinder": 2.0,
-        "meshpy_wrap_around_cylinder_without_check": 0.7,
-        "meshpy_find_close_nodes": 0.5,
-        "meshpy_add_mesh": 5,
-        "meshpy_dump": 9.0,
-        "meshpy_write_vtk": 4.5,
-        "meshpy_write_vtk_smooth": 9.0,
-        "geometric_search_find_nodes_brute_force": 0.05,
-    }
-    test_performance = PerformanceTest(expected_times)
-
-    test_performance.time_function(
-        "cubitpy_create_solid",
-        create_solid_block,
-        args=[testing_solid_block, 100, 100, 10],
+    # store mesh in cache for upcoming tests
+    cache_data.mesh = evaluate_execution_time(
+        "MeshPy: Create large beam mesh",
+        create_beam_mesh,
+        kwargs={
+            "n_x": 40,
+            "n_y": 40,
+            "n_z": 10,
+            "n_el": 2,
+        },
+        expected_time=9.0,
     )
 
-    test_performance.time_function(
-        "meshpy_load_solid", load_solid, args=[testing_solid_block, False]
+
+@pytest.mark.performance
+def test_performance_meshpy_rotate(evaluate_execution_time, cache_data):
+    """Test the performance of rotating a large beam mesh."""
+
+    evaluate_execution_time(
+        "MeshPy: Rotate large beam mesh",
+        cache_data.mesh.rotate,
+        kwargs={"rotation": Rotation([1, 1, 0], np.pi / 3)},
+        expected_time=0.6,
     )
 
-    test_performance.time_function(
-        "meshpy_load_solid_full", load_solid, args=[testing_solid_block, True]
+
+@pytest.mark.performance
+def test_performance_meshpy_translate(evaluate_execution_time, cache_data):
+    """Test the performance of translating a large beam mesh."""
+
+    evaluate_execution_time(
+        "MeshPy: Translate large beam mesh",
+        cache_data.mesh.translate,
+        kwargs={"vector": [0.5, 0, 0]},
+        expected_time=0.5,
     )
 
-    mesh = test_performance.time_function(
-        "meshpy_create_beams", create_large_beam_mesh, args=[40, 40, 10, 2]
+
+@pytest.mark.performance
+def test_performance_meshpy_reflect(evaluate_execution_time, cache_data):
+    """Test the performance of reflecting a large beam mesh."""
+
+    evaluate_execution_time(
+        "MeshPy: Reflect large beam mesh",
+        cache_data.mesh.reflect,
+        kwargs={"normal_vector": [0.5, 0.4, 0.1]},
+        expected_time=0.7,
     )
 
-    test_performance.time_function(
-        "meshpy_rotate", Mesh.rotate, args=[mesh, Rotation([1, 1, 0], np.pi / 3)]
-    )
 
-    test_performance.time_function(
-        "meshpy_translate", Mesh.translate, args=[mesh, [0.5, 0, 0]]
-    )
+@pytest.mark.performance
+def test_performance_mespy_wrap_around_cylinder(evaluate_execution_time, cache_data):
+    """Test the performance of wrapping a large beam mesh around a cylinder."""
 
-    test_performance.time_function(
-        "meshpy_reflect", Mesh.reflect, args=[mesh, [0.5, 0.4, 0.1]]
-    )
-
-    test_performance.time_function(
-        "meshpy_wrap_around_cylinder",
-        Mesh.wrap_around_cylinder,
-        args=[mesh],
+    evaluate_execution_time(
+        "MeshPy: Wrap large beam mesh around cylinder",
+        cache_data.mesh.wrap_around_cylinder,
         kwargs={"radius": 1.0},
+        expected_time=2.0,
     )
 
-    test_performance.time_function(
-        "meshpy_wrap_around_cylinder_without_check",
-        Mesh.wrap_around_cylinder,
-        args=[mesh],
+
+@pytest.mark.performance
+def test_performance_meshpy_wrap_around_cylinder_without_check(
+    evaluate_execution_time, cache_data
+):
+    """Test the performance of wrapping a large beam mesh around a cylinder
+    without checking for advanced warnings."""
+
+    evaluate_execution_time(
+        "MeshPy: Wrap large beam mesh around cylinder without check",
+        cache_data.mesh.wrap_around_cylinder,
         kwargs={"radius": 1.0, "advanced_warning": False},
+        expected_time=0.7,
     )
 
-    test_performance.time_function(
-        "meshpy_find_close_nodes", find_close_nodes, args=[mesh.nodes]
+
+@pytest.mark.performance
+def test_performance_meshpy_find_close_nodes(evaluate_execution_time, cache_data):
+    """Test the performance of finding close nodes in a large beam mesh."""
+
+    evaluate_execution_time(
+        "MeshPy: Find close nodes in large beam mesh",
+        find_close_nodes,
+        kwargs={"nodes": cache_data.mesh.nodes},
+        expected_time=0.5,
     )
+
+
+@pytest.mark.performance
+def test_performance_meshpy_add_mesh_to_input_file(evaluate_execution_time, cache_data):
+    """Test the performance of adding a mesh to an input file."""
 
     input_file = InputFile()
-    test_performance.time_function(
-        "meshpy_add_mesh", InputFile.add, args=[input_file, mesh]
+
+    evaluate_execution_time(
+        "MeshPy: Add large beam mesh to input file",
+        input_file.add,
+        kwargs={"object_to_add": cache_data.mesh},
+        expected_time=5.0,
     )
 
-    test_performance.time_function(
-        "meshpy_dump",
-        InputFile.dump,
-        args=[input_file, testing_beam],
-        kwargs={"validate_sections_only": True},
+    cache_data.input_file = input_file
+
+
+@pytest.mark.performance
+def test_performance_meshpy_dump_input_file(
+    evaluate_execution_time,
+    cache_data,
+    tmp_path,
+):
+    """Test the performance of dumping an input file with a large beam mesh."""
+
+    evaluate_execution_time(
+        "MeshPy: Dump input file with large beam mesh",
+        cache_data.input_file.dump,
+        kwargs={
+            "input_file_path": tmp_path / "performance_testing_beam.4C.yaml",
+            "validate_sections_only": True,
+        },
+        expected_time=9.0,
     )
 
-    # Use a smaller mesh for shorter times in vtk testing
-    mesh_smaller_for_output = create_large_beam_mesh(20, 20, 10, 2)
 
-    test_performance.time_function(
-        "meshpy_write_vtk",
-        Mesh.write_vtk,
-        args=[mesh_smaller_for_output],
+@pytest.mark.performance
+def test_performance_meshpy_write_vtk(evaluate_execution_time, tmp_path, cache_data):
+    """Test the performance of writing a beam mesh to VTK format."""
+
+    # use a smaller mesh for testing vtk output performance
+    cache_data.mesh = create_beam_mesh(n_x=20, n_y=20, n_z=10, n_el=2)
+
+    evaluate_execution_time(
+        "MeshPy: Write beam mesh to VTK",
+        cache_data.mesh.write_vtk,
         kwargs={
             "output_name": "performance_testing_beam",
             "output_directory": tmp_path,
             "beam_centerline_visualization_segments": 1,
         },
+        expected_time=4.5,
     )
 
-    test_performance.time_function(
-        "meshpy_write_vtk_smooth",
-        Mesh.write_vtk,
-        args=[mesh_smaller_for_output],
+
+@pytest.mark.performance
+def test_performance_meshpy_write_vtk_smooth(
+    evaluate_execution_time, tmp_path, cache_data
+):
+    """Test the performance of writing a beam mesh to VTK format with more
+    segments."""
+
+    evaluate_execution_time(
+        "MeshPy: Write beam mesh to VTK with more segments",
+        cache_data.mesh.write_vtk,
         kwargs={
             "output_name": "performance_testing_beam",
             "output_directory": tmp_path,
             "beam_centerline_visualization_segments": 5,
         },
+        expected_time=9.0,
     )
 
-    test_performance.time_function(
-        "geometric_search_find_nodes_brute_force",
-        get_geometric_search_time,
-        args=[FindClosePointAlgorithm.brute_force_cython, 100, 1000],
-    )
 
-    assert test_performance.failed_tests == 0
+@pytest.mark.performance
+def test_performance_meshpy_find_close_points_brute_force_cython(
+    evaluate_execution_time,
+):
+    """Test the performance of finding close points using brute force Cython
+    algorithm."""
+
+    def repeat_find_random_close_points(n_points, n_runs, algorithm):
+        """Repeat finding close points with random points."""
+        np.random.seed(seed=1)
+        points = np.random.rand(n_points, 3)
+
+        for _ in range(n_runs):
+            find_close_points(points, algorithm=algorithm)
+
+    evaluate_execution_time(
+        "MeshPy: Find close points (brute force Cython)",
+        repeat_find_random_close_points,
+        kwargs={
+            "n_points": 100,
+            "n_runs": 1000,
+            "algorithm": FindClosePointAlgorithm.brute_force_cython,
+        },
+        expected_time=0.05,
+    )
