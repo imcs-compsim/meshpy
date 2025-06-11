@@ -186,14 +186,14 @@ def test_performance_cubitpy_create_solid(evaluate_execution_time, shared_tmp_pa
             "ny": 100,
             "nz": 10,
         },
-        expected_time=8.0,
+        expected_time=10.0,
     )
 
 
 @pytest.mark.parametrize(
     ("log_name", "full_import", "expected_time"),
     [
-        ("MeshPy: Load solid mesh (no full import)", False, 1.5),
+        ("MeshPy: Load solid mesh (no full import)", False, 2.5),
         ("MeshPy: Load solid mesh (full import)", True, 3.5),
     ],
 )
@@ -228,7 +228,7 @@ def test_performance_meshpy_create_beams(evaluate_execution_time, cache_data):
             "n_z": 10,
             "n_el": 2,
         },
-        expected_time=9.0,
+        expected_time=4.0,
     )
 
 
@@ -240,7 +240,7 @@ def test_performance_meshpy_rotate(evaluate_execution_time, cache_data):
         "MeshPy: Rotate large beam mesh",
         cache_data.mesh.rotate,
         kwargs={"rotation": Rotation([1, 1, 0], np.pi / 3)},
-        expected_time=0.6,
+        expected_time=0.5,
     )
 
 
@@ -252,7 +252,7 @@ def test_performance_meshpy_translate(evaluate_execution_time, cache_data):
         "MeshPy: Translate large beam mesh",
         cache_data.mesh.translate,
         kwargs={"vector": [0.5, 0, 0]},
-        expected_time=0.5,
+        expected_time=0.25,
     )
 
 
@@ -264,7 +264,7 @@ def test_performance_meshpy_reflect(evaluate_execution_time, cache_data):
         "MeshPy: Reflect large beam mesh",
         cache_data.mesh.reflect,
         kwargs={"normal_vector": [0.5, 0.4, 0.1]},
-        expected_time=0.7,
+        expected_time=0.5,
     )
 
 
@@ -276,7 +276,7 @@ def test_performance_mespy_wrap_around_cylinder(evaluate_execution_time, cache_d
         "MeshPy: Wrap large beam mesh around cylinder",
         cache_data.mesh.wrap_around_cylinder,
         kwargs={"radius": 1.0},
-        expected_time=2.0,
+        expected_time=1.75,
     )
 
 
@@ -291,7 +291,7 @@ def test_performance_meshpy_wrap_around_cylinder_without_check(
         "MeshPy: Wrap large beam mesh around cylinder without check",
         cache_data.mesh.wrap_around_cylinder,
         kwargs={"radius": 1.0, "advanced_warning": False},
-        expected_time=0.7,
+        expected_time=0.5,
     )
 
 
@@ -303,7 +303,7 @@ def test_performance_meshpy_find_close_nodes(evaluate_execution_time, cache_data
         "MeshPy: Find close nodes in large beam mesh",
         find_close_nodes,
         kwargs={"nodes": cache_data.mesh.nodes},
-        expected_time=0.5,
+        expected_time=0.4,
     )
 
 
@@ -317,7 +317,7 @@ def test_performance_meshpy_add_mesh_to_input_file(evaluate_execution_time, cach
         "MeshPy: Add large beam mesh to input file",
         input_file.add,
         kwargs={"object_to_add": cache_data.mesh},
-        expected_time=5.0,
+        expected_time=10.0,
     )
 
     cache_data.input_file = input_file
@@ -338,7 +338,7 @@ def test_performance_meshpy_dump_input_file(
             "input_file_path": tmp_path / "performance_testing_beam.4C.yaml",
             "validate_sections_only": True,
         },
-        expected_time=9.0,
+        expected_time=5.5,
     )
 
 
@@ -357,7 +357,7 @@ def test_performance_meshpy_write_vtk(evaluate_execution_time, tmp_path, cache_d
             "output_directory": tmp_path,
             "beam_centerline_visualization_segments": 1,
         },
-        expected_time=4.5,
+        expected_time=4.0,
     )
 
 
@@ -376,7 +376,7 @@ def test_performance_meshpy_write_vtk_smooth(
             "output_directory": tmp_path,
             "beam_centerline_visualization_segments": 5,
         },
-        expected_time=9.0,
+        expected_time=7.5,
     )
 
 
@@ -403,5 +403,5 @@ def test_performance_meshpy_find_close_points_brute_force_cython(
             "n_runs": 1000,
             "algorithm": FindClosePointAlgorithm.brute_force_cython,
         },
-        expected_time=0.05,
+        expected_time=0.025,
     )

@@ -246,5 +246,5 @@ def test_performance_create_mesh_in_time(evaluate_execution_time, cache_data):
             "number_of_elements_in_time": 1000,
             "time_start": 1.69,
         },
-        expected_time=6.0,
+        expected_time=3.0,
     )
