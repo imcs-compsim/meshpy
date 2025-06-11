@@ -44,7 +44,7 @@ class SolidRigidSphere(_VolumeElement):
             "id": self.i_global,
             "cell": {
                 "type": "POINT1",
-                "connectivity": [node.i_global for node in self.nodes],
+                "connectivity": self.nodes,
             },
             "data": self.data,
         }

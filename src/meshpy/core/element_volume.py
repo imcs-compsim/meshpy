@@ -47,7 +47,7 @@ class VolumeElement(_Element):
             "id": self.i_global,
             "cell": {
                 "type": element_type_to_four_c_string[type(self)],
-                "connectivity": [node.i_global for node in self.nodes],
+                "connectivity": self.nodes,
             },
             "data": self.data,
         }

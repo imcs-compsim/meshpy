@@ -55,7 +55,7 @@ class Beam3rHerm2Line3(_Beam):
             "id": self.i_global,
             "cell": {
                 "type": "HERM2LINE3",
-                "connectivity": [self.nodes[i].i_global for i in [0, 2, 1]],
+                "connectivity": [self.nodes[i] for i in [0, 2, 1]],
             },
             "data": {
                 "type": "BEAM3R",
@@ -90,7 +90,7 @@ class Beam3rLine2Line2(_Beam):
             "id": self.i_global,
             "cell": {
                 "type": "LINE2",
-                "connectivity": [self.nodes[i].i_global for i in [0, 1]],
+                "connectivity": self.nodes,
             },
             "data": {
                 "type": "BEAM3R",
@@ -139,7 +139,7 @@ class Beam3kClass(_Beam):
             "id": self.i_global,
             "cell": {
                 "type": "LINE3",
-                "connectivity": [self.nodes[i].i_global for i in [0, 2, 1]],
+                "connectivity": [self.nodes[i] for i in [0, 2, 1]],
             },
             "data": {
                 "type": "BEAM3K",
@@ -205,7 +205,7 @@ class Beam3eb(_Beam):
             "id": self.i_global,
             "cell": {
                 "type": "LINE2",
-                "connectivity": [self.nodes[i].i_global for i in [0, 1]],
+                "connectivity": self.nodes,
             },
             "data": {
                 "type": "BEAM3EB",
