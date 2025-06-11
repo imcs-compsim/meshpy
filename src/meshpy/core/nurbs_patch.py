@@ -223,7 +223,7 @@ class NURBSSurface(NURBSPatch):
                         },
                         "data": {
                             "type": "WALLNURBS",
-                            "MAT": self.material.i_global,
+                            "MAT": self.material,
                             **(
                                 self.element_description
                                 if self.element_description
@@ -322,7 +322,7 @@ class NURBSVolume(NURBSPatch):
                             },
                             "data": {
                                 "type": "SOLID",
-                                "MAT": self.material.i_global,
+                                "MAT": self.material,
                                 **(
                                     self.element_description
                                     if self.element_description
