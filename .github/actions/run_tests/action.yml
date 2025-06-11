@@ -31,4 +31,4 @@ runs:
         TEMP_DIR="${RUNNER_TEMP}/meshpy_pytest"
         mkdir -p "$TEMP_DIR"
         echo "PYTEST_TMPDIR=$TEMP_DIR" >> $GITHUB_ENV
-        pytest  --basetemp="$TEMP_DIR" ${{ inputs.additional-pytest-flags}}
+        pytest  --basetemp="$TEMP_DIR" ${{ inputs.additional-pytest-flags}} --color=yes
