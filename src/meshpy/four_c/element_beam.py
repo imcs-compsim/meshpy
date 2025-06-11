@@ -55,11 +55,11 @@ class Beam3rHerm2Line3(_Beam):
             "id": self.i_global,
             "cell": {
                 "type": "HERM2LINE3",
-                "connectivity": [self.nodes[i].i_global for i in [0, 2, 1]],
+                "connectivity": [self.nodes[i] for i in [0, 2, 1]],
             },
             "data": {
                 "type": "BEAM3R",
-                "MAT": self.material.i_global,
+                "MAT": self.material,
                 "TRIADS": [
                     item
                     for i in [0, 2, 1]
@@ -90,11 +90,11 @@ class Beam3rLine2Line2(_Beam):
             "id": self.i_global,
             "cell": {
                 "type": "LINE2",
-                "connectivity": [self.nodes[i].i_global for i in [0, 1]],
+                "connectivity": self.nodes,
             },
             "data": {
                 "type": "BEAM3R",
-                "MAT": self.material.i_global,
+                "MAT": self.material,
                 "TRIADS": [
                     item
                     for i in [0, 1]
@@ -139,13 +139,13 @@ class Beam3kClass(_Beam):
             "id": self.i_global,
             "cell": {
                 "type": "LINE3",
-                "connectivity": [self.nodes[i].i_global for i in [0, 2, 1]],
+                "connectivity": [self.nodes[i] for i in [0, 2, 1]],
             },
             "data": {
                 "type": "BEAM3K",
                 "WK": 1 if self.weak else 0,
                 "ROTVEC": 1 if self.rotvec else 0,
-                "MAT": self.material.i_global,
+                "MAT": self.material,
                 "TRIADS": [
                     item
                     for i in [0, 2, 1]
@@ -205,10 +205,10 @@ class Beam3eb(_Beam):
             "id": self.i_global,
             "cell": {
                 "type": "LINE2",
-                "connectivity": [self.nodes[i].i_global for i in [0, 1]],
+                "connectivity": self.nodes,
             },
             "data": {
                 "type": "BEAM3EB",
-                "MAT": self.material.i_global,
+                "MAT": self.material,
             },
         }

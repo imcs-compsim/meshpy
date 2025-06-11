@@ -38,7 +38,9 @@ from meshpy.core.coupling import Coupling as _Coupling
 from meshpy.core.function import Function as _Function
 from meshpy.core.geometry_set import GeometrySet as _GeometrySet
 from meshpy.core.geometry_set import GeometrySetNodes as _GeometrySetNodes
+from meshpy.core.material import Material as _Material
 from meshpy.core.mesh import Mesh as _Mesh
+from meshpy.core.node import Node as _Node
 from meshpy.core.nurbs_patch import NURBSPatch as _NURBSPatch
 from meshpy.four_c.input_file_mappings import (
     INPUT_FILE_MAPPINGS as _INPUT_FILE_MAPPINGS,
@@ -123,7 +125,7 @@ class InputFile(_FourCInput):
         # to native Python types via the FourCIPP type converter.
         self.type_converter.register_numpy_types()
         self.type_converter.register_type(
-            _Function, lambda converter, obj: obj.i_global
+            (_Function, _Material, _Node), lambda converter, obj: obj.i_global
         )
 
     def add(self, object_to_add, **kwargs):
