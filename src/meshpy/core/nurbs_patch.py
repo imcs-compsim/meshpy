@@ -208,7 +208,7 @@ class NURBSSurface(NURBSPatch):
             ):
                 element_cps_ids = get_ids_ctrlpts_surface(knot_span_u, knot_span_v)
 
-                connectivity = [self.nodes[i].i_global for i in element_cps_ids]
+                connectivity = [self.nodes[i] for i in element_cps_ids]
 
                 num_cp_in_element = (self.polynomial_orders[0] + 1) * (
                     self.polynomial_orders[1] + 1
@@ -223,7 +223,7 @@ class NURBSSurface(NURBSPatch):
                         },
                         "data": {
                             "type": "WALLNURBS",
-                            "MAT": self.material.i_global,
+                            "MAT": self.material,
                             **(
                                 self.element_description
                                 if self.element_description
@@ -305,7 +305,7 @@ class NURBSVolume(NURBSPatch):
                         knot_span_u, knot_span_v, knot_span_w
                     )
 
-                    connectivity = [self.nodes[i].i_global for i in element_cps_ids]
+                    connectivity = [self.nodes[i] for i in element_cps_ids]
 
                     num_cp_in_element = (
                         (self.polynomial_orders[0] + 1)
@@ -322,7 +322,7 @@ class NURBSVolume(NURBSPatch):
                             },
                             "data": {
                                 "type": "SOLID",
-                                "MAT": self.material.i_global,
+                                "MAT": self.material,
                                 **(
                                     self.element_description
                                     if self.element_description
