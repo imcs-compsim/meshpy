@@ -547,3 +547,30 @@ def test_find_close_points_tolerance_precision(algorithm):
 
     has_partner, _ = find_close_points(coords, algorithm=algorithm, tol=1.1 * delta)
     assert np.array_equal(has_partner, [0, 0, 1, 1])
+
+
+@pytest.mark.performance
+def test_performance_meshpy_find_close_points_brute_force_cython(
+    evaluate_execution_time,
+):
+    """Test the performance of finding close points using brute force Cython
+    algorithm."""
+
+    def repeat_find_random_close_points(n_points, n_runs, algorithm):
+        """Repeat finding close points with random points."""
+        np.random.seed(seed=1)
+        points = np.random.rand(n_points, 3)
+
+        for _ in range(n_runs):
+            find_close_points(points, algorithm=algorithm)
+
+    evaluate_execution_time(
+        "MeshPy: Find close points (brute force Cython)",
+        repeat_find_random_close_points,
+        kwargs={
+            "n_points": 100,
+            "n_runs": 1000,
+            "algorithm": FindClosePointAlgorithm.brute_force_cython,
+        },
+        expected_time=0.025,
+    )
