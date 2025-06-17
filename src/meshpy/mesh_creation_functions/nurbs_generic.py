@@ -36,8 +36,7 @@ def add_geomdl_nurbs_to_mesh(
     geomdl_obj,
     *,
     material=None,
-    element_string=None,
-    element_description=None,
+    data=None,
 ):
     """Generic NURBS mesh creation function.
 
@@ -49,9 +48,8 @@ def add_geomdl_nurbs_to_mesh(
         NURBS geometry created using Geomdl.
     material: Material
         Material for this geometry.
-    element_description:
-        Information that will be written after the information of
-        the elements.
+    data:
+        General element data, e.g., material, formulation, ...
 
     Return
     ----
@@ -107,8 +105,7 @@ def add_geomdl_nurbs_to_mesh(
         geomdl_obj.degree,
         nodes=control_points,
         material=material,
-        element_string=element_string,
-        element_description=element_description,
+        data=data,
     )
 
     # Add element and control points to the mesh
