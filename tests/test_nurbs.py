@@ -64,10 +64,7 @@ def test_nurbs_hollow_cylinder_segment_2d(
     }
 
     patch_set = add_geomdl_nurbs_to_mesh(
-        mesh,
-        surf_obj,
-        material=mat,
-        element_description=element_description,
+        mesh, surf_obj, material=mat, data=element_description
     )
 
     mesh.add(patch_set)
@@ -100,10 +97,7 @@ def test_nurbs_flat_plate_2d(
     }
 
     patch_set = add_geomdl_nurbs_to_mesh(
-        mesh,
-        surf_obj,
-        material=mat,
-        element_description=element_description,
+        mesh, surf_obj, material=mat, data=element_description
     )
 
     mesh.add(patch_set)
@@ -162,10 +156,7 @@ def test_nurbs_rotation_nurbs_surface(
     }
 
     patch_set = add_geomdl_nurbs_to_mesh(
-        mesh,
-        surf_obj,
-        material=mat,
-        element_description=element_description,
+        mesh, surf_obj, material=mat, data=element_description
     )
 
     mesh.add(patch_set)
@@ -199,10 +190,7 @@ def test_nurbs_translate_nurbs_surface(
     }
 
     patch_set = add_geomdl_nurbs_to_mesh(
-        mesh,
-        surf_obj,
-        material=mat,
-        element_description=element_description,
+        mesh, surf_obj, material=mat, data=element_description
     )
 
     mesh.add(patch_set)
@@ -234,7 +222,7 @@ def test_nurbs_cylindrical_shell_sector(
         mesh,
         surf_obj,
         material=mat,
-        element_description={"KINEM": "linear", "EAS": "none", "THICK": 1.0},
+        data={"KINEM": "linear", "EAS": "none", "THICK": 1.0},
     )
 
     mesh.add(patch_set)
@@ -268,10 +256,7 @@ def test_nurbs_couple_nurbs_meshes(
     }
 
     patch_set_1 = add_geomdl_nurbs_to_mesh(
-        mesh,
-        surf_obj_1,
-        material=mat,
-        element_description=element_description,
+        mesh, surf_obj_1, material=mat, data=element_description
     )
 
     mesh.add(patch_set_1)
@@ -284,10 +269,7 @@ def test_nurbs_couple_nurbs_meshes(
     )
 
     patch_set_2 = add_geomdl_nurbs_to_mesh(
-        mesh,
-        surf_obj_2,
-        material=mat,
-        element_description=element_description,
+        mesh, surf_obj_2, material=mat, data=element_description
     )
 
     mesh.add(patch_set_2)
@@ -321,10 +303,7 @@ def test_nurbs_sphere_surface(
     }
 
     patch_set = add_geomdl_nurbs_to_mesh(
-        mesh,
-        surf_obj,
-        material=mat,
-        element_description=element_description,
+        mesh, surf_obj, material=mat, data=element_description
     )
 
     mesh.add(patch_set)
@@ -352,8 +331,7 @@ def test_nurbs_string_types(
         mesh,
         surf_obj,
         material=mat,
-        element_string="WALLNURBS",
-        element_description={"KINEM": "linear", "EAS": "none", "THICK": 1.0},
+        data={"KINEM": "linear", "EAS": "none", "THICK": 1.0},
     )
 
     mesh.add(patch_set)
@@ -387,10 +365,7 @@ def test_nurbs_hemisphere_surface(
     # Add the patch sets of every surface section of the hemisphere to the input file
     for surf in surfs:
         patch_set = add_geomdl_nurbs_to_mesh(
-            mesh,
-            surf,
-            material=mat,
-            element_description=element_description,
+            mesh, surf, material=mat, data=element_description
         )
 
         mesh.add(patch_set)
@@ -424,10 +399,7 @@ def test_nurbs_torus_surface(
     # Add the patch sets of every surface section of the torus to the input file
     for surf in surfs:
         patch_set = add_geomdl_nurbs_to_mesh(
-            mesh,
-            surf,
-            material=mat,
-            element_description=element_description,
+            mesh, surf, material=mat, data=element_description
         )
 
         mesh.add(patch_set)

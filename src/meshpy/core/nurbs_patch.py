@@ -40,12 +40,11 @@ class NURBSPatch(_Element):
         self,
         knot_vectors,
         polynomial_orders,
-        element_string,
         material=None,
         nodes=None,
-        element_description=None,
+        data=None,
     ):
-        super().__init__(nodes=nodes, material=material)
+        super().__init__(nodes=nodes, material=material, data=data)
 
         # Knot vectors
         self.knot_vectors = knot_vectors
@@ -55,10 +54,6 @@ class NURBSPatch(_Element):
 
         # Set numbers for elements
         self.n_nurbs_patch = None
-
-        # Set the element definitions
-        self.element_string = element_string
-        self.element_description = element_description
 
     def get_nurbs_dimension(self):
         """Return the number of dimensions of the NURBS structure."""
@@ -158,10 +153,8 @@ class NURBSPatch(_Element):
 class NURBSSurface(NURBSPatch):
     """A patch of a NURBS surface."""
 
-    def __init__(self, *args, element_string=None, **kwargs):
-        if element_string is None:
-            element_string = "WALLNURBS"
-        super().__init__(*args, element_string, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def dump_to_list(self):
         """Return a list with all the element definitions contained in this
@@ -224,11 +217,7 @@ class NURBSSurface(NURBSPatch):
                         "data": {
                             "type": "WALLNURBS",
                             "MAT": self.material,
-                            **(
-                                self.element_description
-                                if self.element_description
-                                else {}
-                            ),
+                            **(self.data if self.data else {}),
                         },
                     }
                 )
@@ -240,10 +229,8 @@ class NURBSSurface(NURBSPatch):
 class NURBSVolume(NURBSPatch):
     """A patch of a NURBS volume."""
 
-    def __init__(self, *args, element_string=None, **kwargs):
-        if element_string is not None:
-            raise ValueError("element_string is not yet implemented for NURBS volumes")
-        super().__init__(*args, element_string, **kwargs)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
 
     def dump_to_list(self):
         """Return a list with all the element definitions contained in this
@@ -323,11 +310,7 @@ class NURBSVolume(NURBSPatch):
                             "data": {
                                 "type": "SOLID",
                                 "MAT": self.material,
-                                **(
-                                    self.element_description
-                                    if self.element_description
-                                    else {}
-                                ),
+                                **(self.data if self.data else {}),
                             },
                         }
                     )
