@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Create a beam filament from a NURBS curve represented with splinepy."""
+"""Create a beam filament from a curve represented with splinepy."""
 
 import numpy as _np
 
@@ -29,13 +29,13 @@ from meshpy.mesh_creation_functions.beam_parametric_curve import (
 )
 
 
-def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
+def get_curve_function_and_jacobian_for_integration(curve, tol: float | None = None):
     """Return function objects for evaluating the curve and the derivative.
     These functions are used in the curve integration. It can happen that the
     integration algorithm has to evaluate the curve outside of the defined
-    domain. This usually leads to errors in common NURBS packages. Therefore,
-    we check for this evaluation outside of the parameter domain here and
-    perform a linear extrapolation.
+    domain. This usually leads to errors in common spline/NURBS packages.
+    Therefore, we check for this evaluation outside of the parameter domain
+    here and perform a linear extrapolation.
 
     Args
     ----
@@ -53,17 +53,16 @@ def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
         jacobian:
             Function for evaluating the tangent along the curve
         curve_start:
-            Parameter coordinate for the start for the NURBS curve
+            Parameter coordinate for the start for the curve
         curve_end:
-            Parameter coordinate for the end for the NURBS curve
+            Parameter coordinate for the end for the curve
     """
 
     if tol is None:
         tol = _mpy.eps_pos
 
-    knot_vector = curve.knot_vectors[0]
-    curve_start = _np.min(knot_vector)
-    curve_end = _np.max(knot_vector)
+    curve_start = curve.parametric_bounds[0][0]
+    curve_end = curve.parametric_bounds[1][0]
 
     def eval_r(t):
         """Evaluate the position along the curve."""
@@ -91,11 +90,11 @@ def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
         )
 
     def jacobian(t):
-        """Convert the spline to a Jacobian function that can be used for curve
-        generation.
+        """Convert the curve to a Jacobian function that can be used for
+        integration along the curve.
 
         There is no tolerance here, since the integration algorithms
-        sometimes evaluate the derivative far outside the interval.
+        sometimes evaluates the derivative far outside the interval.
         """
 
         if curve_start <= t <= curve_end:
@@ -109,10 +108,10 @@ def get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=None):
     return function, jacobian, curve_start, curve_end
 
 
-def create_beam_mesh_from_nurbs(
+def create_beam_mesh_from_splinepy(
     mesh, beam_class, material, curve, *, tol=None, **kwargs
 ):
-    """Generate a beam from a NURBS curve.
+    """Generate a beam from a splinepy curve.
 
     Args
     ----
@@ -147,7 +146,7 @@ def create_beam_mesh_from_nurbs(
         jacobian,
         curve_start,
         curve_end,
-    ) = get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=tol)
+    ) = get_curve_function_and_jacobian_for_integration(curve, tol=tol)
 
     # Create the beams
     return _create_beam_mesh_parametric_curve(

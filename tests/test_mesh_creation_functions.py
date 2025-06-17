@@ -47,10 +47,6 @@ from meshpy.mesh_creation_functions.beam_arc import (
     create_beam_mesh_arc_segment_via_axis,
     create_beam_mesh_arc_segment_via_rotation,
 )
-from meshpy.mesh_creation_functions.beam_from_nurbs_curve import (
-    create_beam_mesh_from_nurbs,
-    get_nurbs_curve_function_and_jacobian_for_integration,
-)
 from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_generic
 from meshpy.mesh_creation_functions.beam_helix import create_beam_mesh_helix
 from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
@@ -60,6 +56,10 @@ from meshpy.mesh_creation_functions.beam_node_continuation import (
 )
 from meshpy.mesh_creation_functions.beam_parametric_curve import (
     create_beam_mesh_parametric_curve,
+)
+from meshpy.mesh_creation_functions.beam_splinepy import (
+    create_beam_mesh_from_splinepy,
+    get_curve_function_and_jacobian_for_integration,
 )
 from meshpy.utils.nodes import get_nodal_coordinates
 
@@ -120,6 +120,20 @@ def create_helix_function(
         )
 
     return helix
+
+
+def create_testing_bezier_curve():
+    """Create a Bezier curve used for testing."""
+
+    control_points = np.array(
+        [
+            [0.0, 0.0, 0.0],
+            [1.0, 2.0, 1.0],
+            [2.0, 2.0, 2.0],
+            [3.0, 0.0, 0.0],
+        ]
+    )
+    return splinepy.Bezier(degrees=[3], control_points=control_points)
 
 
 def create_testing_nurbs_curve():
@@ -502,29 +516,42 @@ def test_mesh_creation_functions_wire(
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-def test_mesh_creation_functions_nurbs(
-    assert_results_equal, get_corresponding_reference_file_path
+@pytest.mark.parametrize(
+    ("name", "curve_creation_function", "ref_length"),
+    [
+        ("bezier", create_testing_bezier_curve, 5.064502358928783),
+        ("nurbs", create_testing_nurbs_curve, 3.140204411551537),
+    ],
+)
+def test_mesh_creation_functions_splinepy(
+    name,
+    curve_creation_function,
+    ref_length,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
 ):
-    """Test the create_beam_mesh_from_nurbs function."""
+    """Test the create_beam_mesh_from_splinepy function with different splinepy
+    curves."""
 
-    # Create beam elements.
-    curve = create_testing_nurbs_curve()
+    curve = curve_creation_function()
     mat = MaterialReissner(radius=0.05)
     mesh = Mesh()
-    _, length = create_beam_mesh_from_nurbs(
+    _, length = create_beam_mesh_from_splinepy(
         mesh, Beam3rHerm2Line3, mat, curve, n_el=3, output_length=True
     )
-    assert np.isclose(3.140204411551537, length, rtol=mpy.eps_pos, atol=0.0)
+    assert np.isclose(ref_length, length, rtol=mpy.eps_pos, atol=0.0)
 
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier=name), mesh
+    )
 
 
-def test_mesh_creation_functions_nurbs_unit():
+def test_mesh_creation_functions_splinepy_unit():
     """Unittest the function and jacobian creation in the
-    create_beam_mesh_from_nurbs function."""
+    create_beam_mesh_from_splinepy function."""
 
     curve = create_testing_nurbs_curve()
-    r, dr, _, _ = get_nurbs_curve_function_and_jacobian_for_integration(curve, tol=10)
+    r, dr, _, _ = get_curve_function_and_jacobian_for_integration(curve, tol=10)
 
     t_values = [5.0 / 7.0, -0.3, 1.2]
     results_r = [
