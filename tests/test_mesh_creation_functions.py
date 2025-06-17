@@ -122,6 +122,20 @@ def create_helix_function(
     return helix
 
 
+def create_testing_bezier_curve():
+    """Create a Bezier curve used for testing."""
+
+    control_points = np.array(
+        [
+            [0.0, 0.0, 0.0],
+            [1.0, 2.0, 1.0],
+            [2.0, 2.0, 2.0],
+            [3.0, 0.0, 0.0],
+        ]
+    )
+    return splinepy.Bezier(degrees=[3], control_points=control_points)
+
+
 def create_testing_nurbs_curve():
     """Create a NURBS curve used for testing."""
 
@@ -502,21 +516,34 @@ def test_mesh_creation_functions_wire(
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-def test_mesh_creation_functions_nurbs(
-    assert_results_equal, get_corresponding_reference_file_path
+@pytest.mark.parametrize(
+    ("name", "curve_creation_function", "ref_length"),
+    [
+        ("bezier", create_testing_bezier_curve, 5.064502358928783),
+        ("nurbs", create_testing_nurbs_curve, 3.140204411551537),
+    ],
+)
+def test_mesh_creation_functions_splinepy(
+    name,
+    curve_creation_function,
+    ref_length,
+    assert_results_equal,
+    get_corresponding_reference_file_path,
 ):
-    """Test the create_beam_mesh_from_nurbs function."""
+    """Test the create_beam_mesh_from_nurbs function with different splinepy
+    curves."""
 
-    # Create beam elements.
-    curve = create_testing_nurbs_curve()
+    curve = curve_creation_function()
     mat = MaterialReissner(radius=0.05)
     mesh = Mesh()
     _, length = create_beam_mesh_from_nurbs(
         mesh, Beam3rHerm2Line3, mat, curve, n_el=3, output_length=True
     )
-    assert np.isclose(3.140204411551537, length, rtol=mpy.eps_pos, atol=0.0)
+    assert np.isclose(ref_length, length, rtol=mpy.eps_pos, atol=0.0)
 
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_equal(
+        get_corresponding_reference_file_path(additional_identifier=name), mesh
+    )
 
 
 def test_mesh_creation_functions_nurbs_unit():
