@@ -31,6 +31,84 @@ from meshpy.core.nurbs_patch import NURBSSurface as _NURBSSurface
 from meshpy.core.nurbs_patch import NURBSVolume as _NURBSVolume
 
 
+def add_splinepy_nurbs_to_mesh(
+    mesh,
+    splinepy_obj,
+    *,
+    material=None,
+    data=None,
+):
+    """Add a splinepy NURBS to the mesh.
+
+    Args
+    ----
+    mesh: Mesh
+        Mesh that the created NURBS geometry should be added to.
+    splinepy_obj: splinepy object
+        NURBS geometry created using splinepy.
+    material: Material
+        Material for this geometry.
+    data:
+        General element data, e.g., material, formulation, ...
+
+    Return
+    ----
+    return_set: GeometryName
+        Set with the control points that form the topology of the mesh.
+
+        For a surface, the following information is stored:
+            Vertices: 'vertex_u_min_v_min', 'vertex_u_max_v_min', 'vertex_u_min_v_max', 'vertex_u_max_v_max'
+            Edges: 'line_v_min', 'line_u_max', 'line_v_max', 'line_u_min'
+            Surface: 'surf'
+
+        For a volume, the following information is stored:
+            Vertices: 'vertex_u_min_v_min_w_min', 'vertex_u_max_v_min_w_min', 'vertex_u_min_v_max_w_min', 'vertex_u_max_v_max_w_min',
+                      'vertex_u_min_v_min_w_max', 'vertex_u_max_v_min_w_max', 'vertex_u_min_v_max_w_max', 'vertex_u_max_v_max_w_max'
+            Edges: 'line_v_min_w_min', 'line_u_max_w_min', 'line_v_max_w_min', 'line_u_min_w_min',
+                   'line_u_min_v_min', 'line_u_max_v_min', 'line_u_min_v_max', 'line_u_max_v_max'
+                   'line_v_min_w_max', 'line_u_max_w_max', 'line_v_max_w_max', 'line_u_min_w_max'
+            Surfaces: 'surf_w_min', 'surf_w_max', 'surf_v_min', 'surf_v_max', 'surf_v_max', 'surf_u_min'
+            Volume: 'vol'
+    """
+
+    # Make sure the material is in the mesh
+    mesh.add_material(material)
+
+    # Fill control points
+    control_points = [
+        _ControlPoint(coord, weight[0])
+        for coord, weight in zip(splinepy_obj.control_points, splinepy_obj.weights)
+    ]
+
+    # Fill element
+    manifold_dim = len(splinepy_obj.knot_vectors)
+    if manifold_dim == 2:
+        nurbs_object = _NURBSSurface
+    elif manifold_dim == 3:
+        nurbs_object = _NURBSVolume
+    else:
+        raise NotImplementedError(
+            "Error, not implemented for a NURBS {}!".format(type(splinepy_obj))
+        )
+
+    element = nurbs_object(
+        splinepy_obj.knot_vectors,
+        splinepy_obj.degrees,
+        nodes=control_points,
+        material=material,
+        data=data,
+    )
+
+    # Add element and control points to the mesh
+    mesh.elements.append(element)
+    mesh.nodes.extend(control_points)
+
+    # Create geometry sets that will be returned
+    return_set = create_geometry_sets(element)
+
+    return return_set
+
+
 def add_geomdl_nurbs_to_mesh(
     mesh,
     geomdl_obj,
