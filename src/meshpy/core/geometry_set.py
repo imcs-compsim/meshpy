@@ -259,6 +259,9 @@ class GeometrySetNodes(GeometrySetBase):
             Node(s) or list of nodes to be added to this geometry set.
         """
 
+        if geometry_type not in _mpy.geo:
+            raise TypeError(f"Expected geometry enum, got {geometry_type}")
+
         super().__init__(geometry_type, **kwargs)
         self.nodes = {}
         if nodes is not None:
