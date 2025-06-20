@@ -66,6 +66,17 @@ class NURBSPatch(_Element):
             )
         return n_knots
 
+    def get_number_of_control_points_per_dir(self):
+        """Return the number of control points in each parameter direction of
+        the patch."""
+        n_dim = len(self.knot_vectors)
+        n_cp_per_dim = []
+        for i_dim in range(n_dim):
+            knot_vector_size = len(self.knot_vectors[i_dim])
+            polynomial_order = self.polynomial_orders[i_dim]
+            n_cp_per_dim.append(knot_vector_size - polynomial_order - 1)
+        return n_cp_per_dim
+
     def dump_element_specific_section(self, input_file):
         """Set the knot vectors of the NURBS patch in the input file."""
 
@@ -73,8 +84,9 @@ class NURBSPatch(_Element):
             "knot_vectors": [],
         }
 
-        for dir_manifold in range(len(self.knot_vectors)):
-            num_knotvectors = len(self.knot_vectors[dir_manifold])
+        for dir_manifold in range(self.get_nurbs_dimension()):
+            knotvector = self.knot_vectors[dir_manifold]
+            num_knots = len(knotvector)
 
             # Check the type of knot vector, in case that the multiplicity of the first and last
             # knot vectors is not p + 1, then it is a closed (periodic) knot vector, otherwise it
@@ -82,17 +94,8 @@ class NURBSPatch(_Element):
             knotvector_type = "Interpolated"
 
             for i in range(self.polynomial_orders[dir_manifold] - 1):
-                if (
-                    abs(
-                        self.knot_vectors[dir_manifold][i]
-                        - self.knot_vectors[dir_manifold][i + 1]
-                    )
-                    > _mpy.eps_knot_vector
-                ) or (
-                    abs(
-                        self.knot_vectors[dir_manifold][num_knotvectors - 2 - i]
-                        - self.knot_vectors[dir_manifold][num_knotvectors - 1 - i]
-                    )
+                if (abs(knotvector[i] - knotvector[i + 1]) > _mpy.eps_knot_vector) or (
+                    abs(knotvector[num_knots - 2 - i] - knotvector[num_knots - 1 - i])
                     > _mpy.eps_knot_vector
                 ):
                     knotvector_type = "Periodic"

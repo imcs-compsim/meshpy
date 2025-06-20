@@ -566,7 +566,7 @@ def create_geometry_sets(element):
     return_set = _GeometryName()
 
     # Get the number of control points on each parametric direction that define the patch
-    num_cps_uvw = get_num_cps_uvw(element.knot_vectors)
+    num_cps_uvw = element.get_number_of_control_points_per_dir()
 
     # Get the NURBS dimension
     nurbs_dimension = len(element.knot_vectors)
