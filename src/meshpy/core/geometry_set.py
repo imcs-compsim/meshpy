@@ -136,6 +136,13 @@ class GeometrySetBase(_BaseMeshItem):
             for node in nodes
         ]
 
+    def __add__(self, other):
+        """Allow to add two geometry sets to each other and return a geometry
+        set with the geometries from both sets."""
+        combined_set = self.copy()
+        combined_set.add(other)
+        return combined_set
+
 
 class GeometrySet(GeometrySetBase):
     """Geometry set which is defined by geometric entries."""
@@ -243,6 +250,11 @@ class GeometrySet(GeometrySetBase):
         """Return a list of the objects with the specified geometry type."""
         return list(self.geometry_objects[self.geometry_type].keys())
 
+    def copy(self):
+        """Return a shallow copy of this object, the reference to the nodes
+        will be the same, but the containers storing them will be copied."""
+        return GeometrySet(list(self.geometry_objects[self.geometry_type].keys()))
+
 
 class GeometrySetNodes(GeometrySetBase):
     """Geometry set which is defined by nodes and not explicit geometry."""
@@ -315,6 +327,14 @@ class GeometrySetNodes(GeometrySetBase):
     def get_all_nodes(self):
         """Return all nodes associated with this set."""
         return list(self.nodes.keys())
+
+    def copy(self):
+        """Return a shallow copy of this object, the reference to the nodes
+        will be the same, but the containers storing them will be copied."""
+        return GeometrySetNodes(
+            geometry_type=self.geometry_type,
+            nodes=list(self.nodes.keys()),
+        )
 
 
 class GeometryName(dict):
