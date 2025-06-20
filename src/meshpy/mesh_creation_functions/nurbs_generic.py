@@ -21,8 +21,6 @@
 # THE SOFTWARE.
 """Generic function used to create NURBS meshes within meshpy."""
 
-import numpy as _np
-
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySetNodes as _GeometrySetNodes
@@ -252,20 +250,6 @@ def create_geometry_sets(element):
     For more information of the return item, look into
     add_geomdl_nurbs_to_mesh.
     """
-
-    def get_num_cps_uvw(knot_vectors):
-        """Obtain the number of control points on each parametric direction of
-        a patch."""
-        num_cps_uvw = _np.zeros(len(knot_vectors), dtype=int)
-
-        for direction in range(len(knot_vectors)):
-            knotvector_size_dir = len(element.knot_vectors[direction])
-            p_dir = element.polynomial_orders[direction]
-            cp_size_dir = knotvector_size_dir - p_dir - 1
-
-            num_cps_uvw[direction] = cp_size_dir
-
-        return num_cps_uvw
 
     def get_patch_vertices(return_set, num_cps_uvw, nurbs_dimension, element):
         """Get the control points positioned over the vertices of a patch."""
