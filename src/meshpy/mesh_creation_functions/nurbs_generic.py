@@ -21,52 +21,49 @@
 # THE SOFTWARE.
 """Generic function used to create NURBS meshes within meshpy."""
 
+from typing import Type as _Type
+
 from meshpy.core.conf import mpy as _mpy
 from meshpy.core.geometry_set import GeometryName as _GeometryName
 from meshpy.core.geometry_set import GeometrySetNodes as _GeometrySetNodes
+from meshpy.core.mesh import Mesh as _Mesh
 from meshpy.core.node import ControlPoint as _ControlPoint
 from meshpy.core.nurbs_patch import NURBSSurface as _NURBSSurface
 from meshpy.core.nurbs_patch import NURBSVolume as _NURBSVolume
 
 
 def add_splinepy_nurbs_to_mesh(
-    mesh,
+    mesh: _Mesh,
     splinepy_obj,
     *,
     material=None,
-    data=None,
-):
+    data: dict | None = None,
+) -> _GeometryName:
     """Add a splinepy NURBS to the mesh.
 
-    Args
-    ----
-    mesh: Mesh
-        Mesh that the created NURBS geometry should be added to.
-    splinepy_obj: splinepy object
-        NURBS geometry created using splinepy.
-    material: Material
-        Material for this geometry.
-    data:
-        General element data, e.g., material, formulation, ...
+    Args:
+        mesh: Mesh that the created NURBS geometry will be added to.
+        splinepy_obj (splinepy object): NURBS geometry created using splinepy.
+        material (Material): Material for this geometry.
+        data: General element data, e.g., material, formulation, ...
 
-    Return
-    ----
-    return_set: GeometryName
-        Set with the control points that form the topology of the mesh.
+    Returns:
+        GeometryName:
+            Set with the control points that form the topology of the mesh.
 
-        For a surface, the following information is stored:
-            Vertices: 'vertex_u_min_v_min', 'vertex_u_max_v_min', 'vertex_u_min_v_max', 'vertex_u_max_v_max'
-            Edges: 'line_v_min', 'line_u_max', 'line_v_max', 'line_u_min'
-            Surface: 'surf'
+            For a surface, the following information is stored:
+                Vertices: 'vertex_u_min_v_min', 'vertex_u_max_v_min', 'vertex_u_min_v_max', 'vertex_u_max_v_max'
+                Edges: 'line_v_min', 'line_u_max', 'line_v_max', 'line_u_min'
+                Surface: 'surf'
 
-        For a volume, the following information is stored:
-            Vertices: 'vertex_u_min_v_min_w_min', 'vertex_u_max_v_min_w_min', 'vertex_u_min_v_max_w_min', 'vertex_u_max_v_max_w_min',
-                      'vertex_u_min_v_min_w_max', 'vertex_u_max_v_min_w_max', 'vertex_u_min_v_max_w_max', 'vertex_u_max_v_max_w_max'
-            Edges: 'line_v_min_w_min', 'line_u_max_w_min', 'line_v_max_w_min', 'line_u_min_w_min',
-                   'line_u_min_v_min', 'line_u_max_v_min', 'line_u_min_v_max', 'line_u_max_v_max'
-                   'line_v_min_w_max', 'line_u_max_w_max', 'line_v_max_w_max', 'line_u_min_w_max'
-            Surfaces: 'surf_w_min', 'surf_w_max', 'surf_v_min', 'surf_v_max', 'surf_v_max', 'surf_u_min'
-            Volume: 'vol'
+            For a volume, the following information is stored:
+                Vertices: 'vertex_u_min_v_min_w_min', 'vertex_u_max_v_min_w_min', 'vertex_u_min_v_max_w_min', 'vertex_u_max_v_max_w_min',
+                        'vertex_u_min_v_min_w_max', 'vertex_u_max_v_min_w_max', 'vertex_u_min_v_max_w_max', 'vertex_u_max_v_max_w_max'
+                Edges: 'line_v_min_w_min', 'line_u_max_w_min', 'line_v_max_w_min', 'line_u_min_w_min',
+                    'line_u_min_v_min', 'line_u_max_v_min', 'line_u_min_v_max', 'line_u_max_v_max'
+                    'line_v_min_w_max', 'line_u_max_w_max', 'line_v_max_w_max', 'line_u_min_w_max'
+                Surfaces: 'surf_w_min', 'surf_w_max', 'surf_v_min', 'surf_v_max', 'surf_v_max', 'surf_u_min'
+                Volume: 'vol'
     """
 
     # Make sure the material is in the mesh
@@ -80,6 +77,7 @@ def add_splinepy_nurbs_to_mesh(
 
     # Fill element
     manifold_dim = len(splinepy_obj.knot_vectors)
+    nurbs_object: _Type[_NURBSSurface] | _Type[_NURBSVolume]
     if manifold_dim == 2:
         nurbs_object = _NURBSSurface
     elif manifold_dim == 3:
@@ -108,43 +106,37 @@ def add_splinepy_nurbs_to_mesh(
 
 
 def add_geomdl_nurbs_to_mesh(
-    mesh,
+    mesh: _Mesh,
     geomdl_obj,
     *,
     material=None,
-    data=None,
-):
-    """Generic NURBS mesh creation function.
+    data: dict | None = None,
+) -> _GeometryName:
+    """Add a geomdl NURBS to the mesh.
 
-    Args
-    ----
-    mesh: Mesh
-        Mesh that the created NURBS geometry should be added to.
-    geomdl_obj: Geomdl object
-        NURBS geometry created using Geomdl.
-    material: Material
-        Material for this geometry.
-    data:
-        General element data, e.g., material, formulation, ...
+    Args:
+        mesh: Mesh that the created NURBS geometry will be added to.
+        geomdl_obj (geomdl object): NURBS geometry created using geomdl.
+        material (Material): Material for this geometry.
+        data: General element data, e.g., material, formulation, ...
 
-    Return
-    ----
-    return_set: GeometryName
-        Set with the control points that form the topology of the mesh.
+    Returns:
+        GeometryName:
+            Set with the control points that form the topology of the mesh.
 
-        For a surface, the following information is stored:
-            Vertices: 'vertex_u_min_v_min', 'vertex_u_max_v_min', 'vertex_u_min_v_max', 'vertex_u_max_v_max'
-            Edges: 'line_v_min', 'line_u_max', 'line_v_max', 'line_u_min'
-            Surface: 'surf'
+            For a surface, the following information is stored:
+                Vertices: 'vertex_u_min_v_min', 'vertex_u_max_v_min', 'vertex_u_min_v_max', 'vertex_u_max_v_max'
+                Edges: 'line_v_min', 'line_u_max', 'line_v_max', 'line_u_min'
+                Surface: 'surf'
 
-        For a volume, the following information is stored:
-            Vertices: 'vertex_u_min_v_min_w_min', 'vertex_u_max_v_min_w_min', 'vertex_u_min_v_max_w_min', 'vertex_u_max_v_max_w_min',
-                      'vertex_u_min_v_min_w_max', 'vertex_u_max_v_min_w_max', 'vertex_u_min_v_max_w_max', 'vertex_u_max_v_max_w_max'
-            Edges: 'line_v_min_w_min', 'line_u_max_w_min', 'line_v_max_w_min', 'line_u_min_w_min',
-                   'line_u_min_v_min', 'line_u_max_v_min', 'line_u_min_v_max', 'line_u_max_v_max'
-                   'line_v_min_w_max', 'line_u_max_w_max', 'line_v_max_w_max', 'line_u_min_w_max'
-            Surfaces: 'surf_w_min', 'surf_w_max', 'surf_v_min', 'surf_v_max', 'surf_v_max', 'surf_u_min'
-            Volume: 'vol'
+            For a volume, the following information is stored:
+                Vertices: 'vertex_u_min_v_min_w_min', 'vertex_u_max_v_min_w_min', 'vertex_u_min_v_max_w_min', 'vertex_u_max_v_max_w_min',
+                        'vertex_u_min_v_min_w_max', 'vertex_u_max_v_min_w_max', 'vertex_u_min_v_max_w_max', 'vertex_u_max_v_max_w_max'
+                Edges: 'line_v_min_w_min', 'line_u_max_w_min', 'line_v_max_w_min', 'line_u_min_w_min',
+                    'line_u_min_v_min', 'line_u_max_v_min', 'line_u_min_v_max', 'line_u_max_v_max'
+                    'line_v_min_w_max', 'line_u_max_w_max', 'line_v_max_w_max', 'line_u_min_w_max'
+                Surfaces: 'surf_w_min', 'surf_w_max', 'surf_v_min', 'surf_v_max', 'surf_v_max', 'surf_u_min'
+                Volume: 'vol'
     """
 
     # Make sure the material is in the mesh
@@ -166,7 +158,7 @@ def add_geomdl_nurbs_to_mesh(
 
     # Fill element
     manifold_dim = len(geomdl_obj.knotvector)
-
+    nurbs_object: _Type[_NURBSSurface] | _Type[_NURBSVolume]
     if manifold_dim == 2:
         nurbs_object = _NURBSSurface
     elif manifold_dim == 3:
@@ -244,11 +236,11 @@ def create_control_points_volume(geomdl_obj):
     return control_points
 
 
-def create_geometry_sets(element):
+def create_geometry_sets(element: _NURBSSurface | _NURBSVolume) -> _GeometryName:
     """Function that returns a GeometryName object.
 
     For more information of the return item, look into
-    add_geomdl_nurbs_to_mesh.
+    `add_splinepy_nurbs_to_mesh` and `add_geomdl_nurbs_to_mesh`.
     """
 
     def get_patch_vertices(return_set, num_cps_uvw, nurbs_dimension, element):

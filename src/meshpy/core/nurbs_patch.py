@@ -21,6 +21,8 @@
 # THE SOFTWARE.
 """This module implements NURBS patches for the mesh."""
 
+from typing import Any as _Any
+
 import numpy as _np
 
 from meshpy.core.conf import mpy as _mpy
@@ -55,8 +57,12 @@ class NURBSPatch(_Element):
         # Set numbers for elements
         self.n_nurbs_patch = None
 
-    def get_nurbs_dimension(self):
-        """Return the number of dimensions of the NURBS structure."""
+    def get_nurbs_dimension(self) -> int:
+        """Determine the number of dimensions of the NURBS structure.
+
+        Returns:
+            Number of dimensions of the NURBS object.
+        """
         n_knots = len(self.knot_vectors)
         n_polynomial = len(self.polynomial_orders)
         if not n_knots == n_polynomial:
@@ -66,9 +72,13 @@ class NURBSPatch(_Element):
             )
         return n_knots
 
-    def get_number_of_control_points_per_dir(self):
-        """Return the number of control points in each parameter direction of
-        the patch."""
+    def get_number_of_control_points_per_dir(self) -> list[int]:
+        """Determine the number of control points in each parameter direction
+        of the patch.
+
+        Returns:
+            List of control points per direction.
+        """
         n_dim = len(self.knot_vectors)
         n_cp_per_dim = []
         for i_dim in range(n_dim):
@@ -77,10 +87,10 @@ class NURBSPatch(_Element):
             n_cp_per_dim.append(knot_vector_size - polynomial_order - 1)
         return n_cp_per_dim
 
-    def dump_element_specific_section(self, input_file):
+    def dump_element_specific_section(self, input_file) -> None:
         """Set the knot vectors of the NURBS patch in the input file."""
 
-        patch_data = {
+        patch_data: dict[str, _Any] = {
             "knot_vectors": [],
         }
 
@@ -120,9 +130,13 @@ class NURBSPatch(_Element):
         patch_data["ID"] = len(patches) + 1
         patches.append(patch_data)
 
-    def get_number_elements(self):
-        """Get the number of elements in this patch by checking the amount of
-        nonzero knot spans in the knot vector."""
+    def get_number_elements(self) -> int:
+        """Determine the number of elements in this patch by checking the
+        amount of nonzero knot spans in the knot vector.
+
+        Returns:
+            Number of elements for this patch.
+        """
 
         num_elements_dir = _np.zeros(len(self.knot_vectors), dtype=int)
 
@@ -141,7 +155,7 @@ class NURBSPatch(_Element):
 
         return total_num_elements
 
-    def _check_material(self):
+    def _check_material(self) -> None:
         """Check if the linked material is valid for this type of NURBS solid
         element."""
         for material_type in type(self).valid_material:
