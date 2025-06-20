@@ -190,32 +190,22 @@ class MaterialEulerBernoulli(_MaterialBeamBase):
 class MaterialSolid(_MaterialSolidBase):
     """Base class for a material for solids."""
 
-    def __init__(
-        self, material_string=None, youngs_modulus=-1.0, nu=0.0, density=0.0, **kwargs
-    ):
+    def __init__(self, material_string=None, **kwargs):
         """Set the material values for a solid."""
-        super().__init__(**kwargs)
-
         self.material_string = material_string
-        self.youngs_modulus = youngs_modulus
-        self.nu = nu
-        self.density = density
+        super().__init__(**kwargs)
 
     def dump_to_list(self):
         """Return a list with the (single) item representing this material."""
 
-        return {
-            "MAT": self.i_global,
-            self.material_string: {
-                "YOUNG": self.youngs_modulus,
-                "NUE": self.nu,
-                "DENS": self.density,
-            },
-        }
+        return {"MAT": self.i_global, self.material_string: self.data}
 
 
 class MaterialStVenantKirchhoff(MaterialSolid):
     """Holds material definition for StVenant Kirchhoff solids."""
 
-    def __init__(self, **kwargs):
-        super().__init__(material_string="MAT_Struct_StVenantKirchhoff", **kwargs)
+    def __init__(self, youngs_modulus=-1.0, nu=0.0, density=0.0):
+        super().__init__(
+            material_string="MAT_Struct_StVenantKirchhoff",
+            data={"YOUNG": youngs_modulus, "NUE": nu, "DENS": density},
+        )
