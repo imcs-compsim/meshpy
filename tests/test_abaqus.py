@@ -87,7 +87,6 @@ def test_abaqus_helix(
             additional_identifier=additional_identifier, extension="inp"
         ),
         input_file.get_input_file_string(normal_definition),
-        string_splitter=",",
         atol=1e-14,
     )
 
@@ -124,6 +123,5 @@ def test_abaqus_frame(
             additional_identifier=additional_identifier, extension="inp"
         ),
         input_file.get_input_file_string(normal_definition),
-        string_splitter=",",
         atol=1e-15,
     )
