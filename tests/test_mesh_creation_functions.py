@@ -29,7 +29,6 @@ import pytest
 import splinepy
 from autograd import jacobian
 
-from beamme.core.conf import bme
 from beamme.core.mesh import Mesh
 from beamme.core.node import NodeCosserat
 from beamme.core.rotation import Rotation
@@ -539,14 +538,14 @@ def test_mesh_creation_functions_splinepy(
     _, length = create_beam_mesh_from_splinepy(
         mesh, Beam3rHerm2Line3, mat, curve, n_el=3, output_length=True
     )
-    assert np.isclose(ref_length, length, rtol=bme.eps_pos, atol=0.0)
+    assert_results_equal(ref_length, length)
 
     assert_results_equal(
         get_corresponding_reference_file_path(additional_identifier=name), mesh
     )
 
 
-def test_mesh_creation_functions_splinepy_unit():
+def test_mesh_creation_functions_splinepy_unit(assert_results_equal):
     """Unittest the function and jacobian creation in the
     create_beam_mesh_from_splinepy function."""
 
@@ -566,8 +565,8 @@ def test_mesh_creation_functions_splinepy_unit():
     ]
 
     for t, result_r, result_dr in zip(t_values, results_r, results_dr):
-        assert np.allclose(r(t), result_r, atol=bme.eps_pos, rtol=0.0)
-        assert np.allclose(dr(t), result_dr, atol=bme.eps_pos, rtol=0.0)
+        assert_results_equal(r(t), result_r)
+        assert_results_equal(dr(t), result_dr)
 
 
 def test_mesh_creation_functions_node_continuation(
@@ -621,7 +620,7 @@ def test_mesh_creation_functions_node_continuation(
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-def test_mesh_creation_functions_node_continuation_accumulated():
+def test_mesh_creation_functions_node_continuation_accumulated(assert_results_equal):
     """Test that the arc node continuation function can be applied multiple
     times in a row.
 
@@ -660,12 +659,7 @@ def test_mesh_creation_functions_node_continuation_accumulated():
     rotation_expected = Rotation(axis, angle) * rotation_ref
     quaternion_expected = np.array([-0.5, 0.5, -0.5, -0.5])
     assert rotation_actual == rotation_expected
-    assert np.allclose(
-        rotation_actual.q,
-        quaternion_expected,
-        atol=bme.eps_quaternion,
-        rtol=0.0,
-    )
+    assert_results_equal(rotation_actual.q, quaternion_expected)
 
 
 def test_mesh_creation_functions_element_length_option(
@@ -1178,12 +1172,7 @@ def test_mesh_creation_functions_curve_3d_helix(
         ),
         delimiter=",",
     )
-    assert np.allclose(
-        coordinates_mathematica,
-        get_nodal_coordinates(mesh.nodes),
-        rtol=bme.eps_pos,
-        atol=1e-14,
-    )
+    assert_results_equal(coordinates_mathematica, get_nodal_coordinates(mesh.nodes))
 
     # Check the output.
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
@@ -1216,7 +1205,7 @@ def test_mesh_creation_functions_curve_3d_helix_length(assert_results_equal):
     mesh_2.add(helix_set_2)
 
     # Check the computed length
-    assert np.isclose(length, 13.18763323790246, rtol=1e-12, atol=0.0)
+    assert_results_equal(length, 13.18763323790246)
 
     # Check that both meshes are equal
     assert_results_equal(mesh_1, mesh_2)
@@ -1252,12 +1241,7 @@ def test_mesh_creation_functions_curve_2d_sin(
         ),
         delimiter=",",
     )
-    assert np.allclose(
-        coordinates_mathematica,
-        get_nodal_coordinates(mesh.nodes),
-        rtol=bme.eps_pos,
-        atol=1e-14,
-    )
+    assert_results_equal(coordinates_mathematica, get_nodal_coordinates(mesh.nodes))
 
     # Check the output.
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
