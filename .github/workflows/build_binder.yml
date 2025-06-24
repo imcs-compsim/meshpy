@@ -16,6 +16,6 @@ jobs:
     steps:
       - uses: s-weigand/trigger-mybinder-build@v1
         with:
-          target-repo: imcs-compsim/meshpy
+          target-repo: imcs-compsim/meshpy/HEAD
           service-name: gh
           debug: true
