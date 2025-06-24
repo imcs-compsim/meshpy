@@ -14,7 +14,8 @@ jobs:
   trigger-binder-build:
     runs-on: ubuntu-latest
     steps:
-      - name: Trigger binder build
-        run: |
-          echo "Triggering Binder build for the main branch..."
-          curl "https://mybinder.org/build/gh/imcs-compsim/meshpy/main"
+      - uses: s-weigand/trigger-mybinder-build@v1
+        with:
+          target-repo: imcs-compsim/meshpy
+          service-name: gh
+          debug: true
