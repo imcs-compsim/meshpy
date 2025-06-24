@@ -547,9 +547,7 @@ def test_four_c_simulation_honeycomb_variants(
     add_result_description(input_file, displacements, nodes)
 
     # Check the created input file
-    assert_results_equal(
-        get_corresponding_reference_file_path(), input_file, rtol=1e-10
-    )
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
     # Check if we still have to actually run 4C.
     if not enforce_four_c:
