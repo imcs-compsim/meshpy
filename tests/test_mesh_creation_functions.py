@@ -527,6 +527,7 @@ def test_mesh_creation_functions_splinepy(
     name,
     curve_creation_function,
     ref_length,
+    assert_numerics_equal,
     assert_results_equal,
     get_corresponding_reference_file_path,
 ):
@@ -539,14 +540,14 @@ def test_mesh_creation_functions_splinepy(
     _, length = create_beam_mesh_from_splinepy(
         mesh, Beam3rHerm2Line3, mat, curve, n_el=3, output_length=True
     )
-    assert np.isclose(ref_length, length, rtol=mpy.eps_pos, atol=0.0)
+    assert_numerics_equal(ref_length, length)
 
     assert_results_equal(
         get_corresponding_reference_file_path(additional_identifier=name), mesh
     )
 
 
-def test_mesh_creation_functions_splinepy_unit():
+def test_mesh_creation_functions_splinepy_unit(assert_numerics_equal):
     """Unittest the function and jacobian creation in the
     create_beam_mesh_from_splinepy function."""
 
@@ -566,8 +567,8 @@ def test_mesh_creation_functions_splinepy_unit():
     ]
 
     for t, result_r, result_dr in zip(t_values, results_r, results_dr):
-        assert np.allclose(r(t), result_r, atol=mpy.eps_pos, rtol=0.0)
-        assert np.allclose(dr(t), result_dr, atol=mpy.eps_pos, rtol=0.0)
+        assert_numerics_equal(r(t), result_r)
+        assert_numerics_equal(dr(t), result_dr)
 
 
 def test_mesh_creation_functions_node_continuation(
@@ -621,7 +622,7 @@ def test_mesh_creation_functions_node_continuation(
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-def test_mesh_creation_functions_node_continuation_accumulated():
+def test_mesh_creation_functions_node_continuation_accumulated(assert_numerics_equal):
     """Test that the arc node continuation function can be applied multiple
     times in a row.
 
@@ -660,12 +661,7 @@ def test_mesh_creation_functions_node_continuation_accumulated():
     rotation_expected = Rotation(axis, angle) * rotation_ref
     quaternion_expected = np.array([-0.5, 0.5, -0.5, -0.5])
     assert rotation_actual == rotation_expected
-    assert np.allclose(
-        rotation_actual.q,
-        quaternion_expected,
-        atol=mpy.eps_quaternion,
-        rtol=0.0,
-    )
+    assert_numerics_equal(rotation_actual.q, quaternion_expected)
 
 
 def test_mesh_creation_functions_element_length_option(
@@ -1151,7 +1147,7 @@ def test_mesh_creation_functions_arc_length_argument_checks():
 
 
 def test_mesh_creation_functions_curve_3d_helix(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_numerics_equal, assert_results_equal, get_corresponding_reference_file_path
 ):
     """Create a helix from a parametric curve where the parameter is
     transformed so the arc length along the beam is not proportional to the
@@ -1182,18 +1178,15 @@ def test_mesh_creation_functions_curve_3d_helix(
         ),
         delimiter=",",
     )
-    assert np.allclose(
-        coordinates_mathematica,
-        get_nodal_coordinates(mesh.nodes),
-        rtol=mpy.eps_pos,
-        atol=1e-14,
-    )
+    assert_numerics_equal(coordinates_mathematica, get_nodal_coordinates(mesh.nodes))
 
     # Check the output.
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-def test_mesh_creation_functions_curve_3d_helix_length(assert_results_equal):
+def test_mesh_creation_functions_curve_3d_helix_length(
+    assert_numerics_equal, assert_results_equal
+):
     """Create a helix from a parametric curve where and check that the correct
     length is returned."""
 
@@ -1220,14 +1213,14 @@ def test_mesh_creation_functions_curve_3d_helix_length(assert_results_equal):
     mesh_2.add(helix_set_2)
 
     # Check the computed length
-    assert np.isclose(length, 13.18763323790246, rtol=1e-12, atol=0.0)
+    assert_numerics_equal(length, 13.18763323790246)
 
     # Check that both meshes are equal
     assert_results_equal(mesh_1, mesh_2)
 
 
 def test_mesh_creation_functions_curve_2d_sin(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_numerics_equal, assert_results_equal, get_corresponding_reference_file_path
 ):
     """Create a sin from a parametric curve."""
 
@@ -1256,12 +1249,7 @@ def test_mesh_creation_functions_curve_2d_sin(
         ),
         delimiter=",",
     )
-    assert np.allclose(
-        coordinates_mathematica,
-        get_nodal_coordinates(mesh.nodes),
-        rtol=mpy.eps_pos,
-        atol=1e-14,
-    )
+    assert_numerics_equal(coordinates_mathematica, get_nodal_coordinates(mesh.nodes))
 
     # Check the output.
     assert_results_equal(get_corresponding_reference_file_path(), mesh)

@@ -39,6 +39,41 @@ from meshpy.four_c.input_file import InputFile
 
 
 @pytest.fixture(scope="function")
+def assert_numerics_equal() -> Callable:
+    """Return function to compare two numerical quantities.
+
+    Necessary to enable the function call through pytest fixtures.
+
+    Returns:
+        Function to compare two arrays.
+    """
+
+    def _assert_numerics_equal(
+        reference: int | float | list | np.generic | np.ndarray,
+        result: int | float | list | np.generic | np.ndarray,
+        rtol: float = 1e-13,
+        atol: float = 1e-13,
+    ) -> None:
+        """Comparison between two numerical quantities with relative and/or
+        absolute tolerance.
+
+        If the comparison fails, an assertion is raised.
+
+        Args:
+            reference: The reference array.
+            result: The result array.
+            rtol: The relative tolerance.
+            atol: The absolute tolerance.
+        """
+        if not np.allclose(result, reference, rtol=rtol, atol=atol):
+            raise AssertionError(
+                f"Arrays are not equal:\n\nresult: {result}\n\nreference: {reference}"
+            )
+
+    return _assert_numerics_equal
+
+
+@pytest.fixture(scope="function")
 def assert_results_equal() -> Callable:
     """Return function to compare either string or files.
 

@@ -376,7 +376,7 @@ def test_meshpy_wrap_cylinder_not_on_same_plane(
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
-def test_meshpy_get_nodes_by_function():
+def test_meshpy_get_nodes_by_function(assert_numerics_equal):
     """Check if the get_nodes_by_function method of Mesh works properly."""
 
     def get_nodes_at_x(node, x_value):
@@ -395,10 +395,12 @@ def test_meshpy_get_nodes_by_function():
     nodes = mesh.get_nodes_by_function(get_nodes_at_x, 1.0)
     assert 2 == len(nodes)
     for node in nodes:
-        assert np.abs(1.0 - node.coordinates[0]) < 1e-10
+        assert_numerics_equal(1.0, node.coordinates[0])
 
 
-def test_meshpy_get_min_max_coordinates(get_corresponding_reference_file_path):
+def test_meshpy_get_min_max_coordinates(
+    get_corresponding_reference_file_path, assert_numerics_equal
+):
     """Test if the get_min_max_coordinates function works properly."""
 
     # Create the mesh.
@@ -415,7 +417,7 @@ def test_meshpy_get_min_max_coordinates(get_corresponding_reference_file_path):
     # Check the results.
     min_max = get_min_max_coordinates(mesh.nodes)
     ref_solution = [-0.5, -1.0, -1.5, 2.0, 3.0, 4.0]
-    assert np.linalg.norm(min_max - ref_solution) < 1e-10
+    assert_numerics_equal(min_max, ref_solution)
 
 
 def test_meshpy_geometry_sets(

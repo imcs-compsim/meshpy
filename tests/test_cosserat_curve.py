@@ -85,7 +85,11 @@ def create_beam_solid_input_file(get_corresponding_reference_file_path):
     ],
 )
 def test_cosserat_curve_translate_and_rotate(
-    twist_type, twist_angle, starting_triad_guess, get_corresponding_reference_file_path
+    twist_type,
+    twist_angle,
+    starting_triad_guess,
+    get_corresponding_reference_file_path,
+    assert_numerics_equal,
 ):
     """Test that a curve can be loaded, rotated and transformed."""
 
@@ -134,11 +138,11 @@ def test_cosserat_curve_translate_and_rotate(
         )
         return rotations
 
-    assert np.allclose(sol_half_pos, load_compare("pos_half_ref"), rtol=1e-14)
-    assert np.allclose(sol_half_q, get_compare_rot_with_twist("q_half_ref"), rtol=1e-14)
+    assert_numerics_equal(sol_half_pos, load_compare("pos_half_ref"))
+    assert_numerics_equal(sol_half_q, get_compare_rot_with_twist("q_half_ref"))
 
-    assert np.allclose(sol_full_pos, load_compare("pos_full_ref"), rtol=1e-14)
-    assert np.allclose(sol_full_q, get_compare_rot_with_twist("q_full_ref"), rtol=1e-14)
+    assert_numerics_equal(sol_full_pos, load_compare("pos_full_ref"))
+    assert_numerics_equal(sol_full_q, get_compare_rot_with_twist("q_full_ref"))
 
 
 def test_cosserat_curve_bad_guess_triad(get_corresponding_reference_file_path):
@@ -170,7 +174,9 @@ def test_cosserat_curve_vtk_representation(
     )
 
 
-def test_cosserat_curve_project_point(get_corresponding_reference_file_path):
+def test_cosserat_curve_project_point(
+    get_corresponding_reference_file_path, assert_numerics_equal
+):
     """Test that the project point function works as expected."""
 
     # Load the curve
@@ -180,11 +186,10 @@ def test_cosserat_curve_project_point(get_corresponding_reference_file_path):
     curve.translate(-curve.centerline_interpolation(0.0))
 
     # Check the projection results
-    rtol = 1e-14
     t_ref = 4.264045157204052
-    assert np.allclose(t_ref, curve.project_point([-5, 1, 1]), rtol=rtol)
-    assert np.allclose(t_ref, curve.project_point([-5, 1, 1], t0=2.0), rtol=rtol)
-    assert np.allclose(t_ref, curve.project_point([-5, 1, 1], t0=4.0), rtol=rtol)
+    assert_numerics_equal(t_ref, curve.project_point([-5, 1, 1]))
+    assert_numerics_equal(t_ref, curve.project_point([-5, 1, 1], t0=2.0))
+    assert_numerics_equal(t_ref, curve.project_point([-5, 1, 1], t0=4.0))
 
 
 def test_cosserat_curve_mesh_transformation(
