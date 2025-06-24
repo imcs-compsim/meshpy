@@ -41,7 +41,14 @@ It can be used to create input files for the following finite element solvers (a
 - [Abaqus](https://en.wikipedia.org/wiki/Abaqus) (commercial software package)
 - [AceFEM](http://symech.fgg.uni-lj.si) (Finite element package for automation of the finite element method in [Mathematica](https://www.wolfram.com/mathematica/))
 
-MeshPy is developed at the [Institute for Mathematics and Computer-Based Simulation (IMCS)](https://www.unibw.de/imcs-en) at the Universität der Bundeswehr München.
+MeshPy is jointly developed at the [Institute for Mathematics and Computer-Based Simulation (IMCS)](https://www.unibw.de/imcs-en) at the Universität der Bundeswehr München and
+the [Institute for Computational Mechanics (LNM)](https://www.epc.ed.tum.de/lnm/home/) at the Technical University Munich.
+
+- **Website**: https://imcs-compsim.github.io/meshpy/
+- **API Documentation** https://imcs-compsim.github.io/meshpy/api-documentation/meshpy.html
+- **Coverage Report** https://imcs-compsim.github.io/meshpy/coverage-report/
+- **Github** https://github.com/imcs-compsim/meshpy
+- **Launch interactively online in Binder** https://mybinder.org/v2/gh/imcs-compsim/meshpy/main
 
 ## Overview <!-- omit from toc -->
 - [Examples](#examples)

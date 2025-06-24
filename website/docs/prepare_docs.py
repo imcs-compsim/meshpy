@@ -19,25 +19,29 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
+"""Prepare documentation for the website."""
 
-# general configuration
-project = "MeshPy"
-copyright = "2025, MeshPy Authors"
-author = "MeshPy Authors"
+import os
+import shutil
+from pathlib import Path
 
-# html theme configuration
-html_theme = "pydata_sphinx_theme"
-html_title = "MeshPy"
-html_theme_options = {
-    "github_url": "https://github.com/imcs-compsim/meshpy",
-}
 
-# myst configuration (markdown support)
-extensions = [
-    "myst_parser",
-]
-myst_enable_extensions = [
-    "colon_fence",  # For ::: fenced code blocks
-    "linkify",  # Auto-detects URLs and makes them hyperlinks
-]
-myst_heading_anchors = 3  # automatic heading anchors for Markdown files
+def prepare_docs():
+    """Prepare documentation for the website.
+
+    Currently, this only copies the README.md file to the documentation
+    directory.
+    """
+
+    markdown_dir = Path("website/docs/source/md")
+
+    # create directory which contains all the markdown files
+    os.makedirs(markdown_dir, exist_ok=True)
+
+    # copy readme
+    shutil.copy("README.md", os.path.join(markdown_dir, "README.md"))
+
+
+if __name__ == "__main__":
+    """Prepare documentation for the website."""
+    prepare_docs()
