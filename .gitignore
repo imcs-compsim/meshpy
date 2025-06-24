@@ -13,6 +13,9 @@
 # API documentation
 api-documentation/*
 
+# website folder which contains automatically copied files
+website/docs/source/md/*
+
 
 ### Automatically created ignores ###
 
