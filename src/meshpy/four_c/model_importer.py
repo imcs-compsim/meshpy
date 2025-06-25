@@ -59,7 +59,9 @@ if _cubitpy_is_available():
     )
 
 
-def import_cubitpy_model(cubit, convert_input_to_mesh: bool = False):
+def import_cubitpy_model(
+    cubit, convert_input_to_mesh: bool = False
+) -> _Tuple[_InputFile, _Mesh]:
     """Convert a CubitPy instance to a MeshPy InputFile.
 
     Args:
