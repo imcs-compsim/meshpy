@@ -98,8 +98,8 @@ jobs:
         uses: ./.github/actions/run_tests
         with:
           source-command: "source python-workflow-venv/bin/activate"
-          install-command: "-e .[dev,fourc]"
-          additional-pytest-flags: "--4C --ArborX --cov-fail-under=93"
+          install-command: "-e .[cubitpy,dev,fourc]"
+          additional-pytest-flags: "--4C --ArborX --CubitPy --performance-tests --cov-fail-under=93"
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
