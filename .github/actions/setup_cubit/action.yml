@@ -1,0 +1,19 @@
+name: setup_cubit
+description: Setup a Cubit installation for testing
+runs:
+  using: composite
+  steps:
+    - name: Setup Cubit
+      shell: bash
+      run: |
+        cd ${GITHUB_WORKSPACE}
+        wget https://f002.backblazeb2.com/file/cubit-downloads/Coreform-Cubit/Releases/Linux/Coreform-Cubit-2025.3%2B58709-Lin64.tar.gz
+        ll -la
+        # ${{ inputs.source-command }}
+        # pip install ${{ inputs.install-command }}
+        # python --version
+        # pip list
+        # TEMP_DIR="${RUNNER_TEMP}/meshpy_pytest"
+        # mkdir -p "$TEMP_DIR"
+        # echo "PYTEST_TMPDIR=$TEMP_DIR" >> $GITHUB_ENV
+        # pytest  --basetemp="$TEMP_DIR" ${{ inputs.additional-pytest-flags}} --color=yes
