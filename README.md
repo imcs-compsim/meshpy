@@ -72,25 +72,28 @@ the [Institute for Computational Mechanics (LNM)](https://www.epc.ed.tum.de/lnm/
 
 ## Examples
 
-<p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/honeycomb.png" width="350" title="Honeycomb structure under tension (simulated with 4C)">
-</p>
-<p align="center" style="font-style: italic; color: gray;">Honeycomb structure under tension (simulated with 4C)</p>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/composite_plate.png" width="400" title="Fiber reinforced composite plate (simulated with 4C)">
-</p>
-<p align="center" style="font-style: italic; color: gray;">Fiber reinforced composite plate (simulated with 4C)</p>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/pressure_pipe.png" width="350" title="Fiber reinforced pipe under pressure (simulated with 4C)">
-</p>
-<p align="center" style="font-style: italic; color: gray;">Fiber reinforced pipe under pressure (simulated with 4C)</p>
-
-<p align="center">
-  <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/twisted_plate.png" width="350" title="Fiber reinforcements of a twisted plate (simulated with 4C)">
-</p>
-<p align="center" style="font-style: italic; color: gray;">Fiber reinforcements of a twisted plate (simulated with 4C)</p>
+<table style="margin-left: auto; margin-right: auto; border-collapse: separate; border-spacing: 20px;">
+  <tr>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/honeycomb.png" width="350" class="dark-light" title="Honeycomb structure under tension">
+      <div style="font-style: italic; color: gray; margin-top: 5px;">Honeycomb structure under tension</div>
+    </td>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/composite_plate.png" width="350" class="dark-light" title="Fiber reinforced composite plate">
+      <div style="font-style: italic; color: gray; margin-top: 5px;">Fiber reinforced composite plate</div>
+    </td>
+  </tr>
+  <tr>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/pressure_pipe.png" width="350" class="dark-light" title="Fiber reinforced pipe under pressure">
+      <div style="font-style: italic; color: gray; margin-top: 5px;">Fiber reinforced pipe under pressure</div>
+    </td>
+    <td align="center">
+      <img src="https://raw.githubusercontent.com/imcs-compsim/meshpy/refs/heads/main/doc/assets/twisted_plate.png" width="350" class="dark-light" title="Fiber reinforcements of a twisted plate">
+      <div style="font-style: italic; color: gray; margin-top: 5px;">Fiber reinforcements of a twisted plate</div>
+    </td>
+  </tr>
+</table>
 
 ## How to use MeshPy?
 

@@ -31,13 +31,21 @@ html_title = "MeshPy"
 html_theme_options = {
     "github_url": "https://github.com/imcs-compsim/meshpy",
 }
+html_show_sourcelink = False  # Hide "View Source" link on the right side of the page
 
-# myst configuration (markdown support)
+# extensions
 extensions = [
-    "myst_parser",
+    "myst_parser",  # to enable Markdown support
+    "sphinxcontrib.jquery",  # to enable custom JavaScript (open links in new empty tab)
 ]
+
+# markdown configuration
 myst_enable_extensions = [
     "colon_fence",  # For ::: fenced code blocks
     "linkify",  # Auto-detects URLs and makes them hyperlinks
 ]
 myst_heading_anchors = 3  # automatic heading anchors for Markdown files
+
+# JavaScript configuration (to open links in new tabs)
+html_js_files = ["js/custom.js"]
+html_static_path = ["static"]
