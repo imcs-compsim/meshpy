@@ -7,8 +7,8 @@ runs:
       shell: bash
       run: |
         cd ${GITHUB_WORKSPACE}
-        wget https://f002.backblazeb2.com/file/cubit-downloads/Coreform-Cubit/Releases/Linux/Coreform-Cubit-2025.3%2B58709-Lin64.tar.gz
-        tar -xzf *.tar.gz -C cubit
+        wget -q https://f002.backblazeb2.com/file/cubit-downloads/Coreform-Cubit/Releases/Linux/Coreform-Cubit-2025.3%2B58709-Lin64.tar.gz
+        tar -xzf *.tar.gz
         ls -la
         # ${{ inputs.source-command }}
         # pip install ${{ inputs.install-command }}
