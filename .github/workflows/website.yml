@@ -15,8 +15,8 @@ concurrency:
 
 jobs:
   build_website:
-    # Only run if a push to main occurred, do not run after nightly cron job
-    if: ${{ github.event.workflow_run.event == 'push' }}
+    # Only run if documentation was built successfully (if it is skipped, it is not successful)
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
