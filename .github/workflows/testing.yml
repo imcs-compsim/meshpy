@@ -80,6 +80,8 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/4c-multiphysics/4c:main
+    env:
+      CUBIT_ROOT: ${GITHUB_WORKSPACE}/Coreform-Cubit-2025.3
     defaults:
       run:
         shell: bash
@@ -90,6 +92,8 @@ jobs:
           submodules: true
       - name: Setup cubit
         uses: ./.github/actions/setup_cubit
+        with:
+          cubit_download_url: https://f002.backblazeb2.com/file/cubit-downloads/Coreform-Cubit/Releases/Linux/Coreform-Cubit-2025.3%2B58709-Lin64.tar.gz
       - name: Setup virtual python environment
         uses: ./.github/actions/setup_virtual_python_environment
       - name: Build ArborX geometric search

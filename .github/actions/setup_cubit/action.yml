@@ -1,5 +1,9 @@
 name: setup_cubit
 description: Setup a Cubit installation for testing
+inputs:
+  cubit_download_url:
+    description: URL where Cubit can be downloaded from
+    required: true
 runs:
   using: composite
   steps:
@@ -7,5 +11,5 @@ runs:
       shell: bash
       run: |
         cd ${GITHUB_WORKSPACE}
-        wget -q https://f002.backblazeb2.com/file/cubit-downloads/Coreform-Cubit/Releases/Linux/Coreform-Cubit-2025.3%2B58709-Lin64.tar.gz
+        wget -q ${{ inputs.cubit_download_url }}
         tar -xzf *.tar.gz
