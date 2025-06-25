@@ -8,8 +8,8 @@ runs:
       run: |
         cd ${GITHUB_WORKSPACE}
         wget https://f002.backblazeb2.com/file/cubit-downloads/Coreform-Cubit/Releases/Linux/Coreform-Cubit-2025.3%2B58709-Lin64.tar.gz
+        tar -xzf *.tar.gz -C cubit
         ls -la
-        tar -xvzf *.tar.gz -C cubit
         # ${{ inputs.source-command }}
         # pip install ${{ inputs.install-command }}
         # python --version
