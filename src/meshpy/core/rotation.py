@@ -21,8 +21,6 @@
 # THE SOFTWARE.
 """This module defines a class that represents a rotation in 3D."""
 
-import copy as _copy
-
 import numpy as _np
 import quaternion as _quaternion
 

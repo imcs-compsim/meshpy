@@ -23,7 +23,6 @@
 interaction potentials."""
 
 from meshpy.core.boundary_condition import BoundaryCondition as _BoundaryCondition
-from meshpy.core.mesh import Mesh as _Mesh
 
 
 class BeamPotential:

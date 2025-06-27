@@ -106,7 +106,7 @@ repos:
     hooks:
       - id: ruff # linter
         name: Run ruff (linter for Python)
-        args: ["--fix", "--select", "I,TID252"] # "I => sort imports, TID252 => ban relative imports
+        args: ["--fix", "--select", "I,TID252,F401"] # "I => sort imports, TID252 => ban relative imports, F401 => unused imports"
       - id: ruff-format # formatter
         name: Run ruff (formatter for Python)
   - repo: https://github.com/crate-ci/typos

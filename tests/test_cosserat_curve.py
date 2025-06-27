@@ -26,7 +26,6 @@ import pytest
 import pyvista as pv
 import quaternion
 
-from meshpy.core.conf import mpy
 from meshpy.core.rotation import Rotation
 from meshpy.cosserat_curve.cosserat_curve import CosseratCurve
 from meshpy.cosserat_curve.warping_along_cosserat_curve import (

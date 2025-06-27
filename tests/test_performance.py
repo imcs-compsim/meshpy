@@ -30,10 +30,6 @@ from meshpy.four_c.element_beam import Beam3rHerm2Line3
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.material import MaterialReissner
 from meshpy.four_c.model_importer import import_four_c_model
-from meshpy.geometric_search.find_close_points import (
-    FindClosePointAlgorithm,
-    find_close_points,
-)
 from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
 from meshpy.utils.environment import cubitpy_is_available
 from meshpy.utils.nodes import find_close_nodes
