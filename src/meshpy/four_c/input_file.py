@@ -28,7 +28,6 @@ from datetime import datetime as _datetime
 from pathlib import Path as _Path
 from typing import Dict as _Dict
 from typing import List as _List
-from typing import Optional as _Optional
 
 from fourcipp.fourc_input import FourCInput as _FourCInput
 

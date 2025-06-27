@@ -22,7 +22,6 @@
 """This script creates solid input files with CubitPy which are then used in
 MeshPy testing."""
 
-from meshpy.core.conf import mpy
 from meshpy.four_c.input_file import InputFile
 from meshpy.four_c.model_importer import import_cubitpy_model
 from meshpy.utils.environment import cubitpy_is_available
