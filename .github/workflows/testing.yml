@@ -79,7 +79,7 @@ jobs:
     name: ubuntu-latest with 4C and ArborX
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/4c-multiphysics/4c:main
+      image: ghcr.io/4c-multiphysics/4c:2025.2.0
     defaults:
       run:
         shell: bash
