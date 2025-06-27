@@ -44,10 +44,8 @@ def shared_tmp_path(tmp_path_factory):
     return tmp_path_factory.mktemp("performance_tests")
 
 
-def create_solid_block(file_path, nx, ny, nz):
+def create_solid_block(cubit, file_path, nx, ny, nz):
     """Create a solid block (1 x 1 x 1) with (nx * ny * nz) elements."""
-
-    cubit = CubitPy()
 
     # Create brick.
     brick = cubit.brick(1)
@@ -171,18 +169,53 @@ def create_beam_mesh(n_x, n_y, n_z, n_el):
 
 @pytest.mark.performance
 def test_performance_cubitpy_create_solid(evaluate_execution_time, shared_tmp_path):
-    """Test the performance of creating a solid block using CubitPy."""
+    """Test the performance of creating a solid block using CubitPy.
+
+    The version of Cubit we use in testing only allows for 50,000, so we
+    create a mesh with exactly that.
+    """
+
+    cubit = CubitPy()
 
     evaluate_execution_time(
-        "CubitPy: Create solid block",
+        "CubitPy: Create half solid block",
         create_solid_block,
         kwargs={
-            "file_path": shared_tmp_path / "performance_testing_solid.4C.yaml",
+            "cubit": cubit,
+            "file_path": shared_tmp_path / "performance_testing_solid_half.4C.yaml",
             "nx": 100,
-            "ny": 100,
+            "ny": 50,
             "nz": 10,
         },
-        expected_time=10.0,
+        expected_time=1.0,
+    )
+
+
+@pytest.mark.performance
+def test_performance_meshpy_double_solid_block(
+    evaluate_execution_time, shared_tmp_path
+):
+    """The version of Cubit we use in testing only allows for 50,000 elements,
+    our goal is 100,000 so we double the block with 50,000 elements here."""
+
+    def double_block():
+        """Load the block with 50,000 elements and double the mesh."""
+        input_file, mesh = import_four_c_model(
+            shared_tmp_path / "performance_testing_solid_half.4C.yaml",
+            convert_input_to_mesh=True,
+        )
+        mesh_translated = mesh.copy()
+        mesh_translated.translate([1, 0, 0])
+        input_file.add(mesh)
+        input_file.add(mesh_translated)
+        input_file.dump(
+            shared_tmp_path / "performance_testing_solid.4C.yaml", validate=False
+        )
+
+    evaluate_execution_time(
+        "MeshPy: Load and double solid element block from cubit",
+        double_block,
+        expected_time=5.0,
     )
 
 
