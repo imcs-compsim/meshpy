@@ -36,7 +36,9 @@ from meshpy.four_c.material import (
 
 
 class Beam3rHerm2Line3(_Beam):
-    """Represents a BEAM3R HERM2LINE3 element."""
+    """Represents a Simo-Reissner beam element with third order Hermitian
+    interpolation of the centerline and second order Lagrangian interpolation
+    of the rotations."""
 
     nodes_create = [-1, 0, 1]
     beam_type = _mpy.beam.reissner
@@ -54,7 +56,7 @@ class Beam3rHerm2Line3(_Beam):
         return {
             "id": self.i_global,
             "cell": {
-                "type": "HERM2LINE3",
+                "type": "LINE3",
                 "connectivity": [self.nodes[i] for i in [0, 2, 1]],
             },
             "data": {
@@ -65,6 +67,7 @@ class Beam3rHerm2Line3(_Beam):
                     for i in [0, 2, 1]
                     for item in self.nodes[i].rotation.get_rotation_vector()
                 ],
+                "HERMITE_CENTERLINE": True,
             },
         }
 
