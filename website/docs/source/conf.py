@@ -21,15 +21,15 @@
 # THE SOFTWARE.
 
 # general configuration
-project = "MeshPy"
-copyright = "2025, MeshPy Authors"
-author = "MeshPy Authors"
+project = "BeamMe"
+copyright = "2025, BeamMe Authors"
+author = "BeamMe Authors"
 
 # html theme configuration
 html_theme = "pydata_sphinx_theme"
-html_title = "MeshPy"
+html_title = "BeamMe"
 html_theme_options = {
-    "github_url": "https://github.com/imcs-compsim/meshpy",
+    "github_url": "https://github.com/beamme-py/beamme",
 }
 html_show_sourcelink = False  # Hide "View Source" link on the right side of the page
 
