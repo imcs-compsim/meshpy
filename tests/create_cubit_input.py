@@ -20,11 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
 """This script creates solid input files with CubitPy which are then used in
-MeshPy testing."""
+testing."""
 
-from meshpy.four_c.input_file import InputFile
-from meshpy.four_c.model_importer import import_cubitpy_model
-from meshpy.utils.environment import cubitpy_is_available
+from beamme.four_c.input_file import InputFile
+from beamme.four_c.model_importer import import_cubitpy_model
+from beamme.utils.environment import cubitpy_is_available
 
 if cubitpy_is_available():
     from cubitpy import CubitPy, cupy
@@ -279,7 +279,7 @@ def create_solid_shell_meshes(file_path_blocks, file_path_dome):
     def create_brick_mesh(
         dimensions, n_elements, *, element_type=cupy.element_type.hex8sh
     ):
-        """Create a MeshPy mesh with a solid brick."""
+        """Create a mesh with a solid brick."""
         cubit = CubitPy()
         create_brick(
             cubit,

@@ -508,7 +508,7 @@ Cell[BoxData[{
  CellLabel->
   "In[118]:=",ExpressionUUID->"0e5ab382-da74-4dab-8883-14783664fb59"],
 
-Cell["Output the coordinates to compare with meshpy", "Text",ExpressionUUID->"1b007c3e-b86a-4a11-b2a3-59854e2a4470"],
+Cell["Output the coordinates to compare with beamme", "Text",ExpressionUUID->"1b007c3e-b86a-4a11-b2a3-59854e2a4470"],
 
 Cell[BoxData[{
  RowBox[{
@@ -517,7 +517,7 @@ Cell[BoxData[{
     RowBox[{"{",
      RowBox[{
      "referenceFileDirectory", ",",
-      "\"\<test_meshpy_curve_3d_helix_mathematica.csv\>\""}], "}"}], "]"}]}],
+      "\"\<test_curve_3d_helix_mathematica.csv\>\""}], "}"}], "]"}]}],
   ";"}], "\[IndentingNewLine]",
  RowBox[{
   RowBox[{"Export", "[",
@@ -653,7 +653,7 @@ Cell[BoxData[{
   RowBox[{"pltCurve", ",", "pltPoints", ",", "pltNodes"}], "]"}]}], "Input",
  CellLabel->"In[82]:=",ExpressionUUID->"54d2d687-b73e-44e7-982a-b561f58587c0"],
 
-Cell["Output the coordinates to compare with meshpy", "Text",ExpressionUUID->"a5e0a165-187e-454b-a308-d5c39a0d250e"],
+Cell["Output the coordinates to compare with beamme", "Text",ExpressionUUID->"a5e0a165-187e-454b-a308-d5c39a0d250e"],
 
 Cell[BoxData[{
  RowBox[{
@@ -662,7 +662,7 @@ Cell[BoxData[{
     RowBox[{"{",
      RowBox[{
      "referenceFileDirectory", ",",
-      "\"\<test_meshpy_curve_2d_sin_mathematica.csv\>\""}], "}"}], "]"}]}],
+      "\"\<test_curve_2d_sin_mathematica.csv\>\""}], "}"}], "]"}]}],
   ";"}], "\[IndentingNewLine]",
  RowBox[{
   RowBox[{"Export", "[",

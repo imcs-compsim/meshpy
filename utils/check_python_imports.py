@@ -105,7 +105,7 @@ class ImportChecker(_ast.NodeVisitor):
 
             # Check for private imports from third party libraries
             if not (
-                node.module is not None and node.module.startswith("meshpy.")
+                node.module is not None and node.module.startswith("beamme.")
             ) and alias.name.startswith("_"):
                 from_module = node.module or f"relative import (level {node.level})"
                 self.errors.append(
@@ -131,7 +131,7 @@ class ImportChecker(_ast.NodeVisitor):
                 )
             else:
                 # Check for correct aliases (internal imports cannot be renamed)
-                if node.module is not None and node.module.startswith("meshpy."):
+                if node.module is not None and node.module.startswith("beamme."):
                     expected_asname = "_" + alias.name
                     if alias.asname != expected_asname:
                         from_module = (

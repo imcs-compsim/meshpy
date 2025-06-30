@@ -23,8 +23,8 @@
 
 import pytest
 
-from meshpy.core.conf import mpy
-from meshpy.four_c.header_functions import (
+from beamme.core.conf import mpy
+from beamme.four_c.header_functions import (
     set_beam_contact_runtime_output,
     set_beam_contact_section,
     set_beam_to_solid_meshtying,
@@ -32,7 +32,7 @@ from meshpy.four_c.header_functions import (
     set_header_static,
     set_runtime_output,
 )
-from meshpy.four_c.input_file import InputFile
+from beamme.four_c.input_file import InputFile
 
 
 def test_header_functions_static(

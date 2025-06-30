@@ -325,7 +325,7 @@ BeamMe provides a flexible testing system where additional tests can be enabled 
 These flags can be combined arbitrarily; for example, to run the 4C, CubitPy, and ArborX tests but exclude the default test suite, use:
 ```bash
 # 4C Tests require a path to a 4C executable
-export MESHPY_FOUR_C_EXE=<path_to_4C>
+export BEAMME_FOUR_C_EXE=<path_to_4C>
 # CubitPy Tests require a path to a Cubit/Coreform installation
 export CUBIT_ROOT=<path_to_Cubit_or_Coreform>
 

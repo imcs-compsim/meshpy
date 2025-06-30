@@ -26,17 +26,17 @@ import pytest
 import pyvista as pv
 import quaternion
 
-from meshpy.core.rotation import Rotation
-from meshpy.cosserat_curve.cosserat_curve import CosseratCurve
-from meshpy.cosserat_curve.warping_along_cosserat_curve import (
+from beamme.core.rotation import Rotation
+from beamme.cosserat_curve.cosserat_curve import CosseratCurve
+from beamme.cosserat_curve.warping_along_cosserat_curve import (
     create_transform_boundary_conditions,
     get_mesh_transformation,
     warp_mesh_along_curve,
 )
-from meshpy.four_c.element_beam import Beam3rHerm2Line3
-from meshpy.four_c.material import MaterialReissner
-from meshpy.four_c.model_importer import import_four_c_model
-from meshpy.mesh_creation_functions.beam_helix import create_beam_mesh_helix
+from beamme.four_c.element_beam import Beam3rHerm2Line3
+from beamme.four_c.material import MaterialReissner
+from beamme.four_c.model_importer import import_four_c_model
+from beamme.mesh_creation_functions.beam_helix import create_beam_mesh_helix
 
 
 def load_cosserat_curve_from_file(get_corresponding_reference_file_path, **kwargs):

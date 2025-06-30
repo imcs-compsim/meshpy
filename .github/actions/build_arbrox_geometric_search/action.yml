@@ -11,5 +11,5 @@ runs:
         cd ${GITHUB_WORKSPACE}
         mkdir -p src/build/arborx
         cd src/build/arborx
-        cmake -DKokkos_DIR=${{ env.kokkos_dir }} ../../meshpy/geometric_search/src -G Ninja
+        cmake -DKokkos_DIR=${{ env.kokkos_dir }} ../../beamme/geometric_search/src -G Ninja
         ninja

@@ -19,12 +19,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This file contains utility functions for the examples in MeshPy."""
+"""This file contains utility functions for the first example."""
 
 import numpy as np
 import pyvista as pv
 
-from meshpy.utils.environment import is_testing
+from beamme.utils.environment import is_testing
 
 from .general_utils import reset_print_out
 

@@ -28,8 +28,8 @@ from typing import Callable, Optional
 
 import pytest
 
-from meshpy.core.mesh import Mesh
-from meshpy.four_c.input_file import InputFile
+from beamme.core.mesh import Mesh
+from beamme.four_c.input_file import InputFile
 
 PERFORMANCE_LOG = {}
 

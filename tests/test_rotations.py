@@ -19,13 +19,12 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This script is used to test the functionality of the Rotation class in the
-meshpy module."""
+"""This script is used to test the functionality of the Rotation class."""
 
 import numpy as np
 
-from meshpy.core.conf import mpy
-from meshpy.core.rotation import Rotation, smallest_rotation
+from beamme.core.conf import mpy
+from beamme.core.rotation import Rotation, smallest_rotation
 
 
 def get_rotation_matrix(axis, alpha):

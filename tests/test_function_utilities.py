@@ -19,10 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This script is used to test the functionality of the meshpy.function_utility
+"""This script is used to test the functionality of the function_utility
 module."""
 
-from meshpy.four_c.function_utility import (
+from beamme.four_c.function_utility import (
     create_linear_interpolation_dict,
     create_linear_interpolation_function,
 )

@@ -24,13 +24,13 @@
 import numpy as np
 import pytest
 
-from meshpy.abaqus.beam import generate_abaqus_beam
-from meshpy.abaqus.input_file import AbaqusBeamNormalDefinition, AbaqusInputFile
-from meshpy.abaqus.material import AbaqusBeamMaterial
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.core.mesh import Mesh
-from meshpy.core.rotation import Rotation
-from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
+from beamme.abaqus.beam import generate_abaqus_beam
+from beamme.abaqus.input_file import AbaqusBeamNormalDefinition, AbaqusInputFile
+from beamme.abaqus.material import AbaqusBeamMaterial
+from beamme.core.geometry_set import GeometrySet
+from beamme.core.mesh import Mesh
+from beamme.core.rotation import Rotation
+from beamme.mesh_creation_functions.beam_line import create_beam_mesh_line
 
 PYTEST_ABAQUS_NORMAL_DEFINITION_PARAMETRIZE = [
     ("normal_definition", "additional_identifier"),

@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This script contains a tutorial for meshpy.
+"""This script contains a tutorial for beamme.
 
 Most basic functionality is covered by this tutorial. For more
 information have a closer look at the test cases, as they cover all
@@ -31,24 +31,24 @@ import os
 import autograd.numpy as npAD
 import numpy as np
 
-from meshpy.core.boundary_condition import BoundaryCondition
-from meshpy.core.conf import mpy
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.core.mesh import Mesh
-from meshpy.core.rotation import Rotation
-from meshpy.four_c.element_beam import Beam3rHerm2Line3
-from meshpy.four_c.function import Function
-from meshpy.four_c.input_file import InputFile
-from meshpy.four_c.material import MaterialReissner
-from meshpy.mesh_creation_functions.beam_basic_geometry import (
+from beamme.core.boundary_condition import BoundaryCondition
+from beamme.core.conf import mpy
+from beamme.core.geometry_set import GeometrySet
+from beamme.core.mesh import Mesh
+from beamme.core.rotation import Rotation
+from beamme.four_c.element_beam import Beam3rHerm2Line3
+from beamme.four_c.function import Function
+from beamme.four_c.input_file import InputFile
+from beamme.four_c.material import MaterialReissner
+from beamme.mesh_creation_functions.beam_basic_geometry import (
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_line,
 )
-from meshpy.mesh_creation_functions.beam_curve import create_beam_mesh_parametric_curve
-from meshpy.utils.nodes import get_single_node
+from beamme.mesh_creation_functions.beam_curve import create_beam_mesh_parametric_curve
+from beamme.utils.nodes import get_single_node
 
 
-def meshpy_tutorial(base_dir, preview=False):
+def beamme_tutorial(base_dir, preview=False):
     """Create a honeycomb like structure with different type of connectors.
 
     Args
@@ -102,7 +102,7 @@ def meshpy_tutorial(base_dir, preview=False):
     mesh.write_vtk("step_1", base_dir)
 
     # We want to fix all positions and rotations of the first node.
-    # mpy is a global object that stores enums and other options for meshpy.
+    # mpy is a global object that stores enums and other options for beamme.
     mesh.add(
         BoundaryCondition(
             beam_set_1["start"],
@@ -262,7 +262,7 @@ def meshpy_tutorial(base_dir, preview=False):
     input_file.add(
         """
         ------------------------------------------------------------------TITLE
-        meshpy tutorial
+        beamme tutorial
         -----------------------------------------------------------PROBLEM TYPE
         PROBLEMTYPE                           Structure
         RESTART                               0
@@ -309,5 +309,5 @@ if __name__ == "__main__":
 
     # Adapt this path to the directory you want to store the tutorial files in.
     tutorial_directory = ""
-    input_file = meshpy_tutorial(tutorial_directory)
+    input_file = beamme_tutorial(tutorial_directory)
     input_file.dump(os.path.join(tutorial_directory, "tutorial.4C.yaml"))

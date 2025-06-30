@@ -29,7 +29,7 @@ import pytest
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
 
-from meshpy.core.conf import mpy
+from beamme.core.conf import mpy
 
 # Import additional confest files (split for better overview)
 pytest_plugins = [

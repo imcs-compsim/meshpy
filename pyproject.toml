@@ -3,9 +3,9 @@ requires = ["setuptools", "wheel", "cython", "numpy"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "MeshPy"
-description = "MeshPy: A general purpose 3D beam finite element input generator"
-authors = [{name = "MeshPy Authors"}]
+name = "BeamMe"
+description = "BeamMe: A general purpose 3D beam finite element input generator"
+authors = [{name = "BeamMe Authors"}]
 maintainers = [
   {name = "Ivo Steinbrecher", email = "ivo.steinbrecher@unibw.de"},
   {name = "David Rudlstorfer", email = "david.rudlstorfer@tum.de"},
@@ -44,19 +44,19 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://imcs-compsim.github.io/meshpy/"
-Documentation = "https://imcs-compsim.github.io/meshpy/api-documentation/"
-Repository = "https://github.com/imcs-compsim/meshpy/"
-Issues = "https://github.com/imcs-compsim/meshpy/issues/"
+Homepage = "https://beamme-py.github.io/beamme/"
+Documentation = "https://beamme-py.github.io/beamme/api-documentation/"
+Repository = "https://github.com/beamme-py/beamme/"
+Issues = "https://github.com/beamme-py/beamme/issues/"
 
 # Tools
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-addopts = "-p pytest_cov --cov-report=term --cov-report=html --cov-fail-under=90 --cov=src/meshpy/"
+addopts = "-p pytest_cov --cov-report=term --cov-report=html --cov-fail-under=90 --cov=src/beamme/"
 markers = [
   "fourc: tests in combination with 4C",
   "arborx: tests in combination with ArborX",
   "cubitpy: tests in combination with CubitPy",
-  "performance: performance tests of MeshPy"
+  "performance: performance tests"
 ]

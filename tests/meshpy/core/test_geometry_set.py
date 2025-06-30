@@ -25,10 +25,10 @@ from typing import Callable
 
 import pytest
 
-from meshpy.core.conf import mpy
-from meshpy.core.element_beam import Beam
-from meshpy.core.geometry_set import GeometrySet, GeometrySetNodes
-from meshpy.core.node import Node
+from beamme.core.conf import mpy
+from beamme.core.element_beam import Beam
+from beamme.core.geometry_set import GeometrySet, GeometrySetNodes
+from beamme.core.node import Node
 
 
 @pytest.fixture()
@@ -69,7 +69,7 @@ def assert_geometry_set_add_operator() -> Callable:
         (Beam, []),
     ],
 )
-def test_meshpy_core_geometry_set_add_operator(
+def test_core_geometry_set_add_operator(
     mesh_object, mesh_object_args, assert_geometry_set_add_operator
 ):
     """Test that geometry sets can be added to each other.
@@ -93,7 +93,7 @@ def test_meshpy_core_geometry_set_add_operator(
 
 
 @pytest.mark.parametrize("geometry_type", [mpy.geo.point, mpy.geo.line])
-def test_meshpy_core_geometry_set_nodes_add_operator(
+def test_core_geometry_set_nodes_add_operator(
     geometry_type, assert_geometry_set_add_operator
 ):
     """Test that node based geometry sets can be added to each other."""

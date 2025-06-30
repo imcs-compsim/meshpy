@@ -24,15 +24,15 @@
 import numpy as np
 import pytest
 
-from meshpy.core.mesh import Mesh
-from meshpy.core.rotation import Rotation
-from meshpy.four_c.element_beam import Beam3rHerm2Line3
-from meshpy.four_c.input_file import InputFile
-from meshpy.four_c.material import MaterialReissner
-from meshpy.four_c.model_importer import import_four_c_model
-from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
-from meshpy.utils.environment import cubitpy_is_available
-from meshpy.utils.nodes import find_close_nodes
+from beamme.core.mesh import Mesh
+from beamme.core.rotation import Rotation
+from beamme.four_c.element_beam import Beam3rHerm2Line3
+from beamme.four_c.input_file import InputFile
+from beamme.four_c.material import MaterialReissner
+from beamme.four_c.model_importer import import_four_c_model
+from beamme.mesh_creation_functions.beam_line import create_beam_mesh_line
+from beamme.utils.environment import cubitpy_is_available
+from beamme.utils.nodes import find_close_nodes
 
 if cubitpy_is_available():
     from cubitpy import CubitPy, cupy
@@ -192,9 +192,7 @@ def test_performance_cubitpy_create_solid(evaluate_execution_time, shared_tmp_pa
 
 
 @pytest.mark.performance
-def test_performance_meshpy_double_solid_block(
-    evaluate_execution_time, shared_tmp_path
-):
+def test_performance_double_solid_block(evaluate_execution_time, shared_tmp_path):
     """The version of Cubit we use in testing only allows for 50,000 elements,
     our goal is 100,000 so we double the block with 50,000 elements here."""
 
@@ -213,7 +211,7 @@ def test_performance_meshpy_double_solid_block(
         )
 
     evaluate_execution_time(
-        "MeshPy: Load and double solid element block from cubit",
+        "BeamMe: Load and double solid element block from cubit",
         double_block,
         expected_time=5.0,
     )
@@ -222,15 +220,15 @@ def test_performance_meshpy_double_solid_block(
 @pytest.mark.parametrize(
     ("log_name", "full_import", "expected_time"),
     [
-        ("MeshPy: Load solid mesh (no full import)", False, 2.5),
-        ("MeshPy: Load solid mesh (full import)", True, 3.5),
+        ("BeamMe: Load solid mesh (no full import)", False, 2.5),
+        ("BeamMe: Load solid mesh (full import)", True, 3.5),
     ],
 )
 @pytest.mark.performance
-def test_performance_meshpy_load_solid(
+def test_performance_load_solid(
     evaluate_execution_time, shared_tmp_path, log_name, full_import, expected_time
 ):
-    """Test the performance of loading a solid mesh using MeshPy."""
+    """Test the performance of loading a solid mesh."""
 
     evaluate_execution_time(
         log_name,
@@ -244,12 +242,12 @@ def test_performance_meshpy_load_solid(
 
 
 @pytest.mark.performance
-def test_performance_meshpy_create_beams(evaluate_execution_time, cache_data):
+def test_performance_create_beams(evaluate_execution_time, cache_data):
     """Test the performance of creating a large beam mesh."""
 
     # store mesh in cache for upcoming tests
     cache_data.mesh = evaluate_execution_time(
-        "MeshPy: Create large beam mesh",
+        "BeamMe: Create large beam mesh",
         create_beam_mesh,
         kwargs={
             "n_x": 40,
@@ -262,11 +260,11 @@ def test_performance_meshpy_create_beams(evaluate_execution_time, cache_data):
 
 
 @pytest.mark.performance
-def test_performance_meshpy_rotate(evaluate_execution_time, cache_data):
+def test_performance_rotate(evaluate_execution_time, cache_data):
     """Test the performance of rotating a large beam mesh."""
 
     evaluate_execution_time(
-        "MeshPy: Rotate large beam mesh",
+        "BeamMe: Rotate large beam mesh",
         cache_data.mesh.rotate,
         kwargs={"rotation": Rotation([1, 1, 0], np.pi / 3)},
         expected_time=0.5,
@@ -274,11 +272,11 @@ def test_performance_meshpy_rotate(evaluate_execution_time, cache_data):
 
 
 @pytest.mark.performance
-def test_performance_meshpy_translate(evaluate_execution_time, cache_data):
+def test_performance_translate(evaluate_execution_time, cache_data):
     """Test the performance of translating a large beam mesh."""
 
     evaluate_execution_time(
-        "MeshPy: Translate large beam mesh",
+        "BeamMe: Translate large beam mesh",
         cache_data.mesh.translate,
         kwargs={"vector": [0.5, 0, 0]},
         expected_time=0.25,
@@ -286,11 +284,11 @@ def test_performance_meshpy_translate(evaluate_execution_time, cache_data):
 
 
 @pytest.mark.performance
-def test_performance_meshpy_reflect(evaluate_execution_time, cache_data):
+def test_performance_reflect(evaluate_execution_time, cache_data):
     """Test the performance of reflecting a large beam mesh."""
 
     evaluate_execution_time(
-        "MeshPy: Reflect large beam mesh",
+        "BeamMe: Reflect large beam mesh",
         cache_data.mesh.reflect,
         kwargs={"normal_vector": [0.5, 0.4, 0.1]},
         expected_time=0.5,
@@ -302,7 +300,7 @@ def test_performance_mespy_wrap_around_cylinder(evaluate_execution_time, cache_d
     """Test the performance of wrapping a large beam mesh around a cylinder."""
 
     evaluate_execution_time(
-        "MeshPy: Wrap large beam mesh around cylinder",
+        "BeamMe: Wrap large beam mesh around cylinder",
         cache_data.mesh.wrap_around_cylinder,
         kwargs={"radius": 1.0},
         expected_time=1.75,
@@ -310,14 +308,14 @@ def test_performance_mespy_wrap_around_cylinder(evaluate_execution_time, cache_d
 
 
 @pytest.mark.performance
-def test_performance_meshpy_wrap_around_cylinder_without_check(
+def test_performance_wrap_around_cylinder_without_check(
     evaluate_execution_time, cache_data
 ):
     """Test the performance of wrapping a large beam mesh around a cylinder
     without checking for advanced warnings."""
 
     evaluate_execution_time(
-        "MeshPy: Wrap large beam mesh around cylinder without check",
+        "BeamMe: Wrap large beam mesh around cylinder without check",
         cache_data.mesh.wrap_around_cylinder,
         kwargs={"radius": 1.0, "advanced_warning": False},
         expected_time=0.5,
@@ -325,11 +323,11 @@ def test_performance_meshpy_wrap_around_cylinder_without_check(
 
 
 @pytest.mark.performance
-def test_performance_meshpy_find_close_nodes(evaluate_execution_time, cache_data):
+def test_performance_find_close_nodes(evaluate_execution_time, cache_data):
     """Test the performance of finding close nodes in a large beam mesh."""
 
     evaluate_execution_time(
-        "MeshPy: Find close nodes in large beam mesh",
+        "BeamMe: Find close nodes in large beam mesh",
         find_close_nodes,
         kwargs={"nodes": cache_data.mesh.nodes},
         expected_time=0.4,
@@ -337,13 +335,13 @@ def test_performance_meshpy_find_close_nodes(evaluate_execution_time, cache_data
 
 
 @pytest.mark.performance
-def test_performance_meshpy_add_mesh_to_input_file(evaluate_execution_time, cache_data):
+def test_performance_add_mesh_to_input_file(evaluate_execution_time, cache_data):
     """Test the performance of adding a mesh to an input file."""
 
     input_file = InputFile()
 
     evaluate_execution_time(
-        "MeshPy: Add large beam mesh to input file",
+        "BeamMe: Add large beam mesh to input file",
         input_file.add,
         kwargs={"object_to_add": cache_data.mesh},
         expected_time=10.0,
@@ -353,7 +351,7 @@ def test_performance_meshpy_add_mesh_to_input_file(evaluate_execution_time, cach
 
 
 @pytest.mark.performance
-def test_performance_meshpy_dump_input_file(
+def test_performance_dump_input_file(
     evaluate_execution_time,
     cache_data,
     tmp_path,
@@ -361,7 +359,7 @@ def test_performance_meshpy_dump_input_file(
     """Test the performance of dumping an input file with a large beam mesh."""
 
     evaluate_execution_time(
-        "MeshPy: Dump input file with large beam mesh",
+        "BeamMe: Dump input file with large beam mesh",
         cache_data.input_file.dump,
         kwargs={
             "input_file_path": tmp_path / "performance_testing_beam.4C.yaml",
@@ -372,14 +370,14 @@ def test_performance_meshpy_dump_input_file(
 
 
 @pytest.mark.performance
-def test_performance_meshpy_write_vtk(evaluate_execution_time, tmp_path, cache_data):
+def test_performance_write_vtk(evaluate_execution_time, tmp_path, cache_data):
     """Test the performance of writing a beam mesh to VTK format."""
 
     # use a smaller mesh for testing vtk output performance
     cache_data.mesh = create_beam_mesh(n_x=20, n_y=20, n_z=10, n_el=2)
 
     evaluate_execution_time(
-        "MeshPy: Write beam mesh to VTK",
+        "BeamMe: Write beam mesh to VTK",
         cache_data.mesh.write_vtk,
         kwargs={
             "output_name": "performance_testing_beam",
@@ -391,14 +389,12 @@ def test_performance_meshpy_write_vtk(evaluate_execution_time, tmp_path, cache_d
 
 
 @pytest.mark.performance
-def test_performance_meshpy_write_vtk_smooth(
-    evaluate_execution_time, tmp_path, cache_data
-):
+def test_performance_write_vtk_smooth(evaluate_execution_time, tmp_path, cache_data):
     """Test the performance of writing a beam mesh to VTK format with more
     segments."""
 
     evaluate_execution_time(
-        "MeshPy: Write beam mesh to VTK with more segments",
+        "BeamMe: Write beam mesh to VTK with more segments",
         cache_data.mesh.write_vtk,
         kwargs={
             "output_name": "performance_testing_beam",

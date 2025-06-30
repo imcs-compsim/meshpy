@@ -24,14 +24,14 @@
 import numpy as np
 import splinepy
 
-from meshpy.core.mesh import Mesh
-from meshpy.core.rotation import Rotation
-from meshpy.four_c.material import MaterialSolid, MaterialStVenantKirchhoff
-from meshpy.mesh_creation_functions.nurbs_generic import (
+from beamme.core.mesh import Mesh
+from beamme.core.rotation import Rotation
+from beamme.four_c.material import MaterialSolid, MaterialStVenantKirchhoff
+from beamme.mesh_creation_functions.nurbs_generic import (
     add_geomdl_nurbs_to_mesh,
     add_splinepy_nurbs_to_mesh,
 )
-from meshpy.mesh_creation_functions.nurbs_geometries import (
+from beamme.mesh_creation_functions.nurbs_geometries import (
     create_nurbs_brick,
     create_nurbs_cylindrical_shell_sector,
     create_nurbs_flat_plate_2d,
