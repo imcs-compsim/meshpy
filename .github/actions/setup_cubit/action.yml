@@ -1,0 +1,41 @@
+name: setup_cubit
+description: Setup a Cubit installation for testing
+inputs:
+  cubit_download_url:
+    description: URL where Cubit can be downloaded from
+    required: true
+  cubit_email:
+    description: Email to activate cubit
+    required: true
+  cubit_password:
+    description: Password to activate cubit
+    required: true
+outputs:
+  cubit_root:
+    description: "Path to the Cubit installation"
+    value: ${{ steps.setup-cubit.outputs.cubit_root }}
+runs:
+  using: composite
+  steps:
+    - name: Download and unpack Cubit
+      id: setup-cubit
+      shell: bash
+      run: |
+        # Check if secrets are available
+        if [[ -z "${{ inputs.cubit_email }}" || -z "${{ inputs.cubit_password }}" ]]; then
+          echo "cubit_email or cubit_password is empty or not injected. Cannot activate Cubit."
+          exit 1
+        fi
+        # We need these packages for cubit to work
+        sudo apt update
+        sudo apt install -y libglu1-mesa
+        # Download cubit and extract it
+        cd ${GITHUB_WORKSPACE}
+        wget -q ${{ inputs.cubit_download_url }}
+        tar -xzf *.tar.gz
+        # Save cubit root path for following steps
+        CUBIT_FOLDER=$(find . -maxdepth 1 -type d -name "Coreform-Cubit-*" | head -n 1 | sed 's|^\./||')
+        CUBIT_ROOT="$(pwd)/$CUBIT_FOLDER"
+        echo "cubit_root=$CUBIT_ROOT" >> "$GITHUB_OUTPUT"
+        # Activate cubit
+        $CUBIT_ROOT/bin/rlm_activate --login ${{ inputs.cubit_email }} ${{ inputs.cubit_password }}

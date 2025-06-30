@@ -1,10 +1,5 @@
 name: setup_virtual_python_environment
 description: Configure the python virtual environment
-inputs:
-  python-exe:
-    description: Command for python executable
-    required: false
-    default: "python"
 runs:
   using: composite
   steps:
@@ -12,6 +7,6 @@ runs:
       shell: bash
       run: |
         cd ${GITHUB_WORKSPACE}
-        ${{ inputs.python-exe }} -m venv python-workflow-venv
+        python -m venv python-workflow-venv
         source python-workflow-venv/bin/activate
         pip install --upgrade pip

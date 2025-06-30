@@ -13,6 +13,10 @@ inputs:
     description: Additional flags to pass to pytest, i.e., markers
     required: false
     default: ""
+  cubit-root:
+    description: Path to the cubit installation
+    required: false
+    default: ""
 runs:
   using: composite
   steps:
@@ -20,9 +24,9 @@ runs:
       shell: bash
       env:
         MESHPY_FOUR_C_EXE: /home/user/4C/build/4C
-        CUBIT_ROOT: /imcs/public/compsim/opt/cubit-15.2
         OMPI_MCA_rmaps_base_oversubscribe: 1
       run: |
+        export CUBIT_ROOT=${{ inputs.cubit-root }}
         cd ${GITHUB_WORKSPACE}
         ${{ inputs.source-command }}
         pip install ${{ inputs.install-command }}
