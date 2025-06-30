@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Test environment utils of MeshPy."""
+"""Test environment utils."""
 
 import os
 from pathlib import Path
@@ -27,7 +27,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from meshpy.utils.environment import (
+from beamme.utils.environment import (
     cubitpy_is_available,
     get_env_variable,
     get_git_data,
@@ -39,10 +39,10 @@ from meshpy.utils.environment import (
 def test_is_cubitpy_available() -> None:
     """Test is_cubitpy_available function."""
 
-    with patch("meshpy.utils.environment._find_spec", return_value=True):
+    with patch("beamme.utils.environment._find_spec", return_value=True):
         assert cubitpy_is_available() is True
 
-    with patch("meshpy.utils.environment._find_spec", return_value=None):
+    with patch("beamme.utils.environment._find_spec", return_value=None):
         assert cubitpy_is_available() is False
 
 
@@ -82,8 +82,8 @@ def test_get_env_variable() -> None:
             get_env_variable("TEST_VAR")
 
 
-@patch("meshpy.utils.environment._shutil.which")
-@patch("meshpy.utils.environment._subprocess.run")
+@patch("beamme.utils.environment._shutil.which")
+@patch("beamme.utils.environment._subprocess.run")
 def test_get_git_data_success(mock_run, mock_which):
     """Test get_git_data function with successful git command execution."""
 
@@ -106,7 +106,7 @@ def test_get_git_data_success(mock_run, mock_which):
     assert mock_run.call_count == 2
 
 
-@patch("meshpy.utils.environment._shutil.which")
+@patch("beamme.utils.environment._shutil.which")
 def test_get_git_data_git_not_found(mock_which):
     """Test get_git_data function when git executable is not found."""
 
@@ -116,8 +116,8 @@ def test_get_git_data_git_not_found(mock_which):
         get_git_data(Path("/path/to/repo"))
 
 
-@patch("meshpy.utils.environment._shutil.which")
-@patch("meshpy.utils.environment._subprocess.run")
+@patch("beamme.utils.environment._shutil.which")
+@patch("beamme.utils.environment._subprocess.run")
 def test_get_git_data_subprocess_failure(mock_run, mock_which):
     """Test get_git_data function with subprocess command failure."""
 

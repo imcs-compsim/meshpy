@@ -34,8 +34,8 @@ import xmltodict
 from fourcipp.utils.dict_utils import compare_nested_dicts_or_lists
 from vistools.vtk.compare_grids import compare_grids
 
-from meshpy.core.mesh import Mesh
-from meshpy.four_c.input_file import InputFile
+from beamme.core.mesh import Mesh
+from beamme.four_c.input_file import InputFile
 
 
 @pytest.fixture(scope="function")
@@ -229,7 +229,7 @@ def custom_fourcipp_comparison(
     ):
         if not np.allclose(obj, reference_obj, rtol=rtol, atol=atol):
             raise AssertionError(
-                f"Custom MeshPy comparison failed!\n\nThe objects are not equal:\n\nobj: {obj}\n\nreference_obj: {reference_obj}"
+                f"Custom BeamMe comparison failed!\n\nThe objects are not equal:\n\nobj: {obj}\n\nreference_obj: {reference_obj}"
             )
         return True
 

@@ -29,39 +29,39 @@ import pytest
 import splinepy
 from autograd import jacobian
 
-from meshpy.core.conf import mpy
-from meshpy.core.mesh import Mesh
-from meshpy.core.node import NodeCosserat
-from meshpy.core.rotation import Rotation
-from meshpy.four_c.element_beam import Beam3eb, Beam3rHerm2Line3
-from meshpy.four_c.material import MaterialEulerBernoulli, MaterialReissner
-from meshpy.mesh_creation_functions.applications.beam_fibers_in_rectangle import (
+from beamme.core.conf import mpy
+from beamme.core.mesh import Mesh
+from beamme.core.node import NodeCosserat
+from beamme.core.rotation import Rotation
+from beamme.four_c.element_beam import Beam3eb, Beam3rHerm2Line3
+from beamme.four_c.material import MaterialEulerBernoulli, MaterialReissner
+from beamme.mesh_creation_functions.applications.beam_fibers_in_rectangle import (
     create_fibers_in_rectangle,
 )
-from meshpy.mesh_creation_functions.applications.beam_stent import (
+from beamme.mesh_creation_functions.applications.beam_stent import (
     create_beam_mesh_stent,
 )
-from meshpy.mesh_creation_functions.applications.beam_wire import create_wire_fibers
-from meshpy.mesh_creation_functions.beam_arc import (
+from beamme.mesh_creation_functions.applications.beam_wire import create_wire_fibers
+from beamme.mesh_creation_functions.beam_arc import (
     create_beam_mesh_arc_segment_2d,
     create_beam_mesh_arc_segment_via_axis,
     create_beam_mesh_arc_segment_via_rotation,
 )
-from meshpy.mesh_creation_functions.beam_generic import create_beam_mesh_generic
-from meshpy.mesh_creation_functions.beam_helix import create_beam_mesh_helix
-from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
-from meshpy.mesh_creation_functions.beam_node_continuation import (
+from beamme.mesh_creation_functions.beam_generic import create_beam_mesh_generic
+from beamme.mesh_creation_functions.beam_helix import create_beam_mesh_helix
+from beamme.mesh_creation_functions.beam_line import create_beam_mesh_line
+from beamme.mesh_creation_functions.beam_node_continuation import (
     create_beam_mesh_arc_at_node,
     create_beam_mesh_line_at_node,
 )
-from meshpy.mesh_creation_functions.beam_parametric_curve import (
+from beamme.mesh_creation_functions.beam_parametric_curve import (
     create_beam_mesh_parametric_curve,
 )
-from meshpy.mesh_creation_functions.beam_splinepy import (
+from beamme.mesh_creation_functions.beam_splinepy import (
     create_beam_mesh_from_splinepy,
     get_curve_function_and_jacobian_for_integration,
 )
-from meshpy.utils.nodes import get_nodal_coordinates
+from beamme.utils.nodes import get_nodal_coordinates
 
 
 def create_helix_function(

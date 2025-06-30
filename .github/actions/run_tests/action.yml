@@ -23,7 +23,7 @@ runs:
     - name: Testing
       shell: bash
       env:
-        MESHPY_FOUR_C_EXE: /home/user/4C/build/4C
+        BEAMME_FOUR_C_EXE: /home/user/4C/build/4C
         OMPI_MCA_rmaps_base_oversubscribe: 1
       run: |
         export CUBIT_ROOT=${{ inputs.cubit-root }}

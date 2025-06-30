@@ -19,18 +19,18 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Test the MeshPy beam to space-time surface functionality."""
+"""Test the beam to space-time surface functionality."""
 
 import numpy as np
 import pytest
 
-from meshpy.core.conf import mpy
-from meshpy.core.mesh import Mesh
-from meshpy.four_c.element_beam import Beam3rHerm2Line3, Beam3rLine2Line2
-from meshpy.four_c.material import MaterialReissner
-from meshpy.mesh_creation_functions.beam_arc import create_beam_mesh_arc_segment_2d
-from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
-from meshpy.space_time.beam_to_space_time import beam_to_space_time, mesh_to_data_arrays
+from beamme.core.conf import mpy
+from beamme.core.mesh import Mesh
+from beamme.four_c.element_beam import Beam3rHerm2Line3, Beam3rLine2Line2
+from beamme.four_c.material import MaterialReissner
+from beamme.mesh_creation_functions.beam_arc import create_beam_mesh_arc_segment_2d
+from beamme.mesh_creation_functions.beam_line import create_beam_mesh_line
+from beamme.space_time.beam_to_space_time import beam_to_space_time, mesh_to_data_arrays
 
 
 def get_name(beam_class):
@@ -216,7 +216,7 @@ def test_performance_create_mesh_in_space(evaluate_execution_time, cache_data):
     mesh = Mesh()
 
     evaluate_execution_time(
-        "MeshPy: Space-Time: Create mesh in space",
+        "BeamMe: Space-Time: Create mesh in space",
         create_beam_mesh_line,
         kwargs={
             "mesh": mesh,
@@ -238,7 +238,7 @@ def test_performance_create_mesh_in_time(evaluate_execution_time, cache_data):
     """Test the performance of the mesh creation in time."""
 
     evaluate_execution_time(
-        "MeshPy: Space-Time: Create mesh in time",
+        "BeamMe: Space-Time: Create mesh in time",
         beam_to_space_time,
         kwargs={
             "mesh_space_or_generator": cache_data.mesh,

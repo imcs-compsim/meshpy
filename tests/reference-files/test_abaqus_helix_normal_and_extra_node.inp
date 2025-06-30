@@ -1,7 +1,7 @@
 ** ----------------------------------------
-** This input file was created with MeshPy.
+** This input file was created with BeamMe.
 ** Copyright (c) 2018-2025 BeamMe Authors
-** https://imcs-compsim.github.io/meshpy/
+** https://beamme-py.github.io/beamme/
 ** ----------------------------------------
 *Node
      1,  5.00000000000000e-01,  0.00000000000000e+00,  0.00000000000000e+00

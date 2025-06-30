@@ -16,6 +16,6 @@ jobs:
     steps:
       - uses: s-weigand/trigger-mybinder-build@v1
         with:
-          target-repo: imcs-compsim/beamme/HEAD
+          target-repo: beamme-py/beamme/HEAD
           service-name: gh
           debug: true

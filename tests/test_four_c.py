@@ -19,33 +19,32 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This script is used to test the functionality of MeshPy for creating 4C
-input files."""
+"""This script is used to test the functionality to create 4C input files."""
 
 import numpy as np
 import pytest
 
-from meshpy.core.boundary_condition import BoundaryCondition
-from meshpy.core.conf import mpy
-from meshpy.core.function import Function
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.core.mesh import Mesh
-from meshpy.core.rotation import Rotation
-from meshpy.four_c.beam_interaction_conditions import add_beam_interaction_condition
-from meshpy.four_c.beam_potential import BeamPotential
-from meshpy.four_c.dbc_monitor import linear_time_transformation
-from meshpy.four_c.element_beam import Beam3rHerm2Line3
-from meshpy.four_c.input_file import InputFile
-from meshpy.four_c.locsys_condition import LocSysCondition
-from meshpy.four_c.material import MaterialReissner
-from meshpy.four_c.model_importer import import_four_c_model
-from meshpy.four_c.solid_shell_thickness_direction import (
+from beamme.core.boundary_condition import BoundaryCondition
+from beamme.core.conf import mpy
+from beamme.core.function import Function
+from beamme.core.geometry_set import GeometrySet
+from beamme.core.mesh import Mesh
+from beamme.core.rotation import Rotation
+from beamme.four_c.beam_interaction_conditions import add_beam_interaction_condition
+from beamme.four_c.beam_potential import BeamPotential
+from beamme.four_c.dbc_monitor import linear_time_transformation
+from beamme.four_c.element_beam import Beam3rHerm2Line3
+from beamme.four_c.input_file import InputFile
+from beamme.four_c.locsys_condition import LocSysCondition
+from beamme.four_c.material import MaterialReissner
+from beamme.four_c.model_importer import import_four_c_model
+from beamme.four_c.solid_shell_thickness_direction import (
     get_visualization_third_parameter_direction_hex8,
     set_solid_shell_thickness_direction,
 )
-from meshpy.mesh_creation_functions.beam_helix import create_beam_mesh_helix
-from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
-from meshpy.utils.nodes import is_node_on_plane
+from beamme.mesh_creation_functions.beam_helix import create_beam_mesh_helix
+from beamme.mesh_creation_functions.beam_line import create_beam_mesh_line
+from beamme.utils.nodes import is_node_on_plane
 
 
 def test_four_c_material_numbering(

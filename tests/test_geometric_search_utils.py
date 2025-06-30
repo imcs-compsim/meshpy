@@ -19,11 +19,11 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Test environment utils of MeshPy."""
+"""Test environment utils."""
 
 from unittest.mock import patch
 
-from meshpy.geometric_search.utils import (
+from beamme.geometric_search.utils import (
     arborx_is_available,
     cython_is_available,
 )
@@ -32,18 +32,18 @@ from meshpy.geometric_search.utils import (
 def test_is_arborx_available() -> None:
     """Test is_arborx_available function."""
 
-    with patch("meshpy.geometric_search.utils._find_spec", return_value=True):
+    with patch("beamme.geometric_search.utils._find_spec", return_value=True):
         assert arborx_is_available() is True
 
-    with patch("meshpy.geometric_search.utils._find_spec", return_value=None):
+    with patch("beamme.geometric_search.utils._find_spec", return_value=None):
         assert arborx_is_available() is False
 
 
 def test_is_cython_available() -> None:
     """Test is_cython_available function."""
 
-    with patch("meshpy.geometric_search.utils._find_spec", return_value=True):
+    with patch("beamme.geometric_search.utils._find_spec", return_value=True):
         assert cython_is_available() is True
 
-    with patch("meshpy.geometric_search.utils._find_spec", return_value=None):
+    with patch("beamme.geometric_search.utils._find_spec", return_value=None):
         assert cython_is_available() is False

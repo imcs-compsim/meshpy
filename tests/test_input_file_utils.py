@@ -21,11 +21,11 @@
 # THE SOFTWARE.
 """This script is used to test the functionality of the input file utils."""
 
-from meshpy.core.mesh import Mesh
-from meshpy.core.mesh_utils import get_coupled_nodes_to_master_map
-from meshpy.four_c.element_beam import Beam3rLine2Line2
-from meshpy.four_c.material import MaterialReissner
-from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
+from beamme.core.mesh import Mesh
+from beamme.core.mesh_utils import get_coupled_nodes_to_master_map
+from beamme.four_c.element_beam import Beam3rLine2Line2
+from beamme.four_c.material import MaterialReissner
+from beamme.mesh_creation_functions.beam_line import create_beam_mesh_line
 
 
 def test_input_file_utils_get_coupled_nodes_to_master_map():

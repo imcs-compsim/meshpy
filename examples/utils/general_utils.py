@@ -19,13 +19,13 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This file contains utility functions for the examples in MeshPy."""
+"""This file contains utility functions for the examples."""
 
 import sys
 
 import pyvista as pv
 
-from meshpy.utils.environment import is_mybinder
+from beamme.utils.environment import is_mybinder
 
 # Store the default system out, so we can reset it after pyvista changes it
 stdout = sys.stdout

@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This script is used to test the functionality of the meshpy.geometric_search
+"""This script is used to test the functionality of the geometric_search
 module."""
 
 import random
@@ -27,21 +27,21 @@ import random
 import numpy as np
 import pytest
 
-from meshpy.core.mesh import Mesh
-from meshpy.core.rotation import Rotation
-from meshpy.four_c.element_beam import Beam3rHerm2Line3
-from meshpy.four_c.material import MaterialReissner
-from meshpy.geometric_search.find_close_points import (
+from beamme.core.mesh import Mesh
+from beamme.core.rotation import Rotation
+from beamme.four_c.element_beam import Beam3rHerm2Line3
+from beamme.four_c.material import MaterialReissner
+from beamme.geometric_search.find_close_points import (
     FindClosePointAlgorithm,
     find_close_points,
     partner_indices_to_point_partners,
     point_partners_to_partner_indices,
     point_partners_to_unique_indices,
 )
-from meshpy.mesh_creation_functions.applications.beam_honeycomb import (
+from beamme.mesh_creation_functions.applications.beam_honeycomb import (
     create_beam_mesh_honeycomb_flat,
 )
-from meshpy.utils.nodes import filter_nodes, get_nodal_coordinates
+from beamme.utils.nodes import filter_nodes, get_nodal_coordinates
 
 PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE = [
     "algorithm",
@@ -550,7 +550,7 @@ def test_find_close_points_tolerance_precision(algorithm):
 
 
 @pytest.mark.performance
-def test_performance_meshpy_find_close_points_brute_force_cython(
+def test_performance_find_close_points_brute_force_cython(
     evaluate_execution_time,
 ):
     """Test the performance of finding close points using brute force Cython
@@ -565,7 +565,7 @@ def test_performance_meshpy_find_close_points_brute_force_cython(
             find_close_points(points, algorithm=algorithm)
 
     evaluate_execution_time(
-        "MeshPy: Find close points (brute force Cython)",
+        "BeamMe: Find close points (brute force Cython)",
         repeat_find_random_close_points,
         kwargs={
             "n_points": 100,

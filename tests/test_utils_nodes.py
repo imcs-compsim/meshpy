@@ -19,10 +19,10 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""Test node utils of MeshPy."""
+"""Test node utils."""
 
-from meshpy.core.node import Node
-from meshpy.utils.nodes import is_node_on_plane
+from beamme.core.node import Node
+from beamme.utils.nodes import is_node_on_plane
 
 
 def test_is_node_on_plane():

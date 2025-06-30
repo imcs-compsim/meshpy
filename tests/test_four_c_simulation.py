@@ -19,42 +19,42 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 # THE SOFTWARE.
-"""This script is used to simulate 4C input files created with MeshPy."""
+"""This script is used to simulate create 4C input files."""
 
 import os
 
 import numpy as np
 import pytest
 
-from meshpy.core.boundary_condition import BoundaryCondition
-from meshpy.core.conf import mpy
-from meshpy.core.function import Function
-from meshpy.core.geometry_set import GeometrySet
-from meshpy.core.mesh import Mesh
-from meshpy.core.rotation import Rotation
-from meshpy.four_c.beam_interaction_conditions import add_beam_interaction_condition
-from meshpy.four_c.dbc_monitor import (
+from beamme.core.boundary_condition import BoundaryCondition
+from beamme.core.conf import mpy
+from beamme.core.function import Function
+from beamme.core.geometry_set import GeometrySet
+from beamme.core.mesh import Mesh
+from beamme.core.rotation import Rotation
+from beamme.four_c.beam_interaction_conditions import add_beam_interaction_condition
+from beamme.four_c.dbc_monitor import (
     dbc_monitor_to_mesh,
     dbc_monitor_to_mesh_all_values,
 )
-from meshpy.four_c.element_beam import Beam3rHerm2Line3
-from meshpy.four_c.function_utility import create_linear_interpolation_function
-from meshpy.four_c.header_functions import (
+from beamme.four_c.element_beam import Beam3rHerm2Line3
+from beamme.four_c.function_utility import create_linear_interpolation_function
+from beamme.four_c.header_functions import (
     add_result_description,
     set_beam_contact_runtime_output,
     set_beam_contact_section,
     set_header_static,
     set_runtime_output,
 )
-from meshpy.four_c.input_file import InputFile
-from meshpy.four_c.material import MaterialReissner
-from meshpy.four_c.model_importer import import_four_c_model
-from meshpy.four_c.run_four_c import run_four_c
-from meshpy.mesh_creation_functions.applications.beam_honeycomb import (
+from beamme.four_c.input_file import InputFile
+from beamme.four_c.material import MaterialReissner
+from beamme.four_c.model_importer import import_four_c_model
+from beamme.four_c.run_four_c import run_four_c
+from beamme.mesh_creation_functions.applications.beam_honeycomb import (
     create_beam_mesh_honeycomb,
 )
-from meshpy.mesh_creation_functions.beam_line import create_beam_mesh_line
-from meshpy.utils.nodes import check_node_by_coordinate
+from beamme.mesh_creation_functions.beam_line import create_beam_mesh_line
+from beamme.utils.nodes import check_node_by_coordinate
 
 # We test all test cases in this file twice. Once we only run up to the first
 # call of 4C and compare the created input files, this allows to run some core
