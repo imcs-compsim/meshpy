@@ -1,8 +1,8 @@
 name: run_tests
-description: Perform MeshPy test suite
+description: Perform Test suite
 inputs:
   install-command:
-    description: Command to install MeshPy with pip
+    description: Command to install BeamMe with pip
     required: false
     default: ".[dev,fourc]"
   source-command:
@@ -20,7 +20,7 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: MeshPy testing
+    - name: Testing
       shell: bash
       env:
         MESHPY_FOUR_C_EXE: /home/user/4C/build/4C
@@ -32,7 +32,7 @@ runs:
         pip install ${{ inputs.install-command }}
         python --version
         pip list
-        TEMP_DIR="${RUNNER_TEMP}/meshpy_pytest"
+        TEMP_DIR="${RUNNER_TEMP}/beamme_pytest"
         mkdir -p "$TEMP_DIR"
         echo "PYTEST_TMPDIR=$TEMP_DIR" >> $GITHUB_ENV
         pytest  --basetemp="$TEMP_DIR" ${{ inputs.additional-pytest-flags}} --color=yes

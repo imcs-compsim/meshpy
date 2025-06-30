@@ -15,7 +15,7 @@ on:
     type: choice
 
 jobs:
-  meshpy-code-check:
+  code-check:
     name: Code check
     runs-on: ubuntu-latest
     defaults:

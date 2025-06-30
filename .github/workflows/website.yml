@@ -44,7 +44,8 @@ jobs:
   deploy:
     environment:
       name: Website
-      url: http://imcs-compsim.github.io/meshpy
+      # TODO Check if this url is really necessary or if it works without it
+      url: http://beamme-py.github.io/beamme
     runs-on: ubuntu-latest
     needs: build_website
     permissions:
