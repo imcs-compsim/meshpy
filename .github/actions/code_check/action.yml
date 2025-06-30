@@ -1,5 +1,5 @@
 name: code_check
-description: Perform MeshPy code checks
+description: Perform Code checks
 runs:
   using: composite
   steps:

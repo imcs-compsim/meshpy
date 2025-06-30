@@ -17,7 +17,7 @@ env:
   CUBIT_DOWNLOAD_URL: https://f002.backblazeb2.com/file/cubit-downloads/Coreform-Cubit/Releases/Linux/Coreform-Cubit-2025.3%2B58709-Lin64.tar.gz
 
 jobs:
-  meshpy-testing:
+  beamme-testing:
     name: ${{ matrix.os-version }} python${{ matrix.python-version }}
     strategy:
       fail-fast: false
@@ -51,7 +51,7 @@ jobs:
           name: ${{github.job}}-${{ matrix.os-version }}-python${{ matrix.python-version }}-${{github.run_number}}
           path: ${{ env.PYTEST_TMPDIR }}
 
-  meshpy-testing-all-dependencies:
+  beamme-testing-all-dependencies:
     name: ubuntu-latest with all dependencies
     runs-on: ubuntu-latest
     container:
@@ -91,7 +91,7 @@ jobs:
       - name: Coverage badge and report
         uses: ./.github/actions/coverage
 
-  meshpy-performance-testing:
+  beamme-performance-testing:
     name: performance tests
     continue-on-error: true
     runs-on: ubuntu-latest
