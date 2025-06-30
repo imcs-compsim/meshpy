@@ -6,13 +6,15 @@ on:
   push:
     branches:
       - main
-  pull_request:
+  pull_request_target:
     types:
       - opened
       - reopened
       - synchronize
   workflow_dispatch:
-    type: choice
+
+env:
+  CUBIT_DOWNLOAD_URL: https://f002.backblazeb2.com/file/cubit-downloads/Coreform-Cubit/Releases/Linux/Coreform-Cubit-2025.3%2B58709-Lin64.tar.gz
 
 jobs:
   meshpy-testing:
@@ -49,34 +51,8 @@ jobs:
           name: ${{github.job}}-${{ matrix.os-version }}-python${{ matrix.python-version }}-${{github.run_number}}
           path: ${{ env.PYTEST_TMPDIR }}
 
-  meshpy-testing-cubitpy:
-    name: self-hosted with CubitPy
-    runs-on: self-hosted
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-      - name: Setup virtual python environment
-        uses: ./.github/actions/setup_virtual_python_environment
-        with:
-          python-exe: /home_local/github-runner/testing_lib/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/python-3.12.1-qnjucxirxh534suwewl6drfa237u6t7w/bin/python
-      - name: Run the test suite
-        uses: ./.github/actions/run_tests
-        with:
-          install-command: ".[cubitpy,dev,fourc]"
-          source-command: "source python-workflow-venv/bin/activate"
-          additional-pytest-flags: "--CubitPy --no-cov"
-      - name: Upload test results on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{github.job}}-${{github.run_number}}
-          path: ${{ env.PYTEST_TMPDIR }}
-
-  meshpy-testing-4C-arborx:
-    name: ubuntu-latest with 4C and ArborX
+  meshpy-testing-all-dependencies:
+    name: ubuntu-latest with all dependencies
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/4c-multiphysics/4c:main
@@ -88,6 +64,13 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: true
+      - name: Setup cubit
+        id: cubit
+        uses: ./.github/actions/setup_cubit
+        with:
+          cubit_download_url: ${{ env.CUBIT_DOWNLOAD_URL }}
+          cubit_email: ${{ secrets.CUBIT_EMAIL }}
+          cubit_password: ${{ secrets.CUBIT_PASSWORD }}
       - name: Setup virtual python environment
         uses: ./.github/actions/setup_virtual_python_environment
       - name: Build ArborX geometric search
@@ -96,8 +79,9 @@ jobs:
         uses: ./.github/actions/run_tests
         with:
           source-command: "source python-workflow-venv/bin/activate"
-          install-command: "-e .[dev,fourc]"
-          additional-pytest-flags: "--4C --ArborX --cov-fail-under=93"
+          install-command: "-e .[cubitpy,dev,fourc]"
+          additional-pytest-flags: "--4C --ArborX --CubitPy --cov-fail-under=93"
+          cubit-root: ${{ steps.cubit.outputs.cubit_root }}
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
@@ -109,24 +93,34 @@ jobs:
 
   meshpy-performance-testing:
     name: performance tests
-    runs-on: self-hosted
     continue-on-error: true
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/4c-multiphysics/4c:main
     defaults:
       run:
         shell: bash
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          submodules: true
+      - name: Setup cubit
+        id: cubit
+        uses: ./.github/actions/setup_cubit
+        with:
+          cubit_download_url: ${{ env.CUBIT_DOWNLOAD_URL }}
+          cubit_email: ${{ secrets.CUBIT_EMAIL }}
+          cubit_password: ${{ secrets.CUBIT_PASSWORD }}
       - name: Setup virtual python environment
         uses: ./.github/actions/setup_virtual_python_environment
-        with:
-          python-exe: /home_local/github-runner/testing_lib/spack/opt/spack/linux-ubuntu20.04-icelake/gcc-9.4.0/python-3.12.1-qnjucxirxh534suwewl6drfa237u6t7w/bin/python
       - name: Run the test suite
         uses: ./.github/actions/run_tests
         with:
           install-command: ".[cubitpy,dev,fourc]"
           source-command: "source python-workflow-venv/bin/activate"
           additional-pytest-flags: "--performance-tests --exclude-standard-tests -s --no-cov"
+          cubit-root: ${{ steps.cubit.outputs.cubit_root }}
       - name: Upload test results on failure
         if: failure()
         uses: actions/upload-artifact@v4
