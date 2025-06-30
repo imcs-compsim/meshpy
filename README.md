@@ -34,12 +34,6 @@
 
 </div>
 
-<div align="center">
-
-⚠️ **Disclaimer**: We are currently in the transition-phase from MeshPy to BeamMe. Therefore, naming is not yet consistent across this repository.
-
-</div>
-
 BeamMe is a general purpose 3D beam finite element input generator written in Python.
 It contains advanced geometry creation and manipulation functions to create complex beam geometries, including a consistent handling of finite rotations.
 It can be used to create input files for the following finite element solvers (adaption to other solvers is easily possibly):
@@ -50,11 +44,11 @@ It can be used to create input files for the following finite element solvers (a
 BeamMe is jointly developed at the [Institute for Mathematics and Computer-Based Simulation (IMCS)](https://www.unibw.de/imcs-en) at the Universität der Bundeswehr München and
 the [Institute for Computational Mechanics (LNM)](https://www.epc.ed.tum.de/lnm/home/) at the Technical University Munich.
 
-- **Website**: https://beamme-py.github.io/beamme/
-- **API Documentation** https://beamme-py.github.io/beamme/api-documentation/beamme.html
-- **Coverage Report** https://beamme-py.github.io/beamme/coverage-report/
-- **Github** https://github.com/beamme-py/beamme
-- **Launch interactively online in Binder** https://mybinder.org/v2/gh/beamme-py/beamme/main
+- **Website:** https://beamme-py.github.io/beamme/
+- **API Documentation:** https://beamme-py.github.io/beamme/api-documentation/beamme.html
+- **Coverage Report:** https://beamme-py.github.io/beamme/coverage-report/
+- **Github:** https://github.com/beamme-py/beamme
+- **Launch interactively online in Binder:** https://mybinder.org/v2/gh/beamme-py/beamme/main
 
 ## Overview <!-- omit from toc -->
 - [Examples](#examples)
