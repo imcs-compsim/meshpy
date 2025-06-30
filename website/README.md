@@ -1,6 +1,6 @@
-# The MeshPy website
+# The BeamMe website
 
-The MeshPy website is based on the Sphinx PyData Theme (https://pydata-sphinx-theme.readthedocs.io)
+The BeamMe website is based on the Sphinx PyData Theme (https://pydata-sphinx-theme.readthedocs.io)
 
 ## Setup
 
@@ -12,7 +12,7 @@ pip install -r website/requirements.txt
 
 ## Building the website locally
 
-In the source directory of MeshPy simply execute
+In the source directory of BeamMe simply execute
 
 ```bash
 python website/docs/prepare_docs.py
