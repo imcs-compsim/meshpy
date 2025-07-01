@@ -6,15 +6,12 @@ on:
   push:
     branches:
       - main
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - reopened
       - synchronize
   workflow_dispatch:
-
-env:
-  CUBIT_DOWNLOAD_URL: https://f002.backblazeb2.com/file/cubit-downloads/Coreform-Cubit/Releases/Linux/Coreform-Cubit-2025.3%2B58709-Lin64.tar.gz
 
 jobs:
   beamme-testing:
@@ -26,7 +23,7 @@ jobs:
         python-version: ["3.10", "3.13"]
     runs-on: ${{ matrix.os-version }}
     steps:
-      - name: Checkout repository
+      - name: Checkout PR code
         uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v5
@@ -48,82 +45,5 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: ${{github.job}}-${{ matrix.os-version }}-python${{ matrix.python-version }}-${{github.run_number}}
-          path: ${{ env.PYTEST_TMPDIR }}
-
-  beamme-testing-all-dependencies:
-    name: ubuntu-latest with all dependencies
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/4c-multiphysics/4c:main
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Setup cubit
-        id: cubit
-        uses: ./.github/actions/setup_cubit
-        with:
-          cubit_download_url: ${{ env.CUBIT_DOWNLOAD_URL }}
-          cubit_email: ${{ secrets.CUBIT_EMAIL }}
-          cubit_password: ${{ secrets.CUBIT_PASSWORD }}
-      - name: Setup virtual python environment
-        uses: ./.github/actions/setup_virtual_python_environment
-      - name: Build ArborX geometric search
-        uses: ./.github/actions/build_arbrox_geometric_search
-      - name: Run the test suite
-        uses: ./.github/actions/run_tests
-        with:
-          source-command: "source python-workflow-venv/bin/activate"
-          install-command: "-e .[cubitpy,dev,fourc]"
-          additional-pytest-flags: "--4C --ArborX --CubitPy --cov-fail-under=93"
-          cubit-root: ${{ steps.cubit.outputs.cubit_root }}
-      - name: Upload test results on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{github.job}}-${{github.run_number}}
-          path: ${{ env.PYTEST_TMPDIR }}
-      - name: Coverage badge and report
-        uses: ./.github/actions/coverage
-
-  beamme-performance-testing:
-    name: performance tests
-    continue-on-error: true
-    runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/4c-multiphysics/4c:main
-    defaults:
-      run:
-        shell: bash
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: true
-      - name: Setup cubit
-        id: cubit
-        uses: ./.github/actions/setup_cubit
-        with:
-          cubit_download_url: ${{ env.CUBIT_DOWNLOAD_URL }}
-          cubit_email: ${{ secrets.CUBIT_EMAIL }}
-          cubit_password: ${{ secrets.CUBIT_PASSWORD }}
-      - name: Setup virtual python environment
-        uses: ./.github/actions/setup_virtual_python_environment
-      - name: Run the test suite
-        uses: ./.github/actions/run_tests
-        with:
-          install-command: ".[cubitpy,dev,fourc]"
-          source-command: "source python-workflow-venv/bin/activate"
-          additional-pytest-flags: "--performance-tests --exclude-standard-tests -s --no-cov"
-          cubit-root: ${{ steps.cubit.outputs.cubit_root }}
-      - name: Upload test results on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{github.job}}-${{github.run_number}}
+          name: ${{ github.job }}-${{ matrix.os-version }}-python${{ matrix.python-version }}-${{ github.run_number }}
           path: ${{ env.PYTEST_TMPDIR }}

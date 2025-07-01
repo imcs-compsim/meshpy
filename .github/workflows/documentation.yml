@@ -3,7 +3,7 @@ name: Build documentation
 on:
   # Only build the documentation once the test suite has completed on the main branch
   workflow_run:
-    workflows: [Test suite]
+    workflows: [Protected test suite (can access cubit secrets)]
     types: [completed]
     branches: [main]
 
