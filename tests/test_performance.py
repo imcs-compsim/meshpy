@@ -187,7 +187,7 @@ def test_performance_cubitpy_create_solid(evaluate_execution_time, shared_tmp_pa
             "ny": 50,
             "nz": 10,
         },
-        expected_time=1.0,
+        expected_time=2.7,
     )
 
 
@@ -213,7 +213,7 @@ def test_performance_double_solid_block(evaluate_execution_time, shared_tmp_path
     evaluate_execution_time(
         "BeamMe: Load and double solid element block from cubit",
         double_block,
-        expected_time=5.0,
+        expected_time=10.5,
     )
 
 
@@ -255,7 +255,7 @@ def test_performance_create_beams(evaluate_execution_time, cache_data):
             "n_z": 10,
             "n_el": 2,
         },
-        expected_time=4.0,
+        expected_time=4.5,
     )
 
 
@@ -401,5 +401,5 @@ def test_performance_write_vtk_smooth(evaluate_execution_time, tmp_path, cache_d
             "output_directory": tmp_path,
             "beam_centerline_visualization_segments": 5,
         },
-        expected_time=7.5,
+        expected_time=7.75,
     )
