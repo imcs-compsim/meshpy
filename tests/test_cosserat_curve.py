@@ -161,12 +161,7 @@ def test_cosserat_curve_vtk_representation(
     curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pv.UnstructuredGrid(curve.get_pyvista_polyline()).save(result_path)
 
-    assert_results_equal(
-        reference_path,
-        result_path,
-        rtol=1e-8,
-        atol=1e-8,
-    )
+    assert_results_equal(reference_path, result_path)
 
 
 def test_cosserat_curve_project_point(get_corresponding_reference_file_path):
@@ -212,7 +207,6 @@ def test_cosserat_curve_mesh_transformation(
     assert_results_equal(
         get_corresponding_reference_file_path(extension="json"),
         {"pos": pos, "rot": quaternion.as_float_array(rot)},
-        rtol=1e-14,
     )
 
 
@@ -240,7 +234,7 @@ def test_cosserat_curve_mesh_warp(
             Rotation([0, 0, 1], -0.5 * np.pi) * Rotation([0, 1, 0], -0.5 * np.pi)
         ),
     )
-    assert_results_equal(get_corresponding_reference_file_path(), mesh, rtol=1e-10)
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
 def test_cosserat_curve_mesh_warp_transform_boundary_conditions(
@@ -270,6 +264,4 @@ def test_cosserat_curve_mesh_warp_transform_boundary_conditions(
         ),
     )
 
-    assert_results_equal(
-        get_corresponding_reference_file_path(), mesh, rtol=1e-8, atol=1e-8
-    )
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
