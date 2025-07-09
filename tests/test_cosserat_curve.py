@@ -264,4 +264,6 @@ def test_cosserat_curve_mesh_warp_transform_boundary_conditions(
         ),
     )
 
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_equal(
+        get_corresponding_reference_file_path(), mesh, rtol=1e-12, atol=1e-12
+    )
