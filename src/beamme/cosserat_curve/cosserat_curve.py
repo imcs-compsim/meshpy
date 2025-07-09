@@ -382,6 +382,9 @@ class CosseratCurve(object):
         sol_q = _np.zeros(
             len(points_on_arc_length_in_bound), dtype=_quaternion.quaternion
         )
+        arc_length_spline_interpolation = get_spline_interpolation(
+            coordinates, self.point_arc_length
+        )
         for i_point, centerline_arc_length in enumerate(points_on_arc_length_in_bound):
             if (
                 centerline_arc_length >= self.point_arc_length[0]
@@ -406,9 +409,7 @@ class CosseratCurve(object):
 
                 # Perform a spline interpolation for the positions and a slerp
                 # interpolation for the rotations
-                sol_r[i_point] = get_spline_interpolation(
-                    coordinates, self.point_arc_length
-                )(centerline_arc_length)
+                sol_r[i_point] = arc_length_spline_interpolation(centerline_arc_length)
                 sol_q[i_point] = _quaternion.slerp_evaluate(q1, q2, xi)
             else:
                 raise ValueError("Centerline value out of bounds")
