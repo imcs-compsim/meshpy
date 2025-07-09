@@ -21,7 +21,9 @@ jobs:
     name: ubuntu-latest with all dependencies
     runs-on: ubuntu-latest
     environment:
-      name: cubit-secrets
+      # If this workflow is triggered in a PR we use the untrusted environment (someone has to approve the workflow run),
+      # otherwise (scheduled or merge triggers) we use the trusted environment (no approval needed).
+      name: ${{ github.event_name == 'pull_request_target' && 'cubit_secrets_untrusted' || 'cubit_secrets_trusted' }}
     container:
       image: ghcr.io/4c-multiphysics/4c:main
     defaults:
@@ -45,7 +47,7 @@ jobs:
       - name: Setup virtual python environment
         uses: ./.github/actions/setup_virtual_python_environment
       - name: Build ArborX geometric search
-        uses: ./.github/actions/build_arbrox_geometric_search
+        uses: ./.github/actions/build_arborx_geometric_search
       - name: Run the test suite
         uses: ./.github/actions/run_tests
         with:
@@ -67,7 +69,9 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-latest
     environment:
-      name: cubit-secrets
+      # If this workflow is triggered in a PR we use the untrusted environment (someone has to approve the workflow run),
+      # otherwise (scheduled or merge triggers) we use the trusted environment (no approval needed).
+      name: ${{ github.event_name == 'pull_request_target' && 'cubit_secrets_untrusted' || 'cubit_secrets_trusted' }}
     container:
       image: ghcr.io/4c-multiphysics/4c:main
     defaults:
