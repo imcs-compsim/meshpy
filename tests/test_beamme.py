@@ -1289,8 +1289,8 @@ def test_nurbs_import(
     mat = MaterialStVenantKirchhoff(youngs_modulus=10, nu=0)
     element_description = {"KINEM": "nonlinear"}
 
-    volume_set = GeometrySetNodes(geometry_type=mpy.geo.volume)
-    fix_set = GeometrySetNodes(geometry_type=mpy.geo.surface)
+    volume_set = GeometrySetNodes(geometry_type=bme.geo.volume)
+    fix_set = GeometrySetNodes(geometry_type=bme.geo.surface)
     for i in range(3):
         patch_set = add_splinepy_nurbs_to_mesh(
             mesh, extruded, material=mat, data=element_description
@@ -1309,14 +1309,14 @@ def test_nurbs_import(
                 "VAL": [0, 0, 0],
                 "FUNCT": [0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
     mesh.add(
         BoundaryCondition(
             volume_set,
             data={"COUPLING_ID": 1},
-            bc_type=mpy.bc.beam_to_solid_volume_meshtying,
+            bc_type=bme.bc.beam_to_solid_volume_meshtying,
         )
     )
 
@@ -1436,7 +1436,7 @@ def test_nurbs_import(
         BoundaryCondition(
             set_1["line"] + set_2["line"],
             {"COUPLING_ID": 1},
-            bc_type=mpy.bc.beam_to_solid_volume_meshtying,
+            bc_type=bme.bc.beam_to_solid_volume_meshtying,
         )
     )
 
