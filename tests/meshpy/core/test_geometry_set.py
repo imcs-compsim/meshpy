@@ -25,7 +25,7 @@ from typing import Callable
 
 import pytest
 
-from beamme.core.conf import mpy
+from beamme.core.conf import bme
 from beamme.core.element_beam import Beam
 from beamme.core.geometry_set import GeometrySet, GeometrySetNodes
 from beamme.core.node import Node
@@ -92,7 +92,7 @@ def test_core_geometry_set_add_operator(
     )
 
 
-@pytest.mark.parametrize("geometry_type", [mpy.geo.point, mpy.geo.line])
+@pytest.mark.parametrize("geometry_type", [bme.geo.point, bme.geo.line])
 def test_core_geometry_set_nodes_add_operator(
     geometry_type, assert_geometry_set_add_operator
 ):

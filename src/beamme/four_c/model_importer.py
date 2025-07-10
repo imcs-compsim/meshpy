@@ -32,7 +32,7 @@ from beamme.core.boundary_condition import BoundaryCondition as _BoundaryConditi
 from beamme.core.boundary_condition import (
     BoundaryConditionBase as _BoundaryConditionBase,
 )
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.coupling import Coupling as _Coupling
 from beamme.core.element_volume import VolumeHEX8 as _VolumeHEX8
 from beamme.core.element_volume import VolumeHEX20 as _VolumeHEX20
@@ -153,15 +153,15 @@ def _boundary_condition_from_dict(
     del data["E"]
 
     if bc_key in (
-        _mpy.bc.dirichlet,
-        _mpy.bc.neumann,
-        _mpy.bc.locsys,
-        _mpy.bc.beam_to_solid_surface_meshtying,
-        _mpy.bc.beam_to_solid_surface_contact,
-        _mpy.bc.beam_to_solid_volume_meshtying,
+        _bme.bc.dirichlet,
+        _bme.bc.neumann,
+        _bme.bc.locsys,
+        _bme.bc.beam_to_solid_surface_meshtying,
+        _bme.bc.beam_to_solid_surface_contact,
+        _bme.bc.beam_to_solid_volume_meshtying,
     ) or isinstance(bc_key, str):
         return _BoundaryCondition(geometry_set, data, bc_type=bc_key)
-    elif bc_key is _mpy.bc.point_coupling:
+    elif bc_key is _bme.bc.point_coupling:
         return _Coupling(geometry_set, bc_key, data, check_overlapping_nodes=False)
     else:
         raise ValueError("Got unexpected boundary condition!")
@@ -225,7 +225,7 @@ def _extract_mesh_sections(input_file: _InputFile) -> _Tuple[_InputFile, _Mesh]:
 
     # Add geometry sets
     geometry_sets_in_sections: dict[str, dict[int, _GeometrySetNodes]] = {
-        key: {} for key in _mpy.geo
+        key: {} for key in _bme.geo
     }
     for section_name in input_file.sections.keys():
         if section_name.endswith("TOPOLOGY"):

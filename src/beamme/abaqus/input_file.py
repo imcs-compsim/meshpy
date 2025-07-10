@@ -27,7 +27,7 @@ from enum import auto as _auto
 
 import numpy as _np
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.geometry_set import GeometrySet as _GeometrySet
 from beamme.core.mesh import Mesh as _Mesh
 from beamme.core.mesh_utils import (
@@ -128,7 +128,7 @@ class AbaqusInputFile(object):
         """Generate the string for the Abaqus input file."""
 
         # Perform some checks on the mesh.
-        if _mpy.check_overlapping_elements:
+        if _bme.check_overlapping_elements:
             self.mesh.check_overlapping_elements()
 
         # Assign global indices to all materials
@@ -139,7 +139,7 @@ class AbaqusInputFile(object):
 
         # Add the lines to the input file
         input_file_lines = []
-        input_file_lines.extend(["** " + line for line in _mpy.input_file_header])
+        input_file_lines.extend(["** " + line for line in _bme.input_file_header])
         input_file_lines.extend(self.get_nodes_lines())
         input_file_lines.extend(self.get_element_lines())
         input_file_lines.extend(self.get_material_lines())
@@ -314,19 +314,19 @@ class AbaqusInputFile(object):
         """Add lines to the input file that represent node and element sets."""
 
         input_file_lines = []
-        for point_set in self.mesh.geometry_sets[_mpy.geo.point]:
+        for point_set in self.mesh.geometry_sets[_bme.geo.point]:
             if point_set.name is None:
                 raise ValueError("Sets added to the mesh have to have a valid name!")
             input_file_lines.extend(
                 get_set_lines("Nset", point_set.get_points(), point_set.name)
             )
-        for line_set in self.mesh.geometry_sets[_mpy.geo.line]:
+        for line_set in self.mesh.geometry_sets[_bme.geo.line]:
             if line_set.name is None:
                 raise ValueError("Sets added to the mesh have to have a valid name!")
             if isinstance(line_set, _GeometrySet):
                 input_file_lines.extend(
                     get_set_lines(
-                        "Elset", line_set.geometry_objects[_mpy.geo.line], line_set.name
+                        "Elset", line_set.geometry_objects[_bme.geo.line], line_set.name
                     )
                 )
             else:

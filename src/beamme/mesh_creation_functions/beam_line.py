@@ -23,7 +23,7 @@
 
 import numpy as _np
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.rotation import Rotation as _Rotation
 from beamme.mesh_creation_functions.beam_generic import (
     create_beam_mesh_generic as _create_beam_mesh_generic,
@@ -81,7 +81,7 @@ def create_beam_mesh_line(mesh, beam_class, material, start_point, end_point, **
     # The tolerance is used here to ensure that round-off changes in the last digits of
     # the floating point values don't switch the case. This increases the robustness in
     # testing.
-    if abs(_np.dot(t1, [0, 0, 1])) < abs(_np.dot(t1, [0, 1, 0])) - _mpy.eps_quaternion:
+    if abs(_np.dot(t1, [0, 0, 1])) < abs(_np.dot(t1, [0, 1, 0])) - _bme.eps_quaternion:
         t2 = [0, 0, 1]
     else:
         t2 = [0, 1, 0]

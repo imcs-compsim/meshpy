@@ -180,4 +180,4 @@ class BeamMe(object):
         ]
 
 
-mpy = BeamMe()
+bme = BeamMe()

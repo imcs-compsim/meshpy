@@ -27,7 +27,7 @@ from typing import Optional as _Optional
 import numpy as _np
 
 from beamme.core.boundary_condition import BoundaryCondition as _BoundaryCondition
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.function import Function as _Function
 from beamme.core.geometry_set import GeometrySet as _GeometrySet
 from beamme.core.mesh import Mesh as _Mesh
@@ -197,7 +197,7 @@ def add_point_neuman_condition_to_mesh(
             "VAL": force.tolist() + [0] * (n_dof - 3),
             "FUNCT": function_array + [0] * (n_dof - 3),
         },
-        bc_type=_mpy.bc.neumann,
+        bc_type=_bme.bc.neumann,
     )
     mesh.add(bc)
 

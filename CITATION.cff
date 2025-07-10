@@ -1,12 +1,15 @@
 cff-version: 1.2.0
-message: "Whenever you use or mention MeshPy in some sort of scientific document/publication/presentation, please cite MeshPy as follows."
+title: "BeamMe - A general purpose 3D beam finite element input generator"
+message: >-
+  Whenever you use or mention BeamMe in some sort of scientific
+  document, publication, or presentation, please cite BeamMe as
+  follows.
+type: software
 authors:
-  - family-names: Steinbrecher
-    given-names: I.
-  - family-names: Popp
-    given-names: A.
-title: "MeshPy - A general purpose 3D beam finite element input generator"
-date-released: "2021"
-url: "https://imcs-compsim.github.io/meshpy"
-identifier: "MeshPyWebsite"
-license: ""
+  - name: BeamMe Authors
+identifiers:
+  - type: url
+    value: "https://beamme-py.github.io/beamme"
+repository-code: "https://github.com/beamme-py/beamme"
+url: "https://beamme-py.github.io/beamme"
+license: MIT

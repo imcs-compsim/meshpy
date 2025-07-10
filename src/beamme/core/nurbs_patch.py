@@ -25,7 +25,7 @@ from typing import Any as _Any
 
 import numpy as _np
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.element import Element as _Element
 from beamme.core.material import (
     MaterialSolidBase as _MaterialSolidBase,
@@ -104,9 +104,9 @@ class NURBSPatch(_Element):
             knotvector_type = "Interpolated"
 
             for i in range(self.polynomial_orders[dir_manifold] - 1):
-                if (abs(knotvector[i] - knotvector[i + 1]) > _mpy.eps_knot_vector) or (
+                if (abs(knotvector[i] - knotvector[i + 1]) > _bme.eps_knot_vector) or (
                     abs(knotvector[num_knots - 2 - i] - knotvector[num_knots - 1 - i])
-                    > _mpy.eps_knot_vector
+                    > _bme.eps_knot_vector
                 ):
                     knotvector_type = "Periodic"
                     break
@@ -147,7 +147,7 @@ class NURBSPatch(_Element):
                         self.knot_vectors[i_dir][i_knot]
                         - self.knot_vectors[i_dir][i_knot + 1]
                     )
-                    > _mpy.eps_knot_vector
+                    > _bme.eps_knot_vector
                 ):
                     num_elements_dir[i_dir] += 1
 

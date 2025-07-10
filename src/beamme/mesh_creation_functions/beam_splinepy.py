@@ -23,7 +23,7 @@
 
 import numpy as _np
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.mesh_creation_functions.beam_parametric_curve import (
     create_beam_mesh_parametric_curve as _create_beam_mesh_parametric_curve,
 )
@@ -43,7 +43,7 @@ def get_curve_function_and_jacobian_for_integration(curve, tol: float | None = N
         Curve that is used to describe the beam centerline.
     tol: float
         Tolerance for checking if point is close to the start or end of the
-        interval. If None is given, use the default tolerance from mpy.
+        interval. If None is given, use the default tolerance from bme.
 
     Return
     ----
@@ -59,7 +59,7 @@ def get_curve_function_and_jacobian_for_integration(curve, tol: float | None = N
     """
 
     if tol is None:
-        tol = _mpy.eps_pos
+        tol = _bme.eps_pos
 
     curve_start = curve.parametric_bounds[0][0]
     curve_end = curve.parametric_bounds[1][0]
@@ -125,7 +125,7 @@ def create_beam_mesh_from_splinepy(
         Curve that is used to describe the beam centerline.
     tol: float
         Tolerance for checking if point is close to the start or end of the
-        interval. If None is given, use the default tolerance from mpy.
+        interval. If None is given, use the default tolerance from bme.
 
     **kwargs (for all of them look into create_beam_mesh_function)
     ----

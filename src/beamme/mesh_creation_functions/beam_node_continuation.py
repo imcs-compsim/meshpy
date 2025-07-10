@@ -23,7 +23,7 @@
 
 import numpy as _np
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.mesh_creation_functions.beam_arc import (
     create_beam_mesh_arc_segment_via_axis as _create_beam_mesh_arc_segment_via_axis,
 )
@@ -138,7 +138,7 @@ def create_beam_mesh_arc_at_node(
     # The normal has to be perpendicular to the start point tangent
     start_node = _get_single_node(start_node)
     tangent = start_node.rotation * [1, 0, 0]
-    if _np.abs(_np.dot(tangent, arc_axis_normal)) > _mpy.eps_pos:
+    if _np.abs(_np.dot(tangent, arc_axis_normal)) > _bme.eps_pos:
         raise ValueError(
             "The normal has to be perpendicular to the tangent in the start node!"
         )

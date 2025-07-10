@@ -32,7 +32,7 @@ from typing import List as _List
 from fourcipp.fourc_input import FourCInput as _FourCInput
 
 from beamme.core.boundary_condition import BoundaryCondition as _BoundaryCondition
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.coupling import Coupling as _Coupling
 from beamme.core.function import Function as _Function
 from beamme.core.geometry_set import GeometrySet as _GeometrySet
@@ -97,7 +97,7 @@ def _dump_coupling(coupling):
                 f"Expected a single connected type of beam elements, got {element_types}"
             )
         element_type = element_types.pop()
-        if element_type.beam_type is _mpy.beam.kirchhoff:
+        if element_type.beam_type is _bme.beam.kirchhoff:
             rotvec = {element.rotvec for element in connected_elements}
             if len(rotvec) > 1 or not rotvec.pop():
                 raise TypeError(
@@ -211,7 +211,7 @@ class InputFile(_FourCInput):
 
                 if add_header_default:
                     lines = [
-                        "# " + line + "\n" for line in _mpy.input_file_header
+                        "# " + line + "\n" for line in _bme.input_file_header
                     ] + lines
 
                 if add_footer_application_script:
@@ -229,7 +229,7 @@ class InputFile(_FourCInput):
         """
 
         # Perform some checks on the mesh.
-        if _mpy.check_overlapping_elements:
+        if _bme.check_overlapping_elements:
             mesh.check_overlapping_elements()
 
         def _get_global_start_geometry_set(dictionary):
@@ -398,14 +398,14 @@ class InputFile(_FourCInput):
         # depending on the type of the connected beam element.
         def get_number_of_coupling_conditions(key):
             """Return the number of coupling conditions in the mesh."""
-            if (key, _mpy.geo.point) in mesh.boundary_conditions.keys():
-                return len(mesh.boundary_conditions[key, _mpy.geo.point])
+            if (key, _bme.geo.point) in mesh.boundary_conditions.keys():
+                return len(mesh.boundary_conditions[key, _bme.geo.point])
             else:
                 return 0
 
         if (
-            get_number_of_coupling_conditions(_mpy.bc.point_coupling)
-            + get_number_of_coupling_conditions(_mpy.bc.point_coupling_penalty)
+            get_number_of_coupling_conditions(_bme.bc.point_coupling)
+            + get_number_of_coupling_conditions(_bme.bc.point_coupling_penalty)
             > 0
         ):
             mesh.set_node_links()

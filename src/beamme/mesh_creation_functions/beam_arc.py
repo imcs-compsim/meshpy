@@ -23,7 +23,7 @@
 
 import numpy as _np
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.rotation import Rotation as _Rotation
 from beamme.mesh_creation_functions.beam_generic import (
     create_beam_mesh_generic as _create_beam_mesh_generic,
@@ -231,7 +231,7 @@ def create_beam_mesh_arc_segment_2d(
     """
 
     # The center point has to be on the x-y plane.
-    if _np.abs(center[2]) > _mpy.eps_pos:
+    if _np.abs(center[2]) > _bme.eps_pos:
         raise ValueError("The z-value of center has to be 0!")
 
     # Check if the beam is in clockwise or counter clockwise direction.

@@ -23,7 +23,7 @@
 
 import pytest
 
-from beamme.core.conf import mpy
+from beamme.core.conf import bme
 from beamme.four_c.header_functions import (
     set_beam_contact_runtime_output,
     set_beam_contact_section,
@@ -54,13 +54,13 @@ def test_header_functions_static(
 
     set_beam_to_solid_meshtying(
         input_file,
-        mpy.bc.beam_to_solid_volume_meshtying,
+        bme.bc.beam_to_solid_volume_meshtying,
         contact_discretization="mortar",
     )
 
     set_beam_to_solid_meshtying(
         input_file,
-        mpy.bc.beam_to_solid_surface_meshtying,
+        bme.bc.beam_to_solid_surface_meshtying,
         contact_discretization="gp",
         coupling_type="consistent_fad",
         segmentation=False,
@@ -124,7 +124,7 @@ def test_header_functions_static_prestress(
     )
     set_beam_to_solid_meshtying(
         input_file,
-        mpy.bc.beam_to_solid_volume_meshtying,
+        bme.bc.beam_to_solid_volume_meshtying,
         contact_discretization="mortar",
         binning_parameters={
             "binning_bounding_box": [1, 2, 3, 4, 5, 6],
@@ -135,7 +135,7 @@ def test_header_functions_static_prestress(
 
     set_beam_to_solid_meshtying(
         input_file,
-        mpy.bc.beam_to_solid_surface_meshtying,
+        bme.bc.beam_to_solid_surface_meshtying,
         contact_discretization="gp",
         segmentation=False,
         couple_restart=False,

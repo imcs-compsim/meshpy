@@ -29,7 +29,7 @@ from typing import Optional as _Optional
 import numpy as _np
 import vtk as _vtk
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.element import Element as _Element
 from beamme.core.node import NodeCosserat as _NodeCosserat
 from beamme.core.rotation import Rotation as _Rotation
@@ -95,7 +95,7 @@ class Beam(_Element):
             """Check if the given node matches with the position and rotation
             and optionally also the arc length."""
 
-            if _np.linalg.norm(pos - node.coordinates) > _mpy.eps_pos:
+            if _np.linalg.norm(pos - node.coordinates) > _bme.eps_pos:
                 raise ValueError(
                     f"{name} position does not match with function! Got {pos} from function but "
                     + f"given node value is {node.coordinates}"
@@ -104,7 +104,7 @@ class Beam(_Element):
                 raise ValueError(f"{name} rotation does not match with function!")
 
             if arc_length is not None:
-                if _np.abs(node.arc_length - arc_length) > _mpy.eps_pos:
+                if _np.abs(node.arc_length - arc_length) > _bme.eps_pos:
                     raise ValueError(
                         f"Arc lengths don't match, got {node.arc_length} and {arc_length}"
                     )
@@ -159,11 +159,11 @@ class Beam(_Element):
         """Return the dict to couple this beam to another beam."""
 
         match coupling_dof_type:
-            case _mpy.coupling_dof.joint:
+            case _bme.coupling_dof.joint:
                 if cls.coupling_joint_dict is None:
                     raise ValueError(f"Joint coupling is not implemented for {cls}")
                 return cls.coupling_joint_dict
-            case _mpy.coupling_dof.fix:
+            case _bme.coupling_dof.fix:
                 if cls.coupling_fix_dict is None:
                     raise ValueError("Fix coupling is not implemented for {cls}")
                 return cls.coupling_fix_dict

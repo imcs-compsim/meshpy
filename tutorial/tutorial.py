@@ -32,7 +32,7 @@ import autograd.numpy as npAD
 import numpy as np
 
 from beamme.core.boundary_condition import BoundaryCondition
-from beamme.core.conf import mpy
+from beamme.core.conf import bme
 from beamme.core.geometry_set import GeometrySet
 from beamme.core.mesh import Mesh
 from beamme.core.rotation import Rotation
@@ -102,7 +102,7 @@ def beamme_tutorial(base_dir, preview=False):
     mesh.write_vtk("step_1", base_dir)
 
     # We want to fix all positions and rotations of the first node.
-    # mpy is a global object that stores enums and other options for beamme.
+    # bme is a global object that stores enums and other options for beamme.
     mesh.add(
         BoundaryCondition(
             beam_set_1["start"],
@@ -110,7 +110,7 @@ def beamme_tutorial(base_dir, preview=False):
                 "NUMDOF 9 ONOFF 1 1 1 1 1 1 0 0 0 VAL 0 0 0 0 0 0 0 0 0 "
                 "FUNCT 0 0 0 0 0 0 0 0 0"
             ),
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
 
@@ -200,13 +200,13 @@ def beamme_tutorial(base_dir, preview=False):
     # This can be done easily with couple_nodes.
     print(
         'Point couplings before "couple_nodes": {}'.format(
-            len(mesh.boundary_conditions[(mpy.bc.point_coupling, mpy.geo.point)])
+            len(mesh.boundary_conditions[(bme.bc.point_coupling, bme.geo.point)])
         )
     )
     mesh.couple_nodes()
     print(
         'Point couplings after "couple_nodes": {}'.format(
-            len(mesh.boundary_conditions[(mpy.bc.point_coupling, mpy.geo.point)])
+            len(mesh.boundary_conditions[(bme.bc.point_coupling, bme.geo.point)])
         )
     )
 
@@ -238,7 +238,7 @@ def beamme_tutorial(base_dir, preview=False):
                 "FUNCT 0 {} 0 0 0 0 0 0 0"
             ),
             format_replacement=[line_load_val, fun_t],
-            bc_type=mpy.bc.neumann,
+            bc_type=bme.bc.neumann,
         )
     )
 
