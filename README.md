@@ -34,7 +34,7 @@
 
 </div>
 
-BeamMe is a general purpose 3D beam finite element input generator written in Python.
+BeamMe (previously MeshPy) is a general purpose 3D beam finite element input generator written in Python.
 It contains advanced geometry creation and manipulation functions to create complex beam geometries, including a consistent handling of finite rotations.
 It can be used to create input files for the following finite element solvers (adaption to other solvers is easily possibly):
 - [4C](https://www.4c-multiphysics.org/) (academic finite element solver)
