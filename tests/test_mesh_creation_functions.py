@@ -413,7 +413,7 @@ def test_mesh_creation_functions_stent(
     )
 
     # Check the output.
-    assert_results_equal(get_corresponding_reference_file_path(), mesh, rtol=1e-10)
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
 def test_mesh_creation_functions_fibers_in_rectangle(
@@ -729,11 +729,7 @@ def test_mesh_creation_functions_element_length_option(
 
     # Check the output
     mesh.add(mesh_line, mesh_line_long, mesh_arc, mesh_curve)
-    assert_results_equal(
-        get_corresponding_reference_file_path(),
-        mesh,
-        rtol=1e-10,
-    )
+    assert_results_equal(get_corresponding_reference_file_path(), mesh)
 
 
 def test_mesh_creation_functions_argument_checks():

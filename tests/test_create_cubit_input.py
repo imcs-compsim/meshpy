@@ -30,9 +30,6 @@ from tests.create_cubit_input import (
     create_tube_tutorial,
 )
 
-# Tolerances to be used for the assert_results_equal functions in this file
-ASSERT_RESULTS_EQUAL_TOL = {"atol": 1e-13, "rtol": 1e-13}
-
 
 @pytest.mark.cubitpy
 def test_create_cubit_input_tube(
@@ -44,9 +41,7 @@ def test_create_cubit_input_tube(
 
     result_path = tmp_path / get_corresponding_reference_file_path().name
     create_tube(result_path)
-    assert_results_equal(
-        result_path, get_corresponding_reference_file_path(), **ASSERT_RESULTS_EQUAL_TOL
-    )
+    assert_results_equal(result_path, get_corresponding_reference_file_path())
 
 
 @pytest.mark.cubitpy
@@ -66,7 +61,7 @@ def test_create_cubit_input_tutorial(
         / "tutorial"
         / "4C_input_solid_tutorial.4C.yaml"
     )
-    assert_results_equal(tutorial_path, result_path, **ASSERT_RESULTS_EQUAL_TOL)
+    assert_results_equal(tutorial_path, result_path)
 
 
 @pytest.mark.cubitpy
@@ -79,9 +74,7 @@ def test_create_cubit_input_block(
 
     result_path = tmp_path / get_corresponding_reference_file_path().name
     create_block(result_path)
-    assert_results_equal(
-        result_path, get_corresponding_reference_file_path(), **ASSERT_RESULTS_EQUAL_TOL
-    )
+    assert_results_equal(result_path, get_corresponding_reference_file_path())
 
 
 @pytest.mark.cubitpy
@@ -103,6 +96,4 @@ def test_create_cubit_input_solid_shell(
 
     create_solid_shell_meshes(result_path_blocks, result_path_dome)
     assert_results_equal(result_path_blocks, reference_path_blocks)
-    assert_results_equal(
-        result_path_dome, reference_path_dome, **ASSERT_RESULTS_EQUAL_TOL
-    )
+    assert_results_equal(result_path_dome, reference_path_dome)
