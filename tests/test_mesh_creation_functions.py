@@ -29,7 +29,7 @@ import pytest
 import splinepy
 from autograd import jacobian
 
-from beamme.core.conf import mpy
+from beamme.core.conf import bme
 from beamme.core.mesh import Mesh
 from beamme.core.node import NodeCosserat
 from beamme.core.rotation import Rotation
@@ -539,7 +539,7 @@ def test_mesh_creation_functions_splinepy(
     _, length = create_beam_mesh_from_splinepy(
         mesh, Beam3rHerm2Line3, mat, curve, n_el=3, output_length=True
     )
-    assert np.isclose(ref_length, length, rtol=mpy.eps_pos, atol=0.0)
+    assert np.isclose(ref_length, length, rtol=bme.eps_pos, atol=0.0)
 
     assert_results_equal(
         get_corresponding_reference_file_path(additional_identifier=name), mesh
@@ -566,8 +566,8 @@ def test_mesh_creation_functions_splinepy_unit():
     ]
 
     for t, result_r, result_dr in zip(t_values, results_r, results_dr):
-        assert np.allclose(r(t), result_r, atol=mpy.eps_pos, rtol=0.0)
-        assert np.allclose(dr(t), result_dr, atol=mpy.eps_pos, rtol=0.0)
+        assert np.allclose(r(t), result_r, atol=bme.eps_pos, rtol=0.0)
+        assert np.allclose(dr(t), result_dr, atol=bme.eps_pos, rtol=0.0)
 
 
 def test_mesh_creation_functions_node_continuation(
@@ -663,7 +663,7 @@ def test_mesh_creation_functions_node_continuation_accumulated():
     assert np.allclose(
         rotation_actual.q,
         quaternion_expected,
-        atol=mpy.eps_quaternion,
+        atol=bme.eps_quaternion,
         rtol=0.0,
     )
 
@@ -1181,7 +1181,7 @@ def test_mesh_creation_functions_curve_3d_helix(
     assert np.allclose(
         coordinates_mathematica,
         get_nodal_coordinates(mesh.nodes),
-        rtol=mpy.eps_pos,
+        rtol=bme.eps_pos,
         atol=1e-14,
     )
 
@@ -1255,7 +1255,7 @@ def test_mesh_creation_functions_curve_2d_sin(
     assert np.allclose(
         coordinates_mathematica,
         get_nodal_coordinates(mesh.nodes),
-        rtol=mpy.eps_pos,
+        rtol=bme.eps_pos,
         atol=1e-14,
     )
 

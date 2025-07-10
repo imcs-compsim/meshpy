@@ -30,7 +30,7 @@ import beamme.core.conf as _conf
 from beamme.core.boundary_condition import (
     BoundaryConditionBase as _BoundaryConditionBase,
 )
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.geometry_set import GeometrySet as _GeometrySet
 from beamme.core.geometry_set import GeometrySetBase as _GeometrySetBase
 from beamme.core.node import Node as _Node
@@ -52,11 +52,11 @@ class Coupling(_BoundaryConditionBase):
         Args:
             geometry: Geometry set or nodes that should be coupled.
             coupling_type: If this is a string, this will be the section that
-                this coupling will be added to. If it is a mpy.bc, the section
+                this coupling will be added to. If it is a bme.bc, the section
                 will be determined automatically.
             coupling_dof_type: If this is a dictionary it is the dictionary
                 that will be used in the input file, otherwise it has to be
-                of type mpy.coupling_dof.
+                of type bme.coupling_dof.
             check_overlapping_nodes: If all nodes of this coupling condition
                 have to be at the same physical position.
         """
@@ -73,7 +73,7 @@ class Coupling(_BoundaryConditionBase):
         # Couplings only work for point sets
         if (
             isinstance(geometry, _GeometrySetBase)
-            and geometry.geometry_type is not _mpy.geo.point
+            and geometry.geometry_type is not _bme.geo.point
         ):
             raise TypeError("Couplings are only implemented for point sets.")
 
@@ -95,7 +95,7 @@ class Coupling(_BoundaryConditionBase):
         for i, node in enumerate(nodes):
             # Get the difference to the first node
             diff[i, :] = node.coordinates - nodes[0].coordinates
-        if _np.max(_np.linalg.norm(diff, axis=1)) > _mpy.eps_pos:
+        if _np.max(_np.linalg.norm(diff, axis=1)) > _bme.eps_pos:
             raise ValueError(
                 "The nodes given to Coupling do not have the same position."
             )

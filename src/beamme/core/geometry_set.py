@@ -29,7 +29,7 @@ from typing import cast as _cast
 
 import beamme.core.conf as _conf
 from beamme.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.container import ContainerBase as _ContainerBase
 from beamme.core.element import Element as _Element
 from beamme.core.element_beam import Beam as _Beam
@@ -41,10 +41,10 @@ class GeometrySetBase(_BaseMeshItem):
 
     # Node set names for the input file file.
     geometry_set_names = {
-        _mpy.geo.point: "DNODE",
-        _mpy.geo.line: "DLINE",
-        _mpy.geo.surface: "DSURFACE",
-        _mpy.geo.volume: "DVOL",
+        _bme.geo.point: "DNODE",
+        _bme.geo.line: "DLINE",
+        _bme.geo.surface: "DSURFACE",
+        _bme.geo.volume: "DVOL",
     }
 
     def __init__(
@@ -200,7 +200,7 @@ class GeometrySet(GeometrySetBase):
         super().__init__(geometry_type, **kwargs)
 
         self.geometry_objects: dict[_conf.Geometry, dict[_Node | _Element, None]] = {}
-        for geo in _mpy.geo:
+        for geo in _bme.geo:
             self.geometry_objects[geo] = {}
         self.add(geometry)
 
@@ -215,9 +215,9 @@ class GeometrySet(GeometrySetBase):
         """
 
         if isinstance(item, _Node):
-            return _mpy.geo.point
+            return _bme.geo.point
         elif isinstance(item, _Beam):
-            return _mpy.geo.line
+            return _bme.geo.line
         elif isinstance(item, GeometrySet):
             return item.geometry_type
         raise TypeError(f"Got unexpected type {type(item)}")
@@ -255,8 +255,8 @@ class GeometrySet(GeometrySetBase):
         Returns:
             A dictionary containing the explicitly added nodes for this set.
         """
-        if self.geometry_type is _mpy.geo.point:
-            return _cast(dict[_Node, None], self.geometry_objects[_mpy.geo.point])
+        if self.geometry_type is _bme.geo.point:
+            return _cast(dict[_Node, None], self.geometry_objects[_bme.geo.point])
         else:
             return {}
 
@@ -268,7 +268,7 @@ class GeometrySet(GeometrySetBase):
         Returns:
             A list containing the points (represented by nodes) associated with this set.
         """
-        if self.geometry_type is _mpy.geo.point:
+        if self.geometry_type is _bme.geo.point:
             return list(self.get_node_dict().keys())
         else:
             raise TypeError(
@@ -286,14 +286,14 @@ class GeometrySet(GeometrySetBase):
             A list containing all associated nodes.
         """
 
-        if self.geometry_type is _mpy.geo.point:
+        if self.geometry_type is _bme.geo.point:
             return list(
-                _cast(_KeysView[_Node], self.geometry_objects[_mpy.geo.point].keys())
+                _cast(_KeysView[_Node], self.geometry_objects[_bme.geo.point].keys())
             )
-        elif self.geometry_type is _mpy.geo.line:
+        elif self.geometry_type is _bme.geo.line:
             nodes = []
             for element in _cast(
-                _KeysView[_Element], self.geometry_objects[_mpy.geo.line].keys()
+                _KeysView[_Element], self.geometry_objects[_bme.geo.line].keys()
             ):
                 nodes.extend(element.nodes)
             # Remove duplicates while preserving order
@@ -338,7 +338,7 @@ class GeometrySetNodes(GeometrySetBase):
             nodes: Node(s) or list of nodes to be added to this geometry set.
         """
 
-        if geometry_type not in _mpy.geo:
+        if geometry_type not in _bme.geo:
             raise TypeError(f"Expected geometry enum, got {geometry_type}")
 
         super().__init__(geometry_type, **kwargs)
@@ -392,7 +392,7 @@ class GeometrySetNodes(GeometrySetBase):
         Returns:
             A list containing the points (represented by nodes) associated with this set.
         """
-        if self.geometry_type is _mpy.geo.point:
+        if self.geometry_type is _bme.geo.point:
             return list(self.get_node_dict().keys())
         else:
             raise TypeError(
@@ -454,7 +454,7 @@ class GeometrySetContainer(_ContainerBase):
 
         self.item_types = [GeometrySetBase]
 
-        for geometry_key in _mpy.geo:
+        for geometry_key in _bme.geo:
             self[geometry_key] = []
 
     def copy(self):
@@ -465,7 +465,7 @@ class GeometrySetContainer(_ContainerBase):
         copy = GeometrySetContainer()
 
         # Add a copy of every list from this container to the new one.
-        for geometry_key in _mpy.geo:
+        for geometry_key in _bme.geo:
             copy[geometry_key] = self[geometry_key].copy()
 
         return copy

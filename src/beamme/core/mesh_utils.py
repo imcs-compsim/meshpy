@@ -25,7 +25,7 @@ from typing import Dict as _Dict
 from typing import List as _List
 from typing import Tuple as _Tuple
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.mesh import Mesh as _Mesh
 from beamme.core.node import Node as _Node
 
@@ -59,8 +59,8 @@ def get_coupled_nodes_to_master_map(
 
     # Get a dictionary that maps the "replaced" nodes to the "master" ones
     replaced_node_to_master_map = {}
-    for coupling in mesh.boundary_conditions[_mpy.bc.point_coupling, _mpy.geo.point]:
-        if coupling.data is not _mpy.coupling_dof.fix:
+    for coupling in mesh.boundary_conditions[_bme.bc.point_coupling, _bme.geo.point]:
+        if coupling.data is not _bme.coupling_dof.fix:
             raise ValueError(
                 "This function is only implemented for rigid joints at the DOFs"
             )

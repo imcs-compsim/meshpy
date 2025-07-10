@@ -28,7 +28,7 @@ from typing import Union as _Union
 
 import beamme.core.conf as _conf
 from beamme.core.base_mesh_item import BaseMeshItem as _BaseMeshItem
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.container import ContainerBase as _ContainerBase
 from beamme.core.geometry_set import GeometrySet as _GeometrySet
 from beamme.core.geometry_set import GeometrySetBase as _GeometrySetBase
@@ -75,7 +75,7 @@ class BoundaryCondition(BoundaryConditionBase):
             geometry_set: Geometry that this boundary condition acts on.
             data: Data defining the properties of this boundary condition.
             bc_type: If this is a string, this will be the section that
-                this BC will be added to. If it is a mpy.bc, the section will
+                this BC will be added to. If it is a bme.bc, the section will
                 be determined automatically.
             double_nodes: Depending on this parameter, it will be checked if point
                 Neumann conditions do contain nodes at the same spatial positions.
@@ -96,12 +96,12 @@ class BoundaryCondition(BoundaryConditionBase):
         spatial position, which results in incorrect load application.
         """
 
-        if self.double_nodes is _mpy.double_nodes.keep:
+        if self.double_nodes is _bme.double_nodes.keep:
             return
 
         if (
-            self.bc_type == _mpy.bc.neumann
-            and self.geometry_set.geometry_type == _mpy.geo.point
+            self.bc_type == _bme.bc.neumann
+            and self.geometry_set.geometry_type == _bme.geo.point
         ):
             my_nodes = self.geometry_set.get_points()
             partners = _find_close_nodes(my_nodes)
@@ -113,7 +113,7 @@ class BoundaryCondition(BoundaryConditionBase):
                         double_node_list.append(node)
             if (
                 len(double_node_list) > 0
-                and self.double_nodes is _mpy.double_nodes.remove
+                and self.double_nodes is _bme.double_nodes.remove
             ):
                 # Create the a new geometry set with the unique nodes.
                 self.geometry_set = _GeometrySet(
@@ -138,6 +138,6 @@ class BoundaryConditionContainer(_ContainerBase):
 
         self.item_types = [BoundaryConditionBase]
 
-        for bc_key in _mpy.bc:
-            for geometry_key in _mpy.geo:
+        for bc_key in _bme.bc:
+            for geometry_key in _bme.geo:
                 self[(bc_key, geometry_key)] = []

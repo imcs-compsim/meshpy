@@ -24,7 +24,7 @@
 import numpy as np
 import pytest
 
-from beamme.core.conf import mpy
+from beamme.core.conf import bme
 from beamme.core.mesh import Mesh
 from beamme.four_c.element_beam import Beam3rHerm2Line3, Beam3rLine2Line2
 from beamme.four_c.material import MaterialReissner
@@ -120,7 +120,7 @@ def test_space_time_elbow(
     # Create the couplings
     if couple_nodes:
         mesh.couple_nodes(
-            reuse_matching_nodes=True, coupling_dof_type=mpy.coupling_dof.fix
+            reuse_matching_nodes=True, coupling_dof_type=bme.coupling_dof.fix
         )
 
     # Get the space-time mesh
@@ -183,7 +183,7 @@ def test_space_time_varying_material_length(
         mesh = Mesh()
         mesh.add(mesh_1, mesh_2)
         if couple_nodes:
-            mesh.couple_nodes(coupling_dof_type=mpy.coupling_dof.fix)
+            mesh.couple_nodes(coupling_dof_type=bme.coupling_dof.fix)
         return mesh
 
     # Get the space-time mesh

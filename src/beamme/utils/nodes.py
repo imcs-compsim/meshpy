@@ -25,7 +25,7 @@ from typing import Union as _Union
 
 import numpy as _np
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.geometry_set import GeometryName as _GeometryName
 from beamme.core.geometry_set import GeometrySet as _GeometrySet
 from beamme.core.geometry_set import GeometrySetBase as _GeometrySetBase
@@ -67,7 +67,7 @@ def find_close_nodes(nodes, **kwargs):
     return [[nodes[i] for i in partners] for partners in partner_indices]
 
 
-def check_node_by_coordinate(node, axis, value, eps=_mpy.eps_pos):
+def check_node_by_coordinate(node, axis, value, eps=_bme.eps_pos):
     """Check if the node is at a certain coordinate value.
 
     Args
@@ -229,12 +229,12 @@ def get_min_max_nodes(nodes, *, middle_nodes=False):
     for i, direction in enumerate(["x", "y", "z"]):
         # Check if there is more than one value in dimension.
         min_max = [_np.min(pos[:, i]), _np.max(pos[:, i])]
-        if _np.abs(min_max[1] - min_max[0]) >= _mpy.eps_pos:
+        if _np.abs(min_max[1] - min_max[0]) >= _bme.eps_pos:
             for j, text in enumerate(["min", "max"]):
                 # get all nodes with the min / max coordinate
                 min_max_nodes = []
                 for index, value in enumerate(
-                    _np.abs(pos[:, i] - min_max[j]) < _mpy.eps_pos
+                    _np.abs(pos[:, i] - min_max[j]) < _bme.eps_pos
                 ):
                     if value:
                         min_max_nodes.append(node_list[index])
@@ -243,7 +243,7 @@ def get_min_max_nodes(nodes, *, middle_nodes=False):
 
 
 def is_node_on_plane(
-    node, *, normal=None, origin_distance=None, point_on_plane=None, tol=_mpy.eps_pos
+    node, *, normal=None, origin_distance=None, point_on_plane=None, tol=_bme.eps_pos
 ):
     """Query if a node lies on a plane defined by a point_on_plane or the
     origin distance.

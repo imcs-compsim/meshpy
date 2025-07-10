@@ -31,7 +31,7 @@ from typing import Union as _Union
 
 import numpy as _np
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.element_beam import Beam as _Beam
 from beamme.core.geometry_set import GeometryName as _GeometryName
 from beamme.core.geometry_set import GeometrySet as _GeometrySet
@@ -232,7 +232,7 @@ def create_beam_mesh_generic(
 
         if rotation_node == rotation_function:
             return None
-        elif not _mpy.allow_beam_rotation:
+        elif not _bme.allow_beam_rotation:
             # The settings do not allow for a rotation of the beam
             raise ValueError(
                 f"Given rotation of the {name} node does not match with given rotation function!"
@@ -241,7 +241,7 @@ def create_beam_mesh_generic(
             # Evaluate the relative rotation
             # First check if the first basis vector is the same
             relative_basis_1 = rotation_node.inv() * rotation_function * [1, 0, 0]
-            if _np.linalg.norm(relative_basis_1 - [1, 0, 0]) < _mpy.eps_quaternion:
+            if _np.linalg.norm(relative_basis_1 - [1, 0, 0]) < _bme.eps_quaternion:
                 # Calculate the relative rotation
                 return rotation_function.inv() * rotation_node
             else:

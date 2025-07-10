@@ -25,7 +25,7 @@ an input file."""
 from typing import List as _List
 from typing import Union as _Union
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.four_c.input_file import InputFile as _InputFile
 
 
@@ -231,9 +231,9 @@ def set_beam_to_solid_meshtying(
 
     # Add the beam to solid volume mesh tying options.
     bts_parameters = {}
-    if interaction_type == _mpy.bc.beam_to_solid_volume_meshtying:
+    if interaction_type == _bme.bc.beam_to_solid_volume_meshtying:
         bts_section_name = "BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING"
-    elif interaction_type == _mpy.bc.beam_to_solid_surface_meshtying:
+    elif interaction_type == _bme.bc.beam_to_solid_surface_meshtying:
         bts_section_name = "BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING"
         if coupling_type is not None:
             bts_parameters["COUPLING_TYPE"] = coupling_type
@@ -267,7 +267,7 @@ def set_beam_to_solid_meshtying(
     bts_parameters["GEOMETRY_PAIR_SEGMENTATION_SEARCH_POINTS"] = (
         segmentation_search_points
     )
-    if interaction_type == _mpy.bc.beam_to_solid_volume_meshtying:
+    if interaction_type == _bme.bc.beam_to_solid_volume_meshtying:
         bts_parameters["COUPLE_RESTART_STATE"] = couple_restart
 
     input_file.add({bts_section_name: bts_parameters})
