@@ -28,6 +28,7 @@ import warnings
 import autograd.numpy as npAD
 import numpy as np
 import pytest
+import splinepy
 import vtk
 
 from beamme.core.boundary_condition import BoundaryCondition
@@ -72,6 +73,7 @@ from beamme.mesh_creation_functions.beam_line import create_beam_mesh_line
 from beamme.mesh_creation_functions.beam_parametric_curve import (
     create_beam_mesh_parametric_curve,
 )
+from beamme.mesh_creation_functions.nurbs_generic import add_splinepy_nurbs_to_mesh
 from beamme.utils.nodes import (
     get_min_max_coordinates,
     get_single_node,
@@ -1258,21 +1260,83 @@ def test_surface_to_surface_contact_import(
     assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
 
-def test_nurbs_import(assert_results_equal, get_corresponding_reference_file_path):
+def test_nurbs_import(
+    assert_results_equal, get_corresponding_reference_file_path, tmp_path
+):
     """Test if the import of a NURBS mesh works as expected.
+
+    We first create the NURBS structure, dump it to disk and then read it again.
+    Then we add the beam and beam-to-volume stuff.
 
     This script generates the 4C test case:
     beam3r_herm2line3_static_beam_to_solid_volume_meshtying_nurbs27_mortar_penalty_line4
+
+    TODO: This test case basically covers that we can import NURBS from
+    existing import files. However, this test case also contains a fully
+    working 4C test case. So this case should be moved to the 4C tests and
+    we should add a very basic unit test case if we can import NURBS.
     """
 
-    # Create mesh and load solid file.
-    input_file, mesh = import_four_c_model(
-        input_file_path=get_corresponding_reference_file_path(
-            additional_identifier="solid_mesh"
+    # Create a third of the NURBS hollow cylinder
+    base = splinepy.helpme.create.disk(
+        outer_radius=0.3, inner_radius=0.2, angle=120, n_knot_spans=1
+    )
+    extruded = base.create.extruded(extrusion_vector=[0, 0, 1])
+    extruded.elevate_degrees([0, 2])
+
+    # Add NURBS to mesh (3 times to get the full cylinder)
+    mesh = Mesh()
+    mat = MaterialStVenantKirchhoff(youngs_modulus=10, nu=0)
+    element_description = {"KINEM": "nonlinear"}
+
+    volume_set = GeometrySetNodes(geometry_type=mpy.geo.volume)
+    fix_set = GeometrySetNodes(geometry_type=mpy.geo.surface)
+    for i in range(3):
+        patch_set = add_splinepy_nurbs_to_mesh(
+            mesh, extruded, material=mat, data=element_description
+        )
+        volume_set = volume_set + patch_set["vol"]
+        fix_set = fix_set + patch_set["surf_w_min"]
+        mesh.add(patch_set)
+        mesh.rotate(Rotation([0, 0, 1], np.pi * 2.0 / 3.0))
+
+    mesh.add(
+        BoundaryCondition(
+            fix_set,
+            data={
+                "NUMDOF": 3,
+                "ONOFF": [1, 1, 1],
+                "VAL": [0, 0, 0],
+                "FUNCT": [0, 0, 0],
+            },
+            bc_type=mpy.bc.dirichlet,
+        )
+    )
+    mesh.add(
+        BoundaryCondition(
+            volume_set,
+            data={"COUPLING_ID": 1},
+            bc_type=mpy.bc.beam_to_solid_volume_meshtying,
         )
     )
 
-    input_file.pop("PROBLEM TYPE")
+    # We need this because we get "double" CP from the splinepy object.
+    mesh.couple_nodes(reuse_matching_nodes=True)
+    # We need this to math the "old" result description
+    mesh.rotate(Rotation([0, 0, 1], np.pi * 0.5))
+    nurbs_input_file = InputFile()
+    nurbs_input_file.add(mesh)
+    nurbs_path = tmp_path / "nurbs_mesh.4C.yaml"
+    nurbs_input_file.dump(
+        nurbs_path,
+        validate=False,
+        add_header_default=False,
+        add_header_information=False,
+        add_footer_application_script=False,
+    )
+
+    # Create mesh and load solid file.
+    input_file, mesh = import_four_c_model(input_file_path=nurbs_path)
 
     set_header_static(
         input_file,
@@ -1294,13 +1358,13 @@ def test_nurbs_import(assert_results_equal, get_corresponding_reference_file_pat
             "binning_cutoff_radius": 1,
         },
     )
-    set_runtime_output(input_file, output_solid=False)
+    set_runtime_output(input_file)
     input_file["PROBLEM TYPE"]["SHAPEFCT"] = "Nurbs"
     input_file["IO"]["OUTPUT_BIN"] = True
     input_file["IO"]["STRUCT_DISP"] = True
     input_file["IO"]["VERBOSITY"] = "Standard"
 
-    fun = Function([{"COMPONENT": 0, "SYMBOLIC_FUNCTION_OF_SPACE_TIME": "t"}])
+    fun = Function([{"SYMBOLIC_FUNCTION_OF_TIME": "t"}])
     mesh.add(fun)
 
     # Create the beam material.
@@ -1368,13 +1432,20 @@ def test_nurbs_import(assert_results_equal, get_corresponding_reference_file_pat
             bc_type=mpy.bc.neumann,
         )
     )
+    mesh.add(
+        BoundaryCondition(
+            set_1["line"] + set_2["line"],
+            {"COUPLING_ID": 1},
+            bc_type=mpy.bc.beam_to_solid_volume_meshtying,
+        )
+    )
 
     # Add result checks.
     displacements = [
         [
-            -5.14451531793581718e-01,
-            -1.05846397858073843e-01,
-            -1.77822866851472888e-01,
+            -5.14451531199392575e-01,
+            -1.05846397823837826e-01,
+            -1.77822866488512921e-01,
         ]
     ]
     nodes = [64]
