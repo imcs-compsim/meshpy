@@ -30,7 +30,7 @@ import quaternion as _quaternion
 from numpy.typing import NDArray as _NDArray
 
 from beamme.core.boundary_condition import BoundaryCondition as _BoundaryCondition
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.geometry_set import GeometrySet as _GeometrySet
 from beamme.core.mesh import Mesh as _Mesh
 from beamme.core.node import Node as _Node
@@ -191,7 +191,7 @@ def get_mesh_transformation(
         # Check that the arc length coordinates match
         if (
             _np.abs(arc_lengths[i_node] - arc_lengths_sorted[node_unique_id])
-            > _mpy.eps_pos
+            > _bme.eps_pos
         ):
             raise ValueError("Arc lengths do not match")
 
@@ -305,7 +305,7 @@ def create_transform_boundary_conditions(
                     "FUNCT": fun_pos + [None] * n_additional_dof,
                     "TAG": "monitor_reaction",
                 },
-                bc_type=_mpy.bc.dirichlet,
+                bc_type=_bme.bc.dirichlet,
             )
         )
 

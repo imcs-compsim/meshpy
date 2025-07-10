@@ -27,7 +27,7 @@ import numpy as np
 import pytest
 
 from beamme.core.boundary_condition import BoundaryCondition
-from beamme.core.conf import mpy
+from beamme.core.conf import bme
 from beamme.core.function import Function
 from beamme.core.geometry_set import GeometrySet
 from beamme.core.mesh import Mesh
@@ -233,8 +233,8 @@ def test_four_c_simulation_honeycomb_sphere(
     mesh_honeycomb.add(ft)
 
     # Change the sets to lines, only for purpose of matching the test file
-    honeycomb_set["bottom"].geo_type = mpy.geo.line
-    honeycomb_set["top"].geo_type = mpy.geo.line
+    honeycomb_set["bottom"].geo_type = bme.geo.line
+    honeycomb_set["top"].geo_type = bme.geo.line
     mesh_honeycomb.add(
         BoundaryCondition(
             honeycomb_set["bottom"],
@@ -244,7 +244,7 @@ def test_four_c_simulation_honeycomb_sphere(
                 "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
     mesh_honeycomb.add(
@@ -256,7 +256,7 @@ def test_four_c_simulation_honeycomb_sphere(
                 "VAL": [0, 0, 5.0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [0, 0, ft, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
 
@@ -341,7 +341,7 @@ def test_four_c_simulation_beam_and_solid_tube(
                 "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
     mesh.add(
@@ -353,7 +353,7 @@ def test_four_c_simulation_beam_and_solid_tube(
                 "VAL": [3.0, 3.0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [cos, sin, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
 
@@ -505,7 +505,7 @@ def test_four_c_simulation_honeycomb_variants(
                         "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                         "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                     },
-                    bc_type=mpy.bc.dirichlet,
+                    bc_type=bme.bc.dirichlet,
                 )
             )
             mesh.add(
@@ -527,8 +527,8 @@ def test_four_c_simulation_honeycomb_variants(
                             0,
                         ],
                     },
-                    bc_type=mpy.bc.neumann,
-                    double_nodes=mpy.double_nodes.remove,
+                    bc_type=bme.bc.neumann,
+                    double_nodes=bme.double_nodes.remove,
                 )
             )
             counter += 1
@@ -547,9 +547,7 @@ def test_four_c_simulation_honeycomb_variants(
     add_result_description(input_file, displacements, nodes)
 
     # Check the created input file
-    assert_results_equal(
-        get_corresponding_reference_file_path(), input_file, rtol=1e-10
-    )
+    assert_results_equal(get_corresponding_reference_file_path(), input_file)
 
     # Check if we still have to actually run 4C.
     if not enforce_four_c:
@@ -638,7 +636,7 @@ def test_four_c_simulation_rotated_beam_axis(
                     "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                     "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 },
-                bc_type=mpy.bc.dirichlet,
+                bc_type=bme.bc.dirichlet,
             )
         )
         mesh_line.add(
@@ -650,7 +648,7 @@ def test_four_c_simulation_rotated_beam_axis(
                     "VAL": [force_fac] * 6 + [0] * 3,
                     "FUNCT": [ft] * 6 + [0] * 3,
                 },
-                bc_type=mpy.bc.neumann,
+                bc_type=bme.bc.neumann,
             )
         )
 
@@ -728,7 +726,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
                 "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
     initial_mesh.add(
@@ -741,7 +739,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
                 "FUNCT": [1, 1, 1, 0, 0, 0, 0, 0, 0],
                 "TAG": "monitor_reaction",
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
     initial_input_file.add(
@@ -782,7 +780,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
                 "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
     function_nbc = Function(
@@ -904,7 +902,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                             "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                             "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                         },
-                        bc_type=mpy.bc.dirichlet,
+                        bc_type=bme.bc.dirichlet,
                     )
                 )
             else:
@@ -929,7 +927,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                             "FUNCT": [0, 0, 2, 0, 0, 0, 0, 0, 0],
                             "TAG": "monitor_reaction",
                         },
-                        bc_type=mpy.bc.dirichlet,
+                        bc_type=bme.bc.dirichlet,
                     )
                 )
 
@@ -972,7 +970,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
                 "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
 
@@ -1042,7 +1040,7 @@ def test_four_c_simulation_cantilever_convergence(
                     "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                     "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 },
-                bc_type=mpy.bc.dirichlet,
+                bc_type=bme.bc.dirichlet,
             )
         )
         fun = Function(
@@ -1060,7 +1058,7 @@ def test_four_c_simulation_cantilever_convergence(
                     "VAL": [0, 0, -0.5, 0, 0, 0, 0, 0, 0],
                     "FUNCT": [0, 0, fun, 0, 0, 0, 0, 0, 0],
                 },
-                bc_type=mpy.bc.dirichlet,
+                bc_type=bme.bc.dirichlet,
             ),
         )
 
@@ -1136,7 +1134,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
                     "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                     "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 },
-                bc_type=mpy.bc.dirichlet,
+                bc_type=bme.bc.dirichlet,
             )
         )
 
@@ -1169,7 +1167,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
                     "VAL": [0, 0, 1, 0, 0, 0, 0, 0, 0],
                     "FUNCT": [0, 0, fun, 0, 0, 0, 0, 0, 0],
                 },
-                bc_type=mpy.bc.dirichlet,
+                bc_type=bme.bc.dirichlet,
             )
         )
 
@@ -1178,7 +1176,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
         mesh,
         beam_x["line"],
         beam_y["line"],
-        mpy.bc.beam_to_beam_contact,
+        bme.bc.beam_to_beam_contact,
     )
 
     # Create the input file

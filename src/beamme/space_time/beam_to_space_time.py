@@ -32,7 +32,7 @@ from typing import cast as _cast
 import numpy as _np
 import vtk as _vtk
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.coupling import Coupling as _Coupling
 from beamme.core.element_volume import VolumeElement as _VolumeElement
 from beamme.core.geometry_set import GeometryName as _GeometryName
@@ -233,7 +233,7 @@ def beam_to_space_time(
     # Add joints to the space time mesh
     space_time_couplings = []
     for coupling in mesh_space_reference.boundary_conditions[
-        _mpy.bc.point_coupling, _mpy.geo.point
+        _bme.bc.point_coupling, _bme.geo.point
     ]:
         for i_mesh_space in range(number_of_copies_in_time):
             coupling_node_ids = [
@@ -262,7 +262,7 @@ def beam_to_space_time(
     return_set["end"] = _GeometrySet(end_nodes)
     return_set["left"] = _GeometrySet(left_nodes)
     return_set["right"] = _GeometrySet(right_nodes)
-    return_set["surface"] = _GeometrySetNodes(_mpy.geo.surface, space_time_mesh.nodes)
+    return_set["surface"] = _GeometrySetNodes(_bme.geo.surface, space_time_mesh.nodes)
 
     return space_time_mesh, return_set
 

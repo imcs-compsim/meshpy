@@ -22,68 +22,68 @@
 """This file provides the mappings between BeamMe objects and 4C input
 files."""
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 
 INPUT_FILE_MAPPINGS = {
     "boundary_conditions": {
-        (_mpy.bc.dirichlet, _mpy.geo.point): "DESIGN POINT DIRICH CONDITIONS",
-        (_mpy.bc.dirichlet, _mpy.geo.line): "DESIGN LINE DIRICH CONDITIONS",
-        (_mpy.bc.dirichlet, _mpy.geo.surface): "DESIGN SURF DIRICH CONDITIONS",
-        (_mpy.bc.dirichlet, _mpy.geo.volume): "DESIGN VOL DIRICH CONDITIONS",
-        (_mpy.bc.locsys, _mpy.geo.point): "DESIGN POINT LOCSYS CONDITIONS",
-        (_mpy.bc.locsys, _mpy.geo.line): "DESIGN LINE LOCSYS CONDITIONS",
-        (_mpy.bc.locsys, _mpy.geo.surface): "DESIGN SURF LOCSYS CONDITIONS",
-        (_mpy.bc.locsys, _mpy.geo.volume): "DESIGN VOL LOCSYS CONDITIONS",
-        (_mpy.bc.neumann, _mpy.geo.point): "DESIGN POINT NEUMANN CONDITIONS",
-        (_mpy.bc.neumann, _mpy.geo.line): "DESIGN LINE NEUMANN CONDITIONS",
-        (_mpy.bc.neumann, _mpy.geo.surface): "DESIGN SURF NEUMANN CONDITIONS",
-        (_mpy.bc.neumann, _mpy.geo.volume): "DESIGN VOL NEUMANN CONDITIONS",
+        (_bme.bc.dirichlet, _bme.geo.point): "DESIGN POINT DIRICH CONDITIONS",
+        (_bme.bc.dirichlet, _bme.geo.line): "DESIGN LINE DIRICH CONDITIONS",
+        (_bme.bc.dirichlet, _bme.geo.surface): "DESIGN SURF DIRICH CONDITIONS",
+        (_bme.bc.dirichlet, _bme.geo.volume): "DESIGN VOL DIRICH CONDITIONS",
+        (_bme.bc.locsys, _bme.geo.point): "DESIGN POINT LOCSYS CONDITIONS",
+        (_bme.bc.locsys, _bme.geo.line): "DESIGN LINE LOCSYS CONDITIONS",
+        (_bme.bc.locsys, _bme.geo.surface): "DESIGN SURF LOCSYS CONDITIONS",
+        (_bme.bc.locsys, _bme.geo.volume): "DESIGN VOL LOCSYS CONDITIONS",
+        (_bme.bc.neumann, _bme.geo.point): "DESIGN POINT NEUMANN CONDITIONS",
+        (_bme.bc.neumann, _bme.geo.line): "DESIGN LINE NEUMANN CONDITIONS",
+        (_bme.bc.neumann, _bme.geo.surface): "DESIGN SURF NEUMANN CONDITIONS",
+        (_bme.bc.neumann, _bme.geo.volume): "DESIGN VOL NEUMANN CONDITIONS",
         (
-            _mpy.bc.moment_euler_bernoulli,
-            _mpy.geo.point,
+            _bme.bc.moment_euler_bernoulli,
+            _bme.geo.point,
         ): "DESIGN POINT MOMENT EB CONDITIONS",
         (
-            _mpy.bc.beam_to_solid_volume_meshtying,
-            _mpy.geo.line,
+            _bme.bc.beam_to_solid_volume_meshtying,
+            _bme.geo.line,
         ): "BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING LINE",
         (
-            _mpy.bc.beam_to_solid_volume_meshtying,
-            _mpy.geo.volume,
+            _bme.bc.beam_to_solid_volume_meshtying,
+            _bme.geo.volume,
         ): "BEAM INTERACTION/BEAM TO SOLID VOLUME MESHTYING VOLUME",
         (
-            _mpy.bc.beam_to_solid_surface_meshtying,
-            _mpy.geo.line,
+            _bme.bc.beam_to_solid_surface_meshtying,
+            _bme.geo.line,
         ): "BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING LINE",
         (
-            _mpy.bc.beam_to_solid_surface_meshtying,
-            _mpy.geo.surface,
+            _bme.bc.beam_to_solid_surface_meshtying,
+            _bme.geo.surface,
         ): "BEAM INTERACTION/BEAM TO SOLID SURFACE MESHTYING SURFACE",
         (
-            _mpy.bc.beam_to_solid_surface_contact,
-            _mpy.geo.line,
+            _bme.bc.beam_to_solid_surface_contact,
+            _bme.geo.line,
         ): "BEAM INTERACTION/BEAM TO SOLID SURFACE CONTACT LINE",
         (
-            _mpy.bc.beam_to_solid_surface_contact,
-            _mpy.geo.surface,
+            _bme.bc.beam_to_solid_surface_contact,
+            _bme.geo.surface,
         ): "BEAM INTERACTION/BEAM TO SOLID SURFACE CONTACT SURFACE",
-        (_mpy.bc.point_coupling, _mpy.geo.point): "DESIGN POINT COUPLING CONDITIONS",
+        (_bme.bc.point_coupling, _bme.geo.point): "DESIGN POINT COUPLING CONDITIONS",
         (
-            _mpy.bc.beam_to_beam_contact,
-            _mpy.geo.line,
+            _bme.bc.beam_to_beam_contact,
+            _bme.geo.line,
         ): "BEAM INTERACTION/BEAM TO BEAM CONTACT CONDITIONS",
         (
-            _mpy.bc.point_coupling_penalty,
-            _mpy.geo.point,
+            _bme.bc.point_coupling_penalty,
+            _bme.geo.point,
         ): "DESIGN POINT PENALTY COUPLING CONDITIONS",
         (
             "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
-            _mpy.geo.surface,
+            _bme.geo.surface,
         ): "DESIGN SURF MORTAR CONTACT CONDITIONS 3D",
     },
     "geometry_sets": {
-        _mpy.geo.point: "DNODE-NODE TOPOLOGY",
-        _mpy.geo.line: "DLINE-NODE TOPOLOGY",
-        _mpy.geo.surface: "DSURF-NODE TOPOLOGY",
-        _mpy.geo.volume: "DVOL-NODE TOPOLOGY",
+        _bme.geo.point: "DNODE-NODE TOPOLOGY",
+        _bme.geo.line: "DLINE-NODE TOPOLOGY",
+        _bme.geo.surface: "DSURF-NODE TOPOLOGY",
+        _bme.geo.volume: "DVOL-NODE TOPOLOGY",
     },
 }

@@ -26,7 +26,7 @@ from typing import Optional as _Optional
 from typing import Union as _Union
 
 from beamme.core.boundary_condition import BoundaryCondition as _BoundaryCondition
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.function import Function as _Function
 from beamme.core.geometry_set import GeometrySet as _GeometrySet
 from beamme.core.rotation import Rotation as _Rotation
@@ -76,8 +76,8 @@ class LocSysCondition(_BoundaryCondition):
 
         # Append the condition string with consistent normal type for line and surface geometry
         if (
-            geometry_set.geometry_type is _mpy.geo.line
-            or geometry_set.geometry_type is _mpy.geo.surface
+            geometry_set.geometry_type is _bme.geo.line
+            or geometry_set.geometry_type is _bme.geo.surface
         ):
             condition_dict["USECONSISTENTNODENORMAL"] = int(use_consistent_node_normal)
         elif use_consistent_node_normal:
@@ -86,5 +86,5 @@ class LocSysCondition(_BoundaryCondition):
             )
 
         super().__init__(
-            geometry_set, data=condition_dict, bc_type=_mpy.bc.locsys, **kwargs
+            geometry_set, data=condition_dict, bc_type=_bme.bc.locsys, **kwargs
         )

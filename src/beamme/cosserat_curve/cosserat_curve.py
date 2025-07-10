@@ -33,7 +33,7 @@ from scipy import integrate as _integrate
 from scipy import interpolate as _interpolate
 from scipy import optimize as _optimize
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.rotation import Rotation as _Rotation
 from beamme.core.rotation import rotate_coordinates as _rotate_coordinates
 from beamme.core.rotation import smallest_rotation as _smallest_rotation
@@ -245,7 +245,7 @@ class CosseratCurve(object):
                 smallest_rotation_to_guess_tangent.inv() * starting_triad_guess
             )
             psi = relative_rotation.get_rotation_vector()
-            if _np.linalg.norm(psi[1:]) > _mpy.eps_quaternion:
+            if _np.linalg.norm(psi[1:]) > _bme.eps_quaternion:
                 raise ValueError(
                     "The twist angle can not be extracted as the relative rotation is not plane!"
                 )
@@ -339,7 +339,7 @@ class CosseratCurve(object):
             self.point_arc_length[-1],
         ]
 
-        if factor < (1.0 - _mpy.eps_quaternion):
+        if factor < (1.0 - _bme.eps_quaternion):
             coordinates = _np.zeros_like(self.coordinates)
             quaternions = _np.zeros_like(self.quaternions)
             coordinates[0] = self.coordinates[0]

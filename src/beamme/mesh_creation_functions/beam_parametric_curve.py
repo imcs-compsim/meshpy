@@ -27,7 +27,7 @@ import scipy.integrate as _integrate
 import scipy.optimize as _optimize
 from autograd import jacobian as _jacobian
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.rotation import Rotation as _Rotation
 from beamme.core.rotation import smallest_rotation as _smallest_rotation
 from beamme.mesh_creation_functions.beam_generic import (
@@ -199,7 +199,7 @@ def create_beam_mesh_parametric_curve(
 
             # In case the interval is not continuous with the last one, we reset the start
             # values for the Newton iteration here
-            if length_a < self.S_start_newton - _mpy.eps_pos:
+            if length_a < self.S_start_newton - _bme.eps_pos:
                 self._reset_start_values()
 
             # Length of the beam element in physical space.

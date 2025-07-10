@@ -25,7 +25,7 @@ import numpy as np
 import pytest
 
 from beamme.core.boundary_condition import BoundaryCondition
-from beamme.core.conf import mpy
+from beamme.core.conf import bme
 from beamme.core.function import Function
 from beamme.core.geometry_set import GeometrySet
 from beamme.core.mesh import Mesh
@@ -242,7 +242,7 @@ def test_four_c_simulation_beam_potential_helix(
                 "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
 
@@ -371,7 +371,7 @@ def test_four_c_locsys_condition(
                 "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
     # Add additional dirichlet boundary condition to check if combination with locsys condition works.
@@ -384,7 +384,7 @@ def test_four_c_locsys_condition(
                 "VAL": [1.0, 0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [fun, 0, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
 
@@ -559,13 +559,13 @@ def test_four_c_add_beam_interaction_condition():
 
     # Add two contact node sets.
     id = add_beam_interaction_condition(
-        mesh, beam_x["line"], beam_y["line"], mpy.bc.beam_to_beam_contact
+        mesh, beam_x["line"], beam_y["line"], bme.bc.beam_to_beam_contact
     )
     assert id == 0
 
     # Check if we can add the same set twice.
     id = add_beam_interaction_condition(
-        mesh, beam_x["line"], beam_x["line"], mpy.bc.beam_to_beam_contact
+        mesh, beam_x["line"], beam_x["line"], bme.bc.beam_to_beam_contact
     )
     assert id == 1
 
@@ -575,19 +575,19 @@ def test_four_c_add_beam_interaction_condition():
             BoundaryCondition(
                 GeometrySet(node),
                 "",
-                bc_type=mpy.bc.dirichlet,
+                bc_type=bme.bc.dirichlet,
             )
         )
 
     # Add condition with higher id.
     id = add_beam_interaction_condition(
-        mesh, beam_x["line"], beam_x["line"], mpy.bc.beam_to_beam_contact, id=3
+        mesh, beam_x["line"], beam_x["line"], bme.bc.beam_to_beam_contact, id=3
     )
     assert id == 3
 
     # Check if the id gap is filled automatically.
     id = add_beam_interaction_condition(
-        mesh, beam_x["line"], beam_y["line"], mpy.bc.beam_to_beam_contact
+        mesh, beam_x["line"], beam_y["line"], bme.bc.beam_to_beam_contact
     )
     assert id == 2
 
@@ -625,7 +625,7 @@ def test_four_c_beam_to_beam_contact(
 
     # Add the beam-to-beam contact condition.
     add_beam_interaction_condition(
-        mesh, beam_x["line"], beam_y["line"], mpy.bc.beam_to_beam_contact
+        mesh, beam_x["line"], beam_y["line"], bme.bc.beam_to_beam_contact
     )
 
     # Compare with the reference solution.
@@ -650,16 +650,16 @@ def test_four_c_beam_to_solid(
     # for the solid. We don't need them in this test case, as we want to
     # create them again. Thus, we have to delete them here.
     mesh.boundary_conditions[
-        (mpy.bc.beam_to_solid_volume_meshtying, mpy.geo.volume)
+        (bme.bc.beam_to_solid_volume_meshtying, bme.geo.volume)
     ].clear()
     mesh.boundary_conditions[
-        (mpy.bc.beam_to_solid_surface_meshtying, mpy.geo.surface)
+        (bme.bc.beam_to_solid_surface_meshtying, bme.geo.surface)
     ].clear()
 
     # Get the geometry set objects representing the geometry from the cubit
     # file.
-    surface_set = mesh.geometry_sets[mpy.geo.surface][0]
-    volume_set = mesh.geometry_sets[mpy.geo.volume][0]
+    surface_set = mesh.geometry_sets[bme.geo.surface][0]
+    volume_set = mesh.geometry_sets[bme.geo.volume][0]
 
     # Add the beam
     material = MaterialReissner()
@@ -673,25 +673,25 @@ def test_four_c_beam_to_solid(
         mesh,
         volume_set,
         beam_set_1["line"],
-        mpy.bc.beam_to_solid_volume_meshtying,
+        bme.bc.beam_to_solid_volume_meshtying,
     )
     add_beam_interaction_condition(
         mesh,
         volume_set,
         beam_set_2["line"],
-        mpy.bc.beam_to_solid_volume_meshtying,
+        bme.bc.beam_to_solid_volume_meshtying,
     )
     add_beam_interaction_condition(
         mesh,
         surface_set,
         beam_set_2["line"],
-        mpy.bc.beam_to_solid_surface_meshtying,
+        bme.bc.beam_to_solid_surface_meshtying,
     )
     add_beam_interaction_condition(
         mesh,
         surface_set,
         beam_set_1["line"],
-        mpy.bc.beam_to_solid_surface_meshtying,
+        bme.bc.beam_to_solid_surface_meshtying,
     )
 
     assert_results_equal(get_corresponding_reference_file_path(), mesh)
@@ -705,7 +705,7 @@ def test_four_c_beam_to_solid(
             mesh,
             volume_set,
             beam_set_1["line"],
-            mpy.bc.beam_to_solid_surface_meshtying,
+            bme.bc.beam_to_solid_surface_meshtying,
         )
 
     # If we add a wrong geometries to the mesh, the creation of the input file
@@ -716,7 +716,7 @@ def test_four_c_beam_to_solid(
             mesh,
             volume_set,
             beam_set_1["line"],
-            mpy.bc.beam_to_solid_surface_contact,
+            bme.bc.beam_to_solid_surface_contact,
         )
         assert_results_equal(get_corresponding_reference_file_path(), mesh)
 

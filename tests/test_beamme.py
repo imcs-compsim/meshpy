@@ -32,7 +32,7 @@ import splinepy
 import vtk
 
 from beamme.core.boundary_condition import BoundaryCondition
-from beamme.core.conf import mpy
+from beamme.core.conf import bme
 from beamme.core.coupling import Coupling
 from beamme.core.element_beam import Beam
 from beamme.core.function import Function
@@ -428,12 +428,12 @@ def test_geometry_sets(assert_results_equal, get_corresponding_reference_file_pa
         mesh.add(NodeCosserat([i, 2 * i, 3 * i], Rotation()))
 
     set_1 = GeometrySetNodes(
-        mpy.geo.point, [mesh.nodes[0], mesh.nodes[1], mesh.nodes[2]]
+        bme.geo.point, [mesh.nodes[0], mesh.nodes[1], mesh.nodes[2]]
     )
     set_2 = GeometrySetNodes(
-        mpy.geo.point, [mesh.nodes[2], mesh.nodes[3], mesh.nodes[4]]
+        bme.geo.point, [mesh.nodes[2], mesh.nodes[3], mesh.nodes[4]]
     )
-    set_12 = GeometrySetNodes(mpy.geo.point)
+    set_12 = GeometrySetNodes(bme.geo.point)
     set_12.add(set_1)
     set_12.add(set_2)
     set_3 = GeometrySet(set_1.get_points())
@@ -464,7 +464,7 @@ def test_unique_ordering_of_get_all_nodes_for_line_condition(
             BoundaryCondition(
                 GeometrySet(node),
                 get_bc_data(identifier=node.coordinates[0]),
-                bc_type=mpy.bc.dirichlet,
+                bc_type=bme.bc.dirichlet,
             )
         )
 
@@ -695,7 +695,7 @@ def test_euler_bernoulli(assert_results_equal, get_corresponding_reference_file_
                 "VAL": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0],
                 "FUNCT": [0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
     mesh.add(
@@ -707,7 +707,7 @@ def test_euler_bernoulli(assert_results_equal, get_corresponding_reference_file_
                 "VAL": [0.0, 0.0, 0.0, 0.0, 0.0, 7.8539816339744e-05],
                 "FUNCT": [0, 0, 0, 0, 0, fun],
             },
-            bc_type=mpy.bc.moment_euler_bernoulli,
+            bc_type=bme.bc.moment_euler_bernoulli,
         )
     )
 
@@ -1006,7 +1006,7 @@ def test_replace_nodes_geometry_set(
 ):
     """Test case for coupling of nodes, and reusing the identical nodes."""
 
-    mpy.check_overlapping_elements = False
+    bme.check_overlapping_elements = False
 
     mat = MaterialReissner(radius=0.1, youngs_modulus=1)
     rot = Rotation([1, 2, 43], 213123)
@@ -1027,10 +1027,10 @@ def test_replace_nodes_geometry_set(
     # Add a set with all nodes, to check that the nodes in the
     # boundary condition are replaced correctly.
     if use_nodal_geometry_sets:
-        mesh_ref.add(GeometrySetNodes(mpy.geo.line, ref_nodes))
-        mesh_ref.add(GeometrySetNodes(mpy.geo.point, ref_nodes))
-        mesh_couple.add(GeometrySetNodes(mpy.geo.line, coupling_nodes))
-        mesh_couple.add(GeometrySetNodes(mpy.geo.point, coupling_nodes))
+        mesh_ref.add(GeometrySetNodes(bme.geo.line, ref_nodes))
+        mesh_ref.add(GeometrySetNodes(bme.geo.point, ref_nodes))
+        mesh_couple.add(GeometrySetNodes(bme.geo.line, coupling_nodes))
+        mesh_couple.add(GeometrySetNodes(bme.geo.point, coupling_nodes))
     else:
         mesh_ref.add(GeometrySet(mesh_ref.elements))
         mesh_ref.add(GeometrySet(ref_nodes))
@@ -1042,9 +1042,9 @@ def test_replace_nodes_geometry_set(
     coupling_nodes_without_replace_node = list(coupling_nodes)
     del coupling_nodes_without_replace_node[3]
     if use_nodal_geometry_sets:
-        mesh_ref.add(GeometrySetNodes(mpy.geo.point, ref_nodes))
+        mesh_ref.add(GeometrySetNodes(bme.geo.point, ref_nodes))
         mesh_couple.add(
-            GeometrySetNodes(mpy.geo.point, coupling_nodes_without_replace_node)
+            GeometrySetNodes(bme.geo.point, coupling_nodes_without_replace_node)
         )
     else:
         mesh_ref.add(GeometrySet(ref_nodes))
@@ -1055,9 +1055,9 @@ def test_replace_nodes_geometry_set(
     coupling_nodes_without_replace_node = list(coupling_nodes)
     del coupling_nodes_without_replace_node[2]
     if use_nodal_geometry_sets:
-        mesh_ref.add(GeometrySetNodes(mpy.geo.point, ref_nodes))
+        mesh_ref.add(GeometrySetNodes(bme.geo.point, ref_nodes))
         mesh_couple.add(
-            GeometrySetNodes(mpy.geo.point, coupling_nodes_without_replace_node)
+            GeometrySetNodes(bme.geo.point, coupling_nodes_without_replace_node)
         )
     else:
         mesh_ref.add(GeometrySet(ref_nodes))
@@ -1069,7 +1069,7 @@ def test_replace_nodes_geometry_set(
 
     # Couple the coupling mesh.
     mesh_couple.couple_nodes(
-        coupling_dof_type=mpy.coupling_dof.fix, reuse_matching_nodes=True
+        coupling_dof_type=bme.coupling_dof.fix, reuse_matching_nodes=True
     )
 
     # Compare the meshes.
@@ -1102,7 +1102,7 @@ def test_replace_nodes_geometry_set(
 
     # Couple the coupling mesh.
     mesh_couple.couple_nodes(
-        coupling_dof_type=mpy.coupling_dof.fix, reuse_matching_nodes=True
+        coupling_dof_type=bme.coupling_dof.fix, reuse_matching_nodes=True
     )
 
     # Compare the meshes.
@@ -1120,10 +1120,10 @@ def test_replace_nodes_geometry_set(
 
     # Create set with all the beam nodes.
     if use_nodal_geometry_sets:
-        node_set_1_ref = GeometrySetNodes(mpy.geo.line, mesh_ref.nodes)
-        node_set_2_ref = GeometrySetNodes(mpy.geo.line, mesh_ref.nodes)
-        node_set_1_couple = GeometrySetNodes(mpy.geo.line, mesh_couple.nodes)
-        node_set_2_couple = GeometrySetNodes(mpy.geo.line, mesh_couple.nodes)
+        node_set_1_ref = GeometrySetNodes(bme.geo.line, mesh_ref.nodes)
+        node_set_2_ref = GeometrySetNodes(bme.geo.line, mesh_ref.nodes)
+        node_set_1_couple = GeometrySetNodes(bme.geo.line, mesh_couple.nodes)
+        node_set_2_couple = GeometrySetNodes(bme.geo.line, mesh_couple.nodes)
     else:
         node_set_1_ref = GeometrySet(mesh_ref.elements)
         node_set_2_ref = GeometrySet(mesh_ref.elements)
@@ -1141,9 +1141,9 @@ def test_replace_nodes_geometry_set(
     mesh_couple.rotate(rot)
 
     # Couple the mesh.
-    mesh_ref.couple_nodes(coupling_dof_type=mpy.coupling_dof.fix)
+    mesh_ref.couple_nodes(coupling_dof_type=bme.coupling_dof.fix)
     mesh_couple.couple_nodes(
-        coupling_dof_type=mpy.coupling_dof.fix, reuse_matching_nodes=True
+        coupling_dof_type=bme.coupling_dof.fix, reuse_matching_nodes=True
     )
 
     # Add the node sets.
@@ -1152,10 +1152,10 @@ def test_replace_nodes_geometry_set(
 
     # Add BCs.
     mesh_ref.add(
-        BoundaryCondition(node_set_2_ref, get_bc_data(), bc_type=mpy.bc.neumann)
+        BoundaryCondition(node_set_2_ref, get_bc_data(), bc_type=bme.bc.neumann)
     )
     mesh_couple.add(
-        BoundaryCondition(node_set_2_couple, get_bc_data(), bc_type=mpy.bc.neumann)
+        BoundaryCondition(node_set_2_couple, get_bc_data(), bc_type=bme.bc.neumann)
     )
 
     # Compare the meshes.
@@ -1191,14 +1191,14 @@ def create_beam_to_solid_conditions_model(
     mesh_beams.add(
         BoundaryCondition(
             line_set,
-            bc_type=mpy.bc.beam_to_solid_volume_meshtying,
+            bc_type=bme.bc.beam_to_solid_volume_meshtying,
             data={"COUPLING_ID": 1},
         )
     )
     mesh_beams.add(
         BoundaryCondition(
             line_set,
-            bc_type=mpy.bc.beam_to_solid_surface_meshtying,
+            bc_type=bme.bc.beam_to_solid_surface_meshtying,
             data={"COUPLING_ID": 2},
         )
     )
@@ -1347,7 +1347,7 @@ def test_nurbs_import(
     )
     set_beam_to_solid_meshtying(
         input_file,
-        mpy.bc.beam_to_solid_volume_meshtying,
+        bme.bc.beam_to_solid_volume_meshtying,
         contact_discretization="mortar",
         mortar_shape="line4",
         penalty_parameter=1000,
@@ -1393,7 +1393,7 @@ def test_nurbs_import(
                 "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
     mesh.add(
@@ -1405,7 +1405,7 @@ def test_nurbs_import(
                 "VAL": [0, 0.02, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [0, fun, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.neumann,
+            bc_type=bme.bc.neumann,
         )
     )
     mesh.add(
@@ -1417,7 +1417,7 @@ def test_nurbs_import(
                 "VAL": [0, 0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [0, 0, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.dirichlet,
+            bc_type=bme.bc.dirichlet,
         )
     )
     mesh.add(
@@ -1429,7 +1429,7 @@ def test_nurbs_import(
                 "VAL": [-0.06, 0, 0, 0, 0, 0, 0, 0, 0],
                 "FUNCT": [fun, 0, 0, 0, 0, 0, 0, 0, 0],
             },
-            bc_type=mpy.bc.neumann,
+            bc_type=bme.bc.neumann,
         )
     )
     mesh.add(
@@ -1483,10 +1483,10 @@ def test_stvenantkirchhoff_solid(
 @pytest.mark.parametrize(
     "coupling_type",
     [
-        ["exact", mpy.bc.point_coupling, mpy.coupling_dof.fix],
+        ["exact", bme.bc.point_coupling, bme.coupling_dof.fix],
         [
             "penalty",
-            mpy.bc.point_coupling_penalty,
+            bme.bc.point_coupling_penalty,
             {
                 "POSITIONAL_PENALTY_PARAMETER": 10000,
                 "ROTATIONAL_PENALTY_PARAMETER": 0,
@@ -1534,7 +1534,7 @@ def test_point_couplings_check():
         """Return a list with nodes to be added to a coupling condition.
 
         The coordinates are modified such that they are close to each
-        other within a radius of mpy.eps_pos * scale_factor
+        other within a radius of bme.eps_pos * scale_factor
         """
         coordinates = np.zeros((10, 3))
         ref_point = [1, 2, 3]
@@ -1544,7 +1544,7 @@ def test_point_couplings_check():
             for i_dir in range(3):
                 factor = 2 * ((i + i_dir % 3) % 2) - 1
                 # Multiply with 0.5 here, because we add the tolerance in + and - direction
-                coordinates[i, i_dir] += factor * mpy.eps_pos * scale_factor
+                coordinates[i, i_dir] += factor * bme.eps_pos * scale_factor
         return [Node(coord) for coord in coordinates]
 
     # This should work, as the points are within the global tolerance of each
@@ -1652,7 +1652,7 @@ def test_vtk_writer_beam(
         output_directory=tmp_path,
         binary=False,
     )
-    assert_results_equal(ref_file, vtk_file, atol=mpy.eps_pos)
+    assert_results_equal(ref_file, vtk_file, atol=bme.eps_pos)
 
     # Write VTK output, without coupling sets."""
     ref_file = get_corresponding_reference_file_path(
@@ -1665,7 +1665,7 @@ def test_vtk_writer_beam(
         output_directory=tmp_path,
         binary=False,
     )
-    assert_results_equal(ref_file, vtk_file, atol=mpy.eps_pos)
+    assert_results_equal(ref_file, vtk_file, atol=bme.eps_pos)
 
     # Write VTK output, with coupling sets and additional points for visualization."""
     ref_file = get_corresponding_reference_file_path(
@@ -1679,7 +1679,7 @@ def test_vtk_writer_beam(
         binary=False,
         beam_centerline_visualization_segments=3,
     )
-    assert_results_equal(ref_file, vtk_file, atol=mpy.eps_pos)
+    assert_results_equal(ref_file, vtk_file, atol=bme.eps_pos)
 
 
 def test_vtk_writer_solid(
@@ -1749,8 +1749,8 @@ def test_vtk_curve_cell_data(
 
     # Create the mesh.
     mesh = Mesh()
-    mpy.vtk_nan_float = 69.69
-    mpy.vtk_nan_int = 69
+    bme.vtk_nan_float = 69.69
+    bme.vtk_nan_int = 69
 
     # Add content to the mesh.
     mat = MaterialBeamBase(radius=0.05)
@@ -1762,7 +1762,7 @@ def test_vtk_curve_cell_data(
         [0, 1, 0],
         [2, 1, 0],
         n_el=2,
-        vtk_cell_data={"cell_data": (1, mpy.vtk_type.int)},
+        vtk_cell_data={"cell_data": (1, bme.vtk_type.int)},
     )
     create_beam_mesh_arc_segment_via_rotation(
         mesh,
@@ -1773,7 +1773,7 @@ def test_vtk_curve_cell_data(
         1.5,
         np.pi / 2.0,
         n_el=2,
-        vtk_cell_data={"cell_data": (2, mpy.vtk_type.int), "other_data": 69},
+        vtk_cell_data={"cell_data": (2, bme.vtk_type.int), "other_data": 69},
     )
 
     # Write VTK output, with coupling sets."""
@@ -1828,12 +1828,12 @@ def test_deep_copy(get_bc_data, assert_results_equal):
         set2 = create_beam_mesh_line(mesh, Beam3rHerm2Line3, mat, [1, 0, 0], [1, 1, 0])
         mesh.add(
             BoundaryCondition(
-                set1["line"], get_bc_data(identifier=1), bc_type=mpy.bc.dirichlet
+                set1["line"], get_bc_data(identifier=1), bc_type=bme.bc.dirichlet
             )
         )
         mesh.add(
             BoundaryCondition(
-                set2["line"], get_bc_data(identifier=2), bc_type=mpy.bc.neumann
+                set2["line"], get_bc_data(identifier=2), bc_type=bme.bc.neumann
             )
         )
         mesh.couple_nodes()
@@ -1882,9 +1882,9 @@ def test_mesh_add_checks():
     mesh.add(element)
 
     # Create objects based on basic mesh items.
-    coupling = Coupling(mesh.nodes, mpy.bc.point_coupling, mpy.coupling_dof.fix)
+    coupling = Coupling(mesh.nodes, bme.bc.point_coupling, bme.coupling_dof.fix)
     coupling_penalty = Coupling(
-        mesh.nodes, mpy.bc.point_coupling_penalty, mpy.coupling_dof.fix
+        mesh.nodes, bme.bc.point_coupling_penalty, bme.coupling_dof.fix
     )
     geometry_set = GeometrySet(mesh.elements)
     mesh.add(coupling)
@@ -1953,7 +1953,7 @@ def test_check_multiple_node_penalty_coupling(
 
     mesh.couple_nodes(
         reuse_matching_nodes=reuse_nodes[1],
-        coupling_type=mpy.bc.point_coupling_penalty,
+        coupling_type=bme.bc.point_coupling_penalty,
         coupling_dof_type={
             "POSITIONAL_PENALTY_PARAMETER": 10000,
             "ROTATIONAL_PENALTY_PARAMETER": 0,
@@ -2030,7 +2030,7 @@ def test_check_overlapping_coupling_nodes(check):
     # couplings for one node.
     args = [
         [set_1["start"], set_2["end"]],
-        mpy.bc.point_coupling,
+        bme.bc.point_coupling,
         "coupling_type_string",
     ]
     if check:

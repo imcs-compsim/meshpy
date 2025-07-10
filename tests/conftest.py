@@ -29,7 +29,7 @@ import pytest
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
 
-from beamme.core.conf import mpy
+from beamme.core.conf import bme
 
 # Import additional confest files (split for better overview)
 pytest_plugins = [
@@ -127,8 +127,8 @@ def pytest_collection_modifyitems(config: Config, items: list) -> None:
 
 @pytest.fixture(autouse=True)
 def run_before_each_test():
-    """Reset the global mpy object before each test."""
-    mpy.set_default_values()
+    """Reset the global bme object before each test."""
+    bme.set_default_values()
 
 
 @pytest.fixture(scope="session")

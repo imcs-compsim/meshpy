@@ -25,7 +25,7 @@ import warnings as _warnings
 
 import numpy as _np
 
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.element_beam import Beam as _Beam
 from beamme.four_c.material import MaterialEulerBernoulli as _MaterialEulerBernoulli
 from beamme.four_c.material import MaterialKirchhoff as _MaterialKirchhoff
@@ -41,7 +41,7 @@ class Beam3rHerm2Line3(_Beam):
     of the rotations."""
 
     nodes_create = [-1, 0, 1]
-    beam_type = _mpy.beam.reissner
+    beam_type = _bme.beam.reissner
     valid_material = [_MaterialReissner, _MaterialReissnerElastoplastic]
 
     coupling_fix_dict = {"NUMDOF": 9, "ONOFF": [1, 1, 1, 1, 1, 1, 0, 0, 0]}
@@ -77,7 +77,7 @@ class Beam3rLine2Line2(_Beam):
     as well as the displacements."""
 
     nodes_create = [-1, 1]
-    beam_type = _mpy.beam.reissner
+    beam_type = _bme.beam.reissner
     valid_material = [_MaterialReissner]
 
     coupling_fix_dict = {"NUMDOF": 6, "ONOFF": [1, 1, 1, 1, 1, 1]}
@@ -111,7 +111,7 @@ class Beam3kClass(_Beam):
     """Represents a Kirchhoff beam element."""
 
     nodes_create = [-1, 0, 1]
-    beam_type = _mpy.beam.kirchhoff
+    beam_type = _bme.beam.kirchhoff
     valid_material = [_MaterialKirchhoff]
 
     coupling_fix_dict = {"NUMDOF": 7, "ONOFF": [1, 1, 1, 1, 1, 1, 0]}
@@ -181,7 +181,7 @@ class Beam3eb(_Beam):
     """Represents a Euler Bernoulli beam element."""
 
     nodes_create = [-1, 1]
-    beam_type = _mpy.beam.euler_bernoulli
+    beam_type = _bme.beam.euler_bernoulli
     valid_material = [_MaterialEulerBernoulli]
 
     def dump_to_list(self):
@@ -199,7 +199,7 @@ class Beam3eb(_Beam):
             )
         direction = self.nodes[1].coordinates - self.nodes[0].coordinates
         t1 = self.nodes[0].rotation * [1, 0, 0]
-        if _np.linalg.norm(direction / _np.linalg.norm(direction) - t1) >= _mpy.eps_pos:
+        if _np.linalg.norm(direction / _np.linalg.norm(direction) - t1) >= _bme.eps_pos:
             raise ValueError(
                 "The rotations do not match the direction of the Euler Bernoulli beam!"
             )

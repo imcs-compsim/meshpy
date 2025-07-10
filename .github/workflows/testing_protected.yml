@@ -21,9 +21,9 @@ jobs:
     name: ubuntu-latest with all dependencies
     runs-on: ubuntu-latest
     environment:
-      # If this workflow is triggered in a PR we use the untrusted environment (someone has to approve the workflow run),
-      # otherwise (scheduled or merge triggers) we use the trusted environment (no approval needed).
-      name: ${{ github.event_name == 'pull_request_target' && 'cubit_secrets_untrusted' || 'cubit_secrets_trusted' }}
+      # Use the trusted environment only for PRs authored by an OWNER or MEMBER (no approval needed); all others use the untrusted environment (someone has to approve the workflow run).
+      # Otherwise (scheduled or merge triggers) use the trusted environment (no approval needed).
+      name: ${{github.event_name == 'pull_request_target' && (github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER') && 'cubit_secrets_trusted' || (github.event_name == 'pull_request_target' && 'cubit_secrets_untrusted' || 'cubit_secrets_trusted')}}
     container:
       image: ghcr.io/4c-multiphysics/4c:main
     defaults:
@@ -69,9 +69,9 @@ jobs:
     continue-on-error: true
     runs-on: ubuntu-latest
     environment:
-      # If this workflow is triggered in a PR we use the untrusted environment (someone has to approve the workflow run),
-      # otherwise (scheduled or merge triggers) we use the trusted environment (no approval needed).
-      name: ${{ github.event_name == 'pull_request_target' && 'cubit_secrets_untrusted' || 'cubit_secrets_trusted' }}
+      # Use the trusted environment only for PRs authored by an OWNER or MEMBER (no approval needed); all others use the untrusted environment (someone has to approve the workflow run).
+      # Otherwise (scheduled or merge triggers) use the trusted environment (no approval needed).
+      name: ${{github.event_name == 'pull_request_target' && (github.event.pull_request.author_association == 'OWNER' || github.event.pull_request.author_association == 'MEMBER') && 'cubit_secrets_trusted' || (github.event_name == 'pull_request_target' && 'cubit_secrets_untrusted' || 'cubit_secrets_trusted')}}
     container:
       image: ghcr.io/4c-multiphysics/4c:main
     defaults:

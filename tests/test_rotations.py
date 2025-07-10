@@ -23,7 +23,7 @@
 
 import numpy as np
 
-from beamme.core.conf import mpy
+from beamme.core.conf import bme
 from beamme.core.rotation import Rotation, smallest_rotation
 
 
@@ -174,7 +174,7 @@ def test_rotation_vector():
     # to a quaternion.
     np.testing.assert_array_less(
         np.linalg.norm(rotation_vector - rotation_from_vec.get_rotation_vector()),
-        mpy.eps_quaternion,
+        bme.eps_quaternion,
     )
 
 
@@ -190,10 +190,10 @@ def test_rotation_operator_overload():
     # Check the result of the operator overloading.
     result_vector = np.dot(rot.get_rotation_matrix(), vector)
     np.testing.assert_array_less(
-        np.linalg.norm(result_vector - rot * vector), mpy.eps_quaternion
+        np.linalg.norm(result_vector - rot * vector), bme.eps_quaternion
     )
     np.testing.assert_array_less(
-        np.linalg.norm(result_vector - rot * np.array(vector)), mpy.eps_quaternion
+        np.linalg.norm(result_vector - rot * np.array(vector)), bme.eps_quaternion
     )
 
 
@@ -213,8 +213,8 @@ def test_rotation_matrix():
         rot = Rotation().from_basis(t1, t2)
         t1_rot = rot * [1, 0, 0]
         t2_rot = rot * [0, 1, 0]
-        np.testing.assert_array_less(np.linalg.norm(t1 - t1_rot), mpy.eps_quaternion)
-        np.testing.assert_array_less(np.linalg.norm(t2 - t2_rot), mpy.eps_quaternion)
+        np.testing.assert_array_less(np.linalg.norm(t1 - t1_rot), bme.eps_quaternion)
+        np.testing.assert_array_less(np.linalg.norm(t2 - t2_rot), bme.eps_quaternion)
 
 
 def test_transformation_matrix():
@@ -226,7 +226,7 @@ def test_transformation_matrix():
         rotation_vector_large
         / np.linalg.norm(rotation_vector_large)
         / 10.0
-        * mpy.eps_quaternion
+        * bme.eps_quaternion
     )
     rotation_small = Rotation.from_rotation_vector(rotation_vector_small)
 
@@ -241,13 +241,13 @@ def test_transformation_matrix():
     assert np.allclose(
         rotation_large.get_transformation_matrix(),
         transformation_matrix_large_reference,
-        atol=mpy.eps_quaternion,
+        atol=bme.eps_quaternion,
         rtol=0.0,
     )
     assert np.allclose(
         rotation_small.get_transformation_matrix(),
         np.identity(3),
-        atol=mpy.eps_quaternion,
+        atol=bme.eps_quaternion,
         rtol=0.0,
     )
 
@@ -262,13 +262,13 @@ def test_transformation_matrix():
     assert np.allclose(
         rotation_large.get_transformation_matrix_inv(),
         transformation_matrix_inverse_large_reference,
-        atol=mpy.eps_quaternion,
+        atol=bme.eps_quaternion,
         rtol=0.0,
     )
     assert np.allclose(
         rotation_small.get_transformation_matrix_inv(),
         np.identity(3),
-        atol=mpy.eps_quaternion,
+        atol=bme.eps_quaternion,
         rtol=0.0,
     )
 
@@ -289,7 +289,7 @@ def test_smallest_rotation_triad():
         0.4114279380770031,
     ]
     np.testing.assert_array_less(
-        np.linalg.norm(rot_smallest.q - rot_smallest_ref), mpy.eps_quaternion
+        np.linalg.norm(rot_smallest.q - rot_smallest_ref), bme.eps_quaternion
     )
 
 

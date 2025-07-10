@@ -38,7 +38,7 @@ from beamme.core.boundary_condition import (
 from beamme.core.boundary_condition import (
     BoundaryConditionContainer as _BoundaryConditionContainer,
 )
-from beamme.core.conf import mpy as _mpy
+from beamme.core.conf import bme as _bme
 from beamme.core.coupling import coupling_factory as _coupling_factory
 from beamme.core.element import Element as _Element
 from beamme.core.element_beam import Beam as _Beam
@@ -310,8 +310,8 @@ class Mesh:
             for bc in bc_list:
                 # Check if sets from couplings should be added.
                 is_coupling = bc_key in (
-                    _mpy.bc.point_coupling,
-                    bc_key == _mpy.bc.point_coupling_penalty,
+                    _bme.bc.point_coupling,
+                    bc_key == _bme.bc.point_coupling_penalty,
                 )
                 if (is_coupling and coupling_sets) or (not is_coupling):
                     # Only add set if it is not already in the container.
@@ -500,7 +500,7 @@ class Mesh:
         points_x = pos[:, 0].copy()
 
         # Check if all points are on the same y-z plane.
-        if _np.abs(_np.min(points_x) - _np.max(points_x)) > _mpy.eps_pos:
+        if _np.abs(_np.min(points_x) - _np.max(points_x)) > _bme.eps_pos:
             # The points are not all on the y-z plane, get the reference
             # radius.
             if radius is not None:
@@ -522,7 +522,7 @@ class Mesh:
                                     - element_coordinates[0, 0]
                                 )
                             )
-                            < _mpy.eps_pos
+                            < _bme.eps_pos
                         )
                         is_xz = (
                             _np.max(
@@ -531,7 +531,7 @@ class Mesh:
                                     - element_coordinates[0, 1]
                                 )
                             )
-                            < _mpy.eps_pos
+                            < _bme.eps_pos
                         )
                         if not (is_yz or is_xz):
                             element_warning.append(i_element)
@@ -554,7 +554,7 @@ class Mesh:
                 )
             radius_phi = radius
             radius_points = points_x
-        elif radius is None or _np.abs(points_x[0] - radius) < _mpy.eps_pos:
+        elif radius is None or _np.abs(points_x[0] - radius) < _bme.eps_pos:
             radius_points = radius_phi = points_x[0]
         else:
             raise ValueError(
@@ -588,8 +588,8 @@ class Mesh:
         *,
         nodes=None,
         reuse_matching_nodes=False,
-        coupling_type=_mpy.bc.point_coupling,
-        coupling_dof_type=_mpy.coupling_dof.fix,
+        coupling_type=_bme.bc.point_coupling,
+        coupling_dof_type=_bme.coupling_dof.fix,
     ):
         """Search through nodes and connect all nodes with the same
         coordinates.
@@ -603,20 +603,20 @@ class Mesh:
             If two nodes have the same position and rotation, the nodes are
             reduced to one node in the mesh. Be aware, that this might lead to
             issues if not all DOFs of the nodes should be coupled.
-        coupling_type: mpy.bc
+        coupling_type: bme.bc
             Type of point coupling.
-        coupling_dof_type: str, mpy.coupling_dof
+        coupling_dof_type: str, bme.coupling_dof
             str: The string that will be used in the input file.
-            mpy.coupling_dof.fix: Fix all positional and rotational DOFs of the
+            bme.coupling_dof.fix: Fix all positional and rotational DOFs of the
                 nodes together.
-            mpy.coupling_dof.joint: Fix all positional DOFs of the nodes
+            bme.coupling_dof.joint: Fix all positional DOFs of the nodes
                 together.
         """
 
         # Check that a coupling BC is given.
         if coupling_type not in (
-            _mpy.bc.point_coupling,
-            _mpy.bc.point_coupling_penalty,
+            _bme.bc.point_coupling,
+            _bme.bc.point_coupling_penalty,
         ):
             raise ValueError(
                 "Only coupling conditions can be applied in 'couple_nodes'!"
@@ -660,7 +660,7 @@ class Mesh:
                 # Use find close points function to find nodes with the
                 # same rotation.
                 partners, n_partners = _find_close_points(
-                    rotation_vectors, tol=_mpy.eps_quaternion
+                    rotation_vectors, tol=_bme.eps_quaternion
                 )
 
                 # Check if nodes with the same rotations were found.
@@ -759,7 +759,7 @@ class Mesh:
                     "There are multiple middle nodes with the "
                     "same coordinates. Per default this raises an error! "
                     "This check can be turned of with "
-                    "mpy.check_overlapping_elements=False"
+                    "bme.check_overlapping_elements=False"
                 )
             else:
                 _warnings.warn(
@@ -798,9 +798,9 @@ class Mesh:
         # Get highest number of node_sets.
         max_sets = max(len(geometry_list) for geometry_list in mesh_sets.values())
 
-        # Set the mpy value.
+        # Set the bme value.
         digits = len(str(max_sets))
-        _mpy.vtk_node_set_format = "{:0" + str(digits) + "}"
+        _bme.vtk_node_set_format = "{:0" + str(digits) + "}"
 
         if overlapping_elements:
             # Check for overlapping elements.

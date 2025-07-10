@@ -34,7 +34,7 @@
 
 </div>
 
-BeamMe is a general purpose 3D beam finite element input generator written in Python.
+BeamMe (previously MeshPy) is a general purpose 3D beam finite element input generator written in Python.
 It contains advanced geometry creation and manipulation functions to create complex beam geometries, including a consistent handling of finite rotations.
 It can be used to create input files for the following finite element solvers (adaption to other solvers is easily possibly):
 - [4C](https://www.4c-multiphysics.org/) (academic finite element solver)
@@ -109,18 +109,18 @@ You can also interactively test the entire BeamMe framework directly from your b
 
 ## How to cite BeamMe?
 
-Whenever you use or mention BeamMe in some sort of scientific document/publication/presentation, please cite BeamMe as
-> Steinbrecher, I., Popp, A.: MeshPy - A general purpose 3D beam finite element input generator, https://imcs-compsim.github.io/meshpy
+Whenever you use or mention BeamMe in some sort of scientific document, publication or presentation, please cite BeamMe as
 
-This can be done with the following BiBTeX entry:
+> BeamMe: A general purpose 3D beam finite element input generator, https://beamme-py.github.io/beamme
+
+This could be done with the following BiBTeX entry:
 ```TeX
-@Misc{MeshPyWebsite,
-  author       = {Steinbrecher, I. and Popp, A.},
-  howpublished = {\url{https://imcs-compsim.github.io/meshpy}},
-  title        = {{M}esh{P}y -- {A} general purpose {3D} beam finite element input generator},
-  year         = {2021},
-  key          = {MeshPyWebsite},
-  url          = {https://imcs-compsim.github.io/meshpy},
+@misc{BeamMe,
+  author       = {{BeamMe Authors}},
+  title        = {{B}eam{M}e -- {A} general purpose {3D} beam finite element input generator},
+  howpublished = {\url{https://beamme-py.github.io/beamme}},
+  year         = {YEAR},
+  note         = {Accessed: DATE}
 }
 ```
 
