@@ -21,7 +21,10 @@
 # THE SOFTWARE.
 """Generic function used to create NURBS meshes."""
 
+import itertools as _itertools
 from typing import Type as _Type
+
+import numpy as _np
 
 from beamme.core.conf import bme as _bme
 from beamme.core.geometry_set import GeometryName as _GeometryName
@@ -237,404 +240,89 @@ def create_control_points_volume(geomdl_obj):
 
 
 def create_geometry_sets(element: _NURBSSurface | _NURBSVolume) -> _GeometryName:
-    """Function that returns a GeometryName object.
+    """Create the geometry sets for NURBS patches of all dimensions.
 
-    For more information of the return item, look into
-    `add_splinepy_nurbs_to_mesh` and `add_geomdl_nurbs_to_mesh`.
+    Args:
+        element: The NURBS patch for which the geometry sets should be created.
+
+    Returns:
+        The geometry set container for the given NURBS patch.
     """
-
-    def get_patch_vertices(return_set, num_cps_uvw, nurbs_dimension, element):
-        """Get the control points positioned over the vertices of a patch."""
-
-        if nurbs_dimension == 2:
-            # Vertex 1 is positioned on u = 0, v = 0
-            return_set["vertex_u_min_v_min"] = _GeometrySetNodes(
-                _bme.geo.point, nodes=element.nodes[0]
-            )
-
-            # Vertex 2 is positioned on u = 1, v = 0
-            return_set["vertex_u_max_v_min"] = _GeometrySetNodes(
-                _bme.geo.point, nodes=element.nodes[num_cps_uvw[0] - 1]
-            )
-
-            # Vertex 3 is positioned on u = 0, v = 1
-            return_set["vertex_u_min_v_max"] = _GeometrySetNodes(
-                _bme.geo.point,
-                nodes=element.nodes[num_cps_uvw[0] * (num_cps_uvw[1] - 1)],
-            )
-
-            # Vertex 4 is positioned on u = 1, v = 1
-            return_set["vertex_u_max_v_max"] = _GeometrySetNodes(
-                _bme.geo.point, nodes=element.nodes[num_cps_uvw[0] * num_cps_uvw[1] - 1]
-            )
-
-        elif nurbs_dimension == 3:
-            # Vertex 1 is positioned on u = 0, v = 0, w =
-            return_set["vertex_u_min_v_min_w_min"] = _GeometrySetNodes(
-                _bme.geo.point, nodes=element.nodes[0]
-            )
-
-            # Vertex 2 is positioned on u = 1, v = 0, w = 0
-            return_set["vertex_u_max_v_min_w_min"] = _GeometrySetNodes(
-                _bme.geo.point, nodes=element.nodes[num_cps_uvw[0] - 1]
-            )
-
-            # Vertex 3 is positioned on u = 0, v = 1, w = 0
-            return_set["vertex_u_min_v_max_w_min"] = _GeometrySetNodes(
-                _bme.geo.point,
-                nodes=element.nodes[num_cps_uvw[0] * (num_cps_uvw[1] - 1)],
-            )
-
-            # Vertex 4 is positioned on u = 1, v = 1, w = 0
-            return_set["vertex_u_max_v_max_w_min"] = _GeometrySetNodes(
-                _bme.geo.point, nodes=element.nodes[num_cps_uvw[0] * num_cps_uvw[1] - 1]
-            )
-
-            # Vertex 5 is positioned on u = 0, v = 0, w = 1
-            return_set["vertex_u_min_v_min_w_max"] = _GeometrySetNodes(
-                _bme.geo.point,
-                nodes=element.nodes[
-                    num_cps_uvw[0] * num_cps_uvw[1] * (num_cps_uvw[2] - 1)
-                ],
-            )
-
-            # Vertex 6 is positioned on u = 1, v = 0, w = 1
-            return_set["vertex_u_max_v_min_w_max"] = _GeometrySetNodes(
-                _bme.geo.point,
-                nodes=element.nodes[
-                    num_cps_uvw[0] * num_cps_uvw[1] * (num_cps_uvw[2] - 1)
-                    + (num_cps_uvw[0] - 1)
-                ],
-            )
-
-            # Vertex 7 is positioned on u = 0, v = 1, w = 1
-            return_set["vertex_u_min_v_max_w_max"] = _GeometrySetNodes(
-                _bme.geo.point,
-                nodes=element.nodes[
-                    num_cps_uvw[0] * num_cps_uvw[1] * (num_cps_uvw[2] - 1)
-                    + num_cps_uvw[0] * (num_cps_uvw[1] - 1)
-                ],
-            )
-
-            # Vertex 8 is positioned on u = 1, v = 1, w = 1
-            return_set["vertex_u_max_v_max_w_max"] = _GeometrySetNodes(
-                _bme.geo.point,
-                nodes=element.nodes[
-                    num_cps_uvw[0] * num_cps_uvw[1] * num_cps_uvw[2] - 1
-                ],
-            )
-
-        else:
-            raise NotImplementedError(
-                "Error, not implemented for NURBS with dimension {}!".format(
-                    nurbs_dimension
-                )
-            )
-
-    def get_patch_lines(return_set, num_cps_uvw, nurbs_dimension, element):
-        """Get the control points positioned over the lines of a patch."""
-
-        if nurbs_dimension == 2:
-            name_dir = ["v", "u"]
-            name_other_dir = ["min", "min_next", "max_next", "max"]
-
-            for i_dir, i_other_dir in ((0, 1), (1, 0)):
-                n_cp_dir = num_cps_uvw[i_dir]
-                n_cp_other_dir = num_cps_uvw[i_other_dir]
-                factor_dir = 1 if i_dir == 0 else n_cp_other_dir
-                factor_other_dir = n_cp_dir if i_dir == 0 else 1
-
-                for index, i_along_other_dir in enumerate(
-                    (
-                        0,
-                        1,
-                        n_cp_other_dir - 2,
-                        n_cp_other_dir - 1,
-                    )
-                ):
-                    cp_indices = []
-                    for i_along_dir in range(n_cp_dir):
-                        cp_indices.append(
-                            i_along_other_dir * factor_other_dir
-                            + i_along_dir * factor_dir
-                        )
-                    set_name = f"line_{name_dir[i_dir]}_{name_other_dir[index]}"
-                    return_set[set_name] = _GeometrySetNodes(
-                        _bme.geo.line,
-                        nodes=[element.nodes[i_node] for i_node in cp_indices],
-                    )
-
-        elif nurbs_dimension == 3:
-            # Define the rest of the lines to define a volume
-            control_points_line_1 = []
-            control_points_line_2 = []
-            control_points_line_3 = []
-            control_points_line_4 = []
-            control_points_line_5 = []
-            control_points_line_6 = []
-            control_points_line_7 = []
-            control_points_line_8 = []
-            control_points_line_9 = []
-            control_points_line_10 = []
-            control_points_line_11 = []
-            control_points_line_12 = []
-
-            # Fill line 1, 3, 9 and 11 with their control points
-            for i in range(num_cps_uvw[0]):
-                # Line 1 has the control points on u = [0,1], v = 0, w = 0
-                cpgid_l1 = num_cps_uvw[0] * 0 + i
-                control_points_line_1.append(element.nodes[cpgid_l1])
-
-                # Line 3 has the control points on u = [0,1], v = 1, w = 0
-                cpgid_l3 = num_cps_uvw[0] * (num_cps_uvw[1] - 1) + i
-                control_points_line_3.append(element.nodes[cpgid_l3])
-
-                # Line 9 has the control points on u = [0,1], v = 0, w = 1
-                cpgid_l9 = num_cps_uvw[0] * num_cps_uvw[1] * (num_cps_uvw[2] - 1) + i
-                control_points_line_9.append(element.nodes[cpgid_l9])
-
-                # Line 11 has the control points on u = [0,1], v = 1, w = 1
-                cpgid_l11 = (
-                    num_cps_uvw[0] * num_cps_uvw[1] * (num_cps_uvw[2] - 1)
-                    + num_cps_uvw[0] * (num_cps_uvw[1] - 1)
-                    + i
-                )
-                control_points_line_11.append(element.nodes[cpgid_l11])
-
-            # Fill line 2, 4, 10 and 12 with their control points
-            for j in range(num_cps_uvw[1]):
-                # Line 2 has the control points on u = 1, v = [0,1] , w = 0
-                cpgid_l2 = num_cps_uvw[0] * j + (num_cps_uvw[0] - 1)
-                control_points_line_2.append(element.nodes[cpgid_l2])
-
-                # Line 4 has the control points on u = 0, v = [0,1] , w = 0
-                cpgid_l4 = num_cps_uvw[0] * j + 0
-                control_points_line_4.append(element.nodes[cpgid_l4])
-
-                # Line 10 has the control points on u = 1, v = [0,1] , w = 1
-                cpgid_l10 = (
-                    num_cps_uvw[0] * num_cps_uvw[1] * (num_cps_uvw[2] - 1)
-                    + num_cps_uvw[0] * j
-                    + (num_cps_uvw[0] - 1)
-                )
-                control_points_line_10.append(element.nodes[cpgid_l10])
-
-                # Line 12 has the control points on u = 0, v = [0,1] , w = 1
-                cpgid_l12 = (
-                    num_cps_uvw[0] * num_cps_uvw[1] * (num_cps_uvw[2] - 1)
-                    + num_cps_uvw[0] * j
-                )
-                control_points_line_12.append(element.nodes[cpgid_l12])
-
-            # Fill line 5, 6, 7 and 8 with their control points
-            for k in range(num_cps_uvw[2]):
-                # Line 5 has the control points on u = 0, v = 0 , w = [0,1]
-                cpgid_l5 = num_cps_uvw[0] * num_cps_uvw[1] * k
-                control_points_line_5.append(element.nodes[cpgid_l5])
-
-                # Line 6 has the control points on u = 1, v = 0 , w = [0,1]
-                cpgid_l6 = num_cps_uvw[0] * num_cps_uvw[1] * k + num_cps_uvw[0] - 1
-                control_points_line_6.append(element.nodes[cpgid_l6])
-
-                # Line 7 has the control points on u = 0, v = 1 , w = [0,1]
-                cpgid_l7 = num_cps_uvw[0] * num_cps_uvw[1] * k + num_cps_uvw[0] * (
-                    num_cps_uvw[1] - 1
-                )
-                control_points_line_7.append(element.nodes[cpgid_l7])
-
-                # Line 8 has the control points on u = 1, v = 1 , w = [0,1]
-                cpgid_l8 = (
-                    num_cps_uvw[0] * num_cps_uvw[1] * k
-                    + num_cps_uvw[0] * num_cps_uvw[1]
-                    - 1
-                )
-                control_points_line_8.append(element.nodes[cpgid_l8])
-
-            # Create geometric sets for lines
-            return_set["line_v_min_w_min"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_1
-            )
-            return_set["line_u_max_w_min"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_2
-            )
-            return_set["line_v_max_w_min"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_3
-            )
-            return_set["line_u_min_w_min"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_4
-            )
-            return_set["line_u_min_v_min"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_5
-            )
-            return_set["line_u_max_v_min"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_6
-            )
-            return_set["line_u_min_v_max"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_7
-            )
-            return_set["line_u_max_v_max"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_8
-            )
-            return_set["line_v_min_w_max"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_9
-            )
-            return_set["line_u_max_w_max"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_10
-            )
-            return_set["line_v_max_w_max"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_11
-            )
-            return_set["line_u_min_w_max"] = _GeometrySetNodes(
-                _bme.geo.line, nodes=control_points_line_12
-            )
-
-        else:
-            raise NotImplementedError(
-                "Error, not implemented for NURBS with dimension {}!".format(
-                    nurbs_dimension
-                )
-            )
-
-    def get_patch_surfaces(return_set, num_cps_uvw, nurbs_dimension, element):
-        """Get the control points positioned over the surfaces of a patch."""
-
-        control_points_surface_1 = []
-
-        if nurbs_dimension == 2:
-            # As there is only one surface, it collects all the control points
-            control_points_surface_1.extend(
-                element.nodes[: (num_cps_uvw[0] * num_cps_uvw[1])]
-            )
-
-            # Create geometric sets for surfaces
-            return_set["surf"] = _GeometrySetNodes(
-                _bme.geo.surface, nodes=control_points_surface_1
-            )
-
-        elif nurbs_dimension == 3:
-            control_points_surface_2 = []
-            control_points_surface_3 = []
-            control_points_surface_4 = []
-            control_points_surface_5 = []
-            control_points_surface_6 = []
-
-            # Surface defined on w = 0
-            control_points_surface_1.extend(
-                element.nodes[: (num_cps_uvw[0] * num_cps_uvw[1])]
-            )
-
-            # Surface defined on w = 1
-            control_points_surface_2.extend(
-                element.nodes[
-                    (num_cps_uvw[0] * num_cps_uvw[1] * (num_cps_uvw[2] - 1)) : (
-                        num_cps_uvw[0] * num_cps_uvw[1] * num_cps_uvw[2]
-                    )
-                ]
-            )
-
-            for layers_w_dir in range(num_cps_uvw[2]):
-                # Calculate the number of control points on the w-plane
-                num_cps_plane_w = num_cps_uvw[0] * num_cps_uvw[1]
-
-                for layers_u_dir in range(num_cps_uvw[0]):
-                    # Surface defined on v = 0
-                    cpgid_l1 = num_cps_uvw[0] * 0 + layers_u_dir
-                    control_points_surface_3.append(
-                        element.nodes[cpgid_l1 + num_cps_plane_w * layers_w_dir]
-                    )
-
-                    # Surface defined on v = 1
-                    cpgid_l3 = num_cps_uvw[0] * (num_cps_uvw[1] - 1) + layers_u_dir
-                    control_points_surface_5.append(
-                        element.nodes[cpgid_l3 + num_cps_plane_w * layers_w_dir]
-                    )
-
-                for layers_v_dir in range(num_cps_uvw[1]):
-                    # Surface defined on u = 1
-                    cpgid_l2 = num_cps_uvw[0] * layers_v_dir + (num_cps_uvw[0] - 1)
-                    control_points_surface_4.append(
-                        element.nodes[cpgid_l2 + num_cps_plane_w * layers_w_dir]
-                    )
-
-                    # Surface defined on u = 0
-                    cpgid_l4 = num_cps_uvw[0] * layers_v_dir + 0
-                    control_points_surface_6.append(
-                        element.nodes[cpgid_l4 + num_cps_plane_w * layers_w_dir]
-                    )
-
-            # Create geometric sets for surfaces
-            return_set["surf_w_min"] = _GeometrySetNodes(
-                _bme.geo.surface, nodes=control_points_surface_1
-            )
-            return_set["surf_w_max"] = _GeometrySetNodes(
-                _bme.geo.surface, nodes=control_points_surface_2
-            )
-            return_set["surf_v_min"] = _GeometrySetNodes(
-                _bme.geo.surface, nodes=control_points_surface_3
-            )
-            return_set["surf_u_max"] = _GeometrySetNodes(
-                _bme.geo.surface, nodes=control_points_surface_4
-            )
-            return_set["surf_v_max"] = _GeometrySetNodes(
-                _bme.geo.surface, nodes=control_points_surface_5
-            )
-            return_set["surf_u_min"] = _GeometrySetNodes(
-                _bme.geo.surface, nodes=control_points_surface_6
-            )
-
-        else:
-            raise NotImplementedError(
-                "Error, not implemented for NURBS with dimension {}!".format(
-                    nurbs_dimension
-                )
-            )
-
-    def get_patch_volume(return_set, num_cps_uvw, nurbs_dimension, element):
-        """Get the control points positioned in the volume of a patch."""
-
-        control_points_volume_1 = []
-
-        if nurbs_dimension == 2:
-            # As this is a surface, it's not necessary to get a volume GeometrySet
-            pass
-
-        elif nurbs_dimension == 3:
-            # As there is only one volume, it collects all the control points
-            control_points_volume_1.extend(
-                element.nodes[: (num_cps_uvw[0] * num_cps_uvw[1] * num_cps_uvw[2])]
-            )
-
-            # Create geometric sets for surfaces
-            return_set["vol"] = _GeometrySetNodes(
-                _bme.geo.volume, nodes=control_points_volume_1
-            )
-
-        else:
-            raise NotImplementedError(
-                "Error, not implemented for NURBS with dimension {}".format(
-                    nurbs_dimension
-                )
-            )
 
     # Create return set
     return_set = _GeometryName()
 
-    # Get the number of control points on each parametric direction that define the patch
+    # Get general data needed for the set creation
     num_cps_uvw = element.get_number_of_control_points_per_dir()
-
-    # Get the NURBS dimension
     nurbs_dimension = len(element.knot_vectors)
+    n_cp = _np.prod(num_cps_uvw)
+    axes = ["u", "v", "w"][:nurbs_dimension]
+    name_map = {0: "min", -1: "max", 1: "min_next", -2: "max_next"}
 
-    # Obtain the vertices of the patch
-    get_patch_vertices(return_set, num_cps_uvw, nurbs_dimension, element)
+    # This is a tensor array that contains the CP indices
+    cp_indices_dim = _np.arange(n_cp, dtype=int).reshape(*num_cps_uvw[::-1]).transpose()
 
-    # Obtain the lines of the patch
-    get_patch_lines(return_set, num_cps_uvw, nurbs_dimension, element)
+    if nurbs_dimension >= 0:
+        # Add point sets
+        directions = [0, -1]
+        for corner in _itertools.product(*([directions] * nurbs_dimension)):
+            name = "vertex_" + "_".join(
+                f"{axis}_{name_map[coord]}" for axis, coord in zip(axes, corner)
+            )
+            index = cp_indices_dim[corner]
+            return_set[name] = _GeometrySetNodes(
+                _bme.geo.point, nodes=element.nodes[index]
+            )
 
-    # Obtain the surfaces of the patch
-    get_patch_surfaces(return_set, num_cps_uvw, nurbs_dimension, element)
+    if nurbs_dimension > 0:
+        # Add edge sets
 
-    # Obtain the volume of the patch
-    get_patch_volume(return_set, num_cps_uvw, nurbs_dimension, element)
+        if nurbs_dimension == 2:
+            directions = [0, 1, -2, -1]
+        elif nurbs_dimension == 3:
+            directions = [0, -1]
+        else:
+            raise ValueError("NURBS dimension 1 not implemented")
+
+        # Iterate over each axis (the axis that varies — the "edge" direction)
+        for edge_axis in range(nurbs_dimension):
+            # The other axes will be fixed
+            fixed_axes = [i for i in range(nurbs_dimension) if i != edge_axis]
+            for fixed_dir in _itertools.product(*([directions] * len(fixed_axes))):
+                # Build slicing tuple for indexing cp_indices_dim
+                slicer: list[slice | int] = [slice(None)] * nurbs_dimension
+                name_parts = []
+                for axis_idx, dir_val in zip(fixed_axes, fixed_dir):
+                    slicer[axis_idx] = dir_val
+                    name_parts.append(f"{axes[axis_idx]}_{name_map[dir_val]}")
+                name = "line_" + "_".join(name_parts)
+
+                # Get node indices along the edge
+                edge_indices = cp_indices_dim[tuple(slicer)].flatten()
+                return_set[name] = _GeometrySetNodes(
+                    _bme.geo.line, nodes=[element.nodes[i] for i in edge_indices]
+                )
+
+    if nurbs_dimension == 2:
+        # Add surface sets for surface NURBS
+        return_set["surf"] = _GeometrySetNodes(_bme.geo.surface, element.nodes)
+
+    if nurbs_dimension == 3:
+        # Add surface sets for volume NURBS
+        for fixed_axis in range(nurbs_dimension):
+            for dir_val in directions:
+                # Build slice and name
+                slicer = [slice(None)] * nurbs_dimension
+                slicer[fixed_axis] = dir_val
+                surface_name = f"surf_{axes[fixed_axis]}_{name_map[dir_val]}"
+
+                surface_indices = cp_indices_dim[tuple(slicer)].flatten()
+                return_set[surface_name] = _GeometrySetNodes(
+                    _bme.geo.surface,
+                    nodes=[element.nodes[i] for i in surface_indices],
+                )
+
+        # Add volume sets
+        return_set["vol"] = _GeometrySetNodes(_bme.geo.volume, element.nodes)
 
     return return_set
