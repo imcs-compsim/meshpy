@@ -145,7 +145,12 @@ def test_cosserat_curve_translate_and_rotate(
         [sol_full_pos, "pos_full_ref"],
         [sol_full_q, "q_full_ref"],
     ]:
-        result_path = tmp_path / (name + ".txt")
+        result_path = (
+            tmp_path
+            / get_corresponding_reference_file_path(
+                additional_identifier=name, extension="txt"
+            ).name
+        )
         if array.dtype == quaternion.quaternion:
             array = quaternion.as_float_array(array)
         np.savetxt(result_path, array)
