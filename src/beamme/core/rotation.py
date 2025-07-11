@@ -486,4 +486,4 @@ def smallest_rotation(q: Rotation, t):
     # Vector part of the quaternion is sin(alpha/2)*axis
     q_rel[1:] = _np.cross(g1_old, g1) / (2.0 * q_rel[0])
 
-    return Rotation.from_quaternion(q_rel) * q
+    return Rotation.from_quaternion(q_rel, normalized=True) * q
