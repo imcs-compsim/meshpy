@@ -210,6 +210,9 @@ class CosseratCurve(object):
                     ds,
                     point_arc_length_piecewise_linear[i],
                     point_arc_length_piecewise_linear[i + 1],
+                    epsabs=1.49e-14,
+                    epsrel=1.49e-14,
+                    limit=200,
                 )[0]
             )
 
