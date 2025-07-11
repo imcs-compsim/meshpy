@@ -1,15 +1,5 @@
 DESIGN POINT DIRICH CONDITIONS:
   - E: 1
-    FUNCT:
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
     NUMDOF: 9
     ONOFF:
       - 1
@@ -22,6 +12,16 @@ DESIGN POINT DIRICH CONDITIONS:
       - 0
       - 0
     VAL:
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    FUNCT:
       - 0
       - 0
       - 0
@@ -33,16 +33,6 @@ DESIGN POINT DIRICH CONDITIONS:
       - 0
 DESIGN POINT NEUMANN CONDITIONS:
   - E: 2
-    FUNCT:
-      - 2
-      - 2
-      - 2
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
-      - 0
     NUMDOF: 9
     ONOFF:
       - 1
@@ -55,9 +45,19 @@ DESIGN POINT NEUMANN CONDITIONS:
       - 0
       - 0
     VAL:
-      - 0.60082018126
-      - 0.52746233233
-      - 0.35164155489
+      - 0.6008201812581666
+      - 0.527462332332383
+      - 0.35164155488825843
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+      - 0
+    FUNCT:
+      - 2
+      - 2
+      - 2
       - 0
       - 0
       - 0
@@ -65,111 +65,111 @@ DESIGN POINT NEUMANN CONDITIONS:
       - 0
       - 0
 DNODE-NODE TOPOLOGY:
-  - NODE 1 DNODE 1
-  - NODE 21 DNODE 2
+  - "NODE 1 DNODE 1"
+  - "NODE 21 DNODE 2"
 FUNCT1:
   - COMPONENT: 0
-    SYMBOLIC_FUNCTION_OF_SPACE_TIME: t
+    SYMBOLIC_FUNCTION_OF_SPACE_TIME: "t"
 FUNCT2:
-  - SYMBOLIC_FUNCTION_OF_TIME: nbc_value
-  - NAME: nbc_value
+  - SYMBOLIC_FUNCTION_OF_TIME: "nbc_value"
+  - VARIABLE: 0
+    NAME: "nbc_value"
+    TYPE: "linearinterpolation"
     NUMPOINTS: 2
     TIMES:
       - 1
       - 11
-    TYPE: linearinterpolation
     VALUES:
       - 1
       - 0
-    VARIABLE: 0
 IO:
   OUTPUT_BIN: true
   STRUCT_DISP: true
-  STRUCT_STRAIN: 'no'
-  STRUCT_STRESS: 'no'
-  VERBOSITY: Standard
+  STRUCT_STRESS: "no"
+  STRUCT_STRAIN: "no"
+  VERBOSITY: "Standard"
 MATERIALS:
   - MAT: 1
     MAT_BeamReissnerElastHyper:
+      YOUNG: 100.0
+      POISSONRATIO: 0.0
+      DENS: 0.0
       CROSSAREA: 0.031415926535897934
-      DENS: 0
+      SHEARCORR: 1
+      MOMINPOL: 0.00015707963267948968
       MOMIN2: 7.853981633974484e-05
       MOMIN3: 7.853981633974484e-05
-      MOMINPOL: 0.00015707963267948968
-      POISSONRATIO: 0
-      SHEARCORR: 1
-      YOUNG: 100
 NODE COORDS:
-  - NODE 1 COORD 0 0 0
-  - NODE 2 COORD 0.1 0 0
-  - NODE 3 COORD 0.2 0 0
-  - NODE 4 COORD 0.3 0 0
-  - NODE 5 COORD 0.4 0 0
-  - NODE 6 COORD 0.5 0 0
-  - NODE 7 COORD 0.6 0 0
-  - NODE 8 COORD 0.7 0 0
-  - NODE 9 COORD 0.8 0 0
-  - NODE 10 COORD 0.9 0 0
-  - NODE 11 COORD 1 0 0
-  - NODE 12 COORD 1.1 0 0
-  - NODE 13 COORD 1.2 0 0
-  - NODE 14 COORD 1.3 0 0
-  - NODE 15 COORD 1.4 0 0
-  - NODE 16 COORD 1.5 0 0
-  - NODE 17 COORD 1.6 0 0
-  - NODE 18 COORD 1.7 0 0
-  - NODE 19 COORD 1.8 0 0
-  - NODE 20 COORD 1.9 0 0
-  - NODE 21 COORD 2 0 0
+  - "NODE 1 COORD 0.0 0.0 0.0"
+  - "NODE 2 COORD 0.1 0.0 0.0"
+  - "NODE 3 COORD 0.2 0.0 0.0"
+  - "NODE 4 COORD 0.30000000000000004 0.0 0.0"
+  - "NODE 5 COORD 0.4 0.0 0.0"
+  - "NODE 6 COORD 0.5 0.0 0.0"
+  - "NODE 7 COORD 0.6 0.0 0.0"
+  - "NODE 8 COORD 0.7 0.0 0.0"
+  - "NODE 9 COORD 0.8 0.0 0.0"
+  - "NODE 10 COORD 0.9 0.0 0.0"
+  - "NODE 11 COORD 1.0 0.0 0.0"
+  - "NODE 12 COORD 1.1 0.0 0.0"
+  - "NODE 13 COORD 1.2 0.0 0.0"
+  - "NODE 14 COORD 1.2999999999999998 0.0 0.0"
+  - "NODE 15 COORD 1.4 0.0 0.0"
+  - "NODE 16 COORD 1.5 0.0 0.0"
+  - "NODE 17 COORD 1.6 0.0 0.0"
+  - "NODE 18 COORD 1.7000000000000002 0.0 0.0"
+  - "NODE 19 COORD 1.8 0.0 0.0"
+  - "NODE 20 COORD 1.9 0.0 0.0"
+  - "NODE 21 COORD 2.0 0.0 0.0"
 PROBLEM TYPE:
-  PROBLEMTYPE: Structure
+  PROBLEMTYPE: "Structure"
 RESULT DESCRIPTION:
   - STRUCTURE:
-      DIS: structure
+      DIS: "structure"
       NODE: 21
-      QUANTITY: dispx
-      TOLERANCE: 1.0e-10
+      QUANTITY: "dispx"
       VALUE: -0.4099883075660667
+      TOLERANCE: 1e-10
   - STRUCTURE:
-      DIS: structure
+      DIS: "structure"
       NODE: 21
-      QUANTITY: dispy
-      TOLERANCE: 1.0e-10
+      QUANTITY: "dispy"
       VALUE: 0.9930750984278164
+      TOLERANCE: 1e-10
   - STRUCTURE:
-      DIS: structure
+      DIS: "structure"
       NODE: 21
-      QUANTITY: dispz
-      TOLERANCE: 1.0e-10
+      QUANTITY: "dispz"
       VALUE: 0.6620500656185498
+      TOLERANCE: 1e-10
 SOLVER 1:
-  NAME: Structure_Solver
-  SOLVER: Superlu
+  NAME: "Structure_Solver"
+  SOLVER: "Superlu"
 STRUCT NOX/Printing:
-  Details: true
   Error: true
   Inner Iteration: false
+  Details: true
   Linear Solver Details: true
   Test Details: true
 STRUCTURAL DYNAMIC:
-  DYNAMICTYPE: Statics
-  INT_STRATEGY: Standard
   LINEAR_SOLVER: 1
-  LOADLIN: false
-  MAXTIME: 10.5
-  NUMSTEP: 21
-  PREDICT: TangDis
-  PRESTRESS: None
+  INT_STRATEGY: "Standard"
+  DYNAMICTYPE: "Statics"
+  PREDICT: "TangDis"
+  PRESTRESS: "None"
   PRESTRESSTIME: 0
   TIMESTEP: 0.5
+  NUMSTEP: 21
+  MAXTIME: 10.5
+  LOADLIN: false
 STRUCTURE ELEMENTS:
-  - 1 BEAM3R LINE3 1 3 2 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0 HERMITE_CENTERLINE true
-  - 2 BEAM3R LINE3 3 5 4 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0 HERMITE_CENTERLINE true
-  - 3 BEAM3R LINE3 5 7 6 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0 HERMITE_CENTERLINE true
-  - 4 BEAM3R LINE3 7 9 8 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0 HERMITE_CENTERLINE true
-  - 5 BEAM3R LINE3 9 11 10 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0 HERMITE_CENTERLINE true
-  - 6 BEAM3R LINE3 11 13 12 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0 HERMITE_CENTERLINE true
-  - 7 BEAM3R LINE3 13 15 14 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0 HERMITE_CENTERLINE true
-  - 8 BEAM3R LINE3 15 17 16 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0 HERMITE_CENTERLINE true
-  - 9 BEAM3R LINE3 17 19 18 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0 HERMITE_CENTERLINE true
-  - 10 BEAM3R LINE3 19 21 20 MAT 1 TRIADS 0 0 0 0 0 0 0 0 0 HERMITE_CENTERLINE true
+  - "1 BEAM3R LINE3 1 3 2 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 HERMITE_CENTERLINE true"
+  - "2 BEAM3R LINE3 3 5 4 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 HERMITE_CENTERLINE true"
+  - "3 BEAM3R LINE3 5 7 6 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 HERMITE_CENTERLINE true"
+  - "4 BEAM3R LINE3 7 9 8 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 HERMITE_CENTERLINE true"
+  - "5 BEAM3R LINE3 9 11 10 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 HERMITE_CENTERLINE true"
+  - "6 BEAM3R LINE3 11 13 12 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 HERMITE_CENTERLINE true"
+  - "7 BEAM3R LINE3 13 15 14 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 HERMITE_CENTERLINE true"
+  - "8 BEAM3R LINE3 15 17 16 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 HERMITE_CENTERLINE true"
+  - "9 BEAM3R LINE3 17 19 18 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 HERMITE_CENTERLINE true"
+  - "10 BEAM3R LINE3 19 21 20 MAT 1 TRIADS 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0 HERMITE_CENTERLINE true"

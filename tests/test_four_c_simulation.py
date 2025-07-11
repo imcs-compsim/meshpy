@@ -745,7 +745,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
     initial_input_file.add(
         {
             "IO/MONITOR STRUCTURE DBC": {
-                "PRECISION_FILE": 10,
+                "PRECISION_FILE": 16,
                 "WRITE_HEADER": True,
                 "INTERVAL_STEPS": 1,
             }
@@ -937,7 +937,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     initial_simulation.add(
         {
             "IO/MONITOR STRUCTURE DBC": {
-                "PRECISION_FILE": 10,
+                "PRECISION_FILE": 16,
                 "WRITE_HEADER": True,
                 "INTERVAL_STEPS": 1,
             }
