@@ -89,6 +89,7 @@ def test_cosserat_curve_translate_and_rotate(
     starting_triad_guess,
     get_corresponding_reference_file_path,
     assert_results_close,
+    tmp_path,
 ):
     """Test that a curve can be loaded, rotated and transformed."""
 
@@ -137,10 +138,23 @@ def test_cosserat_curve_translate_and_rotate(
         )
         return rotations
 
-    assert_results_close(sol_half_pos, load_compare("pos_half_ref"), atol=1e-12)
+    # Store the actual results in the temp folder
+    for array, name in [
+        [sol_half_pos, "pos_half_ref"],
+        [sol_half_q, "q_half_ref"],
+        [sol_full_pos, "pos_full_ref"],
+        [sol_full_q, "q_full_ref"],
+    ]:
+        result_path = tmp_path / (name + ".txt")
+        if array.dtype == quaternion.quaternion:
+            array = quaternion.as_float_array(array)
+        np.savetxt(result_path, array)
+        print(f"Saved in {result_path}")
+
+    assert_results_close(sol_half_pos, load_compare("pos_half_ref"))
     assert_results_close(sol_half_q, get_compare_rot_with_twist("q_half_ref"))
 
-    assert_results_close(sol_full_pos, load_compare("pos_full_ref"), atol=1e-12)
+    assert_results_close(sol_full_pos, load_compare("pos_full_ref"))
     assert_results_close(sol_full_q, get_compare_rot_with_twist("q_full_ref"))
 
 
