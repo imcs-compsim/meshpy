@@ -104,15 +104,23 @@ def test_cosserat_curve_translate_and_rotate(
             starting_triad_guess=starting_triad_guess,
         )
 
-    result_path = tmp_path / "curve.coordinates.txt"
+    der = curve.centerline_interpolation.derivative()
+    tmp = [der(p) for p in curve.point_arc_length]
+    result_path = tmp_path / "curve.derivative2.txt"
+    np.savetxt(result_path, tmp)
+    print(f"Saved in {result_path}")
+
+    result_path = tmp_path / "curve.coordinates2.txt"
     np.savetxt(result_path, curve.coordinates)
     print(f"Saved in {result_path}")
 
-    result_path = tmp_path / "curve.point_arc_length.txt"
+    result_path = tmp_path / "curve.point_arc_length2.txt"
     np.savetxt(result_path, curve.point_arc_length)
     print(f"Saved in {result_path}")
 
-    result_path = tmp_path / "curve.quaternions.txt"
+    print(f"{curve.point_arc_length[-1]}")
+
+    result_path = tmp_path / "curve.quaternions2.txt"
     np.savetxt(result_path, quaternion.as_float_array(curve.quaternions))
     print(f"Saved in {result_path}")
 
