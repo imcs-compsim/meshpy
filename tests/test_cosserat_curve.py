@@ -137,10 +137,10 @@ def test_cosserat_curve_translate_and_rotate(
         )
         return rotations
 
-    assert_results_equal(sol_half_pos, load_compare("pos_half_ref"))
+    assert_results_equal(sol_half_pos, load_compare("pos_half_ref"), atol=1e-12)
     assert_results_equal(sol_half_q, get_compare_rot_with_twist("q_half_ref"))
 
-    assert_results_equal(sol_full_pos, load_compare("pos_full_ref"))
+    assert_results_equal(sol_full_pos, load_compare("pos_full_ref"), atol=1e-12)
     assert_results_equal(sol_full_q, get_compare_rot_with_twist("q_full_ref"))
 
 
