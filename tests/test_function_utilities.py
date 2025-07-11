@@ -28,14 +28,14 @@ from beamme.four_c.function_utility import (
 )
 
 
-def test_linear_interpolation_function(assert_results_equal):
+def test_linear_interpolation_function(assert_results_close):
     """Test that linear interpolation functions are created correctly."""
 
     t = [1.5, 2.5, 3.5, 10.0]
     values = [1.0, -1.0, 3.5, -10.3]
 
     fun = create_linear_interpolation_function(t, values)
-    assert_results_equal(
+    assert_results_close(
         [
             {"SYMBOLIC_FUNCTION_OF_SPACE_TIME": "var"},
             {
@@ -51,7 +51,7 @@ def test_linear_interpolation_function(assert_results_equal):
     )
 
     fun = create_linear_interpolation_function(t, values, function_type="My type")
-    assert_results_equal(
+    assert_results_close(
         [
             {"My type": "var"},
             {
@@ -69,7 +69,7 @@ def test_linear_interpolation_function(assert_results_equal):
     function_definition = create_linear_interpolation_dict(
         t, values, variable_name="test", variable_index=12
     )
-    assert_results_equal(
+    assert_results_close(
         {
             "VARIABLE": 12,
             "NAME": "test",

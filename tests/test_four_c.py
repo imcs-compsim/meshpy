@@ -48,7 +48,7 @@ from beamme.utils.nodes import is_node_on_plane
 
 
 def test_four_c_material_numbering(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test that materials can be added as strings to an input file (as is done
     when importing input files) and that the numbering with other added
@@ -167,11 +167,11 @@ def test_four_c_material_numbering(
 
     input_file.add(mesh)
 
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_close(get_corresponding_reference_file_path(), input_file)
 
 
 def test_four_c_simulation_beam_potential_helix(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the correct creation of input files for simulations including beam
     to beam potential interactions."""
@@ -248,11 +248,11 @@ def test_four_c_simulation_beam_potential_helix(
 
     input_file.add(mesh)
 
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_close(get_corresponding_reference_file_path(), input_file)
 
 
 def test_four_c_solid_shell_direction_detection(
-    assert_results_equal,
+    assert_results_close,
     get_corresponding_reference_file_path,
     tmp_path,
 ):
@@ -273,7 +273,7 @@ def test_four_c_solid_shell_direction_detection(
     )
     # Set the thickness direction and compare result
     set_solid_shell_thickness_direction(mesh_block.elements, selection_type="thickness")
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(additional_identifier="blocks"),
         mesh_block,
     )
@@ -289,7 +289,7 @@ def test_four_c_solid_shell_direction_detection(
     # Test that the thickness version works
     mesh_dome = mesh_dome_original.copy()
     set_solid_shell_thickness_direction(mesh_dome.elements, selection_type="thickness")
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(additional_identifier="dome_thickness"),
         mesh_dome,
     )
@@ -306,7 +306,7 @@ def test_four_c_solid_shell_direction_detection(
         selection_type="projection_director_function",
         director_function=director_function,
     )
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(additional_identifier="dome_thickness"),
         mesh_dome,
     )
@@ -319,7 +319,7 @@ def test_four_c_solid_shell_direction_detection(
         director=[0, 0, 1],
         identify_threshold=None,
     )
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             additional_identifier="dome_constant_direction"
         ),
@@ -334,11 +334,11 @@ def test_four_c_solid_shell_direction_detection(
 
     grid = get_visualization_third_parameter_direction_hex8(mesh_dome)
     grid.save(test_file)
-    assert_results_equal(ref_file, test_file)
+    assert_results_close(ref_file, test_file)
 
 
 def test_four_c_locsys_condition(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test case for point locsys condition for beams.
 
@@ -425,7 +425,7 @@ def test_four_c_locsys_condition(
     )
 
     # Compare with the reference solution.
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_four_c_linear_time_transformation_scaling():
@@ -593,7 +593,7 @@ def test_four_c_add_beam_interaction_condition():
 
 
 def test_four_c_beam_to_beam_contact(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the beam-to-beam contact boundary conditions."""
 
@@ -629,11 +629,11 @@ def test_four_c_beam_to_beam_contact(
     )
 
     # Compare with the reference solution.
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_four_c_beam_to_solid(
-    get_corresponding_reference_file_path, assert_results_equal
+    get_corresponding_reference_file_path, assert_results_close
 ):
     """Test that the automatic ID creation for beam-to-solid conditions
     works."""
@@ -694,7 +694,7 @@ def test_four_c_beam_to_solid(
         bme.bc.beam_to_solid_surface_meshtying,
     )
 
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
     # If we try to add this the IDs won't match, because the next volume ID for
     # beam-to-surface coupling should be 0 (this one does not make sense, but
@@ -718,7 +718,7 @@ def test_four_c_beam_to_solid(
             beam_set_1["line"],
             bme.bc.beam_to_solid_surface_contact,
         )
-        assert_results_equal(get_corresponding_reference_file_path(), mesh)
+        assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 @pytest.mark.parametrize(
@@ -729,7 +729,7 @@ def test_four_c_import_non_consecutive_geometry_sets(
     full_import,
     additional_identifier,
     get_corresponding_reference_file_path,
-    assert_results_equal,
+    assert_results_close,
 ):
     """Test that we can import non-consecutively numbered geometry sets."""
 
@@ -754,7 +754,7 @@ def test_four_c_import_non_consecutive_geometry_sets(
 
     input_file.add(mesh)
 
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             additional_identifier=additional_identifier
         ),

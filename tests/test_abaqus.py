@@ -45,7 +45,7 @@ PYTEST_ABAQUS_NORMAL_DEFINITION_PARAMETRIZE = [
 def test_abaqus_helix(
     normal_definition,
     additional_identifier,
-    assert_results_equal,
+    assert_results_close,
     get_corresponding_reference_file_path,
 ):
     """Create a helix and check the created Abaqus input file."""
@@ -82,7 +82,7 @@ def test_abaqus_helix(
     mesh.add(end_set)
 
     input_file = AbaqusInputFile(mesh)
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             additional_identifier=additional_identifier, extension="inp"
         ),
@@ -95,7 +95,7 @@ def test_abaqus_helix(
 def test_abaqus_frame(
     normal_definition,
     additional_identifier,
-    assert_results_equal,
+    assert_results_close,
     get_corresponding_reference_file_path,
 ):
     """Create a frame out of connected beams with different materials."""
@@ -118,7 +118,7 @@ def test_abaqus_frame(
     mesh.add(fix_set, load_set)
 
     input_file = AbaqusInputFile(mesh)
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             additional_identifier=additional_identifier, extension="inp"
         ),

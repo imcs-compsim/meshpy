@@ -37,7 +37,7 @@ from beamme.four_c.input_file import InputFile
 
 def test_header_functions_static(
     get_corresponding_reference_file_path,
-    assert_results_equal,
+    assert_results_close,
 ):
     """Test the default static header function."""
 
@@ -67,7 +67,7 @@ def test_header_functions_static(
     )
 
     # Check the output.
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_close(get_corresponding_reference_file_path(), input_file)
 
 
 @pytest.mark.parametrize(
@@ -81,7 +81,7 @@ def test_header_functions_static(
 )
 def test_header_functions_static_time(
     get_corresponding_reference_file_path,
-    assert_results_equal,
+    assert_results_close,
     additional_identifier,
     time_step,
     n_steps,
@@ -95,7 +95,7 @@ def test_header_functions_static_time(
         input_file, time_step=time_step, n_steps=n_steps, total_time=total_time
     )
 
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             additional_identifier=additional_identifier
         ),
@@ -105,7 +105,7 @@ def test_header_functions_static_time(
 
 def test_header_functions_static_prestress(
     get_corresponding_reference_file_path,
-    assert_results_equal,
+    assert_results_close,
 ):
     """Test the static header function with non default prestressing
     parameter."""
@@ -142,12 +142,12 @@ def test_header_functions_static_prestress(
     )
 
     # Check the output.
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_close(get_corresponding_reference_file_path(), input_file)
 
 
 def test_header_functions_stress_output(
     get_corresponding_reference_file_path,
-    assert_results_equal,
+    assert_results_close,
 ):
     """Test the static header function with non default stress output
     parameter."""
@@ -167,11 +167,11 @@ def test_header_functions_stress_output(
     set_runtime_output(input_file, output_stress_strain=True)
 
     # Check the output.
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_close(get_corresponding_reference_file_path(), input_file)
 
 
 def test_header_functions_beam_interaction(
-    get_corresponding_reference_file_path, assert_results_equal
+    get_corresponding_reference_file_path, assert_results_close
 ):
     """Test the beam-to-beam contact header function with default parameter."""
 
@@ -192,7 +192,7 @@ def test_header_functions_beam_interaction(
     set_beam_contact_runtime_output(input_file)
 
     # Compare the output.
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_close(get_corresponding_reference_file_path(), input_file)
 
 
 @pytest.mark.parametrize(
@@ -201,7 +201,7 @@ def test_header_functions_beam_interaction(
 )
 def test_header_functions_nox_xml(
     get_corresponding_reference_file_path,
-    assert_results_equal,
+    assert_results_close,
     nox_xml_file_kwarg,
     xml_relative_path,
     tmp_path,
@@ -222,7 +222,7 @@ def test_header_functions_nox_xml(
     assert input_file["STRUCT NOX/Status Test"]["XML File"] == xml_relative_path
 
     # Check the created xml
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(extension="xml"),
         tmp_path / xml_relative_path,
     )

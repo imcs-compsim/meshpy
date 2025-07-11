@@ -43,7 +43,7 @@ ABSOLUTE_TOLERANCE = 1e-13
 
 
 @pytest.fixture(scope="function")
-def assert_results_equal(tmp_path, current_test_name) -> Callable:
+def assert_results_close(tmp_path, current_test_name) -> Callable:
     """Return function to compare either string or files.
 
     Necessary to enable the function call through pytest fixtures.
@@ -57,9 +57,11 @@ def assert_results_equal(tmp_path, current_test_name) -> Callable:
         Function to compare results.
     """
 
-    def _assert_results_equal(
-        reference: Path | str | dict | list | np.ndarray | InputFile | Mesh,
-        result: Path | str | dict | list | np.ndarray | InputFile | Mesh,
+    def _assert_results_close(
+        reference: (
+            Path | str | int | float | dict | list | np.ndarray | InputFile | Mesh
+        ),
+        result: Path | str | int | float | dict | list | np.ndarray | InputFile | Mesh,
         rtol: float = RELATIVE_TOLERANCE,
         atol: float = ABSOLUTE_TOLERANCE,
     ) -> None:
@@ -104,7 +106,7 @@ def assert_results_equal(tmp_path, current_test_name) -> Callable:
             handle_failed_assertion(tmp_path, current_test_name, reference, result)
             raise error
 
-    return _assert_results_equal
+    return _assert_results_close
 
 
 def compare_vtk_files(reference: Path, result: Path, rtol: float, atol: float) -> None:
@@ -141,8 +143,8 @@ def compare_vtk_files(reference: Path, result: Path, rtol: float, atol: float) -
 
 
 def convert_to_primitive_type(
-    obj: dict | list | np.ndarray | Path | Mesh | InputFile | str,
-) -> dict | list | np.ndarray:
+    obj: str | int | float | dict | list | np.ndarray | Path | Mesh | InputFile,
+) -> int | float | dict | list | np.ndarray:
     """Convert the given object to a primitive type (dict, list, numpy array).
 
     Args:
@@ -152,7 +154,7 @@ def convert_to_primitive_type(
         The raw data (either a dictionary, list, numpy array).
     """
 
-    if isinstance(obj, (dict, list, np.ndarray)):
+    if isinstance(obj, (int, float, dict, list, np.ndarray)):
         return obj
 
     if isinstance(obj, Path):
