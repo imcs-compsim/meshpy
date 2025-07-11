@@ -103,6 +103,19 @@ def test_cosserat_curve_translate_and_rotate(
             get_corresponding_reference_file_path,
             starting_triad_guess=starting_triad_guess,
         )
+
+    result_path = tmp_path / "curve.coordinates.txt"
+    np.savetxt(result_path, curve.coordinates)
+    print(f"Saved in {result_path}")
+
+    result_path = tmp_path / "curve.point_arc_length.txt"
+    np.savetxt(result_path, curve.point_arc_length)
+    print(f"Saved in {result_path}")
+
+    result_path = tmp_path / "curve.quaternions.txt"
+    np.savetxt(result_path, quaternion.as_float_array(curve.quaternions))
+    print(f"Saved in {result_path}")
+
     relative_rotation = Rotation([1, 0, 0], twist_angle)
 
     # Translate the curve so that the start is at the origin
