@@ -145,7 +145,7 @@ def test_four_c_simulation_honeycomb_sphere(
     enforce_four_c,
     full_import,
     tmp_path,
-    assert_results_equal,
+    assert_results_close,
     get_corresponding_reference_file_path,
 ):
     """Create the same honeycomb mesh as defined in 4C/tests/input_files/beam3r
@@ -264,7 +264,7 @@ def test_four_c_simulation_honeycomb_sphere(
     input_file.add(mesh_honeycomb)
 
     # Check the created input file
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             additional_identifier="full_import" if full_import else None
         ),
@@ -289,7 +289,7 @@ def test_four_c_simulation_beam_and_solid_tube(
     enforce_four_c,
     full_import,
     tmp_path,
-    assert_results_equal,
+    assert_results_close,
     get_corresponding_reference_file_path,
 ):
     """Merge a solid tube with a beam tube and simulate them together."""
@@ -374,7 +374,7 @@ def test_four_c_simulation_beam_and_solid_tube(
     input_file.add(mesh)
 
     # Check the created input file
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(),
         input_file,
     )
@@ -394,7 +394,7 @@ def test_four_c_simulation_beam_and_solid_tube(
 @pytest.mark.parametrize(*PYTEST_4C_SIMULATION_PARAMETRIZE)
 def test_four_c_simulation_honeycomb_variants(
     enforce_four_c,
-    assert_results_equal,
+    assert_results_close,
     get_corresponding_reference_file_path,
     tmp_path,
 ):
@@ -547,7 +547,7 @@ def test_four_c_simulation_honeycomb_variants(
     add_result_description(input_file, displacements, nodes)
 
     # Check the created input file
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_close(get_corresponding_reference_file_path(), input_file)
 
     # Check if we still have to actually run 4C.
     if not enforce_four_c:
@@ -561,7 +561,7 @@ def test_four_c_simulation_honeycomb_variants(
 def test_four_c_simulation_rotated_beam_axis(
     enforce_four_c,
     tmp_path,
-    assert_results_equal,
+    assert_results_close,
     get_corresponding_reference_file_path,
 ):
     """
@@ -671,7 +671,7 @@ def test_four_c_simulation_rotated_beam_axis(
     input_file.add(mesh)
 
     # Check the created input file
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_close(get_corresponding_reference_file_path(), input_file)
 
     # Check if we still have to actually run 4C.
     if not enforce_four_c:
@@ -696,7 +696,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
     enforce_four_c,
     initial_run_name,
     tmp_path,
-    assert_results_equal,
+    assert_results_close,
     get_corresponding_reference_file_path,
 ):
     """Common driver to simulate a cantilever beam with Dirichlet boundary
@@ -754,7 +754,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
     initial_input_file.add(initial_mesh)
 
     # Check the input file
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(additional_identifier="initial"),
         initial_input_file,
     )
@@ -833,7 +833,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
     add_result_description(restart_input_file, displacements, nodes)
 
     # Check the input file of the restart simulation
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(additional_identifier="restart"),
         restart_input_file,
     )
@@ -851,7 +851,7 @@ def test_four_c_simulation_dbc_monitor_to_input(
 def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_values(
     enforce_four_c,
     tmp_path,
-    assert_results_equal,
+    assert_results_close,
     get_corresponding_reference_file_path,
 ):
     """First simulate a cantilever beam with Dirichlet boundary conditions and
@@ -945,7 +945,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     )
 
     # Check the input file.
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(additional_identifier="dirichlet"),
         initial_simulation,
     )
@@ -997,7 +997,7 @@ def test_four_c_simulation_dirichlet_boundary_to_neumann_boundary_with_all_value
     add_result_description(force_simulation, displacements, nodes)
 
     # Compare the input file of the restart simulation.
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(additional_identifier="neumann"),
         force_simulation,
         atol=1e-6,
@@ -1091,7 +1091,7 @@ def test_four_c_simulation_cantilever_convergence(
 def test_four_c_simulation_beam_to_beam_contact_example(
     enforce_four_c,
     tmp_path,
-    assert_results_equal,
+    assert_results_close,
     get_corresponding_reference_file_path,
 ):
     """Small test example to show how a beam contact example with beam penalty
@@ -1214,7 +1214,7 @@ def test_four_c_simulation_beam_to_beam_contact_example(
     set_beam_contact_runtime_output(input_file, every_iteration=False)
 
     # Compare with the reference solution.
-    assert_results_equal(get_corresponding_reference_file_path(), input_file)
+    assert_results_close(get_corresponding_reference_file_path(), input_file)
 
     displacements = [[1.11158519615313324e-03, 0, -1.48443346935174636e-01]]
     nodes = [13]

@@ -63,7 +63,7 @@ def assert_unique_id_coordinates(
     tol,
     unique_indices_ref,
     inverse_indices_ref,
-    assert_results_equal,
+    assert_results_close,
 ):
     """Test if the unique coordinates are really unique and that the inverse
     indices result in the original array."""
@@ -80,7 +80,7 @@ def assert_unique_id_coordinates(
 
     # Check that the inverse IDs result in the original array.
     reconstructed_coords = unique_points[inverse_indices]
-    assert_results_equal(coords, reconstructed_coords, rtol=0.0, atol=tol)
+    assert_results_close(coords, reconstructed_coords, rtol=0.0, atol=tol)
 
     # Check the IDs
     assert unique_indices == unique_indices_ref
@@ -88,7 +88,7 @@ def assert_unique_id_coordinates(
 
 
 @pytest.mark.parametrize(*PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE)
-def test_find_close_points_between_bins(algorithm, assert_results_equal):
+def test_find_close_points_between_bins(algorithm, assert_results_close):
     """Test if the find_close_points function returns the expected results.
 
     The points are chosen such that for n_bins = [4, 4, 4], some points
@@ -331,7 +331,7 @@ def test_find_close_points_between_bins(algorithm, assert_results_equal):
     # fmt: on
     point_partners_reference[index_vector] = val_vector
     assert len(partner_indices) == 146
-    assert_results_equal(point_partners, point_partners_reference)
+    assert_results_close(point_partners, point_partners_reference)
 
     # Test unique IDs
     assert_unique_id_coordinates(
@@ -341,12 +341,12 @@ def test_find_close_points_between_bins(algorithm, assert_results_equal):
         eps_medium,
         unique_indices_ref,
         inverse_indices_ref,
-        assert_results_equal,
+        assert_results_close,
     )
 
 
 @pytest.mark.parametrize(*PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE)
-def test_find_close_points_binning_flat(algorithm, assert_results_equal):
+def test_find_close_points_binning_flat(algorithm, assert_results_close):
     """Test case for coupling of points, when the nodes are all on a plane.
 
     This is challenging for a binning based approach. However, this test
@@ -440,12 +440,12 @@ def test_find_close_points_binning_flat(algorithm, assert_results_equal):
             1e-5,
             unique_indices_ref,
             inverse_indices_ref,
-            assert_results_equal,
+            assert_results_close,
         )
 
 
 @pytest.mark.parametrize(*PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE)
-def test_find_close_points_single_dimension(algorithm, assert_results_equal):
+def test_find_close_points_single_dimension(algorithm, assert_results_close):
     """Test that the find_close_points function works properly with a 1D
     dimensional array (internally a n x 1 array is required)"""
 
@@ -463,7 +463,7 @@ def test_find_close_points_single_dimension(algorithm, assert_results_equal):
     has_partner, partner = find_close_points(coords, algorithm=algorithm, tol=10 * eps)
 
     # Check the results
-    assert_results_equal(has_partner_expected, has_partner)
+    assert_results_close(has_partner_expected, has_partner)
     assert partner_expected == partner
 
     # Test unique IDs
@@ -476,12 +476,12 @@ def test_find_close_points_single_dimension(algorithm, assert_results_equal):
         10 * eps,
         unique_indices_ref,
         inverse_indices_ref,
-        assert_results_equal,
+        assert_results_close,
     )
 
 
 @pytest.mark.parametrize(*PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE)
-def test_find_close_points_multi_dimension(algorithm, assert_results_equal):
+def test_find_close_points_multi_dimension(algorithm, assert_results_close):
     """Test that the find_close_points function also works properly with
     multidimensional points."""
 
@@ -519,7 +519,7 @@ def test_find_close_points_multi_dimension(algorithm, assert_results_equal):
     has_partner, partner = find_close_points(coords, algorithm=algorithm)
 
     # Check the results
-    assert_results_equal(has_partner_expected, has_partner)
+    assert_results_close(has_partner_expected, has_partner)
     assert partner_expected == partner
 
     # Test unique IDs
@@ -534,12 +534,12 @@ def test_find_close_points_multi_dimension(algorithm, assert_results_equal):
         1e-5,
         unique_indices_ref,
         inverse_indices_ref,
-        assert_results_equal,
+        assert_results_close,
     )
 
 
 @pytest.mark.parametrize(*PYTEST_GEOMETRIC_SEARCH_PARAMETRIZE)
-def test_find_close_points_tolerance_precision(algorithm, assert_results_equal):
+def test_find_close_points_tolerance_precision(algorithm, assert_results_close):
     """Test that the find_close_points tolerance works with a precision of at
     least 12."""
 
@@ -551,7 +551,7 @@ def test_find_close_points_tolerance_precision(algorithm, assert_results_equal):
     coords[3, 0] += 5 * delta
 
     has_partner, _ = find_close_points(coords, algorithm=algorithm, tol=1.1 * delta)
-    assert_results_equal(has_partner, [0, 0, 1, 1])
+    assert_results_close(has_partner, [0, 0, 1, 1])
 
 
 @pytest.mark.performance

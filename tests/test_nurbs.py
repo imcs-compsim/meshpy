@@ -45,7 +45,7 @@ from beamme.mesh_creation_functions.nurbs_geometries import (
 
 
 def test_nurbs_hollow_cylinder_segment_2d(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the creation of a two dimensional hollow cylinder segment."""
 
@@ -76,11 +76,11 @@ def test_nurbs_hollow_cylinder_segment_2d(
     mesh.add(patch_set)
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_nurbs_flat_plate_2d(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the creation of a two dimensional flat plate."""
 
@@ -105,11 +105,11 @@ def test_nurbs_flat_plate_2d(
     mesh.add(patch_set)
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_nurbs_flat_plate_2d_splinepy(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the creation of a two dimensional flat plate with splinepy."""
 
@@ -136,7 +136,7 @@ def test_nurbs_flat_plate_2d_splinepy(
         mesh, surf_obj, material=mat, data=element_description
     )
     mesh.add(patch_set)
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             reference_file_base_name="test_nurbs_flat_plate_2d"
         ),
@@ -144,7 +144,7 @@ def test_nurbs_flat_plate_2d_splinepy(
     )
 
 
-def test_nurbs_brick(assert_results_equal, get_corresponding_reference_file_path):
+def test_nurbs_brick(assert_results_close, get_corresponding_reference_file_path):
     """Test the creation of a brick."""
 
     # Create a brick
@@ -166,11 +166,11 @@ def test_nurbs_brick(assert_results_equal, get_corresponding_reference_file_path
     mesh.add(patch_set)
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_nurbs_brick_splinepy(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the creation of a brick with splinepy."""
 
@@ -198,7 +198,7 @@ def test_nurbs_brick_splinepy(
     mesh.add(patch_set)
 
     # Compare with the reference file
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             reference_file_base_name="test_nurbs_brick"
         ),
@@ -207,7 +207,7 @@ def test_nurbs_brick_splinepy(
 
 
 def test_nurbs_rotation_nurbs_surface(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the rotation of a NURBS mesh."""
 
@@ -239,11 +239,11 @@ def test_nurbs_rotation_nurbs_surface(
     mesh.rotate(Rotation([1, 2, 3], np.pi * 7 / 6))
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_nurbs_translate_nurbs_surface(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the translation of a NURBS surface mesh."""
 
@@ -273,11 +273,11 @@ def test_nurbs_translate_nurbs_surface(
     mesh.translate([-1.6, -2.3, 3.7])
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_nurbs_cylindrical_shell_sector(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the creation of a 3-dimensional cylindrical shell sector."""
 
@@ -303,11 +303,11 @@ def test_nurbs_cylindrical_shell_sector(
     mesh.add(patch_set)
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_nurbs_couple_nurbs_meshes(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the coupling of NURBS surface meshes."""
 
@@ -352,11 +352,11 @@ def test_nurbs_couple_nurbs_meshes(
     mesh.couple_nodes(reuse_matching_nodes=True)
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_nurbs_sphere_surface(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the creating of the base patch of the surface of a sphere."""
 
@@ -384,11 +384,11 @@ def test_nurbs_sphere_surface(
     mesh.add(patch_set)
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_nurbs_string_types(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the creating of a NURBS with strings for the element and material
     definition."""
@@ -412,11 +412,11 @@ def test_nurbs_string_types(
     mesh.add(patch_set)
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_nurbs_hemisphere_surface(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the creation of the surface of a hemisphere."""
 
@@ -446,11 +446,11 @@ def test_nurbs_hemisphere_surface(
         mesh.add(patch_set)
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_nurbs_torus_surface(
-    assert_results_equal, get_corresponding_reference_file_path
+    assert_results_close, get_corresponding_reference_file_path
 ):
     """Test the creation of a torus."""
 
@@ -480,7 +480,7 @@ def test_nurbs_torus_surface(
         mesh.add(patch_set)
 
     # Compare with the reference file
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 @pytest.mark.parametrize(

@@ -45,7 +45,7 @@ def get_name(beam_class):
 
 @pytest.mark.parametrize("beam_type", [Beam3rLine2Line2, Beam3rHerm2Line3])
 def test_space_time_straight(
-    beam_type, assert_results_equal, get_corresponding_reference_file_path
+    beam_type, assert_results_close, get_corresponding_reference_file_path
 ):
     """Create the straight beam for the tests."""
 
@@ -64,7 +64,7 @@ def test_space_time_straight(
     # Check the mesh data arrays
     additional_identifier = get_name(beam_type)
     mesh_data_arrays = mesh_to_data_arrays(space_time_mesh)
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             additional_identifier=additional_identifier, extension="json"
         ),
@@ -74,7 +74,7 @@ def test_space_time_straight(
 
 @pytest.mark.parametrize("beam_type", [Beam3rLine2Line2, Beam3rHerm2Line3])
 def test_space_time_curved(
-    beam_type, assert_results_equal, get_corresponding_reference_file_path
+    beam_type, assert_results_close, get_corresponding_reference_file_path
 ):
     """Create a curved beam for the tests."""
 
@@ -95,7 +95,7 @@ def test_space_time_curved(
     # Check the mesh data arrays
     additional_identifier = get_name(beam_type)
     mesh_data_arrays = mesh_to_data_arrays(space_time_mesh)
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             additional_identifier=additional_identifier, extension="json"
         ),
@@ -106,7 +106,7 @@ def test_space_time_curved(
 @pytest.mark.parametrize("beam_type", [Beam3rLine2Line2, Beam3rHerm2Line3])
 @pytest.mark.parametrize("couple_nodes", [False, True])
 def test_space_time_elbow(
-    beam_type, couple_nodes, assert_results_equal, get_corresponding_reference_file_path
+    beam_type, couple_nodes, assert_results_close, get_corresponding_reference_file_path
 ):
     """Create an elbow beam for the tests."""
 
@@ -132,7 +132,7 @@ def test_space_time_elbow(
     # Check the mesh data arrays
     additional_identifier = get_name(beam_type) + ("_coupling" if couple_nodes else "")
     mesh_data_arrays = mesh_to_data_arrays(space_time_mesh)
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             additional_identifier=additional_identifier, extension="json"
         ),
@@ -147,7 +147,7 @@ def test_space_time_varying_material_length(
     beam_type,
     couple_nodes,
     arc_length,
-    assert_results_equal,
+    assert_results_close,
     get_corresponding_reference_file_path,
 ):
     """Create an elbow beam for the tests."""
@@ -201,7 +201,7 @@ def test_space_time_varying_material_length(
         + ("_arc_length" if arc_length else "")
     )
     mesh_data_arrays = mesh_to_data_arrays(space_time_mesh)
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(
             additional_identifier=additional_identifier, extension="json"
         ),

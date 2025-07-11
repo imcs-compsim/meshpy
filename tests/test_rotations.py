@@ -51,7 +51,7 @@ def get_rotation_matrix(axis, alpha):
     return rot3D
 
 
-def test_cartesian_rotations(assert_results_equal):
+def test_cartesian_rotations(assert_results_close):
     """Create a rotation in all 3 directions.
 
     And compare with the rotation matrix.
@@ -71,10 +71,10 @@ def test_cartesian_rotations(assert_results_equal):
         rotation = Rotation.from_quaternion(rotation.get_quaternion())
         rotation_matrix = Rotation.from_rotation_matrix(rotation.get_rotation_matrix())
 
-        assert_results_equal(rot3D, rotation_matrix.get_rotation_matrix())
+        assert_results_close(rot3D, rotation_matrix.get_rotation_matrix())
 
 
-def test_euler_angles(assert_results_equal):
+def test_euler_angles(assert_results_close):
     """Create a rotation with Euler angles and compare to known results."""
 
     # Euler angles.
@@ -93,7 +93,7 @@ def test_euler_angles(assert_results_equal):
     rotation_y = Rotation([0, 1, 0], beta)
     rotation_z = Rotation([0, 0, 1], gamma)
     rotation_euler = rotation_z * rotation_y * rotation_x
-    assert_results_equal(R_euler, rotation_euler.get_rotation_matrix())
+    assert_results_close(R_euler, rotation_euler.get_rotation_matrix())
     assert rotation_euler == Rotation.from_rotation_matrix(R_euler)
 
     # Direct formula for quaternions for Euler angles.
@@ -149,7 +149,7 @@ def test_inverse_rotation():
     (rot * rot.inv()).get_rotation_vector()
 
 
-def test_rotation_vector(assert_results_equal):
+def test_rotation_vector(assert_results_close):
     """Test if the rotation vector functions give a correct result."""
 
     # Calculate rotation vector and quaternion.
@@ -168,10 +168,10 @@ def test_rotation_vector(assert_results_equal):
 
     # Check that the same rotation vector is returned after being converted
     # to a quaternion.
-    assert_results_equal(rotation_vector, rotation_from_vec.get_rotation_vector())
+    assert_results_close(rotation_vector, rotation_from_vec.get_rotation_vector())
 
 
-def test_rotation_operator_overload(assert_results_equal):
+def test_rotation_operator_overload(assert_results_close):
     """Test if the operator overloading gives a correct result."""
 
     # Calculate rotation and vector.
@@ -182,11 +182,11 @@ def test_rotation_operator_overload(assert_results_equal):
 
     # Check the result of the operator overloading.
     result_vector = np.dot(rot.get_rotation_matrix(), vector)
-    assert_results_equal(result_vector, rot * vector)
-    assert_results_equal(result_vector, rot * np.array(vector))
+    assert_results_close(result_vector, rot * vector)
+    assert_results_close(result_vector, rot * np.array(vector))
 
 
-def test_rotation_matrix(assert_results_equal):
+def test_rotation_matrix(assert_results_close):
     """Test if the correct quaternions are generated from a rotation matrix."""
 
     # Do one calculation for each case in
@@ -202,11 +202,11 @@ def test_rotation_matrix(assert_results_equal):
         rot = Rotation().from_basis(t1, t2)
         t1_rot = rot * [1, 0, 0]
         t2_rot = rot * [0, 1, 0]
-        assert_results_equal(t1, t1_rot)
-        assert_results_equal(t2, t2_rot)
+        assert_results_close(t1, t1_rot)
+        assert_results_close(t2, t2_rot)
 
 
-def test_transformation_matrix(assert_results_equal):
+def test_transformation_matrix(assert_results_close):
     """Test that the transformation matrix is computed correctly."""
 
     rotation_vector_large = [1.0, 2.0, np.pi / 5.0]
@@ -227,11 +227,11 @@ def test_transformation_matrix(assert_results_equal):
             [1.0577668483049911, -0.3844663033900173, 0.5403060272710478],
         ]
     )
-    assert_results_equal(
+    assert_results_close(
         rotation_large.get_transformation_matrix(),
         transformation_matrix_large_reference,
     )
-    assert_results_equal(rotation_small.get_transformation_matrix(), np.identity(3))
+    assert_results_close(rotation_small.get_transformation_matrix(), np.identity(3))
 
     # Test transformation matrix inverse
     transformation_matrix_inverse_large_reference = np.array(
@@ -241,14 +241,14 @@ def test_transformation_matrix(assert_results_equal):
             [-0.5440964474342915, 0.4716532506554118, 0.36463746593568075],
         ]
     )
-    assert_results_equal(
+    assert_results_close(
         rotation_large.get_transformation_matrix_inv(),
         transformation_matrix_inverse_large_reference,
     )
-    assert_results_equal(rotation_small.get_transformation_matrix_inv(), np.identity(3))
+    assert_results_close(rotation_small.get_transformation_matrix_inv(), np.identity(3))
 
 
-def test_smallest_rotation_triad(assert_results_equal):
+def test_smallest_rotation_triad(assert_results_close):
     """Test that the smallest rotation triad is calculated correctly."""
 
     # Get the triad obtained by a smallest rotation from an arbitrary triad
@@ -263,10 +263,10 @@ def test_smallest_rotation_triad(assert_results_equal):
         0.25192421451158936,
         0.4114279380770031,
     ]
-    assert_results_equal(rot_smallest.q, rot_smallest_ref)
+    assert_results_close(rot_smallest.q, rot_smallest_ref)
 
 
-def test_error_accumulation_multiplication(assert_results_equal):
+def test_error_accumulation_multiplication(assert_results_close):
     """Test that error accumulation of successive multiplications of rotations
     does not affect the results."""
 
@@ -284,10 +284,10 @@ def test_error_accumulation_multiplication(assert_results_equal):
         -0.49122781649072017,
         -0.780479962594468,
     ]
-    assert_results_equal(q_ref, rotation.q)
+    assert_results_close(q_ref, rotation.q)
 
 
-def test_error_accumulation_smallest_rotation(assert_results_equal):
+def test_error_accumulation_smallest_rotation(assert_results_close):
     """Test that error accumulation of successive smallest rotation mappings
     does not affect the results.
 
@@ -309,4 +309,4 @@ def test_error_accumulation_smallest_rotation(assert_results_equal):
         -0.5128773537467728,
         0.5644581887089211,
     ]
-    assert_results_equal(q_ref, rotation_new.q)
+    assert_results_close(q_ref, rotation_new.q)

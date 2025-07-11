@@ -43,7 +43,7 @@ ABSOLUTE_TOLERANCE = 1e-13
 
 
 @pytest.fixture(scope="function")
-def assert_results_equal(tmp_path, current_test_name) -> Callable:
+def assert_results_close(tmp_path, current_test_name) -> Callable:
     """Return function to compare either string or files.
 
     Necessary to enable the function call through pytest fixtures.
@@ -57,7 +57,7 @@ def assert_results_equal(tmp_path, current_test_name) -> Callable:
         Function to compare results.
     """
 
-    def _assert_results_equal(
+    def _assert_results_close(
         reference: (
             Path | str | int | float | dict | list | np.ndarray | InputFile | Mesh
         ),
@@ -106,7 +106,7 @@ def assert_results_equal(tmp_path, current_test_name) -> Callable:
             handle_failed_assertion(tmp_path, current_test_name, reference, result)
             raise error
 
-    return _assert_results_equal
+    return _assert_results_close
 
 
 def compare_vtk_files(reference: Path, result: Path, rtol: float, atol: float) -> None:

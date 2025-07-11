@@ -88,7 +88,7 @@ def test_cosserat_curve_translate_and_rotate(
     twist_angle,
     starting_triad_guess,
     get_corresponding_reference_file_path,
-    assert_results_equal,
+    assert_results_close,
 ):
     """Test that a curve can be loaded, rotated and transformed."""
 
@@ -137,11 +137,11 @@ def test_cosserat_curve_translate_and_rotate(
         )
         return rotations
 
-    assert_results_equal(sol_half_pos, load_compare("pos_half_ref"), atol=1e-12)
-    assert_results_equal(sol_half_q, get_compare_rot_with_twist("q_half_ref"))
+    assert_results_close(sol_half_pos, load_compare("pos_half_ref"), atol=1e-12)
+    assert_results_close(sol_half_q, get_compare_rot_with_twist("q_half_ref"))
 
-    assert_results_equal(sol_full_pos, load_compare("pos_full_ref"), atol=1e-12)
-    assert_results_equal(sol_full_q, get_compare_rot_with_twist("q_full_ref"))
+    assert_results_close(sol_full_pos, load_compare("pos_full_ref"), atol=1e-12)
+    assert_results_close(sol_full_q, get_compare_rot_with_twist("q_full_ref"))
 
 
 def test_cosserat_curve_bad_guess_triad(get_corresponding_reference_file_path):
@@ -155,7 +155,7 @@ def test_cosserat_curve_bad_guess_triad(get_corresponding_reference_file_path):
 
 
 def test_cosserat_curve_vtk_representation(
-    tmp_path, get_corresponding_reference_file_path, assert_results_equal
+    tmp_path, get_corresponding_reference_file_path, assert_results_close
 ):
     """Test the vtk representation of the Cosserat curve."""
 
@@ -165,11 +165,11 @@ def test_cosserat_curve_vtk_representation(
     curve = load_cosserat_curve_from_file(get_corresponding_reference_file_path)
     pv.UnstructuredGrid(curve.get_pyvista_polyline()).save(result_path)
 
-    assert_results_equal(reference_path, result_path)
+    assert_results_close(reference_path, result_path)
 
 
 def test_cosserat_curve_project_point(
-    get_corresponding_reference_file_path, assert_results_equal
+    get_corresponding_reference_file_path, assert_results_close
 ):
     """Test that the project point function works as expected."""
 
@@ -181,14 +181,14 @@ def test_cosserat_curve_project_point(
 
     # Check the projection results
     t_ref = 4.264045157204052
-    assert_results_equal(t_ref, curve.project_point([-5, 1, 1]))
-    assert_results_equal(t_ref, curve.project_point([-5, 1, 1], t0=2.0))
-    assert_results_equal(t_ref, curve.project_point([-5, 1, 1], t0=4.0))
+    assert_results_close(t_ref, curve.project_point([-5, 1, 1]))
+    assert_results_close(t_ref, curve.project_point([-5, 1, 1], t0=2.0))
+    assert_results_close(t_ref, curve.project_point([-5, 1, 1], t0=4.0))
 
 
 def test_cosserat_curve_mesh_transformation(
     get_corresponding_reference_file_path,
-    assert_results_equal,
+    assert_results_close,
 ):
     """Test that the get_mesh_transformation function works as expected."""
 
@@ -209,7 +209,7 @@ def test_cosserat_curve_mesh_transformation(
         n_steps=3,
     )
 
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(extension="json"),
         {"pos": pos, "rot": quaternion.as_float_array(rot)},
     )
@@ -217,7 +217,7 @@ def test_cosserat_curve_mesh_transformation(
 
 def test_cosserat_curve_mesh_warp(
     get_corresponding_reference_file_path,
-    assert_results_equal,
+    assert_results_close,
 ):
     """Warp a balloon along a centerline."""
 
@@ -239,12 +239,12 @@ def test_cosserat_curve_mesh_warp(
             Rotation([0, 0, 1], -0.5 * np.pi) * Rotation([0, 1, 0], -0.5 * np.pi)
         ),
     )
-    assert_results_equal(get_corresponding_reference_file_path(), mesh)
+    assert_results_close(get_corresponding_reference_file_path(), mesh)
 
 
 def test_cosserat_curve_mesh_warp_transform_boundary_conditions(
     get_corresponding_reference_file_path,
-    assert_results_equal,
+    assert_results_close,
 ):
     """Test the transform boundary creation function."""
 
@@ -269,6 +269,6 @@ def test_cosserat_curve_mesh_warp_transform_boundary_conditions(
         ),
     )
 
-    assert_results_equal(
+    assert_results_close(
         get_corresponding_reference_file_path(), mesh, rtol=1e-12, atol=1e-12
     )
